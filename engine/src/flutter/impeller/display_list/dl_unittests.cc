@@ -723,6 +723,10 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
 
 TEST_P(DisplayListTest, CanDrawBoundedBlur) {
   auto texture = CreateTextureForFixture("kalimba.jpg");
+  const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+  const flutter::DlTileMode tile_modes[] = {
+      flutter::DlTileMode::kClamp, flutter::DlTileMode::kRepeat,
+      flutter::DlTileMode::kMirror, flutter::DlTileMode::kDecal};
 
   auto callback = [&]() {
     static float sigma = 20;
@@ -730,12 +734,15 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     static float rotate_degree = 0;
     static float bounds_scale = 1.0;
     static bool use_bounds = true;
+    static int selected_tile_mode = 0;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
     ImGui::SliderFloat("Sigma", &sigma, 0, 100);
     ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
     ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
     ImGui::NewLine();
     ImGui::Checkbox("Bounded blur", &use_bounds);
     ImGui::End();
@@ -778,7 +785,7 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
       blur_bounds = bounds;
     }
     auto filter = flutter::DlBlurImageFilter(sigma, sigma, blur_bounds,
-                                             flutter::DlTileMode::kDecal);
+                                             tile_modes[selected_tile_mode]);
     builder.SaveLayer(std::nullopt, &save_paint, &filter);
     builder.Restore();
     builder.Restore();

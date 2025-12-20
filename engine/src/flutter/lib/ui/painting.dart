@@ -4269,20 +4269,20 @@ abstract class ImageFilter {
   /// The `tile_mode` defines the behavior of sampling pixels at the edges when
   /// performing a standard, unbounded blur.
   ///
-  /// The `bounds` argument is optional and enables "bounded blur" mode.
+  /// The `bounds` argument is optional and enables "bounded blur" mode. When
+  /// `bounds` is non-null, the image filter substitutes transparent black for
+  /// any sample it reads from outside the defined bounding rectangle. The final
+  /// weighted sum is then divided by the total weight of the non-transparent samples
+  /// (the effective alpha), resulting in opaque output.
   ///
-  /// When `bounds` is null (the default), a standard Gaussian blur is applied
-  /// and edge sampling behavior is determined by `tileMode`.
-  ///
-  /// When `bounds` is non-null, the filter performs a "bounded blur": the blur
-  /// kernel only samples pixels from inside the rectangle, pixels outside the
-  /// rectangle are treated as transparent, and the resulting pixels are
-  /// unpremultiplied to produce opaque output. This mode is used to implement
-  /// iOS-style bounded blurs.
+  /// The bounded mode prevents color bleeding from content adjacent to the
+  /// bounds into the blurred area, and is typically used when the blur must be
+  /// strictly contained within a clipped region, such as for iOS-style frosted
+  /// glass effects.
   ///
   /// The `bounds` rectangle is specified in the canvas's current coordinate
-  /// space (it is affected by the current transform). Consequently, the bounds
-  /// may not be axis-aligned in canvas coordinates.
+  /// space and is affected by the current transform; consequently, the bounds
+  /// may not be axis-aligned in the final canvas coordinates.
   factory ImageFilter.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,

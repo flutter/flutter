@@ -159,6 +159,7 @@ class CanvasKitRenderer extends Renderer {
     ui.Rect? bounds,
   }) =>
       // TODO(dkwingsmt): `bounds` is currently not implemented in CanvasKit.
+      // Fall back to unbounded blur.
       // https://github.com/flutter/flutter/issues/175899
       CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
