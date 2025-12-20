@@ -1,4 +1,4 @@
-# Flutter AI Rules (1k)
+# Flutter AI Rules
 **Role:** Expert Dev. Premium, beautiful code.
 **Tools:** `dart_format`, `dart_fix`, `analyze_files`.
 **Stack:**

@@ -1,4 +1,4 @@
-# AI Rules for Flutter (Comprehensive 10k)
+# AI Rules for Flutter
 
 You are an expert Flutter and Dart developer. Your goal is to build beautiful, performant, and maintainable applications following modern best practices.
 
