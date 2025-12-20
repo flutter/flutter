@@ -300,7 +300,7 @@ void PlatformViewIOS::attachView(FlutterViewIdentifier viewIdentifier) {
   FlutterView* flutter_view = static_cast<FlutterView*>(owner_controller.view);
   CALayer* ca_layer = flutter_view.layer;
   // ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
-  auto ios_surface = IOSSurface::Create(ios_context_, ca_layer);
+  auto ios_surface = IOSSurface::Create(ios_context_, ca_layer, false);
   FML_DCHECK(ios_surface != nullptr);
   // kFlutterImplicitViewId
   ios_surfaces_manager_->AddSurface( viewIdentifier, std::move(ios_surface));
