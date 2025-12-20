@@ -170,7 +170,7 @@ platform_properties:
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_arm64:
@@ -188,7 +188,7 @@ platform_properties:
       cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_benchmark:
@@ -208,7 +208,7 @@ platform_properties:
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_x64:
@@ -223,10 +223,10 @@ platform_properties:
         ]
       os: Mac-15.7
       device_type: none
-      cpu: x86
+      cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_build_test:
@@ -242,10 +242,10 @@ platform_properties:
         ]
       os: Mac-15.7
       device_type: none
-      cpu: x86
+      cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_mokey:
@@ -257,7 +257,7 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Mac-15.7
-      cpu: x86
+      cpu: arm64
       device_type: "mokey"
 
   mac_arm64_mokey:
@@ -283,10 +283,10 @@ platform_properties:
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
       os: Mac-15.7
-      device_os: iOS-18
+      device_os: iOS-26-2
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_x64_ios:
@@ -301,11 +301,11 @@ platform_properties:
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
       os: Mac-15.7
-      cpu: x86
-      device_os: iOS-18
+      cpu: arm64
+      device_os: iOS-26-2
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   mac_arm64_ios:
@@ -321,10 +321,10 @@ platform_properties:
         ]
       os: Mac-15.7
       cpu: arm64
-      device_os: iOS-18
+      device_os: iOS-26-2
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a400"
+          "sdk_version": "17c52"
         }
 
   windows:
@@ -5492,7 +5492,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7", "cpu=x86"]
+        ["device_os=iOS-26-2","os=Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7", "cpu=arm64"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone

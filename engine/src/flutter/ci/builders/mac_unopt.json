@@ -35,7 +35,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -86,7 +86,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -138,7 +138,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -189,7 +189,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -246,7 +246,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -268,9 +268,9 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-26-0_17a400"
+                        "ios-26-2_17c52"
                     ],
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "drone_dimensions": [
@@ -364,7 +364,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "tests": [
@@ -393,9 +393,9 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-26-0_17a400"
+                        "ios-26-0_17c52"
                     ],
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "drone_dimensions": [
@@ -461,9 +461,9 @@
             "properties": {
                 "$flutter/osx_sdk": {
                     "runtime_versions": [
-                        "ios-26-0_17a400"
+                        "ios-26-0_17c52"
                     ],
-                    "sdk_version": "17a400"
+                    "sdk_version": "17c52"
                 }
             },
             "drone_dimensions": [
