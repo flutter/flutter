@@ -111,8 +111,11 @@ for platform in "${platforms[@]}"; do
   for package in $(cat $package_file_name); do
     echo $package
     split=(${package//:/ })
-    echo "Installing ${split[0]}"
-    yes "y" | $sdkmanager_path --sdk_root=$sdk_root ${split[0]}
+    IFS=',' read -ra ADDR <<< "${split[0]}"
+    for i in "${ADDR[@]}"; do
+      echo "Installing $i"
+      yes "y" | $sdkmanager_path --sdk_root=$sdk_root "$i"
+    done
 
     # We copy only the relevant directories to a temporary dir
     # for upload. sdkmanager creates extra files that we don't need.
@@ -121,23 +124,6 @@ for platform in "${platforms[@]}"; do
       cp -a "$sdk_root/${split[$i]}" "$upload_dir/sdk"
     done
   done
-
-  # Special treatment for NDK to move to expected directory.
-  # Instead of the ndk being in `sdk/ndk/<major>.<minor>.<patch>/`, it will be
-  # in `ndk/`.
-  # This simplifies the build scripts, and enables version difference between
-  # the Dart and Flutter build while reusing the same build rules.
-  # See https://github.com/flutter/flutter/issues/136666#issuecomment-1805467578
-  mv $upload_dir/sdk/ndk $upload_dir/ndk-bundle
-  ndk_sub_paths=`find $upload_dir/ndk-bundle -maxdepth 1 -type d`
-  ndk_sub_paths_arr=($ndk_sub_paths)
-  mv ${ndk_sub_paths_arr[1]} $upload_dir/ndk
-  rm -rf $upload_dir/ndk-bundle
-
-  if [[ ! -d "$upload_dir/ndk" ]]; then
-    echo "Failure to bundle ndk for platform"
-    exit 1
-  fi
 
   # Accept all licenses to ensure they are generated and uploaded.
   yes "y" | $sdkmanager_path --licenses --sdk_root=$sdk_root

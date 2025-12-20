@@ -15,9 +15,19 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
+import 'platform_plugins.dart';
 import 'plugins.dart';
 
 const _kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
+
+/// A wrapper for a platform-specific plugin configuration.
+class PluginPlatformConfig {
+  PluginPlatformConfig(this._config);
+
+  final Map<String, Object?> _config;
+
+  bool get sharedDarwinSource => _config[kSharedDarwinSource] == true;
+}
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -298,6 +308,24 @@ class FlutterManifest {
       );
     }
     return components;
+  }
+
+  /// The iOS-specific plugin configuration, if any.
+  PluginPlatformConfig? get ios {
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null || platforms['ios'] is! Map<String, Object?>) {
+      return null;
+    }
+    return PluginPlatformConfig(platforms['ios']! as Map<String, Object?>);
+  }
+
+  /// The macOS-specific plugin configuration, if any.
+  PluginPlatformConfig? get macos {
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null || platforms['macos'] is! Map<String, Object?>) {
+      return null;
+    }
+    return PluginPlatformConfig(platforms['macos']! as Map<String, Object?>);
   }
 
   /// Returns the iOS bundle identifier declared by this manifest in its

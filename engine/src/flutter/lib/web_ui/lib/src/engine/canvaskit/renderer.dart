@@ -32,19 +32,20 @@ class CanvasKitRenderer extends Renderer {
 
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer();
+      return MultiSurfaceRasterizer(
+        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
+      );
     }
-    return OffscreenCanvasRasterizer();
+    return OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+    );
   }
 
   @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
-
-  /// A surface used specifically for `Picture.toImage` when software rendering
-  /// is supported.
-  final Surface pictureToImageSurface = Surface();
 
   @override
   Future<void> initialize() async {
@@ -59,6 +60,7 @@ class CanvasKitRenderer extends Renderer {
         windowFlutterCanvasKit = canvasKit;
       }
       rasterizer = _createRasterizer();
+      _pictureToImageSurface = rasterizer.createPictureToImageSurface();
       _instance = this;
       await super.initialize();
     }();
@@ -485,8 +487,8 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void dumpDebugInfo() {
-    int i = 0;
-    for (final viewRasterizer in rasterizers.values) {
+    var i = 0;
+    for (final ViewRasterizer viewRasterizer in rasterizers.values) {
       final Map<String, dynamic>? debugJson = viewRasterizer.dumpDebugInfo();
       if (debugJson != null) {
         downloadDebugInfo('flutter-scene$i', debugJson);
@@ -494,4 +496,9 @@ class CanvasKitRenderer extends Renderer {
       }
     }
   }
+
+  late Surface _pictureToImageSurface;
+
+  @override
+  Surface get pictureToImageSurface => _pictureToImageSurface;
 }

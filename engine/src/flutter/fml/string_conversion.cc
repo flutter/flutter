@@ -44,4 +44,9 @@ std::u16string Utf8ToUtf16(const std::string_view string) {
   return converter.from_bytes(string.data());
 }
 
+std::string PathToUtf8(const std::filesystem::path& path) {
+  const std::u8string path_u8 = path.u8string();
+  return std::string(path_u8.begin(), path_u8.end());
+}
+
 }  // namespace fml

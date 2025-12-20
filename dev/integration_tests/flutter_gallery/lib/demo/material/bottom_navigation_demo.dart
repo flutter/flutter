@@ -161,7 +161,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
   }
 
   Widget _buildTransitionsStack() {
-    final List<FadeTransition> transitions = <FadeTransition>[
+    final transitions = <FadeTransition>[
       for (final NavigationIconView view in _navigationViews) view.transition(_type, context),
     ];
 
@@ -179,7 +179,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    final BottomNavigationBar botNavBar = BottomNavigationBar(
+    final botNavBar = BottomNavigationBar(
       items: _navigationViews
           .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
           .toList(),

@@ -5,6 +5,8 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:ui' as ui show SemanticsHitTestBehavior;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
@@ -267,6 +269,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
     if (_viewController.isCreated) {
       config.platformViewId = _viewController.viewId;
+      // Platform views should allow pointer events to pass through to the
+      // underlying platform view content.
+      config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
     }
   }
 }
@@ -293,7 +298,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     if (_viewController == value) {
       return;
     }
-    final bool needsSemanticsUpdate = _viewController.id != value.id;
+    final needsSemanticsUpdate = _viewController.id != value.id;
     _viewController = value;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -372,6 +377,9 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _viewController.id;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 
   @override
@@ -684,7 +692,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     if (_controller == controller) {
       return;
     }
-    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
+    final needsSemanticsUpdate = _controller.viewId != controller.viewId;
     _controller = controller;
     markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -737,6 +745,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.platformViewId = _controller.viewId;
+    // Platform views should allow pointer events to pass through to the
+    // underlying platform view content.
+    config.hitTestBehavior = ui.SemanticsHitTestBehavior.transparent;
   }
 }
 
