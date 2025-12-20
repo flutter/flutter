@@ -2290,7 +2290,7 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
     assertNotNull(collectionInfo);
 
-    assertEquals(collectionInfo.getRowCount(), testSemanticsNode.scrollChildren);
+    assertEquals(testSemanticsNode.scrollChildren, collectionInfo.getRowCount());
     assertEquals(1, collectionInfo.getColumnCount()); // 1 column for a list
     assertFalse(collectionInfo.isHierarchical());
   }
