@@ -9,17 +9,17 @@ This directory contains the default set of AI rules for building Flutter apps, f
 
 ## Device & Editor Specific Limits
 
-Different AI coding assistants and tools have varying limits for their "rules" or "custom instructions" files. *Last updated: 2025-12-12.*
+Different AI coding assistants and tools have varying limits for their "rules" or "custom instructions" files. *Last updated: 2026-01-05.*
 
 | Tool / Product | Rules File / Feature | **Soft / Hard Limit** | Notes & Sources |
+| Tool / Product | Limit | Source | Notes |
 | :--- | :--- | :--- | :--- |
-| **Aider** | `.aider.conf.yml` / `CONVENTIONS.md` | **No Hard Limit** | Uses `CONVENTIONS.md` for rules. Limited by model context window.<br>**Source:** Aider Docs: Configuration |
-| **Antigravity** (Google) | `.agent/rules/*.md` | **12,000 characters** (Hard) | **Source:** User Screenshot (Client-side validation error).<br>No public documentation found specifying this exact client limit yet. |
-| **CodeRabbit** | `.coderabbit.yaml` Instructions | **10,000 characters** (Hard) | "Instructions: max 10000 characters."<br>**Source:** CodeRabbit Docs: Configuration |
-| **Cursor** | `.cursorrules` | **No Hard Limit** | "There is no limit to the .cursorrules file... generally recommend keeping valid rules."<br>**Source:** Cursor Community Forum |
-| **Gemini CLI** | Input Context | **1M+ Tokens** (Context) | Limited by model context (approx 700k words). Practical per-file limits (e.g. 20MB) may apply.<br>**Source:** Google Cloud: Gemini Models |
-| **GitHub Copilot** | **Chat** Instructions | **~2 Pages** (Soft) | "We recommend... no longer than 2 pages."<br>**Source:** GitHub Docs: Custom Instructions |
-| **GitHub Copilot** | **Code Review** Instructions | **4,000 characters** (Hard) | "Instructions... limited to 4000 characters."<br>**Source:** GitHub Docs: Custom Instructions |
-| **Goose** | `.goosehints` / `AGENTS.md` | **No Hard Limit** | Limited by model context. Auto-compacts conversation when full.<br>**Source:** Block Goose: Context Management |
-| **JetBrains AI** | `.aiassistant/rules` | **No Hard Limit** | Limited only by the model's context window (prompts are trimmed if too large).<br>**Source:** JetBrains Blog: AI Assistant Update |
-| **OpenAI** (ChatGPT) | Custom Instructions | **1,500 characters** (Hard) | "Instructions... 1500 character limit."<br>**Source:** OpenAI Help: Custom Instructions |
+| Aider | No Hard Limit | [Aider Conventions](https://aider.chat/docs/usage/conventions.html) | Limited by model context window. |
+| Antigravity (Google) | 12,000 characters (Hard) | Internal Source | Validated via client-side error message. |
+| CodeRabbit | 1,000 characters (Hard) | [CodeRabbit Docs](https://docs.coderabbit.ai/pr-reviews/pre-merge-checks#ui-configuration) | Applied to "Instructions" field. |
+| Cursor | No Hard Limit | [Cursor Docs](https://cursor.com/docs/context/rules) | Keep rules under 500 lines |
+| Gemini CLI | 1M+ Tokens (Context) | [Vertex AI Docs](https://cloud.google.com/vertex-ai/generative-ai/docs/long-context) | Pactical limit is model context window. |
+| GitHub Copilot | ~2 Pages (Soft) / 4k chars | [Copilot Docs](https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot) | Chat: ~2 pages context. Code Review: 4000 char hard limit. |
+| Goose | No Hard Limit | [Goose Docs](https://block.github.io/goose/) | Uses "summarize" or "truncate" context strategies. |
+| JetBrains AI | No Hard Limit | [JetBrains AI Docs](https://www.jetbrains.com/help/idea/ai-assistant.html) | Context managed by AI Assistant; no fixed file size limit. |
+| OpenAI (ChatGPT) | 1,500 characters | [OpenAI Help](https://help.openai.com/en/articles/8096356-chatgpt-custom-instructions) | Is there a character limit for custom instructions? |

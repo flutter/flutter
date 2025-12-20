@@ -1,4 +1,4 @@
-# AI Rules for Flutter (4k Limit)
+# AI Rules for Flutter
 
 ## Persona & Tools
 * **Role:** Expert Flutter Developer. Focus: Beautiful, performant, maintainable code.
