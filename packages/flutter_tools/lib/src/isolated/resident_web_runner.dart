@@ -172,6 +172,8 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   bool get reloadIsRestart =>
+      // When --no-hot is passed, hotMode is false, so reload should behave as restart.
+      !hotMode ||
       debuggingOptions.webUseWasm ||
       // Web behavior when not using the DDC library bundle format is to restart
       // when a reload is issued. We can't use `canHotReload` to signal this
