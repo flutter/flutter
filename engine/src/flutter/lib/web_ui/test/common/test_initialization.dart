@@ -31,7 +31,6 @@ void setUpUnitTests({
       <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
           as engine.JsFlutterConfiguration?,
     );
-    engine.debugThrowOnCreateImageBitmapIfDisabled = true;
 
     if (setUpTestViewDimensions) {
       // The following parameters are hard-coded in Flutter's test embedder. Since

@@ -408,12 +408,6 @@ class MeasureVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     assert(picture.needsPainting);
-    if (picture.picture.isDisposed) {
-      // The picture layer was disposed before the picture could be painted.
-      // Just ignore it then.
-      picture.isCulled = true;
-      return;
-    }
 
     measuringCanvas.save();
     measuringCanvas.translate(picture.offset.dx, picture.offset.dy);
@@ -677,13 +671,6 @@ class PaintVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     assert(picture.needsPainting);
-
-    if (picture.picture.isDisposed) {
-      // The picture layer was disposed before the picture could be painted.
-      // Just ignore it then.
-      picture.isCulled = true;
-      return;
-    }
 
     // For each shader mask this picture is a child of, record that it needs
     // to have the shader mask applied to it.

@@ -5,16 +5,21 @@
 #ifndef FLUTTER_SKWASM_SURFACE_H_
 #define FLUTTER_SKWASM_SURFACE_H_
 
+#include <cassert>
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <emscripten.h>
 #include <emscripten/html5_webgl.h>
 #include <emscripten/threading.h>
 #include <webgl/webgl1.h>
-#include <cassert>
-#include "export.h"
-#include "render_context.h"
-#include "wrappers.h"
+
+#include "flutter/display_list/image/dl_image.h"
+#include "flutter/skwasm/export.h"
+#include "flutter/skwasm/render_context.h"
+#include "flutter/skwasm/wrappers.h"
+#include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 namespace flutter {
 class DisplayList;
@@ -40,50 +45,34 @@ class Surface {
   // Main thread only
   Surface();
 
-  // General getters
   unsigned long GetThreadId() { return thread_; }
-  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE GetGlContext() { return gl_context_; }
 
-  // Lifecycle
-  void SetCallbackHandler(CallbackHandler* callback_handler);
+  // Main thread only
   void Dispose();
-
-  // Surface setup
-  uint32_t SetCanvas(SkwasmObject canvas);
-  void OnInitialized(uint32_t callback_id);
-  void ReceiveCanvasOnWorker(SkwasmObject canvas, uint32_t callback_id);
-
-  // Resizing
-  uint32_t SetSize(int width, int height);
-  void OnResizeComplete(uint32_t callback_id);
-  void ResizeOnWorker(int width, int height, uint32_t callback_id);
-
-  // Rendering
-  uint32_t RenderPictures(flutter::DisplayList** picture, int count);
+  void SetResourceCacheLimit(int bytes);
+  uint32_t RenderPictures(flutter::DisplayList** pictures,
+                          int width,
+                          int height,
+                          int count);
+  uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
+  void SetCallbackHandler(CallbackHandler* callback_handler);
   void OnRenderComplete(uint32_t callback_id, SkwasmObject image_bitmap);
-  void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* picture,
+  void OnRasterizeComplete(uint32_t callback_id, SkData* data);
+
+  // Any thread
+  std::unique_ptr<TextureSourceWrapper> CreateTextureSourceWrapper(
+      SkwasmObject texture_source);
+
+  // Worker thread
+  void RenderPicturesOnWorker(sk_sp<flutter::DisplayList>* pictures,
+                              int width,
+                              int height,
                               int picture_count,
                               uint32_t callback_id,
                               double raster_start);
-
-  // Image Rasterization
-  uint32_t RasterizeImage(flutter::DlImage* image, ImageByteFormat format);
-  void OnRasterizeComplete(uint32_t callback_id, SkData* data);
   void RasterizeImageOnWorker(flutter::DlImage* image,
                               ImageByteFormat format,
                               uint32_t callback_id);
-
-  // Context Loss
-  uint32_t TriggerContextLoss();
-  void OnContextLossTriggered(uint32_t callback_id);
-  void ReportContextLost(uint32_t callback_id);
-  void TriggerContextLossOnWorker(uint32_t callback_id);
-  void OnContextLost();
-
-  // Other
-  void SetResourceCacheLimit(int bytes);
-  std::unique_ptr<TextureSourceWrapper> CreateTextureSourceWrapper(
-      SkwasmObject textureSource);
 
  private:
   void Init();
@@ -98,8 +87,6 @@ class Surface {
 
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE gl_context_ = 0;
   std::unique_ptr<RenderContext> render_context_;
-  uint32_t context_lost_callback_id_ = 0;
-
   unsigned long thread_;
 
   bool is_initialized_ = false;

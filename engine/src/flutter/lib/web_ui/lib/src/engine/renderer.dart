@@ -44,9 +44,6 @@ abstract class Renderer {
 
   late Rasterizer rasterizer;
 
-  /// A surface used specifically for `Picture.toImage`.
-  Surface get pictureToImageSurface;
-
   /// Resets the [Rasterizer] to the default value. Used in tests.
   @visibleForTesting
   void debugResetRasterizer();
@@ -339,8 +336,11 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
+    for (final ViewRasterizer rasterizer in rasterizers.values) {
+      rasterizer.dispose();
+    }
+    rasterizers.clear();
     rasterizer.dispose();
-    pictureToImageSurface.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.
