@@ -113,12 +113,18 @@ class TooltipPositionContext {
       Object.hash(target, targetSize, tooltipSize, overlaySize, verticalOffset, preferBelow);
 }
 
-/// The method of interaction that will trigger a tooltip.
-/// Used in [RawTooltip.triggerMode].
+/// How touch events should trigger a tooltip.
 ///
-/// When using a pointer device like a mouse, a tooltip will be shown as soon
-/// as a pointer hovers over the widget, regardless of the value of
+/// When using a pointer device like a mouse, a tooltip is shown as soon as
+/// a pointer hovers over the widget, regardless of the value of
 /// [RawTooltip.triggerMode].
+///
+/// A tooltip might also be triggered through other means regardless of this
+/// option, such as by calling `ensureTooltipVisible`.
+///
+/// See also:
+///
+///  * [RawTooltip.triggerMode], which uses this enum.
 ///
 /// See also:
 ///
@@ -126,7 +132,7 @@ class TooltipPositionContext {
 ///     a pointer must hover over a tooltip's widget before the tooltip
 ///     will be shown.
 enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling [RawTooltipState.ensureTooltipVisible].
+  /// Tooltip will not be triggered by touch events.
   manual,
 
   /// Tooltip will be shown after a long press.
@@ -210,11 +216,12 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// descriptions that explain the function of a button or other user interface
 /// elements.
 ///
-/// [RawTooltip] can be triggered in three ways:
-///  * By a long press gesture.
-///  * By a tap gesture.
-///  * By hovering over the widget with a mouse pointer.
-///  * Manually, using the [RawTooltipState.ensureTooltipVisible] function.
+/// The tooltip can be triggered in several ways:
+///
+///  * By hovering a mouse pointer over the widget.
+///  * By touch interactions, such as a long press or a tap, depending on the
+///    configuration of [triggerMode].
+///  * Manually, by calling [RawTooltipState.ensureTooltipVisible].
 ///
 /// See also:
 ///
@@ -506,7 +513,7 @@ class RawTooltip extends StatefulWidget {
 
 /// Contains the state for a [RawTooltip].
 ///
-/// This class can be used to programmatically show the [RawTooltip], see the
+/// This class can be used to programmatically show the [RawTooltip]. See the
 /// [ensureTooltipVisible] method.
 class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMixin {
   final OverlayPortalController _overlayController = OverlayPortalController();
