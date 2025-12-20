@@ -98,12 +98,12 @@ class DataColumn {
 
   /// Called when the user asks to sort the table using this column.
   ///
-  /// If null, the column will not be considered sortable.
-  ///
   /// If non-null, space is reserved in the column header for the sort
   /// indicator (the arrow icon), even when this column is not currently
   /// the active sort column and no arrow is painted. This can affect
   /// the layout and width of the column.
+  ///
+  /// If null, the column will not be considered sortable.
   ///
   /// See [DataTable.sortColumnIndex] and [DataTable.sortAscending].
   final DataColumnSortCallback? onSort;
