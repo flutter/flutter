@@ -393,7 +393,7 @@ class Context {
       echo(e.toString());
       echo(stackTrace.toString());
       echoXcodeError('Failed to embed native assets: $e');
-      exitApp(1);
+      exitApp(-1);
     }
 
     if (verbose) {

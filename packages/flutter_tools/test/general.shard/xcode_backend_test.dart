@@ -1174,7 +1174,7 @@ void main() {
         isA<Exception>().having(
           (e) => e.toString(),
           'toString()',
-          contains('App exited with code 1'),
+          contains('App exited with code -1'),
         ),
       ),
     );
