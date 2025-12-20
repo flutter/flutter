@@ -12,12 +12,14 @@ HostWindowTooltip::HostWindowTooltip(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const BoxConstraints& constraints,
+    bool is_sized_to_content,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
     : HostWindow(window_manager, engine),
       get_position_callback_(get_position_callback),
       parent_(parent),
       isolate_(Isolate::Current()),
+      is_sized_to_content_(is_sized_to_content),
       view_alive_(std::make_shared<int>(0)) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kTooltip,
@@ -35,15 +37,13 @@ HostWindowTooltip::HostWindowTooltip(
 }
 
 bool HostWindowTooltip::ViewIsSizedToContent() const {
-  return box_constraints_.biggest().width() != 0 &&
-         box_constraints_.biggest().height() != 0;
+  return is_sized_to_content_;
 }
 
 BoxConstraints HostWindowTooltip::GetConstraints() const {
   Size smallest = box_constraints_.smallest();
-  Size biggest = Size(0, 0);
-  if (box_constraints_.biggest().width() != 0 &&
-      box_constraints_.biggest().height() != 0) {
+  Size biggest = box_constraints_.biggest();
+  if (is_sized_to_content_) {
     auto work_area = GetWorkArea();
     double width = work_area.width;
     width = std::min(width, box_constraints_.biggest().width());

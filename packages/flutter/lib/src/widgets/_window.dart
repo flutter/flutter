@@ -681,6 +681,13 @@ abstract class TooltipWindowController extends BaseWindowController {
   ///
   /// The [positioner] argument specifies how the tooltip should be positioned
   /// relative to the [anchorRect].
+  /// 
+  /// The [preferredConstraints] are the constraints placed upon the size
+  /// of the window.
+  /// 
+  /// If [isSizedToContent] is true, the tooltip will size itself to fit its content
+  /// within the given [preferredConstraints]. If false, the tooltip will use
+  /// the [preferredConstraints] as strict constraints for its size.
   ///
   /// {@macro flutter.widgets.windowing.constraints}
   ///
@@ -693,14 +700,16 @@ abstract class TooltipWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints preferredConstraints = const BoxConstraints(),
+    bool isSizedToContent = true,
     TooltipWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final TooltipWindowController controller = owner.createTooltipWindowController(
       parent: parent,
-      preferredConstraints: preferredConstraints ?? const BoxConstraints(),
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
       delegate: delegate ?? TooltipWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -797,6 +806,7 @@ abstract class WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -851,6 +861,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
