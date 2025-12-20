@@ -277,7 +277,10 @@ class Tooltip extends StatefulWidget {
   /// {@macro flutter.widgets.RawTooltip.onTriggered}
   final TooltipTriggeredCallback? onTriggered;
 
-  /// {@macro flutter.widgets.RawTooltip.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// widget.
+  ///
+  /// If this property is null, [MouseCursor.defer] will be used.
   final MouseCursor? mouseCursor;
 
   /// Whether this tooltip should be invisible to hit testing.
@@ -511,7 +514,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
     );
 
-    Widget effectiveChild = widget.child ?? const SizedBox.shrink();
+    Widget effectiveChild = MouseRegion(
+      cursor: widget.mouseCursor ?? MouseCursor.defer,
+      child: widget.child ?? const SizedBox.shrink(),
+    );
 
     if (_visible) {
       effectiveChild = RawTooltip(
@@ -532,7 +538,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
         enableTapToDismiss: widget.enableTapToDismiss,
         onTriggered: widget.onTriggered,
-        mouseCursor: widget.mouseCursor,
         exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
         positionDelegate: _getDefaultPositionDelegate,
         child: effectiveChild,

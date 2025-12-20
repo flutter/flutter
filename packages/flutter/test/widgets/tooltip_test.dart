@@ -2697,58 +2697,6 @@ void main() {
     },
   );
 
-  testWidgets('Tooltip mouse cursor behavior', (WidgetTester tester) async {
-    const SystemMouseCursor customCursor = SystemMouseCursors.grab;
-
-    await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0x00000000),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
-        home: Center(
-          child: RawTooltip(
-            semanticsTooltip: tooltipText,
-            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
-                const Text(tooltipText),
-            positionDelegate: (TooltipPositionContext context) => positionDependentBox(
-              size: context.overlaySize,
-              childSize: context.tooltipSize,
-              target: context.target,
-              preferBelow: context.preferBelow,
-              verticalOffset: 24.0,
-            ),
-            mouseCursor: customCursor,
-            child: const SizedBox.square(dimension: 50),
-          ),
-        ),
-      ),
-    );
-
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: const Offset(10, 10));
-    await tester.pump();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
-
-    final Offset chip = tester.getCenter(find.byType(RawTooltip));
-    await gesture.moveTo(chip);
-    await tester.pump();
-    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
-  });
-
   testWidgets('Custom tooltip positioning - positionDelegate parameter', (
     WidgetTester tester,
   ) async {

@@ -31,37 +31,10 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 
 /// Signature for building the tooltip overlay child.
 ///
-/// The `animation` parameter is an [Animation] that maps to the tooltip's show
-/// and hide animation. Its value goes from 0.0 to 1.0 when the tooltip is
-/// shown, and from 1.0 to 0.0 when it is hidden.
-///
-/// This animation can be used to create custom transitions for the tooltip,
-/// such as fading or scaling, by wrapping the tooltip's content in a
-/// [FadeTransition] or [ScaleTransition] and using the provided `animation`.
-///
-/// The characteristics of the animation, such as its duration and curve, can be
-/// customized using the [RawTooltip.animationStyle] property.
-///
-/// {@tool snippet}
-/// A common use case is to fade the tooltip's content in and out.
-///
-/// ```dart
-/// RawTooltip(
-///   semanticsTooltip: 'An example tooltip',
-///   tooltipBuilder: (BuildContext context, Animation<double> animation) {
-///     return FadeTransition(
-///       opacity: animation,
-///       child: Container(
-///         padding: const EdgeInsets.all(8.0),
-///         color: Colors.grey,
-///         child: const Text('I am a tooltip!'),
-///       ),
-///     );
-///   },
-///   child: const Icon(Icons.info),
-/// )
-/// ```
-/// {@end-tool}
+/// The animation property exposes the underlying tooltip overlay child show
+/// and hide animation. This can be used to drive animations that sync up with
+/// the tooltip overlay child show/hide animation, for example to fade the
+/// tooltip in and out.
 typedef TooltipComponentBuilder =
     Widget Function(BuildContext context, Animation<double> animation);
 
@@ -86,6 +59,8 @@ typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context
 /// See also:
 ///
 ///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
+// TODO(victorsanni): Consider removing preferBelow and verticalOffset since
+// they are already available in the context of RawTooltip.
 @immutable
 class TooltipPositionContext {
   /// Creates a tooltip position context.
@@ -192,16 +167,16 @@ typedef TooltipTriggeredCallback = VoidCallback;
 /// This widget doesn't affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s,
 /// or other [HitTestTarget]s in the tree.
 class _ExclusiveMouseRegion extends MouseRegion {
-  const _ExclusiveMouseRegion({super.onEnter, super.onExit, super.cursor, super.child});
+  const _ExclusiveMouseRegion({super.onEnter, super.onExit, super.child});
 
   @override
   _RenderExclusiveMouseRegion createRenderObject(BuildContext context) {
-    return _RenderExclusiveMouseRegion(onEnter: onEnter, onExit: onExit, cursor: cursor);
+    return _RenderExclusiveMouseRegion(onEnter: onEnter, onExit: onExit);
   }
 }
 
 class _RenderExclusiveMouseRegion extends RenderMouseRegion {
-  _RenderExclusiveMouseRegion({super.onEnter, super.onExit, super.cursor});
+  _RenderExclusiveMouseRegion({super.onEnter, super.onExit});
 
   static bool isOutermostMouseRegion = true;
   static bool foundInnermostMouseRegion = false;
@@ -228,10 +203,12 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
   }
 }
 
-/// A design-language-agnostic tooltip.
+/// A widget that wraps a child to display an informative overlay in response to
+/// user interactions, such as hovering or long-pressing.
 ///
-/// A tooltip provides a text label which helps explain the function of a button
-/// or some other user interface action.
+/// Tooltips provide essential context by displaying text labels or brief
+/// descriptions that explain the function of a button or other user interface
+/// elements.
 ///
 /// [RawTooltip] can be triggered in three ways:
 ///  * By a long press gesture.
@@ -241,8 +218,8 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 ///
 /// See also:
 ///
-///   * [Tooltip], a higher-level widget in the Material library that wraps
-///     [RawTooltip] with additional functionality.
+///   * [Tooltip], a Material-themed [RawTooltip].
+// TODO(victorsanni): Add an example of how to call ensureTooltipVisible.
 class RawTooltip extends StatefulWidget {
   /// Creates a raw tooltip.
   ///
@@ -260,21 +237,50 @@ class RawTooltip extends StatefulWidget {
     this.triggerMode = TooltipTriggerMode.longPress,
     this.enableFeedback = true,
     this.onTriggered,
-    this.mouseCursor,
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
     required this.child,
   });
 
   /// The text to display in the tooltip's semantics announcement.
+  ///
+  /// This string is used by assistive technologies, most notably screen readers
+  /// like TalkBack and VoiceOver, to describe the tooltip's purpose.
   final String semanticsTooltip;
 
   /// Builds the widget that will be displayed in the tooltip's overlay.
   ///
-  /// The animation property exposes the underlying tooltip overlay child show
-  /// and hide animation. This can be used to drive animations that sync up with
-  /// the tooltip overlay child show/hide animation, for example to fade the
-  /// tooltip in and out.
+  /// The `animation` parameter is an [Animation] that maps to the tooltip's
+  /// show and hide animation. Its value goes from 0.0 to 1.0 when the tooltip
+  /// is shown, and from 1.0 to 0.0 when it is hidden.
+  ///
+  /// This animation can be used to create custom transitions for the tooltip,
+  /// such as fading or scaling, by wrapping the tooltip's content in a
+  /// [FadeTransition] or [ScaleTransition] and using the provided `animation`.
+  ///
+  /// The characteristics of the animation, such as its duration and curve, can
+  /// be customized using the [RawTooltip.animationStyle] property.
+  ///
+  /// {@tool snippet}
+  /// A common use case is to fade the tooltip's content in and out.
+  ///
+  /// ```dart
+  /// RawTooltip(
+  ///   semanticsTooltip: 'An example tooltip',
+  ///   tooltipBuilder: (BuildContext context, Animation<double> animation) {
+  ///     return FadeTransition(
+  ///       opacity: animation,
+  ///       child: Container(
+  ///         padding: const EdgeInsets.all(8.0),
+  ///         color: Colors.grey,
+  ///         child: const Text('I am a tooltip!'),
+  ///       ),
+  ///     );
+  ///   },
+  ///   child: const Icon(Icons.info),
+  /// )
+  /// ```
+  /// {@end-tool}
   final TooltipComponentBuilder tooltipBuilder;
 
   /// Whether the tooltip's [semanticsTooltip] should be excluded from
@@ -371,14 +377,6 @@ class RawTooltip extends StatefulWidget {
   ///   triggered.
   /// {@endtemplate}
   final TooltipTriggeredCallback? onTriggered;
-
-  /// {@template flutter.widgets.RawTooltip.mouseCursor}
-  /// The cursor for a mouse pointer when it enters or is hovering over the
-  /// widget.
-  ///
-  /// If this property is null, [MouseCursor.defer] will be used.
-  /// {@endtemplate}
-  final MouseCursor? mouseCursor;
 
   /// Used to override the curve and duration of the animation that shows and
   /// hides the tooltip.
@@ -570,14 +568,15 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
     assert(
       !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
-      'timer must not be active when the tooltip is fading out',
+      'timer must not be active when the tooltip is animating out',
     );
     if (_controller.isDismissed && withDelay.inMicroseconds > 0) {
       _timer?.cancel();
       _timer = Timer(withDelay, show);
     } else {
-      show(); // If the tooltip is already fading in or fully visible, skip the
-      // animation and show the tooltip immediately.
+      // If the tooltip is already animating in or fully visible, skip
+      // the animation and show the tooltip immediately.
+      show();
     }
   }
 
@@ -585,7 +584,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     assert(
       !(_timer?.isActive ?? false) || _backingController?.status != AnimationStatus.reverse,
-      'timer must not be active when the tooltip is fading out',
+      'timer must not be active when the tooltip is animating out',
     );
 
     _timer?.cancel();
@@ -593,8 +592,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // Use _backingController instead of _controller to prevent the lazy getter
     // from instantiating an AnimationController unnecessarily.
     if (_backingController?.isForwardOrCompleted ?? false) {
-      // Dismiss when the tooltip is fading in: if there's a dismiss delay we'll
-      // allow the fade in animation to continue until the delay timer fires.
+      // Dismiss when the tooltip is animating in: if there's a dismiss delay
+      // we'll allow the animation to continue until the delay timer fires.
       if (withDelay.inMicroseconds > 0) {
         _timer = Timer(withDelay, _controller.reverse);
       } else {
@@ -833,6 +832,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
     assert(debugCheckHasOverlay(context));
     final bool excludeFromSemantics = widget.excludeFromSemantics;
+    // TODO(victorsanni): Add SemanticsRole.tooltip.
     Widget result = Semantics(
       tooltip: excludeFromSemantics ? null : widget.semanticsTooltip,
       child: widget.child,
@@ -842,7 +842,6 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     result = _ExclusiveMouseRegion(
       onEnter: _handleMouseEnter,
       onExit: _handleMouseExit,
-      cursor: widget.mouseCursor ?? MouseCursor.defer,
       child: Listener(
         onPointerDown: _handlePointerDown,
         behavior: HitTestBehavior.opaque,
