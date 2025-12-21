@@ -140,8 +140,24 @@ class TextInputPlugin {
   // TSF support for modern IMEs.
   std::unique_ptr<TSFTextStore> tsf_text_store_;
 
-  // Initializes TSF text store.
+  // TSF Manager for registering text store.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:136
+  Microsoft::WRL::ComPtr<ITfThreadMgr> tsf_thread_manager_;
+
+  // TSF Client ID obtained from Activate.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:154
+  TfClientId tsf_client_id_ = TF_CLIENTID_NULL;
+
+  // TSF Document Manager for the text store.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:124
+  Microsoft::WRL::ComPtr<ITfDocumentMgr> tsf_document_manager_;
+
+  // Initializes TSF text store and registers with TSF manager.
   void InitializeTSF();
+
+  // Registers TSFTextStore with Windows TSF system.
+  // Based on Chromium's CreateDocumentManager (tsf_bridge.cc:441-525)
+  HRESULT RegisterTSFTextStore();
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };

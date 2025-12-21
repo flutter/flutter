@@ -121,7 +121,21 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
       });
 }
 
-TextInputPlugin::~TextInputPlugin() = default;
+TextInputPlugin::~TextInputPlugin() {
+  // Clean up TSF resources.
+  // Based on Chromium: ui/base/ime/win/tsf_bridge.cc:171-201
+  if (tsf_thread_manager_ && tsf_client_id_ != TF_CLIENTID_NULL) {
+    // Note: We don't call UnadviseSink because we didn't implement AdviseSink
+    // event registration (simplified implementation).
+    // Just deactivate the TSF thread manager.
+    tsf_thread_manager_->Deactivate();
+    tsf_client_id_ = TF_CLIENTID_NULL;
+  }
+  
+  // ComPtr members (tsf_thread_manager_, tsf_document_manager_) will
+  // automatically Release() in their destructors.
+  // std::unique_ptr<TSFTextStore> will automatically delete in its destructor.
+}
 
 void TextInputPlugin::ComposeBeginHook() {
   if (active_model_ == nullptr) {
@@ -506,11 +520,39 @@ void TextInputPlugin::EnterPressed(TextInputModel* model) {
 }
 
 void TextInputPlugin::InitializeTSF() {
-  // Create TSF text store for modern IME support.
+  // === TSF INITIALIZATION ===
+  // Based on Chromium: ui/base/ime/win/tsf_bridge.cc:203-263
+  
+  // Check if already initialized
+  if (tsf_client_id_ != TF_CLIENTID_NULL) {
+    return;  // Already initialized
+  }
+
+  // 1. Create ITfThreadMgr (TSF Thread Manager)
+  // Chromium: tsf_bridge.cc:218-223
+  HRESULT hr = ::CoCreateInstance(
+      CLSID_TF_ThreadMgr,
+      nullptr,
+      CLSCTX_ALL,
+      IID_PPV_ARGS(&tsf_thread_manager_));
+  
+  if (FAILED(hr)) {
+    return;  // Failed to create ThreadManager
+  }
+
+  // 2. Activate TSF
+  // Chromium: tsf_bridge.cc:225-229
+  hr = tsf_thread_manager_->Activate(&tsf_client_id_);
+  if (FAILED(hr)) {
+    tsf_thread_manager_.Reset();
+    return;  // Failed to activate
+  }
+
+  // 3. Create TSF text store
   tsf_text_store_ = std::make_unique<TSFTextStore>();
   tsf_text_store_->SetTextInputPlugin(this);
   
-  // Get window handle from the view.
+  // 4. Get window handle from view
   if (engine_) {
     FlutterWindowsView* view = engine_->view(view_id_);
     if (view) {
@@ -518,11 +560,65 @@ void TextInputPlugin::InitializeTSF() {
       tsf_text_store_->SetWindowHandle(hwnd);
     }
   }
+
+  // 5. Register TSFTextStore with TSF system
+  RegisterTSFTextStore();
+}
+
+HRESULT TextInputPlugin::RegisterTSFTextStore() {
+  // === TSF TEXT STORE REGISTRATION ===
+  // Based on Chromium: ui/base/ime/win/tsf_bridge.cc:441-525
+  // This is the CreateDocumentManager method logic
   
-  // TODO(flutter): Register TSFTextStore with Windows TSF manager.
-  // This requires additional TSF bridge implementation similar to Chromium's
-  // TSFBridge. For now, the TSFTextStore is initialized and ready to receive
-  // IME queries once properly registered with the TSF system.
+  if (!tsf_thread_manager_ || tsf_client_id_ == TF_CLIENTID_NULL) {
+    return E_FAIL;
+  }
+
+  if (!tsf_text_store_) {
+    return E_FAIL;
+  }
+
+  // 1. Create Document Manager
+  // Chromium: tsf_bridge.cc:447-451
+  HRESULT hr = tsf_thread_manager_->CreateDocumentMgr(&tsf_document_manager_);
+  if (FAILED(hr)) {
+    return hr;
+  }
+
+  // 2. Create Context with TSFTextStore
+  // Chromium: tsf_bridge.cc:459-466
+  // THIS IS THE KEY STEP - passing TSFTextStore to Windows
+  Microsoft::WRL::ComPtr<ITfContext> context;
+  TfEditCookie edit_cookie = TF_INVALID_EDIT_COOKIE;
+  
+  hr = tsf_document_manager_->CreateContext(
+      tsf_client_id_,
+      0,
+      static_cast<ITextStoreACP*>(tsf_text_store_.get()),  // ← Register TSFTextStore!
+      &context,
+      &edit_cookie);
+  
+  if (FAILED(hr)) {
+    tsf_document_manager_.Reset();
+    return hr;
+  }
+
+  // 3. Push context to document manager
+  // Chromium: tsf_bridge.cc:468-472
+  hr = tsf_document_manager_->Push(context.Get());
+  if (FAILED(hr)) {
+    tsf_document_manager_.Reset();
+    return hr;
+  }
+
+  // 4. Set focus to this document
+  // Chromium: tsf_bridge.cc:308 (in OnTextInputTypeChanged)
+  hr = tsf_thread_manager_->SetFocus(tsf_document_manager_.Get());
+  if (FAILED(hr)) {
+    // Non-fatal, continue
+  }
+
+  return S_OK;
 }
 
 }  // namespace flutter
