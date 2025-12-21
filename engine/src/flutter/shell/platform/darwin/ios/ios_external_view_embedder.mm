@@ -260,6 +260,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   FML_CHECK(platform_views_controller_);
 
   [platform_views_controller_ submitFrame:std::move(pending_frame_) withIosContext:ios_context_];
+  frame->Submit();
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
