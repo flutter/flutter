@@ -34,7 +34,8 @@ class CupertinoFocusHalo extends StatefulWidget {
   /// )
   /// ```
   const CupertinoFocusHalo.withRect({required this.child, super.key})
-    : _borderRadius = BorderRadius.zero;
+    : _borderRadius = BorderRadius.zero,
+      _shapeBuilder = RoundedRectangleBorder.new;
 
   /// Creates a rounded rectangular [CupertinoFocusHalo] around the child
   ///
@@ -56,9 +57,35 @@ class CupertinoFocusHalo extends StatefulWidget {
     required this.child,
     required BorderRadiusGeometry borderRadius,
     super.key,
-  }) : _borderRadius = borderRadius;
+  }) : _borderRadius = borderRadius,
+       _shapeBuilder = RoundedRectangleBorder.new;
+
+  /// Creates a rounded superellipse -shaped [CupertinoFocusHalo] around the child
+  ///
+  /// For example, to highlight a rounded superellipse -shaped section of the widget tree when any button inside that
+  /// section has focus, one could write:
+  ///
+  /// ```dart
+  /// CupertinoFocusHalo.withRoundedSuperellipse(
+  ///   borderRadius: BorderRadius.circular(10.0),
+  ///   child: Column(
+  ///     children: <Widget>[
+  ///       CupertinoButton(child: const Text('Child 1'), onPressed: () {}),
+  ///       CupertinoButton(child: const Text('Child 2'), onPressed: () {}),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
+  const CupertinoFocusHalo.withRoundedSuperellipse({
+    required this.child,
+    required BorderRadiusGeometry borderRadius,
+    super.key,
+  }) : _borderRadius = borderRadius,
+       _shapeBuilder = RoundedSuperellipseBorder.new;
 
   final BorderRadiusGeometry _borderRadius;
+
+  final ShapeBorder Function({BorderRadiusGeometry borderRadius, BorderSide side}) _shapeBuilder;
 
   /// The child to draw the focused border around.
   ///
@@ -96,7 +123,7 @@ class _CupertinoFocusHaloState extends State<CupertinoFocusHalo> {
       child: DecoratedBox(
         position: DecorationPosition.foreground,
         decoration: ShapeDecoration(
-          shape: RoundedSuperellipseBorder(
+          shape: widget._shapeBuilder(
             side: _childHasFocus
                 ? BorderSide(color: _effectiveFocusOutlineColor, width: 3.5)
                 : BorderSide.none,
