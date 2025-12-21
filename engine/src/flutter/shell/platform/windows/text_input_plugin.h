@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
+#include "flutter/shell/platform/windows/tsf_text_store.h"
 
 namespace flutter {
 
@@ -135,6 +136,12 @@ class TextInputPlugin {
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0};
+
+  // TSF support for modern IMEs.
+  std::unique_ptr<TSFTextStore> tsf_text_store_;
+
+  // Initializes TSF text store.
+  void InitializeTSF();
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };

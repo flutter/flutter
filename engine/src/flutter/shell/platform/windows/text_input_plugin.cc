@@ -119,6 +119,9 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
           std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
         HandleMethodCall(call, std::move(result));
       });
+  
+  // Initialize TSF support for modern IMEs.
+  InitializeTSF();
 }
 
 TextInputPlugin::~TextInputPlugin() = default;
@@ -500,6 +503,26 @@ void TextInputPlugin::EnterPressed(TextInputModel* model) {
   args->PushBack(rapidjson::Value(input_action_, allocator).Move(), allocator);
 
   channel_->InvokeMethod(kPerformActionMethod, std::move(args));
+}
+
+void TextInputPlugin::InitializeTSF() {
+  // Create TSF text store for modern IME support.
+  tsf_text_store_ = std::make_unique<TSFTextStore>();
+  tsf_text_store_->SetTextInputPlugin(this);
+  
+  // Get window handle from the view.
+  if (engine_) {
+    FlutterWindowsView* view = engine_->view(view_id_);
+    if (view) {
+      HWND hwnd = view->GetWindowHandle();
+      tsf_text_store_->SetWindowHandle(hwnd);
+    }
+  }
+  
+  // TODO(flutter): Register TSFTextStore with Windows TSF manager.
+  // This requires additional TSF bridge implementation similar to Chromium's
+  // TSFBridge. For now, the TSFTextStore is initialized and ready to receive
+  // IME queries once properly registered with the TSF system.
 }
 
 }  // namespace flutter
