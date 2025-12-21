@@ -193,12 +193,6 @@ IOSExternalViewEmbedder::~IOSExternalViewEmbedder() = default;
 
 // |ExternalViewEmbedder|
 DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
-  // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
-  // various overlays are controlled by this class.
-  return nullptr;
-}
-
-DlCanvas* IOSExternalViewEmbedder::GetRootCanvas(int64_t flutter_view_id) {
   return pending_frame_->Canvas();
 }
 
@@ -207,11 +201,6 @@ void IOSExternalViewEmbedder::CancelFrame() {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CancelFrame");
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ cancelFrame];
-}
-
-bool IOSExternalViewEmbedder::SkipFrame(int64_t flutter_view_id) {
-  auto *rendering_surface = get_ios_rendering_surface_callback_(flutter_view_id);
-  return rendering_surface == nullptr;
 }
 
 // |ExternalViewEmbedder|
@@ -302,21 +291,6 @@ void IOSExternalViewEmbedder::PushVisitedPlatformView(int64_t view_id) {
 
 void IOSExternalViewEmbedder::CollectView(int64_t view_id) {
   [platform_views_controller_ collectView:view_id];
-}
-
-std::unique_ptr<SurfaceFrame> IOSExternalViewEmbedder::AcquireRootFrame(int64_t flutter_view_id) {
-  auto *rendering_surface = get_ios_rendering_surface_callback_(flutter_view_id);
-  if (!rendering_surface) {
-    return std::make_unique<SurfaceFrame>(
-        nullptr, SurfaceFrame::FramebufferInfo(),
-        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
-        [](const SurfaceFrame& surface_frame) { return true; },
-        pending_frame_size_,
-        nullptr,
-        true);
-  }
-
-  return rendering_surface->AcquireFrame(pending_frame_size_);
 }
 
 void IOSExternalViewEmbedder::Reset() {

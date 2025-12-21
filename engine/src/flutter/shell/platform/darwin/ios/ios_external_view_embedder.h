@@ -82,12 +82,8 @@ public:
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
-  DlCanvas* GetRootCanvas(int64_t flutter_view_id) override;
-
   // |ExternalViewEmbedder|
   void CancelFrame() override;
-
-  bool SkipFrame(int64_t flutter_view_id) override;
 
   // |ExternalViewEmbedder|
   void BeginFrame(GrDirectContext* context,
@@ -134,8 +130,6 @@ public:
 
   // |ExternalViewEmbedder|
   void PushVisitedPlatformView(int64_t view_id) override;
-
-  std::unique_ptr<SurfaceFrame> AcquireRootFrame(int64_t flutter_view_id) override;
 
   void Reset();
 

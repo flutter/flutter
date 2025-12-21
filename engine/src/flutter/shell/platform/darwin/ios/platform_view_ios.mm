@@ -458,6 +458,10 @@ std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolv
   return out;
 }
 
+bool PlatformViewIOS::HasRenderingSurface(int64_t flutter_view_id) {
+  return ios_surfaces_manager_.get()->GetRenderingSurface(flutter_view_id) != nullptr;
+}
+
 void PlatformViewIOS::ApplyLocaleToOwnerController() {
   FlutterViewController* owner_controller = [viewControllers_ objectForKey:@(kFlutterImplicitViewId)];
   if (owner_controller) {
