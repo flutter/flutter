@@ -8352,8 +8352,6 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///
-// TODO(loic-sharma): Migrate to RadioGroup.
-// https://github.com/flutter/flutter/issues/179088
 /// ```dart
 /// await showDialog<void>(
 ///   context: context,

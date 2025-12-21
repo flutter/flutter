@@ -71,6 +71,13 @@ class PlatformViewAndroidJNI {
   virtual void FlutterViewSetApplicationLocale(std::string locale) = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Enables or disables the semantics tree.
+  ///
+  /// @note       Must be called from the platform thread.
+  ///
+  virtual void FlutterViewSetSemanticsTreeEnabled(bool enabled) = 0;
+
+  //----------------------------------------------------------------------------
   /// @brief      Sends new custom accessibility events.
   ///
   /// @note       Must be called from the platform thread.
