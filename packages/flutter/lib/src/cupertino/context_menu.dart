@@ -12,10 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../services/hardware_keyboard.dart';
 import 'colors.dart';
 import 'cupertino_focus_halo.dart';
 import 'localizations.dart';

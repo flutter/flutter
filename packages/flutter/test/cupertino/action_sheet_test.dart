@@ -1978,6 +1978,7 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
   testWidgets(
     'CupertinoActionSheet appearance changes correctly when actions or cancel button is focused',
     (WidgetTester tester) async {
