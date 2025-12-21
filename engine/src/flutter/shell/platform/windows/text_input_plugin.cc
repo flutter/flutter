@@ -119,9 +119,6 @@ TextInputPlugin::TextInputPlugin(flutter::BinaryMessenger* messenger,
           std::unique_ptr<flutter::MethodResult<rapidjson::Document>> result) {
         HandleMethodCall(call, std::move(result));
       });
-  
-  // Initialize TSF support for modern IMEs.
-  InitializeTSF();
 }
 
 TextInputPlugin::~TextInputPlugin() = default;
@@ -286,6 +283,9 @@ void TextInputPlugin::HandleMethodCall(
       }
     }
     active_model_ = std::make_unique<TextInputModel>();
+
+    // Initialize TSF when client is set (view_id is now valid).
+    InitializeTSF();
   } else if (method.compare(kSetEditingStateMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
