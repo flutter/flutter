@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/windows/tsf_text_store.h"
 
+#include <OleCtl.h>
+
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 
 namespace flutter {
