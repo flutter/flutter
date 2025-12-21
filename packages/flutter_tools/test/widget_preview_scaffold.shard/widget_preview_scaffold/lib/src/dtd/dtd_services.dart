@@ -6,14 +6,12 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:widget_preview_scaffold/src/dtd/dtd_connection_info.dart';
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 
 /// Provides services, streams, and RPC invocations to interact with Flutter developer tooling.
 class WidgetPreviewScaffoldDtdServices with DtdEditorService {
-  /// Environment variable for the DTD URI.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
-
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
@@ -25,6 +23,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+  static const kGetDevToolsUri = 'getDevToolsUri';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -37,9 +36,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// If the connection is successful, the Widget Preview Scaffold will register services and
   /// subscribe to various streams to interact directly with other tooling (e.g., IDEs).
   Future<void> connect({Uri? dtdUri}) async {
-    final Uri dtdWsUri =
-        dtdUri ??
-        Uri.parse(const String.fromEnvironment(kWidgetPreviewDtdUriEnvVar));
+    final Uri dtdWsUri = dtdUri ?? Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       dtd.postEvent(
@@ -119,6 +116,14 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   /// Sets [key] to [value] in the persistent preferences map.
   Future<void> setPreference(String key, Object? value) async {
     await _call(kSetPreference, params: {'key': key, 'value': value});
+  }
+
+  /// Retrieves the DevTools URI for the previewer instance.
+  Future<Uri> getDevToolsUri() async {
+    final result = StringResponse.fromDTDResponse(
+      (await _call(kGetDevToolsUri))!,
+    );
+    return Uri.parse(result.value!);
   }
 
   @override
