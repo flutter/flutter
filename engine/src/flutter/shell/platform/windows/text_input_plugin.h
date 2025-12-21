@@ -75,6 +75,12 @@ class TextInputPlugin {
   // Allows modifying the TextInputPlugin in tests.
   friend class TextInputPluginModifier;
 
+  // Allows TSFTextStore to access cursor positioning for IME candidate window.
+  // This follows a similar pattern to Chromium's TSFTextStore and TextInputClient
+  // relationship, where the text store needs access to cursor bounds for proper
+  // IME integration.
+  friend class TSFTextStore;
+
   // Sends the current state of the given model to the Flutter engine.
   void SendStateUpdate(const TextInputModel& model);
 
