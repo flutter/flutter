@@ -75,7 +75,7 @@ public:
   std::shared_ptr<IOSContext> ios_context_;
   const GetIOSRenderingSurfaceCallback get_ios_rendering_surface_callback_;
   DlISize pending_frame_size_;
-  std::unordered_map<int64_t, std::unique_ptr<SurfaceFrame>> frame_layers_;
+  std::unique_ptr<SurfaceFrame> pending_frame_;
 
   void CollectView(int64_t view_id) override;
 

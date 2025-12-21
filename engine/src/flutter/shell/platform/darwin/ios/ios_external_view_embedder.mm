@@ -199,15 +199,7 @@ DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
 }
 
 DlCanvas* IOSExternalViewEmbedder::GetRootCanvas(int64_t flutter_view_id) {
-  auto found = frame_layers_.find(flutter_view_id);
-  if (found == frame_layers_.end()) {
-    FML_DLOG(WARNING)
-        << "No root canvas could be found. This is extremely unlikely and "
-           "indicates that the external view embedder did not receive the "
-           "notification to begin the frame.";
-    return nullptr;
-  }
-  return found->second->Canvas();
+  return pending_frame_->Canvas();
 }
 
 // |ExternalViewEmbedder|
@@ -234,7 +226,7 @@ void IOSExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id, DlISiz
   pending_frame_size_ = frame_size;
 
   auto *rendering_surface = get_ios_rendering_surface_callback_(flutter_view_id);
-  frame_layers_[flutter_view_id] = rendering_surface->AcquireFrame(frame_size);
+  pending_frame_ = rendering_surface->AcquireFrame(frame_size);
 
   [platform_views_controller_ beginFrameWithSize:flutter_view_id frameSize:frame_size];
 }
@@ -278,7 +270,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
 //  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
 
-  [platform_views_controller_ submitFrame:std::move(frame_layers_[flutter_view_id]) withIosContext:ios_context_];
+  [platform_views_controller_ submitFrame:std::move(pending_frame_) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
