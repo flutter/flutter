@@ -1124,7 +1124,8 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'label was label 0'),
+              allOf(contains(r'with label: label\u202f0'),
+                contains(r'label was label 0')),
             ),
           ),
         );
@@ -1134,7 +1135,10 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r"attributedLabel was: AttributedString('label 0'"),
+              allOf(
+                contains(r"with attributedLabel: AttributedString('label\u202f0'"),
+                contains(r"attributedLabel was: AttributedString('label 0'"),
+              ),
             ),
           ),
         );
@@ -1146,7 +1150,8 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'hint was hint 0'),
+              allOf(contains(r'with hint: hint\u202f0'),
+                contains(r'hint was hint 0')),
             ),
           ),
         );
@@ -1156,7 +1161,10 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r"attributedHint was: AttributedString('hint 0'"),
+              allOf(
+                contains(r"with attributedHint: AttributedString('hint\u202f0'"),
+                contains(r"attributedHint was: AttributedString('hint 0'"),
+              ),
             ),
           ),
         );
@@ -1168,7 +1176,8 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'value was value 0'),
+              allOf(contains(r'with value: value\u202f0'),
+                contains(r'value was value 0')),
             ),
           ),
         );
@@ -1178,7 +1187,10 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r"attributedValue was: AttributedString('value 0'"),
+              allOf(
+                contains(r"with attributedValue: AttributedString('value\u202f0'"),
+                contains(r"attributedValue was: AttributedString('value 0'"),
+              ),
             ),
           ),
         );
@@ -1190,7 +1202,10 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'increasedValue was increasedValue 0'),
+              allOf(
+                contains(r'with increasedValue: increasedValue\u202f0'),
+                contains(r'increasedValue was increasedValue 0'),
+              ),
             ),
           ),
         );
@@ -1203,7 +1218,12 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r"attributedIncreasedValue was: AttributedString('increasedValue 0'"),
+              allOf(
+                contains(
+                  r"with attributedIncreasedValue: AttributedString('increasedValue\u202f0'",
+                ),
+                contains(r"attributedIncreasedValue was: AttributedString('increasedValue 0'"),
+              ),
             ),
           ),
         );
@@ -1215,7 +1235,10 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'decreasedValue was decreasedValue 0'),
+              allOf(
+                contains(r'with decreasedValue: decreasedValue\u202f0'),
+                contains(r'decreasedValue was decreasedValue 0'),
+              ),
             ),
           ),
         );
@@ -1228,7 +1251,12 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r"attributedDecreasedValue was: AttributedString('decreasedValue 0'"),
+              allOf(
+                contains(
+                  r"with attributedDecreasedValue: AttributedString('decreasedValue\u202f0'",
+                ),
+                contains(r"attributedDecreasedValue was: AttributedString('decreasedValue 0'"),
+              ),
             ),
           ),
         );
@@ -1240,7 +1268,9 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              contains(r'tooltip was tooltip 0'),
+              allOf(contains(r'with tooltip: tooltip\u202f0'),
+                contains(r'tooltip was tooltip 0'),
+              ),
             ),
           ),
         );

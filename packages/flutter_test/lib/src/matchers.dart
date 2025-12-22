@@ -2564,37 +2564,41 @@ class _MatchesSemanticsData extends Matcher {
   Description describe(Description description, [String? index]) {
     description.add('${index == null ? '' : 'Child $index '}has semantics');
     if (label != null) {
-      description.add(' with label: $label');
+      description.add(' with label: ${_escape(label!)}');
     }
     if (attributedLabel != null) {
-      description.add(' with attributedLabel: $attributedLabel');
+      description.add(' with attributedLabel: ${_escapeAttributedString(attributedLabel!)}');
     }
     if (value != null) {
-      description.add(' with value: $value');
+      description.add(' with value: ${_escape(value!)}');
     }
     if (attributedValue != null) {
-      description.add(' with attributedValue: $attributedValue');
+      description.add(' with attributedValue: ${_escapeAttributedString(attributedValue!)}');
     }
     if (hint != null) {
-      description.add(' with hint: $hint');
+      description.add(' with hint: ${_escape(hint!)}');
     }
     if (attributedHint != null) {
-      description.add(' with attributedHint: $attributedHint');
+      description.add(' with attributedHint: ${_escapeAttributedString(attributedHint!)}');
     }
     if (increasedValue != null) {
-      description.add(' with increasedValue: $increasedValue ');
+      description.add(' with increasedValue: ${_escape(increasedValue!)} ');
     }
     if (attributedIncreasedValue != null) {
-      description.add(' with attributedIncreasedValue: $attributedIncreasedValue');
+      description.add(
+        ' with attributedIncreasedValue: ${_escapeAttributedString(attributedIncreasedValue!)}',
+      );
     }
     if (decreasedValue != null) {
-      description.add(' with decreasedValue: $decreasedValue ');
+      description.add(' with decreasedValue: ${_escape(decreasedValue!)} ');
     }
     if (attributedDecreasedValue != null) {
-      description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+      description.add(
+        ' with attributedDecreasedValue: ${_escapeAttributedString(attributedDecreasedValue!)}',
+      );
     }
     if (tooltip != null) {
-      description.add(' with tooltip: $tooltip');
+      description.add(' with tooltip: ${_escape(tooltip!)}');
     }
     if (inputType != null) {
       description.add(' with inputType: $inputType');
@@ -2695,9 +2699,17 @@ class _MatchesSemanticsData extends Matcher {
     return true;
   }
 
+  static String _escape(String string) => string.replaceAll('\u202f', r'\u202f');
+
+  static AttributedString _escapeAttributedString(AttributedString attributedString) {
+    return AttributedString(
+      _escape(attributedString.string),
+      attributes: attributedString.attributes,
+    );
+  }
+
   bool _checkStringMismatch(Map<dynamic, dynamic> matchState, String prefixText, String actual) {
-    final String actualEscaped = actual.replaceAll('\u202f', r'\u202f');
-    return failWithDescription(matchState, '$prefixText was $actualEscaped');
+    return failWithDescription(matchState, '$prefixText was ${_escape(actual)}');
   }
 
   bool _checkStringAttributeMismatch(
@@ -2705,9 +2717,7 @@ class _MatchesSemanticsData extends Matcher {
     String prefixText,
     AttributedString actual,
   ) {
-    final String actualStringEscaped = actual.string.replaceAll('\u202f', r'\u202f');
-    final actualEscaped = AttributedString(actualStringEscaped, attributes: actual.attributes);
-    return failWithDescription(matchState, '$prefixText was: $actualEscaped');
+    return failWithDescription(matchState, '$prefixText was: ${_escapeAttributedString(actual)}');
   }
 
   @override
