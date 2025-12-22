@@ -451,11 +451,13 @@ class RawTooltip extends StatefulWidget {
 
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
 
+  /// {@template flutter.widgets.RawTooltip.dismissAllToolTips}
   /// Dismiss all of the tooltips that are currently shown on the screen,
   /// including those with mouse cursors currently hovering over them.
   ///
   /// This method returns true if it successfully dismisses the tooltips. It
   /// returns false if there is no tooltip shown on the screen.
+  /// {@endtemplate}
   static bool dismissAllToolTips() {
     if (_openedTooltips.isEmpty) {
       return false;
@@ -748,6 +750,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
   }
 
+  /// {@template flutter.widgets.RawTooltipState.ensureTooltipVisible}
   /// Shows the tooltip if it is not already visible.
   ///
   /// After made visible by this method, the tooltip does not automatically
@@ -756,6 +759,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   ///
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
   /// was already visible.
+  /// {@endtemplate}
   bool ensureTooltipVisible() {
     _timer?.cancel();
     _timer = null;

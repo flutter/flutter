@@ -1769,6 +1769,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
+    // TODO(victorsanni): Use actions and shortcuts to dismiss tooltips when
+    // esc is pressed instead of using a Focus widget.
     result = Focus(
       canRequestFocus: false,
       onKeyEvent: (FocusNode node, KeyEvent event) {

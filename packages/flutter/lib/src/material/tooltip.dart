@@ -297,11 +297,7 @@ class Tooltip extends StatefulWidget {
   /// {@macro flutter.widgets.RawTooltip.positionDelegate}
   final TooltipPositionDelegate? positionDelegate;
 
-  /// Dismiss all of the tooltips that are currently shown on the screen,
-  /// including those with mouse cursors currently hovering over them.
-  ///
-  /// This method returns true if it successfully dismisses the tooltips. It
-  /// returns false if there is no tooltip shown on the screen.
+  /// {@macro flutter.widgets.RawTooltip.dismissAllToolTips}
   static bool dismissAllToolTips() {
     return RawTooltip.dismissAllToolTips();
   }
@@ -395,14 +391,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool _visible;
   late TooltipThemeData _tooltipTheme;
 
-  /// Shows the tooltip if it is not already visible.
-  ///
-  /// After made visible by this method, The tooltip does not automatically
-  /// dismiss after `waitDuration`, until the user dismisses/re-triggers it, or
-  /// [Tooltip.dismissAllToolTips] is called.
-  ///
-  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
-  /// was already visible.
+  /// {@macro flutter.widgets.RawTooltipState.ensureTooltipVisible}
   bool ensureTooltipVisible() {
     return _tooltipKey.currentState?.ensureTooltipVisible() ?? false;
   }
