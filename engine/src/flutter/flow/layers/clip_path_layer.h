@@ -20,6 +20,8 @@ class ClipPathLayer : public ClipShapeLayer<DlPath> {
   const DlRect clip_shape_bounds() const override;
 
   void ApplyClip(LayerStateStack::MutatorContext& mutator) const override;
+  void PushClipToEmbeddedNativeViewMutatorStack(
+      ExternalViewEmbedder* view_embedder) const override;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);

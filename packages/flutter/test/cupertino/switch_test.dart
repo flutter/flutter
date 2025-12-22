@@ -2097,6 +2097,17 @@ void main() {
       expect(find.byType(CupertinoSwitch), paints..rrect(color: activeTrackColor));
     });
   });
+
+  testWidgets('CupertinoSwitch does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoSwitch(value: false, onChanged: (_) {})),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSwitch)), Size.zero);
+  });
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
