@@ -9,7 +9,6 @@ import static io.flutter.Build.API_LEVELS;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
@@ -18,8 +17,7 @@ import io.flutter.Log;
 import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 /** A class to initialize the native code. */
 class ResourceExtractor {
@@ -27,7 +25,8 @@ class ResourceExtractor {
   private static final String TIMESTAMP_PREFIX = "res_timestamp-";
   private static final String[] SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
 
-  @SuppressWarnings("deprecation")
+  private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
   static long getVersionCode(@NonNull PackageInfo packageInfo) {
     // Linter needs P (28) hardcoded or else it will fail these lines.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
@@ -37,7 +36,7 @@ class ResourceExtractor {
     }
   }
 
-  private static class ExtractTask extends AsyncTask<Void, Void, Void> {
+  private static class ExtractTask implements Callable<Void> {
     @NonNull private final String mDataDirPath;
     @NonNull private final HashSet<String> mResources;
     @NonNull private final AssetManager mAssetManager;
@@ -58,7 +57,7 @@ class ResourceExtractor {
     }
 
     @Override
-    protected Void doInBackground(Void... unused) {
+    public Void call() {
       final File dataDir = new File(mDataDirPath);
 
       final String timestamp = checkTimestamp(dataDir, mPackageManager, mPackageName);
@@ -72,12 +71,10 @@ class ResourceExtractor {
         return null;
       }
 
-      if (timestamp != null) {
-        try {
-          new File(dataDir, timestamp).createNewFile();
-        } catch (IOException e) {
-          Log.w(TAG, "Failed to write resource timestamp");
-        }
+      try {
+        new File(dataDir, timestamp).createNewFile();
+      } catch (IOException e) {
+        Log.w(TAG, "Failed to write resource timestamp");
       }
 
       return null;
@@ -89,7 +86,6 @@ class ResourceExtractor {
     private boolean extractAPK(@NonNull File dataDir) {
       for (String asset : mResources) {
         try {
-          final String resource = "assets/" + asset;
           final File output = new File(dataDir, asset);
           if (output.exists()) {
             continue;
@@ -102,12 +98,12 @@ class ResourceExtractor {
               OutputStream os = new FileOutputStream(output)) {
             copy(is, os);
           }
-          if (BuildConfig.DEBUG) {
-            Log.i(TAG, "Extracted baseline resource " + resource);
-          }
-        } catch (FileNotFoundException fnfe) {
-          continue;
 
+          if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Extracted baseline resource assets/" + asset);
+          }
+        } catch (FileNotFoundException ignore) {
+          continue;
         } catch (IOException ioe) {
           Log.w(TAG, "Exception unpacking resources: " + ioe.getMessage());
           deleteFiles(mDataDirPath, mResources);
@@ -124,7 +120,7 @@ class ResourceExtractor {
   @NonNull private final PackageManager mPackageManager;
   @NonNull private final AssetManager mAssetManager;
   @NonNull private final HashSet<String> mResources;
-  private ExtractTask mExtractTask;
+  private Future<Void> mExtractFuture;
 
   ResourceExtractor(
       @NonNull String dataDirPath,
@@ -149,23 +145,26 @@ class ResourceExtractor {
   }
 
   ResourceExtractor start() {
-    if (BuildConfig.DEBUG && mExtractTask != null) {
+    if (BuildConfig.DEBUG && mExtractFuture != null) {
       Log.e(
           TAG, "Attempted to start resource extraction while another extraction was in progress.");
     }
-    mExtractTask =
-        new ExtractTask(mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager);
-    mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+    mExtractFuture =
+        EXECUTOR.submit(
+            new ExtractTask(
+                mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager));
+
     return this;
   }
 
   void waitForCompletion() {
-    if (mExtractTask == null) {
+    if (mExtractFuture == null) {
       return;
     }
 
     try {
-      mExtractTask.get();
+      mExtractFuture.get();
     } catch (CancellationException | ExecutionException | InterruptedException e) {
       deleteFiles(mDataDirPath, mResources);
     }
