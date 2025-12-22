@@ -1124,8 +1124,7 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              allOf(contains(r'with label: label\u202f0'),
-                contains(r'label was label 0')),
+              allOf(contains(r'with label: label\u202f0'), contains(r'label was label 0')),
             ),
           ),
         );
@@ -1150,8 +1149,7 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              allOf(contains(r'with hint: hint\u202f0'),
-                contains(r'hint was hint 0')),
+              allOf(contains(r'with hint: hint\u202f0'), contains(r'hint was hint 0')),
             ),
           ),
         );
@@ -1176,8 +1174,7 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              allOf(contains(r'with value: value\u202f0'),
-                contains(r'value was value 0')),
+              allOf(contains(r'with value: value\u202f0'), contains(r'value was value 0')),
             ),
           ),
         );
@@ -1268,9 +1265,7 @@ void main() {
             isA<TestFailure>().having(
               (TestFailure e) => e.message,
               'message',
-              allOf(contains(r'with tooltip: tooltip\u202f0'),
-                contains(r'tooltip was tooltip 0'),
-              ),
+              allOf(contains(r'with tooltip: tooltip\u202f0'), contains(r'tooltip was tooltip 0')),
             ),
           ),
         );
