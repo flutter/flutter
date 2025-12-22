@@ -384,8 +384,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   texture_contents->SetSamplerDescriptor(descriptor);
   std::shared_ptr<FilterContents> blurred_mask =
       FilterContents::MakeGaussianBlur(
-          FilterInput::Make(mask), sigma, sigma,
-          /*bounds=*/std::nullopt, Entity::TileMode::kDecal, style, geometry);
+          FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal,
+          /*bounds=*/std::nullopt, style, geometry);
 
   return ColorFilterContents::MakeBlend(
       BlendMode::kSrcIn,
@@ -402,7 +402,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (color_source_contents->IsSolidColor()) {
     return FilterContents::MakeGaussianBlur(
         FilterInput::Make(color_source_contents), sigma, sigma,
-        /*bounds=*/std::nullopt, Entity::TileMode::kDecal, style,
+        Entity::TileMode::kDecal, /*bounds=*/std::nullopt, style,
         color_source_contents->GetGeometry());
   }
 
@@ -415,8 +415,8 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   /// 2. Blur the mask.
 
   auto blurred_mask = FilterContents::MakeGaussianBlur(
-      FilterInput::Make(mask), sigma, sigma, /*bounds=*/std::nullopt,
-      Entity::TileMode::kDecal, style, color_source_contents->GetGeometry());
+      FilterInput::Make(mask), sigma, sigma, Entity::TileMode::kDecal,
+      /*bounds=*/std::nullopt, style, color_source_contents->GetGeometry());
 
   /// 3. Replace the geometry of the original color source with a rectangle that
   ///    covers the full region of the blurred mask. Note that geometry is in
@@ -461,7 +461,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (is_solid_color) {
     return FilterContents::MakeGaussianBlur(
         input, Sigma(blur_sigma.x), Sigma(blur_sigma.y),
-        /*bounds=*/std::nullopt, Entity::TileMode::kDecal, style);
+        Entity::TileMode::kDecal, /*bounds=*/std::nullopt, style);
   }
   return FilterContents::MakeBorderMaskBlur(input, Sigma(blur_sigma.x),
                                             Sigma(blur_sigma.y), style);

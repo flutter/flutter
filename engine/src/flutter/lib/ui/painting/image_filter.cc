@@ -62,8 +62,8 @@ const std::shared_ptr<DlImageFilter> ImageFilter::filter(
     const DlBlurImageFilter* blur_filter = filter_->asBlur();
     FML_DCHECK(blur_filter != nullptr);
     if (blur_filter->tile_mode() != mode) {
-      return DlBlurImageFilter::Make(
-          blur_filter->sigma_x(), blur_filter->sigma_y(), std::nullopt, mode);
+      return DlBlurImageFilter::Make(blur_filter->sigma_x(),
+                                     blur_filter->sigma_y(), mode);
     }
   }
   return filter_;
@@ -93,7 +93,7 @@ void ImageFilter::initBlur(double sigma_x,
                          SafeNarrow(bounds_right), SafeNarrow(bounds_bottom));
   }
   filter_ = DlBlurImageFilter::Make(SafeNarrow(sigma_x), SafeNarrow(sigma_y),
-                                    bounds, tile_mode);
+                                    tile_mode, bounds);
   // If it was a NOP filter, don't bother processing dynamic substitutions
   // (They'd fail the FML_DCHECK anyway)
   is_dynamic_tile_mode_ = is_dynamic && filter_;

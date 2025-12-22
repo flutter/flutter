@@ -38,12 +38,12 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
     const FilterInput::Ref& input,
     Sigma sigma_x,
     Sigma sigma_y,
-    std::optional<Rect> bounds,
     Entity::TileMode tile_mode,
+    std::optional<Rect> bounds,
     FilterContents::BlurStyle mask_blur_style,
     const Geometry* mask_geometry) {
   auto blur = std::make_shared<GaussianBlurFilterContents>(
-      sigma_x.sigma, sigma_y.sigma, bounds, tile_mode, mask_blur_style,
+      sigma_x.sigma, sigma_y.sigma, tile_mode, bounds, mask_blur_style,
       mask_geometry);
   blur->SetInputs({input});
   return blur;

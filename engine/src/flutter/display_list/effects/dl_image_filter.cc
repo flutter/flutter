@@ -12,8 +12,7 @@ namespace flutter {
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeBlur(DlScalar sigma_x,
                                                        DlScalar sigma_y,
                                                        DlTileMode tile_mode) {
-  return DlBlurImageFilter::Make(sigma_x, sigma_y, /*bounds=*/std::nullopt,
-                                 tile_mode);
+  return DlBlurImageFilter::Make(sigma_x, sigma_y, tile_mode);
 }
 
 std::shared_ptr<DlImageFilter> DlImageFilter::MakeDilate(DlScalar radius_x,

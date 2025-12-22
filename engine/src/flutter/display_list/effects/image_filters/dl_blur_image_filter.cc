@@ -9,8 +9,8 @@ namespace flutter {
 std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
     DlScalar sigma_x,
     DlScalar sigma_y,
-    std::optional<DlRect> bounds,
-    DlTileMode tile_mode) {
+    DlTileMode tile_mode,
+    std::optional<DlRect> bounds) {
   if (!std::isfinite(sigma_x) || !std::isfinite(sigma_y)) {
     return nullptr;
   }
@@ -19,8 +19,8 @@ std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
   }
   sigma_x = (sigma_x < SK_ScalarNearlyZero) ? 0 : sigma_x;
   sigma_y = (sigma_y < SK_ScalarNearlyZero) ? 0 : sigma_y;
-  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, bounds,
-                                             tile_mode);
+  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode,
+                                             bounds);
 }
 
 DlRect* DlBlurImageFilter::map_local_bounds(const DlRect& input_bounds,

@@ -560,8 +560,7 @@ TEST(RasterCache, PrepareLayerTransform) {
   DlRect child_bounds = DlRect::MakeLTRB(10, 10, 50, 50);
   DlPath child_path = DlPath::MakeOval(child_bounds);
   auto child_layer = MockLayer::Make(child_path);
-  auto blur_filter =
-      DlBlurImageFilter::Make(5, 5, std::nullopt, DlTileMode::kClamp);
+  auto blur_filter = DlBlurImageFilter::Make(5, 5, DlTileMode::kClamp);
   auto blur_layer = std::make_shared<ImageFilterLayer>(blur_filter);
   DlMatrix matrix = DlMatrix::MakeScale({2.0f, 2.0f, 1.0f});
   auto transform_layer = std::make_shared<TransformLayer>(matrix);

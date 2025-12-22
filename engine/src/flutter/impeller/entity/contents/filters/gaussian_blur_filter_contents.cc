@@ -767,13 +767,13 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
 GaussianBlurFilterContents::GaussianBlurFilterContents(
     Scalar sigma_x,
     Scalar sigma_y,
-    std::optional<Rect> bounds,
     Entity::TileMode tile_mode,
+    std::optional<Rect> bounds,
     BlurStyle mask_blur_style,
     const Geometry* mask_geometry)
     : sigma_(sigma_x, sigma_y),
-      bounds_(bounds),
       tile_mode_(tile_mode),
+      bounds_(bounds),
       mask_blur_style_(mask_blur_style),
       mask_geometry_(mask_geometry) {
   // This is supposed to be enforced at a higher level.

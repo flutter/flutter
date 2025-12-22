@@ -2465,7 +2465,7 @@ TEST_F(DisplayListTest, RTreeOfSaveRestoreScene) {
 TEST_F(DisplayListTest, RTreeOfSaveLayerFilterScene) {
   DisplayListBuilder builder(/*prepare_rtree=*/true);
   // blur filter with sigma=1 expands by 3 on all sides
-  auto filter = DlBlurImageFilter(1.0, 1.0, std::nullopt, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter(1.0, 1.0, DlTileMode::kClamp);
   DlPaint default_paint = DlPaint();
   DlPaint filter_paint = DlPaint().setImageFilter(&filter);
   builder.DrawRect(DlRect::MakeLTRB(10, 10, 20, 20), default_paint);
@@ -3229,7 +3229,7 @@ TEST_F(DisplayListTest, NOPClipDoesNotTriggerDeferredSave) {
 TEST_F(DisplayListTest, RTreeOfClippedSaveLayerFilterScene) {
   DisplayListBuilder builder(/*prepare_rtree=*/true);
   // blur filter with sigma=1 expands by 30 on all sides
-  auto filter = DlBlurImageFilter(10.0, 10.0, std::nullopt, DlTileMode::kClamp);
+  auto filter = DlBlurImageFilter(10.0, 10.0, DlTileMode::kClamp);
   DlPaint default_paint = DlPaint();
   DlPaint filter_paint = DlPaint().setImageFilter(&filter);
   builder.DrawRect(DlRect::MakeLTRB(10, 10, 20, 20), default_paint);
@@ -4512,7 +4512,7 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsMaxBlend) {
 
 TEST_F(DisplayListTest, DrawDisplayListForwardsBackdropFlag) {
   DisplayListBuilder child_builder;
-  DlBlurImageFilter backdrop(2.0f, 2.0f, std::nullopt, DlTileMode::kDecal);
+  DlBlurImageFilter backdrop(2.0f, 2.0f, DlTileMode::kDecal);
   child_builder.SaveLayer(std::nullopt, nullptr, &backdrop);
   child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 10, 10),
                          DlPaint().setBlendMode(DlBlendMode::kMultiply));

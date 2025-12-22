@@ -4441,8 +4441,8 @@ class _GaussianBlurImageFilter implements ImageFilter {
   _GaussianBlurImageFilter({
     required this.sigmaX,
     required this.sigmaY,
-    this.bounds,
     required this.tileMode,
+    this.bounds,
   });
 
   final double sigmaX;

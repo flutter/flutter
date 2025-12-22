@@ -591,7 +591,7 @@ TEST_P(DisplayListTest, CanDrawWithImageBlurFilter) {
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
 
-    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1], std::nullopt,
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
                                              flutter::DlTileMode::kClamp);
     paint.setImageFilter(&filter);
     builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(200, 200),
@@ -680,7 +680,7 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
     Vector2 scale = ctm_scale * GetContentScale();
     builder.Scale(scale.x, scale.y);
 
-    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1], std::nullopt,
+    auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
                                              flutter::DlTileMode::kClamp);
 
     std::optional<DlRect> bounds;
@@ -784,8 +784,8 @@ TEST_P(DisplayListTest, CanDrawBoundedBlur) {
     if (use_bounds) {
       blur_bounds = bounds;
     }
-    auto filter = flutter::DlBlurImageFilter(sigma, sigma, blur_bounds,
-                                             tile_modes[selected_tile_mode]);
+    auto filter = flutter::DlBlurImageFilter(
+        sigma, sigma, tile_modes[selected_tile_mode], blur_bounds);
     builder.SaveLayer(std::nullopt, &save_paint, &filter);
     builder.Restore();
     builder.Restore();
@@ -1122,8 +1122,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
           }
           case 1: {
             auto internal_filter =
-                flutter::DlBlurImageFilter(10, 10, std::nullopt,
-                                           flutter::DlTileMode::kDecal)
+                flutter::DlBlurImageFilter(10, 10, flutter::DlTileMode::kDecal)
                     .shared();
             auto filter = flutter::DlLocalMatrixImageFilter(filter_matrix,
                                                             internal_filter);

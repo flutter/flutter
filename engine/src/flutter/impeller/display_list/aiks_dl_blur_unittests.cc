@@ -388,7 +388,7 @@ TEST_P(AiksTest, CanRenderBoundedBlur) {
   DlRect rect1 = DlRect::MakeLTRB(70, 70, 313, 170);
   builder.ClipRect(rect1);
   auto backdrop_filter1 =
-      DlBlurImageFilter::Make(20, 20, /*bounds=*/rect1, DlTileMode::kDecal);
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
   builder.Restore();
   builder.Restore();
@@ -401,7 +401,7 @@ TEST_P(AiksTest, CanRenderBoundedBlur) {
   DlRect rect2 = DlRect::MakeLTRB(55, 190, 298, 290);
   builder.ClipRect(rect2);
   auto backdrop_filter2 =
-      DlBlurImageFilter::Make(20, 20, /*bounds=*/rect2, DlTileMode::kDecal);
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect2);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
   builder.Restore();
   builder.Restore();
