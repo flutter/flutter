@@ -4338,10 +4338,10 @@ abstract class ImageFilter {
   /// > This API is only supported when using the Impeller rendering engine.
   /// > On other backends, an [UnsupportedError] will be thrown.
   ///
-  /// To check at runtime whether this API is supported, use [isShaderFilterSupported].
+  /// > To check at runtime whether this API is supported, use [isShaderFilterSupported].
   ///
   /// Example usage:
-  /// 
+  ///
   /// ```dart
   /// if (ui.ImageFilter.isShaderFilterSupported) {
   ///   // Use the filter...
