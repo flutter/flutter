@@ -4341,9 +4341,9 @@ abstract class ImageFilter {
   /// To check at runtime whether this API is supported, use [isShaderFilterSupported].
   ///
   /// Example usage:
+  /// 
   /// ```dart
-  /// if (ImageFilter.isShaderFilterSupported) {
-  ///   final filter = ImageFilter.shader(myShader);
+  /// if (ui.ImageFilter.isShaderFilterSupported) {
   ///   // Use the filter...
   /// }
   /// ```
