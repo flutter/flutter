@@ -429,15 +429,6 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// To programmatically clear the text field, provide a
   /// [TextEditingController] and call its [TextEditingController.clear] method.
   /// Setting [initialSelection] to null will not clear the text field.
-  ///
-  /// This example shows how to clear the dropdown menu text field
-  /// using a controller.
-  ///
-  /// ```dart
-  /// final TextEditingController myController = TextEditingController();
-  ///
-  /// myController.clear();
-  /// ```
   final TextEditingController? controller;
 
   /// The value used for an initial selection.
