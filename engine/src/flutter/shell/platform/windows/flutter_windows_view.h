@@ -101,7 +101,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   void SendInitialBounds();
 
   // Set the text of the alert, and create it if it does not yet exist.
-  void AnnounceAlert(const std::wstring& text);
+  virtual void AnnounceAlert(const std::wstring& text);
 
   // |WindowBindingHandlerDelegate|
   void OnHighContrastChanged() override;
