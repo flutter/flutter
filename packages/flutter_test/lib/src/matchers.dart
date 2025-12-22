@@ -2696,8 +2696,8 @@ class _MatchesSemanticsData extends Matcher {
   }
 
   bool _checkStringMismatch(Map<dynamic, dynamic> matchState, String prefixText, String actual) {
-    final String actualWithNBSP = actual.replaceAll('\u202f', r'\u202f');
-    return failWithDescription(matchState, '$prefixText was $actualWithNBSP');
+    final String actualEscaped = actual.replaceAll('\u202f', r'\u202f');
+    return failWithDescription(matchState, '$prefixText was $actualEscaped');
   }
 
   bool _checkStringAttributeMismatch(
@@ -2705,9 +2705,9 @@ class _MatchesSemanticsData extends Matcher {
     String prefixText,
     AttributedString actual,
   ) {
-    final String actualStringWithNBSP = actual.string.replaceAll('\u202f', r'\u202f');
-    final actualWithNBSP = AttributedString(actualStringWithNBSP, attributes: actual.attributes);
-    return failWithDescription(matchState, '$prefixText was: $actualWithNBSP');
+    final String actualStringEscaped = actual.string.replaceAll('\u202f', r'\u202f');
+    final actualEscaped = AttributedString(actualStringEscaped, attributes: actual.attributes);
+    return failWithDescription(matchState, '$prefixText was: $actualEscaped');
   }
 
   @override
