@@ -425,10 +425,6 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// Controls the text being edited or selected in the menu.
   ///
   /// If null, this widget will create its own [TextEditingController].
-  ///
-  /// To programmatically clear the text field, provide a
-  /// [TextEditingController] and call its [TextEditingController.clear] method.
-  /// Setting [initialSelection] to null will not clear the text field.
   final TextEditingController? controller;
 
   /// The value used for an initial selection.
