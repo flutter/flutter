@@ -197,17 +197,7 @@ public class FlutterMutatorView extends FrameLayout {
     }
     requestUnbufferedDispatch(event);
     final Matrix screenMatrix = new Matrix();
-
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_MOVE:
-        // While the view is dragged, use coordinates provided by the view.
-        screenMatrix.postTranslate(getLeft(), getTop());
-        break;
-      case MotionEvent.ACTION_UP:
-      default:
-        screenMatrix.postTranslate(left, top);
-        break;
-    }
+    screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }
