@@ -9,18 +9,20 @@ import 'package:flutter/foundation.dart';
 /// Context information provided when resolving an [ImageFilterConfig].
 ///
 ///  See also:
-///  * [ImageFilterConfig.resolve], which takes an [ImageFilterContext] to create
-///   a [ui.ImageFilter].
+///  * [ImageFilterConfig.resolve], which takes an instance of this class to
+///    create a [ui.ImageFilter].
 @immutable
 class ImageFilterContext {
   /// Creates an [ImageFilterContext].
   const ImageFilterContext({required this.bounds});
 
-  /// The bounds to apply the filter, in the local coordinate of the current
-  /// canvas state.
+  /// The bounds to apply the filter in the local coordinate space.
   ///
-  /// This is typically the bounds of the widget or render object applying the
-  /// filter.
+  /// Specified in the canvas's current coordinate space and affected by the
+  /// current transform. The bounds may not be axis-aligned in final canvas
+  /// coordinates.
+  ///
+  /// Typically the bounds of the widget or render object applying the filter.
   final ui.Rect bounds;
 }
 
@@ -91,11 +93,8 @@ abstract class ImageFilterConfig {
     return _ComposeImageFilterConfig(outer: outer, inner: inner);
   }
 
-  /// Resolves this configuration into a [ui.ImageFilter], given the
-  /// `bounds` of the widget applying the filter.
-  ///
-  /// The `bounds` can be used to create layout-dependent filters, such as
-  /// a blur that only samples pixels within the bounds.
+  /// Resolves this configuration into a [ui.ImageFilter], given the context of
+  /// the widget applying the filter.
   ui.ImageFilter resolve(ImageFilterContext context);
 }
 
