@@ -1274,21 +1274,6 @@ class RenderBackdropFilter extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null;
 
-  // Computes the bounds of this render object in the coordinate space where the
-  // filter is applied.
-  //
-  // This method applies all ancestor transforms from this render object up to
-  // the root of the render tree, including the root transform of [RenderView],
-  // and then excludes the offset used for the pushed layer. The resulting
-  // transform is applied to the rectangle that represents this object's size.
-  Rect _sizeForFilter(Offset offset) {
-    final Matrix4 transform = Matrix4.translationValues(-offset.dx, -offset.dy, 0);
-    for (RenderObject current = this; current.parent != null; current = current.parent!) {
-      current.parent!.applyPaintTransform(current, transform);
-    }
-    return MatrixUtils.transformRect(transform, Offset.zero & size);
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (!_enabled) {
@@ -1297,7 +1282,7 @@ class RenderBackdropFilter extends RenderProxyBox {
     }
 
     final ui.ImageFilter effectiveFilter = _filterConfig!.resolve(
-      ImageFilterContext(bounds: _sizeForFilter(offset)),
+      ImageFilterContext(bounds: offset & size),
     );
 
     if (child != null) {
@@ -1319,7 +1304,6 @@ class RenderBackdropFilter extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
     properties.add(
       DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
     );

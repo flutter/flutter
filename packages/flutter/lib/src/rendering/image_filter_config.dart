@@ -139,6 +139,24 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
 
   @override
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode, bounded);
+
+  String get _modeString {
+    switch (tileMode) {
+      case ui.TileMode.clamp:
+        return 'clamp';
+      case ui.TileMode.mirror:
+        return 'mirror';
+      case ui.TileMode.repeated:
+        return 'repeated';
+      case ui.TileMode.decal:
+        return 'decal';
+    }
+  }
+
+  String get _boundedString => bounded ? 'bounded' : 'unbounded';
+
+  @override
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString, $_boundedString)';
 }
 
 class _ComposeImageFilterConfig extends ImageFilterConfig {
@@ -165,6 +183,9 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
 
   @override
   int get hashCode => Object.hash(outer, inner);
+
+  @override
+  String toString() => 'ImageFilter.compose(source -> $inner -> $outer -> result)';
 }
 
 class _DirectImageFilterConfig extends ImageFilterConfig {
@@ -190,4 +211,7 @@ class _DirectImageFilterConfig extends ImageFilterConfig {
 
   @override
   int get hashCode => filter.hashCode;
+
+  @override
+  String toString() => filter.toString();
 }
