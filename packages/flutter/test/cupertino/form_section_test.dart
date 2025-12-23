@@ -215,4 +215,17 @@ void main() {
       offsetMoreOrLessEquals(const Offset(margin, 22 + margin), epsilon: 1),
     );
   });
+
+  testWidgets('CupertinoFormSection does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoFormSection(children: const <Widget>[Text('X'), Text('Y')]),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoFormSection)), Size.zero);
+  });
 }

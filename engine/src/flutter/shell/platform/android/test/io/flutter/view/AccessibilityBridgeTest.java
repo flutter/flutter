@@ -165,6 +165,57 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itSetsDelegateOnChannel() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+
+    AccessibilityBridge bridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ mockViewEmbedder,
+            /* platformViewsAccessibilityDelegate= */ null);
+    verify(mockChannel).setAccessibilityMessageHandler(bridge.accessibilityMessageHandler);
+  }
+
+  @Test
+  public void setSemanticsTreeEnabledFalseClearsSemanticsTree() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+
+    AccessibilityBridge bridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ mockViewEmbedder,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    // Add a node to the semantics tree.
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(bridge);
+    assertFalse(bridge.flutterSemanticsTree.isEmpty());
+
+    // Disable semantics and check that the tree is cleared.
+    bridge.accessibilityMessageHandler.resetSemantics();
+    assertTrue(bridge.flutterSemanticsTree.isEmpty());
+  }
+
+  @Test
   public void itSetsAccessibleNavigation() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
@@ -2294,6 +2345,29 @@ public class AccessibilityBridgeTest {
     // construction.
     // Documentation says to check AccessibilityNodeInfo.isHeading() instead.
     assertFalse(nodeInfo.isHeading());
+  }
+
+  @Test
+  public void itAddsScrollViewToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    // Vertical scroll view
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    testSemanticsNode.addAction(Action.SCROLL_UP);
+    testSemanticsNode.addAction(Action.SCROLL_DOWN);
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(nodeInfo.getClassName().toString(), "android.widget.ScrollView");
+    // Horizontal scroll view
+    testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.addFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING);
+    testSemanticsNode.addAction(Action.SCROLL_LEFT);
+    testSemanticsNode.addAction(Action.SCROLL_RIGHT);
+    testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(nodeInfo.getClassName().toString(), "android.widget.HorizontalScrollView");
   }
 
   @Config(sdk = API_LEVELS.API_32)

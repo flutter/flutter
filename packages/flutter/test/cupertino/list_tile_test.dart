@@ -549,6 +549,19 @@ void main() {
     expect(lastPosition.value, 1.0);
   });
 
+  testWidgets('CupertinoListTile does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoListTile(title: Text('X'), trailing: CupertinoListTileChevron()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoListTile)), Size.zero);
+  });
+
   testWidgets('CupertinoListTileChevron does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(

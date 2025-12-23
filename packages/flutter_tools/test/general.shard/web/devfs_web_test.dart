@@ -286,6 +286,7 @@ void main() {
       );
 
       expect(response.statusCode, HttpStatus.ok);
+      expect(response.headers['Content-Type'], 'text/html; charset=utf-8');
       expect(await response.readAsString(), htmlContent);
     }),
   );
@@ -939,6 +940,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1046,6 +1048,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1158,6 +1161,7 @@ void main() {
           fileSystem: globals.fs,
           logger: globals.logger,
           platform: globals.platform,
+          webCrossOriginIsolation: false,
         );
         webDevFS.requireJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1233,6 +1237,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
 
@@ -1281,6 +1286,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1335,6 +1341,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1379,6 +1386,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1418,6 +1426,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
@@ -1512,6 +1521,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
