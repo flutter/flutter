@@ -297,6 +297,7 @@ struct ContentContext::Pipelines {
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
+  Variants<TextureDownsampleBoundedPipeline> texture_downsample_bounded;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -700,6 +701,8 @@ ContentContext::ContentContext(
           std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     }
     pipelines_->texture_downsample.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_bounded.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
@@ -1410,6 +1413,11 @@ PipelineRef ContentContext::GetBlendSoftLightPipeline(
 PipelineRef ContentContext::GetDownsamplePipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->texture_downsample, opts);
+}
+
+PipelineRef ContentContext::GetDownsampleBoundedPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_bounded, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
