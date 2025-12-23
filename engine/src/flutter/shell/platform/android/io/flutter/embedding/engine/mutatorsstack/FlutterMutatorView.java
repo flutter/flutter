@@ -197,7 +197,7 @@ public class FlutterMutatorView extends FrameLayout {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
-
+    requestUnbufferedDispatch(event);
     final Matrix screenMatrix = new Matrix();
 
     switch (event.getAction()) {
@@ -209,9 +209,9 @@ public class FlutterMutatorView extends FrameLayout {
       case MotionEvent.ACTION_MOVE:
         // While the view is dragged, use the left and top positions as
         // they were at the moment the touch event fired.
-        screenMatrix.postTranslate(prevLeft, prevTop);
-        prevLeft = left;
-        prevTop = top;
+        screenMatrix.postTranslate(getLeft(), getTop());
+        prevLeft = getLeft(); // Keep updating these if needed for other logic, or remove
+        prevTop = getTop();
         break;
       case MotionEvent.ACTION_UP:
       default:
