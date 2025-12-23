@@ -2140,12 +2140,12 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // First max-weight item wins initially
+        // First max-weight item wins initially.
         expect(controller.leadingItem, equals(0));
         expect(leadingIndex, equals(0));
         expect(find.text('Item 0'), findsOneWidget);
 
-        // Move to the next max-weight item
+        // Move to the next max-weight item.
         controller.animateToItem(
           1,
           duration: const Duration(milliseconds: 200),
