@@ -66,7 +66,12 @@ class SkwasmRenderer extends Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
-  }) => SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+    ui.Rect? bounds,
+  }) =>
+      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
+      // Fall back to unbounded blur.
+      // https://github.com/flutter/flutter/issues/175899
+      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   @override
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
