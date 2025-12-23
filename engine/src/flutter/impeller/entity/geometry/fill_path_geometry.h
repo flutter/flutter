@@ -49,6 +49,19 @@ class FillPathSourceGeometry : public Geometry {
   FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
 };
 
+/// @brief A Geometry that produces fillable vertices from a |PathSource| object
+///        using the |FillPathSourceGeometry|.
+class FillPathFromSourceGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillPathFromSourceGeometry(const PathSource& source);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const PathSource& source_;
+};
+
 /// @brief A Geometry that produces fillable vertices from a |DlPath| object
 ///        using the |FillPathSourceGeometry| base class and the inherent
 ///        ability for a |DlPath| object to perform path iteration.
