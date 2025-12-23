@@ -577,7 +577,8 @@ FlutterWindow::HandleMessage(UINT const message,
             device_kind = kFlutterPointerDeviceKindTrackpad;
             break;
           default:
-            FML_LOG(ERROR) << "Unrecognized device key " << pointerInfo.pointerType;
+            FML_LOG(ERROR) << "Unrecognized device key "
+                           << pointerInfo.pointerType;
             break;
         }
         if (message == WM_POINTERDOWN) {
