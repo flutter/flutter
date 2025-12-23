@@ -281,7 +281,7 @@ class FakeStdio extends Stdio {
   }
 
   @override
-  var hasTerminal = false;
+  bool hasTerminal = false;
 
   List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
   List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
@@ -306,10 +306,10 @@ class FakeStdin extends Fake implements Stdin {
   }
 
   @override
-  var lineMode = true;
+  bool lineMode = true;
 
   @override
-  var hasTerminal = false;
+  bool hasTerminal = false;
 
   @override
   Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
@@ -368,6 +368,11 @@ class FakePlistParser implements PlistParser {
     }
     setProperty(key, value);
     return true;
+  }
+
+  @override
+  bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
+    return false;
   }
 }
 
@@ -526,6 +531,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
     this.isLLDBDebuggingEnabled = false,
+    this.isUISceneMigrationEnabled = false,
   });
 
   @override
@@ -574,6 +580,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isLLDBDebuggingEnabled;
 
   @override
+  final bool isUISceneMigrationEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -590,6 +599,7 @@ class TestFeatureFlags implements FeatureFlags {
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
+      uiSceneMigration => isUISceneMigrationEnabled,
       _ => false,
     };
   }
@@ -611,6 +621,7 @@ class TestFeatureFlags implements FeatureFlags {
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
   ];
 
   @override
@@ -813,7 +824,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Future<void> get ready => readyCompleter.future;
 
-  var readyCompleter = Completer<void>()..complete();
+  Completer<void> readyCompleter = Completer<void>()..complete();
 
   @override
   DevToolsServerAddress? activeDevToolsServer;
@@ -825,7 +836,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   Uri? dtdUri;
 
   @override
-  var printDtdUri = false;
+  bool printDtdUri = false;
 
   final DevToolsServerAddress? _serverAddress;
 
@@ -838,7 +849,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
     return Completer<void>().future;
   }
 
-  var closed = false;
+  bool closed = false;
 
   @override
   Future<void> close() async {

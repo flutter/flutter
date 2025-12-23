@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -366,6 +367,48 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBoundedBlur) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+  builder.Save();
+
+  // Subcase 1: The 1st branch of downsampling, where the coverage hint is
+  // non-null but was ignored during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect1 = DlRect::MakeLTRB(70, 70, 313, 170);
+  builder.ClipRect(rect1);
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: The 2nd branch of downsampling, where the coverage hint is null
+  // or was already used during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect2 = DlRect::MakeLTRB(55, 190, 298, 290);
+  builder.ClipRect(rect2);
+  auto backdrop_filter2 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderClippedBlur) {
   DisplayListBuilder builder;
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
@@ -375,6 +418,56 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
   paint.setImageFilter(DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal));
   builder.DrawCircle(DlPoint(400, 400), 200, paint);
   builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintBlurOuter) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(blur, color_filter));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, ComposePaintBlurInner) {
+  DisplayListBuilder builder;
+
+  DlPaint background;
+  background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
+  builder.DrawPaint(background);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreen());
+  float matrix[] = {
+      0, 1, 0, 0, 0,  //
+      1, 0, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  std::shared_ptr<DlImageFilter> color_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+  std::shared_ptr<DlImageFilter> blur =
+      DlImageFilter::MakeBlur(20, 20, DlTileMode::kDecal);
+  paint.setImageFilter(DlImageFilter::MakeCompose(color_filter, blur));
+  builder.DrawCircle(DlPoint(400, 400), 200, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

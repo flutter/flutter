@@ -69,6 +69,26 @@ class RegularWindowContent extends StatelessWidget {
                   child: const Text('Create Regular Window'),
                 ),
                 const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          preferredSize: windowSettings.dialogSize,
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          parent: window,
+                          title: 'Dialog',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Create Modal Dialog'),
+                ),
+                const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'
                   'Size: ${(windowSize.width).toStringAsFixed(1)}\u00D7${(windowSize.height).toStringAsFixed(1)}\n'

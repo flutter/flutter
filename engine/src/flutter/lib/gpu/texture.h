@@ -58,6 +58,7 @@ extern bool InternalFlutterGpu_Texture_Initialize(
     int height,
     int sample_count,
     int coordinate_system,
+    int texture_type,
     bool enable_render_target_usage,
     bool enable_shader_read_usage,
     bool enable_shader_write_usage);

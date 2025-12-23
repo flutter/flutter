@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
+import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -38,10 +39,10 @@ HotRunnerConfig? get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 class HotRunnerConfig {
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
-  var stableDartDependencies = false;
+  bool stableDartDependencies = false;
 
   /// Whether the hot runner should scan for modified files asynchronously.
-  var asyncScanning = false;
+  bool asyncScanning = false;
 
   /// A hook for implementations to perform any necessary initialization prior
   /// to a hot restart. Should return true if the hot restart should continue.
@@ -278,12 +279,16 @@ class HotRunner extends ResidentRunner {
     try {
       final List<Uri?> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
+        final FlutterVmService vmService = flutterDevices.first.vmService!;
+        final DartDevelopmentService dds = flutterDevices.first.device!.dds;
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.vmService!.httpAddress,
-            wsUri: flutterDevices.first.vmService!.wsAddress,
+            httpUri: vmService.httpAddress,
+            wsUri: vmService.wsAddress,
             baseUri: baseUris.first.toString(),
+            devToolsUri: dds.devToolsUri,
+            dtdUri: dds.dtdUri,
           ),
         );
       }
@@ -494,6 +499,7 @@ class HotRunner extends ResidentRunner {
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
+        targetPlatform: targetPlatform,
       );
       if (result != 0) {
         return UpdateFSReport();

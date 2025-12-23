@@ -24,15 +24,6 @@ using namespace flutter;
 
 namespace {
 
-// Convert SkFontStyle::Weight values (ranging from 100-900) to txt::FontWeight
-// values (ranging from 0-8).
-txt::FontWeight GetTxtFontWeight(int font_weight) {
-  int txt_weight = (font_weight - 100) / 100;
-  txt_weight = std::clamp(txt_weight, static_cast<int>(txt::FontWeight::w100),
-                          static_cast<int>(txt::FontWeight::w900));
-  return static_cast<txt::FontWeight>(txt_weight);
-}
-
 txt::FontStyle GetTxtFontStyle(SkFontStyle::Slant font_slant) {
   return font_slant == SkFontStyle::Slant::kUpright_Slant
              ? txt::FontStyle::normal
@@ -387,7 +378,7 @@ TextStyle ParagraphSkia::SkiaToTxt(const skt::TextStyle& skia) {
       static_cast<TextDecorationStyle>(skia.getDecorationStyle());
   txt.decoration_thickness_multiplier =
       SkScalarToDouble(skia.getDecorationThicknessMultiplier());
-  txt.font_weight = GetTxtFontWeight(skia.getFontStyle().weight());
+  txt.font_weight = skia.getFontStyle().weight();
   txt.font_style = GetTxtFontStyle(skia.getFontStyle().slant());
 
   txt.text_baseline = static_cast<TextBaseline>(skia.getTextBaseline());

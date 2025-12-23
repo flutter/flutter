@@ -15,7 +15,7 @@ import 'process_text_utils.dart';
 import 'semantics_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
-  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset =
       paragraph.getOffsetForCaret(TextPosition(offset: offset), caret) +
       Offset(0.0, paragraph.preferredLineHeight);
@@ -28,7 +28,7 @@ Offset globalize(Offset point, RenderBox box) {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -45,9 +45,18 @@ void main() {
     );
   });
 
+  Future<void> setAppLifecycleState(AppLifecycleState state) async {
+    final ByteData? message = const StringCodec().encodeMessage(state.toString());
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      message,
+      (ByteData? data) {},
+    );
+  }
+
   group('SelectableRegion', () {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -72,11 +81,10 @@ void main() {
       await gesture.moveTo(const Offset(200.0, 100.0));
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
-      final SelectionEdgeUpdateEvent startEdge =
-          renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
+      final startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(startEdge.globalPosition, const Offset(200.0, 200.0));
       expect(renderSelectionSpy.events[1].type, SelectionEventType.endEdgeUpdate);
-      SelectionEdgeUpdateEvent endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
+      var endEdge = renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent;
       expect(endEdge.globalPosition, const Offset(200.0, 100.0));
       renderSelectionSpy.events.clear();
 
@@ -90,7 +98,7 @@ void main() {
     });
 
     testWidgets('mouse double click sends select-word event', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -118,13 +126,12 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
     testWidgets('touch double click sends select-word event', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -149,8 +156,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
@@ -183,7 +189,7 @@ void main() {
     });
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -213,7 +219,7 @@ void main() {
     });
 
     testWidgets('touch does not accept drag', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -237,8 +243,58 @@ void main() {
       );
     });
 
+    testWidgets(
+      'tapping outside the selectable region dismisses selection',
+      (WidgetTester tester) async {
+        const text = 'Hello world';
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SelectableRegion(
+                  selectionControls: materialTextSelectionControls,
+                  child: const Text(text),
+                ),
+              ),
+            ),
+          ),
+        );
+        // The selection only dismisses when unfocused if the app
+        // was currently active.
+        await setAppLifecycleState(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Drag to select.
+        final Offset textTopLeft = tester.getTopLeft(find.text(text));
+        final Offset textBottomRight = tester.getBottomRight(find.text(text));
+        final TestGesture gesture = await tester.startGesture(
+          textTopLeft,
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.moveTo(textBottomRight);
+        await gesture.up();
+        await tester.pump();
+
+        expect(paragraph.selections, isNotEmpty);
+
+        // Tap just outside the top-left corner of the selectable region
+        // to dismiss the selection.
+        final Rect selectableRegionRect = tester.getRect(find.byType(SelectableRegion));
+        await tester.tapAt(selectableRegionRect.topLeft - const Offset(10.0, 10.0));
+        await tester.pump();
+        expect(paragraph.selections, isEmpty);
+      },
+      // [intended] Tap outside to dismiss the selection is only supported on web.
+      skip: !kIsWeb,
+    );
+
     testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -306,8 +362,8 @@ void main() {
     testWidgets(
       'Horizontal PageView beats SelectionArea child touch drag gestures on iOS',
       (WidgetTester tester) async {
-        final PageController pageController = PageController();
-        const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+        final pageController = PageController();
+        const testValue = 'abc def ghi jkl mno pqr stu vwx yz';
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
@@ -374,8 +430,8 @@ void main() {
       'Vertical PageView beats SelectionArea child touch drag gestures',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/150897.
-        final PageController pageController = PageController();
-        const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+        final pageController = PageController();
+        const testValue = 'abc def ghi jkl mno pqr stu vwx yz';
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
@@ -455,8 +511,8 @@ void main() {
       'Vertical PageView beats SelectionArea child touch drag gestures on iOS',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/150897.
-        final PageController pageController = PageController();
-        const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
+        final pageController = PageController();
+        const testValue = 'abc def ghi jkl mno pqr stu vwx yz';
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
@@ -530,7 +586,7 @@ void main() {
     testWidgets('mouse single-click selection collapses the selection', (
       WidgetTester tester,
     ) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -567,7 +623,7 @@ void main() {
     });
 
     testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -589,13 +645,92 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
+    testWidgets(
+      'ending a drag on a selection handle does not show the context menu on mobile web',
+      (WidgetTester tester) async {
+        const text = 'Hello world, how are you today?';
+        final toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox(key: toolbarKey);
+                  },
+              child: const Text(text),
+            ),
+          ),
+        );
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+
+        // Long press to select 'world'.
+        await tester.longPressAt(textOffsetToPosition(paragraph, 7));
+        await tester.pumpAndSettle();
+
+        // Verify selection, handle visibility, and toolbar visibility.
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 6, extentOffset: 11));
+        final List<FadeTransition> transitions = find
+            .descendant(
+              of: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
+              ),
+              matching: find.byType(FadeTransition),
+            )
+            .evaluate()
+            .map((Element e) => e.widget)
+            .cast<FadeTransition>()
+            .toList();
+        expect(transitions.length, 2);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        // Drag start handle.
+        List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        Offset handlePos = globalize(boxes.first.toRect().bottomLeft, paragraph);
+        TestGesture gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 11));
+
+        // Drag end handle.
+        boxes = paragraph.getBoxesForSelection(paragraph.selections.first);
+        expect(boxes, hasLength(1));
+        handlePos = globalize(boxes.first.toRect().bottomRight, paragraph);
+        gesture = await tester.startGesture(handlePos);
+        await gesture.moveTo(textOffsetToPosition(paragraph, 20));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        // Verify selection and toolbar visibility.
+        expect(find.byKey(toolbarKey), findsNothing);
+        expect(paragraph.selections, isNotEmpty);
+        expect(paragraph.selections.length, 1);
+        expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 20));
+      },
+      variant: TargetPlatformVariant.mobile(),
+      skip: !kIsWeb, // [intended] This test verifies mobile web behavior.
+    );
+
     testWidgets('touch long press and drag sends correct events', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -616,8 +751,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0], isA<SelectWordSelectionEvent>());
-      final SelectWordSelectionEvent selectionEvent =
-          renderSelectionSpy.events[0] as SelectWordSelectionEvent;
+      final selectionEvent = renderSelectionSpy.events[0] as SelectWordSelectionEvent;
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
 
       renderSelectionSpy.events.clear();
@@ -625,8 +759,7 @@ void main() {
       await gesture.up();
       expect(renderSelectionSpy.events.length, 1);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
-      final SelectionEdgeUpdateEvent edgeEvent =
-          renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
+      final edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
       expect(edgeEvent.granularity, TextGranularity.word);
     });
@@ -634,7 +767,7 @@ void main() {
     testWidgets('touch long press cancel does not send ClearSelectionEvent', (
       WidgetTester tester,
     ) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -666,7 +799,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Regression test for https://github.com/flutter/flutter/issues/128765
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -707,7 +840,7 @@ void main() {
     });
 
     testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
-      final UniqueKey spy = UniqueKey();
+      final spy = UniqueKey();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -743,7 +876,7 @@ void main() {
     SelectedContent? content;
 
     // Inserts a new line between selected content of children selectables.
-    final ColumnSelectionContainerDelegate selectionDelegate = ColumnSelectionContainerDelegate();
+    final selectionDelegate = ColumnSelectionContainerDelegate();
 
     addTearDown(selectionDelegate.dispose);
 
@@ -789,7 +922,7 @@ void main() {
   testWidgets(
     'dragging handle or selecting word triggers haptic feedback on Android',
     (WidgetTester tester) async {
-      final List<MethodCall> log = <MethodCall>[];
+      final log = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
         MethodCall methodCall,
       ) async {
@@ -834,7 +967,7 @@ void main() {
       expect(boxes.length, 1);
       final Offset handlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
       await gesture.down(handlePos);
-      final Offset endPos = Offset(textOffsetToPosition(paragraph, 8).dx, handlePos.dy);
+      final endPos = Offset(textOffsetToPosition(paragraph, 8).dx, handlePos.dy);
 
       // Select 1 more character by dragging end handle to trigger feedback.
       await gesture.moveTo(endPos);
@@ -862,13 +995,7 @@ void main() {
     testWidgets(
       'selection is not cleared when app loses focus on desktop',
       (WidgetTester tester) async {
-        Future<void> setAppLifecycleState(AppLifecycleState state) async {
-          final ByteData? message = const StringCodec().encodeMessage(state.toString());
-          await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-              .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-        }
-
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         final GlobalKey selectableKey = GlobalKey();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
@@ -1175,7 +1302,7 @@ void main() {
     testWidgets(
       'touch cannot triple tap or triple tap drag on Android and iOS',
       (WidgetTester tester) async {
-        const String longText =
+        const longText =
             'Hello world this is some long piece of text '
             'that will represent a long paragraph, when triple clicking this block '
             'of text all of it will be selected.\n'
@@ -1437,7 +1564,7 @@ void main() {
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/155143.
         addTearDown(tester.view.reset);
-        const String testString = 'How are you doing today? Good, and you?';
+        const testString = 'How are you doing today? Good, and you?';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1498,7 +1625,7 @@ void main() {
     testWidgets('RenderParagraph should invalidate cached bounding boxes', (
       WidgetTester tester,
     ) async {
-      final UniqueKey outerText = UniqueKey();
+      final outerText = UniqueKey();
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
@@ -2000,7 +2127,7 @@ void main() {
     testWidgets('mouse can select paragraph-by-paragraph on triple click drag', (
       WidgetTester tester,
     ) async {
-      const String longText =
+      const longText =
           'Hello world this is some long piece of text '
           'that will represent a long paragraph, when triple clicking this block '
           'of text all of it will be selected.\n'
@@ -2709,9 +2836,9 @@ void main() {
         // This test verifies that all platforms wait until long press end to
         // show the context menu, and only Android waits until long press end to
         // show the selection handles.
-        final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        final isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
@@ -2823,8 +2950,8 @@ void main() {
     testWidgets(
       'single tap on the previous selection toggles the toolbar on iOS',
       (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -2896,8 +3023,8 @@ void main() {
     testWidgets(
       'right-click mouse can select word at position on Apple platforms',
       (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -2984,8 +3111,8 @@ void main() {
       'right-click mouse on an active selection does not clear the selection in other selectables on Apple platforms',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/150268.
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3069,8 +3196,8 @@ void main() {
     testWidgets(
       'right-click mouse at the same position as previous right-click toggles the context menu on macOS',
       (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3177,8 +3304,8 @@ void main() {
     testWidgets(
       'right-click mouse shows the context menu at position on Android, Fuchsia, and Windows',
       (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3305,8 +3432,8 @@ void main() {
     testWidgets(
       'right-click mouse toggles the context menu on Linux',
       (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3474,8 +3601,7 @@ void main() {
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
 
-        final Map<String, dynamic> clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -3489,13 +3615,11 @@ void main() {
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
-          text: 'I am fine, thank you.',
-        );
+        final controller = TextEditingController(text: 'I am fine, thank you.');
         addTearDown(controller.dispose);
-        final FocusNode selectableRegionFocus = FocusNode();
+        final selectableRegionFocus = FocusNode();
         addTearDown(selectableRegionFocus.dispose);
-        final FocusNode textFieldFocus = FocusNode();
+        final textFieldFocus = FocusNode();
         addTearDown(textFieldFocus.dispose);
 
         await tester.pumpWidget(
@@ -3563,13 +3687,11 @@ void main() {
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - apple',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
-          text: 'I am fine, thank you.',
-        );
+        final controller = TextEditingController(text: 'I am fine, thank you.');
         addTearDown(controller.dispose);
-        final FocusNode selectableRegionFocus = FocusNode();
+        final selectableRegionFocus = FocusNode();
         addTearDown(selectableRegionFocus.dispose);
-        final FocusNode textFieldFocus = FocusNode();
+        final textFieldFocus = FocusNode();
         addTearDown(textFieldFocus.dispose);
 
         await tester.pumpWidget(
@@ -3635,7 +3757,7 @@ void main() {
     testWidgets(
       'select all',
       (WidgetTester tester) async {
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
@@ -3686,7 +3808,7 @@ void main() {
     testWidgets(
       'mouse selection can handle widget span',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3724,8 +3846,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final Map<String, dynamic> clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Good, and you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -3739,7 +3860,7 @@ void main() {
     testWidgets(
       'double click + drag mouse selection can handle widget span',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3782,8 +3903,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final Map<String, dynamic> clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'How are you?Good, and you?Fine,');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -3797,8 +3917,8 @@ void main() {
     testWidgets(
       'double click + drag mouse selection can handle widget span - multiline',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
-        final UniqueKey innerText = UniqueKey();
+        final outerText = UniqueKey();
+        final innerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3852,8 +3972,8 @@ void main() {
     testWidgets(
       'select word event can select inline widget',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
-        final UniqueKey innerText = UniqueKey();
+        final outerText = UniqueKey();
+        final innerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3900,8 +4020,8 @@ void main() {
     testWidgets(
       'select word event should not crash when its position is at an unselectable inline element',
       (WidgetTester tester) async {
-        final FocusNode focusNode = FocusNode();
-        final UniqueKey flutterLogo = UniqueKey();
+        final focusNode = FocusNode();
+        final flutterLogo = UniqueKey();
         addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
@@ -3950,7 +4070,7 @@ void main() {
       'can select word when a selectables rect is completely inside of another selectables rect',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/127076.
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -3999,7 +4119,7 @@ void main() {
     testWidgets(
       'can select word when selectable is broken up by an unselectable WidgetSpan',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -4048,7 +4168,7 @@ void main() {
     testWidgets(
       'widget span is ignored if it does not contain text - non Apple',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -4086,8 +4206,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, control: true),
         );
-        final Map<String, dynamic> clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -4101,7 +4220,7 @@ void main() {
     testWidgets(
       'widget span is ignored if it does not contain text - Apple',
       (WidgetTester tester) async {
-        final UniqueKey outerText = UniqueKey();
+        final outerText = UniqueKey();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -4139,8 +4258,7 @@ void main() {
           tester,
           const SingleActivator(LogicalKeyboardKey.keyC, meta: true),
         );
-        final Map<String, dynamic> clipboardData =
-            mockClipboard.clipboardData as Map<String, dynamic>;
+        final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{
@@ -4554,8 +4672,7 @@ void main() {
       expect(paragraph2.selections.isEmpty, isTrue);
       expect(paragraph1.selections.isEmpty, isTrue);
 
-      final Map<String, dynamic> clipboardData =
-          mockClipboard.clipboardData as Map<String, dynamic>;
+      final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
@@ -4609,7 +4726,7 @@ void main() {
         expect(paragraph1.selections[0].start, 2);
         expect(paragraph1.selections[0].end, 7);
 
-        for (int i = 0; i < 5; i += 1) {
+        for (var i = 0; i < 5; i += 1) {
           await sendKeyCombination(
             tester,
             const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true),
@@ -4620,7 +4737,7 @@ void main() {
           expect(paragraph1.selections[0].end, 8 + i);
         }
 
-        for (int i = 0; i < 5; i += 1) {
+        for (var i = 0; i < 5; i += 1) {
           await sendKeyCombination(
             tester,
             const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true),
@@ -5192,7 +5309,7 @@ void main() {
       testWidgets('Can drag handles to show, unshow, and update magnifier', (
         WidgetTester tester,
       ) async {
-        const String text = 'Monkeys and rabbits in my soup';
+        const text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -5335,7 +5452,7 @@ void main() {
   testWidgets(
     'the selection behavior when clicking `Copy` item in mobile platforms',
     (WidgetTester tester) async {
-      List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+      var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5393,7 +5510,7 @@ void main() {
   testWidgets(
     'the handles do not disappear when clicking `Select all` item in mobile platforms',
     (WidgetTester tester) async {
-      List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+      var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5461,7 +5578,7 @@ void main() {
   testWidgets(
     'Selection behavior when clicking the `Share` button on Android',
     (WidgetTester tester) async {
-      List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+      var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5524,7 +5641,7 @@ void main() {
   testWidgets(
     'builds the correct button items',
     (WidgetTester tester) async {
-      List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+      var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5645,7 +5762,7 @@ void main() {
   testWidgets(
     'Text processing actions are added to the toolbar',
     (WidgetTester tester) async {
-      final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+      final mockProcessTextHandler = MockProcessTextHandler();
       TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.processText,
         mockProcessTextHandler.handleMethodCall,
@@ -5657,7 +5774,7 @@ void main() {
         ),
       );
 
-      Set<String?> buttonLabels = <String?>{};
+      var buttonLabels = <String?>{};
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5691,7 +5808,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // The text processing actions are available on Android only.
-      final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+      final areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
       expect(buttonLabels.contains(fakeAction1Label), areTextActionsSupported);
       expect(buttonLabels.contains(fakeAction2Label), areTextActionsSupported);
     },
@@ -5702,8 +5819,8 @@ void main() {
   testWidgets('SelectionListener onSelectionChanged is accurate with WidgetSpans', (
     WidgetTester tester,
   ) async {
-    final List<String> dataModel = <String>['Hello world, ', 'how are you today.'];
-    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
+    final dataModel = <String>['Hello world, ', 'how are you today.'];
+    final selectionNotifier = SelectionListenerNotifier();
     addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
@@ -5822,8 +5939,8 @@ void main() {
   });
 
   testWidgets('onSelectionChanged SelectedContentRange is accurate', (WidgetTester tester) async {
-    final List<String> dataModel = <String>['How are you?', 'Good, and you?', 'Fine, thank you.'];
-    final SelectionListenerNotifier selectionNotifier = SelectionListenerNotifier();
+    final dataModel = <String>['How are you?', 'Good, and you?', 'Fine, thank you.'];
+    final selectionNotifier = SelectionListenerNotifier();
     SelectedContentRange? selectedRange;
     addTearDown(selectionNotifier.dispose);
 
@@ -6063,8 +6180,8 @@ void main() {
     expect(boxes.length, 1);
     final Offset startHandlePos = globalize(boxes[0].toRect().bottomLeft, paragraph);
     final Offset endHandlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
-    final Offset startPos = Offset(textOffsetToPosition(paragraph, 4).dx, startHandlePos.dy);
-    final Offset endPos = Offset(textOffsetToPosition(paragraph, 6).dx, endHandlePos.dy);
+    final startPos = Offset(textOffsetToPosition(paragraph, 4).dx, startHandlePos.dy);
+    final endPos = Offset(textOffsetToPosition(paragraph, 6).dx, endHandlePos.dy);
 
     // Start handle.
     await touchGesture.down(startHandlePos);
@@ -6145,7 +6262,7 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'w are');
 
-    for (int i = 0; i < 5; i += 1) {
+    for (var i = 0; i < 5; i += 1) {
       await sendKeyCombination(
         tester,
         const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true),
@@ -6159,7 +6276,7 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'w are you?');
 
-    for (int i = 0; i < 5; i += 1) {
+    for (var i = 0; i < 5; i += 1) {
       await sendKeyCombination(
         tester,
         const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true),
@@ -6313,14 +6430,64 @@ void main() {
       },
       skip: !kIsWeb, // [intended] This test verifies web behavior.
     );
+
+    testWidgets(
+      'uses contextMenuBuilder by default on Android and iOS web',
+      (WidgetTester tester) async {
+        final contextMenu = UniqueKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder:
+                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                    return SizedBox.shrink(key: contextMenu);
+                  },
+              child: const Text('How are you?'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsNothing);
+
+        // Show the toolbar by longpressing.
+        final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
+        );
+        final TestGesture gesture = await tester.startGesture(
+          textOffsetToPosition(paragraph1, 6),
+        ); // at the 'r'
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        // `are` is selected.
+        expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(contextMenu), findsOneWidget);
+      },
+      // TODO(Renzo-Olivares): Remove this test when the web context menu
+      // for Android and iOS is re-enabled.
+      // See: https://github.com/flutter/flutter/issues/177123.
+      // [intended] Android and iOS use the flutter rendered menu on the web.
+      skip:
+          !kIsWeb ||
+          !<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.iOS,
+          }.contains(defaultTargetPlatform),
+    );
   });
 
   testWidgets('Multiple selectables on a single line should be in screen order', (
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/127942.
-    final UniqueKey outerText = UniqueKey();
-    const TextStyle textStyle = TextStyle(fontSize: 10);
+    final outerText = UniqueKey();
+    const textStyle = TextStyle(fontSize: 10);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -6363,7 +6530,7 @@ void main() {
     // keyboard copy.
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
-    final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
+    final clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
     expect(clipboardData['text'], 'Hello my name is Dash.');
   });
 }
@@ -6373,7 +6540,7 @@ class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate 
   /// contents with a new line.
   @override
   SelectedContent? getSelectedContent() {
-    final List<SelectedContent> selections = <SelectedContent>[
+    final selections = <SelectedContent>[
       for (final Selectable selectable in selectables)
         if (selectable.getSelectedContent() case final SelectedContent data) data,
     ];

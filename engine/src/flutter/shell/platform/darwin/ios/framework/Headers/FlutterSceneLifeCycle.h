@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterEngine;
+
 /**
  * A protocol for delegates that handle `UISceneDelegate` and `UIWindowSceneDelegate` life-cycle
  * events.
@@ -97,6 +99,45 @@ API_AVAILABLE(ios(13.0))
 @end
 
 /**
+ * A protocol for manually registering a `FlutterEngine` to receive scene life cycle events.
+ */
+@protocol FlutterSceneLifeCycleEngineRegistration
+/**
+ * Registers a `FlutterEngine` to receive scene life cycle events.
+ *
+ * This method is **only** necessary when the following conditions are true:
+ * 1. Multiple Scenes (UIApplicationSupportsMultipleScenes) is enabled.
+ * 2. The `UIWindowSceneDelegate` `window.rootViewController` is not a `FlutterViewController`
+ *    initialized with the target `FlutterEngine`.
+ *
+ * When multiple scenes is enabled (UIApplicationSupportsMultipleScenes), Flutter cannot
+ * automatically associate a `FlutterEngine` with a scene during the scene connection phase. In
+ * order for plugins to receive launch connection information, the `FlutterEngine` must be manually
+ * registered with either the `FlutterSceneDelegate` or `FlutterPluginSceneLifeCycleDelegate` during
+ * `scene:willConnectToSession:options:`.
+ *
+ * In all other cases, or once the `FlutterViewController.view` associated with the `FlutterEngine`
+ * is added to the view hierarchy, Flutter will automatically handle registration for scene events.
+ *
+ * Manually registered engines must also be manually deregistered and re-registered if they
+ * switch scenes. Use `unregisterSceneLifeCycleWithFlutterEngine:`.
+ *
+ * @param engine The `FlutterEngine` to register for scene life cycle events.
+ * @return `NO` if already manually registered.
+ */
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+
+/**
+ * Use this method to unregister a `FlutterEngine` from the scene's life cycle events.
+ *
+ * @param engine The `FlutterEngine` to unregister for scene life cycle events.
+ * @return `NO` if the engine was not found among the manually registered engines and could not be
+ * unregistered.
+ */
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+@end
+
+/**
  * Forwards `UISceneDelegate` and `UIWindowSceneDelegate` callbacks to plugins that register for
  * them.
  *
@@ -105,17 +146,15 @@ API_AVAILABLE(ios(13.0))
  */
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
-@interface FlutterPluginSceneLifeCycleDelegate : NSObject
+@interface FlutterPluginSceneLifeCycleDelegate : NSObject <FlutterSceneLifeCycleEngineRegistration>
 
 #pragma mark - Connecting and disconnecting the scene
 
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene
+- (void)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
                  options:(UISceneConnectionOptions*)connectionOptions;
 
@@ -138,30 +177,24 @@ API_AVAILABLE(ios(13.0))
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+- (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
 
 #pragma mark - Continuing user activities
 
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+- (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
 
 #pragma mark - Performing tasks
 
 /**
  * Calls all plugins registered for `UIWindowScene` callbacks in order of registration until
  * a plugin handles the request.
- *
- * @return `YES` if any plugin handles the request.
  */
-- (BOOL)windowScene:(UIWindowScene*)windowScene
+- (void)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
@@ -174,11 +207,25 @@ API_AVAILABLE(ios(13.0))
  * `FlutterPluginSceneLifeCycleDelegate` that can be used to forward scene life-cycle events to
  * Flutter plugins.
  *
- * This is typically implemented by the app's `SceneDelegate`.
+ * This is typically implemented by the app's `SceneDelegate`, as a `FlutterSceneLifeCycleProvider`
+ * is associated with one and only one `UIScene`.
  */
 API_AVAILABLE(ios(13.0))
 @protocol FlutterSceneLifeCycleProvider
-@property(nonatomic, strong) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
+
+/**
+ * The `FlutterPluginSceneLifeCycleDelegate` instance for forwarding `UIScene` events
+ * to plugins associated with this `UIScene`.
+ *
+ * The implementer of this protocol is responsible for creating the
+ * `FlutterPluginSceneLifeCycleDelegate` object, as well as forwarding `UIScene` events
+ * to plugins by calling the corresponding methods defined on
+ * `FlutterPluginSceneLifeCycleDelegate`.
+ *
+ * The `FlutterPluginSceneLifeCycleDelegate` implementation is stateful. For this reason,
+ * this property getter should typically always return the same object.
+ */
+@property(nonatomic, readonly) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
 @end
 
 NS_ASSUME_NONNULL_END

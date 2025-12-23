@@ -16,10 +16,10 @@ import 'package:test/test.dart';
 
 void main() {
   /// A mock commit hash that is used to simulate a successful git call.
-  const String mockCommitHash = '1234567890abcdef';
+  const mockCommitHash = '1234567890abcdef';
 
   /// Simulating what a presubmit environment would look like.
-  const Map<String, String> presubmitEnv = <String, String>{
+  const presubmitEnv = <String, String>{
     'GIT_BRANCH': 'master',
     'GOLDCTL': 'python tools/goldctl.py',
     'GOLD_TRYJOB': 'flutter/flutter/1234567890',
@@ -28,7 +28,7 @@ void main() {
   };
 
   /// Simulating what a postsubmit environment would look like.
-  const Map<String, String> postsubmitEnv = <String, String>{
+  const postsubmitEnv = <String, String>{
     'GIT_BRANCH': 'master',
     'GOLDCTL': 'python tools/goldctl.py',
     'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/1234567890/+/logdog',
@@ -36,7 +36,7 @@ void main() {
   };
 
   /// Simulating what a local environment would look like.
-  const Map<String, String> localEnv = <String, String>{};
+  const localEnv = <String, String>{};
 
   /// Creates a [SkiaGoldClient] with the given [dimensions] and [verbose] flag.
   ///
@@ -71,13 +71,13 @@ void main() {
   ///
   /// This simulates what the goldctl tool does when it runs.
   void createAuthOptDotJson(String workDirectory) {
-    final io.File authOptDotJson = io.File(p.join(workDirectory, 'temp', 'auth_opt.json'));
+    final authOptDotJson = io.File(p.join(workDirectory, 'temp', 'auth_opt.json'));
     authOptDotJson.createSync(recursive: true);
     authOptDotJson.writeAsStringSync('{"GSUtil": false}');
   }
 
   test('fails if GOLDCTL is not set', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(fixture, environment: localEnv);
       try {
@@ -92,7 +92,7 @@ void main() {
   });
 
   test('prints a warning and skips when the git branch is not master or main', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -127,7 +127,7 @@ void main() {
   });
 
   test('always a success when the git branch is not master or main', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -160,7 +160,7 @@ void main() {
   });
 
   test('auth executes successfully', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -184,9 +184,9 @@ void main() {
   });
 
   test('auth is only invoked once per instance', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
-      int callsToGoldctl = 0;
+      var callsToGoldctl = 0;
       final SkiaGoldClient client = createClient(
         fixture,
         environment: presubmitEnv,
@@ -213,7 +213,7 @@ void main() {
   });
 
   test('auth executes successfully with verbose logging', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -241,7 +241,7 @@ void main() {
   });
 
   test('auth fails', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -265,7 +265,7 @@ void main() {
   });
 
   test('addImg [pre-submit] executes successfully', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -309,7 +309,7 @@ void main() {
   });
 
   test('addImg uses prefix, if specified', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -355,7 +355,7 @@ void main() {
 
   test('addImg [pre-submit] executes successfully with a release version', () async {
     // Adds a suffix of "_Release_3_21" to the test name.
-    final _TestFixture fixture = _TestFixture(
+    final fixture = _TestFixture(
       // Creates a file called "engine/src/fluter/.engine-release.version" with the contents "3.21".
       engineVersion: ReleaseVersion(major: 3, minor: 21),
     );
@@ -403,7 +403,7 @@ void main() {
   });
 
   test('addImg [pre-submit] executes successfully with verbose logging', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -453,7 +453,7 @@ void main() {
 
   // A success case (exit code 0) with a message of "Untriaged" is OK.
   test('addImg [pre-submit] succeeds but has an untriaged image', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -494,7 +494,7 @@ void main() {
       );
 
       // Expect a stderr log message.
-      final String log = fixture.outputSink.toString();
+      final log = fixture.outputSink.toString();
       expect(log, contains('Untriaged image detected'));
     } finally {
       fixture.dispose();
@@ -502,7 +502,7 @@ void main() {
   });
 
   test('addImg [pre-submit] fails due to an unexpected error', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -536,7 +536,7 @@ void main() {
   });
 
   test('addImg [post-submit] executes successfully', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -581,7 +581,7 @@ void main() {
   });
 
   test('addImg [post-submit] executes successfully with verbose logging', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -631,7 +631,7 @@ void main() {
   });
 
   test('addImg [post-submit] fails due to an unapproved image', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -665,7 +665,7 @@ void main() {
   });
 
   test('getExpectationsForTest returns the latest positive digest', () async {
-    final _TestFixture fixture = _TestFixture();
+    final fixture = _TestFixture();
     try {
       final SkiaGoldClient client = createClient(
         fixture,
@@ -707,7 +707,7 @@ final class _TestFixture {
     engineSrcDir.createSync(recursive: true);
 
     // Create a .engine-release.version file in the engine root.
-    final io.Directory flutterDir = io.Directory(p.join(engineSrcDir.path, 'flutter'));
+    final flutterDir = io.Directory(p.join(engineSrcDir.path, 'flutter'));
     flutterDir.createSync(recursive: true);
 
     final String version = engineVersion?.toString() ?? 'none';

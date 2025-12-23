@@ -473,7 +473,7 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/67743.
     testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
-      int sliverToBoxAdapterTapped = 0;
+      var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
         MaterialApp(
           title: 'Flutter Demo',
@@ -517,7 +517,7 @@ void main() {
     testWidgets('tapping by filtering by .hitTestable excludes Slivers', (
       WidgetTester tester,
     ) async {
-      int sliverToBoxAdapterTapped = 0;
+      var sliverToBoxAdapterTapped = 0;
       await tester.pumpWidget(
         MaterialApp(
           title: 'Flutter Demo',
@@ -698,7 +698,7 @@ void main() {
     // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
     // correctly chained after the descendant's candidates, the last element
     // with a Text widget would have been 2.
-    final Text text =
+    final text =
         find
                 .descendant(of: find.byKey(key1), matching: find.byType(Text))
                 .last
@@ -748,7 +748,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      const String customDescription = 'custom description';
+      const customDescription = 'custom description';
       late TestFailure failure;
       try {
         expect(
@@ -771,7 +771,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      const String customDescription = 'custom description';
+      const customDescription = 'custom description';
       late TestFailure failure;
       try {
         expect(
@@ -1082,7 +1082,7 @@ void main() {
 
     group('byPredicate', () {
       testWidgets('finds nodes matching given predicate', (WidgetTester tester) async {
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
@@ -1095,7 +1095,7 @@ void main() {
 
       testWidgets('fails with default message', (WidgetTester tester) async {
         late TestFailure failure;
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
@@ -1116,8 +1116,8 @@ void main() {
 
       testWidgets('fails with given message', (WidgetTester tester) async {
         late TestFailure failure;
-        const String expected = 'custom error message';
-        final RegExp replaceRegExp = RegExp(r'^[^\d]+');
+        const expected = 'custom error message';
+        final replaceRegExp = RegExp(r'^[^\d]+');
         await tester.pumpWidget(semanticsTree);
 
         final SemanticsFinder finder = find.semantics.byPredicate((SemanticsNode node) {
@@ -1382,7 +1382,7 @@ void main() {
 
     group('scrollable', () {
       testWidgets('can find node that can scroll up', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1399,7 +1399,7 @@ void main() {
       });
 
       testWidgets('can find node that can scroll down', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        final controller = ScrollController(initialScrollOffset: 400);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1416,7 +1416,7 @@ void main() {
       });
 
       testWidgets('can find node that can scroll left', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController();
+        final controller = ScrollController();
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1434,7 +1434,7 @@ void main() {
       });
 
       testWidgets('can find node that can scroll right', (WidgetTester tester) async {
-        final ScrollController controller = ScrollController(initialScrollOffset: 200);
+        final controller = ScrollController(initialScrollOffset: 200);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1494,8 +1494,8 @@ void main() {
   group('FinderBase', () {
     group('describeMatch', () {
       test('is used for Finder and results', () {
-        const String expected = 'Fake finder describe match';
-        final _FakeFinder finder = _FakeFinder(
+        const expected = 'Fake finder describe match';
+        final finder = _FakeFinder(
           describeMatchCallback: (_) {
             return expected;
           },
@@ -1505,7 +1505,7 @@ void main() {
         expect(finder.toString(describeSelf: true), contains(expected));
       });
 
-      for (int i = 0; i < 4; i++) {
+      for (var i = 0; i < 4; i++) {
         test('gets expected plurality for $i when reporting results from find', () {
           final Plurality expected = switch (i) {
             0 => Plurality.zero,
@@ -1513,7 +1513,7 @@ void main() {
             _ => Plurality.many,
           };
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
@@ -1533,7 +1533,7 @@ void main() {
             _ => Plurality.many,
           };
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
@@ -1549,7 +1549,7 @@ void main() {
         test('always gets many when describing finder', () {
           const Plurality expected = Plurality.many;
           late final Plurality actual;
-          final _FakeFinder finder = _FakeFinder(
+          final finder = _FakeFinder(
             describeMatchCallback: (Plurality plurality) {
               actual = plurality;
               return 'Fake description';
@@ -1565,9 +1565,9 @@ void main() {
     });
 
     test('findInCandidates gets allCandidates', () {
-      final List<String> expected = <String>['Test1', 'Test2', 'Test3', 'Test4'];
+      final expected = <String>['Test1', 'Test2', 'Test3', 'Test4'];
       late final List<String> actual;
-      final _FakeFinder finder = _FakeFinder(
+      final finder = _FakeFinder(
         allCandidatesCallback: () => expected,
         findInCandidatesCallback: (Iterable<String> candidates) {
           actual = candidates.toList();
@@ -1580,15 +1580,15 @@ void main() {
     });
 
     test('allCandidates calculated for each find', () {
-      const int expectedCallCount = 3;
-      int actualCallCount = 0;
-      final _FakeFinder finder = _FakeFinder(
+      const expectedCallCount = 3;
+      var actualCallCount = 0;
+      final finder = _FakeFinder(
         allCandidatesCallback: () {
           actualCallCount++;
           return <String>['test'];
         },
       );
-      for (int i = 0; i < expectedCallCount; i++) {
+      for (var i = 0; i < expectedCallCount; i++) {
         finder.evaluate();
       }
 
@@ -1596,15 +1596,15 @@ void main() {
     });
 
     test('allCandidates only called once while caching', () {
-      int actualCallCount = 0;
-      final _FakeFinder finder = _FakeFinder(
+      var actualCallCount = 0;
+      final finder = _FakeFinder(
         allCandidatesCallback: () {
           actualCallCount++;
           return <String>['test'];
         },
       );
       finder.runCached(() {
-        for (int i = 0; i < 5; i++) {
+        for (var i = 0; i < 5; i++) {
           finder.evaluate();
           finder.tryEvaluate();
           final FinderResult<String> _ = finder.found;
@@ -1616,15 +1616,13 @@ void main() {
 
     group('tryFind', () {
       test('returns false if no results', () {
-        final _FakeFinder finder = _FakeFinder(findInCandidatesCallback: (_) => <String>[]);
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => <String>[]);
 
         expect(finder.tryEvaluate(), false);
       });
 
       test('returns true if results are available', () {
-        final _FakeFinder finder = _FakeFinder(
-          findInCandidatesCallback: (_) => <String>['Results'],
-        );
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => <String>['Results']);
 
         expect(finder.tryEvaluate(), true);
       });
@@ -1632,14 +1630,14 @@ void main() {
 
     group('found', () {
       test('throws before any calls to evaluate or tryEvaluate', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
 
         expect(finder.hasFound, false);
         expect(() => finder.found, throwsAssertionError);
       });
 
       test('has same results as evaluate after call to evaluate', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
         final FinderResult<String> expected = finder.evaluate();
 
         expect(finder.hasFound, true);
@@ -1647,8 +1645,8 @@ void main() {
       });
 
       test('has expected results after call to tryFind', () {
-        final Iterable<String> expected = Iterable<String>.generate(10, (int i) => i.toString());
-        final _FakeFinder finder = _FakeFinder(findInCandidatesCallback: (_) => expected);
+        final expected = Iterable<String>.generate(10, (int i) => i.toString());
+        final finder = _FakeFinder(findInCandidatesCallback: (_) => expected);
         finder.tryEvaluate();
 
         expect(finder.hasFound, true);
@@ -1658,12 +1656,12 @@ void main() {
 
     group('first and last', () {
       test('describes first correctly', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
         expect(finder.first.toString(describeSelf: true), contains('(ignoring all but first)'));
       });
 
       test('describes last correctly', () {
-        final _FakeFinder finder = _FakeFinder();
+        final finder = _FakeFinder();
         expect(finder.last.toString(describeSelf: true), contains('(ignoring all but last)'));
       });
     });
@@ -1725,8 +1723,8 @@ class SimpleGenericWidget<T> extends StatelessWidget {
 
 /// Wraps [child] in [depth] layers of [SizedBox]
 Widget _deepWidgetTree({required int depth, required Widget child}) {
-  Widget tree = child;
-  for (int i = 0; i < depth; i += 1) {
+  var tree = child;
+  for (var i = 0; i < depth; i += 1) {
     tree = SizedBox(child: tree);
   }
   return tree;

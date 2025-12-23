@@ -5,7 +5,10 @@
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:widget_preview_scaffold/src/controls.dart';
+import 'package:widget_preview_scaffold/src/split.dart';
 import 'package:widget_preview_scaffold/src/widget_preview.dart';
+import 'package:widget_preview_scaffold/src/widget_preview_inspector_service.dart';
 import 'package:widget_preview_scaffold/src/widget_preview_rendering.dart';
 
 import 'utils/widget_preview_scaffold_test_utils.dart';
@@ -89,9 +92,14 @@ void main() {
   testWidgets('WidgetInspector navigates to Preview application location', (
     tester,
   ) async {
-    final controller = FakeWidgetPreviewScaffoldController();
+    final dtd = FakeWidgetPreviewScaffoldDtdServices();
+    // Install the WidgetInspectorService override (this is done in the
+    // constructor body).
+    WidgetPreviewScaffoldInspectorService(dtdServices: dtd);
+    final controller = FakeWidgetPreviewScaffoldController(
+      dtdServicesOverride: dtd,
+    );
     await controller.initialize();
-    final dtd = controller.dtdServices as FakeWidgetPreviewScaffoldDtdServices;
 
     final service = WidgetInspectorService.instance;
     service.isSelectMode = true;
@@ -137,5 +145,43 @@ void main() {
     expect(codeLocation.uri, kScriptUri);
     expect(codeLocation.line, kLine);
     expect(codeLocation.column, kColumn);
+  });
+
+  testWidgets('Embedded DevTools Widget Inspector can be toggled', (
+    tester,
+  ) async {
+    final controller = FakeWidgetPreviewScaffoldController();
+    final widgetPreview = TestWidgetPreviewScaffold(controller: controller);
+
+    await tester.pumpWidget(widgetPreview);
+
+    final Finder widgetInspectorToggleFinder = find.byType(
+      WidgetInspectorToggle,
+    );
+    // We use the presence of a SplitPane to determine if the embedded widget inspector is open
+    // rather than trying to create test implementations for all components needed for
+    // WebViewWidget.
+    //
+    // The widget inspector is hidden by default.
+    final Finder splitFinder = find.byType(SplitPane);
+    expect(widgetInspectorToggleFinder, findsOne);
+    expect(controller.widgetInspectorVisible.value, false);
+    expect(splitFinder, findsNothing);
+
+    // Display the embedded widget inspector.
+    await tester.tap(widgetInspectorToggleFinder);
+    await tester.pump();
+
+    expect(widgetInspectorToggleFinder, findsOne);
+    expect(controller.widgetInspectorVisible.value, true);
+    expect(splitFinder, findsOne);
+
+    // Hide the embedded widget inspector.
+    await tester.tap(widgetInspectorToggleFinder);
+    await tester.pump();
+
+    expect(widgetInspectorToggleFinder, findsOne);
+    expect(controller.widgetInspectorVisible.value, false);
+    expect(splitFinder, findsNothing);
   });
 }

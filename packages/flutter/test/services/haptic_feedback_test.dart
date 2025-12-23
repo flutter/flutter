@@ -9,7 +9,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Haptic feedback control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -30,7 +30,7 @@ void main() {
       Future<void> Function() hapticFunction,
       String platformMethodArgument,
     ) async {
-      final List<MethodCall> log = <MethodCall>[];
+      final log = <MethodCall>[];
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
@@ -54,6 +54,18 @@ void main() {
     await callAndVerifyHapticFunction(
       HapticFeedback.selectionClick,
       'HapticFeedbackType.selectionClick',
+    );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.successNotification,
+      'HapticFeedbackType.successNotification',
+    );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.warningNotification,
+      'HapticFeedbackType.warningNotification',
+    );
+    await callAndVerifyHapticFunction(
+      HapticFeedback.errorNotification,
+      'HapticFeedbackType.errorNotification',
     );
   });
 }

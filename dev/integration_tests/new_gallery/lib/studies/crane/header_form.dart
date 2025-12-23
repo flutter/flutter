@@ -36,42 +36,41 @@ class HeaderForm extends StatelessWidget {
       padding: EdgeInsets.symmetric(
         horizontal: isDesktop && !isSmallDesktop ? appPaddingLarge : appPaddingSmall,
       ),
-      child:
-          isDesktop
-              ? LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  int crossAxisCount = isSmallDesktop ? 2 : 4;
-                  if (fields.length < crossAxisCount) {
-                    crossAxisCount = fields.length;
-                  }
-                  final double itemWidth = constraints.maxWidth / crossAxisCount;
-                  return GridView.count(
-                    crossAxisCount: crossAxisCount,
-                    childAspectRatio: itemWidth / textFieldHeight,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: <Widget>[
-                      for (final HeaderFormField field in fields)
-                        if ((field.index + 1) % crossAxisCount == 0)
-                          _HeaderTextField(field: field)
-                        else
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 16),
-                            child: _HeaderTextField(field: field),
-                          ),
-                    ],
-                  );
-                },
-              )
-              : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  for (final HeaderFormField field in fields)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _HeaderTextField(field: field),
-                    ),
-                ],
-              ),
+      child: isDesktop
+          ? LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                var crossAxisCount = isSmallDesktop ? 2 : 4;
+                if (fields.length < crossAxisCount) {
+                  crossAxisCount = fields.length;
+                }
+                final double itemWidth = constraints.maxWidth / crossAxisCount;
+                return GridView.count(
+                  crossAxisCount: crossAxisCount,
+                  childAspectRatio: itemWidth / textFieldHeight,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: <Widget>[
+                    for (final HeaderFormField field in fields)
+                      if ((field.index + 1) % crossAxisCount == 0)
+                        _HeaderTextField(field: field)
+                      else
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 16),
+                          child: _HeaderTextField(field: field),
+                        ),
+                  ],
+                );
+              },
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (final HeaderFormField field in fields)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _HeaderTextField(field: field),
+                  ),
+              ],
+            ),
     );
   }
 }

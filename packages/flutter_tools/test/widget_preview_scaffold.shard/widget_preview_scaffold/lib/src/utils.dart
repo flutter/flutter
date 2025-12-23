@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:widget_preview_scaffold/src/widget_preview.dart';
+
+import 'widget_preview.dart';
 
 Iterable<WidgetPreview> buildMultiWidgetPreview({
   required String packageName,
@@ -75,26 +76,6 @@ WidgetPreview buildWidgetPreviewError({
   );
 }
 
-/// Returns a [TextStyle] with [FontFeature.proportionalFigures] applied to
-/// fix blurry text.
-TextStyle fixBlurryText(TextStyle style) {
-  return style.copyWith(
-    fontFeatures: [const FontFeature.proportionalFigures()],
-  );
-}
-
-final TextStyle linkTextStyle = fixBlurryText(
-  underlineTextStyle.copyWith(
-    // TODO(bkonyi): this color scheme is from DevTools and should be responsive
-    // to changes in the previewer theme.
-    color: const Color(0xFF1976D2),
-  ),
-);
-
-final TextStyle underlineTextStyle = fixBlurryText(
-  TextStyle(decoration: TextDecoration.underline),
-);
-
 /// A basic vertical spacer.
 class VerticalSpacer extends StatelessWidget {
   /// Creates a basic vertical spacer.
@@ -144,5 +125,78 @@ class HotReloadListenerState extends State<HotReloadListener> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+/// Wraps [child] in a border with default styling.
+///
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+///
+/// Originally from DevTools.
+final class OutlineDecoration extends StatelessWidget {
+  const OutlineDecoration({
+    super.key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  });
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
+      ),
+      child: child,
+    );
   }
 }

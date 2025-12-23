@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -119,10 +120,10 @@ Finder findTooltipContainer(String tooltipText) {
 
 void main() {
   testWidgets('InputChip.color resolves material states', (WidgetTester tester) async {
-    const Color disabledSelectedColor = Color(0xffffff00);
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
+    const disabledSelectedColor = Color(0xffffff00);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: InputChip(
@@ -174,9 +175,9 @@ void main() {
   });
 
   testWidgets('InputChip uses provided state color properties', (WidgetTester tester) async {
-    const Color disabledColor = Color(0xff00ff00);
-    const Color backgroundColor = Color(0xff0000ff);
-    const Color selectedColor = Color(0xffff0000);
+    const disabledColor = Color(0xff00ff00);
+    const backgroundColor = Color(0xff0000ff);
+    const selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
         child: InputChip(
@@ -223,7 +224,7 @@ void main() {
   });
 
   testWidgets('loses focus when disabled', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'InputChip');
+    final focusNode = FocusNode(debugLabel: 'InputChip');
     await tester.pumpWidget(
       wrapForChip(
         child: InputChip(
@@ -257,8 +258,8 @@ void main() {
   });
 
   testWidgets('cannot be traversed to when disabled', (WidgetTester tester) async {
-    final FocusNode focusNode1 = FocusNode(debugLabel: 'InputChip 1');
-    final FocusNode focusNode2 = FocusNode(debugLabel: 'InputChip 2');
+    final focusNode1 = FocusNode(debugLabel: 'InputChip 1');
+    final focusNode2 = FocusNode(debugLabel: 'InputChip 2');
     await tester.pumpWidget(
       wrapForChip(
         child: FocusScope(
@@ -306,7 +307,7 @@ void main() {
   testWidgets(
     'Material3 - Input chip disabled check mark color is determined by platform brightness when light',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
 
       expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
@@ -329,7 +330,7 @@ void main() {
   testWidgets(
     'Material3 - Input chip disabled check mark color is determined by platform brightness when dark',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData.dark();
+      final theme = ThemeData.dark();
       await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
 
       expectCheckmarkColor(find.byType(InputChip), theme.colorScheme.onSurface);
@@ -371,7 +372,7 @@ void main() {
   testWidgets('InputChip clipBehavior properly passes through to the Material', (
     WidgetTester tester,
   ) async {
-    const Text label = Text('label');
+    const label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const InputChip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
@@ -386,7 +387,7 @@ void main() {
   testWidgets('Material3 - Input chip has correct selected color when enabled', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await pumpCheckmarkChip(tester, chip: selectedInputChip(enabled: true), theme: theme);
 
     final RenderBox materialBox = getMaterialBox(tester);
@@ -396,7 +397,7 @@ void main() {
   testWidgets('Material3 - Input chip has correct selected color when disabled', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await pumpCheckmarkChip(tester, chip: selectedInputChip(), theme: theme);
 
     final RenderBox materialBox = getMaterialBox(tester);
@@ -404,7 +405,7 @@ void main() {
   });
 
   testWidgets('InputChip uses provided iconTheme', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     Widget buildChip({IconThemeData? iconTheme}) {
       return MaterialApp(
@@ -473,11 +474,11 @@ void main() {
   });
 
   testWidgets('InputChip avatar layout constraints can be customized', (WidgetTester tester) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(100, 100);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
       return wrapForChip(
@@ -531,11 +532,11 @@ void main() {
   testWidgets('InputChip delete icon layout constraints can be customized', (
     WidgetTester tester,
   ) async {
-    const double border = 1.0;
-    const double iconSize = 18.0;
-    const double labelPadding = 8.0;
-    const double padding = 8.0;
-    const Size labelSize = Size(100, 100);
+    const border = 1.0;
+    const iconSize = 18.0;
+    const labelPadding = 8.0;
+    const padding = 8.0;
+    const labelSize = Size(100, 100);
 
     Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
       return wrapForChip(
@@ -589,7 +590,7 @@ void main() {
   });
 
   testWidgets('InputChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
-    final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
+    final chipAnimationStyle = ChipAnimationStyle(
       enableAnimation: const AnimationStyle(duration: Durations.short2),
       selectAnimation: AnimationStyle.noAnimation,
     );
@@ -603,6 +604,33 @@ void main() {
     );
 
     expect(tester.widget<RawChip>(find.byType(RawChip)).chipAnimationStyle, chipAnimationStyle);
+  });
+
+  testWidgets('InputChip has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapForChip(
+        child: Center(
+          child: InputChip(label: const Text('Chip'), onPressed: () {}),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(10, 10));
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+
+    final Offset chip = tester.getCenter(find.text('Chip'));
+    await gesture.moveTo(chip);
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
   });
 
   testWidgets('InputChip mouse cursor behavior', (WidgetTester tester) async {
@@ -637,7 +665,7 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final FocusNode focusNode = FocusNode(debugLabel: 'Chip');
+    final focusNode = FocusNode(debugLabel: 'Chip');
     addTearDown(focusNode.dispose);
 
     Widget buildChip({required bool enabled}) {
@@ -687,5 +715,27 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
+  });
+
+  testWidgets('InputChip does not crash at zero area', (WidgetTester tester) async {
+    Future<void> testChip(Widget chip) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(child: SizedBox.shrink(child: chip)),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(InputChip)), Size.zero);
+    }
+
+    await testChip(const InputChip(label: Text('X')));
+    await testChip(
+      const InputChip(
+        label: Text('X'),
+        avatar: CircleAvatar(child: Text('A')),
+      ),
+    );
+    await testChip(InputChip(label: const Text('X'), onDeleted: () {}));
   });
 }

@@ -13,5 +13,6 @@
   "pasteButtonLabel": "Gludo",
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "radioButtonUnselectedLabel": "Not selected"
 }

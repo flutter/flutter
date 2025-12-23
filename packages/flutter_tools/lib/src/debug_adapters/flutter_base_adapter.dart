@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import 'flutter_adapter_args.dart';
@@ -165,8 +166,8 @@ abstract class FlutterBaseDebugAdapter
         }(executable, processArgs, env: env);
     this.process = process;
 
-    process.stdout.transform(ByteToLineTransformer()).listen(handleStdout);
-    process.stderr.transform(utf8.decoder).listen(handleStderr);
+    process.stdout.transformWithCallSite(ByteToLineTransformer()).listen(handleStdout);
+    process.stderr.transformWithCallSite(utf8.decoder).listen(handleStderr);
     unawaited(process.exitCode.then(handleExitCode));
   }
 

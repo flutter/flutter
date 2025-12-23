@@ -10,17 +10,22 @@ if (enable_unittests) {
   test_shaders = [
     "blue_green_sampler.frag",
     "children_and_uniforms.frag",
+    "double_sampler_swapped.frag",
+    "double_sampler.frag",
+    "filter_shader.frag",
     "functions.frag",
+    "missing_size.frag",
+    "missing_texture.frag",
     "no_builtin_redefinition.frag",
     "no_uniforms.frag",
     "simple.frag",
-    "uniforms.frag",
-    "uniforms_sorted.frag",
-    "uniform_ordering.frag",
+    "texture.frag",
     "uniform_arrays.frag",
-    "filter_shader.frag",
-    "missing_size.frag",
-    "missing_texture.frag",
+    "uniform_ordering.frag",
+    "uniforms_inserted.frag",
+    "uniforms_reordered.frag",
+    "uniforms_sorted.frag",
+    "uniforms.frag",
     "vec3_uniform.frag",
   ]
 
@@ -38,9 +43,30 @@ if (enable_unittests) {
     iplr = true
   }
 
+  impellerc("compile_sdf_shaders") {
+    mnemonic = "IMPELLERC_SDF"
+    shaders = [
+      "circle_sdf.frag",
+      "sdf.frag",
+    ]
+    shader_target_flags = [
+      "--sksl",
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+      "--runtime-stage-vulkan",
+    ]
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+    iplr = true
+  }
+
   test_fixtures("fixtures") {
-    deps = [ ":compile_general_shaders" ]
-    fixtures = get_target_outputs(":compile_general_shaders")
+    deps = [
+      ":compile_general_shaders",
+      ":compile_sdf_shaders",
+    ]
+    fixtures = get_target_outputs(":compile_general_shaders") +
+               get_target_outputs(":compile_sdf_shaders")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }

@@ -13,10 +13,15 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterView ()
 @property(nonatomic, weak) id<FlutterViewEngineDelegate> delegate;
+@property(nonatomic, weak) UIWindowScene* previousScene;
+@end
+
+@implementation FlutterAutoResizeLayoutConstraint
 @end
 
 @implementation FlutterView {
   BOOL _isWideGamutEnabled;
+  CGSize _intrinsicSize;
 }
 
 - (instancetype)init {
@@ -36,6 +41,71 @@ FLUTTER_ASSERT_ARC
 
 - (UIScreen*)screen {
   return self.window.windowScene.screen;
+}
+
+// iOS has a concept of "intrinsicContentSize", which indicates the size a view would like to be
+// based on its content. When an intrinsicContentSize is set, iOS will automatically add Auto Layout
+// constraints for the width and/or height. However, the constraints use a private API. There are
+// situations where we may want to filter these constraints. To avoid using a private API, Flutter
+// creates a custom constraint called FlutterAutoResizeLayoutConstraint to add a width/height
+// constraint that reflects the intrinsicContentSize.
+- (void)setIntrinsicContentSize:(CGSize)size {
+  if (!self.autoResizable) {
+    return;
+  }
+
+  UIWindow* window = self.window;
+  CGFloat scale = window ? self.window.windowScene.screen.scale : self.traitCollection.displayScale;
+  CGSize scaledSize = CGSizeMake(size.width / scale, size.height / scale);
+
+  CGSize roundedScaleSize = CGSizeMake(roundf(scaledSize.width), roundf(scaledSize.height));
+  CGSize roundedIntrinsicSize =
+      CGSizeMake(roundf(_intrinsicSize.width), roundf(_intrinsicSize.height));
+
+  // If the size has not changed, don't update constraints.
+  if (CGSizeEqualToSize(roundedIntrinsicSize, roundedScaleSize)) {
+    return;
+  }
+  _intrinsicSize = scaledSize;
+
+  self.translatesAutoresizingMaskIntoConstraints = false;
+
+  // Remove any existing FlutterAutoResizeLayoutConstraint
+  [self removeAutoResizeLayoutConstraints];
+
+  FlutterAutoResizeLayoutConstraint* widthConstraint =
+      [FlutterAutoResizeLayoutConstraint constraintWithItem:self
+                                                  attribute:NSLayoutAttributeWidth
+                                                  relatedBy:NSLayoutRelationEqual
+                                                     toItem:nil
+                                                  attribute:NSLayoutAttributeNotAnAttribute
+                                                 multiplier:1.0
+                                                   constant:scaledSize.width];
+
+  FlutterAutoResizeLayoutConstraint* heightConstraint =
+      [FlutterAutoResizeLayoutConstraint constraintWithItem:self
+                                                  attribute:NSLayoutAttributeHeight
+                                                  relatedBy:NSLayoutRelationEqual
+                                                     toItem:nil
+                                                  attribute:NSLayoutAttributeNotAnAttribute
+                                                 multiplier:1.0
+                                                   constant:scaledSize.height];
+
+  [NSLayoutConstraint activateConstraints:@[ widthConstraint, heightConstraint ]];
+  [self setNeedsLayout];
+}
+
+- (void)resetIntrinsicContentSize {
+  _intrinsicSize = CGSizeMake(UIViewNoIntrinsicMetric, UIViewNoIntrinsicMetric);
+  [self removeAutoResizeLayoutConstraints];
+}
+
+- (void)removeAutoResizeLayoutConstraints {
+  for (NSLayoutConstraint* constraint in self.constraints) {
+    if ([constraint isKindOfClass:[FlutterAutoResizeLayoutConstraint class]]) {
+      constraint.active = NO;
+    }
+  }
 }
 
 - (MTLPixelFormat)pixelFormat {
@@ -78,6 +148,8 @@ FLUTTER_ASSERT_ARC
     _delegate = delegate;
     _isWideGamutEnabled = isWideGamutEnabled;
     self.layer.opaque = opaque;
+    _autoResizable = NO;
+    _intrinsicSize = CGSizeMake(UIViewNoIntrinsicMetric, UIViewNoIntrinsicMetric);
   }
 
   return self;
@@ -246,26 +318,31 @@ static void PrintWideGamutWarningOnce() {
   // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
   // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
   UIWindowScene* newScene = newWindow.windowScene;
-  UIWindowScene* previousScene = self.window.windowScene;
-  if (newScene == previousScene) {
+  UIWindowScene* currentScene = self.window.windowScene;
+
+  if (newScene == currentScene) {
     return;
   }
-  FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
-      [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
-  if (newSceneLifeCycleDelegate != nil) {
-    return [newSceneLifeCycleDelegate addFlutterEngine:(FlutterEngine*)self.delegate];
+
+  // Remove the engine from the previous scene if it's no longer in that window and scene.
+  FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
+      [FlutterPluginSceneLifeCycleDelegate fromScene:self.previousScene];
+  if (previousSceneLifeCycleDelegate) {
+    [previousSceneLifeCycleDelegate removeFlutterManagedEngine:(FlutterEngine*)self.delegate];
+    self.previousScene = nil;
   }
 
-  // The window, and therefore windowScene, property may be nil if the receiver does not currently
-  // reside in any window. This occurs when the receiver has just been removed from its superview
-  // or when the receiver has just been added to a superview that is not attached to a window.
-  // Remove the engine from the previous scene if set since it is no longer in that window and
-  // scene.
-  FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
-      [FlutterPluginSceneLifeCycleDelegate fromScene:previousScene];
-  if (previousSceneLifeCycleDelegate != nil) {
-    return [previousSceneLifeCycleDelegate removeFlutterEngine:(FlutterEngine*)self.delegate];
+  if (newScene) {
+    // Add the engine to the new scene's lifecycle delegate.
+    FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
+        [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
+    if (newSceneLifeCycleDelegate) {
+      [newSceneLifeCycleDelegate addFlutterManagedEngine:(FlutterEngine*)self.delegate];
+    }
+  } else {
+    // If the view is being removed from a window, store the current scene to remove the engine
+    // from it later when the view is added to a new window.
+    self.previousScene = currentScene;
   }
 }
-
 @end
