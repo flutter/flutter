@@ -2041,6 +2041,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        // Animate the carousel so item 4 is placed in the first position with max weight (5)
+        // in `flexWeights`, resulting in item 3 as the leading item.
         controller.animateToItem(
           4,
           duration: const Duration(milliseconds: 200),
