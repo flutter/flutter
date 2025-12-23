@@ -1220,26 +1220,27 @@ void PolygonInfo::ComputeMesh(std::vector<UmbraPin>& pins,
       // umbra vertex to our new umbra point.
       AddTriangle(last_penumbra_index,  //
                   p_prev_pin->umbra_index, p_curr_pin->umbra_index);
+    }
 
-      // Then we bridge from the old penumbra point to the new parallel
-      // penumbra point, pivoting around the new umbra index.
-      Point new_penumbra_point =
-          p_curr_pin->path_vertex + p_prev_pin->penumbra_delta;
-      uint16_t new_penumbra_index = AppendVertex(new_penumbra_point, 0.0f);
+    // Then we bridge from the old penumbra point to the new parallel
+    // penumbra point, pivoting around the new umbra index.
+    Point new_penumbra_point =
+        p_curr_pin->path_vertex + p_prev_pin->penumbra_delta;
+    uint16_t new_penumbra_index = AppendVertex(new_penumbra_point, 0.0f);
 
+    if (last_penumbra_index != new_penumbra_index) {
       AddTriangle(p_curr_pin->umbra_index, last_penumbra_index,
                   new_penumbra_index);
-
-      last_penumbra_point = new_penumbra_point;
-      last_penumbra_index = new_penumbra_index;
     }
+
+    last_penumbra_point = new_penumbra_point;
+    last_penumbra_index = new_penumbra_index;
 
     // Now draw a fan from the current pin's umbra vertex to all of the
     // penumbra points associated with this pin's path vertex, ending at
     // our new final penumbra point associated with this pin.
-    Point new_penumbra_point =
-        p_curr_pin->path_vertex + p_curr_pin->penumbra_delta;
-    uint16_t new_penumbra_index =
+    new_penumbra_point = p_curr_pin->path_vertex + p_curr_pin->penumbra_delta;
+    new_penumbra_index =
         AppendFan(p_curr_pin, last_penumbra_point, new_penumbra_point,
                   last_penumbra_index, trigs, direction);
 
@@ -1327,8 +1328,10 @@ uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
       break;
     }
     uint16_t cur_index = AppendVertex(center + fan_delta, 0.0f);
-    AddTriangle(center_index, prev_index, cur_index);
-    prev_index = cur_index;
+    if (prev_index != cur_index) {
+      AddTriangle(center_index, prev_index, cur_index);
+      prev_index = cur_index;
+    }
     if (i == trig_count - 1) {
       // This corner was >90 degrees so we start the loop over in case there
       // are more intermediate angles to emit.
@@ -1342,7 +1345,9 @@ uint16_t PolygonInfo::AppendFan(const UmbraPin* p_curr_pin,
     }
   }
   uint16_t cur_index = AppendVertex(center + end_delta, 0.0f);
-  AddTriangle(center_index, prev_index, cur_index);
+  if (prev_index != cur_index) {
+    AddTriangle(center_index, prev_index, cur_index);
+  }
   return cur_index;
 }
 
@@ -1354,6 +1359,9 @@ uint16_t PolygonInfo::AppendVertex(const Point& vertex, Scalar gaussian) {
   FML_DCHECK(index == gaussians_.size());
   // TODO(jimgraham): Turn this condition into a failure of the tessellation
   FML_DCHECK(index <= std::numeric_limits<uint16_t>::max());
+  if (gaussian == gaussians_.back() && vertex == vertices_.back()) {
+    return index - 1;
+  }
   vertices_.push_back(vertex);
   gaussians_.push_back(gaussian);
   return index;

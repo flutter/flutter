@@ -122,7 +122,9 @@ size_t CountDuplicateTriangles(
 }
 
 bool IsPointInsideTriangle(Point p, std::array<Point, 3> triangle) {
-  if (p == triangle[0] || p == triangle[1] || p == triangle[3]) {
+  if (SimilarPoint(p, triangle[0]) ||  //
+      SimilarPoint(p, triangle[1]) ||  //
+      SimilarPoint(p, triangle[2])) {
     return false;
   }
   Scalar direction = Point::Cross(p, triangle[0], triangle[1]);
@@ -153,6 +155,13 @@ bool DoTrianglesOverlap(
     // to see if that vertex is inside any triangle in the mesh.
     for (size_t j = 0; j < vertex_count; j++) {
       if (IsPointInsideTriangle(vertices[j], triangle)) {
+        FML_LOG(ERROR) << "Point " << vertices[j] << " inside triangle ["
+                       << triangle[0] << ", "  //
+                       << triangle[1] << ", "  //
+                       << triangle[2] << "]";
+        FML_LOG(ERROR) << "Point - corner[0] == " << vertices[j] - triangle[0];
+        FML_LOG(ERROR) << "Point - corner[1] == " << vertices[j] - triangle[1];
+        FML_LOG(ERROR) << "Point - corner[2] == " << vertices[j] - triangle[2];
         return true;
       }
     }
@@ -813,11 +822,11 @@ TEST(ShadowPathGeometryTest, RoundRectTest) {
 
   ASSERT_NE(shadow_vertices, nullptr);
   EXPECT_FALSE(shadow_vertices->IsEmpty());
-  EXPECT_EQ(shadow_vertices->GetVertexCount(), 51u);
-  EXPECT_EQ(shadow_vertices->GetIndexCount(), 156u);
-  EXPECT_EQ(shadow_vertices->GetVertices().size(), 51u);
-  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 51u);
-  EXPECT_EQ(shadow_vertices->GetIndices().size(), 156u);
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 55u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 168u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 55u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 55u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 168u);
   EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
   // We repeat the first and last vertex that is on the outer umbra.
   // There is another duplicate vertex from somewhere else not yet realized.
@@ -958,6 +967,78 @@ TEST(ShadowPathGeometryTest, ReverseOuterToInnerOverturningSpiralTest) {
                                                     matrix);
 
   EXPECT_EQ(shadow_vertices, nullptr);
+}
+
+TEST(ShadowPathGeometryTest, ClockwiseOctagonCollapsedUmbraPolygonTest) {
+  const Matrix matrix = Matrix::MakeScale({2, 2, 1});
+  const Scalar height = 100.0f;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 125));
+  path_builder.LineTo(DlPoint(125, 100));
+  path_builder.LineTo(DlPoint(275, 100));
+  path_builder.LineTo(DlPoint(300, 125));
+  path_builder.LineTo(DlPoint(300, 275));
+  path_builder.LineTo(DlPoint(275, 300));
+  path_builder.LineTo(DlPoint(125, 300));
+  path_builder.LineTo(DlPoint(100, 275));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 87u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 267u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 87u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 87u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 267u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  // There are a couple additional duplicate vertices in this case.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 3u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
+}
+
+TEST(ShadowPathGeometryTest, CounterClockwiseOctagonCollapsedUmbraPolygonTest) {
+  const Matrix matrix = Matrix::MakeScale({2, 2, 1});
+  const Scalar height = 100.0f;
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 125));
+  path_builder.LineTo(DlPoint(100, 275));
+  path_builder.LineTo(DlPoint(125, 300));
+  path_builder.LineTo(DlPoint(275, 300));
+  path_builder.LineTo(DlPoint(300, 275));
+  path_builder.LineTo(DlPoint(300, 125));
+  path_builder.LineTo(DlPoint(275, 100));
+  path_builder.LineTo(DlPoint(125, 100));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  Tessellator tessellator;
+  std::shared_ptr<ShadowVertices> shadow_vertices =
+      ShadowPathGeometry::MakeAmbientShadowVertices(tessellator, path, height,
+                                                    matrix);
+
+  ASSERT_NE(shadow_vertices, nullptr);
+  EXPECT_FALSE(shadow_vertices->IsEmpty());
+  EXPECT_EQ(shadow_vertices->GetVertexCount(), 88u);
+  EXPECT_EQ(shadow_vertices->GetIndexCount(), 267u);
+  EXPECT_EQ(shadow_vertices->GetVertices().size(), 88u);
+  EXPECT_EQ(shadow_vertices->GetGaussians().size(), 88u);
+  EXPECT_EQ(shadow_vertices->GetIndices().size(), 267u);
+  EXPECT_EQ((shadow_vertices->GetIndices().size() % 3u), 0u);
+  // We repeat the first and last vertex that is on the outer umbra.
+  // There are a couple additional duplicate vertices in this case.
+  EXPECT_LE(CountDuplicateVertices(shadow_vertices), 3u);
+  EXPECT_EQ(CountDuplicateTriangles(shadow_vertices), 0u);
+  EXPECT_FALSE(DoTrianglesOverlap(shadow_vertices));
 }
 
 TEST(ShadowPathGeometryTest, MultipleContoursTest) {
