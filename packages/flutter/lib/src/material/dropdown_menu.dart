@@ -436,8 +436,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// Setting this to null does not clear the text field.
   ///
   /// To programmatically clear the text field, use a [TextEditingController]
-  /// and call [TextEditingController.clear] on it. See [controller] for more
-  /// information.
+  /// and call [TextEditingController.clear] on it.
   ///
   /// Defaults to null.
   ///
