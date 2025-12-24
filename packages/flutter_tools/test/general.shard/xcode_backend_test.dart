@@ -17,6 +17,51 @@ void main() {
     fileSystem = MemoryFileSystem();
   });
 
+  test('FLUTTER_BUILD_DIR is defaulted when not set', () {
+    final context = TestContext(
+      <String>['build', 'macos'],
+      <String, String>{
+        'ACTION': 'build',
+        'BUILT_PRODUCTS_DIR': '/path/to/builds',
+        'FLUTTER_ROOT': '/path/to/flutter',
+        'INFOPLIST_PATH': 'Info.plist',
+        'CONFIGURATION': 'Debug',
+      },
+      commands: <FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            '/path/to/flutter/bin/flutter',
+            'assemble',
+            '--no-version-check',
+            '--output=/path/to/builds/',
+            '-dTargetPlatform=darwin',
+            '-dTargetFile=lib/main.dart',
+            '-dBuildMode=debug',
+            '-dConfiguration=Debug',
+            '-dDarwinArchs=',
+            '-dSdkRoot=',
+            '-dSplitDebugInfo=',
+            '-dTreeShakeIcons=',
+            '-dTrackWidgetCreation=',
+            '-dDartObfuscation=',
+            '-dAction=build',
+            '-dFrontendServerStarterPath=',
+            '--ExtraGenSnapshotOptions=',
+            '--DartDefines=',
+            '--ExtraFrontEndOptions=',
+            '-dSrcRoot=',
+            '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
+            '--build-outputs=/Flutter/ephemeral/FlutterOutputs.xcfilelist',
+            'debug_macos_bundle_flutter_assets',
+          ],
+        ),
+      ],
+      fileSystem: fileSystem,
+    );
+    expect(context.environment['FLUTTER_BUILD_DIR'], 'build');
+  });
+
+
   test('prints warning and defaults to iOS if unknown platform', () {
     final Directory buildDir = fileSystem.directory('/path/to/builds')..createSync(recursive: true);
     final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
