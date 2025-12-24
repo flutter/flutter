@@ -2081,8 +2081,8 @@ void main() {
   testWidgets('CupertinoDatePicker semantics excludes disabled dates', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     debugResetSemanticsIdCounter();
-    final DateTime minimumDate = DateTime(2018, 6, 10);
-    final DateTime maximumDate = DateTime(2018, 6, 20);
+    final minimumDate = DateTime(2018, 6, 10);
+    final maximumDate = DateTime(2018, 6, 20);
 
     await tester.pumpWidget(
       CupertinoApp(

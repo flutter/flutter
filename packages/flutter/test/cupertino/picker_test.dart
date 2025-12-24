@@ -118,11 +118,11 @@ void main() {
             scrollController: controller,
             itemExtent: 50.0,
             onSelectedItemChanged: (_) {},
-            children: <Widget>[
-              const Text('0'),
-              // Item at index 1 is excluded from semantics (simulating a disabled item)
-              const ExcludeSemantics(child: Text('1')),
-              const Text('2'),
+            children: const <Widget>[
+              Text('0'),
+              // Item at index 1 is excluded from semantics (simulating a disabled item).
+              ExcludeSemantics(child: Text('1')),
+              Text('2'),
             ],
           ),
         ),
@@ -130,9 +130,9 @@ void main() {
     );
 
     // When the current item (index 1) has an empty label due to ExcludeSemantics,
-    // the picker should not have any value or actions set
+    // the picker should not have any value or actions set.
     expect(semantics, isNot(includesNodeWith(value: '1')));
-    // Also verify that no increase/decrease actions are set for this item
+    // Also verify that no increase/decrease actions are set for this item.
     expect(
       semantics,
       isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.increase])),
@@ -142,24 +142,24 @@ void main() {
       isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.decrease])),
     );
 
-    // Scroll to item 0 which has a valid label
+    // Scroll to item 0 which has a valid label.
     controller.jumpToItem(0);
     await tester.pumpAndSettle();
 
     // Now the picker should have value '0' but no increase action
-    // because the next item (1) has an empty label
+    // because the next item (1) has an empty label.
     expect(semantics, includesNodeWith(value: '0'));
     expect(
       semantics,
       isNot(includesNodeWith(value: '0', actions: <SemanticsAction>[SemanticsAction.increase])),
     );
 
-    // Scroll to item 2 which has a valid label
+    // Scroll to item 2 which has a valid label.
     controller.jumpToItem(2);
     await tester.pumpAndSettle();
 
     // Now the picker should have value '2' but no decrease action
-    // because the previous item (1) has an empty label
+    // because the previous item (1) has an empty label.
     expect(semantics, includesNodeWith(value: '2'));
     expect(
       semantics,
