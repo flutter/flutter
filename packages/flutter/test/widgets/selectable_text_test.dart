@@ -5736,4 +5736,53 @@ void main() {
     );
     await tester.pump();
   });
+
+  testWidgets('SelectableText defaults fix selection for RTL text - #175983', (
+    WidgetTester tester,
+  ) async {
+    // This test verifies that SelectableText correctly applies
+    // BoxHeightStyle.tight and BoxWidthStyle.tight as default values for
+    // selectionHeightStyle and selectionWidthStyle respectively when they
+    // are not explicitly provided. This ensures the fix for accurate selection
+    // in RTL/complex scripts is applied internally by SelectableText.
+    // Regression test for: https://github.com/flutter/flutter/issues/175983
+
+    const arabicText = 'العربية اللغة'; // Example Arabic text
+    final Key selectableKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.rtl, // Set context to RTL
+            child: SelectableText(
+              arabicText,
+              key: selectableKey,
+              // Intentionally NOT setting selectionHeightStyle/selectionWidthStyle
+              // to rely on the new defaults applied internally by this PR.
+              style: const TextStyle(fontSize: 16.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Find the internal RenderEditable used by SelectableText
+    final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
+      find.byKey(selectableKey),
+    );
+
+    // Verify the internal RenderEditable received the expected default styles.
+    // These are the styles this PR explicitly sets as defaults within SelectableText's build method.
+    expect(
+      renderEditable.selectionHeightStyle,
+      ui.BoxHeightStyle.tight,
+      reason: 'selectionHeightStyle should default to tight for accurate RTL selection.',
+    );
+    expect(
+      renderEditable.selectionWidthStyle,
+      ui.BoxWidthStyle.tight,
+      reason: 'selectionWidthStyle should default to tight for accurate RTL selection.',
+    );
+  });
 }
