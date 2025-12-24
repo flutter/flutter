@@ -428,7 +428,9 @@ void main() {
     },
   );
 
-  testWidgets('SizeTransition maintains chosen alignment during animation', (WidgetTester tester) async {
+  testWidgets('SizeTransition maintains chosen alignment during animation', (
+    WidgetTester tester,
+  ) async {
     final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
