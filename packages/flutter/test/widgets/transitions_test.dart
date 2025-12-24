@@ -428,7 +428,7 @@ void main() {
     },
   );
 
-  testWidgets('SizeTransition alignment parameter', (WidgetTester tester) async {
+  testWidgets('SizeTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
     final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
@@ -441,14 +441,19 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    expect(
-      tester.widget(find.byType(SizeTransition)),
-      isA<SizeTransition>().having(
-        (SizeTransition transition) => transition.alignment,
-        'alignment',
-        Alignment.topLeft,
-      ),
-    );
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    var actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
+
+    controller.value = 0.0;
+    await tester.pump();
+    actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
+
+    controller.value = 1.0;
+    await tester.pump();
+    actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
   });
 
   testWidgets('MatrixTransition animates', (WidgetTester tester) async {
