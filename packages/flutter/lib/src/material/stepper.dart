@@ -220,6 +220,8 @@ class Stepper extends StatefulWidget {
     this.stepIconWidth,
     this.stepIconMargin,
     this.clipBehavior = Clip.none,
+    this.headerPadding,
+    this.contentPadding,
   }) : assert(0 <= currentStep && currentStep < steps.length),
        assert(
          stepIconHeight == null ||
@@ -378,6 +380,21 @@ class Stepper extends StatefulWidget {
   ///
   ///  * [Clip], which explains how to use this property.
   final Clip clipBehavior;
+
+  /// The padding around the header row in both [StepperType.vertical] and
+  /// [StepperType.horizontal] steppers.
+  ///
+  /// If null, defaults to `EdgeInsets.symmetric(horizontal: 24.0)`.
+  final EdgeInsetsGeometry? headerPadding;
+
+  /// The padding around the content area in both [StepperType.vertical] and
+  /// [StepperType.horizontal] steppers.
+  ///
+  /// For [StepperType.horizontal], defaults to `EdgeInsets.all(24.0)`.
+  ///
+  /// For [StepperType.vertical], defaults to
+  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`.
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -737,7 +754,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final bool isActive = widget.steps[index].isActive;
     final bool isPreviousActive = index > 0 && widget.steps[index - 1].isActive;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: widget.headerPadding ?? const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
         children: <Widget>[
           Column(
@@ -790,13 +807,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
-            padding: EdgeInsetsDirectional.only(
-              // Adjust [controlsBuilder] padding so that the content is
-              // centered vertically.
-              start: 60.0 + (marginLeft ?? 0.0),
-              end: 24.0,
-              bottom: 24.0,
-            ),
+            padding: widget.contentPadding ??
+                EdgeInsetsDirectional.only(
+                  // Adjust [controlsBuilder] padding so that the content is
+                  // centered vertically.
+                  start: 60.0 + (marginLeft ?? 0.0),
+                  end: 24.0,
+                  bottom: 24.0,
+                ),
             child: Column(
               children: <Widget>[
                 ClipRect(clipBehavior: widget.clipBehavior, child: widget.steps[index].content),
@@ -915,7 +933,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Material(
           elevation: widget.elevation ?? 2,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: widget.headerPadding ?? const EdgeInsets.symmetric(horizontal: 24.0),
             child: SizedBox(
               height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
               child: Row(children: children),
@@ -926,7 +944,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: ListView(
             controller: widget.controller,
             physics: widget.physics,
-            padding: const EdgeInsets.all(24.0),
+            padding: widget.contentPadding ?? const EdgeInsets.all(24.0),
             children: <Widget>[
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
