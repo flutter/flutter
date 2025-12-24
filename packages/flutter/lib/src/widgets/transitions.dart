@@ -412,8 +412,8 @@ class RotationTransition extends MatrixTransition {
 /// Animates its own size and clips and aligns its child.
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
-/// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [alignment].
+/// height, depending upon the value of [axis]. The alignment of the child is
+/// specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -446,13 +446,16 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// to [Alignment.center].
+  /// The [axis] argument defaults to [Axis.vertical]. The [alignment] defaults
+  /// to [Alignment.center], which centers the child within the parent during
+  /// the transition.
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
     @Deprecated(
       'Use alignment instead. '
+      'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
       'This feature was deprecated after v3.38.0-1.0.pre.',
     )
     this.axisAlignment,
@@ -460,7 +463,10 @@ class SizeTransition extends AnimatedWidget {
     this.fixedCrossAxisSizeFactor,
     this.child,
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
-       assert(axisAlignment == null || alignment == null),
+       assert(
+         axisAlignment == null || alignment == null,
+         'Cannot provide both axisAlignment and alignment as axisAlignment has been deprecated and superseded by alignment',
+       ),
        super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
@@ -488,13 +494,18 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
   ///
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
+  ///
+  /// This property has been deprecated and superseded by [alignment]. Existing usages can be migrated to [alignment] as follows:
+  /// - If [axis] is [Axis.horizontal], replace with `Alignment(axisAlignment ?? 0.0, -1.0)`
+  /// - If [axis] is [Axis.vertical], replace with `Alignment(-1.0, axisAlignment ?? 0.0)`
   @Deprecated(
     'Use alignment instead. '
+    'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
     'This feature was deprecated after v3.38.0-1.0.pre.',
   )
   final double? axisAlignment;
 
-  /// The alignment of the child along the main axis during the transition.
+  /// The alignment of the child within the parent during the transition.
   final AlignmentGeometry? alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
