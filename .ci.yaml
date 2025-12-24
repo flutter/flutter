@@ -1092,6 +1092,7 @@ targets:
       - DEPS
 
   - name: Linux build_android_host_app_with_module_source
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/180258
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: false
