@@ -7,14 +7,14 @@ import 'package:flutter_api_samples/material/expansible/expansible.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ExpansionPanel can be expanded', (WidgetTester tester) async {
+  testWidgets('Expansible can be expanded', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ExpansibleApp());
 
     // Verify that the expanded content is not visible initially.
     expect(find.text('Hidden content revealed!'), findsNothing);
 
     // Tap the header to expand.
-    await tester.tap(find.text('Tap to expand'));
+    await tester.tap(find.text('Tap to Expand'));
     await tester.pumpAndSettle();
 
     // Verify that the expanded content is now visible.

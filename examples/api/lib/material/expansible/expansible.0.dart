@@ -56,9 +56,10 @@ class _ExpansibleWidgetExampleState extends State<ExpansibleWidgetExample> {
         ),
         bodyBuilder: (context, animation) => SizeTransition(
           sizeFactor: animation,
-          child: Text('Hidden content revealed!'),
+          child: const Text('Hidden content revealed!'),
         ),
         expansibleBuilder: (context, header, body, animation) => Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [header, body],
         ),
