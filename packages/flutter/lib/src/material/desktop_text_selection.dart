@@ -71,7 +71,11 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double cursorWidth,
+  }) {
     return Offset.zero;
   }
 

@@ -245,6 +245,7 @@ class SelectableRegion extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
     required this.selectionControls,
+    this.cursorWidth = 2.0,
     required this.child,
   });
 
@@ -274,6 +275,9 @@ class SelectableRegion extends StatefulWidget {
   /// The [emptyTextSelectionControls] global variable provides a default
   /// [TextSelectionControls] implementation with no controls.
   final TextSelectionControls selectionControls;
+
+  /// The width of the cursor.
+  final double cursorWidth;
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
@@ -1304,6 +1308,7 @@ class SelectableRegionState extends State<SelectableRegion>
       endHandleLayerLink: _endHandleLayerLink,
       toolbarLayerLink: _toolbarLayerLink,
       magnifierConfiguration: widget.magnifierConfiguration,
+      cursorWidth: widget.cursorWidth,
     );
   }
 
