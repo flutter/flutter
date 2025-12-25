@@ -2731,6 +2731,45 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     });
   }
 
+  /// Compares two [List]s of [IOSSystemContextMenuItemData]
+  /// checking for equality and ignoring [IOSSystemContextMenuItemDataCustom.onPressed].
+  ///
+  /// When comparing custom items the onPressed callback is dropped
+  /// from the comparison because it will only pass the equality
+  /// check if a static method is passed, and will fail when a
+  /// lambda is passed.
+  bool _customItemsEquals(
+    List<IOSSystemContextMenuItemData>? a,
+    List<IOSSystemContextMenuItemData>? b,
+  ) {
+    if (a == null) {
+      return b == null;
+    }
+    if (b == null || a.length != b.length) {
+      return false;
+    }
+    if (identical(a, b)) {
+      return true;
+    }
+    for (int index = 0; index < a.length; index += 1) {
+      if (a[index].runtimeType != b[index].runtimeType) {
+        return false;
+      }
+      // Ignore onPressed callback for custom items.
+      if (a[index] is IOSSystemContextMenuItemDataCustom &&
+          b[index] is IOSSystemContextMenuItemDataCustom) {
+        if (a[index].title != b[index].title) {
+          return false;
+        }
+        continue;
+      }
+      if (a[index] != b[index]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Shows the system context menu anchored on the given [Rect] with the given
   /// buttons.
   ///
@@ -2767,11 +2806,36 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
 
     // Don't show the same thing that's already being shown.
+    late final bool sameItems;
     if (_lastShown != null &&
         _lastShown!.isVisible &&
         _lastShown!._lastTargetRect == targetRect &&
-        listEquals(_lastShown!._lastItems, items)) {
+        (sameItems = listEquals(_lastShown!._lastItems, items))) {
       return Future<void>.value();
+    } else if (_lastShown != null &&
+        _lastShown!.isVisible &&
+        _lastShown!._lastTargetRect == targetRect &&
+        !sameItems) {
+      if (_customItemsEquals(_lastShown!._lastItems, items)) {
+        _customActionCallbacks.clear();
+        for (final IOSSystemContextMenuItemData item in items) {
+          if (item is IOSSystemContextMenuItemDataCustom) {
+            assert(
+              !_customActionCallbacks.containsKey(item.callbackId) ||
+                  _customActionCallbacks[item.callbackId] == item.onPressed,
+              'Duplicate callback ID "${item.callbackId}" with different callbacks. '
+              'Each custom menu item must have a unique ID or the same callback.',
+            );
+            // TODO(Renzo-Olivares): If we do this, then the framework will have updated callbackIds
+            // (since right now it still considers onPressed), and they won't match the engines callbackIds.
+            //
+            // Ideally the callbackIds would not be based on the onPressed to make it more deterministic
+            // across rebuilds, so if an onPressed lambda hasn't changed the id should also not change.
+            _customActionCallbacks[item.callbackId] = item.onPressed;
+          }
+        }
+        return Future<void>.value();
+      }
     }
 
     assert(
