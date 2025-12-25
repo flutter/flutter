@@ -270,7 +270,7 @@ class Hero extends StatefulWidget {
 
   /// The curve to use in the reverse direction.
   ///
-  /// If this property is null, the flipped version of [curve] is used.
+  /// If this property is null, Hero.curve.flipped is used.
   final Curve? reverseCurve;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
