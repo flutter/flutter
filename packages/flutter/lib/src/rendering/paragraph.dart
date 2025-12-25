@@ -877,13 +877,7 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    // TODO(garyq): Since our metric for ideographic baseline is currently
-    // inaccurate and the non-alphabetic baselines are based off of the
-    // alphabetic baseline, we use the alphabetic for now to produce correct
-    // layouts. We should eventually change this back to pass the `baseline`
-    // property when the ideographic baseline is properly implemented
-    // (https://github.com/flutter/flutter/issues/22625).
-    return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -898,7 +892,7 @@ class RenderParagraph extends RenderBox
         ),
       )
       ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
-    return _textIntrinsics.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    return _textIntrinsics.computeDistanceToActualBaseline(baseline);
   }
 
   @override
