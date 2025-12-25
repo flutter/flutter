@@ -1130,9 +1130,9 @@ void main() {
   testWidgets(
     'Clipboard shortcuts (Xerox/Apple)',
     (WidgetTester tester) async {
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
 
       await tester.pumpWidget(
@@ -1175,9 +1175,9 @@ void main() {
   testWidgets(
     'Clipboard shortcuts (IBM CUA)',
     (WidgetTester tester) async {
-      final FocusNode editable = FocusNode();
+      final editable = FocusNode();
       addTearDown(editable.dispose);
-      final FocusNode spy = FocusNode();
+      final spy = FocusNode();
       addTearDown(spy.dispose);
 
       await tester.pumpWidget(
