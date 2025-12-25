@@ -77,6 +77,9 @@ class FlutterProjectBundle {
   // Returns thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy() { return ui_thread_policy_; }
 
+  // Returns whether IAccessibleEx support is enabled.
+  bool iaccessibleex_enabled() const { return iaccessibleex_enabled_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -98,6 +101,9 @@ class FlutterProjectBundle {
 
   // Thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy_;
+
+  // Whether IAccessibleEx support is enabled.
+  bool iaccessibleex_enabled_;
 };
 
 }  // namespace flutter
