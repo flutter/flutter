@@ -1289,6 +1289,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
   }
+  [_windowController closeAllWindows];
   [_platformViewController reset];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
