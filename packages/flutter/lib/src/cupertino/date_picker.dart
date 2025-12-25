@@ -899,10 +899,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               ? localizations.todayLabel
               : localizations.datePickerMediumDate(rangeStart);
 
-          return itemPositioningBuilder(
+          final bool isDisabled = !_isSelectableDate(rangeStart);
+          final Widget child = itemPositioningBuilder(
             context,
-            Text(dateText, style: _themeTextStyle(context, isValid: _isSelectableDate(rangeStart))),
+            Text(dateText, style: _themeTextStyle(context, isValid: !isDisabled)),
           );
+          return isDisabled ? ExcludeSemantics(child: child) : child;
         },
         selectionOverlay: selectionOverlay,
       ),
@@ -983,15 +985,17 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         children: List<Widget>.generate(24, (int index) {
           final int hour = isHourRegionFlipped ? (index + 12) % 24 : index;
           final int displayHour = widget.use24hFormat ? hour : (hour + 11) % 12 + 1;
+          final bool isDisabled = !_isValidHour(selectedAmPm, index);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerHour(displayHour),
               semanticsLabel: localizations.datePickerHourSemanticsLabel(displayHour),
-              style: _themeTextStyle(context, isValid: _isValidHour(selectedAmPm, index)),
+              style: _themeTextStyle(context, isValid: !isDisabled),
             ),
           );
+          return isDisabled ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1040,7 +1044,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               (widget.minimumDate?.isAfter(date) ?? false) ||
               (widget.maximumDate?.isBefore(date) ?? false);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerMinute(minute),
@@ -1048,6 +1052,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               style: _themeTextStyle(context, isValid: !isInvalidMinute),
             ),
           );
+          return isInvalidMinute ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1085,15 +1090,17 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         },
         selectionOverlay: selectionOverlay,
         children: List<Widget>.generate(2, (int index) {
-          return itemPositioningBuilder(
+          final bool isDisabled = !_isValidHour(index, _selectedHourIndex);
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               index == 0
                   ? localizations.anteMeridiemAbbreviation
                   : localizations.postMeridiemAbbreviation,
-              style: _themeTextStyle(context, isValid: _isValidHour(index, _selectedHourIndex)),
+              style: _themeTextStyle(context, isValid: !isDisabled),
             ),
           );
+          return isDisabled ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1472,13 +1479,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               (widget.maximumDate?.year == selectedYear &&
                   widget.maximumDate!.month == selectedMonth &&
                   widget.maximumDate!.day < day);
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerDayOfMonth(day, dayOfWeek),
               style: _themeTextStyle(context, isValid: !isInvalidDay),
             ),
           );
+          return isInvalidDay ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1526,10 +1534,11 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               ? localizations.datePickerStandaloneMonth(month)
               : localizations.datePickerMonth(month);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(monthName, style: _themeTextStyle(context, isValid: !isInvalidMonth)),
           );
+          return isInvalidMonth ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1579,13 +1588,14 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               (widget.minimumDate == null || widget.minimumDate!.year <= year) &&
               (widget.maximumDate == null || widget.maximumDate!.year >= year);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerYear(year),
               style: _themeTextStyle(context, isValid: isValidYear),
             ),
           );
+          return isValidYear ? child : ExcludeSemantics(child: child);
         },
         selectionOverlay: selectionOverlay,
       ),
@@ -1892,10 +1902,11 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
               ? localizations.datePickerStandaloneMonth(month)
               : localizations.datePickerMonth(month);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(monthName, style: _themeTextStyle(context, isValid: !isInvalidMonth)),
           );
+          return isInvalidMonth ? ExcludeSemantics(child: child) : child;
         }),
       ),
     );
@@ -1944,13 +1955,14 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
               (widget.minimumDate == null || widget.minimumDate!.year <= year) &&
               (widget.maximumDate == null || widget.maximumDate!.year >= year);
 
-          return itemPositioningBuilder(
+          final Widget child = itemPositioningBuilder(
             context,
             Text(
               localizations.datePickerYear(year),
               style: _themeTextStyle(context, isValid: isValidYear),
             ),
           );
+          return isValidYear ? child : ExcludeSemantics(child: child);
         },
         selectionOverlay: selectionOverlay,
       ),
