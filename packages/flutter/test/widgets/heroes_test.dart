@@ -620,6 +620,49 @@ Future<void> main() async {
     await tester.pump(const Duration(seconds: 1));
   });
 
+  testWidgets('Default Hero animation is fastOutSlowIn', (WidgetTester tester) async {
+    final observer = TransitionDurationObserver();
+    await tester.pumpWidget(
+      MaterialApp(navigatorObservers: <NavigatorObserver>[observer], routes: routes),
+    );
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Expect the height of the secondKey Hero to vary from 100 to 150
+    // over duration and according to curve.
+
+    final Duration duration = observer.transitionDuration;
+    const Curve curve = Curves.fastOutSlowIn;
+    final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
+    final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
+    final double deltaHeight = finalHeight - initialHeight;
+    const epsilon = 0.001;
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      moreOrLessEquals(curve.transform(0.25) * deltaHeight + initialHeight, epsilon: epsilon),
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      moreOrLessEquals(curve.transform(0.50) * deltaHeight + initialHeight, epsilon: epsilon),
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      moreOrLessEquals(curve.transform(0.75) * deltaHeight + initialHeight, epsilon: epsilon),
+    );
+
+    await tester.pump(duration * 0.25);
+    expect(
+      tester.getSize(find.byKey(secondKey)).height,
+      moreOrLessEquals(curve.transform(1.0) * deltaHeight + initialHeight, epsilon: epsilon),
+    );
+  });
+
   testWidgets('Heroes animation curve is customizable', (WidgetTester tester) async {
     final testCurvesList = <Curve>[
       Curves.linear,
