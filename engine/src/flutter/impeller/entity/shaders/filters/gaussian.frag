@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <impeller/color.glsl>
 #include <impeller/constants.glsl>
 #include <impeller/gaussian.glsl>
 #include <impeller/texture.glsl>
@@ -18,6 +19,11 @@ uniform KernelSamples {
   vec4 sample_data[50];
 }
 kernel_samples;
+
+uniform FragInfo {
+  float unpremultiply;
+}
+frag_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
   if (supports_decal == 1.0) {
@@ -40,5 +46,9 @@ void main() {
                           v_texture_coords + kernel_samples.sample_data[i].xy);
   }
 
-  frag_color = total_color;
+  if (frag_info.unpremultiply > 0.5) {
+    frag_color = IPHalfUnpremultiplyOpaque(total_color);
+  } else {
+    frag_color = total_color;
+  }
 }
