@@ -2,35 +2,87 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package test.io.flutter.embedding.engine;
+package io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Intent;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import io.flutter.embedding.engine.FlutterShellArgs;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
 public class FlutterShellArgsTest {
+
   @Test
-  public void itProcessesShellFlags() {
-    // Setup the test.
-    Intent intent = new Intent();
-    intent.putExtra("dart-flags", "--observe --no-hot --no-pub");
-    intent.putExtra("trace-skia-allowlist", "skia.a,skia.b");
+  public void allFlags_containsAllFlags() {
+    // Count the number of declared flags in FlutterShellArgs.
+    int declaredFlagsCount = 0;
+    for (Field field : FlutterShellArgs.class.getDeclaredFields()) {
+      if (FlutterShellArgs.Flag.class.isAssignableFrom(field.getType())
+          && Modifier.isStatic(field.getModifiers())
+          && Modifier.isFinal(field.getModifiers())) {
+        declaredFlagsCount++;
+      }
+    }
 
-    // Execute the behavior under test.
-    FlutterShellArgs args = FlutterShellArgs.fromIntent(intent);
-    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args.toArray()));
+    // Check that the number of declared flags matches the size of ALL_FLAGS.
+    assertEquals(
+        "If you are adding a new Flag to FlutterShellArgs, please make sure it is added to ALL_FLAGS as well. Otherwise, the flag will be silently ignored when specified.",
+        declaredFlagsCount,
+        FlutterShellArgs.ALL_FLAGS.size());
+  }
 
-    // Verify results.
-    assertEquals(2, argValues.size());
-    assertTrue(argValues.contains("--dart-flags=--observe --no-hot --no-pub"));
-    assertTrue(argValues.contains("--trace-skia-allowlist=skia.a,skia.b"));
+  @Test
+  public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
+    FlutterShellArgs.Flag flag =
+        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.AOTSharedLibraryName");
+    assertEquals(FlutterShellArgs.AOT_SHARED_LIBRARY_NAME, flag);
+  }
+
+  @Test
+  public void getFlagByMetadataKey_returnsNullWhenInvalidKeySpecified() {
+    FlutterShellArgs.Flag flag =
+        FlutterShellArgs.getFlagByMetadataKey("io.flutter.embedding.android.InvalidMetaDataKey");
+    assertNull("Should return null for an invalid meta-data key", flag);
+  }
+
+  @Test
+  public void getFlagByCommandLineArgument_returnsExpectedFlagWhenValidArgumentSpecified() {
+    FlutterShellArgs.Flag flag =
+        FlutterShellArgs.getFlagByCommandLineArgument("--flutter-assets-dir=");
+    assertEquals(FlutterShellArgs.FLUTTER_ASSETS_DIR, flag);
+  }
+
+  @Test
+  public void getFlagByCommandLineArgument_returnsNullWhenInvalidArgumentSpecified() {
+    assertNull(FlutterShellArgs.getFlagFromIntentKey("--non-existent-flag"));
+  }
+
+  @Test
+  public void getFlagFromIntentKey_returnsExpectedFlagWhenValidKeySpecified() {
+    // Test flag without value.
+    FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey("old-gen-heap-size");
+    assertEquals(FlutterShellArgs.OLD_GEN_HEAP_SIZE, flag);
+
+    // Test with flag.
+    flag = FlutterShellArgs.getFlagFromIntentKey("vm-snapshot-data");
+    assertEquals(FlutterShellArgs.VM_SNAPSHOT_DATA, flag);
+  }
+
+  @Test
+  public void getFlagFromIntentKey_returnsNullWhenInvalidKeySpecified() {
+    assertNull(FlutterShellArgs.getFlagFromIntentKey("non-existent-flag"));
+  }
+
+  @Test
+  public void isDeprecated_returnsTrueWhenFlagIsDeprecated() {
+    assertTrue(FlutterShellArgs.isDeprecated(FlutterShellArgs.DISABLE_MERGED_PLATFORM_UI_THREAD));
+  }
+
+  @Test
+  public void isDeprecated_returnsFalseWhenFlagIsNotDeprecated() {
+    assertFalse(FlutterShellArgs.isDeprecated(FlutterShellArgs.VM_SNAPSHOT_DATA));
   }
 }

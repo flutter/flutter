@@ -64,7 +64,6 @@ public class FlutterFragmentTest {
     assertNull(fragment.getDartEntrypointLibraryUri());
     assertNull(fragment.getDartEntrypointArgs());
     assertEquals("/", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertTrue(fragment.shouldAttachEngineToActivity());
     assertFalse(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -95,7 +94,6 @@ public class FlutterFragmentTest {
     assertEquals("package:foo/bar.dart", fragment.getDartEntrypointLibraryUri());
     assertEquals("/custom/route", fragment.getInitialRoute());
     assertArrayEquals(new String[] {"foo", "bar"}, fragment.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());
@@ -124,7 +122,6 @@ public class FlutterFragmentTest {
     assertEquals("my_cached_engine_group", fragment.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", fragment.getDartEntrypointFunctionName());
     assertEquals("/custom/route", fragment.getInitialRoute());
-    assertArrayEquals(new String[] {}, fragment.getFlutterShellArgs().toArray());
     assertFalse(fragment.shouldAttachEngineToActivity());
     assertTrue(fragment.shouldHandleDeeplinking());
     assertNull(fragment.getCachedEngineId());

@@ -38,6 +38,7 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
@@ -331,9 +332,12 @@ import java.util.List;
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
 
+    warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
+    String[] flutterShellArgs =
+        host.getFlutterShellArgs() == null ? new String[0] : host.getFlutterShellArgs();
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
+            ? new FlutterEngineGroup(host.getContext(), flutterShellArgs)
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
@@ -342,6 +346,29 @@ import java.util.List;
                     .setAutomaticallyRegisterPlugins(false)
                     .setWaitForRestorationData(host.shouldRestoreAndSaveState())));
     isFlutterEngineFromHost = false;
+  }
+
+  // Soon, engine flags will no longer be settable via Intent extras, so warn
+  // developers that engine shell arguments set that way will be ignored.
+  private void warnIfEngineFlagsSetViaIntent(Intent intent) {
+    if (intent.getExtras() == null) {
+      return;
+    }
+
+    Bundle extras = intent.getExtras();
+    Set<String> extrasKeys = extras.keySet();
+
+    for (String extrasKey : extrasKeys) {
+      FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey(extrasKey);
+      if (flag != null) {
+        Log.w(
+            TAG,
+            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set "
+                + flag.commandLineArgument
+                + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+        break;
+      }
+    }
   }
 
   /**
@@ -1092,9 +1119,8 @@ import java.util.List;
     @NonNull
     Lifecycle getLifecycle();
 
-    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
     @NonNull
-    FlutterShellArgs getFlutterShellArgs();
+    String[] getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to
