@@ -108,9 +108,16 @@ abstract class ImageFilterConfig {
   /// the widget applying the filter.
   ui.ImageFilter resolve(ImageFilterContext context);
 
-  /// If this configuration directly wraps a [ui.ImageFilter], returns it.
-  /// Otherwise, returns null.
-  ui.ImageFilter? get filter {
+  /// Returns the underlying [ui.ImageFilter] if this configuration does not
+  /// depend on layout information.
+  ///
+  /// This is useful in specialized scenarios where you need access to the
+  /// engine-level object directly and you know the configuration was created
+  /// from a fixed filter (e.g., via [ImageFilterConfig.fromImageFilter]).
+  ///
+  /// Returns null if the filter is layout-dependent (such as a "bounded" blur)
+  /// and requires an [ImageFilterContext] to be resolved.
+  ui.ImageFilter? get staticFilter {
     if (this case final _DirectImageFilterConfig direct) {
       return direct.filter;
     }

@@ -15,7 +15,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
@@ -1263,10 +1262,10 @@ class RenderBackdropFilter extends RenderProxyBox {
   )
   ui.ImageFilter get filter {
     assert(
-      filterConfig.filter != null,
+      filterConfig.staticFilter != null,
       'This getter should only be called when the filter is assigned via the `filter` setter.',
     );
-    return filterConfig.filter!;
+    return filterConfig.staticFilter!;
   }
 
   set filter(ui.ImageFilter value) {
@@ -1333,7 +1332,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       return;
     }
 
-    final ui.ImageFilter effectiveFilter = _filterConfig!.resolve(
+    final ui.ImageFilter effectiveFilter = _filterConfig.resolve(
       ImageFilterContext(bounds: offset & size),
     );
 
