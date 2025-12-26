@@ -1508,7 +1508,7 @@ class _SwitchPainter extends ToggleablePainter {
   bool _stopPressAnimation = false;
   double? _pressedInactiveThumbRadius;
   double? _pressedActiveThumbRadius;
-  late double? _pressedThumbExtension;
+  double _pressedThumbExtension = 0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1560,13 +1560,13 @@ class _SwitchPainter extends ToggleablePainter {
     }
     final inactiveThumbSize = isCupertino
         ? Size(
-            _pressedInactiveThumbRadius! * 2 + _pressedThumbExtension!,
+            _pressedInactiveThumbRadius! * 2 + _pressedThumbExtension,
             _pressedInactiveThumbRadius! * 2,
           )
         : Size.fromRadius(_pressedInactiveThumbRadius ?? inactiveThumbRadius);
     final activeThumbSize = isCupertino
         ? Size(
-            _pressedActiveThumbRadius! * 2 + _pressedThumbExtension!,
+            _pressedActiveThumbRadius! * 2 + _pressedThumbExtension,
             _pressedActiveThumbRadius! * 2,
           )
         : Size.fromRadius(_pressedActiveThumbRadius ?? activeThumbRadius);
