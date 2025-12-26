@@ -407,8 +407,9 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     }
 
     if (member.type != ShaderType::kFloat) {
-      VALIDATION_LOG << "Could not bind uniform buffer data for key: "
-                     << member.name << " : " << static_cast<int>(member.type);
+      VALIDATION_LOG << "Unsupported uniform data type for key: " << member.name
+                     << ", has type " << static_cast<int>(member.type)
+                     << ". Only float uniforms are supported.";
       return false;
     }
 
