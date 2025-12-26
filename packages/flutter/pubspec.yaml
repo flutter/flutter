@@ -1,0 +1,43 @@
+name: flutter
+description: A framework for writing Flutter applications
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+  characters: 1.4.0
+  collection: 1.19.1
+  material_color_utilities: 0.11.1
+  meta: 1.17.0
+  vector_math: 2.2.0
+  sky_engine:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  fake_async: any
+  # To track memory leaks.
+  leak_tracker_flutter_testing: any
+  leak_tracker_testing: any
+  leak_tracker: any
+  web: any
+  clock: any
+  file: any
+  path: any
+  platform: any
+
+# PUBSPEC CHECKSUM: spkhmh

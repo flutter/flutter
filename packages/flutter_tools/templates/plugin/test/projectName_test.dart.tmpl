@@ -1,0 +1,29 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:{{projectName}}/{{projectName}}.dart';
+import 'package:{{projectName}}/{{projectName}}_platform_interface.dart';
+import 'package:{{projectName}}/{{projectName}}_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class Mock{{pluginDartClass}}Platform
+    with MockPlatformInterfaceMixin
+    implements {{pluginDartClass}}Platform {
+
+  @override
+  Future<String?> getPlatformVersion() => Future.value('42');
+}
+
+void main() {
+  final {{pluginDartClass}}Platform initialPlatform = {{pluginDartClass}}Platform.instance;
+
+  test('$MethodChannel{{pluginDartClass}} is the default instance', () {
+    expect(initialPlatform, isInstanceOf<MethodChannel{{pluginDartClass}}>());
+  });
+
+  test('getPlatformVersion', () async {
+    {{pluginDartClass}} {{pluginClassLowerCamelCase}} = {{pluginDartClass}}();
+    Mock{{pluginDartClass}}Platform fakePlatform = Mock{{pluginDartClass}}Platform();
+    {{pluginDartClass}}Platform.instance = fakePlatform;
+
+    expect(await {{pluginClassLowerCamelCase}}.getPlatformVersion(), '42');
+  });
+}

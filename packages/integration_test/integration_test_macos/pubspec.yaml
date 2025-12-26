@@ -1,0 +1,23 @@
+name: integration_test_macos
+description: Desktop implementation of integration_test plugin
+version: 0.0.1+1
+homepage: https://github.com/flutter/flutter/tree/main/packages/integration_test/integration_test_macos
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: IntegrationTestPlugin
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+
+# PUBSPEC CHECKSUM: h86dcv

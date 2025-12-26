@@ -1,0 +1,25 @@
+name: Create an umbrella issue
+description: As a contributor, I would like to create an umbrella issue for a
+feature to be added to the feature tracker.
+title: '☂️ <Feature Title>'
+projects: ["flutter/82"]
+body:
+  - type: input
+    id: design_doc
+    attributes:
+      label: Design Doc
+      description: Add a design doc if there is one for this feature.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the feature you are adding.
+    validations:
+      required: true
+  - type: textarea
+    id: tracking_issues
+    attributes:
+      label: Tracking Issues
+      description: List of issues associated with this feature.
+    validations:
+      required: true

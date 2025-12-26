@@ -1,0 +1,26 @@
+name: multiple_flutters_module
+description: A module that is embedded in the multiple_flutters benchmark test.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  google_fonts: any
+
+
+flutter:
+  uses-material-design: true
+
+  module:
+    androidX: true
+    androidPackage: com.example.multiple_flutters_module
+    iosBundleIdentifier: com.example.multipleFluttersModule
+
+# PUBSPEC CHECKSUM: 4htetl

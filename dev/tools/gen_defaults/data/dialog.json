@@ -1,0 +1,24 @@
+{
+  "version": "6_1_0",
+
+  "md.comp.dialog.action.focus.label-text.color": "primary",
+  "md.comp.dialog.action.focus.state-layer.color": "primary",
+  "md.comp.dialog.action.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
+  "md.comp.dialog.action.hover.label-text.color": "primary",
+  "md.comp.dialog.action.hover.state-layer.color": "primary",
+  "md.comp.dialog.action.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
+  "md.comp.dialog.action.label-text.color": "primary",
+  "md.comp.dialog.action.label-text.text-style": "labelLarge",
+  "md.comp.dialog.action.pressed.label-text.color": "primary",
+  "md.comp.dialog.action.pressed.state-layer.color": "primary",
+  "md.comp.dialog.action.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
+  "md.comp.dialog.container.color": "surfaceContainerHigh",
+  "md.comp.dialog.container.elevation": "md.sys.elevation.level3",
+  "md.comp.dialog.container.shape": "md.sys.shape.corner.extra-large",
+  "md.comp.dialog.headline.color": "onSurface",
+  "md.comp.dialog.headline.text-style": "headlineSmall",
+  "md.comp.dialog.supporting-text.color": "onSurfaceVariant",
+  "md.comp.dialog.supporting-text.text-style": "bodyMedium",
+  "md.comp.dialog.with-icon.icon.color": "secondary",
+  "md.comp.dialog.with-icon.icon.size": 24.0
+}

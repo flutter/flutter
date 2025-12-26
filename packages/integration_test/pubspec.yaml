@@ -1,0 +1,35 @@
+name: integration_test
+description: Runs tests that use the flutter_test API as integration tests.
+publish_to: none
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  path: any
+  vm_service: any
+
+
+dev_dependencies:
+  flutter_goldens:
+    sdk: flutter
+
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.flutter.plugins.integration_test
+        pluginClass: IntegrationTestPlugin
+      ios:
+        pluginClass: IntegrationTestPlugin
+
+# PUBSPEC CHECKSUM: 768bse

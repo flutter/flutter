@@ -1,0 +1,33 @@
+name: deferred_components_test
+description: Integration test application for basic deferred components functionality
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: any
+
+
+flutter:
+  uses-material-design: true
+
+  deferred-components:
+    - name: component1
+      libraries:
+        - package:deferred_components_test/component1.dart
+      assets:
+        - customassets/flutter_logo.png
+
+# PUBSPEC CHECKSUM: dgjojg

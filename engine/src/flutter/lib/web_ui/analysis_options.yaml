@@ -1,0 +1,22 @@
+# Web-specific analysis options.
+#
+# As of today the web code contains quite a few deviations from the repo-wide
+# analysis options due to having been migrated from google3. The ultimate goal
+# is to clean up our code and delete this file.
+
+include: ../../analysis_options.yaml
+
+analyzer:
+  errors:
+    avoid_print: ignore
+    avoid_setters_without_getters: ignore
+    library_private_types_in_public_api: ignore
+    no_default_cases: ignore
+    prefer_relative_imports: ignore
+    public_member_api_docs: ignore
+    use_setters_to_change_properties: ignore
+
+linter:
+  rules:
+    - directives_ordering
+    - unawaited_futures

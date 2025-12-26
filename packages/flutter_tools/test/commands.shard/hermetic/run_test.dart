@@ -1,0 +1,1724 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart' as analytics;
+import 'package:vm_service/vm_service.dart';
+
+import '../../src/common.dart';
+import '../../src/context.dart';
+import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
+import '../../src/package_config.dart';
+import '../../src/test_flutter_command_runner.dart';
+
+void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  group('run', () {
+    late BufferLogger logger;
+    late TestDeviceManager testDeviceManager;
+    late FileSystem fileSystem;
+
+    setUp(() {
+      logger = BufferLogger.test();
+      testDeviceManager = TestDeviceManager(logger: logger);
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testUsingContext(
+      'fails when target not found',
+      () async {
+        final command = RunCommand();
+        expect(
+          () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit error) => error.exitCode,
+              'exitCode',
+              anyOf(isNull, 1),
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+      },
+    );
+
+    testUsingContext(
+      'Walks upward looking for a pubspec.yaml and succeeds if found',
+      () async {
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
+
+        final command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+          throwsToolExit(),
+        );
+        final bufferLogger = globals.logger as BufferLogger;
+        expect(
+          bufferLogger.statusText,
+          containsIgnoringWhitespace('Changing current working directory to:'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+      },
+    );
+
+    testUsingContext(
+      'Walks upward looking for a pubspec.yaml and exits if missing',
+      () async {
+        fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+
+        final command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+          throwsToolExit(message: 'No pubspec.yaml file found'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+      },
+    );
+
+    group('run app', () {
+      late MemoryFileSystem fs;
+      late Artifacts artifacts;
+      late FakeAnsiTerminal fakeTerminal;
+      late analytics.FakeAnalytics fakeAnalytics;
+
+      setUpAll(() {
+        Cache.disableLocking();
+      });
+
+      setUp(() {
+        fakeTerminal = FakeAnsiTerminal();
+        artifacts = Artifacts.test();
+        fs = MemoryFileSystem.test();
+
+        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+
+        final Directory libDir = fs.currentDirectory.childDirectory('lib');
+        libDir.createSync();
+        final File mainFile = libDir.childFile('main.dart');
+        mainFile.writeAsStringSync('void main() {}');
+        fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fs,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+      });
+
+      testUsingContext(
+        'exits with a user message when no supported devices attached',
+        () async {
+          final command = RunCommand();
+          testDeviceManager.devices = <Device>[];
+
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']),
+            throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+          );
+
+          expect(
+            testLogger.statusText,
+            containsIgnoringWhitespace('No supported devices connected.'),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        },
+      );
+
+      testUsingContext(
+        'exits and lists available devices when specified device not found',
+        () async {
+          final command = RunCommand();
+          final device = FakeDevice(isLocalEmulator: true);
+          testDeviceManager
+            ..devices = <Device>[device]
+            ..specifiedDeviceId = 'invalid-device-id';
+
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '-d', 'invalid-device-id', '--no-pub', '--no-hot']),
+            throwsToolExit(),
+          );
+          expect(
+            testLogger.statusText,
+            contains("No supported devices found with name or id matching 'invalid-device-id'"),
+          );
+          expect(testLogger.statusText, contains('The following devices were found:'));
+          expect(
+            testLogger.statusText,
+            contains('FakeDevice (mobile) • fake_device • ios •  (simulator)'),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        },
+      );
+
+      testUsingContext(
+        'fails when targeted device is not Android with --device-user',
+        () async {
+          final device = FakeDevice(isLocalEmulator: true);
+
+          testDeviceManager.devices = <Device>[device];
+
+          final command = TestRunCommandThatOnlyValidates();
+          await expectLater(
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--device-user', '10']),
+            throwsToolExit(
+              message:
+                  '--device-user is only supported for Android. At least one Android device is required.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+          Stdio: () => FakeStdio(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        },
+      );
+
+      testUsingContext(
+        'succeeds when targeted device is an Android device with --device-user',
+        () async {
+          final device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+
+          testDeviceManager.devices = <Device>[device];
+
+          final command = TestRunCommandThatOnlyValidates();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--device-user', '10']);
+          // Finishes normally without error.
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+          Stdio: () => FakeStdio(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        },
+      );
+
+      testUsingContext(
+        'shows unsupported devices when no supported devices are found',
+        () async {
+          final command = RunCommand();
+          final mockDevice = FakeDevice(
+            targetPlatform: TargetPlatform.android_arm,
+            isLocalEmulator: true,
+            sdkNameAndVersion: 'api-14',
+            isSupported: false,
+          );
+          testDeviceManager.devices = <Device>[mockDevice];
+
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']),
+            throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+          );
+
+          expect(
+            testLogger.statusText,
+            containsIgnoringWhitespace('No supported devices connected.'),
+          );
+          expect(
+            testLogger.statusText,
+            containsIgnoringWhitespace(
+              'The following devices were found, but are not supported by this project:',
+            ),
+          );
+          expect(
+            testLogger.statusText,
+            containsIgnoringWhitespace(
+              globals.userMessages.flutterMissPlatformProjects(
+                Device.devicesPlatformTypes(<Device>[mockDevice]),
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        },
+      );
+
+      testUsingContext(
+        'prints warning when --flavor is used with an unsupported target platform',
+        () async {
+          const runCommand = <String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--flavor=vanilla',
+            '-d',
+            'all',
+          ];
+          // Useful for test readability.
+          // ignore: avoid_redundant_argument_values
+          final deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
+          final deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
+          testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
+
+          await createTestCommandRunner(TestRunCommandThatOnlyValidates()).run(runCommand);
+
+          expect(
+            logger.warningText,
+            contains(
+              '--flavor is only supported for Android, macOS, and iOS devices. '
+              'Flavor-related features may not function properly and could '
+              'behave differently in a future release.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          Logger: () => logger,
+        },
+      );
+
+      testUsingContext(
+        'forwards --uninstall-only to DebuggingOptions',
+        () async {
+          final command = RunCommand();
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
+
+          testDeviceManager.devices = <Device>[mockDevice];
+
+          // Causes swift to be detected in the analytics.
+          fs.currentDirectory
+              .childDirectory('ios')
+              .childFile('AppDelegate.swift')
+              .createSync(recursive: true);
+
+          await expectToolExitLater(
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--uninstall-first']),
+            isNull,
+          );
+
+          final DebuggingOptions options = await command.createDebuggingOptions();
+          expect(options.uninstallFirst, isTrue);
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'passes device target platform to analytics',
+        () async {
+          final command = RunCommand();
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
+
+          testDeviceManager.devices = <Device>[mockDevice];
+
+          // Causes swift to be detected in the analytics.
+          fs.currentDirectory
+              .childDirectory('ios')
+              .childFile('AppDelegate.swift')
+              .createSync(recursive: true);
+
+          await expectToolExitLater(
+            createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']),
+            isNull,
+          );
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: globals.stdio.hasTerminal,
+                runIsEmulator: false,
+                runTargetName: 'ios',
+                runTargetOsVersion: 'iOS 13',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'swift',
+                runIOSInterfaceType: 'usb',
+                runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          AnsiTerminal: () => fakeTerminal,
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(),
+          analytics.Analytics: () => fakeAnalytics,
+        },
+      );
+
+      testUsingContext(
+        'correctly reports tests to analytics',
+        () async {
+          fs.currentDirectory
+              .childDirectory('test')
+              .childFile('widget_test.dart')
+              .createSync(recursive: true);
+          fs.currentDirectory
+              .childDirectory('ios')
+              .childFile('AppDelegate.swift')
+              .createSync(recursive: true);
+          final command = RunCommand();
+          final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
+
+          testDeviceManager.devices = <Device>[mockDevice];
+
+          await expectToolExitLater(
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', 'test/widget_test.dart']),
+            isNull,
+          );
+
+          expect(
+            fakeAnalytics.sentEvents,
+            contains(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: globals.stdio.hasTerminal,
+                runIsEmulator: false,
+                runTargetName: 'ios',
+                runTargetOsVersion: 'iOS 13',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'swift',
+                runIOSInterfaceType: 'usb',
+                runIsTest: true,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          AnsiTerminal: () => fakeTerminal,
+          Artifacts: () => artifacts,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          DeviceManager: () => testDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(),
+          analytics.Analytics: () => fakeAnalytics,
+        },
+      );
+
+      group('--machine', () {
+        testUsingContext(
+          'can pass --device-user',
+          () async {
+            final command = DaemonCapturingRunCommand();
+            final device = FakeDevice(platformType: PlatformType.android);
+            testDeviceManager.devices = <Device>[device];
+
+            await expectLater(
+              () => createTestCommandRunner(command).run(<String>[
+                'run',
+                '--no-pub',
+                '--machine',
+                '--device-user',
+                '10',
+                '-d',
+                device.id,
+              ]),
+              throwsToolExit(),
+            );
+            expect(command.appDomain.userIdentifier, '10');
+          },
+          overrides: <Type, Generator>{
+            Artifacts: () => artifacts,
+            Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+            DeviceManager: () => testDeviceManager,
+            FileSystem: () => fs,
+            ProcessManager: () => FakeProcessManager.any(),
+            Stdio: () => FakeStdio(),
+            Logger: () => MachineOutputLogger(parent: logger),
+          },
+        );
+
+        testUsingContext(
+          'can disable devtools with --no-devtools',
+          () async {
+            final command = DaemonCapturingRunCommand();
+            final device = FakeDevice();
+            testDeviceManager.devices = <Device>[device];
+
+            await expectLater(
+              () => createTestCommandRunner(
+                command,
+              ).run(<String>['run', '--no-pub', '--no-devtools', '--machine', '-d', device.id]),
+              throwsToolExit(),
+            );
+            expect(command.appDomain.enableDevTools, isFalse);
+          },
+          overrides: <Type, Generator>{
+            Artifacts: () => artifacts,
+            Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+            DeviceManager: () => testDeviceManager,
+            FileSystem: () => fs,
+            ProcessManager: () => FakeProcessManager.any(),
+            Stdio: () => FakeStdio(),
+            Logger: () => MachineOutputLogger(parent: logger),
+          },
+        );
+      });
+    });
+
+    group('Fatal Logs', () {
+      late TestRunCommandWithFakeResidentRunner command;
+      late MemoryFileSystem fs;
+
+      setUp(() {
+        command = TestRunCommandWithFakeResidentRunner()..fakeResidentRunner = FakeResidentRunner();
+        fs = MemoryFileSystem.test();
+      });
+
+      testUsingContext(
+        "doesn't fail if --fatal-warnings specified and no warnings occur",
+        () async {
+          try {
+            await createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
+          } on Exception {
+            fail('Unexpected exception thrown');
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        "doesn't fail if --fatal-warnings not specified",
+        () async {
+          testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+          try {
+            await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
+          } on Exception {
+            fail('Unexpected exception thrown');
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'fails if --fatal-warnings specified and warnings emitted',
+        () async {
+          testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
+          await expectLater(
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            throwsToolExit(
+              message:
+                  'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'fails if --fatal-warnings specified and errors emitted',
+        () async {
+          testLogger.printError('Error: Danger Will Robinson!');
+          await expectLater(
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            throwsToolExit(
+              message:
+                  'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    });
+
+    testUsingContext(
+      'should only request artifacts corresponding to connected devices',
+      () async {
+        testDeviceManager.devices = <Device>[
+          FakeDevice(targetPlatform: TargetPlatform.android_arm),
+        ];
+
+        expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.androidGenSnapshot,
+          }),
+        );
+
+        testDeviceManager.devices = <Device>[FakeDevice()];
+
+        expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.iOS,
+          }),
+        );
+
+        testDeviceManager.devices = <Device>[
+          FakeDevice(),
+          FakeDevice(targetPlatform: TargetPlatform.android_arm),
+        ];
+
+        expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.iOS,
+            DevelopmentArtifact.androidGenSnapshot,
+          }),
+        );
+
+        testDeviceManager.devices = <Device>[
+          FakeDevice(targetPlatform: TargetPlatform.web_javascript),
+        ];
+
+        expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.web,
+          }),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    group('usageValues', () {
+      testUsingContext(
+        'with only non-iOS usb device',
+        () async {
+          final devices = <Device>[
+            FakeDevice(
+              targetPlatform: TargetPlatform.android_arm,
+              platformType: PlatformType.android,
+            ),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            // run the command so that CLI args are parsed
+            await runner.run(<String>['run']);
+          } on ToolExit catch (error) {
+            // we can ignore the ToolExit, as we are only interested in
+            // command.usageValues.
+            expect(
+              error,
+              isA<ToolExit>().having(
+                (ToolExit exception) => exception.message,
+                'message',
+                contains('No pubspec.yaml file found'),
+              ),
+            );
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'android-arm',
+                runTargetOsVersion: '',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: '',
+                runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with only iOS usb device',
+        () async {
+          final devices = <Device>[FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2')];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            // run the command so that CLI args are parsed
+            await runner.run(<String>['run']);
+          } on ToolExit catch (error) {
+            // we can ignore the ToolExit, as we are only interested in
+            // command.usageValues.
+            expect(
+              error,
+              isA<ToolExit>().having(
+                (ToolExit exception) => exception.message,
+                'message',
+                contains('No pubspec.yaml file found'),
+              ),
+            );
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'ios',
+                runTargetOsVersion: 'iOS 16.2',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: '',
+                runIOSInterfaceType: 'usb',
+                runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with only iOS wireless device',
+        () async {
+          final devices = <Device>[
+            FakeIOSDevice(
+              connectionInterface: DeviceConnectionInterface.wireless,
+              sdkNameAndVersion: 'iOS 16.2',
+            ),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            // run the command so that CLI args are parsed
+            await runner.run(<String>['run']);
+          } on ToolExit catch (error) {
+            // we can ignore the ToolExit, as we are only interested in
+            // command.usageValues.
+            expect(
+              error,
+              isA<ToolExit>().having(
+                (ToolExit exception) => exception.message,
+                'message',
+                contains('No pubspec.yaml file found'),
+              ),
+            );
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'ios',
+                runTargetOsVersion: 'iOS 16.2',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: '',
+                runIOSInterfaceType: 'wireless',
+                runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with both iOS usb and wireless devices',
+        () async {
+          final devices = <Device>[
+            FakeIOSDevice(
+              connectionInterface: DeviceConnectionInterface.wireless,
+              sdkNameAndVersion: 'iOS 16.2',
+            ),
+            FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            // run the command so that CLI args are parsed
+            await runner.run(<String>['run']);
+          } on ToolExit catch (error) {
+            // we can ignore the ToolExit, as we are only interested in
+            // command.usageValues.
+            expect(
+              error,
+              isA<ToolExit>().having(
+                (ToolExit exception) => exception.message,
+                'message',
+                contains('No pubspec.yaml file found'),
+              ),
+            );
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'multiple',
+                runTargetOsVersion: 'multiple',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: '',
+                runIOSInterfaceType: 'wireless',
+                runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    });
+
+    group('--web-header', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+      setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext(
+        'can accept simple, valid values',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
+            'foo': 'bar',
+          });
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when no value is provided',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--no-resident', '--web-header', 'foo']),
+            throwsToolExit(message: 'Invalid web headers: foo'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when value includes delimiter characters',
+        () async {
+          fileSystem.file('lib/main.dart').createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-hot',
+              '--no-resident',
+              '--web-header',
+              'hurray/headers=flutter',
+            ]),
+            throwsToolExit(message: 'Invalid web headers: hurray/headers=flutter'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when using --wasm on a non-web platform',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
+            throwsToolExit(message: '--wasm is only supported on the web platform'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when using the skwasm renderer without --wasm',
+        () async {
+          final command = RunCommand();
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '--no-pub',
+              '--no-resident',
+              ...WebRendererMode.skwasm.toCliDartDefines,
+            ]),
+            throwsToolExit(message: 'Skwasm renderer requires --wasm'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'accepts headers with commas in them',
+        () async {
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--web-header',
+            'hurray=flutter,flutter=hurray',
+          ]);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
+            'hurray': 'flutter,flutter=hurray',
+          });
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+    });
+  });
+
+  group('terminal', () {
+    late FakeAnsiTerminal fakeTerminal;
+
+    setUp(() {
+      fakeTerminal = FakeAnsiTerminal();
+    });
+
+    testUsingContext(
+      'Flutter run sets terminal singleCharMode to false on exit',
+      () async {
+        final residentRunner = FakeResidentRunner();
+        final command = TestRunCommandWithFakeResidentRunner();
+        command.fakeResidentRunner = residentRunner;
+
+        await createTestCommandRunner(command).run(<String>['run', '--no-pub']);
+        // The sync completer where we initially set `terminal.singleCharMode` to
+        // `true` does not execute in unit tests, so explicitly check the
+        // `setSingleCharModeHistory` that the finally block ran, setting this
+        // back to `false`.
+        expect(fakeTerminal.setSingleCharModeHistory, contains(false));
+      },
+      overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'Flutter run catches StdinException while setting terminal singleCharMode to false',
+      () async {
+        fakeTerminal.hasStdin = false;
+        final residentRunner = FakeResidentRunner();
+        final command = TestRunCommandWithFakeResidentRunner();
+        command.fakeResidentRunner = residentRunner;
+
+        try {
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub']);
+        } catch (err) {
+          fail('Expected no error, got $err');
+        }
+        expect(fakeTerminal.setSingleCharModeHistory, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+  });
+
+  testUsingContext(
+    'Flutter run catches catches errors due to vm service disconnection by text and throws a tool exit',
+    () async {
+      final residentRunner = FakeResidentRunner();
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kServiceDisappeared.code,
+        '',
+      );
+      final command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kServerError.code,
+        'Service connection disposed.',
+      );
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Flutter run catches catches errors due to vm service disconnection by code and throws a tool exit',
+    () async {
+      final residentRunner = FakeResidentRunner();
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kServiceDisappeared.code,
+        '',
+      );
+      final command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kConnectionDisposed.code,
+        'dummy text not matched.',
+      );
+
+      await expectToolExitLater(
+        createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        contains('Lost connection to device.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Flutter run does not catch other RPC errors',
+    () async {
+      final residentRunner = FakeResidentRunner();
+      residentRunner.rpcError = RPCError(
+        'flutter._listViews',
+        RPCErrorKind.kInvalidParams.code,
+        '',
+      );
+      final command = TestRunCommandWithFakeResidentRunner();
+      command.fakeResidentRunner = residentRunner;
+
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        throwsA(isA<RPCError>()),
+      );
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'Configures web connection options to use web sockets by default',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+
+      expect(options.webUseSseForDebugBackend, false);
+      expect(options.webUseSseForDebugProxy, false);
+      expect(options.webUseSseForInjectedClient, false);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'flags propagate to debugging options',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'run',
+          '--start-paused',
+          '--disable-service-auth-codes',
+          '--use-test-fonts',
+          '--trace-skia',
+          '--trace-systrace',
+          '--trace-to-file=path/to/trace.binpb',
+          '--profile-microtasks',
+          '--profile-startup',
+          '--verbose-system-logs',
+          '--native-null-assertions',
+          '--enable-impeller',
+          '--enable-flutter-gpu',
+          '--enable-vulkan-validation',
+          '--trace-systrace',
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+          '--enable-embedder-api',
+          '--ci',
+          '--debug-logs-dir=path/to/logs',
+        ]),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+
+      expect(options.startPaused, true);
+      expect(options.disableServiceAuthCodes, true);
+      expect(options.useTestFonts, true);
+      expect(options.traceSkia, true);
+      expect(options.traceSystrace, true);
+      expect(options.traceToFile, 'path/to/trace.binpb');
+      expect(options.profileMicrotasks, true);
+      expect(options.profileStartup, true);
+      expect(options.verboseSystemLogs, true);
+      expect(options.nativeNullAssertions, true);
+      expect(options.traceSystrace, true);
+      expect(options.enableImpeller, ImpellerStatus.enabled);
+      expect(options.enableFlutterGpu, true);
+      expect(options.enableVulkanValidation, true);
+      expect(options.enableSoftwareRendering, true);
+      expect(options.skiaDeterministicRendering, true);
+      expect(options.usingCISystem, true);
+      expect(options.debugLogsDirectoryPath, 'path/to/logs');
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'usingCISystem can also be set by environment LUCI_CI',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['run']),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+
+      expect(options.usingCISystem, true);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(environment: <String, String>{'LUCI_CI': 'True'}),
+    },
+  );
+
+  testUsingContext(
+    'wasm mode selects skwasm renderer by default',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+
+      expect(options.webUseWasm, true);
+      expect(options.webRenderer, WebRendererMode.skwasm);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'fails when "--web-launch-url" is not supported',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['run', '--web-launch-url=http://flutter.dev']),
+        throwsA(
+          isException.having(
+            (Exception exception) => exception.toString(),
+            'toString',
+            isNot(contains('web-launch-url')),
+          ),
+        ),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+      expect(options.webLaunchUrl, 'http://flutter.dev');
+
+      final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
+      expect(pattern.hasMatch(options.webLaunchUrl!), true);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+    },
+  );
+}
+
+class TestDeviceManager extends DeviceManager {
+  TestDeviceManager({required super.logger});
+  var devices = <Device>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers {
+    final discoverer = FakePollingDeviceDiscovery();
+    devices.forEach(discoverer.addDevice);
+    return <DeviceDiscovery>[discoverer];
+  }
+}
+
+class FakeDevice extends Fake implements Device {
+  FakeDevice({
+    bool isLocalEmulator = false,
+    TargetPlatform targetPlatform = TargetPlatform.ios,
+    String sdkNameAndVersion = '',
+    PlatformType platformType = PlatformType.ios,
+    bool isSupported = true,
+    bool supportsFlavors = false,
+  }) : _isLocalEmulator = isLocalEmulator,
+       _targetPlatform = targetPlatform,
+       _sdkNameAndVersion = sdkNameAndVersion,
+       _platformType = platformType,
+       _isSupported = isSupported,
+       _supportsFlavors = supportsFlavors;
+
+  static const kSuccess = 1;
+  static const kFailure = -1;
+  final TargetPlatform _targetPlatform;
+  final bool _isLocalEmulator;
+  final String _sdkNameAndVersion;
+  final PlatformType _platformType;
+  final bool _isSupported;
+  final bool _supportsFlavors;
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  String get id => 'fake_device';
+
+  Never _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
+
+  @override
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
+
+  @override
+  bool supportsRuntimeMode(BuildMode mode) => true;
+
+  @override
+  Future<bool> get supportsHardwareRendering async => true;
+
+  @override
+  var supportsHotReload = false;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlavors => _supportsFlavors;
+
+  @override
+  bool get ephemeral => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  DeviceConnectionInterface get connectionInterface => DeviceConnectionInterface.attached;
+
+  var supported = true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
+
+  @override
+  Future<bool> isSupported() async => supported;
+
+  @override
+  Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
+
+  @override
+  Future<String> get targetPlatformDisplayName async =>
+      getNameForTargetPlatform(await targetPlatform);
+
+  @override
+  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    return FakeDeviceLogReader();
+  }
+
+  @override
+  String get name => 'FakeDevice';
+
+  @override
+  String get displayName => name;
+
+  // THIS IS A KEY FIX
+  @override
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
+
+  @override
+  PlatformType get platformType => _platformType;
+
+  late bool startAppSuccess;
+
+  @override
+  DevFSWriter? createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+    return null;
+  }
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    bool prebuiltApplication = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
+    String? userIdentifier,
+  }) async {
+    if (!startAppSuccess) {
+      return LaunchResult.failed();
+    }
+    if (startAppSuccess) {
+      return LaunchResult.succeeded();
+    }
+    final String dartFlags = debuggingOptions.dartFlags;
+    // In release mode, --dart-flags should be set to the empty string and
+    // provided flags should be dropped. In debug and profile modes,
+    // --dart-flags should not be empty.
+    if (debuggingOptions.buildInfo.isRelease) {
+      if (dartFlags.isNotEmpty) {
+        _throwToolExit(kFailure);
+      }
+      _throwToolExit(kSuccess);
+    } else {
+      if (dartFlags.isEmpty) {
+        _throwToolExit(kFailure);
+      }
+      _throwToolExit(kSuccess);
+    }
+  }
+}
+
+class FakeIOSDevice extends Fake implements IOSDevice {
+  FakeIOSDevice({
+    this.connectionInterface = DeviceConnectionInterface.attached,
+    bool isLocalEmulator = false,
+    String sdkNameAndVersion = '',
+  }) : _isLocalEmulator = isLocalEmulator,
+       _sdkNameAndVersion = sdkNameAndVersion;
+
+  final bool _isLocalEmulator;
+  final String _sdkNameAndVersion;
+
+  @override
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
+
+  @override
+  Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
+
+  @override
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class TestRunCommandForUsageValues extends RunCommand {
+  TestRunCommandForUsageValues({List<Device>? devices}) {
+    this.devices = devices;
+  }
+
+  @override
+  Future<BuildInfo> getBuildInfo({
+    FlutterProject? project,
+    BuildMode? forcedBuildMode,
+    File? forcedTargetFile,
+    bool? forcedUseLocalCanvasKit,
+  }) async {
+    return const BuildInfo(
+      BuildMode.debug,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+  }
+}
+
+class TestRunCommandWithFakeResidentRunner extends RunCommand {
+  late FakeResidentRunner fakeResidentRunner;
+
+  @override
+  Future<ResidentRunner> createRunner({
+    required bool hotMode,
+    required List<FlutterDevice> flutterDevices,
+    required String? applicationBinaryPath,
+    required FlutterProject flutterProject,
+  }) async {
+    return fakeResidentRunner;
+  }
+
+  @override
+  // ignore: must_call_super
+  Future<void> validateCommand() async {
+    devices = <Device>[FakeDevice()..supportsHotReload = true];
+  }
+}
+
+class TestRunCommandThatOnlyValidates extends RunCommand {
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+
+  @override
+  bool get shouldRunPub => false;
+}
+
+class FakeResidentRunner extends Fake implements ResidentRunner {
+  RPCError? rpcError;
+
+  @override
+  Future<int> run({
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
+    bool enableDevTools = false,
+    String? route,
+  }) async {
+    await null;
+    if (rpcError != null) {
+      throw rpcError!;
+    }
+    return 0;
+  }
+}
+
+class DaemonCapturingRunCommand extends RunCommand {
+  late Daemon daemon;
+  late CapturingAppDomain appDomain;
+
+  @override
+  Daemon createMachineDaemon() {
+    daemon = super.createMachineDaemon();
+    appDomain = daemon.appDomain = CapturingAppDomain(daemon);
+    daemon.registerDomain(appDomain);
+    return daemon;
+  }
+}
+
+class CapturingAppDomain extends AppDomain {
+  CapturingAppDomain(super.daemon);
+
+  String? userIdentifier;
+  bool? enableDevTools;
+
+  @override
+  Future<AppInstance> startApp(
+    Device device,
+    String projectDirectory,
+    String target,
+    String? route,
+    DebuggingOptions options,
+    bool enableHotReload, {
+    File? applicationBinary,
+    required bool trackWidgetCreation,
+    String? projectRootPath,
+    String? packagesFilePath,
+    String? dillOutputPath,
+    String? isolateFilter,
+    bool machine = true,
+    String? userIdentifier,
+  }) async {
+    this.userIdentifier = userIdentifier;
+    enableDevTools = options.enableDevTools;
+    throwToolExit('');
+  }
+}
+
+class FakeAnsiTerminal extends Fake implements AnsiTerminal {
+  /// Setting to false will cause operations to Stdin to throw a [StdinException].
+  var hasStdin = true;
+
+  @override
+  var usesTerminalUi = false;
+
+  /// A list of all the calls to the [singleCharMode] setter.
+  var setSingleCharModeHistory = <bool>[];
+
+  @override
+  set singleCharMode(bool value) {
+    if (!hasStdin) {
+      throw const StdinException(
+        'Error setting terminal line mode',
+        OSError('The handle is invalid', 6),
+      );
+    }
+    setSingleCharModeHistory.add(value);
+  }
+
+  @override
+  bool get singleCharMode => setSingleCharModeHistory.last;
+}
+
+/// A Fake that implements FeatureFlags and enables web.
+class FakeFeatureFlags extends Fake implements FeatureFlags {
+  @override
+  bool get isWebEnabled => true;
+
+  @override
+  bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  @override
+  List<Feature> get allFeatures => const <Feature>[];
+}
+
+/// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
+class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
+  DebuggingOptions? lastOptions;
+
+  @override
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    String? target,
+    required bool stayResident,
+    required DebuggingOptions debuggingOptions,
+    required analytics.Analytics analytics,
+    required FileSystem fileSystem,
+    required FlutterProject flutterProject,
+    required Logger logger,
+    required OutputPreferences outputPreferences,
+    required Platform platform,
+    required SystemClock systemClock,
+    required Terminal terminal,
+    bool machine = false,
+    Future<String> Function(String)? urlTunneller,
+  }) {
+    lastOptions = debuggingOptions;
+    return FakeResidentRunner();
+  }
+}

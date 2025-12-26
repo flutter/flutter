@@ -1,0 +1,6 @@
+include: ../analysis_options.yaml
+
+linter:
+  rules:
+    # diagnostic_describe_all_properties: true # blocked on https://github.com/dart-lang/sdk/issues/47418
+    prefer_relative_imports: false # doesn't really work when you have subpackages like we do here

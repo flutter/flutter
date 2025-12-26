@@ -1,0 +1,30 @@
+name: Tool tests general - experiment
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/tool-test-general.yml'
+      - 'dev/**'
+      - 'packages/flutter_tools/**'
+      - 'bin/**'
+      - '.ci.yaml'
+      - 'engine/**'
+      - 'DEPS'
+  push:
+    branches: [master]
+
+jobs:
+  Linux_tool-tests-general:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+
+    steps:
+      # Note: we must check out the tree for the composite action to be available
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/composite-flutter-setup
+
+      - name: Tool Test
+        run: |
+          SHARD=tool_tests SUBSHARD=general dart --enable-asserts dev/bots/test.dart

@@ -1,0 +1,58 @@
+name: Sync stable CHANGELOG to master
+
+on:
+  push:
+    branches: [stable]
+    paths:
+      - 'CHANGELOG.md'
+
+jobs:
+  merge-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Setup Repository
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ github.repository }}
+          ref: master
+
+      - name: Configure git
+        run: |
+          git config user.name "[bot] Merge Changelog"
+          git config user.email "<>"
+
+      - name: Read CHANGELOG.md from the stable branch
+        id: read_stable_changelog
+        run: |
+          CHANGELOG_CONTENT=$(git show origin/stable:CHANGELOG.md)
+          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Prepare PR branch and commit changes
+        id: prepare_pr_branch
+        run: |
+          PR_BRANCH="sync-changelog-stable-to-master-$(date +%s)"
+          echo "pr_branch_name=$PR_BRANCH" >> "$GITHUB_OUTPUT"
+          git checkout -b "$PR_BRANCH" master
+          echo "${{ env.CHANGELOG_CONTENT }}" > CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "Sync CHANGELOG.md from stable"
+          git push origin "$PR_BRANCH"
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_HEAD_BRANCH=${{ steps.prepare_pr_branch.outputs.pr_branch_name }}
+
+          gh pr create \
+            --base master \
+            --head "$PR_HEAD_BRANCH" \
+            --title "Sync CHANGELOG.md from stable" \
+            --body "This PR automates the synchronization of \`CHANGELOG.md\` from the \`stable\` branch to the \`master\` branch." \
+            --label autosubmit

@@ -1,0 +1,26 @@
+name: animated_icons_private_test
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  sky_engine:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_goldens:
+    sdk: flutter
+
+
+# PUBSPEC CHECKSUM: k2cen3

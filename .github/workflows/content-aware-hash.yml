@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Generate a content aware hash for the Flutter Engine
+
+on: workflow_dispatch
+
+jobs:
+  generate-engine-content-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Generate Hash
+        run: |
+          # Script updated to handle gh-readonly-queue/ branches
+          engine_content_hash=$(bin/internal/content_aware_hash.sh)
+          # test notice annotation for retrival from api
+          echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
+          # test summary writing
+          echo "{\"engine_content_hash\": \"${engine_content_hash}\"" >> $GITHUB_STEP_SUMMARY

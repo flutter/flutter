@@ -1,0 +1,26 @@
+name: platform_channels_benchmarks
+description: Test harness for Platform Channel performance tests.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  microbenchmarks:
+    path: ../microbenchmarks
+
+
+dev_dependencies:
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: vblobb

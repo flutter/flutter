@@ -1,0 +1,130 @@
+name: flutter_tools
+description: Tools for building Flutter applications
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+  analyzer: 8.2.0
+  archive: 3.6.1
+  args: 2.7.0
+  dds: 5.0.3
+  dwds: 25.1.0+2
+  code_builder: 4.11.0
+  collection: 1.19.1
+  completion: 1.0.2
+  coverage: 1.15.0
+  crypto: 3.0.6
+  ffi: 2.1.4
+  file: 7.0.1
+  flutter_template_images: 5.0.0
+  html: 0.15.6
+  http: 1.5.0
+  intl: 0.20.2
+  meta: 1.17.0
+  multicast_dns: 0.3.3
+  mustache_template: 2.0.1
+  package_config: 2.2.0
+  process: 5.0.5
+  fake_async: 1.3.3
+  stack_trace: 1.12.1
+  usage: 4.1.1
+  webdriver: 3.1.0
+  webkit_inspection_protocol: 1.2.1
+  xml: 6.5.0
+  yaml: 3.1.3
+  native_stack_traces: 0.6.1
+  shelf: 1.4.2
+  vm_snapshot_analysis: 0.7.6
+  uuid: 4.5.1
+  web_socket_channel: 3.0.3
+  stream_channel: 2.1.4
+  shelf_web_socket: 2.0.1
+  shelf_static: 1.1.3
+  pub_semver: 2.2.0
+  pool: 1.5.2
+  path: 1.9.1
+  mime: 2.0.0
+  logging: 1.3.0
+  http_multi_server: 3.2.2
+  convert: 3.1.2
+  async: 2.13.0
+  unified_analytics: 8.0.5
+  pubspec_parse: 1.5.0
+
+  graphs: 2.3.2
+  hooks_runner: 0.23.0
+  hooks: 0.20.1
+  code_assets: 0.19.7
+  data_assets: 0.19.3
+
+  # We depend on very specific internal implementation details of the
+  # 'test' package, which change between versions, so when upgrading
+  # this, make sure the tests are still running correctly.
+  test_api: 0.7.7
+  test_core: 0.6.12
+
+  vm_service: 15.0.2
+
+  standard_message_codec: 0.0.1+4
+
+  dart_style: 3.1.2
+
+  # The below dependencies are transitive and are here to pin them to a specific version.
+  _fe_analyzer_shared: 89.0.0
+  boolean_selector: 2.1.2
+  browser_launcher: 1.1.3
+  built_collection: 5.1.1
+  built_value: 8.12.0
+  cli_config: 0.2.0
+  clock: 1.1.2
+  csslib: 1.0.2
+  dap: 1.4.0
+  dds_service_extensions: 2.1.0
+  devtools_shared: 12.0.0
+  dtd: 4.0.0
+  extension_discovery: 2.1.0
+  fixnum: 1.1.1
+  frontend_server_client: 4.0.0
+  glob: 2.1.3
+  http_parser: 4.1.2
+  io: 1.0.5
+  json_rpc_2: 3.0.3
+  matcher: 0.12.17
+  petitparser: 6.1.0
+  platform: 3.1.6
+  shelf_packages_handler: 3.0.2
+  shelf_proxy: 1.0.4
+  source_map_stack_trace: 2.1.2
+  source_maps: 0.10.13
+  source_span: 1.10.1
+  sprintf: 7.0.0
+  sse: 4.1.8
+  string_scanner: 1.4.1
+  sync_http: 0.3.1
+  term_glyph: 1.2.2
+  typed_data: 1.4.0
+  vm_service_interface: 2.0.1
+  watcher: 1.1.4
+  web: 1.1.1
+  web_socket: 1.0.1
+  yaml_edit: 2.2.2
+
+dev_dependencies:
+  file_testing: 3.0.2
+
+  checked_yaml: 2.0.4
+  js: 0.7.2
+  json_annotation: 4.9.0
+  node_preamble: 2.0.2
+  test: 1.26.3
+
+dartdoc:
+  # Exclude this package from the hosted API docs.
+  nodoc: true
+# PUBSPEC CHECKSUM: s8p858

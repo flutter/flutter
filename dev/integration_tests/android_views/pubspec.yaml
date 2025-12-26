@@ -1,0 +1,36 @@
+name: platform_views
+# This package is not intended for consumption on pub.dev.
+publish_to: none
+description: An integration test for embedded platform views
+version: 1.0.0+1
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  path_provider: any
+  # This made non-transitive to allow exact pinning
+  # https://github.com/flutter/flutter/issues/116376
+  collection: any
+  assets_for_android_views:
+    git:
+      url: https://github.com/flutter/goldens.git
+      ref: 64d0f6051b9b7b9933d3d16194170a38f544634a
+      path: dev/integration_tests/assets_for_android_views
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: any
+
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: re4vps

@@ -1,0 +1,19 @@
+name: flutter_test_private
+description: Tests private interfaces of the flutter
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  #
+  # For detailed instructions, refer to:
+  # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
+  path: any
+  process_runner: any
+
+  collection: any
+
+# PUBSPEC CHECKSUM: 8lddt7

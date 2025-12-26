@@ -1,0 +1,30 @@
+name: android_driver_extensions
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  matcher: any
+  meta: any
+  path: any
+  platform: any
+  process: any
+  test_api: any
+
+  file: any
+
+dev_dependencies:
+  test: any
+
+
+# PUBSPEC CHECKSUM: 82inqh

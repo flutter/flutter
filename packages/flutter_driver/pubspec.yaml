@@ -1,0 +1,30 @@
+name: flutter_driver
+description: Integration and performance test API for Flutter applications
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  file: any
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  fuchsia_remote_debug_protocol:
+    sdk: flutter
+  path: any
+  meta: any
+  vm_service: any
+  webdriver: any
+
+  matcher: any
+
+dev_dependencies:
+  fake_async: any
+  test: any
+
+
+# PUBSPEC CHECKSUM: r4u6gv

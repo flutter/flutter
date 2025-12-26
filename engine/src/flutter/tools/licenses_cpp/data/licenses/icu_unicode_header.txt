@@ -1,0 +1,7 @@
+icu unicode header
+^© \d\d\d\d.*Unicode, Inc. and others.
+(?s)^© \d\d\d\d.*Unicode, Inc. and others.
+License & terms of use: http://www.unicode.org/copyright.html(.*?)(?:Copyright.*All Rights Reserved.)?
+(.*)Copyright \([Cc]\).*All [Rr]ights [Rr]eserved.
+(?:Copyright[^\n]+[\n])*(?:This software is made available under the terms of the
+ICU License -- ICU 1.8.1 and later.)?

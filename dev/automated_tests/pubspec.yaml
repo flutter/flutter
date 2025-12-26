@@ -1,0 +1,27 @@
+name: flutter_automated_tests
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  flutter_goldens:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  platform: any
+  test: any
+
+  file: any
+
+flutter:
+  uses-material-design: true
+  assets:
+    - icon/test.png
+
+# PUBSPEC CHECKSUM: 1nm9kf

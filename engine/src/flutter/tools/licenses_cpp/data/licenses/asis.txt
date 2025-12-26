@@ -1,0 +1,7 @@
+as is
+(?s)(?:version \d.*)?Copyright.*This software is provided 'as-is'.*3\. This notice
+(?s)(?:version \d.*)?Copyright.*
+This\s+software\s+is\s+provided\s+'as-is',\s+without\s+any\s+express\s+or\s+implied\s+warranty.\s+In\s+no\s+event\s+will\s+the\s+authors\s+be\s+held\s+liable\s+for\s+any\s+damages\s+arising\s+from\s+the\s+use\s+of\s+this\s+software.\s*\s+Permission\s+is\s+granted\s+to\s+anyone\s+to\s+use\s+this\s+software\s+for\s+any\s+purpose,\s+including\s+commercial\s+applications,\s+and\s+to\s+alter\s+it\s+and\s+redistribute\s+it\s+freely,\s+subject\s+to\s+the\s+following\s+restrictions:\s*
+1\.\s+The\s+origin\s+of\s+this\s+software\s+must\s+not\s+be\s+misrepresented;\s+you\s+must\s+not\s+claim\s+that\s+you\s+wrote\s+the\s+original\s+software.\s+If\s+you\s+use\s+this\s+software\s+in\s+a\s+product,\s+an\s+acknowledgment\s+in\s+the\s+product\s+documentation\s+would\s+be\s+appreciated\s+but\s+is\s+not\s+required.\s*
+2\.\s+Altered\s+source\s+versions\s+must\s+be\s+plainly\s+marked\s+as\s+such,\s+and\s+must\s+not\s+be\s+misrepresented\s+as\s+being\s+the\s+original\s+software.\s*
+3\.\s+This\s+notice\s+may\s+not\s+be\s+removed\s+or\s+altered\s+from\s+any\s+source\s+distribution.

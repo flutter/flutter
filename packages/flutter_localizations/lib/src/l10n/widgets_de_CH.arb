@@ -1,0 +1,12 @@
+{
+  "reorderItemToStart": "An den Anfang verschieben",
+  "reorderItemToEnd": "An das Ende verschieben",
+  "reorderItemUp": "Nach oben verschieben",
+  "reorderItemDown": "Nach unten verschieben",
+  "reorderItemLeft": "Nach links verschieben",
+  "reorderItemRight": "Nach rechts verschieben",
+  "copyButtonLabel": "Kopieren",
+  "cutButtonLabel": "Ausschneiden",
+  "pasteButtonLabel": "Einsetzen",
+  "selectAllButtonLabel": "Alle auswählen"
+}

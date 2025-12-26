@@ -1,0 +1,44 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/46115.
+  const InputDecoration inputDecoration = InputDecoration(
+    floatingLabelBehavior: FloatingLabelBehavior.auto,
+  );
+  InputDecoration(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecoration();
+  InputDecoration(error: '');
+  InputDecoration.collapsed();
+  InputDecoration.collapsed();
+  InputDecoration.collapsed();
+  InputDecoration.collapsed(error: '');
+  inputDecoration.floatingLabelBehavior;
+  const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
+    floatingLabelBehavior: FloatingLabelBehavior.auto,
+  );
+  InputDecorationTheme(floatingLabelBehavior: FloatingLabelBehavior.never);
+  InputDecorationTheme();
+  InputDecorationTheme(error: '');
+  inputDecorationTheme.floatingLabelBehavior;
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.never);
+  inputDecorationTheme.copyWith(floatingLabelBehavior: FloatingLabelBehavior.auto);
+  inputDecorationTheme.copyWith();
+  inputDecorationTheme.copyWith(error: '');
+
+  // Changes made in https://github.com/flutter/flutter/pull/152486.
+  const InputDecoration decoration = InputDecoration.collapsed(
+    hintText: 'Hint',
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/161235.
+  const InputDecoration decoration = InputDecoration(maintainHintSize: false);
+  decoration.maintainHintSize;
+
+  const InputDecoration decoration = InputDecoration.collapsed(
+    maintainHintSize: false,
+  );
+}

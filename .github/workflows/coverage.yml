@@ -1,0 +1,29 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: coverage
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/flutter/**'
+
+permissions: read-all
+
+jobs:
+  build:
+    name: coverage
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      - name: ./bin/flutter test --coverage
+        run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
+      - name: upload coverage
+        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00
+        with:
+          files: packages/flutter/coverage/lcov.info
+          verbose: true

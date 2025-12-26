@@ -1,0 +1,22 @@
+name: android_semantics_testing
+description: Integration testing library for Android semantics
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  test: any
+
+  meta: any
+
+flutter:
+  uses-material-design: true
+
+# PUBSPEC CHECKSUM: v5sljv

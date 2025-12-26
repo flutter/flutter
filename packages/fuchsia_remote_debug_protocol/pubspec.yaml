@@ -1,0 +1,25 @@
+name: fuchsia_remote_debug_protocol
+publish_to: none
+description: Provides an API to test/debug Flutter applications on remote Fuchsia devices and emulators.
+homepage: https://flutter.dev
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  process: any
+  vm_service: any
+
+  meta: any
+
+dev_dependencies:
+  test: any
+
+
+dartdoc:
+  # Exclude this package from the hosted API docs.
+  nodoc: true
+
+# PUBSPEC CHECKSUM: 67t3ss

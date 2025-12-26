@@ -1,0 +1,33 @@
+name: dev_tools
+description: Various repository development tools for flutter.
+
+environment:
+  sdk: ^3.8.0-0
+
+resolution: workspace
+
+dependencies:
+  archive: any
+  args: any
+  http: any
+  intl: any
+  meta: any
+  path: any
+  process: any
+  process_runner: any
+  pub_semver: any
+  yaml: any
+
+  collection: any
+  file: any
+  platform: any
+  yaml_edit: any
+
+dev_dependencies:
+  test: any
+  test_api: any
+
+
+  matcher: any
+
+# PUBSPEC CHECKSUM: k73ud7
