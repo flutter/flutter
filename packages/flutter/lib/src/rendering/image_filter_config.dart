@@ -43,9 +43,9 @@ class ImageFilterContext {
 /// parameters. For example, a filter can use the [Rect] bounds provided by
 /// the context to restrict its sampling area to the object's boundaries.
 ///
-/// Most layout-independent filters can be wrapped using
-/// [ImageFilterConfig.fromImageFilter]. For effects that require layout
-/// information, such as a "bounded" blur, use the specialized constructors.
+/// Most layout-independent filters can be wrapped using the default
+/// constructor. For effects that require layout information, such as a
+/// "bounded" blur, use the specialized constructors.
 ///
 /// See also:
 ///
@@ -57,14 +57,12 @@ class ImageFilterContext {
 ///  * [BackdropFilter.filterConfig], which uses this class to configure its effect.
 @immutable
 abstract class ImageFilterConfig {
+  /// Creates a configuration that directly uses the given filter.
+  const factory ImageFilterConfig(ui.ImageFilter filter) = _DirectImageFilterConfig;
+
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ImageFilterConfig();
-
-  /// Creates a configuration that directly uses the given filter.
-  factory ImageFilterConfig.fromImageFilter(ui.ImageFilter filter) {
-    return _DirectImageFilterConfig(filter);
-  }
+  const ImageFilterConfig._();
 
   /// Creates a configuration for a Gaussian blur.
   ///
@@ -88,19 +86,12 @@ abstract class ImageFilterConfig {
   /// output. To avoid seeing artifacts beyond the boundary, this should
   /// almost always be paired with a clipping widget (e.g., [ClipRect]) whose
   /// bounds match the render object.
-  factory ImageFilterConfig.blur({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    bool bounded = false,
-  }) {
-    return _BlurImageFilterConfig(
-      sigmaX: sigmaX,
-      sigmaY: sigmaY,
-      tileMode: tileMode,
-      bounded: bounded,
-    );
-  }
+  const factory ImageFilterConfig.blur({
+    double sigmaX,
+    double sigmaY,
+    ui.TileMode tileMode,
+    bool bounded,
+  }) = _BlurImageFilterConfig;
 
   /// Composes the `inner` filter configuration with `outer`, to combine their
   /// effects.
@@ -108,16 +99,21 @@ abstract class ImageFilterConfig {
   /// Creates a single [ImageFilterConfig] that when applied, has the same
   /// effect as subsequently applying `inner` and `outer`, i.e., result =
   /// outer(inner(source)).
-  factory ImageFilterConfig.compose({
+  const factory ImageFilterConfig.compose({
     required ImageFilterConfig outer,
     required ImageFilterConfig inner,
-  }) {
-    return _ComposeImageFilterConfig(outer: outer, inner: inner);
-  }
+  }) = _ComposeImageFilterConfig;
 
   /// Resolves this configuration into a [ui.ImageFilter], given the context of
   /// the widget applying the filter.
   ui.ImageFilter resolve(ImageFilterContext context);
+
+  /// The description text to show when the filter is part of a composite
+  /// [ImageFilterConfig] created using [ImageFilterConfig.compose].
+  String get shortDescription;
+
+  @override
+  String toString() => 'ImageFilterConfig.$shortDescription';
 }
 
 class _BlurImageFilterConfig extends ImageFilterConfig {
@@ -126,7 +122,7 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
     this.sigmaY = 0.0,
     this.tileMode = ui.TileMode.clamp,
     this.bounded = false,
-  });
+  }) : super._();
 
   final double sigmaX;
   final double sigmaY;
@@ -177,11 +173,11 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
   String get _boundedString => bounded ? 'bounded' : 'unbounded';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString, $_boundedString)';
+  String get shortDescription => 'blur($sigmaX, $sigmaY, $_modeString, $_boundedString)';
 }
 
 class _ComposeImageFilterConfig extends ImageFilterConfig {
-  const _ComposeImageFilterConfig({required this.outer, required this.inner});
+  const _ComposeImageFilterConfig({required this.outer, required this.inner}) : super._();
 
   final ImageFilterConfig outer;
   final ImageFilterConfig inner;
@@ -206,11 +202,14 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String toString() => 'ImageFilter.compose(source -> $inner -> $outer -> result)';
+  String get shortDescription => '${inner.shortDescription} -> ${outer.shortDescription}';
+
+  @override
+  String toString() => 'ImageFilterConfig.compose(source -> $shortDescription -> result)';
 }
 
 class _DirectImageFilterConfig extends ImageFilterConfig {
-  const _DirectImageFilterConfig(this.filter);
+  const _DirectImageFilterConfig(this.filter) : super._();
 
   final ui.ImageFilter filter;
 
@@ -234,5 +233,8 @@ class _DirectImageFilterConfig extends ImageFilterConfig {
   int get hashCode => filter.hashCode;
 
   @override
-  String toString() => filter.toString();
+  String get shortDescription => filter.shortDescription;
+
+  @override
+  String toString() => 'ImageFilterConfig(${filter.shortDescription})';
 }

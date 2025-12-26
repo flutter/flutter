@@ -647,8 +647,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
-       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
        _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
@@ -670,8 +676,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : assert(filter != null || filterConfig != null, 'Either filter or filterConfig must be provided.'),
-       assert(filter == null || filterConfig == null, 'Cannot provide both a filter and a filterConfig.'),
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
        backdropGroupKey = null,
        _useSharedKey = true;
 
@@ -728,7 +740,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   }
 
   ImageFilterConfig get _effectiveFilterConfig {
-    return filterConfig ?? ImageFilterConfig.fromImageFilter(filter!);
+    return filterConfig ?? ImageFilterConfig(filter!);
   }
 
   @override
@@ -754,7 +766,9 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
-    properties.add(DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
     properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
     properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }

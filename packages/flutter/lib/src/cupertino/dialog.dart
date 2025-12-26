@@ -692,7 +692,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: true);
     }
 
-    final ImageFilterConfig colorFilter = ImageFilterConfig.fromImageFilter(switch (brightness) {
+    final colorFilter = ImageFilterConfig(switch (brightness) {
       Brightness.dark => const ColorFilter.matrix(_darkSaturationMatrix),
       Brightness.light || null => const ColorFilter.matrix(_lightSaturationMatrix),
     });
