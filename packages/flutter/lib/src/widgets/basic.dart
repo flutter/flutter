@@ -48,6 +48,7 @@ export 'package:flutter/rendering.dart'
         FlowPaintingContext,
         FractionalOffsetTween,
         HitTestBehavior,
+        ImageFilterConfig,
         LayerLink,
         MainAxisAlignment,
         MainAxisSize,

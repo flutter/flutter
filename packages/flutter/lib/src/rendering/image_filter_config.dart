@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -26,23 +29,32 @@ class ImageFilterContext {
   final ui.Rect bounds;
 }
 
-/// A configuration for a [ui.ImageFilter].
+/// A description of an image filter that can adapt to the layout of its target.
 ///
-/// This class provides a framework-level abstraction for image filters that can
-/// be applied to widgets or render objects. Unlike [ui.ImageFilter], which is an
-/// engine-level object, [ImageFilterConfig] instances are created at the widget
-/// or render object level and can be resolved into a [ui.ImageFilter] at layout
-/// time, allowing them to incorporate layout-dependent information such as the
-/// widget's bounds.
+/// Use [ImageFilterConfig] to define visual effects that depend on the size,
+/// position, or other layout attributes of a widget or render object.
 ///
-/// Most filters can be used via [ImageFilterConfig.fromImageFilter] and
-/// constructors of [ui.ImageFilter]. The most notable filter that requires this
-/// class is [ImageFilterConfig.blur] with the `bounded` option set to true.
+/// Unlike [ui.ImageFilter], which is an engine-level object with static
+/// parameters, [ImageFilterConfig] acts as a framework-level blueprint. It
+/// delays the creation of the actual filter until the painting phase, where
+/// it is resolved into a [ui.ImageFilter] using an [ImageFilterContext].
+///
+/// This resolution process allows filters to use layout information as
+/// parameters. For example, a filter can use the [Rect] bounds provided by
+/// the context to restrict its sampling area to the object's boundaries.
+///
+/// Most layout-independent filters can be wrapped using
+/// [ImageFilterConfig.fromImageFilter]. For effects that require layout
+/// information, such as a "bounded" blur, use the specialized constructors.
 ///
 /// See also:
 ///
-///  * [BackdropFilter.filterConfig], which uses this class to configure its filter.
+///  * [ImageFilterContext], which provides the layout information used to
+///    resolve this configuration.
+///  * [ImageFilterConfig.blur], which can be used to create a "bounded blur"
+///    that limits sampling to the object's boundaries.
 ///  * [ui.ImageFilter], the engine-level class that this config resolves to.
+///  * [BackdropFilter.filterConfig], which uses this class to configure its effect.
 @immutable
 abstract class ImageFilterConfig {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -61,11 +73,21 @@ abstract class ImageFilterConfig {
   ///
   /// The `tileMode` argument determines how the blur should handle edges.
   ///
-  /// If `bounded` is true, the filter performs a "bounded blur". This means the
-  /// blur kernel will only sample pixels from within the provided attached
-  /// render object, treating all pixels outside of it as transparent. This
-  /// mode is typically used to implement high-fidelity iOS-style blurs. It
-  /// defaults to false.
+  /// The `bounded` argument defaults to false, meaning the filter is applied
+  /// to the entire canvas. If `bounded` is true, the filter performs a
+  /// "bounded blur", which is typically used to replicate the high-fidelity
+  /// frosted-glass effect seen on iOS.
+  ///
+  /// In "bounded blur" mode, the kernel samples exclusively from within the
+  /// bounding rectangle of the render object. Pixels outside the bounds are
+  /// treated as transparent, and the result is normalized to ensure an opaque
+  /// output. This process prevents color bleeding from content adjacent to
+  /// the bounds into the blurred area.
+  ///
+  /// This mode only restricts the blur's sampling source; it does not clip the
+  /// output. To avoid seeing artifacts beyond the boundary, this should
+  /// almost always be paired with a clipping widget (e.g., [ClipRect]) whose
+  /// bounds match the render object.
   factory ImageFilterConfig.blur({
     double sigmaX = 0.0,
     double sigmaY = 0.0,
