@@ -299,19 +299,20 @@ end
       platform: TargetPlatform.darwin,
       mode: buildInfo.mode,
     );
-    final String flutterFrameworkFileName = globals.fs.path.basename(
-      engineCacheFlutterFrameworkDirectory,
-    );
-    final Directory flutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
-
-    try {
-      // Copy xcframework engine cache framework to mode directory.
-      copyDirectory(
-        globals.fs.directory(engineCacheFlutterFrameworkDirectory),
-        flutterFrameworkCopy,
-        followLinks: false,
-      );
-    } finally {
+    if (!modeDirectory.existsSync()) {
+      modeDirectory.createSync(recursive: true);
+    }
+    // Copy xcframework engine cache framework to mode directory.
+    final ProcessResult result = await globals.processManager.run(<String>[
+      'rsync',
+      '-av',
+      '--delete',
+      '--filter',
+      '- .DS_Store/',
+      globals.fs.directory(engineCacheFlutterFrameworkDirectory).path,
+      modeDirectory.path,
+    ]);
+    if (result.exitCode != 0) {
       status.stop();
     }
   }
