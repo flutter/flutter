@@ -33,6 +33,9 @@ external Document get document;
 @JS()
 external Window get window;
 
+@JS()
+external Console get console;
+
 extension type CSSStyleDeclaration._(JSObject _) implements JSObject {
   external set backgroundColor(String value);
   external String get backgroundColor;
@@ -132,6 +135,13 @@ extension type Window._(JSObject _) implements EventTarget, JSObject {
   external MediaQueryList matchMedia(String query);
   external Selection? getSelection();
   external String get origin;
+}
+
+extension type Console._(JSObject _) implements JSObject {
+  external void debug(JSAny? data);
+  external void error(JSAny? data);
+  external void info(JSAny? data);
+  external void log(JSAny? data);
 }
 
 extension type XMLHttpRequest._(JSObject _) implements XMLHttpRequestEventTarget, JSObject {
