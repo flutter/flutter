@@ -576,6 +576,7 @@ enum TargetPlatform {
   darwin,
   linux_x64,
   linux_arm64,
+  linux_riscv64,
   windows_x64,
   windows_arm64,
   fuchsia_arm64,
@@ -604,6 +605,7 @@ enum TargetPlatform {
       case TargetPlatform.darwin:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -618,6 +620,7 @@ enum TargetPlatform {
     switch (this) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
         return 'linux';
       case TargetPlatform.darwin:
         return 'macos';
@@ -652,6 +655,8 @@ enum TargetPlatform {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_arm64:
         return 'arm64';
+      case TargetPlatform.linux_riscv64:
+        return 'riscv64';
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -786,6 +791,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
     TargetPlatform.android_x64 => 'android-x64',
     TargetPlatform.linux_x64 => 'linux-x64',
     TargetPlatform.linux_arm64 => 'linux-arm64',
+    TargetPlatform.linux_riscv64 => 'linux-riscv64',
     TargetPlatform.windows_x64 => 'windows-x64',
     TargetPlatform.windows_arm64 => 'windows-arm64',
     TargetPlatform.fuchsia_arm64 => 'fuchsia-arm64',
@@ -811,6 +817,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
     'linux-x64' => TargetPlatform.linux_x64,
     'linux-arm64' => TargetPlatform.linux_arm64,
+    'linux-riscv64' => TargetPlatform.linux_riscv64,
     'windows-x64' => TargetPlatform.windows_x64,
     'windows-arm64' => TargetPlatform.windows_arm64,
     'web-javascript' => TargetPlatform.web_javascript,
