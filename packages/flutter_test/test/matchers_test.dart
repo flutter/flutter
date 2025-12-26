@@ -756,6 +756,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
@@ -1417,6 +1419,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
@@ -1520,6 +1524,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
@@ -1628,6 +1634,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1664,6 +1672,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final fullNode = _FakeSemanticsNode(fullData);
 
@@ -1799,6 +1809,8 @@ void main() {
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
