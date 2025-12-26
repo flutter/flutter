@@ -381,6 +381,8 @@ public class FlutterJNI {
 
   @Nullable private DeferredComponentManager deferredComponentManager;
 
+  @Nullable private SettingsChannel settingsChannel;
+
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
 
@@ -828,6 +830,24 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.setLocale(locale);
+    }
+  }
+
+  /**
+   * Invoked by native to notify framework started or stopped compiling accessibility tree.
+   *
+   * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and clean
+   * up when false.
+   *
+   * @param enabled True if the framework is compiling the accessibility tree.
+   */
+  @UiThread
+  public void setSemanticsTreeEnabled(boolean enabled) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      if (!enabled) {
+        accessibilityDelegate.resetSemantics();
+      }
     }
   }
 
@@ -1476,7 +1496,10 @@ public class FlutterJNI {
   // ----- End Localization Support ----
   @Nullable
   public float getScaledFontSize(float fontSize, int configurationId) {
-    final DisplayMetrics metrics = SettingsChannel.getPastDisplayMetrics(configurationId);
+    final DisplayMetrics metrics =
+        this.settingsChannel == null
+            ? null
+            : this.settingsChannel.getPastDisplayMetrics(configurationId);
     if (metrics == null) {
       Log.e(
           TAG,
@@ -1487,6 +1510,13 @@ public class FlutterJNI {
     }
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, fontSize, metrics)
         / metrics.density;
+  }
+
+  // ----- Start Settings Channel Support ----
+  @UiThread
+  public void setSettingsChannel(@Nullable SettingsChannel settingsChannel) {
+    ensureRunningOnMainThread();
+    this.settingsChannel = settingsChannel;
   }
 
   // ----- Start Deferred Components Support ----
@@ -1686,6 +1716,13 @@ public class FlutterJNI {
      * <p>Must be called on the main thread
      */
     void setLocale(@NonNull String locale);
+
+    /**
+     * Invoked by native to notify embedder to reset accessibility tree.
+     *
+     * <p>The embedding needs to be prepare to clean up previously stored caches.
+     */
+    void resetSemantics();
   }
 
   public interface AsyncWaitForVsyncDelegate {

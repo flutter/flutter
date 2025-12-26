@@ -714,22 +714,28 @@ class ListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// {@template flutter.material.ListTile.horizontalTitleGap}
   /// The horizontal gap between the titles and the leading/trailing widgets.
   ///
   /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
   /// that is also null, then a default value of 16 is used.
+  /// {@endtemplate}
   final double? horizontalTitleGap;
 
+  /// {@template flutter.material.ListTile.minVerticalPadding}
   /// The minimum padding on the top and bottom of the title and subtitle widgets.
   ///
   /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
   /// that is also null, then a default value of 4 is used.
+  /// {@endtemplate}
   final double? minVerticalPadding;
 
+  /// {@template flutter.material.ListTile.minLeadingWidth}
   /// The minimum width allocated for the [ListTile.leading] widget.
   ///
   /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
   /// that is also null, then a default value of 40 is used.
+  /// {@endtemplate}
   final double? minLeadingWidth;
 
   /// {@template flutter.material.ListTile.minTileHeight}
@@ -1449,10 +1455,16 @@ class _RenderListTile extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return math.max(
-      _targetTileHeight,
-      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
-    );
+    final double titleMinHeight = title.getMinIntrinsicHeight(width);
+    final double? subtitleMinHeight = subtitle?.getMinIntrinsicHeight(width);
+
+    const topAndBottomPaddingMultiplier = 2;
+    final double contentHeight =
+        titleMinHeight +
+        (subtitleMinHeight ?? 0.0) +
+        topAndBottomPaddingMultiplier * _minVerticalPadding;
+
+    return math.max(_targetTileHeight, contentHeight);
   }
 
   @override

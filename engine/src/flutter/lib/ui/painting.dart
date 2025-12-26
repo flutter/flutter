@@ -1010,6 +1010,7 @@ enum BlendMode {
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
 ///    engine while using drawImage calls on a [Canvas].
 ///  * [ImageShader].
+///  * [FragmentShader.setImageSampler].
 ///  * [ImageFilter.matrix].
 ///  * [Canvas.drawImage].
 ///  * [Canvas.drawImageRect].
@@ -2741,6 +2742,31 @@ void decodeImageFromPixels(
   });
 }
 
+/// Decodes the given [pixels] into an [Image] synchronously.
+///
+/// The [pixels] are expected to be in the format specified by [format].
+///
+/// The [width] and [height] arguments specify the dimensions of the image.
+///
+/// This function returns an [Image] immediately. The image might not be
+/// fully decoded yet, but it can be drawn to a [Canvas].
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
+  final image = Image._(_Image._(), width, height);
+  _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
+  return image;
+}
+
+@Native<Void Function(Handle, Int32, Int32, Int32, Handle)>(
+  symbol: 'Image::decodeImageFromPixelsSync',
+)
+external void _decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  int format,
+  _Image outImage,
+);
+
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
 ///
@@ -4236,8 +4262,39 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) {
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  ///
+  /// The `sigma_x` and `sigma_y` are the standard deviation of the Gaussian
+  /// kernel in the X direction and the Y direction, respectively.
+  ///
+  /// The `tile_mode` defines the behavior of sampling pixels at the edges when
+  /// performing a standard, unbounded blur.
+  ///
+  /// The `bounds` argument is optional and enables "bounded blur" mode. When
+  /// `bounds` is non-null, the image filter substitutes transparent black for
+  /// any sample it reads from outside the defined bounding rectangle. The final
+  /// weighted sum is then divided by the total weight of the non-transparent samples
+  /// (the effective alpha), resulting in opaque output.
+  ///
+  /// The bounded mode prevents color bleeding from content adjacent to the
+  /// bounds into the blurred area, and is typically used when the blur must be
+  /// strictly contained within a clipped region, such as for iOS-style frosted
+  /// glass effects.
+  ///
+  /// The `bounds` rectangle is specified in the canvas's current coordinate
+  /// space and is affected by the current transform; consequently, the bounds
+  /// may not be axis-aligned in the final canvas coordinates.
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) {
+    return _GaussianBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4381,11 +4438,17 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  _GaussianBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final TileMode? tileMode;
+  final Rect? bounds;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
@@ -4408,10 +4471,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   @override
   bool operator ==(Object other) {
@@ -4421,11 +4486,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
     return other is _GaussianBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -4558,7 +4624,17 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode?.index ?? -1);
+    final Rect bounds = filter.bounds ?? Rect.zero;
+    _initBlur(
+      filter.sigmaX,
+      filter.sigmaY,
+      filter.tileMode?.index ?? -1,
+      filter.bounds != null,
+      bounds.left,
+      bounds.top,
+      bounds.right,
+      bounds.bottom,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4610,11 +4686,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Int32)>(
-    symbol: 'ImageFilter::initBlur',
-    isLeaf: true,
-  )
-  external void _initBlur(double sigmaX, double sigmaY, int tileMode);
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Int32, Bool, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initBlur', isLeaf: true)
+  external void _initBlur(
+    double sigmaX,
+    double sigmaY,
+    int tileMode,
+    bool bounded,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   @Native<Void Function(Pointer<Void>, Double, Double)>(
     symbol: 'ImageFilter::initDilate',
@@ -5589,12 +5673,15 @@ base class FragmentShader extends Shader {
   /// The index provided to setImageSampler is the index of the sampler uniform defined
   /// in the fragment program, excluding all non-sampler uniforms.
   ///
+  /// The optional [filterQuality] argument may be provided to set the quality level used to sample
+  /// the image. By default, it is set to [FilterQuality.none].
+  ///
   /// All the sampler uniforms that a shader expects must be provided or the
   /// results will be undefined.
-  void setImageSampler(int index, Image image) {
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none}) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     assert(!image.debugDisposed, 'Image has been disposed');
-    _setImageSampler(index, image._image);
+    _setImageSampler(index, image._image, filterQuality.index);
   }
 
   /// Releases the native resources held by the [FragmentShader].
@@ -5616,10 +5703,10 @@ base class FragmentShader extends Shader {
     int samplerUniforms,
   );
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32)>(
     symbol: 'ReusableFragmentShader::SetImageSampler',
   )
-  external void _setImageSampler(int index, _Image sampler);
+  external void _setImageSampler(int index, _Image sampler, int filterQualityIndex);
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();

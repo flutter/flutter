@@ -373,7 +373,6 @@ android_java_sources = [
   "io/flutter/util/HandlerCompat.java",
   "io/flutter/util/PathUtils.java",
   "io/flutter/util/Preconditions.java",
-  "io/flutter/util/Predicate.java",
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
