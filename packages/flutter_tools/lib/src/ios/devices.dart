@@ -239,14 +239,26 @@ class IOSDevices extends PollingDeviceDiscovery {
   @override
   Future<void> stopPolling() async {
     await _observedDeviceEventsSubscription?.cancel();
+    _observedDeviceEventsSubscription = null;
+    xcdevice.cancelWirelessDiscovery();
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<void> cancelWirelessDiscovery() async {
+    xcdevice.cancelWirelessDiscovery();
+  }
+
+  @override
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!_platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
     }
-
+    if (forWirelessDiscovery) {
+      return xcdevice.getAvailableIOSDevicesForWirelessDiscovery(timeout: timeout);
+    }
     return xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
@@ -359,10 +371,10 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
-  var devModeEnabled = false;
+  bool devModeEnabled = false;
 
   /// Device has trusted this computer and paired.
-  var isPaired = false;
+  bool isPaired = false;
 
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
@@ -1043,6 +1055,7 @@ class IOSDevice extends Device {
         bundlePath: package.deviceBundlePath,
         bundleId: package.id,
         launchArguments: launchArguments,
+        shutdownHooks: globals.shutdownHooks,
       );
 
       // If it succeeds to launch with LLDB, return, otherwise continue on to
@@ -1463,7 +1476,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   final _fallbackStreamFlutterMessages = <String>[];
 
   /// Used to track if a message prefixed with "flutter:" has been received from the primary log.
-  var primarySourceFlutterLogReceived = false;
+  bool primarySourceFlutterLogReceived = false;
 
   /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
   /// and Unified Logging (Dart VM). When using more than one of these logging
@@ -1876,7 +1889,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  var forwardedPorts = <ForwardedPort>[];
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
   @visibleForTesting
   void addForwardedPorts(List<ForwardedPort> ports) {

@@ -1015,7 +1015,11 @@ config("optimize") {
       cflags = [ "-O3" ]
     }
   } else {
-    cflags = [ "-O2" ] + common_optimize_on_cflags
+    if (optimize_for_size) {
+      cflags = [ "-Os" ] + common_optimize_on_cflags
+    } else {
+      cflags = [ "-O2" ] + common_optimize_on_cflags
+    }
   }
 
   lto_flags = []

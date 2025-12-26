@@ -93,6 +93,10 @@ source_set("flutter_windows_source") {
     "flutter_windows_view_controller.h",
     "host_window.cc",
     "host_window.h",
+    "host_window_dialog.cc",
+    "host_window_dialog.h",
+    "host_window_regular.cc",
+    "host_window_regular.h",
     "keyboard_handler_base.h",
     "keyboard_key_channel_handler.cc",
     "keyboard_key_channel_handler.h",
@@ -208,6 +212,7 @@ executable("flutter_windows_unittests") {
   # Common Windows test sources.
   sources = [
     "accessibility_bridge_windows_unittests.cc",
+    "accessibility_plugin_unittests.cc",
     "compositor_opengl_unittests.cc",
     "compositor_software_unittests.cc",
     "cursor_handler_unittests.cc",

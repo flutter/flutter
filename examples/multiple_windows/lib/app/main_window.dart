@@ -12,6 +12,7 @@ import 'regular_window_content.dart';
 import 'window_settings_dialog.dart';
 import 'models.dart';
 import 'regular_window_edit_dialog.dart';
+import 'dialog_window_edit_dialog.dart';
 
 class MainWindow extends StatelessWidget {
   const MainWindow({super.key});
@@ -96,7 +97,11 @@ class _WindowsTable extends StatelessWidget {
         context: context,
         controller: regular,
       ),
-      DialogWindowController() => throw UnimplementedError(),
+      final DialogWindowController dialog => showDialogWindowEditDialog(
+        context: context,
+        controller: dialog,
+      ),
+      TooltipWindowController() => null,
     };
   }
 
@@ -104,6 +109,7 @@ class _WindowsTable extends StatelessWidget {
     return switch (controller) {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
+      TooltipWindowController() => 'Tooltip',
     };
   }
 
@@ -155,7 +161,7 @@ class _WindowCreatorCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OutlinedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     final UniqueKey key = UniqueKey();
                     windowManager.add(
                       KeyedWindow(
@@ -171,6 +177,25 @@ class _WindowCreatorCard extends StatelessWidget {
                     );
                   },
                   child: const Text('Regular'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          title: 'Modeless Dialog',
+                          preferredSize: windowSettings.dialogSize,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Modeless Dialog'),
                 ),
                 const SizedBox(height: 8),
                 Container(

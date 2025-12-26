@@ -36,7 +36,6 @@ final firstLaunchMessagesWebServer = <Pattern>[
   'Creating widget preview scaffolding at:',
   launchingOnDeviceRegExp,
   'main.dart is being served at',
-  'Done loading previews.',
 ];
 
 final subsequentLaunchMessagesWeb = <Pattern>[launchingOnDeviceRegExp, 'Done loading previews.'];
@@ -131,6 +130,7 @@ void main() {
     });
 
     testWithoutContext(
+<<<<<<< HEAD
       'does not recreate project on subsequent runs',
       () async {
         // The first run of 'flutter widget-preview start' should generate a new preview scaffold
@@ -156,6 +156,20 @@ void main() {
           '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
         ], workingDirectory: tempDir.path);
 
+=======
+      'runs flutter pub get in widget_preview_scaffold if '
+      "widget_preview_scaffold/.dart_tool doesn't exist",
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178660
+        // Generate the widget preview scaffold, but don't bother launching it.
+        processManager.runSync(<String>[
+          flutterBin,
+          'widget-preview',
+          'start',
+          '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
+        ], workingDirectory: tempDir.path);
+
+>>>>>>> origin/master
         // Ensure widget_preview_scaffold/.dart_tool/package_config.json exists.
         final Directory widgetPreviewScaffoldDartTool = tempDir
             .childDirectory('.dart_tool')
@@ -174,7 +188,24 @@ void main() {
         // widget_preview_scaffold/.dart_tool/package_config.json not existing.
         await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
       },
+<<<<<<< HEAD
       // Project is currently under $TMP.
+=======
+      // Project is always regenerated.
+      skip: true, // See https://github.com/flutter/flutter/issues/179036.
+    );
+
+    testWithoutContext(
+      'does not recreate project on subsequent runs',
+      () async {
+        // The first run of 'flutter widget-preview start' should generate a new preview scaffold
+        await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb);
+
+        // We shouldn't regenerate the scaffold after the initial run.
+        await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb);
+      },
+      // Project is always regenerated.
+>>>>>>> origin/master
       skip: true, // See https://github.com/flutter/flutter/issues/179036.
     );
 

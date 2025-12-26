@@ -55,8 +55,10 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addOption(
       'pwa-strategy',
-      defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
-      help: 'The caching strategy to be used by the PWA service worker.',
+      hide: true,
+      help:
+          'This option is deprecated and will be removed in a future Flutter release.\n'
+          'The caching strategy to be used by the PWA service worker.',
       allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );

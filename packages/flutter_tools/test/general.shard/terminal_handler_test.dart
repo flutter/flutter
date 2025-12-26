@@ -934,6 +934,95 @@ void main() {
       expect(runner.calledReload, false);
       expect(runner.calledRestart, true);
     });
+
+    // Cyrillic keyboard layout support tests (QWERTY → ЙЦУКЕН mapping)
+    // Data-driven test approach for better maintainability
+    final cyrillicTestCases = <Map<String, Object>>[
+      <String, Object>{
+        'key': 'к',
+        'description': 'hotReload (Cyrillic r)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledReload, true);
+          expect(runner.calledRestart, false);
+        },
+      },
+      <String, Object>{
+        'key': 'К',
+        'description': 'hotRestart (Cyrillic R)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledReload, false);
+          expect(runner.calledRestart, true);
+        },
+      },
+      <String, Object>{
+        'key': 'й',
+        'description': 'exit (Cyrillic q)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledExit, true);
+        },
+      },
+      <String, Object>{
+        'key': 'Й',
+        'description': 'exit (Cyrillic Q)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledExit, true);
+        },
+      },
+      <String, Object>{
+        'key': 'в',
+        'description': 'detach (Cyrillic d)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledDetach, true);
+        },
+      },
+      <String, Object>{
+        'key': 'В',
+        'description': 'detach (Cyrillic D)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledDetach, true);
+        },
+      },
+      <String, Object>{
+        'key': 'р',
+        'description': 'help (Cyrillic h)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledPrintWithDetails, true);
+        },
+      },
+      <String, Object>{
+        'key': 'Р',
+        'description': 'help (Cyrillic H)',
+        'verify': (FakeResidentRunner runner) {
+          expect(runner.calledPrintWithDetails, true);
+        },
+      },
+    ];
+
+    for (final testCase in cyrillicTestCases) {
+      testWithoutContext('${testCase['key']} - ${testCase['description']}', () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+        final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+        await terminalHandler.processTerminalInput(testCase['key']! as String);
+
+        (testCase['verify']! as void Function(FakeResidentRunner))(runner);
+      });
+    }
+
+    testWithoutContext('ц - debugDumpApp (Cyrillic w)', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{'isolateId': '1'},
+          jsonResponse: <String, Object>{'data': 'WIDGET DATA CYRILLIC'},
+        ),
+      ]);
+
+      await terminalHandler.processTerminalInput('ц');
+
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA CYRILLIC'));
+    });
   });
 
   testWithoutContext('ResidentRunner clears the screen when it should', () async {
@@ -1199,20 +1288,212 @@ void main() {
     terminalHandler.stop();
     expect(fs.file(filename), isNot(exists));
   });
+
+  group('Cyrillic (Russian ЙЦУКЕН) keyboard layout support', () {
+    testWithoutContext('к - hotReload unsupported', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        supportsHotReload: false,
+      );
+      await terminalHandler.processTerminalInput('к');
+    });
+
+    testWithoutContext('К - hotRestart unsupported', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        supportsRestart: false,
+      );
+      await terminalHandler.processTerminalInput('К');
+    });
+
+    testWithoutContext('к - hotReload', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('к');
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+    });
+
+    testWithoutContext('К - hotRestart', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('К');
+
+      expect(runner.calledRestart, true);
+      expect(runner.calledReload, false);
+    });
+
+    testWithoutContext('к - hotReload with non-fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        reloadExitCode: 1,
+      );
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('к');
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+      expect(
+        terminalHandler.logger.statusText,
+        contains('Try again after fixing the above error(s).'),
+      );
+    });
+
+    testWithoutContext('К - hotRestart with non-fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        reloadExitCode: 1,
+      );
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await terminalHandler.processTerminalInput('К');
+
+      expect(runner.calledReload, false);
+      expect(runner.calledRestart, true);
+      expect(
+        terminalHandler.logger.statusText,
+        contains('Try again after fixing the above error(s).'),
+      );
+    });
+
+    testWithoutContext('к - hotReload with fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        reloadExitCode: 1,
+        fatalReloadError: true,
+      );
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await expectLater(() => terminalHandler.processTerminalInput('к'), throwsToolExit());
+
+      expect(runner.calledReload, true);
+      expect(runner.calledRestart, false);
+    });
+
+    testWithoutContext('К - hotRestart with fatal error', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        reloadExitCode: 1,
+        fatalReloadError: true,
+      );
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+
+      await expectLater(() => terminalHandler.processTerminalInput('К'), throwsToolExit());
+
+      expect(runner.calledReload, false);
+      expect(runner.calledRestart, true);
+    });
+
+    testWithoutContext('й,Й - exit', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      await terminalHandler.processTerminalInput('й');
+
+      expect(runner.calledExit, true);
+      runner.calledExit = false;
+
+      await terminalHandler.processTerminalInput('Й');
+
+      expect(runner.calledExit, true);
+    });
+
+    testWithoutContext('ц,Ц - debugDumpApp', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{'isolateId': '1'},
+          jsonResponse: <String, Object>{'data': 'WIDGET DATA 1'},
+        ),
+        // Request 2.
+        listViews,
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpApp',
+          args: <String, Object>{'isolateId': '1'},
+          jsonResponse: <String, Object>{'data': 'WIDGET DATA 2'},
+        ),
+      ]);
+      await terminalHandler.processTerminalInput('ц');
+      await terminalHandler.processTerminalInput('Ц');
+
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 1'));
+      expect(terminalHandler.logger.statusText, contains('WIDGET DATA 2'));
+    });
+
+    testWithoutContext('в,В - detach', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      await terminalHandler.processTerminalInput('в');
+
+      expect(runner.calledDetach, true);
+      runner.calledDetach = false;
+
+      await terminalHandler.processTerminalInput('В');
+
+      expect(runner.calledDetach, true);
+    });
+
+    testWithoutContext('р,Р - printHelp', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      await terminalHandler.processTerminalInput('р');
+
+      expect(runner.calledPrintWithDetails, true);
+      runner.calledPrintWithDetails = false;
+
+      await terminalHandler.processTerminalInput('Р');
+
+      expect(runner.calledPrintWithDetails, true);
+    });
+
+    testWithoutContext('м - launchDevToolsInBrowser', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
+      final runner = terminalHandler.residentRunner as FakeResidentRunner;
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
+      }
+      await terminalHandler.processTerminalInput('м');
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
+      }
+    });
+
+    testWithoutContext('keyboardLayoutMappings keys must not be ASCII characters', () {
+      // This test ensures that no one accidentally adds regular ASCII characters
+      // as keys in the keyboard layout mappings. ASCII characters (0-127) should
+      // never be mapped because they don't need translation - they are already Latin.
+      // Only non-Latin characters (code points > 127) should be mapped.
+      for (final String key in TerminalHandler.keyboardLayoutMappings.keys) {
+        final int codeUnit = key.codeUnitAt(0);
+        expect(
+          codeUnit > 127,
+          isTrue,
+          reason:
+              'Key "$key" (U+${codeUnit.toRadixString(16).padLeft(4, '0').toUpperCase()}) '
+              'is an ASCII character and should not be in keyboard layout mappings. '
+              'Only non-Latin characters should be mapped.',
+        );
+      }
+    });
+  });
 }
 
 class FakeResidentRunner extends ResidentHandlers {
   FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem)
     : flutterDevices = <FlutterDevice>[device];
 
-  var calledDetach = false;
-  var calledPrint = false;
-  var calledExit = false;
-  var calledPrintWithDetails = false;
-  var calledReload = false;
-  var calledRestart = false;
-  var reloadExitCode = 0;
-  var fatalReloadError = false;
+  bool calledDetach = false;
+  bool calledPrint = false;
+  bool calledExit = false;
+  bool calledPrintWithDetails = false;
+  bool calledReload = false;
+  bool calledRestart = false;
+  int reloadExitCode = 0;
+  bool fatalReloadError = false;
 
   @override
   final Logger logger;
@@ -1224,31 +1505,31 @@ class FakeResidentRunner extends ResidentHandlers {
   final List<FlutterDevice> flutterDevices;
 
   @override
-  var canHotReload = true;
+  bool canHotReload = true;
 
   @override
-  var hotMode = true;
+  bool hotMode = true;
 
   @override
-  var isRunningDebug = true;
+  bool isRunningDebug = true;
 
   @override
-  var isRunningProfile = false;
+  bool isRunningProfile = false;
 
   @override
-  var isRunningRelease = false;
+  bool isRunningRelease = false;
 
   @override
-  var stayResident = true;
+  bool stayResident = true;
 
   @override
-  var supportsRestart = true;
+  bool supportsRestart = true;
 
   @override
-  var supportsDetach = true;
+  bool supportsDetach = true;
 
   @override
-  var supportsServiceProtocol = true;
+  bool supportsServiceProtocol = true;
 
   @override
   Future<void> cleanupAfterSignal() async {}
@@ -1301,7 +1582,7 @@ class FakeDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var supportsScreenshot = false;
+  bool supportsScreenshot = false;
 
   @override
   String get name => 'Fake Device';
@@ -1310,7 +1591,7 @@ class FakeDevice extends Fake implements Device {
   String get displayName => name;
 
   @override
-  var dds = DartDevelopmentService(logger: FakeLogger());
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
 
   @override
   Future<void> takeScreenshot(File file) async {
@@ -1391,7 +1672,7 @@ TerminalHandler setUpTerminalHandler(
 class FakeResidentCompiler extends Fake implements ResidentCompiler {}
 
 class TestRunner extends Fake implements ResidentRunner {
-  var hasHelpBeenPrinted = false;
+  bool hasHelpBeenPrinted = false;
 
   @override
   Future<void> cleanupAfterSignal() async {}

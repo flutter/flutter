@@ -8,15 +8,15 @@
 #include <iosfwd>
 #include <memory>
 #include <string_view>
-#include "flutter/third_party/abseil-cpp/absl/status/statusor.h"
 #include "flutter/third_party/re2/re2/re2.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 /// A filter is a concatenation of multiple regex.
 ///
 /// This is used for things like the include.txt and exclude.txt.
 class Filter {
  public:
-  static absl::StatusOr<Filter> Open(std::string_view path);
+  static absl::StatusOr<Filter> Open(const std::string& path);
 
   static absl::StatusOr<Filter> Open(std::istream& input);
 

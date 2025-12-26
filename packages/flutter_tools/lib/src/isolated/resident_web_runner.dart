@@ -313,6 +313,7 @@ class ResidentWebRunner extends ResidentRunner {
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
           platform: _platform,
@@ -935,8 +936,13 @@ class ResidentWebRunner extends ResidentRunner {
           connectionInfoCompleter?.complete(
             DebugConnectionInfo(
               wsUri: websocketUri,
+<<<<<<< HEAD
               devToolsUri: Uri.tryParse(debugConnection.devToolsUri ?? ''),
               dtdUri: Uri.tryParse(debugConnection.dtdUri ?? ''),
+=======
+              devToolsUri: debugConnection.devToolsUri?.toUri(),
+              dtdUri: debugConnection.dtdUri?.toUri(),
+>>>>>>> origin/master
             ),
           );
         }),

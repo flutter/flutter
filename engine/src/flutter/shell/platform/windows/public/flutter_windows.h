@@ -43,6 +43,10 @@ typedef enum {
   // This falls back to a high performance GPU if no low power GPU is
   // available.
   LowPowerPreference,
+  // Prefer performance over energy efficiency, such as a discrete GPU or
+  // dedicated GPU.
+  // This falls back to a low power GPU if no high performance GPU is available.
+  HighPerformancePreference,
 } FlutterDesktopGpuPreference;
 
 // Configures the thread policy for running the UI isolate.

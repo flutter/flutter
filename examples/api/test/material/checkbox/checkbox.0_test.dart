@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/checkbox/checkbox.0.dart' as example;
+import 'package:flutter_api_samples/material/checkbox/checkbox.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -32,8 +33,17 @@ void main() {
 
     expect(checkbox.checkColor, Colors.white);
     expect(checkbox.fillColor!.resolve(<WidgetState>{}), Colors.red);
-    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.pressed}), Colors.blue);
-    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.hovered}), Colors.blue);
-    expect(checkbox.fillColor!.resolve(<WidgetState>{WidgetState.focused}), Colors.blue);
+    expect(
+      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.pressed}),
+      Colors.blue,
+    );
+    expect(
+      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.hovered}),
+      Colors.blue,
+    );
+    expect(
+      checkbox.fillColor!.resolve(<WidgetState>{WidgetState.focused}),
+      Colors.blue,
+    );
   });
 }

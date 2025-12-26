@@ -31,7 +31,7 @@ class FakeTextChannel implements MethodChannel {
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
-    final MethodCall call = MethodCall(method, arguments);
+    final call = MethodCall(method, arguments);
     outgoingCalls.add(call);
     return await outgoing(call) as T;
   }
@@ -44,9 +44,9 @@ class FakeTextChannel implements MethodChannel {
 
   void validateOutgoingMethodCalls(List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
-    final StringBuffer output = StringBuffer();
-    bool hasError = false;
-    for (int i = 0; i < calls.length; i++) {
+    final output = StringBuffer();
+    var hasError = false;
+    for (var i = 0; i < calls.length; i++) {
       final ByteData outgoingData = codec.encodeMethodCall(outgoingCalls[i]);
       final ByteData expectedData = codec.encodeMethodCall(calls[i]);
       final String outgoingString = utf8.decode(outgoingData.buffer.asUint8List());

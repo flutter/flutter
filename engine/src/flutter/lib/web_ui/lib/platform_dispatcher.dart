@@ -89,6 +89,14 @@ abstract class PlatformDispatcher {
 
   void setApplicationLocale(Locale locale) {}
 
+  double? get lineHeightScaleFactorOverride;
+
+  double? get letterSpacingOverride;
+
+  double? get wordSpacingOverride;
+
+  double? get paragraphSpacingOverride;
+
   AccessibilityFeatures get accessibilityFeatures;
 
   VoidCallback? get onAccessibilityFeaturesChanged;
@@ -529,11 +537,11 @@ class Locale {
   String toLanguageTag() => _rawToString('-');
 
   String _rawToString(String separator) {
-    final StringBuffer out = StringBuffer(languageCode);
-    if (scriptCode != null) {
+    final out = StringBuffer(languageCode);
+    if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }
-    if (_countryCode != null) {
+    if (_countryCode != null && countryCode!.isNotEmpty) {
       out.write('$separator$countryCode');
     }
     return out.toString();

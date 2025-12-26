@@ -13,6 +13,7 @@ import 'tween.dart';
 /// Used to override the default parameters of an animation.
 ///
 /// Currently, this class is used by the following widgets:
+/// - [Expansible]
 /// - [ExpansionTile]
 /// - [MaterialApp]
 /// - [PopupMenuButton]

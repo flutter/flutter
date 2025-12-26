@@ -744,7 +744,7 @@ extension type DomHTMLScriptElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLScriptElement createDomHTMLScriptElement(String? nonce) {
-  final DomHTMLScriptElement script = domDocument.createElement('script') as DomHTMLScriptElement;
+  final script = domDocument.createElement('script') as DomHTMLScriptElement;
   if (nonce != null) {
     script.nonce = nonce;
   }
@@ -783,7 +783,7 @@ extension type DomHTMLStyleElement._(JSObject _) implements DomHTMLElement {
 }
 
 DomHTMLStyleElement createDomHTMLStyleElement(String? nonce) {
-  final DomHTMLStyleElement style = domDocument.createElement('style') as DomHTMLStyleElement;
+  final style = domDocument.createElement('style') as DomHTMLStyleElement;
   if (nonce != null) {
     style.nonce = nonce;
   }
@@ -845,8 +845,7 @@ void debugResetCanvasCount() {
 
 DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
   debugCanvasCount++;
-  final DomHTMLCanvasElement canvas =
-      domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }
@@ -896,8 +895,18 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   set fillStyle(Object? style) => _fillStyle = style?.toJSAnyShallow;
 
   external String font;
+  external String fontWeight;
   external String direction;
+  external String letterSpacing;
+  external String wordSpacing;
+  external String textRendering;
+  external String fontKerning;
+  external String fontVariantCaps;
   external set lineWidth(num? value);
+
+  @JS('setLineDash')
+  external void _setLineDash(JSFloat32Array? value);
+  void setLineDash(Float32List? value) => _setLineDash(value?.toJS);
 
   @JS('strokeStyle')
   external set _strokeStyle(JSAny? value);
@@ -993,6 +1002,7 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void rect(num x, num y, num width, num height);
   external void resetTransform();
   external void restore();
+  external void reset();
   external void setTransform(num a, num b, num c, num d, num e, num f);
   external void transform(num a, num b, num c, num d, num e, num f);
 
@@ -1039,7 +1049,16 @@ extension type DomCanvasRenderingContext2D._(JSObject _) implements JSObject {
   external void strokeText(String text, num x, num y);
   external set globalAlpha(num? value);
 
-  external void fillTextCluster(DomTextCluster textCluster, double x, double y);
+  @JS('fillTextCluster')
+  external void _fillTextCluster(JSAny? textCluster, double x, double y, [JSAny? options]);
+
+  void fillTextCluster(DomTextCluster textCluster, double x, double y, [Object? options]) {
+    if (options == null) {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y);
+    } else {
+      return _fillTextCluster(textCluster.toJSAnyDeep, x, y, options.toJSAnyDeep);
+    }
+  }
 }
 
 @JS('ImageBitmapRenderingContext')
@@ -1244,8 +1263,8 @@ class HttpFetchResponseImpl implements HttpFetchResponse {
   @override
   bool get hasPayload {
     final bool accepted = status >= 200 && status < 300;
-    final bool fileUri = status == 0;
-    final bool notModified = status == 304;
+    final fileUri = status == 0;
+    final notModified = status == 304;
     final bool unknownRedirect = status > 307 && status < 400;
     return accepted || fileUri || notModified || unknownRedirect;
   }
@@ -1351,10 +1370,10 @@ class MockHttpFetchPayload implements HttpFetchPayload {
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final int totalLength = _byteBuffer.lengthInBytes;
-    int currentIndex = 0;
+    var currentIndex = 0;
     while (currentIndex < totalLength) {
       final int chunkSize = math.min(_chunkSize, totalLength - currentIndex);
-      final Uint8List chunk = Uint8List.sublistView(
+      final chunk = Uint8List.sublistView(
         _byteBuffer.asByteData(),
         currentIndex,
         currentIndex + chunkSize,
@@ -1737,7 +1756,7 @@ extension type DomMutationObserver._(JSObject _) implements JSObject {
   @JS('observe')
   external void _observe(DomNode target, JSAny options);
   void observe(DomNode target, {bool? childList, bool? attributes, List<String>? attributeFilter}) {
-    final Map<String, dynamic> options = <String, dynamic>{
+    final options = <String, dynamic>{
       'childList': ?childList,
       'attributes': ?attributes,
       'attributeFilter': ?attributeFilter,

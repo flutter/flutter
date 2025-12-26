@@ -111,6 +111,46 @@ Future<void> createSingleFrameCodec() async {
   _finish();
 }
 
+@pragma('vm:entry-point')
+Future<void> singleFrameCodecHandlesNoGpu() async {
+  final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(
+    Uint8List.fromList(List<int>.filled(4, 100)),
+  );
+  final ImageDescriptor descriptor = ImageDescriptor.raw(
+    buffer,
+    width: 1,
+    height: 1,
+    pixelFormat: PixelFormat.rgba8888,
+  );
+  _turnOffGPU(true);
+  Timer flusher = Timer.periodic(Duration(milliseconds: 1), (timer) {
+    _flushGpuAwaitingTasks();
+  });
+  try {
+    final Codec codec = await descriptor.instantiateCodec();
+
+    // Call getNextFrame twice.  The first call will throw because the GPU has
+    // been disabled.  The second call will throw because SingleFrameCodec does
+    // not have a cached image.
+    for (int i = 0; i < 2; i++) {
+      bool didThrow = false;
+      try {
+        final FrameInfo info = await codec.getNextFrame();
+      } catch (e) {
+        didThrow = true;
+      }
+      assert(didThrow);
+    }
+
+    codec.dispose();
+    descriptor.dispose();
+    buffer.dispose();
+    _finish();
+  } finally {
+    flusher.cancel();
+  }
+}
+
 @pragma('vm:external-name', 'ValidateCodec')
 external void _validateCodec(Codec codec);
 
@@ -176,6 +216,7 @@ void sendSemanticsUpdate() {
   String tooltip = "tooltip";
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -198,6 +239,26 @@ void sendSemanticsUpdate() {
   transform[13] = 0;
   transform[14] = 0;
   transform[15] = 0;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[1] = 0;
+  hitTestTransform[2] = 0;
+  hitTestTransform[3] = 0;
+
+  hitTestTransform[4] = 0;
+  hitTestTransform[5] = 1;
+  hitTestTransform[6] = 0;
+  hitTestTransform[7] = 0;
+
+  hitTestTransform[8] = 0;
+  hitTestTransform[9] = 0;
+  hitTestTransform[10] = 1;
+  hitTestTransform[11] = 0;
+
+  hitTestTransform[12] = 0;
+  hitTestTransform[13] = 0;
+  hitTestTransform[14] = 0;
+  hitTestTransform[15] = 0;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
@@ -209,6 +270,7 @@ void sendSemanticsUpdate() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalParent: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -227,6 +289,7 @@ void sendSemanticsUpdate() {
     tooltip: tooltip,
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -244,6 +307,7 @@ void sendSemanticsUpdateWithRole() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -251,6 +315,10 @@ void sendSemanticsUpdateWithRole() {
   transform[0] = 1;
   transform[5] = 1;
   transform[10] = 1;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[5] = 1;
+  hitTestTransform[10] = 1;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
@@ -262,6 +330,7 @@ void sendSemanticsUpdateWithRole() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalParent: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -280,6 +349,7 @@ void sendSemanticsUpdateWithRole() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -298,6 +368,7 @@ void sendSemanticsUpdateWithLocale() {
   final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder();
 
   final Float64List transform = Float64List(16);
+  final Float64List hitTestTransform = Float64List(16);
   final Int32List childrenInTraversalOrder = Int32List(0);
   final Int32List childrenInHitTestOrder = Int32List(0);
   final Int32List additionalActions = Int32List(0);
@@ -305,6 +376,10 @@ void sendSemanticsUpdateWithLocale() {
   transform[0] = 1;
   transform[5] = 1;
   transform[10] = 1;
+
+  hitTestTransform[0] = 1;
+  hitTestTransform[5] = 1;
+  hitTestTransform[10] = 1;
   builder.updateNode(
     id: 0,
     flags: SemanticsFlags.none,
@@ -319,6 +394,7 @@ void sendSemanticsUpdateWithLocale() {
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
+    traversalParent: 0,
     rect: Rect.fromLTRB(0, 0, 10, 10),
     identifier: "identifier",
     label: "label",
@@ -334,6 +410,7 @@ void sendSemanticsUpdateWithLocale() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: hitTestTransform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,
@@ -370,6 +447,7 @@ void sendSemanticsUpdateWithIsLink() {
     platformViewId: -1,
     scrollChildren: 0,
     scrollIndex: 0,
+    traversalParent: 0,
     scrollPosition: 0,
     scrollExtentMax: 0,
     scrollExtentMin: 0,
@@ -388,6 +466,7 @@ void sendSemanticsUpdateWithIsLink() {
     tooltip: "tooltip",
     textDirection: TextDirection.ltr,
     transform: transform,
+    hitTestTransform: transform,
     childrenInTraversalOrder: childrenInTraversalOrder,
     childrenInHitTestOrder: childrenInHitTestOrder,
     additionalActions: additionalActions,

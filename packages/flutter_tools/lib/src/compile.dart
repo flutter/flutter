@@ -462,6 +462,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   _CompileExpressionToJsRequest(
     super.completer,
     this.libraryUri,
+    this.scriptUri,
     this.line,
     this.column,
     this.jsModules,
@@ -471,6 +472,7 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
   );
 
   final String? libraryUri;
+  final String? scriptUri;
   final int line;
   final int column;
   final Map<String, String>? jsModules;
@@ -589,6 +591,7 @@ abstract class ResidentCompiler {
   /// compilation result and a number of errors.
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -995,6 +998,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   @override
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,
@@ -1011,6 +1015,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       _CompileExpressionToJsRequest(
         completer,
         libraryUri,
+        scriptUri,
         line,
         column,
         jsModules,
@@ -1032,23 +1037,23 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = Uuid().generateV4();
     server.stdin
-      ..writeln('compile-expression-to-js $inputKey')
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.line)
-      ..writeln(request.column);
-    request.jsModules?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin.writeln(inputKey);
-    request.jsFrameValues?.forEach((String k, String v) {
-      server.stdin.writeln('$k:$v');
-    });
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.moduleName ?? '')
-      ..writeln(request.expression ?? '');
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode({
+          'type': 'COMPILE_EXPRESSION_JS',
+          'data': {
+            'expression': request.expression,
+            'libraryUri': request.libraryUri,
+            'scriptUri': request.scriptUri,
+            'line': request.line,
+            'column': request.column,
+            'jsModules': request.jsModules,
+            'jsFrameValues': request.jsFrameValues,
+            'moduleName': request.moduleName,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }
