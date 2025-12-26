@@ -1,6 +1,0 @@
-{
-  "SHIFT": ["ShiftLeft", "ShiftLeft", "ShiftRight"],
-  "CONTROL": ["ControlLeft", "ControlLeft", "ControlRight"],
-  "MOD1": ["AltLeft", "AltLeft", "AltRight"],
-  "META": ["MetaLeft", "MetaLeft", "MetaRight"]
-}
