@@ -307,7 +307,10 @@ org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3=swiftExportClasspathResol
 org.jetbrains.trove4j:trove4j:20160824=lintClassPath
 org.jetbrains:annotations:13.0=_internal-unified-test-platform-android-test-plugin-host-retention,kotlinBuildToolsApiClasspath,kotlinCompilerClasspath,kotlinInternalAbiValidation,kotlinKlibCommonizerClasspath,lintClassPath,swiftExportClasspathResolvable
 org.jetbrains:annotations:23.0.0=_internal-unified-test-platform-android-device-provider-ddmlib,_internal-unified-test-platform-android-device-provider-gradle,_internal-unified-test-platform-android-driver-instrumentation,_internal-unified-test-platform-android-test-plugin,_internal-unified-test-platform-android-test-plugin-host-additional-test-output,_internal-unified-test-platform-android-test-plugin-host-apk-installer,_internal-unified-test-platform-android-test-plugin-host-coverage,_internal-unified-test-platform-android-test-plugin-host-device-info,_internal-unified-test-platform-android-test-plugin-host-emulator-control,_internal-unified-test-platform-android-test-plugin-host-logcat,_internal-unified-test-platform-android-test-plugin-result-listener-gradle,_internal-unified-test-platform-core,_internal-unified-test-platform-launcher,debugAndroidTestCompileClasspath,debugCompileClasspath,debugRuntimeClasspath,debugUnitTestCompileClasspath,debugUnitTestRuntimeClasspath,profileCompileClasspath,profileRuntimeClasspath,profileUnitTestCompileClasspath,profileUnitTestRuntimeClasspath,releaseCompileClasspath,releaseRuntimeClasspath,releaseUnitTestCompileClasspath,releaseUnitTestRuntimeClasspath
+<<<<<<< HEAD
+=======
 org.jspecify:jspecify:1.0.0=debugAndroidTestCompileClasspath,debugCompileClasspath,debugRuntimeClasspath,debugUnitTestCompileClasspath,debugUnitTestRuntimeClasspath,profileCompileClasspath,profileRuntimeClasspath,profileUnitTestCompileClasspath,profileUnitTestRuntimeClasspath,releaseCompileClasspath,releaseRuntimeClasspath,releaseUnitTestCompileClasspath,releaseUnitTestRuntimeClasspath
+>>>>>>> origin/master
 org.jvnet.staxex:stax-ex:1.8=lintClassPath
 org.ow2.asm:asm-analysis:7.0=lintClassPath
 org.ow2.asm:asm-analysis:9.1=androidJacocoAnt

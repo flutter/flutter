@@ -386,6 +386,8 @@ void atk_object_notify_state_change(AtkObject* accessible,
     mock->atk_object_notify_state_change(accessible, state, value);
   }
 }
+<<<<<<< HEAD
+=======
 
 void g_object_set(gpointer object, const gchar* first_property_name, ...) {
   check_thread();
@@ -415,3 +417,4 @@ void g_object_set(gpointer object, const gchar* first_property_name, ...) {
 
   va_end(args);
 }
+>>>>>>> origin/master

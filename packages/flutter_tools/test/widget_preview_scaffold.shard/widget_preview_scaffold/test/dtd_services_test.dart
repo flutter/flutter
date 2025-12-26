@@ -74,7 +74,27 @@ void main() {
         // Start DTD and register the widget preview DTD services with a custom handler for hot
         // restart requests.
         final hotRestartRequestCompleter = Completer<void>();
+<<<<<<< HEAD
+        dtdServer = WidgetPreviewDtdServices(
+          previewAnalytics: WidgetPreviewAnalytics(
+            analytics: getInitializedFakeAnalyticsInstance(
+              // We don't care about anything written to the file system by analytics, so we're safe
+              // to use a different file system here.
+              fs: MemoryFileSystem.test(),
+              fakeFlutterVersion: FakeFlutterVersion(),
+            ),
+          ),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          shutdownHooks: ShutdownHooks(),
+          dtdLauncher: DtdLauncher(
+            logger: logger,
+            artifacts: globals.artifacts!,
+            processManager: globals.processManager,
+          ),
+=======
         dtdServer = await launchDtdServer(
+>>>>>>> origin/master
           onHotRestartPreviewerRequest: hotRestartRequestCompleter.complete,
         );
 
@@ -115,7 +135,31 @@ void main() {
     testUsingContext(
       'can set and retreive values from $PersistentPreferences',
       () async {
+<<<<<<< HEAD
+        dtdServer = WidgetPreviewDtdServices(
+          previewAnalytics: WidgetPreviewAnalytics(
+            analytics: getInitializedFakeAnalyticsInstance(
+              // We don't care about anything written to the file system by analytics, so we're safe
+              // to use a different file system here.
+              fs: MemoryFileSystem.test(),
+              fakeFlutterVersion: FakeFlutterVersion(),
+            ),
+          ),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          shutdownHooks: ShutdownHooks(),
+          dtdLauncher: DtdLauncher(
+            logger: logger,
+            artifacts: globals.artifacts!,
+            processManager: globals.processManager,
+          ),
+          onHotRestartPreviewerRequest: () {},
+          project: FakeFlutterProject(),
+        );
+        await dtdServer.launchAndConnect();
+=======
         dtdServer = await launchDtdServer();
+>>>>>>> origin/master
 
         // The properties file should be created by the PersistentProperties constructor.
         final File preferencesFile = dtdServer.preferences.file;

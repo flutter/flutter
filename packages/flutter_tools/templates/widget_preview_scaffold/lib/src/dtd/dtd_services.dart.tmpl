@@ -6,7 +6,10 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+<<<<<<< HEAD
+=======
 import 'package:widget_preview_scaffold/src/dtd/dtd_connection_info.dart';
+>>>>>>> origin/master
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
 import 'package:widget_preview_scaffold/src/dtd/utils.dart';
 

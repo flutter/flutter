@@ -14,6 +14,12 @@ import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
+<<<<<<< HEAD
+import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
+import 'package:widget_preview_scaffold/src/theme/ide_theme.dart';
+import 'package:widget_preview_scaffold/src/theme/theme.dart';
+
+=======
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:widget_preview_scaffold/src/dtd/editor_service.dart';
@@ -21,6 +27,7 @@ import 'package:widget_preview_scaffold/src/split.dart';
 import 'package:widget_preview_scaffold/src/theme/ide_theme.dart';
 import 'package:widget_preview_scaffold/src/theme/theme.dart';
 
+>>>>>>> origin/master
 import 'package:widget_preview_scaffold/src/controls.dart';
 import 'package:widget_preview_scaffold/src/generated_preview.dart';
 import 'package:widget_preview_scaffold/src/utils.dart';

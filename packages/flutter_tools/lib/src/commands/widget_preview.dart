@@ -511,12 +511,15 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
           // See https://github.com/flutter/flutter/issues/179036
           projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+<<<<<<< HEAD
+=======
         );
         unawaited(
           _widgetPreviewApp!.run(
             appStartedCompleter: appStarted,
             connectionInfoCompleter: connectionInfo,
           ),
+>>>>>>> origin/master
         );
         await appStarted.future;
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);

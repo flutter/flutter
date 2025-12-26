@@ -249,6 +249,8 @@ class AssembleCommand extends FlutterCommand {
       output = globals.fs.path.join(_flutterProject.directory.path, output);
     }
     final Artifacts artifacts = globals.artifacts!;
+<<<<<<< HEAD
+=======
 
     List<String> decodedDefines;
     try {
@@ -262,6 +264,7 @@ class AssembleCommand extends FlutterCommand {
       );
     }
 
+>>>>>>> origin/master
     return Environment(
       outputDir: globals.fs.directory(output),
       buildDir: _flutterProject.directory

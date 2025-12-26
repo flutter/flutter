@@ -60,6 +60,9 @@ class WidgetPreviewDtdServices {
   static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
   static const kWidgetPreviewConnectedEvent = 'Connected';
 
+  static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
+  static const kWidgetPreviewConnectedEvent = 'Connected';
+
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
   static const kNoValueForKey = 200;
