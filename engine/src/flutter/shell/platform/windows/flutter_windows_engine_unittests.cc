@@ -769,7 +769,7 @@ class MockFlutterWindowsView : public FlutterWindowsView {
  public:
   MockFlutterWindowsView(FlutterWindowsEngine* engine,
                          std::unique_ptr<WindowBindingHandler> wbh)
-      : FlutterWindowsView(kImplicitViewId, engine, std::move(wbh)) {}
+      : FlutterWindowsView(kImplicitViewId, engine, std::move(wbh), nullptr) {}
   ~MockFlutterWindowsView() {}
 
   MOCK_METHOD(void,
