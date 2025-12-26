@@ -1258,7 +1258,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// error.
   @Deprecated(
     'Use filterConfig instead. '
-    'This feature was deprecated after v3.22.0-12.0.pre.',
+    'This feature was deprecated after v3.40.0-1.0.pre.',
   )
   ui.ImageFilter get filter {
     assert(
