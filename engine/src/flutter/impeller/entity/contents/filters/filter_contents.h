@@ -39,12 +39,14 @@ class FilterContents : public Contents {
   enum class MorphType { kDilate, kErode };
 
   /// Creates a gaussian blur that operates in 2 dimensions.
-  /// See also: `MakeDirectionalGaussianBlur`
+  ///
+  /// For definition of parameters, see DlBlurImageFilter.
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
       const FilterInput::Ref& input,
       Sigma sigma_x,
       Sigma sigma_y,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
+      std::optional<Rect> bounds = std::nullopt,
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
 
