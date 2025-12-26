@@ -444,7 +444,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         } else if (notification.metrics.axisDirection == AxisDirection.up) {
           _dragOffset = _dragOffset! + notification.scrollDelta!;
         }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _checkDragOffset();
       }
       if (_status == RefreshIndicatorStatus.armed && notification.dragDetails == null) {
         // On iOS start the refresh when the Scrollable bounces back from the
@@ -459,7 +459,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         } else if (notification.metrics.axisDirection == AxisDirection.up) {
           _dragOffset = _dragOffset! + notification.overscroll;
         }
-        _checkDragOffset(notification.metrics.viewportDimension);
+        _checkDragOffset();
       }
     } else if (notification is ScrollEndNotification) {
       switch (_status) {
@@ -514,8 +514,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return true;
   }
 
-  void _checkDragOffset(double containerExtent) {
+  void _checkDragOffset() {
     assert(_status == RefreshIndicatorStatus.drag || _status == RefreshIndicatorStatus.armed);
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) {
+      return;
+    }
+    final double containerExtent = renderBox.size.height;
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     if (_status == RefreshIndicatorStatus.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
