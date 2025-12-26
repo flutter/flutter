@@ -375,7 +375,7 @@ class CommonFinders {
     return byWidgetPredicate((Widget widget) {
       return widget is RawTooltip &&
           (message is RegExp
-              ? message.hasMatch(widget.semanticsTooltip)
+              ? message.hasMatch(widget.semanticsTooltip ?? '')
               : (widget.semanticsTooltip == message));
     }, skipOffstage: skipOffstage);
   }

@@ -128,7 +128,7 @@ class TooltipPositionContext {
 ///
 /// See also:
 ///
-///   * [RawTooltip.waitDuration], which defines the length of time that
+///   * [RawTooltip.hoverDelay], which defines the length of time that
 ///     a pointer must hover over a tooltip's widget before the tooltip
 ///     will be shown.
 enum TooltipTriggerMode {
@@ -226,7 +226,8 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// See also:
 ///
 ///   * [Tooltip], a Material-themed [RawTooltip].
-// TODO(victorsanni): Add an example of how to call ensureTooltipVisible.
+// TODO(victorsanni): https://github.com/flutter/flutter/issues/180318
+// Add an example of how to call ensureTooltipVisible.
 class RawTooltip extends StatefulWidget {
   /// Creates a raw tooltip.
   ///
@@ -236,10 +237,9 @@ class RawTooltip extends StatefulWidget {
     super.key,
     required this.semanticsTooltip,
     required this.tooltipBuilder,
-    this.excludeFromSemantics = false,
-    this.waitDuration = Duration.zero,
-    this.showDuration = const Duration(milliseconds: 1500),
-    this.exitDuration = const Duration(milliseconds: 100),
+    this.hoverDelay = Duration.zero,
+    this.touchDelay = const Duration(milliseconds: 1500),
+    this.dismissDelay = const Duration(milliseconds: 100),
     this.enableTapToDismiss = true,
     this.triggerMode = TooltipTriggerMode.longPress,
     this.enableFeedback = true,
@@ -253,7 +253,10 @@ class RawTooltip extends StatefulWidget {
   ///
   /// This string is used by assistive technologies, most notably screen readers
   /// like TalkBack and VoiceOver, to describe the tooltip's purpose.
-  final String semanticsTooltip;
+  ///
+  /// If non-null and non-empty, the tooltip will add a [Semantics] label that
+  /// is set to this value.
+  final String? semanticsTooltip;
 
   /// Builds the widget that will be displayed in the tooltip's overlay.
   ///
@@ -290,40 +293,32 @@ class RawTooltip extends StatefulWidget {
   /// {@end-tool}
   final TooltipComponentBuilder tooltipBuilder;
 
-  /// Whether the tooltip's [semanticsTooltip] should be excluded from
-  /// the semantics tree.
-  ///
-  /// Set this property to true if the app is going to provide its own custom
-  /// semantics label.
-  ///
-  /// Defaults to false. A tooltip will add a [Semantics] label that is set to
-  /// [semanticsTooltip] if non-empty.
-  final bool excludeFromSemantics;
-
-  /// {@template flutter.widgets.RawTooltip.waitDuration}
+  /// {@template flutter.widgets.RawTooltip.hoverDelay}
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
-  /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
+  /// Defaults to 0 milliseconds (the tooltip is shown immediately upon hover).
   /// {@endtemplate}
-  final Duration waitDuration;
+  final Duration hoverDelay;
 
-  /// {@template flutter.widgets.RawTooltip.showDuration}
+  /// {@template flutter.widgets.RawTooltip.touchDelay}
   /// The length of time that the tooltip will be shown after a long press is
   /// released (if triggerMode is [TooltipTriggerMode.longPress]) or a tap is
-  /// released (if triggerMode is [TooltipTriggerMode.tap]). This property
-  /// does not affect mouse pointer devices.
+  /// released (if triggerMode is [TooltipTriggerMode.tap]).
   ///
-  /// Defaults to 1.5 seconds for long press and tap released
+  /// This property does not affect mouse pointer devices.
+  ///
+  /// Defaults to 1.5 seconds (the tooltip is shown 1.5 seconds after a tap or
+  /// long press is released).
   ///
   /// See also:
   ///
-  ///  * [exitDuration], which allows configuring the time until a pointer
+  ///  * [dismissDelay], which allows configuring the time until a pointer
   /// disappears when hovering.
   /// {@endtemplate}
-  final Duration showDuration;
+  final Duration touchDelay;
 
-  /// {@template flutter.widgets.RawTooltip.exitDuration}
+  /// {@template flutter.widgets.RawTooltip.dismissDelay}
   /// The length of time that a pointer must have stopped hovering over a
   /// tooltip's widget before the tooltip will be hidden.
   ///
@@ -331,10 +326,10 @@ class RawTooltip extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [showDuration], which allows configuring the length of time that a
+  ///  * [touchDelay], which allows configuring the length of time that a
   /// tooltip will be visible after touch events are released.
   /// {@endtemplate}
-  final Duration exitDuration;
+  final Duration dismissDelay;
 
   /// {@template flutter.widgets.RawTooltip.enableTapToDismiss}
   /// Whether the tooltip can be dismissed by tap.
@@ -479,23 +474,22 @@ class RawTooltip extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(
       StringProperty(
-        'semantics tooltip',
+        'semantics',
         semanticsTooltip,
-        showName: semanticsTooltip.isEmpty,
-        defaultValue: semanticsTooltip.isEmpty ? null : kNoDefaultValue,
+        showName: semanticsTooltip == null || semanticsTooltip!.isEmpty,
+        defaultValue: semanticsTooltip == null || semanticsTooltip!.isEmpty
+            ? null
+            : kNoDefaultValue,
       ),
     );
     properties.add(
-      FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true),
+      DiagnosticsProperty<Duration>('hover delay', hoverDelay, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null),
+      DiagnosticsProperty<Duration>('touch delay', touchDelay, defaultValue: null),
     );
     properties.add(
-      DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null),
-    );
-    properties.add(
-      DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null),
+      DiagnosticsProperty<Duration>('dismiss delay', dismissDelay, defaultValue: null),
     );
     properties.add(
       DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null),
@@ -558,21 +552,21 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       case (true, false):
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
-        SemanticsService.tooltip(widget.semanticsTooltip);
+        SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
         break;
     }
     _animationStatus = status;
   }
 
-  void _scheduleShowTooltip({required Duration withDelay, Duration? showDuration}) {
+  void _scheduleShowTooltip({required Duration withDelay, Duration? touchDelay}) {
     assert(mounted);
     void show() {
       assert(mounted);
 
       _controller.forward();
       _timer?.cancel();
-      _timer = showDuration == null ? null : Timer(showDuration, _controller.reverse);
+      _timer = touchDelay == null ? null : Timer(touchDelay, _controller.reverse);
     }
 
     assert(
@@ -685,7 +679,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     _scheduleShowTooltip(
       withDelay: Duration.zero,
       // _activeHoveringPointerDevices keep the tooltip visible.
-      showDuration: _activeHoveringPointerDevices.isEmpty ? widget.showDuration : null,
+      touchDelay: _activeHoveringPointerDevices.isEmpty ? widget.touchDelay : null,
     );
   }
 
@@ -705,7 +699,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     if (_activeHoveringPointerDevices.isNotEmpty) {
       return;
     }
-    _scheduleDismissTooltip(withDelay: widget.showDuration);
+    _scheduleDismissTooltip(withDelay: widget.touchDelay);
   }
 
   // # Current Hovering Behavior:
@@ -736,7 +730,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       tooltip._scheduleDismissTooltip();
     }
     _scheduleShowTooltip(
-      withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : widget.waitDuration,
+      withDelay: tooltipsToDismiss.isNotEmpty ? Duration.zero : widget.hoverDelay,
     );
   }
 
@@ -746,7 +740,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     }
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
-      _scheduleDismissTooltip(withDelay: widget.exitDuration);
+      _scheduleDismissTooltip(withDelay: widget.dismissDelay);
     }
   }
 
@@ -754,7 +748,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   /// Shows the tooltip if it is not already visible.
   ///
   /// After made visible by this method, the tooltip does not automatically
-  /// dismiss after [RawTooltip.waitDuration] until the user dismisses/re-triggers it, or
+  /// dismiss after [RawTooltip.hoverDelay] until the user dismisses/re-triggers it, or
   /// [RawTooltip.dismissAllToolTips] is called.
   ///
   /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
@@ -838,12 +832,14 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
-    if (widget.semanticsTooltip.isEmpty) {
+    if (widget.semanticsTooltip?.isEmpty ?? false) {
       return widget.child;
     }
     assert(debugCheckHasOverlay(context));
-    final bool excludeFromSemantics = widget.excludeFromSemantics;
-    // TODO(victorsanni): Add SemanticsRole.tooltip.
+    final bool excludeFromSemantics =
+        widget.semanticsTooltip == null || widget.semanticsTooltip!.isEmpty;
+    // TODO(victorsanni): https://github.com/flutter/flutter/issues/180320
+    // Add SemanticsRole.tooltip.
     Widget result = Semantics(
       tooltip: excludeFromSemantics ? null : widget.semanticsTooltip,
       child: widget.child,

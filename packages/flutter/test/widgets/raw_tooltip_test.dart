@@ -575,9 +575,9 @@ void main() {
     WidgetTester tester,
   ) async {
     // Specs: https://github.com/flutter/flutter/issues/4182
-    const showDuration = Duration(seconds: 1);
+    const touchDelay = Duration(seconds: 1);
     const eternity = Duration(days: 9999);
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, touchDelay: touchDelay);
 
     final Finder tooltip = find.byType(RawTooltip);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
@@ -594,16 +594,16 @@ void main() {
     await tester.pump();
     expect(find.text(tooltipText), findsOneWidget);
 
-    await tester.pump(showDuration);
+    await tester.pump(touchDelay);
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('RawTooltip is dismissed after a long press and showDuration expired', (
+  testWidgets('RawTooltip is dismissed after a long press and touchDelay expired', (
     WidgetTester tester,
   ) async {
-    const showDuration = Duration(seconds: 3);
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
+    const touchDelay = Duration(seconds: 3);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, touchDelay: touchDelay);
 
     final Finder tooltip = find.byType(RawTooltip);
     final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
@@ -614,17 +614,17 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
     await gesture.up();
 
-    // Tooltip is dismissed after showDuration expired
-    await tester.pump(showDuration);
+    // Tooltip is dismissed after touchDelay expired
+    await tester.pump(touchDelay);
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('RawTooltip is dismissed after a tap and showDuration expired', (
+  testWidgets('RawTooltip is dismissed after a tap and touchDelay expired', (
     WidgetTester tester,
   ) async {
-    const showDuration = Duration(seconds: 3);
-    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, showDuration: showDuration);
+    const touchDelay = Duration(seconds: 3);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.tap, touchDelay: touchDelay);
 
     final Finder tooltip = find.byType(RawTooltip);
     expect(find.text(tooltipText), findsNothing);
@@ -632,8 +632,8 @@ void main() {
     await _testGestureTap(tester, tooltip);
     expect(find.text(tooltipText), findsOneWidget);
 
-    // Tooltip is dismissed after showDuration expired
-    await tester.pump(showDuration);
+    // Tooltip is dismissed after touchDelay expired
+    await tester.pump(touchDelay);
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsNothing);
   });
@@ -682,10 +682,10 @@ void main() {
   });
 
   testWidgets(
-    'Tooltip is dismissed after a tap and showDuration expired when competing with a GestureDetector',
+    'Tooltip is dismissed after a tap and touchDelay expired when competing with a GestureDetector',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/98854
-      const showDuration = Duration(seconds: 3);
+      const touchDelay = Duration(seconds: 3);
       await tester.pumpWidget(
         WidgetsApp(
           color: const Color(0x00000000),
@@ -708,7 +708,7 @@ void main() {
               triggerMode: TooltipTriggerMode.tap,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              showDuration: showDuration,
+              touchDelay: touchDelay,
               child: const SizedBox(width: 100.0, height: 100.0),
             ),
           ),
@@ -723,8 +723,8 @@ void main() {
       await tester.pump(kPressTimeout);
       expect(find.text(tooltipText), findsOneWidget);
 
-      // Tooltip is dismissed after showDuration expired
-      await tester.pump(showDuration);
+      // Tooltip is dismissed after touchDelay expired
+      await tester.pump(touchDelay);
       await tester.pump(const Duration(milliseconds: 10));
       expect(find.text(tooltipText), findsNothing);
     },
@@ -732,7 +732,7 @@ void main() {
 
   testWidgets('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -771,7 +771,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
 
     // Remove the `Tooltip` widget.
     await tester.pumpWidget(
@@ -831,7 +831,7 @@ void main() {
   });
 
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -871,7 +871,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.text(tooltipText), findsOneWidget);
 
     // Wait a looong time to make sure that it doesn't go away if the mouse is
@@ -894,7 +894,7 @@ void main() {
   testWidgets('Tooltip shows without delay when the mouse moves from another tooltip', (
     WidgetTester tester,
   ) async {
-    const waitDuration = Duration(milliseconds: 700);
+    const hoverDelay = Duration(milliseconds: 700);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -923,14 +923,14 @@ void main() {
               semanticsTooltip: 'first tooltip',
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('first tooltip'),
-              waitDuration: waitDuration,
+              hoverDelay: hoverDelay,
               child: const SizedBox(width: 100.0, height: 100.0),
             ),
             RawTooltip(
               semanticsTooltip: 'last tooltip',
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text('last tooltip'),
-              waitDuration: waitDuration,
+              hoverDelay: hoverDelay,
               child: const SizedBox(width: 100.0, height: 100.0),
             ),
           ],
@@ -943,7 +943,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(RawTooltip).first));
     await tester.pump();
     // Wait for the first tooltip to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.text('first tooltip'), findsOneWidget);
     expect(find.text('last tooltip'), findsNothing);
 
@@ -958,7 +958,7 @@ void main() {
   testWidgets(
     'Tooltip shows/hides when the mouse hovers, and then exits and re-enters in quick succession',
     (WidgetTester tester) async {
-      const waitDuration = Duration(milliseconds: 700);
+      const hoverDelay = Duration(milliseconds: 700);
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(() async {
         return gesture.removePointer();
@@ -984,8 +984,8 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: waitDuration,
-              exitDuration: waitDuration,
+              hoverDelay: hoverDelay,
+              dismissDelay: hoverDelay,
               child: const SizedBox(width: 100.0, height: 100.0),
             ),
           ),
@@ -995,7 +995,7 @@ void main() {
       Future<void> mouseEnterAndWaitUntilVisible() async {
         await gesture.moveTo(tester.getCenter(find.byType(RawTooltip)));
         await tester.pump();
-        await tester.pump(waitDuration);
+        await tester.pump(hoverDelay);
         await tester.pumpAndSettle();
         expect(find.text(tooltipText), findsOne);
       }
@@ -1051,7 +1051,7 @@ void main() {
   );
 
   testWidgets('Tooltip text is also hoverable', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -1091,7 +1091,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.text(tooltipText), findsOneWidget);
 
     // Wait a looong time to make sure that it doesn't go away if the mouse is
@@ -1118,7 +1118,7 @@ void main() {
   testWidgets('Tooltip should not show more than one tooltip when hovered', (
     WidgetTester tester,
   ) async {
-    const waitDuration = Duration(milliseconds: 500);
+    const hoverDelay = Duration(milliseconds: 500);
     final innerKey = UniqueKey();
     final outerKey = UniqueKey();
     await tester.pumpWidget(
@@ -1173,7 +1173,7 @@ void main() {
     await tester.pump();
 
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
 
     expect(find.text('Outer'), findsNothing);
     expect(find.text('Inner'), findsOneWidget);
@@ -1195,7 +1195,7 @@ void main() {
   });
 
   testWidgets('Tooltip can be dismissed by escape key', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       if (gesture != null) {
@@ -1236,7 +1236,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.byType(ColoredBox), findsOneWidget);
 
     // Try to dismiss the tooltip with the shortcut key.
@@ -1251,7 +1251,7 @@ void main() {
   });
 
   testWidgets('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -1270,14 +1270,14 @@ void main() {
             children: <Widget>[
               RawTooltip(
                 semanticsTooltip: 'tooltip1',
-                showDuration: const Duration(days: 1),
+                touchDelay: const Duration(days: 1),
                 tooltipBuilder: (context, animation) => const Text('message1'),
                 child: const Text('tooltip1'),
               ),
               const Spacer(flex: 2),
               RawTooltip(
                 semanticsTooltip: 'tooltip2',
-                showDuration: const Duration(days: 1),
+                touchDelay: const Duration(days: 1),
                 tooltipBuilder: (context, animation) => const Text('message2'),
                 child: const Text('tooltip2'),
               ),
@@ -1290,7 +1290,7 @@ void main() {
     tester.state<RawTooltipState>(find.byTooltip('tooltip1')).ensureTooltipVisible();
     tester.state<RawTooltipState>(find.byTooltip('tooltip2')).ensureTooltipVisible();
     await tester.pump();
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     // Make sure both messages are on the screen.
     expect(find.text('message1'), findsOneWidget);
     expect(find.text('message2'), findsOneWidget);
@@ -1304,7 +1304,7 @@ void main() {
 
   testWidgets('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/54096.
-    const waitDuration = Duration(seconds: 1);
+    const hoverDelay = Duration(seconds: 1);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
       return gesture.removePointer();
@@ -1332,7 +1332,7 @@ void main() {
             semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
-            waitDuration: waitDuration,
+            hoverDelay: hoverDelay,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
         ),
@@ -1364,7 +1364,7 @@ void main() {
     );
 
     // If the issue regresses, an exception will be thrown while we are waiting.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
@@ -1458,7 +1458,7 @@ void main() {
                       key: tooltipKey,
                       tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                           FadeTransition(opacity: animation, child: const Text('B')),
-                      showDuration: const Duration(seconds: 50),
+                      touchDelay: const Duration(seconds: 50),
                       semanticsTooltip: 'B',
                       child: const Text('child'),
                     ),
@@ -1629,10 +1629,9 @@ void main() {
         },
         home: Center(
           child: RawTooltip(
-            semanticsTooltip: 'Foo',
+            semanticsTooltip: null,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text('Foo'),
-            excludeFromSemantics: true,
             child: const Text('Bar'),
           ),
         ),
@@ -1737,9 +1736,9 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'wait duration: 0:00:00.000000',
-      'show duration: 0:00:01.500000',
-      'exit duration: 0:00:00.100000',
+      'hover delay: 0:00:00.000000',
+      'touch delay: 0:00:01.500000',
+      'dismiss delay: 0:00:00.100000',
       'triggerMode: TooltipTriggerMode.longPress',
       'enableFeedback: true',
     ]);
@@ -1753,9 +1752,8 @@ void main() {
       key: const ValueKey<String>('foo'),
       tooltipBuilder: (BuildContext context, Animation<double> animation) => const Text('message'),
       semanticsTooltip: 'message',
-      waitDuration: const Duration(seconds: 1),
-      showDuration: const Duration(seconds: 2),
-      excludeFromSemantics: true,
+      hoverDelay: const Duration(seconds: 1),
+      touchDelay: const Duration(seconds: 2),
       triggerMode: TooltipTriggerMode.manual,
       child: const SizedBox.shrink(),
     ).debugFillProperties(builder);
@@ -1767,10 +1765,9 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'semantics: excluded',
-      'wait duration: 0:00:01.000000',
-      'show duration: 0:00:02.000000',
-      'exit duration: 0:00:00.100000',
+      'hover delay: 0:00:01.000000',
+      'touch delay: 0:00:02.000000',
+      'dismiss delay: 0:00:00.100000',
       'triggerMode: TooltipTriggerMode.manual',
       'enableFeedback: true',
     ]);
@@ -1848,7 +1845,7 @@ void main() {
     var onTriggeredCalled = false;
     void onTriggered() => onTriggeredCalled = true;
 
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(Offset.zero);
@@ -1882,12 +1879,12 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(onTriggeredCalled, false);
   });
 
   testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(Offset.zero);
@@ -1927,7 +1924,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.text(tooltipText), findsOneWidget);
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
@@ -1938,8 +1935,8 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Hovered tooltips do not dismiss after showDuration', (WidgetTester tester) async {
-    const Duration waitDuration = Duration.zero;
+  testWidgets('Hovered tooltips do not dismiss after touchDelay', (WidgetTester tester) async {
+    const Duration hoverDelay = Duration.zero;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(Offset.zero);
@@ -1972,7 +1969,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(tooltip));
     await tester.pump();
     // Wait for it to appear.
-    await tester.pump(waitDuration);
+    await tester.pump(hoverDelay);
     expect(find.text(tooltipText), findsOneWidget);
     await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
@@ -1995,10 +1992,10 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Hovered tooltips with showDuration set do dismiss when hovering elsewhere', (
+  testWidgets('Hovered tooltips with touchDelay set do dismiss when hovering elsewhere', (
     WidgetTester tester,
   ) async {
-    const showDuration = Duration(seconds: 1);
+    const touchDelay = Duration(seconds: 1);
 
     await tester.pumpWidget(
       WidgetsApp(
@@ -2018,7 +2015,7 @@ void main() {
             semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
-            showDuration: showDuration,
+            touchDelay: touchDelay,
             child: const SizedBox(width: 100.0, height: 100.0),
           ),
         ),
@@ -2042,7 +2039,7 @@ void main() {
     expect(
       find.text(tooltipText),
       findsNothing,
-      reason: 'Tooltip should not wait for showDuration before it hides itself.',
+      reason: 'Tooltip should not wait for touchDelay before it hides itself.',
     );
   });
 
@@ -2094,10 +2091,10 @@ void main() {
     );
   });
 
-  testWidgets('Hovered tooltips hide after stopping the hover and exitDuration expires', (
+  testWidgets('Hovered tooltips hide after stopping the hover and dismissDelay expires', (
     WidgetTester tester,
   ) async {
-    const exitDuration = Duration(seconds: 1);
+    const dismissDelay = Duration(seconds: 1);
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0x00000000),
@@ -2118,7 +2115,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              exitDuration: exitDuration,
+              dismissDelay: dismissDelay,
               child: const SizedBox.expand(),
             ),
           ),
@@ -2142,7 +2139,7 @@ void main() {
     expect(
       find.text(tooltipText),
       findsOneWidget,
-      reason: 'Tooltip should wait until exitDuration expires before being hidden',
+      reason: 'Tooltip should wait until dismissDelay expires before being hidden',
     );
 
     await tester.pump(const Duration(seconds: 1));
@@ -2359,7 +2356,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               child: const SizedBox.expand(),
             ),
           ),
@@ -2420,7 +2417,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               positionDelegate: (TooltipPositionContext context) => positionDependentBox(
                 size: context.overlaySize,
                 childSize: context.tooltipSize,
@@ -2497,7 +2494,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               child: const SizedBox.expand(),
             ),
           ),
@@ -2545,7 +2542,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               triggerMode: TooltipTriggerMode.tap,
               child: const SizedBox.expand(),
             ),
@@ -2592,7 +2589,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   FadeTransition(opacity: animation, child: const Text(tooltipText)),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               child: const SizedBox.expand(),
             ),
           ),
@@ -2637,7 +2634,7 @@ void main() {
             semanticsTooltip: tooltipText,
             tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                 const Text(tooltipText),
-            waitDuration: const Duration(seconds: 1),
+            hoverDelay: const Duration(seconds: 1),
             child: const SizedBox.square(dimension: 50),
           ),
         ),
@@ -2676,7 +2673,7 @@ void main() {
               semanticsTooltip: tooltipText,
               tooltipBuilder: (BuildContext context, Animation<double> animation) =>
                   const Text(tooltipText),
-              waitDuration: const Duration(seconds: 1),
+              hoverDelay: const Duration(seconds: 1),
               child: const SizedBox.square(dimension: 50),
             ),
           ),
@@ -2748,7 +2745,7 @@ void main() {
 Future<void> setWidgetForTooltipMode(
   WidgetTester tester,
   TooltipTriggerMode triggerMode, {
-  Duration? showDuration,
+  Duration? touchDelay,
   bool? enableTapToDismiss,
   TooltipTriggeredCallback? onTriggered,
   bool? ignorePointer,
@@ -2773,7 +2770,7 @@ Future<void> setWidgetForTooltipMode(
           semanticsTooltip: tooltipText,
           triggerMode: triggerMode,
           onTriggered: onTriggered,
-          showDuration: showDuration ?? const Duration(milliseconds: 1500),
+          touchDelay: touchDelay ?? const Duration(milliseconds: 1500),
           enableTapToDismiss: enableTapToDismiss ?? true,
           positionDelegate: (TooltipPositionContext context) => positionDependentBox(
             size: context.overlaySize,

@@ -40,7 +40,7 @@ import 'shortcuts.dart';
 import 'tap_region.dart';
 import 'text.dart';
 import 'title.dart';
-import 'tooltip.dart';
+import 'raw_tooltip.dart';
 import 'transitions.dart';
 import 'value_listenable_builder.dart';
 import 'widget_inspector.dart';
@@ -1769,8 +1769,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       return true;
     }());
 
-    // TODO(victorsanni): Use actions and shortcuts to dismiss tooltips when
-    // esc is pressed instead of using a Focus widget.
+    // TODO(victorsanni): https://github.com/flutter/flutter/issues/180319
+    // Use actions and shortcuts to dismiss tooltips when esc is pressed instead
+    // of using a Focus widget.
     result = Focus(
       canRequestFocus: false,
       onKeyEvent: (FocusNode node, KeyEvent event) {

@@ -508,26 +508,29 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: widget.child ?? const SizedBox.shrink(),
     );
 
+    final bool excludeFromSemantics =
+        widget.excludeFromSemantics ??
+        _tooltipTheme.excludeFromSemantics ??
+        _defaultExcludeFromSemantics;
+
     if (_visible) {
       effectiveChild = RawTooltip(
         key: _tooltipKey,
-        semanticsTooltip: widget.message ?? widget.richMessage?.toPlainText() ?? '',
+        semanticsTooltip: excludeFromSemantics
+            ? null
+            : widget.message ?? widget.richMessage?.toPlainText() ?? '',
         tooltipBuilder: (BuildContext context, Animation<double> animation) => IgnorePointer(
           ignoring: widget.ignorePointer ?? widget.message != null,
           child: FadeTransition(opacity: animation, child: tooltipBox),
         ),
-        excludeFromSemantics:
-            widget.excludeFromSemantics ??
-            _tooltipTheme.excludeFromSemantics ??
-            _defaultExcludeFromSemantics,
-        showDuration: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
+        touchDelay: widget.showDuration ?? _tooltipTheme.showDuration ?? _defaultShowDuration,
         triggerMode: widget.triggerMode ?? _tooltipTheme.triggerMode ?? _defaultTriggerMode,
         enableFeedback:
             widget.enableFeedback ?? _tooltipTheme.enableFeedback ?? _defaultEnableFeedback,
-        waitDuration: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
+        hoverDelay: widget.waitDuration ?? _tooltipTheme.waitDuration ?? _defaultWaitDuration,
         enableTapToDismiss: widget.enableTapToDismiss,
         onTriggered: widget.onTriggered,
-        exitDuration: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
+        dismissDelay: widget.exitDuration ?? _tooltipTheme.exitDuration ?? _defaultExitDuration,
         positionDelegate: _getDefaultPositionDelegate,
         child: effectiveChild,
       );
