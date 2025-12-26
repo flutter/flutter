@@ -263,6 +263,7 @@ class Dart2WasmCompiler extends TestCompiler {
 
       '--libraries-spec=${environment.dartSdkDir.path}/lib/libraries.json',
       '--enable-asserts',
+      '--enable-experimental-ffi',
       '--enable-experimental-wasm-interop',
 
       '-DFLUTTER_WEB_USE_SKIA=${renderer == Renderer.canvaskit}',
