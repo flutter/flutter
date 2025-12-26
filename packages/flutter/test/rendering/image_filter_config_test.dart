@@ -14,7 +14,7 @@ void main() {
       expect(context.bounds, Rect.zero);
     });
 
-    test('ImageFilterConfig() == and hashCode', () {
+    test('ImageFilterConfig.new == and hashCode', () {
       final imageFilter1 = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
       final imageFilter2 = ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
       final imageFilter3 = ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
@@ -32,12 +32,19 @@ void main() {
       expect(config3.hashCode, config4.hashCode);
     });
 
-    test('ImageFilterConfig() toString and shortDescription', () {
+    test('ImageFilterConfig.new toString and shortDescription', () {
       final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
       final config = ImageFilterConfig(imageFilter);
 
       expect(config.shortDescription, 'blur(5.0, 5.0, unspecified)');
       expect(config.toString(), 'ImageFilterConfig(blur(5.0, 5.0, unspecified))');
+    });
+
+    test('ImageFilterConfig.new get filter', () {
+      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
+      final config = ImageFilterConfig(imageFilter);
+
+      expect(config.filter!.toString(), 'ImageFilter.blur(5.0, 5.0, unspecified))');
     });
 
     test('ImageFilterConfig.blur == and hashCode', () {

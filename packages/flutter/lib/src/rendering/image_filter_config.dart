@@ -108,6 +108,15 @@ abstract class ImageFilterConfig {
   /// the widget applying the filter.
   ui.ImageFilter resolve(ImageFilterContext context);
 
+  /// If this configuration directly wraps a [ui.ImageFilter], returns it.
+  /// Otherwise, returns null.
+  ui.ImageFilter? get filter {
+    if (this case final _DirectImageFilterConfig direct) {
+      return direct.filter;
+    }
+    return null;
+  }
+
   /// The description text to show when the filter is part of a composite
   /// [ImageFilterConfig] created using [ImageFilterConfig.compose].
   String get shortDescription;

@@ -1201,15 +1201,27 @@ class RenderShaderMask extends RenderProxyBox {
 /// such as a blur.
 class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
-  //
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
+  ///
   /// The [blendMode] argument defaults to [BlendMode.srcOver].
   RenderBackdropFilter({
     RenderBox? child,
+    ui.ImageFilter? filter,
     ImageFilterConfig? filterConfig,
     BlendMode blendMode = BlendMode.srcOver,
     bool enabled = true,
     BackdropKey? backdropKey,
-  }) : _filterConfig = filterConfig,
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       _filterConfig = filterConfig ?? ImageFilterConfig(filter!),
        _enabled = enabled,
        _blendMode = blendMode,
        _backdropKey = backdropKey,
@@ -1229,13 +1241,53 @@ class RenderBackdropFilter extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// The image filter to apply to the existing painted content.
+  ///
+  /// For example, consider using [ui.ImageFilter.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filter] property is equivalent to [filterConfig] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  ///
+  /// Assigning a filter via this setter will overwrite any existing
+  /// [filterConfig].
+  ///
+  /// This getter should only be called when the filter is
+  /// assigned via the [filter] setter, otherwise it will throw an assertion
+  /// error.
+  @Deprecated(
+    'Use filterConfig instead. '
+    'This feature was deprecated after v3.22.0-12.0.pre.',
+  )
+  ui.ImageFilter get filter {
+    assert(
+      filterConfig.filter != null,
+      'This getter should only be called when the filter is assigned via the `filter` setter.',
+    );
+    return filterConfig.filter!;
+  }
+
+  set filter(ui.ImageFilter value) {
+    filterConfig = ImageFilterConfig(value);
+  }
+
   /// The configuration for the image filter to apply to the existing painted content.
   ///
-  /// This is the framework-level configuration object that can be resolved
-  /// into a [ui.ImageFilter] at layout time.
-  ImageFilterConfig? get filterConfig => _filterConfig;
-  ImageFilterConfig? _filterConfig;
-  set filterConfig(ImageFilterConfig? value) {
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filterConfig] property is equivalent to [filter] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  ///
+  /// Assigning a new [filterConfig] will overwrite any existing filter
+  /// assigned via the [filter] setter.
+  ImageFilterConfig get filterConfig => _filterConfig;
+  ImageFilterConfig _filterConfig;
+  set filterConfig(ImageFilterConfig value) {
     if (_filterConfig == value) {
       return;
     }

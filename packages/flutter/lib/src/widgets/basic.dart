@@ -693,21 +693,19 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// blur effect.
   ///
   /// The [filter] parameter is equivalent to [filterConfig] (with the help of
-  /// [ImageFilterConfig.fromImageFilter]), except for features only supported
-  /// by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
   /// [ImageFilterConfig.blur]).
-  ///
-  /// Only one of [filter] or [filterConfig] can be provided.
   final ui.ImageFilter? filter;
 
   /// The configuration for the image filter to apply to the existing painted content.
   ///
-  /// For example, consider using [ImageFilter.blur] to create a backdrop
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
   /// blur effect.
   ///
   /// The [filterConfig] parameter is equivalent to [filter] (with the help of
-  /// [ImageFilterConfig.fromImageFilter]), except for features only supported
-  /// by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
   /// [ImageFilterConfig.blur]).
   final ImageFilterConfig? filterConfig;
 
