@@ -34,7 +34,7 @@ const double _previewBorderRadiusRatio = 12.0;
 
 // The duration of the transition used when a modal popup is shown. Eyeballed
 // from a physical device running iOS 13.1.2.
-const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 200);
 
 // The duration it takes for the CupertinoContextMenu to open.
 // This value was eyeballed from the Xcode simulator running iOS 16.0.
@@ -471,7 +471,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
       barrierLabel: CupertinoLocalizations.of(context).menuDismissLabel,
-      filter: ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+      filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       contextMenuLocation: _contextMenuLocation,
       previousChildRect: _decoyChildEndRect!,
       scaleFactor: _scaleFactor,
@@ -786,8 +786,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   double? _scale = 1.0;
   final GlobalKey _sheetGlobalKey = GlobalKey();
 
-  static final CurveTween _curve = CurveTween(curve: Curves.easeOutBack);
-  static final CurveTween _curveReverse = CurveTween(curve: Curves.easeInBack);
+  static final CurveTween _curve = CurveTween(curve: Curves.easeOut);
+  static final CurveTween _curveReverse = CurveTween(curve: Curves.easeIn);
   static final RectTween _rectTween = RectTween();
   static final Animatable<Rect?> _rectAnimatable = _rectTween.chain(_curve);
   static final RectTween _rectTweenReverse = RectTween();
@@ -1091,7 +1091,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
   static const double _kSheetScaleThreshold = 0.9;
   static const double _kPadding = 20.0;
   static const double _kDamping = 400.0;
-  static const Duration _kMoveControllerDuration = Duration(milliseconds: 600);
+  static const Duration _kMoveControllerDuration = Duration(milliseconds: 250);
 
   late Offset _dragOffset;
   double _lastScale = 1.0;
@@ -1279,7 +1279,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic>
       value: 1.0,
       vsync: this,
     );
-    _moveCurvedAnimation = CurvedAnimation(parent: _moveController, curve: Curves.elasticIn);
+    _moveCurvedAnimation = CurvedAnimation(parent: _moveController, curve: Curves.decelerate);
     _sheetController = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 300),
