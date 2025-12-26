@@ -44,7 +44,7 @@ void main() {
       final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
       final config = ImageFilterConfig(imageFilter);
 
-      expect(config.filter!.toString(), 'ImageFilter.blur(5.0, 5.0, unspecified))');
+      expect(config.filter!.toString(), 'ImageFilter.blur(5.0, 5.0, unspecified)');
     });
 
     test('ImageFilterConfig.blur == and hashCode', () {

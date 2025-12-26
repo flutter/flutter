@@ -108,16 +108,17 @@ abstract class ImageFilterConfig {
   /// the widget applying the filter.
   ui.ImageFilter resolve(ImageFilterContext context);
 
-  /// Returns the underlying [ui.ImageFilter] if this configuration does not
-  /// depend on layout information.
+  /// The underlying [ui.ImageFilter] if this configuration was created by
+  /// wrapping an existing filter.
   ///
-  /// This is useful in specialized scenarios where you need access to the
-  /// engine-level object directly and you know the configuration was created
-  /// from a fixed filter (e.g., via [ImageFilterConfig.fromImageFilter]).
+  /// This getter returns non-null only if this object was created using the
+  /// default [ImageFilterConfig.new] constructor.
   ///
-  /// Returns null if the filter is layout-dependent (such as a "bounded" blur)
-  /// and requires an [ImageFilterContext] to be resolved.
-  ui.ImageFilter? get staticFilter {
+  /// For all other constructors (such as [ImageFilterConfig.blur]), this getter
+  /// returns null, even if the filter's parameters do not currently depend on
+  /// layout information. For these configurations, you must use [resolve] to
+  /// obtain the actual [ui.ImageFilter].
+  ui.ImageFilter? get filter {
     if (this case final _DirectImageFilterConfig direct) {
       return direct.filter;
     }
@@ -130,6 +131,38 @@ abstract class ImageFilterConfig {
 
   @override
   String toString() => 'ImageFilterConfig.$shortDescription';
+}
+
+class _DirectImageFilterConfig extends ImageFilterConfig {
+  const _DirectImageFilterConfig(this.filter) : super._();
+
+  @override
+  final ui.ImageFilter filter;
+
+  @override
+  ui.ImageFilter resolve(ImageFilterContext context) {
+    return filter;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _DirectImageFilterConfig && other.filter == filter;
+  }
+
+  @override
+  int get hashCode => filter.hashCode;
+
+  @override
+  String get shortDescription => filter.shortDescription;
+
+  @override
+  String toString() => 'ImageFilterConfig(${filter.shortDescription})';
 }
 
 class _BlurImageFilterConfig extends ImageFilterConfig {
@@ -222,35 +255,4 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
 
   @override
   String toString() => 'ImageFilterConfig.compose(source -> $shortDescription -> result)';
-}
-
-class _DirectImageFilterConfig extends ImageFilterConfig {
-  const _DirectImageFilterConfig(this.filter) : super._();
-
-  final ui.ImageFilter filter;
-
-  @override
-  ui.ImageFilter resolve(ImageFilterContext context) {
-    return filter;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _DirectImageFilterConfig && other.filter == filter;
-  }
-
-  @override
-  int get hashCode => filter.hashCode;
-
-  @override
-  String get shortDescription => filter.shortDescription;
-
-  @override
-  String toString() => 'ImageFilterConfig(${filter.shortDescription})';
 }

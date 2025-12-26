@@ -1262,10 +1262,10 @@ class RenderBackdropFilter extends RenderProxyBox {
   )
   ui.ImageFilter get filter {
     assert(
-      filterConfig.staticFilter != null,
+      filterConfig.filter != null,
       'This getter should only be called when the filter is assigned via the `filter` setter.',
     );
-    return filterConfig.staticFilter!;
+    return filterConfig.filter!;
   }
 
   set filter(ui.ImageFilter value) {
