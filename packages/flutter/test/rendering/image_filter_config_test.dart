@@ -15,9 +15,9 @@ void main() {
     });
 
     test('ImageFilterConfig.new == and hashCode', () {
-      final imageFilter1 = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
-      final imageFilter2 = ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
-      final imageFilter3 = ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+      final imageFilter1 = ui.ImageFilter.blur(sigmaX: 5.1, sigmaY: 5.1);
+      final imageFilter2 = ui.ImageFilter.blur(sigmaX: 10.1, sigmaY: 10.1);
+      final imageFilter3 = ui.ImageFilter.blur(sigmaX: 10.1, sigmaY: 10.1);
 
       final config1 = ImageFilterConfig(imageFilter1);
       final config2 = ImageFilterConfig(imageFilter1);
@@ -33,25 +33,25 @@ void main() {
     });
 
     test('ImageFilterConfig.new toString and shortDescription', () {
-      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
+      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.1, sigmaY: 5.1);
       final config = ImageFilterConfig(imageFilter);
 
-      expect(config.shortDescription, 'blur(5.0, 5.0, unspecified)');
-      expect(config.toString(), 'ImageFilterConfig(blur(5.0, 5.0, unspecified))');
+      expect(config.shortDescription, 'blur(5.1, 5.1, unspecified)');
+      expect(config.toString(), 'ImageFilterConfig(blur(5.1, 5.1, unspecified))');
     });
 
     test('ImageFilterConfig.new get filter', () {
-      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
+      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.1, sigmaY: 5.1);
       final config = ImageFilterConfig(imageFilter);
 
-      expect(config.filter!.toString(), 'ImageFilter.blur(5.0, 5.0, unspecified)');
+      expect(config.filter!.toString(), 'ImageFilter.blur(5.1, 5.1, unspecified)');
     });
 
     test('ImageFilterConfig.blur == and hashCode', () {
-      const config1 = ImageFilterConfig.blur(sigmaX: 5.0, sigmaY: 5.0);
-      const config2 = ImageFilterConfig.blur(sigmaX: 5.0, sigmaY: 5.0);
-      const config3 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
-      const config4 = ImageFilterConfig.blur(sigmaX: 5.0, sigmaY: 5.0, bounded: true);
+      const config1 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1);
+      const config2 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1);
+      const config3 = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
+      const config4 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1, bounded: true);
 
       expect(config1, config2);
       expect(config1.hashCode, config2.hashCode);
@@ -72,8 +72,8 @@ void main() {
     });
 
     test('ImageFilterConfig.compose == and hashCode', () {
-      const blur1 = ImageFilterConfig.blur(sigmaX: 5.0, sigmaY: 5.0);
-      const blur2 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+      const blur1 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1);
+      const blur2 = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
 
       const config1 = ImageFilterConfig.compose(outer: blur1, inner: blur2);
       const config2 = ImageFilterConfig.compose(outer: blur1, inner: blur2);
@@ -86,8 +86,8 @@ void main() {
     });
 
     test('ImageFilterConfig.compose toString and shortDescription', () {
-      const blur1 = ImageFilterConfig.blur(sigmaX: 5.0, sigmaY: 5.0);
-      const blur2 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+      const blur1 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1);
+      const blur2 = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
       const config = ImageFilterConfig.compose(outer: blur1, inner: blur2);
 
       final expectedShortDescription = '${blur2.shortDescription} -> ${blur1.shortDescription}';
@@ -99,24 +99,24 @@ void main() {
     });
 
     test('ImageFilter resolves correctly', () {
-      const bounds = Rect.fromLTWH(0, 0, 100, 100);
+      const bounds = Rect.fromLTWH(0.1, 0.1, 100.1, 100.1);
       const context = ImageFilterContext(bounds: bounds);
 
-      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0);
+      final imageFilter = ui.ImageFilter.blur(sigmaX: 5.1, sigmaY: 5.1);
       final directConfig = ImageFilterConfig(imageFilter);
       expect(directConfig.resolve(context), imageFilter);
 
-      const blurConfig = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+      const blurConfig = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
       final ui.ImageFilter resolvedBlur = blurConfig.resolve(context);
       expect(resolvedBlur, isA<ui.ImageFilter>());
-      expect(resolvedBlur.shortDescription, 'blur(10.0, 10.0, clamp)');
+      expect(resolvedBlur.shortDescription, 'blur(10.1, 10.1, clamp)');
 
-      const boundedBlurConfig = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0, bounded: true);
+      const boundedBlurConfig = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1, bounded: true);
       final ui.ImageFilter resolvedBoundedBlur = boundedBlurConfig.resolve(context);
       expect(resolvedBoundedBlur, isA<ui.ImageFilter>());
       expect(
         resolvedBoundedBlur.shortDescription,
-        'blur(10.0, 10.0, clamp, bounds: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0))',
+        'blur(10.1, 10.1, clamp, bounds: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0))',
       );
 
       const composeConfig = ImageFilterConfig.compose(outer: blurConfig, inner: boundedBlurConfig);
@@ -124,8 +124,8 @@ void main() {
       expect(resolvedCompose, isA<ui.ImageFilter>());
       expect(
         resolvedCompose.shortDescription,
-        'blur(10.0, 10.0, clamp, bounds: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)) '
-        '-> blur(10.0, 10.0, clamp)',
+        'blur(10.1, 10.1, clamp, bounds: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)) '
+        '-> blur(10.1, 10.1, clamp)',
       );
     });
   });

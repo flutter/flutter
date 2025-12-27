@@ -91,7 +91,7 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, Layer
   }
 
   @override
-  String get shortDescription => toString();
+  String toString() => 'ImageFilter.$shortDescription';
 }
 
 class CkColorFilterImageFilter extends CkImageFilter {
