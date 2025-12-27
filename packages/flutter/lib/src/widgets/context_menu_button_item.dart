@@ -48,6 +48,9 @@ enum ContextMenuButtonType {
   ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   liveTextInput,
 
+  /// A button that launches a translation popup for the current text selection
+  translate,
+
   /// Anything other than the default button types.
   custom,
 }

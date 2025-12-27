@@ -1218,6 +1218,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get searchWebButtonLabel => 'Search Web';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get shareButtonLabel => 'Share';
 
   @override

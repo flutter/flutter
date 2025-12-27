@@ -893,6 +893,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                              shareSelectedText:[self textInRange:_selectedTextRange]];
 }
 
+- (void)handleTranslateAction {
+  [self.textInputDelegate flutterTextInputView:self
+                         translateSelectedText:[self textInRange:_selectedTextRange]];
+}
+
 // DFS algorithm to search a UICommand from the menu tree.
 - (UICommand*)searchCommandWithSelector:(SEL)selector
                                 element:(UIMenuElement*)element API_AVAILABLE(ios(16.0)) {
