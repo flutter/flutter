@@ -127,6 +127,7 @@ void main() {
         'blur(10.1, 10.1, clamp, bounds: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)) '
         '-> blur(10.1, 10.1, clamp)',
       );
-    });
+    }, skip: kIsWeb); // `bounds` is currently not supported on Web.
+    // https://github.com/flutter/flutter/issues/175899
   });
 }
