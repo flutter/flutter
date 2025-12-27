@@ -112,7 +112,7 @@ Finder flying(WidgetTester tester, Finder finder) {
 
 void checkBackgroundBoxOffset(WidgetTester tester, int boxIndex, Offset offset) {
   final Widget transitionBackgroundBox = tester
-      .widget<Stack>(flying(tester, find.byType(Stack)))
+      .widget<Stack>(flying(tester, find.byType(Stack)).first)
       .children[boxIndex];
   final Offset testOffset = tester.getBottomRight(
     find.descendant(of: find.byWidget(transitionBackgroundBox), matching: find.byType(SizedBox)),

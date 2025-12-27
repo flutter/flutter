@@ -39,15 +39,17 @@ void main() {
   testWidgets('largeTitle is aligned with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
-        home: CupertinoNavigationBar.large(
-          leading: CupertinoButton(onPressed: null, child: Text('Something')),
-          largeTitle: Text('Title'),
+        home: CupertinoPageScaffold(
+          child: CupertinoNavigationBar.large(
+            leading: CupertinoButton(onPressed: null, child: Text('Something')),
+            largeTitle: Text('Title'),
+          ),
         ),
       ),
     );
 
-    expect(tester.getCenter(find.text('Title')).dx, greaterThan(110.0));
-    expect(tester.getCenter(find.text('Title')).dx, lessThan(111.0));
+    expect(tester.getCenter(find.text('Title')).dx, greaterThan(101.0));
+    expect(tester.getCenter(find.text('Title')).dx, lessThan(102.0));
   });
 
   testWidgets('Middle still in center with back button', (WidgetTester tester) async {
@@ -74,7 +76,9 @@ void main() {
 
   testWidgets('largeTitle still aligned with back button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: CupertinoNavigationBar.large(largeTitle: Text('Title'))),
+      const CupertinoApp(
+        home: CupertinoPageScaffold(child: CupertinoNavigationBar.large(largeTitle: Text('Title'))),
+      ),
     );
 
     tester
@@ -82,7 +86,9 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             builder: (BuildContext context) {
-              return const CupertinoNavigationBar.large(largeTitle: Text('Page 2'));
+              return const CupertinoPageScaffold(
+                child: CupertinoNavigationBar.large(largeTitle: Text('Page 2')),
+              );
             },
           ),
         );
@@ -90,8 +96,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(tester.getCenter(find.text('Page 2')).dx, greaterThan(129.0));
-    expect(tester.getCenter(find.text('Page 2')).dx, lessThan(130.0));
+    expect(tester.getCenter(find.text('Page 2')).dx, greaterThan(119.0));
+    expect(tester.getCenter(find.text('Page 2')).dx, lessThan(120.0));
   });
 
   testWidgets(
@@ -148,12 +154,51 @@ void main() {
       await tester.pump();
 
       expect(
-        tester.widget(find.byType(BackdropFilter)),
+        tester.widget(find.byType(BackdropFilter).last),
         isA<BackdropFilter>().having((BackdropFilter f) => f.enabled, 'filter enabled', true),
       );
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/pull/166019
+  testWidgets('Applied blur does not go outside of bounds when in background', (
+    WidgetTester tester,
+  ) async {
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(controller: scrollController, children: const <Widget>[Placeholder()]),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter).last),
+      isA<BackdropFilter>().having(
+        (BackdropFilter f) => f.blendMode == BlendMode.srcATop,
+        'filter is srcATop',
+        true,
+      ),
+    );
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
+  });
 
   testWidgets("Background doesn't add blur effect when no content is scrolled under", (
     WidgetTester test,
@@ -184,7 +229,7 @@ void main() {
     await test.pump();
 
     expect(
-      test.widget(find.byType(BackdropFilter)),
+      test.widget(find.byType(BackdropFilter).last),
       isA<BackdropFilter>().having(
         (BackdropFilter filter) => filter.enabled,
         'filter enabled',
@@ -2989,6 +3034,7 @@ void main() {
               CupertinoSliverNavigationBar.search(
                 largeTitle: Text('Large title'),
                 searchField: CupertinoSearchTextField(),
+                enableBackgroundFilterBlur: false,
               ),
               SliverFillRemaining(child: SizedBox(height: 300.0)),
             ],
