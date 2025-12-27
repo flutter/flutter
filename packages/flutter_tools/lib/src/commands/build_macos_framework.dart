@@ -367,6 +367,9 @@ end
           );
         }
       }
+
+      // Copy vendored frameworks from plugin podspecs.
+      await copyVendoredFrameworks(modeDirectory, 'macos');
     } finally {
       status.stop();
     }
