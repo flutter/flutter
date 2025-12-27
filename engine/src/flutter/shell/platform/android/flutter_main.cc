@@ -98,6 +98,7 @@ void FlutterMain::Init(JNIEnv* env,
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
+    FML_LOG(ERROR) << "arg: " << arg;
     args.push_back(std::move(arg));
   }
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
@@ -163,7 +164,10 @@ void FlutterMain::Init(JNIEnv* env,
         fml::jni::JavaStringToString(env, kernelPath);
 
     if (fml::IsFile(application_kernel_path)) {
+      FML_LOG(ERROR) << "Application_kernel_path: " << application_kernel_path;
       settings.application_kernel_asset = application_kernel_path;
+    } else {
+      FML_LOG(ERROR) << "No Application_kernel_path";
     }
   }
 

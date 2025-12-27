@@ -77,6 +77,7 @@ public class DartExecutor implements BinaryMessenger {
     if (flutterJNI.isAttached()) {
       isApplicationRunning = true;
     }
+    Log.setLogLevel(Log.VERBOSE);
   }
 
   /**

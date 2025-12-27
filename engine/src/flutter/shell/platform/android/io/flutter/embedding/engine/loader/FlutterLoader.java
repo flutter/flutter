@@ -342,6 +342,7 @@ public class FlutterLoader {
           // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
           // arguments to be used for engine initialization and should be fixed. See
           // https://github.com/flutter/flutter/issues/172553.
+          Log.w(TAG, "Arg: " + arg);
           shellArgs.add(arg);
         }
       }

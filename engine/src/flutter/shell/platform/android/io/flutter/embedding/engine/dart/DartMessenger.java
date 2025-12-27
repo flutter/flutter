@@ -66,6 +66,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
   DartMessenger(@NonNull FlutterJNI flutterJNI, @NonNull TaskQueueFactory taskQueueFactory) {
     this.flutterJNI = flutterJNI;
     this.taskQueueFactory = taskQueueFactory;
+    Log.setLogLevel(Log.VERBOSE);
   }
 
   DartMessenger(@NonNull FlutterJNI flutterJNI) {

@@ -186,12 +186,14 @@ static jlong AttachJNI(JNIEnv* env, jclass clazz, jobject flutterJNI) {
   fml::jni::JavaObjectWeakGlobalRef java_object(env, flutterJNI);
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
       std::make_shared<PlatformViewAndroidJNIImpl>(java_object);
+  FML_LOG(ERROR) << "Attaching JNI/shell holder";
   auto shell_holder = std::make_unique<AndroidShellHolder>(
       FlutterMain::Get().GetSettings(), jni_facade,
       FlutterMain::Get().GetAndroidRenderingAPI());
   if (shell_holder->IsValid()) {
     return reinterpret_cast<jlong>(shell_holder.release());
   } else {
+    FML_LOG(ERROR) << "not valid";
     return 0;
   }
 }
@@ -259,6 +261,7 @@ static void SurfaceCreated(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
                            jobject jsurface) {
+  FML_LOG(ERROR) << "SurfaceCreated";
   // Note: This frame ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
@@ -272,6 +275,7 @@ static void SurfaceWindowChanged(JNIEnv* env,
                                  jobject jcaller,
                                  jlong shell_holder,
                                  jobject jsurface) {
+  FML_LOG(ERROR) << "SurfaceWindowChanged";
   // Note: This frame ensures that any local references used by
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
@@ -287,11 +291,13 @@ static void SurfaceChanged(JNIEnv* env,
                            jlong shell_holder,
                            jint width,
                            jint height) {
+  FML_LOG(ERROR) << "SurfaceChanged";
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
       DlISize(width, height));
 }
 
 static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
+  FML_LOG(ERROR) << "SurfaceDestroyed";
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed();
 }
 
@@ -411,6 +417,7 @@ static void SetViewportMetrics(JNIEnv* env,
       0,                      // p_display_id
   };
 
+  FML_LOG(ERROR) << "SetViewportMetrics";
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
       kFlutterImplicitViewId, metrics);
 }
@@ -467,6 +474,7 @@ static void DispatchPlatformMessage(JNIEnv* env,
                                     jobject message,
                                     jint position,
                                     jint responseId) {
+  FML_LOG(ERROR) << "DispatchPlatformMessage";
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPlatformMessage(
       env,                                         //
       fml::jni::JavaStringToString(env, channel),  //
@@ -481,6 +489,7 @@ static void DispatchEmptyPlatformMessage(JNIEnv* env,
                                          jlong shell_holder,
                                          jstring channel,
                                          jint responseId) {
+  FML_LOG(ERROR) << "DispatchEmptyPlatformMessage";
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchEmptyPlatformMessage(
       env,                                         //
       fml::jni::JavaStringToString(env, channel),  //
@@ -500,6 +509,7 @@ static void DispatchPointerDataPacket(JNIEnv* env,
                                       jlong shell_holder,
                                       jobject buffer,
                                       jint position) {
+  FML_LOG(ERROR) << "DispatchPointerDataPacket";
   uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
   auto packet = std::make_unique<flutter::PointerDataPacket>(data, position);
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPointerDataPacket(
@@ -513,6 +523,7 @@ static void DispatchSemanticsAction(JNIEnv* env,
                                     jint action,
                                     jobject args,
                                     jint args_position) {
+  FML_LOG(ERROR) << "DispatchSemanticsAction";
   ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchSemanticsAction(
       env,           //
       id,            //
@@ -526,6 +537,7 @@ static void SetSemanticsEnabled(JNIEnv* env,
                                 jobject jcaller,
                                 jlong shell_holder,
                                 jboolean enabled) {
+  FML_LOG(ERROR) << "SetSemanticsEnabled";
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetSemanticsEnabled(enabled);
 }
 
@@ -533,6 +545,7 @@ static void SetAccessibilityFeatures(JNIEnv* env,
                                      jobject jcaller,
                                      jlong shell_holder,
                                      jint flags) {
+  FML_LOG(ERROR) << "SetAccessibilityFeatures";
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetAccessibilityFeatures(flags);
 }
 
@@ -545,6 +558,7 @@ static void RegisterTexture(JNIEnv* env,
                             jlong shell_holder,
                             jlong texture_id,
                             jobject surface_texture) {
+  FML_LOG(ERROR) << "RegisterTexture";
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
       static_cast<int64_t>(texture_id),                             //
       fml::jni::ScopedJavaGlobalRef<jobject>(env, surface_texture)  //
@@ -561,6 +575,7 @@ static void RegisterImageTexture(JNIEnv* env,
       reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
                           : ImageExternalTexture::ImageLifecycle::kKeepAlive;
 
+  FML_LOG(ERROR) << "RegisterImageTexture";
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
       static_cast<int64_t>(texture_id),                                  //
       fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
@@ -572,6 +587,7 @@ static void UnregisterTexture(JNIEnv* env,
                               jobject jcaller,
                               jlong shell_holder,
                               jlong texture_id) {
+  FML_LOG(ERROR) << "UnregisterImageTexture";
   ANDROID_SHELL_HOLDER->GetPlatformView()->UnregisterTexture(
       static_cast<int64_t>(texture_id));
 }
@@ -580,11 +596,13 @@ static void MarkTextureFrameAvailable(JNIEnv* env,
                                       jobject jcaller,
                                       jlong shell_holder,
                                       jlong texture_id) {
+  FML_LOG(ERROR) << "MarkTextureFrameAvailable";
   ANDROID_SHELL_HOLDER->GetPlatformView()->MarkTextureFrameAvailable(
       static_cast<int64_t>(texture_id));
 }
 
 static void ScheduleFrame(JNIEnv* env, jobject jcaller, jlong shell_holder) {
+  FML_LOG(ERROR) << "ScheduleFrame";
   ANDROID_SHELL_HOLDER->GetPlatformView()->ScheduleFrame();
 }
 
@@ -697,6 +715,7 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
       std::make_unique<const fml::SymbolMapping>(
           native_lib, DartSnapshot::kIsolateInstructionsSymbol);
 
+  FML_LOG(ERROR) << "LoadDartDeferredLibrary";
   ANDROID_SHELL_HOLDER->GetPlatformView()->LoadDartDeferredLibrary(
       loading_unit_id, std::move(data_mapping),
       std::move(instructions_mapping));
@@ -712,6 +731,7 @@ static void UpdateJavaAssetManager(JNIEnv* env,
       jAssetManager,                                         // asset manager
       fml::jni::JavaStringToString(env, jAssetBundlePath));  // apk asset dir
 
+  FML_LOG(ERROR) << "UpdateJavaAssetManager";
   ANDROID_SHELL_HOLDER->GetPlatformView()->UpdateAssetResolverByType(
       std::move(asset_resolver),
       AssetResolver::AssetResolverType::kApkAssetProvider);
