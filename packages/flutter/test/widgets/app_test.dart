@@ -778,6 +778,17 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
   });
+
+  testWidgets('WidgetsApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox.shrink(
+          child: WidgetsApp(builder: (_, _) => const Text('X'), color: const Color(0xFFAABBCC)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetsApp)), Size.zero);
+  });
 }
 
 typedef SimpleRouterDelegateBuilder =
