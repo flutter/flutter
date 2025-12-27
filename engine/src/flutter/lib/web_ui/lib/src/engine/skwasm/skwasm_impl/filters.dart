@@ -333,9 +333,6 @@ abstract class SkwasmColorFilter {
   /// The handle is deleted immediately after [borrow] returns. The [borrow]
   /// function must not store the handle to avoid dangling pointer bugs.
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow);
-
-  @override
-  String get shortDescription => toString();
 }
 
 class SkwasmModeColorFilter extends SkwasmColorFilter {
@@ -362,9 +359,6 @@ class SkwasmModeColorFilter extends SkwasmColorFilter {
 
   @override
   int get hashCode => Object.hash(color, blendMode);
-
-  @override
-  String get shortDescription => toString();
 
   @override
   String toString() => 'ColorFilter.mode($color, $blendMode)';
