@@ -605,6 +605,91 @@ void _testEngineSemanticsOwner() {
     owner().updateSemantics(builder.build());
   }
 
+    test('tab with linkUrl renders as anchor element with href', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    const url = 'https://flutter.dev';
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      linkUrl: url,
+      label: 'tab link label',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.tagName.toLowerCase(), 'a');
+    expect(object.element.getAttribute('role'), 'tab');
+    expect(object.element.getAttribute('href'), url);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('tab without linkUrl renders as default element', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      label: 'regular tab',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.tagName.toLowerCase(), isNot('a'));
+    expect(object.element.getAttribute('role'), 'tab');
+    expect(object.element.hasAttribute('href'), isFalse);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('tab linkUrl can be updated dynamically', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    const url1 = 'https://flutter.dev';
+    const url2 = 'https://dart.dev';
+    final tester = SemanticsTester(owner());
+
+    // Initial state with linkUrl
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      linkUrl: url1,
+      label: 'tab link',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('href'), url1);
+
+    // Update to different URL
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.tab,
+      linkUrl: url2,
+      label: 'tab link',
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expect(object.element.getAttribute('href'), url2);
+
+    semantics().semanticsEnabled = false;
+  });
+
   void renderLabel(String label) {
     renderSemantics(label: label);
   }

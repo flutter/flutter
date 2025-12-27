@@ -1,7 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
+import '../dom.dart';
 import 'label_and_value.dart';
 import 'semantics.dart';
 
@@ -20,6 +20,33 @@ class SemanticTab extends SemanticRole {
       ) {
     setAriaRole('tab');
     addTappable();
+  }
+
+  @override
+  DomElement createElement() {
+    // When the tab has a link URL, render as an <a> element to enable
+    // proper link functionality (right-click copy, SEO indexing) while
+    // still using role="tab" for accessibility.
+    if (semanticsObject.hasLinkUrl) {
+      final DomElement element = domDocument.createElement('a');
+      element.style.display = 'block';
+      return element;
+    }
+    return super.createElement();
+  }
+
+  @override
+  void update() {
+    super.update();
+
+    // Update the href attribute when the link URL changes.
+    if (semanticsObject.isLinkUrlDirty) {
+      if (semanticsObject.hasLinkUrl) {
+        element.setAttribute('href', semanticsObject.linkUrl!);
+      } else {
+        element.removeAttribute('href');
+      }
+    }
   }
 
   @override
