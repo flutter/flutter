@@ -915,36 +915,24 @@ void main() {
       'Every TableRow in a Table must have at least one child, so there is no empty row.',
     );
   });
-
   // Regression test for https://github.com/flutter/flutter/issues/180337.
-  // Verifies that placing a Slider (uses OverlayPortal) inside a TableRow
+  // Verifies that placing a Slider (which uses OverlayPortal) inside a TableRow
   // does not trigger a render object ownership assertion.
-  testWidgets(
-    'Table widget - Slider inside TableRow does not crash',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-         MaterialApp(
-          home: Scaffold(
-            body: Table(
-              children: <TableRow>[
-                TableRow(
-                  children: <Widget>[
-                    Slider(
-                      value: 0.0,
-                      onChanged: null,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+  testWidgets('Table widget - Slider inside TableRow does not crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Table(
+            children: <TableRow>[
+              TableRow(children: <Widget>[Slider(value: 0.0, onChanged: null)]),
+            ],
           ),
         ),
-      );
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    },
-  );
-
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('Set defaultVerticalAlignment to intrinsic height and check their heights', (
     WidgetTester tester,
   ) async {
