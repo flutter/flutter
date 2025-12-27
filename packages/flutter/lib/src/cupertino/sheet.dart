@@ -124,6 +124,10 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// means the sheet takes up only the bottom 10% of the screen. If not provided, defaults
 /// to 0.08 (8% of screen height).
 ///
+/// When `showDragHandle` is set to `true`, then an iOS-style drag handle will
+/// be placed at the top of the sheet. If a value is not provided, then it will
+/// default to false.
+///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
@@ -162,6 +166,7 @@ Future<T?> showCupertinoSheet<T>({
   bool useNestedNavigation = false,
   bool enableDrag = true,
   double? topGap,
+  bool showDragHandle = false,
 }) {
   assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null);
@@ -203,10 +208,14 @@ Future<T?> showCupertinoSheet<T>({
     };
   }
 
-  return Navigator.of(
-    context,
-    rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: widgetBuilder, enableDrag: enableDrag, topGap: topGap));
+  return Navigator.of(context, rootNavigator: true).push<T>(
+    CupertinoSheetRoute<T>(
+      builder: widgetBuilder,
+      enableDrag: enableDrag,
+      showDragHandle: showDragHandle,
+      topGap: topGap,
+    ),
+  );
 }
 
 /// Provides an iOS-style sheet transition.
@@ -575,6 +584,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     required this.builder,
     this.enableDrag = true,
     double? topGap,
+    this.showDragHandle = false,
   }) : assert(
          topGap == null || (topGap >= 0.0 && topGap <= 0.9),
          'topGap must be between 0.0 and 0.9',
@@ -596,6 +606,45 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   @override
   bool get _hasCustomTopGap => _topGap != null;
 
+  /// Shows a drag handle at the top of the sheet.
+  ///
+  /// Defaults to false.
+  final bool showDragHandle;
+
+  Widget _dragHandleBuilder(BuildContext context) {
+    if (!showDragHandle) {
+      return builder(context);
+    }
+
+    const dragHandleTopPadding = 5.0;
+    const dragHandleHeight = 5.0;
+    const dragHandleWidth = 36.0;
+
+    return Stack(
+      children: <Widget>[
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(viewInsets: const EdgeInsets.only(top: 30)),
+          child: builder(context),
+        ),
+        const Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsetsGeometry.only(top: dragHandleTopPadding),
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                shape: RoundedSuperellipseBorder(
+                  borderRadius: BorderRadiusGeometry.all(Radius.circular(dragHandleWidth / 2)),
+                ),
+                color: CupertinoColors.tertiaryLabel,
+              ),
+              child: SizedBox(height: dragHandleHeight, width: dragHandleWidth),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget buildContent(BuildContext context) {
     return MediaQuery.removePadding(
@@ -605,7 +654,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: builder(context)),
+          child: _CupertinoSheetScope(child: _dragHandleBuilder(context)),
         ),
       ),
     );
