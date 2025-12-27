@@ -2075,7 +2075,7 @@ void main() {
     await tester.pumpWidget(buildWidget());
 
     final Finder ignorePointerFinder = find
-        .descendant(of: find.byType(ExpansionPanelList), matching: find.byType(IgnorePointer))
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(IgnorePointer))
         .first;
 
     final IgnorePointer ignorePointerFalse = tester.widget(ignorePointerFinder);
@@ -2086,5 +2086,54 @@ void main() {
 
     final IgnorePointer ignorePointerTrue = tester.widget(ignorePointerFinder);
     expect(ignorePointerTrue.ignoring, isTrue);
+  });
+
+  testWidgets('ExpansionPanel hides ExpandIcon when expandable is false', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWidget({bool expandable = true}) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                expandable: expandable,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content for Panel')),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Test default behavior (expandable: true).
+    await tester.pumpWidget(buildWidget());
+
+    final Finder visibilityFinder = find
+        .ancestor(of: find.byType(ExpandIcon), matching: find.byType(Visibility))
+        .first;
+
+    Visibility visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isTrue);
+    expect(visibility.maintainSize, isTrue);
+    expect(visibility.maintainAnimation, isTrue);
+    expect(visibility.maintainState, isTrue);
+
+    // Test with expandable: false.
+    await tester.pumpWidget(buildWidget(expandable: false));
+    await tester.pumpAndSettle();
+
+    visibility = tester.widget(visibilityFinder);
+    expect(visibility.visible, isFalse);
+    // Verify that space is still maintained for consistent layout.
+    expect(visibility.maintainSize, isTrue);
+    expect(visibility.maintainAnimation, isTrue);
+    expect(visibility.maintainState, isTrue);
+
+    // Verify that ExpandIcon is still in the tree (just not visible).
+    expect(find.byType(ExpandIcon), findsOneWidget);
   });
 }
