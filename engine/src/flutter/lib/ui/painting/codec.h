@@ -20,6 +20,8 @@ class Codec : public RefCountedDartWrappable<Codec> {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  virtual ~Codec() = default;
+
   virtual int frameCount() const = 0;
 
   virtual int repetitionCount() const = 0;
