@@ -140,6 +140,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerWin32(
@@ -148,6 +149,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
     );
   }
 
@@ -159,6 +161,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     return DialogWindowControllerWin32(
       owner: this,
@@ -166,6 +169,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
+      decorated: decorated,
       parent: parent,
     );
   }
@@ -277,6 +281,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -292,6 +297,7 @@ class RegularWindowControllerWin32 extends RegularWindowController {
       preferredSize,
       preferredConstraints,
       title,
+      decorated,
     );
     if (viewId < 0) {
       throw Exception('Windows failed to create a regular window with a valid view id.');
@@ -508,6 +514,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
     BaseWindowController? parent,
   }) : _owner = owner,
        _delegate = delegate,
@@ -525,6 +532,7 @@ class DialogWindowControllerWin32 extends DialogWindowController {
       preferredSize,
       preferredConstraints,
       title,
+      decorated,
       parent != null
           ? _Win32PlatformInterface.getWindowHandle(
               WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -712,6 +720,7 @@ class _Win32PlatformInterface {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated,
   ) {
     final ffi.Pointer<_RegularWindowCreationRequest> request =
         allocator<_RegularWindowCreationRequest>();
@@ -719,6 +728,7 @@ class _Win32PlatformInterface {
       request.ref.preferredSize.from(preferredSize);
       request.ref.preferredConstraints.from(preferredConstraints);
       request.ref.title = (title ?? 'Regular window').toNativeUtf16(allocator: allocator);
+      request.ref.decorated = decorated;
       return _createRegularWindow(engineId, request);
     } finally {
       allocator.free(request);
@@ -739,6 +749,7 @@ class _Win32PlatformInterface {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated,
     HWND? parent,
   ) {
     final ffi.Pointer<_DialogWindowCreationRequest> request =
@@ -747,6 +758,7 @@ class _Win32PlatformInterface {
       request.ref.preferredSize.from(preferredSize);
       request.ref.preferredConstraints.from(preferredConstraints);
       request.ref.title = (title ?? 'Dialog window').toNativeUtf16(allocator: allocator);
+      request.ref.decorated = decorated;
       request.ref.parentOrNull = parent ?? ffi.Pointer<ffi.Void>.fromAddress(0);
       return _createDialogWindow(engineId, request);
     } finally {
@@ -899,6 +911,8 @@ final class _RegularWindowCreationRequest extends ffi.Struct {
   external _WindowSizeRequest preferredSize;
   external _WindowConstraintsRequest preferredConstraints;
   external ffi.Pointer<_Utf16> title;
+  @ffi.Bool()
+  external bool decorated;
 }
 
 /// Payload for the creation method used by [_Win32PlatformInterface.createDialogWindow].
@@ -906,6 +920,8 @@ final class _DialogWindowCreationRequest extends ffi.Struct {
   external _WindowSizeRequest preferredSize;
   external _WindowConstraintsRequest preferredConstraints;
   external ffi.Pointer<_Utf16> title;
+  @ffi.Bool()
+  external bool decorated;
   external HWND parentOrNull;
 }
 

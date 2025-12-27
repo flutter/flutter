@@ -586,6 +586,7 @@ class _TestWindowingOwner extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) {
     return _TestRegularWindowController(
       delegate: delegate,
@@ -605,6 +606,7 @@ class _TestWindowingOwner extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     return _TestDialogWindowController(
       delegate: delegate,

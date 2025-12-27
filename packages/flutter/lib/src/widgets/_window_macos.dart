@@ -80,12 +80,14 @@ class WindowingOwnerMacOS extends WindowingOwner {
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) {
     final res = RegularWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       preferredSize: preferredSize,
       title: title,
+      decorated: decorated,
     );
     _activeControllers.add(res);
     return res;
@@ -98,6 +100,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     BoxConstraints? preferredConstraints,
     BaseWindowController? parent,
     String? title,
+    bool decorated = true,
   }) {
     final res = DialogWindowControllerMacOS(
       owner: this,
@@ -105,6 +108,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
       preferredSize: preferredSize,
       parent: parent,
       title: title,
+      decorated: decorated,
     );
     _activeControllers.add(res);
     return res;
@@ -152,6 +156,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -163,6 +168,7 @@ class RegularWindowControllerMacOS extends RegularWindowController {
     _onWillClose = NativeCallable<Void Function()>.isolateLocal(_handleOnWillClose);
     _onResize = NativeCallable<Void Function()>.isolateLocal(_handleOnResize);
     final int viewId = _MacOSPlatformInterface.createRegularWindow(
+      decorated: decorated,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -323,6 +329,7 @@ class DialogWindowControllerMacOS extends DialogWindowController {
     this.parent,
     BoxConstraints? preferredConstraints,
     String? title,
+    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
@@ -334,6 +341,7 @@ class DialogWindowControllerMacOS extends DialogWindowController {
     _onWillClose = NativeCallable<Void Function()>.isolateLocal(_handleOnWillClose);
     _onResize = NativeCallable<Void Function()>.isolateLocal(_handleOnResize);
     final int viewId = _MacOSPlatformInterface.createDialogWindow(
+      decorated: decorated,
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       onShouldClose: _onShouldClose.nativeFunction,
@@ -459,6 +467,9 @@ class DialogWindowControllerMacOS extends DialogWindowController {
 
 final class _WindowCreationRequest extends Struct {
   @Bool()
+  external bool decorated;
+
+  @Bool()
   external bool hasSize;
   external _Size contentSize;
 
@@ -541,6 +552,7 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createRegularWindow({
+    bool decorated = true,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
@@ -548,6 +560,7 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
+      ..ref.decorated = decorated
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners;
@@ -582,6 +595,7 @@ class _MacOSPlatformInterface {
 
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createDialogWindow({
+    bool decorated = true,
     required Size? preferredSize,
     BoxConstraints? preferredConstraints,
     int? parentViewId,
@@ -590,6 +604,7 @@ class _MacOSPlatformInterface {
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
   }) {
     final Pointer<_WindowCreationRequest> request = _allocator<_WindowCreationRequest>()
+      ..ref.decorated = decorated
       ..ref.onShouldClose = onShouldClose
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners

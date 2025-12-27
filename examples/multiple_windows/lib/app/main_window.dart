@@ -172,6 +172,7 @@ class _WindowCreatorCard extends StatelessWidget {
                           ),
                           title: 'Regular',
                           preferredSize: windowSettings.regularSize,
+                          decorated: windowSettings.regularDecorated,
                         ),
                       ),
                     );

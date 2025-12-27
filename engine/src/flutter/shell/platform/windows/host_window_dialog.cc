@@ -37,17 +37,21 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
+                                   bool decorated,
                                    std::optional<HWND> const& owner_window)
-    : HostWindow(
-          window_manager,
-          engine,
-          WindowArchetype::kDialog,
-          GetWindowStyleForDialog(owner_window),
-          GetExtendedWindowStyleForDialog(owner_window),
-          constraints,
-          GetInitialRect(engine, preferred_size, constraints, owner_window),
-          title,
-          owner_window) {
+    : HostWindow(window_manager,
+                 engine,
+                 WindowArchetype::kDialog,
+                 decorated ? GetWindowStyleForDialog(owner_window) : 0,
+                 GetExtendedWindowStyleForDialog(owner_window),
+                 constraints,
+                 GetInitialRect(engine,
+                                preferred_size,
+                                constraints,
+                                owner_window,
+                                decorated),
+                 title,
+                 owner_window) {
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
@@ -63,8 +67,10 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
-                                      std::optional<HWND> const& owner_window) {
-  auto const window_style = GetWindowStyleForDialog(owner_window);
+                                      std::optional<HWND> const& owner_window,
+                                      bool decorated) {
+  auto const window_style =
+      decorated ? GetWindowStyleForDialog(owner_window) : 0;
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
   std::optional<Size> const window_size =
