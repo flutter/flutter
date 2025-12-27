@@ -1977,6 +1977,214 @@ void main() {
     });
   });
 
+  group('CarouselView onIndexChanged callback', () {
+    testWidgets('CarouselView shows correct item after animation', (WidgetTester tester) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+      var leadingIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView(
+              itemExtent: 300,
+              controller: controller,
+              onIndexChanged: (int index) {
+                leadingIndex = index;
+              },
+              children: List<Widget>.generate(6, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      controller.animateToItem(
+        3,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.leadingItem, equals(3));
+      expect(leadingIndex, equals(3));
+
+      controller.animateToItem(
+        1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.linear,
+      );
+
+      await tester.pumpAndSettle();
+      expect(controller.leadingItem, equals(1));
+      expect(leadingIndex, equals(1));
+    });
+
+    testWidgets(
+      'CarouselView.weighted shows correct item after animation with symmetric flexWeights',
+      (WidgetTester tester) async {
+        final controller = CarouselController();
+        addTearDown(controller.dispose);
+        var leadingIndex = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weighted(
+                flexWeights: const [2, 5, 2],
+                controller: controller,
+                onIndexChanged: (int index) => leadingIndex = index,
+                children: List.generate(6, (i) => Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Animate the carousel so item 4 is placed in the first position with max weight (5)
+        // in `flexWeights`, resulting in item 3 as the leading item.
+        controller.animateToItem(
+          4,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.leadingItem, equals(3));
+        expect(leadingIndex, equals(3));
+        expect(find.text('Item 3'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'CarouselView.weighted shows correct item after animation with asymmetric flexWeights',
+      (WidgetTester tester) async {
+        final controller = CarouselController();
+        addTearDown(controller.dispose);
+        var leadingIndex = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weighted(
+                flexWeights: const [1, 2, 3, 4],
+                controller: controller,
+                onIndexChanged: (int index) => leadingIndex = index,
+                children: List.generate(6, (i) => Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        controller.animateToItem(
+          2,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.leadingItem, equals(0));
+        expect(leadingIndex, equals(0));
+      },
+    );
+
+    testWidgets('CarouselView shows the correct item after dragging', (WidgetTester tester) async {
+      final controller = CarouselController();
+      addTearDown(controller.dispose);
+      var leadingIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 5, 2],
+              controller: controller,
+              itemSnapping: true,
+              onIndexChanged: (int index) {
+                leadingIndex = index;
+              },
+              children: List<Widget>.generate(5, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+
+      expect(controller.leadingItem, equals(1));
+      expect(leadingIndex, equals(1));
+    });
+
+    testWidgets(
+      'CarouselView.weighted resolves leading item correctly when multiple items share the largest weight',
+      (WidgetTester tester) async {
+        final controller = CarouselController();
+        addTearDown(controller.dispose);
+        var leadingIndex = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CarouselView.weighted(
+                flexWeights: const [5, 5, 2, 3],
+                controller: controller,
+                itemSnapping: true,
+                onIndexChanged: (int index) => leadingIndex = index,
+                children: List.generate(4, (i) => Text('Item $i')),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // First max-weight item wins initially.
+        expect(controller.leadingItem, equals(0));
+        expect(leadingIndex, equals(0));
+        expect(find.text('Item 0'), findsOneWidget);
+
+        // Move to the next max-weight item.
+        controller.animateToItem(
+          1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.leadingItem, equals(1));
+        expect(leadingIndex, equals(1));
+        expect(find.text('Item 1'), findsOneWidget);
+      },
+    );
+
+    testWidgets('CarouselView.weighted starts with the correct initial item', (
+      WidgetTester tester,
+    ) async {
+      final controller = CarouselController(initialItem: 2);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 5, 2],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(5, (int i) => Text('Item $i')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(controller.leadingItem, equals(1));
+      expect(find.text('Item 1'), findsOneWidget);
+    });
+  });
+
   group('CarouselView item clipBehavior', () {
     testWidgets('CarouselView Item clipBehavior defaults to Clip.antiAlias', (
       WidgetTester tester,
