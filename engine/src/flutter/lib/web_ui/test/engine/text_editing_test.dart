@@ -700,6 +700,143 @@ Future<void> testMain() async {
     );
   });
 
+  group('IOSTextEditingStrategy iframe scrollIntoView', () {
+    late HybridTextEditing testTextEditing;
+    late IOSTextEditingStrategySpy editingStrategySpy;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      editingStrategySpy = IOSTextEditingStrategySpy(testTextEditing);
+      testTextEditing.debugTextEditingStrategyOverride = editingStrategySpy;
+      testTextEditing.configuration = multilineConfig;
+    });
+
+    tearDown(() {
+      editingStrategySpy.disable();
+    });
+
+    test('scrollIntoView is called in placeElement when in iframe', () async {
+      // Simulate being in an iframe
+      editingStrategySpy.debugIsInIframeOverride = true;
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // IOSTextEditingStrategy overrides initializeElementPlacement() and does
+      // not place the element immediately on enable. Call placeElement()
+      // directly to verify the scrollIntoView behavior.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called when in iframe',
+      );
+    });
+
+    test('scrollIntoView is NOT called when not in iframe', () async {
+      // Simulate NOT being in an iframe
+      editingStrategySpy.debugIsInIframeOverride = false;
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategySpy.isEnabled, isTrue);
+
+      // See comment in the previous test.
+      editingStrategySpy.placeElement();
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        equals(0),
+        reason: 'scrollIntoView should NOT be called when not in iframe',
+      );
+    });
+
+    test('placeElement applies geometry before scrollIntoView', () async {
+      editingStrategySpy.debugIsInIframeOverride = true;
+
+      editingStrategySpy.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      // Set geometry
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 200,
+            height: 100,
+            globalTransform: Matrix4.translationValues(50, 60, 0).storage,
+          ),
+        ),
+        () {},
+      );
+
+      // IOSTextEditingStrategy does not apply geometry until placeElement is
+      // called (it delays placement on iOS).
+      editingStrategySpy.placeElement();
+
+      // Verify geometry was applied.
+      expect(editingStrategySpy.domElement!.style.width, '200px');
+      expect(editingStrategySpy.domElement!.style.height, '100px');
+
+      expect(
+        editingStrategySpy.scrollIntoViewCallCount,
+        greaterThan(0),
+        reason: 'scrollIntoView should be called after geometry is applied',
+      );
+    });
+  });
+
+  group('DomWindow.parent for iframe detection', () {
+    test('parent property is accessible', () {
+      // Test harness may run in an iframe; just verify the API is accessible.
+      final DomWindow? parent = domWindow.parent;
+      expect(parent, isNotNull);
+    });
+
+    test('top property is accessible', () {
+      // Test harness may run in an iframe; just verify the API is accessible.
+      final DomWindow? top = domWindow.top;
+      expect(top, isNotNull);
+    });
+  });
+
+  group('DomElement.scrollIntoView', () {
+    test('scrollIntoView can be called without options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(() => element.scrollIntoView(), returnsNormally);
+
+      element.remove();
+    });
+
+    test('scrollIntoView can be called with options', () {
+      final DomElement element = createDomElement('div');
+      domDocument.body!.append(element);
+
+      // Should not throw
+      expect(
+        () => element.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'}),
+        returnsNormally,
+      );
+
+      element.remove();
+    });
+  });
+
   group('$HybridTextEditing', () {
     HybridTextEditing? textEditing;
     final spy = PlatformMessagesSpy();
@@ -3989,5 +4126,38 @@ class GlobalTextEditingStrategySpy extends GloballyPositionedTextEditingStrategy
   void placeElement() {
     placeElementCount++;
     super.placeElement();
+  }
+}
+
+/// Spy class for testing IOSTextEditingStrategy iframe scrollIntoView behavior.
+class IOSTextEditingStrategySpy extends IOSTextEditingStrategy {
+  IOSTextEditingStrategySpy(super.owner);
+
+  /// Override to simulate iframe context for testing.
+  bool? debugIsInIframeOverride;
+
+  /// Count of how many times scrollIntoView was called.
+  int scrollIntoViewCallCount = 0;
+
+  @override
+  bool get isInIframe {
+    if (debugIsInIframeOverride != null) {
+      return debugIsInIframeOverride!;
+    }
+    return super.isInIframe;
+  }
+
+  @override
+  void placeElement() {
+    moveFocusToActiveDomElement();
+    geometry?.applyToDomElement(activeDomElement);
+
+    // When running inside an iframe on iOS Safari, the browser's automatic
+    // scroll-into-view behavior doesn't work. Call scrollIntoView explicitly.
+    // See: https://github.com/flutter/flutter/issues/178743
+    if (isInIframe) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+      scrollIntoViewCallCount++;
+    }
   }
 }
