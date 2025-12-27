@@ -1,15 +1,6 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-/// @docImport 'chip.dart';
-/// @docImport 'color_scheme.dart';
-/// @docImport 'list_tile.dart';
-library;
-
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
+import 'raw_circle_avatar.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -173,29 +164,6 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double? maxRadius;
 
-  // The default radius if nothing is specified.
-  static const double _defaultRadius = 20.0;
-
-  // The default min if only the max is specified.
-  static const double _defaultMinRadius = 0.0;
-
-  // The default max if only the min is specified.
-  static const double _defaultMaxRadius = double.infinity;
-
-  double get _minDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
-    }
-    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
-  }
-
-  double get _maxDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
-    }
-    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -219,49 +187,26 @@ class CircleAvatar extends StatelessWidget {
         Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
       };
     }
-    final double minDiameter = _minDiameter;
-    final double maxDiameter = _maxDiameter;
-    return AnimatedContainer(
-      constraints: BoxConstraints(
-        minHeight: minDiameter,
-        minWidth: minDiameter,
-        maxWidth: maxDiameter,
-        maxHeight: maxDiameter,
-      ),
-      duration: kThemeChangeDuration,
-      decoration: BoxDecoration(
-        color: effectiveBackgroundColor,
-        image: backgroundImage != null
-            ? DecorationImage(
-                image: backgroundImage!,
-                onError: onBackgroundImageError,
-                fit: BoxFit.cover,
-              )
-            : null,
-        shape: BoxShape.circle,
-      ),
-      foregroundDecoration: foregroundImage != null
-          ? BoxDecoration(
-              image: DecorationImage(
-                image: foregroundImage!,
-                onError: onForegroundImageError,
-                fit: BoxFit.cover,
-              ),
-              shape: BoxShape.circle,
-            )
-          : null,
-      child: child == null
-          ? null
-          : Center(
-              // Need to disable text scaling here so that the text doesn't
-              // escape the avatar when the textScaleFactor is large.
-              child: MediaQuery.withNoTextScaling(
-                child: IconTheme(
-                  data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: DefaultTextStyle(style: textStyle, child: child!),
-                ),
-              ),
-            ),
+
+    final Widget? childContent = child == null
+        ? null
+        : IconTheme(
+            data: theme.iconTheme.copyWith(color: textStyle.color),
+            child: DefaultTextStyle(style: textStyle, child: child!),
+          );
+
+    return RawCircleAvatar(
+      key: key,
+      backgroundColor: effectiveBackgroundColor,
+      backgroundImage: backgroundImage,
+      foregroundImage: foregroundImage,
+      onBackgroundImageError: onBackgroundImageError,
+      onForegroundImageError: onForegroundImageError,
+      foregroundColor: foregroundColor,
+      radius: radius,
+      minRadius: minRadius,
+      maxRadius: maxRadius,
+      child: childContent,
     );
   }
 }
