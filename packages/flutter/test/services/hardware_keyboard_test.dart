@@ -596,6 +596,25 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  testWidgets('Skips asserts before keyboard state initialization', (WidgetTester tester) async {
+    addTearDown(() => HardwareKeyboard.instance.clearState());
+    const KeyUpEvent strayUp = KeyUpEvent(
+      physicalKey: PhysicalKeyboardKey.keyA,
+      logicalKey: LogicalKeyboardKey.keyA,
+      timeStamp: Duration.zero,
+    );
+
+    // Before initialization, a stray KeyUpEvent should not trigger assertions.
+    expect(() => HardwareKeyboard.instance.handleKeyEvent(strayUp), returnsNormally);
+
+    // Initialize keyboard state, but make sure the pressed set is empty for determinism.
+    await HardwareKeyboard.instance.syncKeyboardState();
+    expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
+
+    // After initialization, the same stray KeyUpEvent should assert in debug mode.
+    expect(() => HardwareKeyboard.instance.handleKeyEvent(strayUp), throwsAssertionError);
+  });
 }
 
 Future<void> _runWhileOverridingOnError(
