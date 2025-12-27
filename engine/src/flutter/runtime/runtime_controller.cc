@@ -316,6 +316,15 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
   return false;
 }
 
+bool RuntimeController::TextureFrameAvailable(int64_t texture_id) {
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->TextureFrameAvailable(texture_id);
+    return true;
+  }
+
+  return false;
+}
+
 bool RuntimeController::NotifyIdle(fml::TimeDelta deadline) {
   if (deadline - fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros()) <
       fml::TimeDelta::FromMilliseconds(1)) {
