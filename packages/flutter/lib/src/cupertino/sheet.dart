@@ -641,6 +641,14 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   bool get opaque => false;
+
+  /// This property is not applicable to [CupertinoSheetRoute].
+  ///
+  /// Cupertino sheets always slide up from the bottom and are not fullscreen
+  /// dialogs. This property is inherited from [PageRoute] but has no effect
+  /// on the sheet's behavior or appearance.
+  @override
+  bool get fullscreenDialog => false;
 }
 
 // Internally used to see if another sheet is in the tree already.
