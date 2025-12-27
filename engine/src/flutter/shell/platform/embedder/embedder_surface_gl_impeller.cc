@@ -10,10 +10,42 @@
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
+#include "impeller/entity/gles3/entity_shaders_gles.h"
+#include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles3/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
 namespace flutter {
+
+namespace {
+std::vector<std::shared_ptr<fml::Mapping>> GetShaderMappings(bool is_gles3) {
+  if (is_gles3) {
+    return {
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_entity_shaders_gles3_data,
+            impeller_entity_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_gles3_data,
+            impeller_modern_shaders_gles3_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_framebuffer_blend_shaders_gles3_data,
+            impeller_framebuffer_blend_shaders_gles3_length),
+    };
+  }
+  return {
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_entity_shaders_gles_data,
+          impeller_entity_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_modern_shaders_gles_data,
+          impeller_modern_shaders_gles_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_gles_data,
+          impeller_framebuffer_blend_shaders_gles_length),
+  };
+}
+}  // namespace
 
 class ReactorWorker final : public impeller::ReactorGLES::Worker {
  public:
@@ -63,22 +95,15 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   // state can be accessed.
   gl_dispatch_table_.gl_make_current_callback();
 
-  std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_entity_shaders_gles_data,
-          impeller_entity_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_modern_shaders_gles_data,
-          impeller_modern_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_framebuffer_blend_shaders_gles_data,
-          impeller_framebuffer_blend_shaders_gles_length),
-  };
   auto gl = std::make_unique<impeller::ProcTableGLES>(
       gl_dispatch_table_.gl_proc_resolver);
   if (!gl->IsValid()) {
     return;
   }
+
+  const auto is_gles3 =
+      gl->GetDescription()->GetGlVersion().IsAtLeast(impeller::Version(3));
+  const auto shader_mappings = GetShaderMappings(is_gles3);
 
   impeller_context_ = impeller::ContextGLES::Create(
       impeller::Flags{}, std::move(gl), shader_mappings,
