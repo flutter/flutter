@@ -452,7 +452,7 @@ class ThemeData with Diagnosticable {
       canvasColor ??= colorScheme.surface;
       scaffoldBackgroundColor ??= colorScheme.surface;
       cardColor ??= colorScheme.surface;
-      dividerColor ??= colorScheme.outline;
+      dividerColor ??= colorScheme.outlineVariant;
       dialogBackgroundColor ??= colorScheme.surface;
       indicatorColor ??= onPrimarySurfaceColor;
       applyElevationOverlayColor ??= brightness == Brightness.dark;
@@ -855,7 +855,9 @@ class ThemeData with Diagnosticable {
       canvasColor: colorScheme.surface,
       scaffoldBackgroundColor: colorScheme.surface,
       cardColor: colorScheme.surface,
-      dividerColor: colorScheme.onSurface.withOpacity(0.12),
+      dividerColor: (useMaterial3 ?? false)
+          ? colorScheme.outlineVariant
+          : colorScheme.onSurface.withOpacity(0.12),
       dialogBackgroundColor: colorScheme.surface,
       indicatorColor: onPrimarySurfaceColor,
       textTheme: textTheme,
@@ -1210,6 +1212,14 @@ class ThemeData with Diagnosticable {
   ///
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
+  ///
+  /// In Material 3, defaults to [ColorScheme.outlineVariant].
+  /// In Material 2, defaults to [ColorScheme.onSurface] with 12% opacity.
+  ///
+  /// See also:
+  ///
+  ///  * [Divider], a widget that uses this color.
+  ///  * [VerticalDivider], another widget that uses this color.
   final Color dividerColor;
 
   /// The focus color used indicate that a component has the input focus.
