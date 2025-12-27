@@ -339,4 +339,23 @@ void main() {
     expect(painter.shadow.blurRadius, 8.0);
     debugDisableShadows = true;
   });
+
+  testWidgets('Banner does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Banner(
+              message: 'X',
+              textDirection: TextDirection.ltr,
+              location: BannerLocation.bottomEnd,
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Banner)), Size.zero);
+  });
 }
