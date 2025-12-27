@@ -940,7 +940,15 @@ class RenderFlex extends RenderBox
       getBaseline: ChildLayoutHelper.getDryBaseline,
     );
 
-    if (_isBaselineAligned) {
+    // If this Flex is baseline aligned, and the caller is asking for the same baseline
+    // as the alignment baseline, then we can just return the baseline offset we calculated
+    // during layout.
+    //
+    // However, if the caller is asking for a different baseline (e.g. asking for
+    // ideographic baseline on an alphabetic-aligned Row), we cannot use the cached
+    // baselineOffset (which is the value for textBaseline specifically) and must
+    // compute the requested baseline by iterating over the children.
+    if (_isBaselineAligned && baseline == textBaseline) {
       return sizes.baselineOffset;
     }
 
