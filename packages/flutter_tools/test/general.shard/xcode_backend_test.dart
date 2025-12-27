@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -764,15 +766,39 @@ void main() {
     const appPath = '/path/to/my_flutter_app';
     const platformDirPath = '$appPath/ios';
     const frameworksFolderPath = 'Runner.app/Frameworks';
+    final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+      '$frameworksFolderPath/App.framework/flutter_assets',
+    )..createSync(recursive: true);
+    const ffiPackageName = 'package_a';
+    flutterAssetsDir
+        .childFile('NativeAssetsManifest.json')
+        .writeAsStringSync(
+          jsonEncode({
+            'format-version': [1, 0, 0],
+            'native-assets': {
+              'ios_arm64': {
+                'package:$ffiPackageName/native_asset.dart': [
+                  'absolute',
+                  '$ffiPackageName.framework/$ffiPackageName',
+                ],
+              },
+            },
+          }),
+        );
     const flutterBuildDir = 'build';
     final Directory nativeAssetsDir = fileSystem.directory(
-      '/path/to/my_flutter_app/$flutterBuildDir/native_assets/ios/',
+      '$appPath/$flutterBuildDir/native_assets/ios/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    const ffiPackageName = 'package_a';
     final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
       ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
+    // In addition to the ffiPackageName framework, create an additional unrelated framework in
+    // the same directory. It should not get copied since it is not referenced in the manifest.
+    final Directory unrelatedFramework = nativeAssetsDir.childDirectory('unrelated.framework')
+      ..createSync();
+    unrelatedFramework.childFile('random.txt').createSync();
+
     const infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
     infoPlist.createSync(recursive: true);
@@ -835,6 +861,7 @@ void main() {
             '- native_assets.yaml',
             '--filter',
             '- native_assets.json',
+            // We should copy $ffiPackageName.framework, but not the unrelated framework path.
             ffiPackageDir.path,
             targetBuildDir.childDirectory(frameworksFolderPath).path,
           ],
@@ -886,15 +913,38 @@ void main() {
     const appPath = '/path/to/my_flutter_app';
     const platformDirPath = '$appPath/macos';
     const frameworksFolderPath = 'Runner.app/Frameworks';
+    final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+      '$frameworksFolderPath/App.framework/Resources/flutter_assets',
+    )..createSync(recursive: true);
+    const ffiPackageName = 'package_a';
+    flutterAssetsDir
+        .childFile('NativeAssetsManifest.json')
+        .writeAsStringSync(
+          jsonEncode({
+            'format-version': [1, 0, 0],
+            'native-assets': {
+              'ios_arm64': {
+                'package:$ffiPackageName/native_asset.dart': [
+                  'absolute',
+                  '$ffiPackageName.framework/$ffiPackageName',
+                ],
+              },
+            },
+          }),
+        );
     const flutterBuildDir = 'build';
     final Directory nativeAssetsDir = fileSystem.directory(
       '/path/to/my_flutter_app/$flutterBuildDir/native_assets/macos/',
     );
     nativeAssetsDir.createSync(recursive: true);
-    const ffiPackageName = 'package_a';
     final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
       ..createSync();
     nativeAssetsDir.childFile('random.txt').createSync();
+    // In addition to the ffiPackageName framework, create an additional unrelated framework in
+    // the same directory. It should not get copied since it is not referenced in the manifest.
+    final Directory unrelatedFramework = nativeAssetsDir.childDirectory('unrelated.framework')
+      ..createSync();
+    unrelatedFramework.childFile('random.txt').createSync();
     const infoPlistPath = 'Runner.app/Info.plist';
     final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
     infoPlist.createSync(recursive: true);
@@ -987,6 +1037,7 @@ void main() {
             '- native_assets.yaml',
             '--filter',
             '- native_assets.json',
+            // We should copy $ffiPackageName.framework, but not the unrelated framework path.
             ffiPackageDir.path,
             targetBuildDir.childDirectory(frameworksFolderPath).path,
           ],
@@ -1012,22 +1063,124 @@ void main() {
     expect(testContext.processManager.hasRemainingExpectations, isFalse);
   });
 
-  group('parseFrameworkNameFromDirectory', () {
-    test('Non-framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(fileSystem.directory('path/to/directory')),
-        isNull,
-      );
-    });
+  test('reports error message for invalid native assets manifest', () {
+    final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+      ..createSync(recursive: true);
+    final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+      ..createSync(recursive: true);
+    const appPath = '/path/to/my_flutter_app';
+    const platformDirPath = '$appPath/macos';
+    const frameworksFolderPath = 'Runner.app/Frameworks';
+    final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+      '$frameworksFolderPath/App.framework/Resources/flutter_assets',
+    )..createSync(recursive: true);
+    flutterAssetsDir
+        .childFile('NativeAssetsManifest.json')
+        .writeAsStringSync(
+          jsonEncode({
+            'format-version': [1, 0, 0],
+            'native-assets': {'ios_arm64': 'invalid content'},
+          }),
+        );
+    const flutterBuildDir = 'build';
 
-    test('Framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(
-          fileSystem.directory('path/to/directory.framework'),
+    const infoPlistPath = 'Runner.app/Info.plist';
+    final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
+    infoPlist.createSync(recursive: true);
+    const buildMode = 'Debug';
+    const codesignIdentity = '12312313';
+    final testContext = TestContext(
+      <String>['embed_and_thin', 'macos'],
+      <String, String>{
+        'BUILT_PRODUCTS_DIR': buildDir.path,
+        'CONFIGURATION': buildMode,
+        'INFOPLIST_PATH': infoPlistPath,
+        'SOURCE_ROOT': platformDirPath,
+        'FLUTTER_APPLICATION_PATH': appPath,
+        'FLUTTER_BUILD_DIR': flutterBuildDir,
+        'TARGET_BUILD_DIR': targetBuildDir.path,
+        'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+        'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
+      },
+      commands: <FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'mkdir',
+            '-p',
+            '--',
+            targetBuildDir.childDirectory(frameworksFolderPath).path,
+          ],
         ),
-        'directory',
-      );
-    });
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-8',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store',
+            buildDir.childDirectory('App.framework').path,
+            targetBuildDir.childDirectory(frameworksFolderPath).path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-8',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store',
+            '--filter',
+            '- Headers',
+            '--filter',
+            '- Modules',
+            buildDir.childDirectory('FlutterMacOS.framework').path,
+            '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--verbose',
+            '--sign',
+            codesignIdentity,
+            '--',
+            targetBuildDir.childDirectory(frameworksFolderPath).childFile('App.framework/App').path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--verbose',
+            '--sign',
+            codesignIdentity,
+            '--',
+            targetBuildDir
+                .childDirectory(frameworksFolderPath)
+                .childFile('FlutterMacOS.framework/FlutterMacOS')
+                .path,
+          ],
+        ),
+      ],
+      fileSystem: fileSystem,
+    );
+
+    expect(
+      testContext.run,
+      throwsA(
+        isA<Exception>().having(
+          (e) => e.toString(),
+          'toString()',
+          contains('App exited with code -1'),
+        ),
+      ),
+    );
+
+    expect(testContext.processManager.hasRemainingExpectations, isFalse);
+    expect(testContext.stderr, contains('error: Failed to embed native assets:'));
   });
 }
 
@@ -1060,6 +1213,11 @@ class TestContext extends Context {
   @override
   Directory directoryFromPath(String path) {
     return fileSystem.directory(path);
+  }
+
+  @override
+  File fileFromPath(String path) {
+    return fileSystem.file(path);
   }
 
   @override
