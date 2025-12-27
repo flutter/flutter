@@ -26,6 +26,7 @@ if (enable_unittests) {
     "uniforms_reordered.frag",
     "uniforms_sorted.frag",
     "uniforms.frag",
+    "uniforms_renamed.frag",
     "vec3_uniform.frag",
   ]
 
