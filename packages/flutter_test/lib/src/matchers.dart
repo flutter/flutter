@@ -1034,6 +1034,35 @@ Matcher containsSemantics({
   );
 }
 
+/// Asserts that a [CapturedAccessibilityAnnouncement] matches the expected message.
+///
+/// The [message] argument matches the [CapturedAccessibilityAnnouncement.message].
+/// The [textDirection] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.textDirection].
+/// The [assertiveness] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.assertiveness].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await SemanticsService.sendAnnouncement(tester.view, 'Hello', TextDirection.ltr);
+/// expect(tester.takeAnnouncements(), contains(accessibilityAnnouncement('Hello')));
+/// ```
+///
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which retrieves the announcements.
+///  * [SemanticsService.sendAnnouncement], which sends an announcement.
+Matcher accessibilityAnnouncement(
+  String message, {
+  TextDirection? textDirection,
+  Assertiveness? assertiveness,
+}) {
+  return _MatchesAccessibilityAnnouncement(
+    expectedMessage: message,
+    expectedTextDirection: textDirection,
+    expectedAssertiveness: assertiveness,
+  );
+}
+
 /// Asserts that the currently rendered widget meets the provided accessibility
 /// `guideline`.
 ///
@@ -2939,6 +2968,40 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createSemanticsActionSummary(List<SemanticsAction> enums) {
     return '[${enums.map((ui.SemanticsAction d) => d.name).join(', ')}]';
+  }
+}
+
+class _MatchesAccessibilityAnnouncement extends Matcher {
+  const _MatchesAccessibilityAnnouncement({
+    required this.expectedMessage,
+    required this.expectedTextDirection,
+    required this.expectedAssertiveness,
+  });
+
+  final String expectedMessage;
+  final TextDirection? expectedTextDirection;
+  final Assertiveness? expectedAssertiveness;
+
+  @override
+  bool matches(
+    covariant CapturedAccessibilityAnnouncement event,
+    Map<dynamic, dynamic> matchState,
+  ) {
+    return event.message == expectedMessage &&
+        (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness);
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('Semantic announcement with message "$expectedMessage"');
+    if (expectedTextDirection != null) {
+      description.add(', textDirection: $expectedTextDirection');
+    }
+    if (expectedAssertiveness != null) {
+      description.add(', assertiveness: $expectedAssertiveness');
+    }
+    return description;
   }
 }
 
