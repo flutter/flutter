@@ -90,10 +90,32 @@ void main() {
 
   testWidgets('Codec future fails', (WidgetTester tester) async {
     final completer = Completer<Codec>();
-    MultiFrameImageStreamCompleter(codec: completer.future, scale: 1.0);
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      scale: 1.0,
+    );
+    // Add a listener to ensure the error is reported.
+    final listener = ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) {},
+      onError: (Object exception, StackTrace? stackTrace) {
+        throw exception;
+      },
+    );
+    imageStream.addListener(listener);
+
     completer.completeError('failure message');
     await tester.idle();
     expect(tester.takeException(), 'failure message');
+    imageStream.removeListener(listener);
+  });
+
+  testWidgets('Codec future fails with no listener', (WidgetTester tester) async {
+    final completer = Completer<Codec>();
+    MultiFrameImageStreamCompleter(codec: completer.future, scale: 1.0);
+
+    completer.completeError('failure message');
+    await tester.idle();
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Decoding starts when a listener is added after codec is ready', (
@@ -294,7 +316,9 @@ void main() {
     },
   );
 
-  testWidgets('Chunk errors are reported', (WidgetTester tester) async {
+  testWidgets('Chunk errors are reported only when listeners with error callbacks exist', (
+    WidgetTester tester,
+  ) async {
     final chunkEvents = <ImageChunkEvent>[];
     final completer = Completer<Codec>();
     final streamController = StreamController<ImageChunkEvent>();
@@ -304,22 +328,53 @@ void main() {
       scale: 1.0,
     );
 
-    imageStream.addListener(
-      ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) {},
-        onChunk: (ImageChunkEvent event) {
-          chunkEvents.add(event);
-        },
-      ),
+    // 1. No listeners.
+    streamController.addError(Error());
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
+    await tester.idle();
+    expect(tester.takeException(), isNull); // Silenced.
+    expect(chunkEvents.length, 0);
+
+    // 2. Passive listener (no onError).
+    final listenerWithoutError = ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) {},
+      onChunk: (ImageChunkEvent event) {
+        chunkEvents.add(event);
+      },
     );
+    imageStream.addListener(listenerWithoutError);
     streamController.addError(Error());
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
-
-    expect(tester.takeException(), isNotNull);
+    expect(tester.takeException(), isNull); // Silenced.
     expect(chunkEvents.length, 1);
-    expect(chunkEvents[0].cumulativeBytesLoaded, 2);
-    expect(chunkEvents[0].expectedTotalBytes, 3);
+    expect(chunkEvents.last.cumulativeBytesLoaded, 2);
+
+    // 3. Active listener (with onError).
+    final listenerWithError = ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) {},
+      onChunk: (ImageChunkEvent event) {
+        chunkEvents.add(event);
+      },
+      onError: (Object exception, StackTrace? stackTrace) {
+        throw exception;
+      },
+    );
+    imageStream.addListener(listenerWithError);
+    streamController.addError('active error');
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 3, expectedTotalBytes: 3));
+    await tester.idle();
+    expect(tester.takeException(), 'active error'); // Reported.
+    expect(chunkEvents.length, 3); // both listeners hear chunk
+    expect(chunkEvents.last.cumulativeBytesLoaded, 3);
+
+    // 4. Remove active listener. Back to passive only.
+    imageStream.removeListener(listenerWithError);
+    streamController.addError(Error());
+    await tester.idle();
+    expect(tester.takeException(), isNull); // Silenced.
+
+    imageStream.removeListener(listenerWithoutError);
   });
 
   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
@@ -336,7 +391,14 @@ void main() {
       addTearDown(image.dispose);
     }
 
-    imageStream.addListener(ImageStreamListener(listener));
+    imageStream.addListener(
+      ImageStreamListener(
+        listener,
+        onError: (Object exception, StackTrace? stackTrace) {
+          throw exception;
+        },
+      ),
+    );
     codecCompleter.complete(mockCodec);
     // MultiFrameImageStreamCompleter only sets an error handler for the next
     // frame future after the codec future has completed.
