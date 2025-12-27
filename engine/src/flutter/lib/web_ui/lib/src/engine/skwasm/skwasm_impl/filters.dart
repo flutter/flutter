@@ -115,11 +115,8 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
   @override
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
-  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
-
   @override
-  String get shortDescription =>
-      'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)}${_boundsString()})';
+  String get shortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
 }
 
 class SkwasmDilateFilter extends SkwasmImageFilter {
