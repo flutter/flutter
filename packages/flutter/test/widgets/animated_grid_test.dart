@@ -664,6 +664,32 @@ void main() {
     // Verify that the left/right padding is not applied.
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
+
+  testWidgets('AnimatedGrid does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ScrollController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedGrid(
+            controller: controller,
+            itemBuilder: (_, int index, _) => Text('$index'),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedGrid)), Size.zero);
+    await controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeIn,
+    );
+    await tester.pump();
+  });
 }
 
 class _StatefulListItem extends StatefulWidget {
