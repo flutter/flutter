@@ -191,3 +191,19 @@ bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
 
   return false;
 }
+
+void InternalFlutterWindows_WindowManager_BeginMoveDrag(HWND hwnd, int button) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    window->BeginMoveDrag(button);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_BeginResizeDrag(HWND hwnd,
+                                                          int button,
+                                                          int edge) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  if (window) {
+    window->BeginResizeDrag(button, edge);
+  }
+}

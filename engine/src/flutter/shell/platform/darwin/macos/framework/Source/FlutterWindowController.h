@@ -110,6 +110,12 @@ char* InternalFlutter_Window_GetTitle(void* window);
 FLUTTER_DARWIN_EXPORT
 bool InternalFlutter_Window_IsActivated(void* window);
 
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_BeginMoveDrag(void* window, int button);
+
+FLUTTER_DARWIN_EXPORT
+void InternalFlutter_Window_BeginResizeDrag(void* window, int button, int edge);
+
 // NOLINTEND(google-objc-function-naming)
 }
 
