@@ -22,9 +22,20 @@ enum Assertiveness { polite, assertive }
 /// This was determined by trial and error with some extra buffer added.
 Duration liveMessageDuration = const Duration(milliseconds: 300);
 
+/// Delay before setting the announcement text. This allows VoiceOver to finish
+/// reading the button's accessible name before the announcement is made.
+///
+/// See: https://github.com/flutter/flutter/issues/179076
+Duration announcementDelay = const Duration(milliseconds: 500);
+
 /// Sets [liveMessageDuration] to reduce the delay in tests.
 void setLiveMessageDurationForTest(Duration duration) {
   liveMessageDuration = duration;
+}
+
+/// Sets [announcementDelay] to reduce the delay in tests.
+void setAnnouncementDelayForTest(Duration duration) {
+  announcementDelay = duration;
 }
 
 /// Makes accessibility announcements using `aria-live` DOM elements.
@@ -87,14 +98,48 @@ class AccessibilityAnnouncements {
   ///
   /// [assertiveness] controls how interruptive the announcement is.
   void announce(String message, Assertiveness assertiveness) {
+    // When a modal dialog is present (aria-modal="true"), screen readers ignore
+    // content outside the dialog. To ensure announcements are heard, we temporarily
+    // move the EXISTING aria-live element INTO the modal dialog, make the announcement,
+    // then move it back. This works because VoiceOver already knows about the existing
+    // aria-live element from when the page loaded.
+    //
+    // We also add a small delay before setting the announcement text to allow
+    // VoiceOver to finish reading the button's accessible name first.
+    //
+    // See: https://github.com/flutter/flutter/issues/179076
+    final DomElement? modalDialog = _findTopmostModalDialog();
     final DomHTMLElement ariaLiveElement = ariaLiveElementFor(assertiveness);
+    final DomElement? originalParent = ariaLiveElement.parentElement;
 
-    final DomHTMLDivElement messageElement = createDomHTMLDivElement();
+    if (modalDialog != null && originalParent != null) {
+      modalDialog.append(ariaLiveElement);
+    }
+
     // See the doc-comment for [_appendSpace] for the rationale.
-    messageElement.text = _appendSpace ? '$message\u00A0' : message;
+    final messageText = _appendSpace ? '$message\u00A0' : message;
     _appendSpace = !_appendSpace;
-    ariaLiveElement.append(messageElement);
-    Timer(liveMessageDuration, () => messageElement.remove());
+
+    Timer(announcementDelay, () {
+      ariaLiveElement.text = messageText;
+    });
+
+    Timer(announcementDelay + liveMessageDuration, () {
+      ariaLiveElement.text = '';
+      if (modalDialog != null && originalParent != null) {
+        originalParent.append(ariaLiveElement);
+      }
+    });
+  }
+
+  static DomElement? _findTopmostModalDialog() {
+    final List<DomElement> modalElements = domDocument
+        .querySelectorAll('[aria-modal="true"]')
+        .toList();
+    if (modalElements.isEmpty) {
+      return null;
+    }
+    return modalElements.last;
   }
 
   static DomHTMLElement _createElement(Assertiveness assertiveness) {
