@@ -20,6 +20,18 @@ List<ui.PointerData> _allPointerData(List<ui.PointerDataPacket> packets) {
   return packets.expand((ui.PointerDataPacket packet) => packet.data).toList();
 }
 
+class _MockParentPostMessage {
+  int callCount = 0;
+  Object? lastMessage;
+  String? lastTargetOrigin;
+
+  void call(Object message, String targetOrigin) {
+    callCount++;
+    lastMessage = message;
+    lastTargetOrigin = targetOrigin;
+  }
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -61,6 +73,8 @@ void testMain() {
 
     ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     dpi = EngineFlutterDisplay.instance.devicePixelRatio;
+    debugSetIframeEmbeddingForTests(false);
+    debugParentPostMessageHandler = null;
   });
 
   tearDown(() {
@@ -746,6 +760,74 @@ void testMain() {
     );
     rootElement.dispatchEvent(event);
     expect(EngineSemantics.instance.gestureMode, GestureMode.pointerEvents);
+  });
+
+  test('wheel event in iframe does not scroll parent when handled', () {
+    final mockParent = _MockParentPostMessage();
+    addTearDown(() {
+      debugParentPostMessageHandler = null;
+      debugResetIframeDetectionCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugParentPostMessageHandler = mockParent.call;
+    debugSetIframeEmbeddingForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: false);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 10,
+      clientY: 10,
+      deltaX: 5,
+      deltaY: 15,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+    expect(mockParent.callCount, 0);
+    expect(mockParent.lastMessage, isNull);
+  });
+
+  test('wheel event in iframe scrolls parent when platform default allowed', () {
+    final mockParent = _MockParentPostMessage();
+    addTearDown(() {
+      debugParentPostMessageHandler = null;
+      debugResetIframeDetectionCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugParentPostMessageHandler = mockParent.call;
+    debugSetIframeEmbeddingForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: true);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 20,
+      clientY: 30,
+      deltaX: 7,
+      deltaY: 21,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+    expect(mockParent.callCount, 1);
+    final message = mockParent.lastMessage! as Map<String, Object?>;
+    expect(message['type'], 'flutter-scroll');
+    expect(message['deltaX'], 7);
+    expect(message['deltaY'], 21);
+    expect(mockParent.lastTargetOrigin, '*');
   });
 
   test('does synthesize add or hover or move for scroll', () {
