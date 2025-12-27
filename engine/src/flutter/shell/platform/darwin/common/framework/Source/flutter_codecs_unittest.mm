@@ -57,11 +57,10 @@ TEST(FlutterJSONCodec, CanDecodeZeroLength) {
   ASSERT_TRUE([codec decode:[NSData data]] == nil);
 }
 
-TEST(FlutterJSONCodec, ThrowsOnInvalidDecode) {
+TEST(FlutterJSONCodec, ReturnsNilOnInvalidDecode) {
   NSString* value = @"{{{";
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
-  EXPECT_EXIT([codec decode:[value dataUsingEncoding:value.fastestEncoding]],
-              testing::KilledBySignal(SIGABRT), "No string key for value in object around line 1");
+  ASSERT_TRUE([codec decode:[value dataUsingEncoding:value.fastestEncoding]] == nil);
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
