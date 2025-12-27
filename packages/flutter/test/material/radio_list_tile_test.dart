@@ -680,7 +680,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: tileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: tileColor),
+    );
   });
 
   testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
@@ -700,7 +703,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Material), paints..rect(color: selectedTileColor));
+    expect(
+      find.descendant(of: find.byType(ListTile), matching: find.byType(Material)),
+      paints..path(color: selectedTileColor),
+    );
   });
 
   testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
@@ -935,7 +941,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: activeEnabledFillColor)
         ..circle(color: activeEnabledFillColor),
@@ -948,7 +953,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -960,7 +964,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: activeDisabledFillColor)
         ..circle(color: activeDisabledFillColor),
@@ -973,7 +976,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -1067,7 +1069,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.primary)
         ..circle(color: theme.colorScheme.primary),
@@ -1085,7 +1086,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: hoverColor)
         ..circle(color: Colors.transparent),
     );
@@ -1098,7 +1098,6 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
       paints
-        ..rect()
         ..circle(color: Colors.transparent)
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
@@ -1149,9 +1148,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      Material.of(tester.element(find.byType(Radio<bool>))),
+      find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: const Color(0x00000000))
+        ..path(color: const Color(0x00000000))
         ..rect(color: const Color(0x66bcbcbc))
         ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: 20.0),
       reason: 'Default inactive pressed Radio should have overlay color from fillColor',
@@ -1162,9 +1161,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      Material.of(tester.element(find.byType(Radio<bool>))),
+      find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: const Color(0x00000000))
+        ..path(color: const Color(0x00000000))
         ..rect(color: const Color(0x66bcbcbc))
         ..circle(color: fillColor.withAlpha(kRadialReactionAlpha), radius: 20.0),
       reason: 'Default active pressed Radio should have overlay color from fillColor',
@@ -1175,9 +1174,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      Material.of(tester.element(find.byType(Radio<bool>))),
+      find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: const Color(0x00000000))
+        ..path(color: const Color(0x00000000))
         ..rect(color: const Color(0x66bcbcbc))
         ..circle(color: inactivePressedOverlayColor, radius: 20.0),
       reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
@@ -1188,9 +1187,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      Material.of(tester.element(find.byType(Radio<bool>))),
+      find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: const Color(0x00000000))
+        ..path(color: const Color(0x00000000))
         ..rect(color: const Color(0x66bcbcbc))
         ..circle(color: activePressedOverlayColor, radius: 20.0),
       reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
@@ -1207,9 +1206,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      Material.of(tester.element(find.byType(Radio<bool>))),
+      find.ancestor(of: find.byType(ListTile), matching: find.byType(Material)),
       paints
-        ..rect(color: const Color(0x00000000))
+        ..path(color: const Color(0x00000000))
         ..rect(color: const Color(0x0a000000))
         ..circle(color: hoverOverlayColor, radius: 20.0),
       reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
@@ -1524,7 +1523,6 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
-          ..rect()
           ..circle(color: Colors.transparent)
           ..circle(color: const Color(0xff2196f3))
           ..circle(color: const Color(0xff2196f3)),
@@ -1542,7 +1540,6 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
-          ..rect()
           ..circle(color: hoverColor)
           ..circle(color: Colors.transparent),
       );
@@ -1555,7 +1552,6 @@ void main() {
       expect(
         Material.of(tester.element(find.byType(Radio<int>))),
         paints
-          ..rect()
           ..circle(color: Colors.transparent)
           ..circle(color: const Color(0x61000000))
           ..circle(color: const Color(0x61000000)),
@@ -2187,9 +2183,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
-      paints
-        ..rect()
-        ..circle(color: activeEnabledBackgroundColor),
+      paints..circle(color: activeEnabledBackgroundColor),
     );
 
     // Check when the radio isn't selected.
@@ -2198,9 +2192,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
-      paints
-        ..rect()
-        ..circle(color: inactiveEnabledBackgroundColor),
+      paints..circle(color: inactiveEnabledBackgroundColor),
     );
 
     // Check when the radio is selected, but disabled.
@@ -2209,9 +2201,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
-      paints
-        ..rect()
-        ..circle(color: activeDisabledBackgroundColor),
+      paints..circle(color: activeDisabledBackgroundColor),
     );
 
     // Check when the radio is unselected and disabled.
@@ -2220,9 +2210,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Radio<int>))),
-      paints
-        ..rect()
-        ..circle(color: inactiveDisabledBackgroundColor),
+      paints..circle(color: inactiveDisabledBackgroundColor),
     );
   });
 
