@@ -276,7 +276,7 @@ class Container extends StatelessWidget {
        assert(
          color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".',
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
        constraints = (width != null || height != null)
            ? constraints?.tighten(width: width, height: height) ??
