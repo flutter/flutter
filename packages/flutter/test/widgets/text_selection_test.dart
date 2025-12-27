@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1899,6 +1901,132 @@ void main() {
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+
+  const directionalityTestCases = <_DirectionalityTestCase>[
+    _DirectionalityTestCase(
+      description: 'Ambient LTR, Text LTR (English)',
+      ambientDirection: TextDirection.ltr,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient RTL, Text RTL (Arabic)',
+      ambientDirection: TextDirection.rtl,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient RTL, Text LTR (English in Arabic App - Bug Case)',
+      ambientDirection: TextDirection.rtl,
+      text: 'Hello World',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+    _DirectionalityTestCase(
+      description: 'Ambient LTR, Text RTL (Arabic in English App)',
+      ambientDirection: TextDirection.ltr,
+      text: 'مرحبا بالعالم',
+      selectionBase: 0,
+      selectionExtent: 5,
+    ),
+  ];
+
+  for (final testCase in directionalityTestCases) {
+    testWidgets(
+      'handles point correctly: ${testCase.description}',
+      (WidgetTester tester) async {
+        final customControls = DirectionalitySpyTextSelectionControls();
+        final controller = TextEditingController(text: testCase.text);
+        final focusNode = FocusNode();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              textSelectionTheme: const TextSelectionThemeData(selectionColor: Colors.blue),
+            ),
+            home: Directionality(
+              textDirection: testCase.ambientDirection,
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  selectionControls: customControls,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final RenderEditable renderEditable = tester.allRenderObjects
+            .whereType<RenderEditable>()
+            .first;
+        expect(renderEditable.textDirection, testCase.ambientDirection);
+
+        // Focus and set selection
+        focusNode.requestFocus();
+        await tester.pump();
+
+        controller.selection = TextSelection(
+          baseOffset: testCase.selectionBase,
+          extentOffset: testCase.selectionExtent,
+        );
+        await tester.pumpAndSettle();
+
+        // Get selection endpoints
+        final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+          controller.selection,
+        );
+        expect(endpoints.length, 2);
+
+        // Identify which endpoint is physically to the left
+        final double point1X = endpoints[0].point.dx;
+        final double point2X = endpoints[1].point.dx;
+
+        // Find handles handles
+        final Finder leftHandleFinder = find.byKey(
+          const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.left),
+        );
+        final Finder rightHandleFinder = find.byKey(
+          const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.right),
+        );
+
+        final Offset leftHandlePos = tester.getCenter(leftHandleFinder);
+        final Offset rightHandlePos = tester.getCenter(rightHandleFinder);
+
+        // Verification:
+        // The handle type `left` should be physically to the left of `right`.
+        expect(
+          leftHandlePos.dx,
+          lessThan(rightHandlePos.dx),
+          reason:
+              "Handle of type 'left' should be visually to the left of handle of type 'right'. "
+              'Found LeftType at $leftHandlePos, RightType at $rightHandlePos.',
+        );
+
+        // Also verify they align generally with endpoints
+        // One handle should be near point1X, one near point2X.
+        final double minEndpointX = math.min(point1X, point2X);
+        final double maxEndpointX = math.max(point1X, point2X);
+
+        // Left Handle should be near minEndpointX
+        expect(
+          (leftHandlePos.dx - minEndpointX).abs(),
+          lessThan(50.0),
+          reason: 'Left handle should be near left endpoint',
+        );
+
+        // Right Handle should be near maxEndpointX
+        expect(
+          (rightHandlePos.dx - maxEndpointX).abs(),
+          lessThan(50.0),
+          reason: 'Right handle should be near right endpoint',
+        );
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  }
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2130,4 +2258,36 @@ class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) {}
+}
+
+class DirectionalitySpyTextSelectionControls extends MaterialTextSelectionControls {
+  // Wrap the handle in a widget with a Key that identifies its type.
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return KeyedSubtree(
+      key: ValueKey<TextSelectionHandleType>(type),
+      child: super.buildHandle(context, type, textLineHeight, onTap),
+    );
+  }
+}
+
+class _DirectionalityTestCase {
+  const _DirectionalityTestCase({
+    required this.description,
+    required this.ambientDirection,
+    required this.text,
+    required this.selectionBase,
+    required this.selectionExtent,
+  });
+
+  final String description;
+  final TextDirection ambientDirection;
+  final String text;
+  final int selectionBase;
+  final int selectionExtent;
 }
