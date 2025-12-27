@@ -7,6 +7,8 @@ import '../dom.dart';
 import '../util.dart';
 import 'rasterizer.dart';
 
+bool _debugBitmapSizePrinted = false;
+
 /// A visible (on-screen) canvas that can display bitmaps.
 ///
 /// In a typical frame, the content will be rendered in an OffscreenCanvas, and
@@ -70,8 +72,22 @@ class RenderCanvas extends DisplayCanvas {
   ///
   /// The canvas will be resized to accomodate the bitmap immediately before
   /// rendering it.
-  void render(DomImageBitmap bitmap) {
-    _ensureSize(BitmapSize(bitmap.width, bitmap.height));
+  void render(DomImageBitmap bitmap, BitmapSize frameSize) {
+    assert(() {
+      if (frameSize.width != bitmap.width || frameSize.height != bitmap.height) {
+        if (!_debugBitmapSizePrinted) {
+          _debugBitmapSizePrinted = true;
+          printWarning(
+            'Frame size was different from Bitmap size. This typically indicates that we have '
+            'reached the Bitmap allocation limits of the browser. Things should continue to work '
+            'but you may notice content rendering is less clear.',
+          );
+        }
+      }
+      return true;
+    }());
+
+    _ensureSize(frameSize);
     renderContext.transferFromImageBitmap(bitmap);
   }
 
