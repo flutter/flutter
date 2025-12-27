@@ -847,6 +847,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     implements _ParentInkResponseState {
   Set<InteractiveInkFeature>? _splashes;
   InteractiveInkFeature? _currentSplash;
+  Offset? _startPosition;
+  Offset? _lastPosition;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
@@ -863,6 +865,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   static const Duration _activationDuration = Duration(milliseconds: 100);
   Timer? _activationTimer;
+  Timer? _tapCancelTimer;
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
@@ -1010,16 +1013,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       updateKeepAlive();
     }
 
-    switch (type) {
-      case _HighlightType.pressed:
-        statesController.update(WidgetState.pressed, value);
-      case _HighlightType.hover:
-        if (callOnHover) {
-          statesController.update(WidgetState.hovered, value);
-        }
-      case _HighlightType.focus:
-        // see handleFocusUpdate()
-        break;
+    // Update the appropriate WidgetState for this highlight type.
+    if (type == _HighlightType.pressed) {
+      statesController.update(WidgetState.pressed, value);
+    } else if (type == _HighlightType.hover) {
+      if (callOnHover) {
+        statesController.update(WidgetState.hovered, value);
+      }
+    } else {
+      // _HighlightType.focus: handled in handleFocusUpdate().
     }
 
     if (type == _HighlightType.pressed) {
@@ -1048,7 +1050,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           radius: widget.radius,
           borderRadius: widget.borderRadius,
           customBorder: widget.customBorder,
-          rectCallback: widget.getRectCallback!(referenceBox),
+          rectCallback: widget.getRectCallback?.call(referenceBox),
           onRemoved: handleInkRemoval,
           textDirection: Directionality.of(context),
           fadeDuration: getFadeDurationForType(type),
@@ -1058,19 +1060,19 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         highlight.activate();
       }
     } else {
-      highlight!.deactivate();
+      highlight?.deactivate();
     }
     assert(value == (_highlights[type] != null && _highlights[type]!.active));
 
-    switch (type) {
-      case _HighlightType.pressed:
-        widget.onHighlightChanged?.call(value);
-      case _HighlightType.hover:
-        if (callOnHover) {
-          widget.onHover?.call(value);
-        }
-      case _HighlightType.focus:
-        break;
+    // Notify listeners for the specific highlight type.
+    if (type == _HighlightType.pressed) {
+      widget.onHighlightChanged?.call(value);
+    } else if (type == _HighlightType.hover) {
+      if (callOnHover) {
+        widget.onHover?.call(value);
+      }
+    } else {
+      // _HighlightType.focus: no hover/highlight callback to call here.
     }
   }
 
@@ -1096,7 +1098,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         widget.splashColor ??
         Theme.of(context).splashColor;
     final RectCallback? rectCallback = widget.containedInkWell
-        ? widget.getRectCallback!(referenceBox)
+        ? widget.getRectCallback?.call(referenceBox)
         : null;
     final BorderRadius? borderRadius = widget.borderRadius;
     final ShapeBorder? customBorder = widget.customBorder;
@@ -1105,7 +1107,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     void onRemoved() {
       if (_splashes != null) {
         assert(_splashes!.contains(splash));
-        _splashes!.remove(splash);
+        _splashes?.remove(splash);
         if (_currentSplash == splash) {
           _currentSplash = null;
         }
@@ -1153,6 +1155,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _hasFocus = false;
+  bool _longPressAccepted = false;
   void handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
@@ -1172,6 +1175,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleTapDown(TapDownDetails details) {
+    // If the InkWell is previously disabled, it will have a null _actionMap.
+    // ...   _startNewSplash(details: details);
     handleAnyTapDown(details);
     widget.onTapDown?.call(details);
   }
@@ -1201,14 +1206,15 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       );
       globalPosition = referenceBox.localToGlobal(referenceBox.paintBounds.center);
     } else {
-      globalPosition = details!.globalPosition;
+      globalPosition = details?.globalPosition ?? Offset.zero;
     }
     statesController.update(WidgetState.pressed, true); // ... before creating the splash
     final InteractiveInkFeature splash = _createSplash(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
-    _splashes!.add(splash);
+    _splashes?.add(splash);
     _currentSplash?.cancel();
     _currentSplash = splash;
+    _longPressAccepted = false;
     updateKeepAlive();
     updateHighlight(_HighlightType.pressed, value: true);
   }
@@ -1226,9 +1232,22 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleTapCancel() {
+    widget.onTapCancel?.call();
+    if (widget.onLongPress != null) {
+      return;
+    }
+
+    // If the tap was cancelled but we haven't moved far, it might be an implicit
+    // long press (e.g. Tooltip won the arena). In that case, we keep the splash.
+    // We will clean it up on PointerUp/Cancel.
+    if (_primaryEnabled && _startPosition != null && _lastPosition != null) {
+      if ((_lastPosition! - _startPosition!).distance < kTouchSlop) {
+        return;
+      }
+    }
+
     _currentSplash?.cancel();
     _currentSplash = null;
-    widget.onTapCancel?.call();
     updateHighlight(_HighlightType.pressed, value: false);
   }
 
@@ -1240,20 +1259,65 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleLongPress() {
-    _currentSplash?.confirm();
-    _currentSplash = null;
+    // Always accept the long press logic to persist the splash.
+    // This must happen synchronously before any other event loop processing
+    _longPressAccepted = true;
+
     if (widget.onLongPress != null) {
       if (widget.enableFeedback) {
         Feedback.forLongPress(context);
       }
-      widget.onLongPress!();
     }
   }
 
-  void handleLongPressUp() {
-    _currentSplash?.confirm();
+  void handleLongPressCancel() {
+    // Always cancel the splash when long press is cancelled
+    // This handles both: post-accept drag and pre-accept scroll/drag
+    _longPressAccepted = false;
+    _currentSplash?.cancel();
     _currentSplash = null;
+    updateHighlight(_HighlightType.pressed, value: false);
+  }
+
+  void handleLongPressEnd(LongPressEndDetails details) {
+    // The splash should be canceled if the user releases the pointer outside of the
+    // ink well bounds, OR if this is an implicit long press (onLongPress == null).
+    final object = context.findRenderObject()! as RenderBox;
+    if (_currentSplash != null) {
+      // Cancel splash if implicit mode (no onLongPress callback) or released outside bounds
+      // Only cancel the splash if the pointer was released outside the bounds.
+      // Persist the splash until release when the long press is accepted, regardless
+      // of whether an explicit `onLongPress` handler exists. This ensures implicit
+      // long-press visual persistence behaves like an explicit long press.
+      if (!object.paintBounds.contains(details.localPosition)) {
+        _currentSplash?.cancel();
+      } else {
+        _currentSplash?.confirm();
+      }
+      _currentSplash = null;
+    }
+
+    // Fire callback if valid long press action was accepted
+    if (_longPressAccepted) {
+      if (object.paintBounds.contains(details.localPosition)) {
+        widget.onLongPress?.call();
+      }
+    }
+    _longPressAccepted = false;
     widget.onLongPressUp?.call();
+    // Ensure the pressed highlight is removed when the long press ends.
+    // This prevents the overlay (pressed) color from persisting after release.
+    updateHighlight(_HighlightType.pressed, value: false);
+  }
+
+  void handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    // The splash should be canceled if the user drags the pointer outside of the
+    // ink well bounds.
+    // Also track that action should be cancelled
+    final object = context.findRenderObject()! as RenderBox;
+    if (!object.paintBounds.contains(details.localPosition)) {
+      handleLongPressCancel();
+    }
   }
 
   void handleSecondaryTap() {
@@ -1272,6 +1336,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   @override
   void deactivate() {
+    _activationTimer?.cancel();
+    _activationTimer = null;
+    _tapCancelTimer?.cancel();
+    _tapCancelTimer = null;
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
@@ -1403,21 +1471,56 @@ class _InkResponseState extends State<_InkResponseStateWidget>
                 onLongPress: widget.excludeFromSemantics || widget.onLongPress == null
                     ? null
                     : simulateLongPress,
-                child: GestureDetector(
-                  onTapDown: _primaryEnabled ? handleTapDown : null,
-                  onTapUp: _primaryEnabled ? handleTapUp : null,
-                  onTap: _primaryEnabled ? handleTap : null,
-                  onTapCancel: _primaryEnabled ? handleTapCancel : null,
-                  onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
-                  onLongPress: widget.onLongPress != null ? handleLongPress : null,
-                  onLongPressUp: widget.onLongPressUp != null ? handleLongPressUp : null,
-                  onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
-                  onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp : null,
-                  onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
-                  onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
-                  behavior: HitTestBehavior.opaque,
-                  excludeFromSemantics: true,
-                  child: widget.child,
+                child: Listener(
+                  onPointerDown: (PointerDownEvent event) {
+                    _startPosition = event.position;
+                    _lastPosition = event.position;
+                  },
+                  onPointerMove: (PointerMoveEvent event) {
+                    _lastPosition = event.position;
+                  },
+                  onPointerUp: (PointerUpEvent event) {
+                    _startPosition = null;
+                    _lastPosition = null;
+                    if (_currentSplash != null) {
+                      _currentSplash!.confirm();
+                      _currentSplash = null;
+                    }
+                    updateHighlight(_HighlightType.pressed, value: false);
+                  },
+                  onPointerCancel: (PointerCancelEvent event) {
+                    _startPosition = null;
+                    _lastPosition = null;
+                    _currentSplash?.cancel();
+                    _currentSplash = null;
+                    updateHighlight(_HighlightType.pressed, value: false);
+                  },
+                  child: GestureDetector(
+                    onTapDown: _primaryEnabled ? handleTapDown : null,
+                    onTapUp: _primaryEnabled ? handleTapUp : null,
+                    onTap: _primaryEnabled ? handleTap : null,
+                    onTapCancel: _primaryEnabled ? handleTapCancel : null,
+                    onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
+                    // Enable LongPress if explicitly provided OR if we want to fallback to implicit visual persistence (if Tap is enabled)
+                    onLongPress: widget.onLongPress != null ? handleLongPress : null,
+                    onLongPressCancel: widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressCancel
+                        : null,
+                    onLongPressEnd: widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressEnd
+                        : null,
+                    onLongPressMoveUpdate:
+                        widget.onLongPress != null || widget.onLongPressUp != null
+                        ? handleLongPressMoveUpdate
+                        : null,
+                    onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
+                    onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp : null,
+                    onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
+                    onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
+                    behavior: HitTestBehavior.opaque,
+                    excludeFromSemantics: true,
+                    child: widget.child,
+                  ),
                 ),
               ),
             ),
