@@ -1,5 +1,0 @@
-targets:
-  $default:
-    sources:
-      exclude:
-        - "test/examples/sector_layout_test.dart"
