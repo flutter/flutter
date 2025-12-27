@@ -5768,9 +5768,7 @@ void main() {
     );
 
     // Find the internal RenderEditable used by SelectableText
-    final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
-      find.byKey(selectableKey),
-    );
+    final RenderEditable renderEditable = findRenderEditable(tester);
 
     // Verify the internal RenderEditable received the expected default styles.
     // These are the styles this PR explicitly sets as defaults within SelectableText's build method.
