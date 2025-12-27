@@ -77,4 +77,40 @@ void main() {
 
     expect(redContainerFinder, findsNothing);
   });
+
+  testWidgets(
+    'Hits on the Enter key when "And Me" is focused toggle the red box',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const example.FocusableActionDetectorExampleApp(),
+      );
+
+      expect(
+        find.widgetWithText(AppBar, 'FocusableActionDetector Example'),
+        findsOne,
+      );
+
+      expect(redContainerFinder, findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+
+      expect(redContainerFinder, findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+
+      expect(redContainerFinder, findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(redContainerFinder, findsOne);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(redContainerFinder, findsNothing);
+    },
+  );
 }

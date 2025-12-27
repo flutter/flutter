@@ -45,6 +45,9 @@ class _FadButtonState extends State<FadButton> {
       ActivateIntent: CallbackAction<Intent>(
         onInvoke: (Intent intent) => _toggleState(),
       ),
+      ButtonActivateIntent: CallbackAction<Intent>(
+        onInvoke: (Intent intent) => _toggleState(),
+      ),
     };
   }
 
