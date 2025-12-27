@@ -149,7 +149,20 @@ class PlatformViewManager {
     return _contents.putIfAbsent(viewId, () {
       final DomElement wrapper = domDocument.createElement('flt-platform-view')
         ..id = getPlatformViewDomId(viewId)
-        ..setAttribute('slot', slotName);
+        ..setAttribute('slot', slotName)
+        // Position relative so the wheel overlay can be positioned absolutely inside
+        // Width/height 100% to fill the slot's dimensions
+        ..style.position = 'relative'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.display = 'block';
+      
+      // Enable touch scrolling inside platform views.
+      // Flutter sets touch-action: none on the body to capture all touch events,
+      // but this prevents native touch scrolling inside platform views.
+      // We override it here to allow touch scrolling for HTML content.
+      // This fixes touch scrolling for Issue #113196 and #157435.
+      setElementStyle(wrapper, 'touch-action', 'pan-y pan-x');
 
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;
@@ -164,9 +177,263 @@ class PlatformViewManager {
       _ensureContentCorrectlySized(content, viewType);
       wrapper.append(content);
 
+      // Add a transparent overlay to capture wheel events ONLY for cross-origin iframes.
+      // Cross-origin iframes (like YouTube embeds) completely isolate events - wheel 
+      // events inside the iframe never reach the parent page due to browser security.
+      // This overlay sits on top and captures wheel events, forwarding them to Flutter.
+      // This fixes Issue #113196.
+      //
+      // For regular HTML elements (not iframes), we DON'T add the overlay because:
+      // 1. They can handle wheel events natively
+      // 2. They may have their own scrollable content
+      // 3. The overlay would block their native scrolling
+      if (_isCrossOriginIframe(content)) {
+        final DomElement wheelOverlay = domDocument.createElement('div')
+          ..style.position = 'absolute'
+          ..style.top = '0'
+          ..style.left = '0'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..style.zIndex = '1000'
+          // Capture wheel events only, let clicks pass through
+          ..style.pointerEvents = 'auto';
+        
+        _setupWheelEventForwarding(wheelOverlay, wrapper);
+        wrapper.append(wheelOverlay);
+      } else {
+        // For regular HTML elements, set up touch boundary detection.
+        // When the user scrolls to the boundary of the HTML element,
+        // we need to propagate the scroll to Flutter.
+        _setupTouchBoundaryDetection(content, wrapper);
+      }
+
       wrapper.setAttribute(_ariaHiddenAttribute, 'true');
 
       return wrapper;
+    });
+  }
+  
+  /// Sets up wheel event forwarding from the overlay to Flutter's scroll handler.
+  /// Also forwards other pointer events to the content beneath the overlay.
+  void _setupWheelEventForwarding(DomElement overlay, DomElement wrapper) {
+    // Capture wheel events and forward to Flutter
+    overlay.addEventListener(
+      'wheel',
+      createDomEventListener((DomEvent event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Find the flutter-view element to dispatch the event
+        DomElement? flutterView = wrapper.parentElement;
+        while (flutterView != null && flutterView.tagName != 'FLUTTER-VIEW') {
+          flutterView = flutterView.parentElement;
+        }
+
+        if (flutterView != null) {
+          final DomWheelEvent wheelEvent = event as DomWheelEvent;
+          final DomWheelEvent newEvent = createDomWheelEvent(
+            'wheel',
+            <String, dynamic>{
+              'bubbles': true,
+              'cancelable': true,
+              'clientX': wheelEvent.clientX,
+              'clientY': wheelEvent.clientY,
+              'deltaX': wheelEvent.deltaX,
+              'deltaY': wheelEvent.deltaY,
+              'deltaMode': wheelEvent.deltaMode,
+              'buttons': wheelEvent.buttons,
+            },
+          );
+          flutterView.dispatchEvent(newEvent);
+        }
+      }),
+      <String, bool>{'capture': false, 'passive': false}.jsify()!,
+    );
+    
+    // For click events, temporarily hide the overlay and re-dispatch to element beneath
+    overlay.addEventListener(
+      'click',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+    
+    // For mousedown, also forward to content
+    overlay.addEventListener(
+      'mousedown',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+    
+    // For mouseup, also forward to content  
+    overlay.addEventListener(
+      'mouseup',
+      createDomEventListener((DomEvent event) {
+        _forwardPointerEventToContent(event as DomMouseEvent, overlay);
+      }),
+    );
+  }
+  
+  /// Checks if the given element is a cross-origin iframe.
+  /// 
+  /// Sets up touch boundary detection for regular HTML elements.
+  /// When the user scrolls to the boundary of the HTML element during touch scrolling,
+  /// we prevent the default to stop the HTML element from rubber-banding and let
+  /// Flutter handle the scroll.
+  void _setupTouchBoundaryDetection(DomElement content, DomElement wrapper) {
+    double? lastTouchY;
+    bool? browserOwnsScroll;  // Once browser takes over (cancelable=false), it owns the gesture
+    
+    content.addEventListener(
+      'touchstart',
+      createDomEventListener((DomEvent event) {
+        final DomTouchEvent touchEvent = event as DomTouchEvent;
+        final Iterable<DomTouch> touches = touchEvent.touches;
+        if (touches.isNotEmpty) {
+          lastTouchY = touches.first.clientY;
+          browserOwnsScroll = null;  // Reset on new touch
+          
+          // Check if we're starting at a boundary
+          final DomElement scrollable = _findScrollableElement(content);
+          final double scrollTop = scrollable.scrollTop;
+          final double scrollHeight = scrollable.scrollHeight;
+          final double clientHeight = scrollable.clientHeight.toDouble();
+          final double maxScroll = scrollHeight - clientHeight;
+          
+          final bool isAtBoundaryAtStart = scrollTop <= 1 || scrollTop >= maxScroll - 1;
+          print('[TOUCH] touchstart: y=${touches.first.clientY}, scrollTop=$scrollTop, maxScroll=$maxScroll, atBoundary=$isAtBoundaryAtStart');
+        }
+      }),
+      <String, bool>{'passive': true}.jsify()!,
+    );
+    
+    content.addEventListener(
+      'touchmove',
+      createDomEventListener((DomEvent event) {
+        final DomTouchEvent touchEvent = event as DomTouchEvent;
+        final Iterable<DomTouch> touches = touchEvent.touches;
+        if (touches.isEmpty || lastTouchY == null) {
+          return;
+        }
+        
+        final double currentY = touches.first.clientY;
+        final double deltaY = lastTouchY! - currentY;  // Positive = scrolling down
+        lastTouchY = currentY;
+        
+        // Find the scrollable element (could be content itself or a child)
+        final DomElement scrollable = _findScrollableElement(content);
+        
+        final double scrollTop = scrollable.scrollTop;
+        final double scrollHeight = scrollable.scrollHeight;
+        final double clientHeight = scrollable.clientHeight.toDouble();
+        final double maxScroll = scrollHeight - clientHeight;
+        
+        // Check if at boundary in the direction of scroll
+        final bool atTop = scrollTop <= 1 && deltaY < 0;  // Trying to scroll up at top
+        final bool atBottom = scrollTop >= maxScroll - 1 && deltaY > 0;  // Trying to scroll down at bottom
+        final bool atBoundary = atTop || atBottom;
+        
+        // Once browser takes over (first non-cancelable event), it owns this gesture
+        if (!event.cancelable) {
+          browserOwnsScroll = true;
+        }
+        
+        print('[TOUCH] touchmove: deltaY=$deltaY, scrollTop=$scrollTop, maxScroll=$maxScroll, atTop=$atTop, atBottom=$atBottom, cancelable=${event.cancelable}, browserOwns=$browserOwnsScroll');
+        
+        // Only prevent if:
+        // 1. Event is cancelable (we can still prevent it)
+        // 2. We're at a boundary in the scroll direction
+        // 3. Browser hasn't already taken over this gesture
+        if (event.cancelable && atBoundary && browserOwnsScroll != true) {
+          // At boundary and event is cancelable - prevent default to stop rubber-banding
+          // and let Flutter handle the scroll
+          print('[TOUCH] Preventing default - at boundary');
+          event.preventDefault();
+        }
+      }),
+      <String, bool>{'passive': false}.jsify()!,
+    );
+  }
+  
+  /// Finds the scrollable element within a platform view content.
+  /// Returns the content itself if it's scrollable, or searches for a scrollable child.
+  DomElement _findScrollableElement(DomElement content) {
+    // Check if content itself is scrollable
+    if (_isScrollable(content)) {
+      return content;
+    }
+    
+    // Search for a scrollable child
+    final Iterable<DomElement> children = content.querySelectorAll('*');
+    for (final DomElement child in children) {
+      if (_isScrollable(child)) {
+        return child;
+      }
+    }
+    
+    // Default to content
+    return content;
+  }
+  
+  /// Checks if an element is scrollable.
+  bool _isScrollable(DomElement element) {
+    final String overflowY = element.style.overflowY;
+    final String overflow = element.style.overflow;
+    final bool hasOverflow = overflowY == 'auto' || overflowY == 'scroll' ||
+        overflow == 'auto' || overflow == 'scroll';
+    final bool hasContent = element.scrollHeight > element.clientHeight;
+    return hasOverflow && hasContent;
+  }
+
+  /// Cross-origin iframes completely isolate events due to browser security,
+  /// so we need the wheel overlay to capture and forward wheel events.
+  /// Regular HTML elements and same-origin iframes don't need the overlay.
+  bool _isCrossOriginIframe(DomElement element) {
+    // Check if it's an iframe
+    if (element.tagName.toLowerCase() != 'iframe') {
+      return false;
+    }
+    
+    // Check if it has a src attribute that indicates cross-origin
+    final String? src = element.getAttribute('src');
+    if (src == null || src.isEmpty) {
+      return false;
+    }
+    
+    // Try to determine if it's cross-origin
+    try {
+      final Uri srcUri = Uri.parse(src);
+      final Uri currentUri = Uri.parse(domWindow.location.href);
+      
+      // If the iframe src has a different origin (protocol + host + port), it's cross-origin
+      if (srcUri.hasScheme && srcUri.host.isNotEmpty) {
+        final bool isCrossOrigin = srcUri.origin != currentUri.origin;
+        return isCrossOrigin;
+      }
+      
+      // Relative URLs are same-origin
+      return false;
+    } catch (_) {
+      // If we can't parse the URL, assume it might be cross-origin to be safe
+      return true;
+    }
+  }
+  
+  /// Forwards a pointer event to the element beneath the overlay.
+  ///
+  /// Note: For cross-origin iframes, we can't actually dispatch events to the
+  /// content. This method temporarily sets pointer-events to 'none' to allow
+  /// the browser to naturally handle click-through.
+  void _forwardPointerEventToContent(DomMouseEvent event, DomElement overlay) {
+    // Temporarily hide the overlay to allow click-through
+    final String originalPointerEvents = overlay.style.pointerEvents;
+    overlay.style.pointerEvents = 'none';
+
+    // Use a microtask to restore pointer-events after the browser has had
+    // a chance to dispatch the event to the element beneath.
+    Future<void>.microtask(() {
+      overlay.style.pointerEvents = originalPointerEvents;
     });
   }
 

@@ -967,6 +967,15 @@ class ScrollableState extends State<Scrollable>
       }
       // The `event` won't result in a scroll, so allow the platform to trigger
       // any default native actions.
+      //
+      // This is the key fix for GitHub issues:
+      // - #156985: Scroll events bubble to parent page when at boundaries
+      // - #113196: Mouse scroll blocked over HtmlElementView iframe
+      //
+      // When the scrollable is at its boundary (can't scroll further in the
+      // direction of the event), we let the browser handle the event. This
+      // enables proper nested scrolling behavior and allows scroll events
+      // to pass through to parent scrollables or the browser.
       event.respond(allowPlatformDefault: true);
     } else if (event is PointerScrollInertiaCancelEvent) {
       position.pointerScroll(0);
@@ -976,10 +985,17 @@ class ScrollableState extends State<Scrollable>
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final PointerScrollEvent scrollEvent = event as PointerScrollEvent;
+    final double delta = _pointerSignalEventDelta(scrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
       position.pointerScroll(delta);
+      // GitHub Issue #156985: When THIS scrollable successfully handles the scroll,
+      // we must call respond(allowPlatformDefault: false) to override any previous
+      // respond(allowPlatformDefault: true) calls from NESTED scrollables that are
+      // at their boundaries. Without this, the engine would scroll the parent page
+      // even though we just handled the scroll.
+      scrollEvent.respond(allowPlatformDefault: false);
     }
   }
 
