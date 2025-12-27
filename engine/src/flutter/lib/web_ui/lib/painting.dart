@@ -444,6 +444,9 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
   factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
+
+  @override
+  String get shortDescription => toString();
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -592,6 +595,8 @@ class ImageFilter {
   }
 
   static bool get isShaderFilterSupported => false;
+
+  String get shortDescription => toString();
 }
 
 enum ColorSpace { sRGB, extendedSRGB, displayP3 }
