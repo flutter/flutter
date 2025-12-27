@@ -2,14 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'chip.dart';
-/// @docImport 'color_scheme.dart';
-/// @docImport 'list_tile.dart';
-library;
-
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -173,28 +167,8 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double? maxRadius;
 
-  // The default radius if nothing is specified.
-  static const double _defaultRadius = 20.0;
-
-  // The default min if only the max is specified.
-  static const double _defaultMinRadius = 0.0;
-
-  // The default max if only the min is specified.
-  static const double _defaultMaxRadius = double.infinity;
-
-  double get _minDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
-    }
-    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
-  }
-
-  double get _maxDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
-    }
-    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
-  }
+  // The duration for animating theme changes.
+  static const Duration _kThemeChangeDuration = Duration(milliseconds: 200);
 
   @override
   Widget build(BuildContext context) {
@@ -219,49 +193,38 @@ class CircleAvatar extends StatelessWidget {
         Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
       };
     }
-    final double minDiameter = _minDiameter;
-    final double maxDiameter = _maxDiameter;
-    return AnimatedContainer(
-      constraints: BoxConstraints(
-        minHeight: minDiameter,
-        minWidth: minDiameter,
-        maxWidth: maxDiameter,
-        maxHeight: maxDiameter,
-      ),
-      duration: kThemeChangeDuration,
-      decoration: BoxDecoration(
-        color: effectiveBackgroundColor,
-        image: backgroundImage != null
-            ? DecorationImage(
-                image: backgroundImage!,
-                onError: onBackgroundImageError,
-                fit: BoxFit.cover,
-              )
-            : null,
-        shape: BoxShape.circle,
-      ),
-      foregroundDecoration: foregroundImage != null
-          ? BoxDecoration(
-              image: DecorationImage(
-                image: foregroundImage!,
-                onError: onForegroundImageError,
-                fit: BoxFit.cover,
-              ),
-              shape: BoxShape.circle,
-            )
-          : null,
-      child: child == null
-          ? null
-          : Center(
-              // Need to disable text scaling here so that the text doesn't
-              // escape the avatar when the textScaleFactor is large.
-              child: MediaQuery.withNoTextScaling(
-                child: IconTheme(
-                  data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: DefaultTextStyle(style: textStyle, child: child!),
-                ),
+
+    final Widget? childContent = child == null
+        ? null
+        : Center(
+            child: MediaQuery.withNoTextScaling(
+              child: IconTheme(
+                data: theme.iconTheme.copyWith(color: textStyle.color),
+                child: DefaultTextStyle(style: textStyle, child: child!),
               ),
             ),
+          );
+
+    // Convert radius to size (diameter = radius * 2)
+    final double? size = radius != null ? radius! * 2.0 : null;
+    final double? minSize = minRadius != null ? minRadius! * 2.0 : null;
+    final double? maxSize = maxRadius != null ? maxRadius! * 2.0 : null;
+
+    return RawAvatar(
+      size: size,
+      minSize: minSize,
+      maxSize: maxSize,
+      shape: const CircleBorder(),
+      backgroundColor: effectiveBackgroundColor,
+      backgroundImage: backgroundImage,
+      onBackgroundImageError: onBackgroundImageError,
+      foregroundImage: foregroundImage,
+      onForegroundImageError: onForegroundImageError,
+      child: AnimatedDefaultTextStyle(
+        style: textStyle,
+        duration: _kThemeChangeDuration,
+        child: childContent ?? const SizedBox.shrink(),
+      ),
     );
   }
 }
