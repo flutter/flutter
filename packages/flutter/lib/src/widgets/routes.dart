@@ -1316,6 +1316,32 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return _of<T>(context);
   }
 
+  /// Returns the modal route most closely associated with the given context.
+  ///
+  /// Similar to [of], but this method does not cause rebuilds when the route's
+  /// state changes. This makes it more efficient for cases where you need to
+  /// read the current route's value once and don't need to rebuild when the
+  /// route changes.
+  ///
+  /// Returns null if the given context is not associated with a modal route.
+  ///
+  /// {@tool snippet}
+  /// Example usage:
+  ///
+  /// ```dart
+  /// // Read the current route's name without subscribing to changes
+  /// String? routeName = ModalRoute.readFrom(context)?.settings.name;
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [of], which provides the same information but will cause rebuilds when
+  ///    the route changes.
+  static ModalRoute<T>? readFrom<T extends Object?>(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_ModalScopeStatus>()?.route as ModalRoute<T>?;
+  }
+
   static ModalRoute<T>? _of<T extends Object?>(BuildContext context, [_ModalRouteAspect? aspect]) {
     return InheritedModel.inheritFrom<_ModalScopeStatus>(context, aspect: aspect)?.route
         as ModalRoute<T>?;
