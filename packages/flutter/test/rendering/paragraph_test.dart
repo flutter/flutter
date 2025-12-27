@@ -374,7 +374,7 @@ void main() {
     expect(paragraph.size.height, 30.0);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
-  test('textAlign triggers TextPainter relayout in the paint method', () {
+  test('changing textAlign triggers layout', () {
     final paragraph = RenderParagraph(
       const TextSpan(text: 'A', style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
@@ -391,10 +391,9 @@ void main() {
     expect(getRectForA(), const Rect.fromLTWH(0, 0, 10, 10));
 
     paragraph.textAlign = TextAlign.right;
-    expect(paragraph.debugNeedsLayout, isFalse);
-    expect(paragraph.debugNeedsPaint, isTrue);
+    expect(paragraph.debugNeedsLayout, isTrue);
 
-    paragraph.paint(MockPaintingContext(), Offset.zero);
+    pumpFrame();
     expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
   });
 
