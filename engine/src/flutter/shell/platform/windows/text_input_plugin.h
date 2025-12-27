@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
+#include "flutter/shell/platform/windows/tsf_text_store.h"
 
 namespace flutter {
 
@@ -73,6 +74,12 @@ class TextInputPlugin {
  private:
   // Allows modifying the TextInputPlugin in tests.
   friend class TextInputPluginModifier;
+
+  // Allows TSFTextStore to access cursor positioning for IME candidate window.
+  // This follows a similar pattern to Chromium's TSFTextStore and TextInputClient
+  // relationship, where the text store needs access to cursor bounds for proper
+  // IME integration.
+  friend class TSFTextStore;
 
   // Sends the current state of the given model to the Flutter engine.
   void SendStateUpdate(const TextInputModel& model);
@@ -135,6 +142,28 @@ class TextInputPlugin {
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0,  //
       0.0, 0.0, 0.0, 0.0};
+
+  // TSF support for modern IMEs.
+  std::unique_ptr<TSFTextStore> tsf_text_store_;
+
+  // TSF Manager for registering text store.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:136
+  Microsoft::WRL::ComPtr<ITfThreadMgr> tsf_thread_manager_;
+
+  // TSF Client ID obtained from Activate.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:154
+  TfClientId tsf_client_id_ = TF_CLIENTID_NULL;
+
+  // TSF Document Manager for the text store.
+  // Chromium: ui/base/ime/win/tsf_bridge.h:124
+  Microsoft::WRL::ComPtr<ITfDocumentMgr> tsf_document_manager_;
+
+  // Initializes TSF text store and registers with TSF manager.
+  void InitializeTSF();
+
+  // Registers TSFTextStore with Windows TSF system.
+  // Based on Chromium's CreateDocumentManager (tsf_bridge.cc:441-525)
+  HRESULT RegisterTSFTextStore();
 
   FML_DISALLOW_COPY_AND_ASSIGN(TextInputPlugin);
 };
