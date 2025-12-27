@@ -216,7 +216,7 @@ Future<void> runDemos(
   }
 
   if (scrollToTopWhenDone) {
-    await scrollToTop(demoItem!, driver);
+    await scrollToTop(demoItem, driver);
   }
 }
 

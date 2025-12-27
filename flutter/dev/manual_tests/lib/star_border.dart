@@ -373,7 +373,7 @@ class _OptionsState extends State<Options> {
                           value: true,
                           groupValue: widget.model.lerpTo,
                           onChanged: (bool? value) {
-                            widget.model.lerpTo = value!;
+                            widget.model.lerpTo = value;
                           },
                         ),
                         const Text('To'),
@@ -385,7 +385,7 @@ class _OptionsState extends State<Options> {
                           value: false,
                           groupValue: widget.model.lerpTo,
                           onChanged: (bool? value) {
-                            widget.model.lerpTo = value!;
+                            widget.model.lerpTo = value;
                           },
                         ),
                         const Text('From'),

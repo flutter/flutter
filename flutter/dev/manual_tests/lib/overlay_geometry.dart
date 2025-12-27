@@ -173,7 +173,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         Colors.blue.shade900,
         i / cardHeights.length,
       );
-      return CardModel(i, cardHeights[i], color!);
+      return CardModel(i, cardHeights[i], color);
     });
   }
 

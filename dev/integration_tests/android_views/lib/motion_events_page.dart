@@ -100,7 +100,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
                 child: const Text('SAVE'),
                 onPressed: () {
                   const StandardMessageCodec codec = StandardMessageCodec();
-                  saveRecordedEvents(codec.encodeMessage(flutterViewEvents)!, context);
+                  saveRecordedEvents(codec.encodeMessage(flutterViewEvents), context);
                 },
               ),
             ),

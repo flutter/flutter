@@ -41,8 +41,8 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(
     tester.element(find.text(label)),
     ListTile,
-  )!;
-  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
+  );
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
   final RichText richText = asset.widget as RichText;
   expect(richText.text.style!.color, equals(color));
 }

@@ -38,7 +38,7 @@ class PageViewAppState extends State<PageViewApp> {
         Colors.blue.shade900,
         i / cardSizes.length,
       );
-      return CardModel(i, cardSizes[i], color!);
+      return CardModel(i, cardSizes[i], color);
     });
   }
 

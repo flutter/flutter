@@ -63,9 +63,9 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
         final double height = MediaQuery.of(context).size.height / widget.rowCount;
         final double colorPosition = _controller.value;
         final int c1Position = colorPosition.floor();
-        final Color c1 = colorList[c1Position % colorList.length][900]!;
-        final Color c2 = colorList[(c1Position + 1) % colorList.length][900]!;
-        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position)!;
+        final Color c1 = colorList[c1Position % colorList.length][900];
+        final Color c2 = colorList[(c1Position + 1) % colorList.length][900];
+        final Color baseColor = Color.lerp(c1, c2, colorPosition - c1Position);
         counter++;
         return Scaffold(
           body: Table(
@@ -88,7 +88,7 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
                       : MyContainer(
                           // This key forces rebuilding the element
                           key: ValueKey<int>(widgetCounter + label),
-                          color: Color.lerp(Colors.white, baseColor, label / totalLength)!,
+                          color: Color.lerp(Colors.white, baseColor, label / totalLength),
                           constraints: BoxConstraints.expand(height: height),
                           child: Text('${widgetCounter + label}'),
                         );
