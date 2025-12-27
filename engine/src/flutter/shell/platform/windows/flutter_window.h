@@ -84,6 +84,8 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint32_t rotation,
+                             uint32_t pressure,
                              int modifiers_state);
 
   // Called when the a mouse button, determined by |button|, goes down.
@@ -91,7 +93,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             UINT button);
+                             UINT button,
+                             uint32_t rotation,
+                             uint32_t pressure);
 
   // Called when the a mouse button, determined by |button|, goes from
   // down to up
