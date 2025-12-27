@@ -33,6 +33,9 @@ abstract class CkManagedSkImageFilterConvertible implements ui.ImageFilter {
   ui.TileMode? get backdropTileMode;
 
   Matrix4 get transform;
+
+  @override
+  String toString() => 'ImageFilter.$shortDescription';
 }
 
 /// The CanvasKit implementation of [ui.ImageFilter].
@@ -86,6 +89,9 @@ abstract class CkImageFilter implements CkManagedSkImageFilterConvertible, Layer
     }, defaultBlurTileMode: ui.TileMode.decal);
     return result;
   }
+
+  @override
+  String get shortDescription => toString();
 }
 
 class CkColorFilterImageFilter extends CkImageFilter {
@@ -113,6 +119,9 @@ class CkColorFilterImageFilter extends CkImageFilter {
     }
     return other is CkColorFilterImageFilter && other.colorFilter == colorFilter;
   }
+
+  @override
+  String get shortDescription => colorFilter.toString();
 
   @override
   String toString() => colorFilter.toString();
@@ -166,9 +175,7 @@ class _CkBlurImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
   @override
-  String toString() {
-    return 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
-  }
+  String get shortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
 }
 
 class _CkMatrixImageFilter extends CkImageFilter {
@@ -209,7 +216,7 @@ class _CkMatrixImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(filterQuality, Object.hashAll(matrix));
 
   @override
-  String toString() => 'ImageFilter.matrix($matrix, $filterQuality)';
+  String get shortDescription => 'matrix($matrix, $filterQuality)';
 
   @override
   Matrix4 get transform => _transform;
@@ -250,9 +257,7 @@ class _CkDilateImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() {
-    return 'ImageFilter.dilate($radiusX, $radiusY)';
-  }
+  String get shortDescription => 'dilate($radiusX, $radiusY)';
 }
 
 class _CkErodeImageFilter extends CkImageFilter {
@@ -290,9 +295,7 @@ class _CkErodeImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() {
-    return 'ImageFilter.erode($radiusX, $radiusY)';
-  }
+  String get shortDescription => 'erode($radiusX, $radiusY)';
 }
 
 class _CkComposeImageFilter extends CkImageFilter {
@@ -327,7 +330,8 @@ class _CkComposeImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String toString() {
-    return 'ImageFilter.compose($outer, $inner)';
-  }
+  String get shortDescription => '${inner.shortDescription} -> ${outer.shortDescription}';
+
+  @override
+  String toString() => 'ImageFilter.compose(source -> $shortDescription -> result)';
 }

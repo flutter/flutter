@@ -4403,7 +4403,7 @@ abstract class ImageFilter {
 
   /// The description text to show when the filter is part of a composite
   /// [ImageFilter] created using [ImageFilter.compose].
-  String get shortDescription;
+  String get shortDescription => toString();
 }
 
 class _MatrixImageFilter implements ImageFilter {
