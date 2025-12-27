@@ -21,9 +21,6 @@ void main() {
 
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -46,7 +43,7 @@ void main() {
                     ),
                   );
                 },
-                onReorder: handleReorder,
+                onReorderItem: handleReorder,
               ),
             ],
           ),
@@ -79,9 +76,6 @@ void main() {
 
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -104,7 +98,7 @@ void main() {
                     ),
                   );
                 },
-                onReorder: handleReorder,
+                onReorderItem: handleReorder,
               ),
             ],
           ),
@@ -159,7 +153,7 @@ void main() {
                     ),
                   );
                 },
-                onReorder: (int _, int _) {},
+                onReorderItem: (_, _) {},
               ),
             ],
           ),
@@ -196,13 +190,12 @@ void main() {
               slivers: <Widget>[
                 SliverReorderableList(
                   itemCount: itemCount,
-                  itemBuilder: (BuildContext _, int index) =>
-                      Container(key: Key('$index'), height: 2000.0),
+                  itemBuilder: (_, int index) => Container(key: Key('$index'), height: 2000.0),
                   findChildIndexCallback: (Key key) {
                     finderCalled = true;
                     return null;
                   },
-                  onReorder: (int oldIndex, int newIndex) {},
+                  onReorderItem: (_, _) {},
                 ),
               ],
             );
@@ -225,9 +218,6 @@ void main() {
   ) async {
     final items = List<int>.generate(3, (int index) => index);
     void handleReorder(int fromIndex, int toIndex) {
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -248,7 +238,7 @@ void main() {
             );
           },
           itemCount: items.length,
-          onReorder: handleReorder,
+          onReorderItem: handleReorder,
         ),
       ),
     );
@@ -278,11 +268,8 @@ void main() {
               slivers: <Widget>[
                 SliverReorderableList(
                   itemCount: -1,
-                  onReorder: (int fromIndex, int toIndex) {
+                  onReorderItem: (int fromIndex, int toIndex) {
                     setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
                       items.insert(toIndex, items.removeAt(fromIndex));
                     });
                   },
@@ -313,11 +300,8 @@ void main() {
                 ),
                 SliverReorderableList(
                   itemCount: 0,
-                  onReorder: (int fromIndex, int toIndex) {
+                  onReorderItem: (int fromIndex, int toIndex) {
                     setState(() {
-                      if (toIndex > fromIndex) {
-                        toIndex -= 1;
-                      }
                       items.insert(toIndex, items.removeAt(fromIndex));
                     });
                   },
@@ -551,7 +535,7 @@ void main() {
                   ),
                 );
               },
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         ),
@@ -611,7 +595,7 @@ void main() {
                   ),
                 );
               },
-              onReorder: (int oldIndex, int newIndex) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         ),
@@ -978,9 +962,6 @@ void main() {
     final Finder item0 = find.textContaining('item 0');
 
     void handleReorder(int fromIndex, int toIndex) {
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -998,7 +979,7 @@ void main() {
               ),
             );
           },
-          onReorder: handleReorder,
+          onReorderItem: handleReorder,
           onReorderStart: (int index) {
             startIndex = index;
           },
@@ -1045,6 +1026,270 @@ void main() {
     expect(endIndex, equals(0));
   });
 
+  testWidgets(
+    'SliverReorderableList prefers old onReorder callback if provided along with onReorderItem callback',
+    (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      int onReorderItemCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+
+        if (fromIndex < toIndex) {
+          toIndex -= 1;
+        }
+
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+
+      void handleReorderItem(int fromIndex, int toIndex) {
+        onReorderItemCallCount += 1;
+
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverReorderableList(
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(
+                    key: ValueKey<int>(items[index]),
+                    height: 100,
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: Text('item ${items[index]}'),
+                    ),
+                  );
+                },
+                onReorderItem: handleReorderItem,
+                onReorder: handleReorder,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Start gesture on the first item.
+      final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+
+      // Drag enough to move down the first item.
+      await dragDown.moveBy(const Offset(0, 50));
+      await tester.pump();
+      await dragDown.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 1);
+      expect(onReorderItemCallCount, 0);
+      expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+      // Now do the reverse.
+      final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+
+      // Drag enough to move up the first item.
+      await dragUp.moveBy(const Offset(0, -50));
+      await tester.pump();
+      await dragUp.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 2);
+      expect(onReorderItemCallCount, 0);
+      expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+    },
+  );
+
+  testWidgets('SliverReorderableList calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverReorderableList(
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(items[index]),
+                  height: 100,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text('item ${items[index]}'),
+                  ),
+                );
+              },
+              onReorderItem: handleReorderItem,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets(
+    'ReorderableList prefers old onReorder callback if provided along with onReorderItem callback',
+    (WidgetTester tester) async {
+      const int itemCount = 5;
+      int onReorderCallCount = 0;
+      int onReorderItemCallCount = 0;
+      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+      void handleReorder(int fromIndex, int toIndex) {
+        onReorderCallCount += 1;
+
+        if (fromIndex < toIndex) {
+          toIndex -= 1;
+        }
+
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+
+      void handleReorderItem(int fromIndex, int toIndex) {
+        onReorderItemCallCount += 1;
+
+        items.insert(toIndex, items.removeAt(fromIndex));
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReorderableList(
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                key: ValueKey<int>(items[index]),
+                height: 100,
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: Text('item ${items[index]}'),
+                ),
+              );
+            },
+            onReorderItem: handleReorderItem,
+            onReorder: handleReorder,
+          ),
+        ),
+      );
+
+      // Start gesture on the first item.
+      final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+
+      // Drag enough to move down the first item.
+      await dragDown.moveBy(const Offset(0, 50));
+      await tester.pump();
+      await dragDown.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 1);
+      expect(onReorderItemCallCount, 0);
+      expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+      // Now do the reverse.
+      final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+
+      // Drag enough to move up the first item.
+      await dragUp.moveBy(const Offset(0, -50));
+      await tester.pump();
+      await dragUp.up();
+      await tester.pumpAndSettle();
+
+      expect(onReorderCallCount, 2);
+      expect(onReorderItemCallCount, 0);
+      expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+    },
+  );
+
+  testWidgets('ReorderableList calls onReorderItem callback correctly', (
+    WidgetTester tester,
+  ) async {
+    const int itemCount = 5;
+    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+
+    void handleReorderItem(int fromIndex, int toIndex) {
+      items.insert(toIndex, items.removeAt(fromIndex));
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableList(
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              key: ValueKey<int>(items[index]),
+              height: 100,
+              child: ReorderableDragStartListener(
+                index: index,
+                child: Text('item ${items[index]}'),
+              ),
+            );
+          },
+          onReorderItem: handleReorderItem,
+        ),
+      ),
+    );
+
+    // Start gesture on the first item.
+    final TestGesture dragDown = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move down the first item.
+    await dragDown.moveBy(const Offset(0, 50));
+    await tester.pump();
+    await dragDown.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[1, 0, 2, 3, 4]));
+
+    // Now do the reverse.
+    final TestGesture dragUp = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kPressTimeout);
+
+    // Drag enough to move up the first item.
+    await dragUp.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await dragUp.up();
+    await tester.pumpAndSettle();
+
+    expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (
     WidgetTester tester,
   ) async {
@@ -1064,7 +1309,7 @@ void main() {
         itemCount: numbers.length,
         itemExtent: 30,
         prototypeItem: const SizedBox(),
-        onReorder: (int fromIndex, int toIndex) {},
+        onReorderItem: (_, _) {},
       ),
       throwsAssertionError,
     );
@@ -1078,9 +1323,6 @@ void main() {
     const items = <double>[10.0, 20.0, 30.0, 40.0, 50.0];
 
     void handleReorder(int fromIndex, int toIndex) {
-      if (toIndex > fromIndex) {
-        toIndex -= 1;
-      }
       items.insert(toIndex, items.removeAt(fromIndex));
     }
 
@@ -1088,10 +1330,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: ReorderableList(
-          itemBuilder: (BuildContext context, int index) =>
-              SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index')),
+          itemBuilder: (_, int index) {
+            return SizedBox(key: ValueKey<double>(items[index]), child: Text('Item $index'));
+          },
           itemCount: itemCount,
-          onReorder: handleReorder,
+          onReorderItem: handleReorder,
           itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return items[index];
           },
@@ -1127,7 +1370,7 @@ void main() {
         itemCount: numbers.length,
         itemExtent: 30,
         prototypeItem: const SizedBox(),
-        onReorder: (int fromIndex, int toIndex) {},
+        onReorderItem: (_, _) {},
       ),
       throwsAssertionError,
     );
@@ -1157,10 +1400,7 @@ void main() {
                 },
                 itemCount: numbers.length,
                 itemExtent: 30,
-                onReorder: (int fromIndex, int toIndex) {
-                  if (fromIndex < toIndex) {
-                    toIndex--;
-                  }
+                onReorderItem: (int fromIndex, int toIndex) {
                   final int value = numbers.removeAt(fromIndex);
                   numbers.insert(toIndex, value);
                 },
@@ -1204,7 +1444,7 @@ void main() {
                 },
                 itemCount: numbers.length,
                 prototypeItem: const SizedBox(height: 30, child: Text('3')),
-                onReorder: (int oldIndex, int newIndex) {},
+                onReorderItem: (_, _) {},
               );
             },
           ),
@@ -1231,9 +1471,6 @@ void main() {
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
-        if (toIndex > fromIndex) {
-          toIndex -= 1;
-        }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
 
@@ -1252,7 +1489,7 @@ void main() {
                 ),
               );
             },
-            onReorder: handleReorder,
+            onReorderItem: handleReorder,
           ),
         ),
       );
@@ -1280,9 +1517,6 @@ void main() {
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
-        if (toIndex > fromIndex) {
-          toIndex -= 1;
-        }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
 
@@ -1302,7 +1536,7 @@ void main() {
                 ),
               );
             },
-            onReorder: handleReorder,
+            onReorderItem: handleReorder,
           ),
         ),
       );
@@ -1332,9 +1566,6 @@ void main() {
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
-        if (toIndex > fromIndex) {
-          toIndex -= 1;
-        }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
 
@@ -1353,7 +1584,7 @@ void main() {
                 ),
               );
             },
-            onReorder: handleReorder,
+            onReorderItem: handleReorder,
           ),
         ),
       );
@@ -1382,9 +1613,6 @@ void main() {
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
-        if (toIndex > fromIndex) {
-          toIndex -= 1;
-        }
         items.insert(toIndex, items.removeAt(fromIndex));
       }
 
@@ -1404,7 +1632,7 @@ void main() {
                 ),
               );
             },
-            onReorder: handleReorder,
+            onReorderItem: handleReorder,
           ),
         ),
       );
@@ -1452,7 +1680,7 @@ void main() {
                                 ),
                               );
                             },
-                            onReorder: (int oldIndex, int newIndex) {},
+                            onReorderItem: (_, _) {},
                           ),
                         ],
                       ),
@@ -1535,7 +1763,7 @@ void main() {
                   );
                 },
                 itemCount: items.length,
-                onReorder: (int fromIndex, int toIndex) {},
+                onReorderItem: (_, _) {},
                 autoScrollerVelocityScalar: autoScrollerVelocityScalar,
               ),
             ],
@@ -1591,10 +1819,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ReorderableList(
-            onReorder: (int oldIndex, int newIndex) {
-              if (newIndex > oldIndex) {
-                newIndex -= 1;
-              }
+            onReorderItem: (int oldIndex, int newIndex) {
               final String item = items.removeAt(oldIndex);
               items.insert(newIndex, item);
             },
@@ -1650,7 +1875,7 @@ void main() {
                       );
                     },
                     itemCount: 4,
-                    onReorder: (int fromIndex, int toIndex) {},
+                    onReorderItem: (_, _) {},
                   ),
                 ],
               ),
@@ -1706,7 +1931,7 @@ void main() {
                         );
                       },
                       itemCount: itemSizes.length,
-                      onReorder: (int fromIndex, int toIndex) {},
+                      onReorderItem: (_, _) {},
                     ),
                   ],
                 ),
@@ -1775,7 +2000,7 @@ void main() {
                   itemCount: 5,
                   itemExtent: itemExtent,
                   prototypeItem: prototypeItem,
-                  onReorder: (int fromIndex, int toIndex) {},
+                  onReorderItem: (_, _) {},
                 ),
               ],
             ),
@@ -1823,7 +2048,7 @@ void main() {
                   );
                 },
                 itemCount: 5,
-                onReorder: (int fromIndex, int toIndex) {},
+                onReorderItem: (_, _) {},
               ),
             ],
           ),
@@ -1862,7 +2087,7 @@ void main() {
                       );
                     },
                     itemCount: 5,
-                    onReorder: (int fromIndex, int toIndex) {},
+                    onReorderItem: (_, _) {},
                   ),
                 ],
               ),
@@ -1943,11 +2168,8 @@ class TestList extends StatelessWidget {
                         );
                       },
                       itemCount: items.length,
-                      onReorder: (int fromIndex, int toIndex) {
+                      onReorderItem: (int fromIndex, int toIndex) {
                         setState(() {
-                          if (toIndex > fromIndex) {
-                            toIndex -= 1;
-                          }
                           items.insert(toIndex, items.removeAt(fromIndex));
                         });
                       },
