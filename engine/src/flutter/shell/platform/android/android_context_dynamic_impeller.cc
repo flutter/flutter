@@ -126,7 +126,6 @@ GetActualRenderingAPIForImpeller(
           .enable_surface_control = settings.enable_surface_control,
           .impeller_flags =
               {
-                  .lazy_shader_mode = settings.impeller_flags.lazy_shader_mode,
                   .antialiased_lines =
                       settings.impeller_flags.antialiased_lines,
               },
