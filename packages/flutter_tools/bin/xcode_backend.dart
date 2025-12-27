@@ -22,7 +22,12 @@ void main(List<String> arguments) {
 /// All interactions with the platform are broken into individual methods that
 /// can be overridden in tests.
 class Context {
-  Context({required this.arguments, required this.environment, File? scriptOutputStreamFile}) {
+  Context({required this.arguments, required Map<String, String> environment, File? scriptOutputStreamFile}) :
+    environment = Map<String, String>.of(environment) {
+    if (this.environment['FLUTTER_BUILD_DIR'] == null) {
+      print('♦ Missing FLUTTER_BUILD_DIR environment variable; defaulting to "build"');
+      this.environment['FLUTTER_BUILD_DIR'] = 'build';
+    }
     if (scriptOutputStreamFile != null) {
       scriptOutputStream = scriptOutputStreamFile.openSync(mode: FileMode.write);
     }
@@ -338,7 +343,10 @@ class Context {
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
-    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
+    if (environment['FLUTTER_BUILD_DIR'] == null) {
+      print('♦ Missing FLUTTER_BUILD_DIR environment variable; defaulting to "build"');
+    }
+    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR'] ?? 'build';
     final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
