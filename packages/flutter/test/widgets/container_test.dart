@@ -779,6 +779,20 @@ void main() {
       matchesGoldenFile('container.clipBehaviour.with.shadow.png'),
     );
   });
+
+  testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Container(decoration: const BoxDecoration(), child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Container)), Size.zero);
+  });
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {
