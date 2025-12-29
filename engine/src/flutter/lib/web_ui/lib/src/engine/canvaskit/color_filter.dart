@@ -97,7 +97,7 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible, Layer
   }
 
   @override
-  String get shortDescription => toString();
+  String get debugShortDescription => toString();
 }
 
 /// A reusable identity transform matrix.

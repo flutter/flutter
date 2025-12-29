@@ -446,7 +446,7 @@ class ColorFilter implements ImageFilter {
   factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
 
   @override
-  String get shortDescription => toString();
+  String get debugShortDescription => toString();
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -596,7 +596,7 @@ class ImageFilter {
 
   static bool get isShaderFilterSupported => false;
 
-  String get shortDescription => toString();
+  String get debugShortDescription => toString();
 }
 
 enum ColorSpace { sRGB, extendedSRGB, displayP3 }

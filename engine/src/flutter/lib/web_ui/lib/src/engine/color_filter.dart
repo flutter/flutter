@@ -136,7 +136,7 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
 
   @override
-  String get shortDescription => toString();
+  String get debugShortDescription => toString();
 
   @override
   String toString() {

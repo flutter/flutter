@@ -59,7 +59,7 @@ abstract class LayerImageFilter implements ui.ImageFilter {
   Matrix4? get transform;
 
   @override
-  String get shortDescription => toString();
+  String get debugShortDescription => toString();
 }
 
 /// A [ui.Path] with a helper method to convert it to an SVG string.

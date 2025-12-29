@@ -33,11 +33,11 @@ void main() {
       expect(config3.hashCode, config4.hashCode);
     });
 
-    test('ImageFilterConfig.new toString and shortDescription', () {
+    test('ImageFilterConfig.new toString and debugShortDescription', () {
       final imageFilter = ui.ImageFilter.blur(sigmaX: 5.1, sigmaY: 5.1);
       final config = ImageFilterConfig(imageFilter);
 
-      expect(config.shortDescription, 'blur(5.1, 5.1, unspecified)');
+      expect(config.debugShortDescription, 'blur(5.1, 5.1, unspecified)');
       expect(config.toString(), 'ImageFilterConfig(blur(5.1, 5.1, unspecified))');
     });
 
@@ -62,13 +62,13 @@ void main() {
       expect(config1.hashCode, isNot(equals(config4.hashCode)));
     });
 
-    test('ImageFilterConfig.blur toString and shortDescription', () {
+    test('ImageFilterConfig.blur toString and debugShortDescription', () {
       const config = ImageFilterConfig.blur(sigmaX: 2.5, sigmaY: 3.5, tileMode: ui.TileMode.decal);
-      expect(config.shortDescription, 'blur(2.5, 3.5, decal, unbounded)');
+      expect(config.debugShortDescription, 'blur(2.5, 3.5, decal, unbounded)');
       expect(config.toString(), 'ImageFilterConfig.blur(2.5, 3.5, decal, unbounded)');
 
       const config2 = ImageFilterConfig.blur(sigmaX: 2.5, sigmaY: 3.5, bounded: true);
-      expect(config2.shortDescription, 'blur(2.5, 3.5, clamp, bounded)');
+      expect(config2.debugShortDescription, 'blur(2.5, 3.5, clamp, bounded)');
       expect(config2.toString(), 'ImageFilterConfig.blur(2.5, 3.5, clamp, bounded)');
     });
 
@@ -86,13 +86,13 @@ void main() {
       expect(config1.hashCode, isNot(equals(config3.hashCode)));
     });
 
-    test('ImageFilterConfig.compose toString and shortDescription', () {
+    test('ImageFilterConfig.compose toString and debugShortDescription', () {
       const blur1 = ImageFilterConfig.blur(sigmaX: 5.1, sigmaY: 5.1);
       const blur2 = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
       const config = ImageFilterConfig.compose(outer: blur1, inner: blur2);
 
-      final expectedShortDescription = '${blur2.shortDescription} -> ${blur1.shortDescription}';
-      expect(config.shortDescription, expectedShortDescription);
+      final expectedShortDescription = '${blur2.debugShortDescription} -> ${blur1.debugShortDescription}';
+      expect(config.debugShortDescription, expectedShortDescription);
       expect(
         config.toString(),
         'ImageFilterConfig.compose(source -> $expectedShortDescription -> result)',
@@ -110,13 +110,13 @@ void main() {
       const blurConfig = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1);
       final ui.ImageFilter resolvedBlur = blurConfig.resolve(context);
       expect(resolvedBlur, isA<ui.ImageFilter>());
-      expect(resolvedBlur.shortDescription, 'blur(10.1, 10.1, clamp)');
+      expect(resolvedBlur.debugShortDescription, 'blur(10.1, 10.1, clamp)');
 
       const boundedBlurConfig = ImageFilterConfig.blur(sigmaX: 10.1, sigmaY: 10.1, bounded: true);
       final ui.ImageFilter resolvedBoundedBlur = boundedBlurConfig.resolve(context);
       expect(resolvedBoundedBlur, isA<ui.ImageFilter>());
       expect(
-        resolvedBoundedBlur.shortDescription,
+        resolvedBoundedBlur.debugShortDescription,
         'blur(10.1, 10.1, clamp, bounds: Rect.fromLTRB(0.1, 0.1, 100.2, 100.2))',
       );
 
@@ -124,7 +124,7 @@ void main() {
       final ui.ImageFilter resolvedCompose = composeConfig.resolve(context);
       expect(resolvedCompose, isA<ui.ImageFilter>());
       expect(
-        resolvedCompose.shortDescription,
+        resolvedCompose.debugShortDescription,
         'blur(10.1, 10.1, clamp, bounds: Rect.fromLTRB(0.1, 0.1, 100.2, 100.2)) '
         '-> blur(10.1, 10.1, clamp)',
       );

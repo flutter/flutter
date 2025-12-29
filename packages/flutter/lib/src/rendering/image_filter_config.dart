@@ -127,10 +127,10 @@ abstract class ImageFilterConfig {
 
   /// The description text to show when the filter is part of a composite
   /// [ImageFilterConfig] created using [ImageFilterConfig.compose].
-  String get shortDescription;
+  String get debugShortDescription;
 
   @override
-  String toString() => 'ImageFilterConfig.$shortDescription';
+  String toString() => 'ImageFilterConfig.$debugShortDescription';
 }
 
 class _DirectImageFilterConfig extends ImageFilterConfig {
@@ -159,10 +159,10 @@ class _DirectImageFilterConfig extends ImageFilterConfig {
   int get hashCode => filter.hashCode;
 
   @override
-  String get shortDescription => filter.shortDescription;
+  String get debugShortDescription => filter.debugShortDescription;
 
   @override
-  String toString() => 'ImageFilterConfig(${filter.shortDescription})';
+  String toString() => 'ImageFilterConfig(${filter.debugShortDescription})';
 }
 
 class _BlurImageFilterConfig extends ImageFilterConfig {
@@ -222,7 +222,7 @@ class _BlurImageFilterConfig extends ImageFilterConfig {
   String get _boundedString => bounded ? 'bounded' : 'unbounded';
 
   @override
-  String get shortDescription => 'blur($sigmaX, $sigmaY, $_modeString, $_boundedString)';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, $_modeString, $_boundedString)';
 }
 
 class _ComposeImageFilterConfig extends ImageFilterConfig {
@@ -251,8 +251,8 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String get shortDescription => '${inner.shortDescription} -> ${outer.shortDescription}';
+  String get debugShortDescription => '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
 
   @override
-  String toString() => 'ImageFilterConfig.compose(source -> $shortDescription -> result)';
+  String toString() => 'ImageFilterConfig.compose(source -> $debugShortDescription -> result)';
 }
