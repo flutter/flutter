@@ -771,7 +771,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     testWithoutContext('removes xattr', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
+          command: <String>['xattr', '-cr', projectDirectory.path],
         ),
       ]);
 
@@ -786,7 +786,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     testWithoutContext('ignores errors', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', projectDirectory.path],
+          command: <String>['xattr', '-cr', projectDirectory.path],
           exitCode: 1,
         ),
       ]);
@@ -796,7 +796,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ProcessUtils(processManager: processManager, logger: logger),
         logger,
       );
-      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      expect(logger.traceText, contains('Failed to remove extended attributes'));
       expect(processManager, hasNoRemainingExpectations);
     });
   });

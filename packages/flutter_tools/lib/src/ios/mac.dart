@@ -704,23 +704,30 @@ bool publicHeadersChanged({
   return headersChanged;
 }
 
-/// Extended attributes applied by Finder can cause code signing errors. Remove them.
-/// https://developer.apple.com/library/archive/qa/qa1940/_index.html
+/// Extended attributes can cause code signing errors. Remove them.
+///
+/// Attributes like `com.apple.FinderInfo` and `com.apple.provenance` are added
+/// by Finder, cloud storage services (OneDrive, iCloud, Dropbox), or when files
+/// are downloaded. These must be removed before code signing.
+///
+/// See: https://developer.apple.com/library/archive/qa/qa1940/_index.html
+/// See: https://github.com/flutter/flutter/issues/180351
 Future<void> removeFinderExtendedAttributes(
   FileSystemEntity projectDirectory,
   ProcessUtils processUtils,
   Logger logger,
 ) async {
+  // Use -cr to clear ALL extended attributes recursively.
+  // This handles com.apple.FinderInfo, com.apple.provenance, and any other
+  // extended attributes that may cause code signing failures.
   final bool success = await processUtils.exitsHappy(<String>[
     'xattr',
-    '-r',
-    '-d',
-    'com.apple.FinderInfo',
+    '-cr',
     projectDirectory.path,
   ]);
   // Ignore all errors, for example if directory is missing.
   if (!success) {
-    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${projectDirectory.path}');
+    logger.printTrace('Failed to remove extended attributes from ${projectDirectory.path}');
   }
 }
 

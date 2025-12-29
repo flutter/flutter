@@ -41,7 +41,7 @@ import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
 List<String> _xattrArgs(FlutterProject flutterProject) {
-  return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
+  return <String>['xattr', '-cr', flutterProject.directory.path];
 }
 
 const kRunReleaseArgs = <String>[

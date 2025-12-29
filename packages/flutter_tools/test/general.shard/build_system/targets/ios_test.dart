@@ -133,7 +133,7 @@ void main() {
           ],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+          command: <String>['xattr', '-cr', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>[
@@ -185,7 +185,7 @@ void main() {
           ],
         ),
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+          command: <String>['xattr', '-cr', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>[
@@ -255,7 +255,7 @@ void main() {
         ),
 
         FakeCommand(
-          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
+          command: <String>['xattr', '-cr', frameworkBinary.path],
         ),
         FakeCommand(
           command: <String>[
@@ -324,9 +324,7 @@ void main() {
         FakeCommand(
           command: <String>[
             'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
+            '-cr',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -416,9 +414,7 @@ void main() {
         FakeCommand(
           command: <String>[
             'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
+            '-cr',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -518,9 +514,7 @@ void main() {
         FakeCommand(
           command: <String>[
             'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
+            '-cr',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -594,9 +588,7 @@ void main() {
         FakeCommand(
           command: <String>[
             'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
+            '-cr',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -664,9 +656,7 @@ void main() {
         FakeCommand(
           command: <String>[
             'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
+            '-cr',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -852,7 +842,7 @@ void main() {
       );
 
       xattrCommand = FakeCommand(
-        command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', binary.path],
+        command: <String>['xattr', '-cr', binary.path],
       );
 
       adHocCodesignCommand = FakeCommand(

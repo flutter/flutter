@@ -132,7 +132,7 @@ void main() {
   }
 
   const xattrCommand = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
+    command: <String>['xattr', '-cr', '/'],
   );
 
   FakeCommand setUpXCResultCommand({
