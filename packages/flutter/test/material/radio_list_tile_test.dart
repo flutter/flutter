@@ -82,6 +82,24 @@ void main() {
     expect(generatedRadioListTiles[2].checked, equals(false));
   });
 
+  testWidgets('RadioListTile forwards statesController to ListTile', (WidgetTester tester) async {
+    final controller = WidgetStatesController();
+
+    await tester.pumpWidget(
+      wrap(
+        child: RadioListTile<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (_) {},
+          statesController: controller,
+        ),
+      ),
+    );
+
+    controller.update(WidgetState.hovered, true);
+    expect(controller.value.contains(WidgetState.hovered), true);
+  });
+
   testWidgets('RadioListTile simple control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final Key titleKey = UniqueKey();
