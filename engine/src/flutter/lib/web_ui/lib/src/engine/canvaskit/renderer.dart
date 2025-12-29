@@ -32,20 +32,19 @@ class CanvasKitRenderer extends Renderer {
 
   static Rasterizer _createRasterizer() {
     if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer(
-        (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
-      );
+      return MultiSurfaceRasterizer();
     }
-    return OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
-    );
+    return OffscreenCanvasRasterizer();
   }
 
   @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
-    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
   }
+
+  /// A surface used specifically for `Picture.toImage` when software rendering
+  /// is supported.
+  final Surface pictureToImageSurface = Surface();
 
   @override
   Future<void> initialize() async {
@@ -60,7 +59,6 @@ class CanvasKitRenderer extends Renderer {
         windowFlutterCanvasKit = canvasKit;
       }
       rasterizer = _createRasterizer();
-      _pictureToImageSurface = rasterizer.createPictureToImageSurface();
       _instance = this;
       await super.initialize();
     }();
@@ -158,7 +156,12 @@ class CanvasKitRenderer extends Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
-  }) => CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+    ui.Rect? bounds,
+  }) =>
+      // TODO(dkwingsmt): `bounds` is currently not implemented in CanvasKit.
+      // Fall back to unbounded blur.
+      // https://github.com/flutter/flutter/issues/175899
+      CkImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   @override
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
@@ -496,9 +499,4 @@ class CanvasKitRenderer extends Renderer {
       }
     }
   }
-
-  late Surface _pictureToImageSurface;
-
-  @override
-  Surface get pictureToImageSurface => _pictureToImageSurface;
 }
