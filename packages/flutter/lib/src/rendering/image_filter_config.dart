@@ -57,7 +57,21 @@ class ImageFilterContext {
 ///  * [BackdropFilter.filterConfig], which uses this class to configure its effect.
 @immutable
 abstract class ImageFilterConfig {
-  /// Creates a configuration that directly uses the given filter.
+  /// Creates a configuration that directly wraps an existing [ui.ImageFilter].
+  ///
+  /// This constructor is used to adapt standard engine-level filters to APIs
+  /// that require an [ImageFilterConfig].
+  ///
+  /// Since the provided [ui.ImageFilter] is already instantiated,
+  /// it cannot automatically incorporate layout information (such as bounds) from the
+  /// [ImageFilterContext] during resolution. For example, wrapping a
+  /// [ui.ImageFilter.blur] with this constructor results in a static blur
+  /// with a fixed blur bounds. If you need a blur that adapts to its layout
+  /// (such as a "bounded blur"), use the [ImageFilterConfig.blur] constructor
+  /// directly instead.
+  ///
+  /// The [filter] property of an instance created with this constructor
+  /// will return the original filter.
   const factory ImageFilterConfig(ui.ImageFilter filter) = _DirectImageFilterConfig;
 
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -71,21 +85,27 @@ abstract class ImageFilterConfig {
   ///
   /// The `tileMode` argument determines how the blur should handle edges.
   ///
-  /// The `bounded` argument defaults to false, meaning the filter is applied
-  /// to the entire canvas. If `bounded` is true, the filter performs a
-  /// "bounded blur", which is typically used to replicate the high-fidelity
-  /// frosted-glass effect seen on iOS.
+  /// The `bounded` argument (defaults to false) controls the sampling strategy:
+  ///
+  ///  * If false, the filter is applied to the entire canvas using standard
+  ///    sampling.
+  ///  * If true, the filter performs a "bounded blur", typically used to
+  ///    replicate the high-fidelity frosted-glass effect seen on iOS.
   ///
   /// In "bounded blur" mode, the kernel samples exclusively from within the
-  /// bounding rectangle of the render object. Pixels outside the bounds are
-  /// treated as transparent, and the result is normalized to ensure an opaque
-  /// output. This process prevents color bleeding from content adjacent to
-  /// the bounds into the blurred area.
+  /// bounding rectangle of the object. Pixels outside the bounds are treated
+  /// as transparent, and the result is normalized to maintain full opacity
+  /// at the edges. This mode prevents color bleeding from adjacent content.
+  ///
+  /// Unlike the low-level API [ui.ImageFilter.blur], this constructor does not
+  /// require an explicit [Rect]. Because [ImageFilterConfig] is resolved during
+  /// the painting phase, it automatically uses the [Rect] bounds provided by
+  /// the [ImageFilterContext]. This ensures the effect stays perfectly
+  /// synchronized with the layout without manual coordinate management.
   ///
   /// This mode only restricts the blur's sampling source; it does not clip the
-  /// output. To avoid seeing artifacts beyond the boundary, this should
-  /// almost always be paired with a clipping widget (e.g., [ClipRect]) whose
-  /// bounds match the render object.
+  /// output. This should almost always be paired with a clipping widget (e.g.,
+  /// [ClipRect]) to avoid seeing blur artifacts beyond the object's boundaries.
   const factory ImageFilterConfig.blur({
     double sigmaX,
     double sigmaY,
