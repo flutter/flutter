@@ -18,8 +18,6 @@ part 'list_my_teams.dart';
 
 
 class ExampleConnector {
-
-  ExampleConnector({required this.dataConnect});
   
   
   CreateDemoUserVariablesBuilder createDemoUser () {
@@ -47,6 +45,8 @@ class ExampleConnector {
     'example',
     'scholesa-edu-2',
   );
+
+  ExampleConnector({required this.dataConnect});
   static ExampleConnector get instance {
     return ExampleConnector(
         dataConnect: FirebaseDataConnect.instanceFor(

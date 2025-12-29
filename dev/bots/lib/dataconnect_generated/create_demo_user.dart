@@ -1,9 +1,9 @@
 part of 'generated.dart';
 
 class CreateDemoUserVariablesBuilder {
-  CreateDemoUserVariablesBuilder(this._dataConnect, );
   
   final FirebaseDataConnect _dataConnect;
+  CreateDemoUserVariablesBuilder(this._dataConnect, );
   Deserializer<CreateDemoUserData> dataDeserializer = (dynamic json)  => CreateDemoUserData.fromJson(jsonDecode(json));
   
   Future<OperationResult<CreateDemoUserData, void>> execute() {
@@ -12,20 +12,16 @@ class CreateDemoUserVariablesBuilder {
 
   MutationRef<CreateDemoUserData, void> ref() {
     
-    return _dataConnect.mutation('CreateDemoUser', dataDeserializer, emptySerializer, null);
+    return _dataConnect.mutation("CreateDemoUser", dataDeserializer, emptySerializer, null);
   }
 }
 
 @immutable
 class CreateDemoUserUserInsert {
+  final String id;
   CreateDemoUserUserInsert.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']);
-
-  CreateDemoUserUserInsert({
-    required this.id,
-  });
-  final String id;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -44,22 +40,22 @@ class CreateDemoUserUserInsert {
   
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
+    Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
     return json;
   }
+
+  CreateDemoUserUserInsert({
+    required this.id,
+  });
 }
 
 @immutable
 class CreateDemoUserData {
+  final CreateDemoUserUserInsert user_insert;
   CreateDemoUserData.fromJson(dynamic json):
   
   user_insert = CreateDemoUserUserInsert.fromJson(json['user_insert']);
-
-  CreateDemoUserData({
-    required this.user_insert,
-  });
-  final CreateDemoUserUserInsert user_insert;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -78,9 +74,13 @@ class CreateDemoUserData {
   
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
+    Map<String, dynamic> json = {};
     json['user_insert'] = user_insert.toJson();
     return json;
   }
+
+  CreateDemoUserData({
+    required this.user_insert,
+  });
 }
 

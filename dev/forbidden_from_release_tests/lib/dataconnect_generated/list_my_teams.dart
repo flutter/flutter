@@ -1,9 +1,9 @@
 part of 'generated.dart';
 
 class ListMyTeamsVariablesBuilder {
-  ListMyTeamsVariablesBuilder(this._dataConnect, );
   
   final FirebaseDataConnect _dataConnect;
+  ListMyTeamsVariablesBuilder(this._dataConnect, );
   Deserializer<ListMyTeamsData> dataDeserializer = (dynamic json)  => ListMyTeamsData.fromJson(jsonDecode(json));
   
   Future<QueryResult<ListMyTeamsData, void>> execute() {
@@ -12,26 +12,20 @@ class ListMyTeamsVariablesBuilder {
 
   QueryRef<ListMyTeamsData, void> ref() {
     
-    return _dataConnect.query('ListMyTeams', dataDeserializer, emptySerializer, null);
+    return _dataConnect.query("ListMyTeams", dataDeserializer, emptySerializer, null);
   }
 }
 
 @immutable
 class ListMyTeamsTeams {
+  final String id;
+  final String name;
+  final String? description;
   ListMyTeamsTeams.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
   name = nativeFromJson<String>(json['name']),
   description = json['description'] == null ? null : nativeFromJson<String>(json['description']);
-
-  ListMyTeamsTeams({
-    required this.id,
-    required this.name,
-    this.description,
-  });
-  final String id;
-  final String name;
-  final String? description;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -48,11 +42,11 @@ class ListMyTeamsTeams {
     
   }
   @override
-  int get hashCode => Object.hashAll(<Object?>[id.hashCode, name.hashCode, description.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, name.hashCode, description.hashCode]);
   
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
+    Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
     json['name'] = nativeToJson<String>(name);
     if (description != null) {
@@ -60,20 +54,22 @@ class ListMyTeamsTeams {
     }
     return json;
   }
+
+  ListMyTeamsTeams({
+    required this.id,
+    required this.name,
+    this.description,
+  });
 }
 
 @immutable
 class ListMyTeamsData {
+  final List<ListMyTeamsTeams> teams;
   ListMyTeamsData.fromJson(dynamic json):
   
   teams = (json['teams'] as List<dynamic>)
         .map((e) => ListMyTeamsTeams.fromJson(e))
         .toList();
-
-  ListMyTeamsData({
-    required this.teams,
-  });
-  final List<ListMyTeamsTeams> teams;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -92,9 +88,13 @@ class ListMyTeamsData {
   
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{};
-    json['teams'] = teams.map((ListMyTeamsTeams e) => e.toJson()).toList();
+    Map<String, dynamic> json = {};
+    json['teams'] = teams.map((e) => e.toJson()).toList();
     return json;
   }
+
+  ListMyTeamsData({
+    required this.teams,
+  });
 }
 
