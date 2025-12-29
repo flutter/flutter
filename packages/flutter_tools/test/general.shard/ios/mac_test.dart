@@ -761,7 +761,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
     });
   });
 
-  group('remove Finder extended attributes', () {
+  group('remove extended attributes', () {
     late Directory projectDirectory;
     setUp(() {
       final fs = MemoryFileSystem.test();
@@ -775,7 +775,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ),
       ]);
 
-      await removeFinderExtendedAttributes(
+      await removeExtendedAttributes(
         projectDirectory,
         ProcessUtils(processManager: processManager, logger: logger),
         logger,
@@ -791,7 +791,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         ),
       ]);
 
-      await removeFinderExtendedAttributes(
+      await removeExtendedAttributes(
         projectDirectory,
         ProcessUtils(processManager: processManager, logger: logger),
         logger,

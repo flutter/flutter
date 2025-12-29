@@ -196,7 +196,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     app.project.parent.directory,
     globals.processUtils,
     globals.logger,
@@ -712,7 +712,7 @@ bool publicHeadersChanged({
 ///
 /// See: https://developer.apple.com/library/archive/qa/qa1940/_index.html
 /// See: https://github.com/flutter/flutter/issues/180351
-Future<void> removeFinderExtendedAttributes(
+Future<void> removeExtendedAttributes(
   FileSystemEntity projectDirectory,
   ProcessUtils processUtils,
   Logger logger,
