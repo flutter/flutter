@@ -330,7 +330,8 @@ class _CkComposeImageFilter extends CkImageFilter {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String get debugShortDescription => '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
+  String get debugShortDescription =>
+      '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
 
   @override
   String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';

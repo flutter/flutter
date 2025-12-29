@@ -138,12 +138,7 @@ abstract class ImageFilterConfig {
   /// returns null, even if the filter's parameters do not currently depend on
   /// layout information. For these configurations, you must use [resolve] to
   /// obtain the actual [ui.ImageFilter].
-  ui.ImageFilter? get filter {
-    if (this case final _DirectImageFilterConfig direct) {
-      return direct.filter;
-    }
-    return null;
-  }
+  ui.ImageFilter? get filter => null;
 
   /// The description text to show when the filter is part of a composite
   /// [ImageFilterConfig] created using [ImageFilterConfig.compose].
@@ -271,7 +266,8 @@ class _ComposeImageFilterConfig extends ImageFilterConfig {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String get debugShortDescription => '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
+  String get debugShortDescription =>
+      '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
 
   @override
   String toString() => 'ImageFilterConfig.compose(source -> $debugShortDescription -> result)';
