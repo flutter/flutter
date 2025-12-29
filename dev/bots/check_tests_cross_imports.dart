@@ -373,14 +373,13 @@ class TestsCrossImportChecker {
       if (index < 0) {
         throw ArgumentError('All files must include $prefix in their path.', 'files');
       }
-      final String comparablePath = file.absolute.path
-          .substring(index)
-          .replaceAll(r'\', '/');
+      final String comparablePath = file.absolute.path.substring(index).replaceAll(r'\', '/');
       return !knownPaths.contains(comparablePath);
     }).toSet();
   }
 
-  // Get a list of all the filenames in the source directory that end in "_test.dart".
+  /// Get a list of all the filenames in the source directory that end in
+  /// "_test.dart".
   static Set<File> _getTestFiles(Directory directory, _Library library) {
     return _getFiles(directory.childDirectory(library.directory), RegExp(r'_test\.dart$')).toSet();
   }
@@ -405,7 +404,7 @@ class TestsCrossImportChecker {
   /// Returns the error message for the given known paths that no longer have a
   /// cross import.
   ///
-  /// `library` must not be `Library.Material`, because Material is allowed to
+  /// `library` must not be `_Library.Material`, because Material is allowed to
   /// cross-import.
   static String _getFixedImportError(Set<String> fixedPaths, _Library library) {
     assert(fixedPaths.isNotEmpty);
@@ -433,17 +432,29 @@ class TestsCrossImportChecker {
     return path.relative(file.absolute.path, from: root.absolute.path);
   }
 
-  /// Returns the import error for the `files` in testLibraryName which import
-  /// importedLibraryName.
+  /// Returns the import error for the `files` in `testLibrary` which import
+  /// `importedLibrary`.
+  ///
+  /// Import errors only occur when Widgets imports Material or Cupertino, and
+  /// when Cupertino imports Material.
   String _getImportError({
     required Set<File> files,
-    required String testLibraryName,
-    required String importedLibraryName,
+    required _Library testLibrary,
+    required _Library importedLibrary,
   }) {
+    assert(
+      switch ((testLibrary, importedLibrary)) {
+        (_Library.widgets, _Library.material) => true,
+        (_Library.widgets, _Library.cupertino) => true,
+        (_Library.cupertino, _Library.material) => true,
+        (_, _) => false,
+      },
+      'Import errors only occur when Widgets imports Material or Cupertino, and when Cupertino imports Material.',
+    );
     final buffer = StringBuffer(
       files.length < 2
-          ? 'The following test in $testLibraryName has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
-          : 'The following ${files.length} tests in $testLibraryName have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
+          ? 'The following test in ${testLibrary.name} has a disallowed import of ${importedLibrary.name}. Refactor it or move it to ${importedLibrary.name}.\n'
+          : 'The following ${files.length} tests in ${testLibrary.name} have a disallowed import of ${importedLibrary.name}. Refactor them or move them to ${importedLibrary.name}.\n',
     );
     for (final file in files) {
       buffer.writeln('  ${_getRelativePath(file)}');
@@ -485,8 +496,8 @@ class TestsCrossImportChecker {
       foundError(
         _getImportError(
           files: unknownWidgetsTestsImportingMaterial,
-          testLibraryName: _Library.widgets.name,
-          importedLibraryName: _Library.material.name,
+          testLibrary: _Library.widgets,
+          importedLibrary: _Library.material,
         ).split('\n'),
       );
     }
@@ -499,8 +510,8 @@ class TestsCrossImportChecker {
       foundError(
         _getImportError(
           files: unknownWidgetsTestsImportingCupertino,
-          testLibraryName: _Library.widgets.name,
-          importedLibraryName: _Library.cupertino.name,
+          testLibrary: _Library.widgets,
+          importedLibrary: _Library.cupertino,
         ).split('\n'),
       );
     }
@@ -513,13 +524,16 @@ class TestsCrossImportChecker {
       foundError(
         _getImportError(
           files: unknownCupertinoTestsImportingMaterial,
-          testLibraryName: _Library.cupertino.name,
-          importedLibraryName: _Library.material.name,
+          testLibrary: _Library.cupertino,
+          importedLibrary: _Library.material,
         ).split('\n'),
       );
     }
 
     // Find any known cross imports that weren't found, and are therefore fixed.
+    // TODO(justinmc): Remove this after all known cross imports have been
+    // fixed.
+    // See https://github.com/flutter/flutter/issues/177028.
     final Set<String> fixedWidgetsCrossImports = _differencePaths(
       knownWidgetsCrossImports,
       widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
