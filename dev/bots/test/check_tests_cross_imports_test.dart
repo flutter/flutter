@@ -133,16 +133,14 @@ void main() {
     final String result = await capture(() async {
       success = checker.check();
     }, shouldHaveErrors: true);
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
-              '║   $excluded',
-              '║ However, they now need to be removed from the',
-              '║ knownCupertinoCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .join('\n');
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
+      '║   $excluded',
+      '║ However, they now need to be removed from the',
+      '║ knownCupertinoCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
     expect(result, equals('$lines\n'));
     expect(success, isFalse);
   });
