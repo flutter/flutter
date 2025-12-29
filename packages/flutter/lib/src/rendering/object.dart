@@ -1418,6 +1418,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   bool _debugDoingSemantics = false;
   final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
+  final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1455,6 +1456,13 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
+
+      final List<RenderObject> nodesToProcessGeometry =
+          _nodesNeedingSemanticsGeometryUpdate
+              .where((RenderObject object) => !object._needsLayout && object.owner == this)
+              .toList()
+            ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      _nodesNeedingSemanticsGeometryUpdate.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
@@ -1488,7 +1496,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.ensureGeometry');
       }
-      for (final node in nodesToProcess) {
+      print('nodesToProcessGeometry ${nodesToProcessGeometry}');
+      for (final node in nodesToProcessGeometry) {
         if (node._semantics.parentDataDirty) {
           // same as above.
           continue;
@@ -2525,7 +2534,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (owner case final PipelineOwner owner? when (_isRelayoutBoundary ?? false)) {
+    if (owner case final PipelineOwner owner when (owner._semanticsOwner != null)) {
+      _semantics.geometry = null;
+      if (parent != null) {
+        owner._nodesNeedingSemanticsGeometryUpdate.remove(this);
+      }
+      if (parent?._semantics.geometry != null) {
+        owner._nodesNeedingSemanticsGeometryUpdate.add(parent!);
+      }
+    }
+    if (owner case final PipelineOwner owner when (_isRelayoutBoundary ?? false)) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
           debugPrintStack(label: 'markNeedsLayout() called for $this');
@@ -2592,6 +2610,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     owner!._nodesNeedingLayout.add(this);
+    if (owner!._semanticsOwner != null) {
+      owner!._nodesNeedingSemanticsGeometryUpdate.add(this);
+    }
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -3654,6 +3675,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(_semantics.parentDataDirty || !_semantics.built);
     assert(owner!._semanticsOwner != null);
     owner!._nodesNeedingSemantics.add(this);
+    owner!._nodesNeedingSemanticsGeometryUpdate.add(this);
     owner!.requestVisualUpdate();
   }
 
@@ -5809,7 +5831,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       return;
     }
     // Parent data changes may result in node formation changes.
-    geometry = null;
     markNeedsBuild();
     parentData = newParentData;
     updateChildren();
@@ -5876,7 +5897,18 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   void _updateGeometry({required _SemanticsGeometry newGeometry}) {
+    final _SemanticsGeometry? currentGeometry = geometry;
     geometry = newGeometry;
+    if (currentGeometry != null) {
+      final bool isSemanticsHidden =
+          configProvider.original.isHidden ||
+          (!(parentData?.mergeIntoParent ?? false) && newGeometry.hidden);
+      final sizeChanged = currentGeometry.rect.size != newGeometry.rect.size;
+      final visibilityChanged = configProvider.effective.isHidden != isSemanticsHidden;
+      if (!sizeChanged && !visibilityChanged) {
+        return;
+      }
+    }
     markNeedsBuild();
     _updateChildGeometry();
   }
@@ -6169,7 +6201,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       if (node != renderObject && node._semantics.parentDataDirty && !mayProduceSiblingNodes) {
         break;
       }
-      node._semantics.geometry = null;
       node._semantics.parentData = null;
       node._semantics._blocksPreviousSibling = null;
       // Since this node is a semantics boundary, the produced sibling nodes will
@@ -6271,6 +6302,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     properties.add(
       FlagProperty('noParentData', value: parentData == null, ifTrue: 'NO PARENT DATA'),
     );
+    properties.add(
+      FlagProperty('geometry', value: geometry == null, ifTrue: 'NO GEOMETRY'));
     properties.add(
       FlagProperty(
         'semanticsBlock',
