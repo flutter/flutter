@@ -163,7 +163,7 @@ skwasm_toolchain("skwasm_heavy") {
 
 copy("skwasm_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//flutter/lib/web_ui/skwasm(:skwasm)" ]
+  public_deps = [ "//flutter/skwasm(:skwasm)" ]
 
   sources = [
     "$root_out_dir/skwasm/skwasm.js",
@@ -180,7 +180,7 @@ copy("skwasm_group") {
 
 copy("skwasm_heavy_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//flutter/lib/web_ui/skwasm:skwasm_heavy(:skwasm_heavy)" ]
+  public_deps = [ "//flutter/skwasm:skwasm_heavy(:skwasm_heavy)" ]
 
   sources = [
     "$root_out_dir/skwasm_heavy/skwasm_heavy.js",
@@ -197,7 +197,7 @@ copy("skwasm_heavy_group") {
 
 copy("wimp_group") {
   visibility = [ "//flutter/web_sdk:*" ]
-  public_deps = [ "//flutter/lib/web_ui/skwasm:wimp(:skwasm)" ]
+  public_deps = [ "//flutter/skwasm:wimp(:skwasm)" ]
 
   sources = [
     "$root_out_dir/skwasm/wimp.js",
