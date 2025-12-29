@@ -214,8 +214,8 @@
           FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded];
 
   UIViewController* rootViewController = flutterViewController;
-  // Make Flutter View's origin x/y not 0.
   if ([scenarioIdentifier isEqualToString:@"non_full_screen_flutter_view_platform_view"]) {
+    // Make Flutter View's origin x/y not 0.
     rootViewController = [[NoStatusBarViewController alloc] init];
     [rootViewController.view addSubview:flutterViewController.view];
     flutterViewController.view.frame = CGRectMake(150, 150, 500, 500);
