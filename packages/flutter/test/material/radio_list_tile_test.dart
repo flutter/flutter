@@ -96,8 +96,8 @@ void main() {
       ),
     );
 
-    controller.update(WidgetState.hovered, true);
-    expect(controller.value.contains(WidgetState.hovered), true);
+    final ListTile tile = tester.widget(find.byType(ListTile));
+    expect(tile.statesController, controller);
   });
 
   testWidgets('RadioListTile simple control test', (WidgetTester tester) async {
