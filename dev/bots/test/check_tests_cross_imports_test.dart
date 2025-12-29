@@ -108,32 +108,20 @@ void main() {
   });
 
   test('when not all widgets knowns have cross imports', () async {
-    final String excluded = TestsCrossImportChecker.knownWidgetsCrossImports.first.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
+    final String excluded = TestsCrossImportChecker.knownWidgetsCrossImports.first;
     buildTestFiles(excludes: <String>{excluded});
     bool? success;
     final String result = await capture(() async {
       success = checker.check();
     }, shouldHaveErrors: true);
-    final String script = '/dev/bots/check_tests_cross_imports.dart'.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
-    final String lines =
-        <String>[
-              '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-              '║ Huzzah! The following tests in Widgets no longer contain cross imports!',
-              '║   $excluded',
-              '║ However, they now need to be removed from the',
-              '║ knownWidgetsCrossImports list in the script $script.',
-              '╚═══════════════════════════════════════════════════════════════════════════════',
-            ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
-            .join('\n');
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ Huzzah! The following tests in Widgets no longer contain cross imports!',
+      '║   $excluded',
+      '║ However, they now need to be removed from the',
+      '║ knownWidgetsCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
     expect(result, equals('$lines\n'));
     expect(success, isFalse);
   });
@@ -145,22 +133,15 @@ void main() {
     final String result = await capture(() async {
       success = checker.check();
     }, shouldHaveErrors: true);
-    final String script = '/dev/bots/check_tests_cross_imports.dart'.replaceAll(
-      '/',
-      Platform.isWindows ? r'\' : '/',
-    );
     final String lines =
         <String>[
               '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
               '║ Huzzah! The following tests in Cupertino no longer contain cross imports!',
               '║   $excluded',
               '║ However, they now need to be removed from the',
-              '║ knownCupertinoCrossImports list in the script $script.',
+              '║ knownCupertinoCrossImports list in the script /dev/bots/check_tests_cross_imports.dart.',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
-            .map((String line) {
-              return line.replaceAll('/', Platform.isWindows ? r'\' : '/');
-            })
             .join('\n');
     expect(result, equals('$lines\n'));
     expect(success, isFalse);
