@@ -1576,12 +1576,16 @@ public class FlutterView extends FrameLayout
   @Override
   public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
-    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    if(textInputPlugin != null) {
+      textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    }
   }
 
   @Override
   public void autofill(@NonNull SparseArray<AutofillValue> values) {
-    textInputPlugin.autofill(values);
+    if(textInputPlugin != null) {
+      textInputPlugin.autofill(values);
+    }
   }
 
   @Override
