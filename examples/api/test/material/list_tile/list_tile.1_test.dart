@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListTiles wrapped in Card widgets', (WidgetTester tester) async {
-    const totalTiles = 7;
+    const int totalTiles = 7;
 
     await tester.pumpWidget(const example.ListTileApp());
 
     expect(find.byType(ListTile), findsNWidgets(totalTiles));
 
     // The ListTile widget is wrapped in a Card widget.
-    for (var i = 0; i < totalTiles; i++) {
+    for (int i = 0; i < totalTiles; i++) {
       expect(
         find.ancestor(
           of: find.byType(ListTile).at(i),

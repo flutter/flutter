@@ -93,7 +93,7 @@ void main() {
     final Finder draggable = find.byType(Draggable<int>);
     final Finder target = find.byType(DragTarget<int>);
 
-    var counter = 0;
+    int counter = 0;
 
     for (int i = 0; i < 5; i++) {
       final TestGesture gesture = await tester.startGesture(

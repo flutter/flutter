@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final mockClipboard = _MockClipboard();
+  final _MockClipboard mockClipboard = _MockClipboard();
 
   testWidgets('Copies text on Ctrl-C', (WidgetTester tester) async {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(

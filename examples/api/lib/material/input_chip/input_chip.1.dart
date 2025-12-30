@@ -208,7 +208,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
       final int cursorEnd = _previousSelection!.extentOffset;
       final int cursorStart = _previousSelection!.baseOffset;
 
-      final values = <T>[...widget.values];
+      final List<T> values = <T>[...widget.values];
 
       // If the current number and the previous number of replacements are different, then
       // the user has deleted the InputChip using the keyboard. In this case, we trigger
@@ -275,7 +275,7 @@ class ChipsInputEditingController<T> extends TextEditingController {
   /// from the outside the context of the text field.
   void updateValues(List<T> values) {
     if (values.length != this.values.length) {
-      final char = String.fromCharCode(kObjectReplacementChar);
+      final String char = String.fromCharCode(kObjectReplacementChar);
       final int length = values.length;
       value = TextEditingValue(
         text: char * length,
@@ -286,7 +286,7 @@ class ChipsInputEditingController<T> extends TextEditingController {
   }
 
   String get textWithoutReplacements {
-    final char = String.fromCharCode(kObjectReplacementChar);
+    final String char = String.fromCharCode(kObjectReplacementChar);
     return text.replaceAll(RegExp(char), '');
   }
 

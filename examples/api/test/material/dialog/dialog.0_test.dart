@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Show Dialog', (WidgetTester tester) async {
-    const dialogText = 'This is a typical dialog.';
+    const String dialogText = 'This is a typical dialog.';
 
     await tester.pumpWidget(const example.DialogExampleApp());
 
@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('Show Dialog.fullscreen', (WidgetTester tester) async {
-    const dialogText = 'This is a fullscreen dialog.';
+    const String dialogText = 'This is a fullscreen dialog.';
 
     await tester.pumpWidget(const example.DialogExampleApp());
 

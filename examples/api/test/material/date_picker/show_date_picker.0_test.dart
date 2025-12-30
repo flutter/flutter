@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can show date picker', (WidgetTester tester) async {
-    const datePickerTitle = 'Select date';
-    const initialDate = 'Sun, Jul 25';
+    const String datePickerTitle = 'Select date';
+    const String initialDate = 'Sun, Jul 25';
 
     await tester.pumpWidget(const example.DatePickerApp());
 

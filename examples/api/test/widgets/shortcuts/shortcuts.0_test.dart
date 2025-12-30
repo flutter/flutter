@@ -30,7 +30,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.ShortcutsExampleApp());
 
-    var counter = 0;
+    int counter = 0;
 
     while (counter < 10) {
       expect(find.text('count: $counter'), findsOneWidget);

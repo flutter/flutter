@@ -13,7 +13,7 @@ void main() {
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(find.text('CHILD 0'), findsOneWidget);
 
-    for (var i = 1; i <= 20; i += 1) {
+    for (int i = 1; i <= 20; i += 1) {
       await tester.tap(find.byIcon(Icons.add));
       await tester.pumpAndSettle();
       expect(find.text('CHILD $i'), findsOneWidget);
@@ -25,7 +25,7 @@ void main() {
     await tester.pumpWidget(const example.FocusExampleApp());
     expect(find.byIcon(Icons.add), findsOneWidget);
 
-    for (var i = 0; i <= 10; i += 1) {
+    for (int i = 0; i <= 10; i += 1) {
       expect(find.text('CHILD $i'), findsOneWidget);
       final ActionChip chip = tester.widget<ActionChip>(
         find.ancestor(

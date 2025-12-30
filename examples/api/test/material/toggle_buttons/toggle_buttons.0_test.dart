@@ -19,8 +19,8 @@ void main() {
     TextButton secondButton = findButton('Banana');
     TextButton thirdButton = findButton('Orange');
 
-    const selectedColor = Color(0xffef9a9a);
-    const unselectedColor = Color(0x00fef7ff);
+    const Color selectedColor = Color(0xffef9a9a);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// First button is selected.
     expect(firstButton.style!.backgroundColor!.resolve(enabled), selectedColor);
@@ -67,8 +67,8 @@ void main() {
     TextButton secondButton = findButton('Potatoes');
     TextButton thirdButton = findButton('Carrots');
 
-    const selectedColor = Color(0xffa5d6a7);
-    const unselectedColor = Color(0x00fef7ff);
+    const Color selectedColor = Color(0xffa5d6a7);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// Second button is selected.
     expect(
@@ -115,8 +115,8 @@ void main() {
     TextButton secondButton = findButton(Icons.cloud);
     TextButton thirdButton = findButton(Icons.ac_unit);
 
-    const selectedColor = Color(0xff90caf9);
-    const unselectedColor = Color(0x00fef7ff);
+    const Color selectedColor = Color(0xff90caf9);
+    const Color unselectedColor = Color(0x00fef7ff);
 
     /// Third button is selected.
     expect(

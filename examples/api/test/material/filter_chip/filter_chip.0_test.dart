@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Filter exercises using FilterChip', (WidgetTester tester) async {
-    const baseText = 'Looking for: ';
+    const String baseText = 'Looking for: ';
 
     await tester.pumpWidget(const example.ChipApp());
 

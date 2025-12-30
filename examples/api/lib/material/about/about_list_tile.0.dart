@@ -24,7 +24,7 @@ class AboutListTileExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.bodyMedium!;
-    final aboutBoxChildren = <Widget>[
+    final List<Widget> aboutBoxChildren = <Widget>[
       const SizedBox(height: 24),
       RichText(
         text: TextSpan(

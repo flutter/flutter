@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Open and dismiss general dialog', (WidgetTester tester) async {
-    const dialogText = 'Alert!';
+    const String dialogText = 'Alert!';
 
     await tester.pumpWidget(const example.GeneralDialogApp());
 

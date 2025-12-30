@@ -72,7 +72,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 onPressed: (int index) {
                   setState(() {
                     // The button that is tapped is set to true, and the others to false.
-                    for (var i = 0; i < _selectedFruits.length; i++) {
+                    for (int i = 0; i < _selectedFruits.length; i++) {
                       _selectedFruits[i] = i == index;
                     }
                   });
@@ -122,7 +122,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 onPressed: (int index) {
                   setState(() {
                     // The button that is tapped is set to true, and the others to false.
-                    for (var i = 0; i < _selectedWeather.length; i++) {
+                    for (int i = 0; i < _selectedWeather.length; i++) {
                       _selectedWeather[i] = i == index;
                     }
                   });

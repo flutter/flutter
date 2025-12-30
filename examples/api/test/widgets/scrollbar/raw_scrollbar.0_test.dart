@@ -18,7 +18,7 @@ void main() {
     expect(find.text('Scrollable 1 : Index 0'), findsOne);
     expect(find.text('Scrollable 2 : Index 0'), findsOne);
 
-    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
     pointer.hover(tester.getCenter(find.byType(ListView).first));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 1000)));
     await tester.pumpAndSettle();

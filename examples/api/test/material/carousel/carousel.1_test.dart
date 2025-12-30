@@ -26,7 +26,7 @@ void main() {
     expect(find.text('Item 1'), findsOneWidget);
     expect(find.text('Item 0'), findsNothing);
 
-    for (var i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
       await tester.drag(carousel, const Offset(-350, 0));
       await tester.pumpAndSettle();
     }

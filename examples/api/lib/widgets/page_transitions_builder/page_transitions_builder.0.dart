@@ -39,7 +39,7 @@ class SlideRightPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    const begin = Offset(1.0, 0.0);
+    const Offset begin = Offset(1.0, 0.0);
     const Offset end = Offset.zero;
     final Animatable<Offset> tween = Tween<Offset>(
       begin: begin,

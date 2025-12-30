@@ -52,8 +52,8 @@ void main() {
     final Offset centerOfPositioned = tester.getCenter(positionedWidget.first);
 
     // Drag the magnifier and confirm its new position is expected.
-    const dragDistance = Offset(10, 10);
-    final updatedPositioned = Offset(
+    const Offset dragDistance = Offset(10, 10);
+    final Offset updatedPositioned = Offset(
       oldConcretePositioned.left ?? 0.0 + 10.0,
       oldConcretePositioned.top ?? 0.0 + 10.0,
     );

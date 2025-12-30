@@ -85,8 +85,8 @@ void main() {
   testWidgets('Triggers a notification listener when the screen is dragged', (
     WidgetTester tester,
   ) async {
-    var overscrollNotified = false;
-    var leadingPaintOffset = 0.0;
+    bool overscrollNotified = false;
+    double leadingPaintOffset = 0.0;
 
     await tester.pumpWidget(
       NotificationListener<OverscrollIndicatorNotification>(

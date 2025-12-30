@@ -24,7 +24,7 @@ void main() {
         isTrue,
       );
     }
-    for (var i = 4; i <= 7; i++) {
+    for (int i = 4; i <= 7; i++) {
       expect(tester.widget<IconButton>(iconButtons.at(i)).onPressed, isNull);
     }
   });

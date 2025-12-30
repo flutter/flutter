@@ -18,11 +18,11 @@ void main() {
       find.ancestor(of: find.byIcon(Icons.android), matching: find.byType(Ink)),
     );
 
-    final decoration = ink.decoration! as ShapeDecoration;
+    final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
     expect(decoration.color, Colors.lightBlue);
     expect(decoration.shape, const CircleBorder());
 
-    final iconButton = ink.child! as IconButton;
+    final IconButton iconButton = ink.child! as IconButton;
     expect(iconButton.color, Colors.white);
   });
 }

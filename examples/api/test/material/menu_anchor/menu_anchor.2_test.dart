@@ -25,7 +25,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz));
     await tester.pumpAndSettle();
 
-    for (var i = 1; i <= 3; i++) {
+    for (int i = 1; i <= 3; i++) {
       expect(find.widgetWithText(MenuItemButton, 'Item $i'), findsOne);
     }
   });

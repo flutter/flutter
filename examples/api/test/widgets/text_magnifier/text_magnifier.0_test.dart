@@ -47,8 +47,8 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(
 }
 
 void main() {
-  const durationBetweenActions = Duration(milliseconds: 20);
-  const defaultText = 'I am a magnifier, fear me!';
+  const Duration durationBetweenActions = Duration(milliseconds: 20);
+  const String defaultText = 'I am a magnifier, fear me!';
 
   Future<void> showMagnifier(WidgetTester tester, int textOffset) async {
     assert(textOffset >= 0);

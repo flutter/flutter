@@ -19,7 +19,7 @@ void main() {
       expect(find.byType(BottomAppBar), findsOne);
       expect(tester.getCenter(find.byType(FloatingActionButton)).dx, 400);
 
-      for (var i = 1; i <= 5; i++) {
+      for (int i = 1; i <= 5; i++) {
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pump();
         expect(find.text('You have pressed the button $i times.'), findsOne);

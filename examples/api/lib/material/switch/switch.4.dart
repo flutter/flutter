@@ -21,7 +21,7 @@ class _SwitchAppState extends State<SwitchApp> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
+    final ThemeData theme = ThemeData(
       platform: isMaterial ? TargetPlatform.android : TargetPlatform.iOS,
       adaptations: <Adaptation<Object>>[
         if (isCustomized) const _SwitchThemeAdaptation(),

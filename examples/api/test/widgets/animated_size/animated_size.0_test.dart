@@ -11,8 +11,8 @@ void main() {
   testWidgets('AnimatedSize animates on tap', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AnimatedSizeExampleApp());
 
-    const beginSize = Size.square(100.0);
-    const endSize = Size.square(250.0);
+    const Size beginSize = Size.square(100.0);
+    const Size endSize = Size.square(250.0);
 
     RenderBox box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size, equals(beginSize));

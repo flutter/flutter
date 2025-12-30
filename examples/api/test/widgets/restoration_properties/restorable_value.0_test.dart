@@ -40,7 +40,7 @@ void main() {
     expect(find.text('42'), findsOneWidget);
 
     // Tap the button 10 times to change the answer value.
-    for (var i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
       await tester.tap(find.byType(OutlinedButton));
       await tester.pump();
     }

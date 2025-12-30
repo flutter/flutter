@@ -23,7 +23,7 @@ void main() {
   testWidgets('foo value can be updated', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
-    var counter = 0;
+    int counter = 0;
 
     while (counter < 10) {
       counter++;
@@ -43,7 +43,7 @@ void main() {
   testWidgets('bar value can be updated', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
-    var counter = 0;
+    int counter = 0;
 
     while (counter < 10) {
       counter++;
@@ -65,10 +65,10 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
-    var fooCounter = 0;
-    var barCounter = 0;
+    int fooCounter = 0;
+    int barCounter = 0;
 
-    for (var i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
       if (i.isEven) {
         fooCounter++;
       } else {

@@ -52,7 +52,7 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   Offset? _previousDragPosition;
 
   static double _keepScaleWithinBounds(double scale) {
-    const minScale = 0.1;
+    const double minScale = 0.1;
     const double maxScale = 30;
     if (scale <= 0) {
       return minScale;

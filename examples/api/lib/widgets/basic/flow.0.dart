@@ -101,8 +101,8 @@ class FlowMenuDelegate extends FlowDelegate {
 
   @override
   void paintChildren(FlowPaintingContext context) {
-    var dx = 0.0;
-    for (var i = 0; i < context.childCount; ++i) {
+    double dx = 0.0;
+    for (int i = 0; i < context.childCount; ++i) {
       dx = context.getChildSize(i)!.width * i;
       context.paintChild(
         i,

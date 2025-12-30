@@ -16,7 +16,7 @@ void main() {
     final Finder textFinder = find.widgetWithText(CircleAvatar, 'B');
     expect(tester.getCenter(textFinder), const Offset(58, 440));
 
-    const expectedOffsets = <Offset>[
+    const List<Offset> expectedOffsets = <Offset>[
       Offset(43, 407),
       Offset(81, 272),
       Offset(185, 103),
@@ -30,8 +30,8 @@ void main() {
       Offset(43, 407),
     ];
 
-    const steps = 10;
-    for (var i = 0; i <= steps; i++) {
+    const int steps = 10;
+    for (int i = 0; i <= steps; i++) {
       await tester.pump(const Duration(seconds: 3) * (1 / steps));
       final Offset center = tester.getCenter(textFinder);
       expect(center.dx, moreOrLessEquals(expectedOffsets[i].dx, epsilon: 1));

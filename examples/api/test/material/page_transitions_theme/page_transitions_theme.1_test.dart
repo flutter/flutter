@@ -26,7 +26,8 @@ void main() {
       switch (platform) {
         case TargetPlatform.android:
           expect(theme.builders[platform], isA<ZoomPageTransitionsBuilder>());
-          final builder = theme.builders[platform]! as ZoomPageTransitionsBuilder;
+          final ZoomPageTransitionsBuilder builder =
+              theme.builders[platform]! as ZoomPageTransitionsBuilder;
           expect(builder.allowSnapshotting, isFalse);
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:

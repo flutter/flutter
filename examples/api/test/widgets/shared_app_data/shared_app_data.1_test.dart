@@ -29,7 +29,7 @@ void main() {
   testWidgets('Button tap resets SharedObject', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SharedAppDataExampleApp());
 
-    for (var i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
       final example.SharedObject sharedObject = getSharedObject(tester);
 
       final Finder buttonFinder = find.ancestor(

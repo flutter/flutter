@@ -33,7 +33,7 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
   SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
 
   void _changeColor() {
-    final color = Color.fromRGBO(
+    final Color color = Color.fromRGBO(
       _random.nextInt(255),
       _random.nextInt(255),
       _random.nextInt(255),

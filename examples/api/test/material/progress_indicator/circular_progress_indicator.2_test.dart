@@ -51,7 +51,7 @@ void main() {
       ),
     );
     expect(find.byType(CircularProgressIndicator), findsNWidgets(4));
-    for (var i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       expect(
         find.byType(CircularProgressIndicator).at(i),
         paints..arc(startAngle: 1.5707963267948966, sweepAngle: 0.001),

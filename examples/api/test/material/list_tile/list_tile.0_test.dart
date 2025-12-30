@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ListTile with Hero does not throw', (WidgetTester tester) async {
-    const totalTiles = 3;
+    const int totalTiles = 3;
 
     await tester.pumpWidget(const example.ListTileApp());
 
     expect(find.byType(ListTile), findsNWidgets(totalTiles));
 
-    const heroTransitionText = 'Tap here for Hero transition';
-    const goBackText = 'Tap here to go back';
+    const String heroTransitionText = 'Tap here for Hero transition';
+    const String goBackText = 'Tap here to go back';
 
     expect(find.text(heroTransitionText), findsOneWidget);
     expect(find.text(goBackText), findsNothing);

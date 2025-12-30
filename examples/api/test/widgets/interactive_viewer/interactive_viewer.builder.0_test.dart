@@ -19,10 +19,10 @@ void main() {
     expect(zeroFinder, findsOneWidget);
     expect(nineFinder, findsNothing);
 
-    const firstLocation = Offset(750.0, 100.0);
+    const Offset firstLocation = Offset(750.0, 100.0);
     final TestGesture gesture = await tester.startGesture(firstLocation);
 
-    const secondLocation = Offset(50.0, 100.0);
+    const Offset secondLocation = Offset(50.0, 100.0);
     await gesture.moveTo(secondLocation);
     await tester.pump();
 

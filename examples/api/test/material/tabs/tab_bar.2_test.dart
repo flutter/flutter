@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Switch tabs in the TabBar', (WidgetTester tester) async {
-    const primaryTabLabel1 = 'Flights';
-    const primaryTabLabel2 = 'Trips';
-    const primaryTabLabel3 = 'Explore';
-    const secondaryTabLabel1 = 'Overview';
-    const secondaryTabLabel2 = 'Specifications';
+    const String primaryTabLabel1 = 'Flights';
+    const String primaryTabLabel2 = 'Trips';
+    const String primaryTabLabel3 = 'Explore';
+    const String secondaryTabLabel1 = 'Overview';
+    const String secondaryTabLabel2 = 'Specifications';
 
     await tester.pumpWidget(const example.TabBarApp());
 
@@ -26,7 +26,7 @@ void main() {
     );
     expect(secondaryTabBar.tabs.length, 2);
 
-    var tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel1 tab';
+    String tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel1 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
     await tester.tap(find.text(primaryTabLabel1));

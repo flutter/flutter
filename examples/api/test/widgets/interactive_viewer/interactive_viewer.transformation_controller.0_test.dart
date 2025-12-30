@@ -24,7 +24,7 @@ void main() {
     await tester.drag(find.byType(Container).first, const Offset(20, 20));
 
     // Pans.
-    const panStart = Offset(400.0, 300.0);
+    const Offset panStart = Offset(400.0, 300.0);
     final Offset panEnd = panStart + const Offset(20.0, 20.0);
     final TestGesture gesture = await tester.startGesture(panStart);
     await tester.pump();
@@ -39,7 +39,7 @@ void main() {
     );
 
     // Zooms.
-    const scaleStart1 = Offset(400.0, 300.0);
+    const Offset scaleStart1 = Offset(400.0, 300.0);
     final Offset scaleStart2 = scaleStart1 + const Offset(10.0, 0.0);
     final Offset scaleEnd1 = scaleStart1 - const Offset(10.0, 0.0);
     final Offset scaleEnd2 = scaleStart2 + const Offset(10.0, 0.0);

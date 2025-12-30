@@ -28,7 +28,7 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
 
-    for (var i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       await tester.tap(find.byIcon(Icons.add));
     }
     await tester.pump();

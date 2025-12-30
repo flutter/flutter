@@ -21,8 +21,8 @@ void main() {
       ),
     );
     final Finder containerFinder = find.byType(Container);
-    const expectedSize = Size(100, 100);
-    for (var i = 0; i < 4; i += 1) {
+    const Size expectedSize = Size(100, 100);
+    for (int i = 0; i < 4; i += 1) {
       expect(tester.getSize(containerFinder.at(i)), equals(expectedSize));
     }
     expect(containerFinder, findsNWidgets(4));
@@ -36,7 +36,7 @@ void main() {
     );
     final Finder containerFinder = find.byType(Container);
     Rect previousRect = tester.getRect(containerFinder.first);
-    for (var i = 1; i < 4; i += 1) {
+    for (int i = 1; i < 4; i += 1) {
       expect(
         tester.getRect(containerFinder.at(i)),
         equals(previousRect.shift(const Offset(100, 70))),

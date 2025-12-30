@@ -144,7 +144,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
   }
 
   List<MenuEntry> _getMenus() {
-    final result = <MenuEntry>[
+    final List<MenuEntry> result = <MenuEntry>[
       MenuEntry(
         label: 'Menu Demo',
         menuChildren: <MenuEntry>[

@@ -138,18 +138,18 @@ class _RenderSelectableAdapter extends RenderProxyBox
       _geometry.value = _noSelection;
       return;
     }
-    final renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final selectionRect = Rect.fromPoints(_start!, _end!);
+    final Rect renderObjectRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final Rect selectionRect = Rect.fromPoints(_start!, _end!);
     if (renderObjectRect.intersect(selectionRect).isEmpty) {
       _geometry.value = _noSelection;
     } else {
       final Rect selectionRect = _getSelectionHighlightRect();
-      final firstSelectionPoint = SelectionPoint(
+      final SelectionPoint firstSelectionPoint = SelectionPoint(
         localPosition: selectionRect.bottomLeft,
         lineHeight: selectionRect.size.height,
         handleType: TextSelectionHandleType.left,
       );
-      final secondSelectionPoint = SelectionPoint(
+      final SelectionPoint secondSelectionPoint = SelectionPoint(
         localPosition: selectionRect.bottomRight,
         lineHeight: selectionRect.size.height,
         handleType: TextSelectionHandleType.right,
@@ -211,7 +211,8 @@ class _RenderSelectableAdapter extends RenderProxyBox
         _end = Offset.infinite;
       case SelectionEventType.granularlyExtendSelection:
         result = SelectionResult.end;
-        final extendSelectionEvent = event as GranularlyExtendSelectionEvent;
+        final GranularlyExtendSelectionEvent extendSelectionEvent =
+            event as GranularlyExtendSelectionEvent;
         // Initialize the offset it there is no ongoing selection.
         if (_start == null || _end == null) {
           if (extendSelectionEvent.forward) {
@@ -241,7 +242,8 @@ class _RenderSelectableAdapter extends RenderProxyBox
         }
       case SelectionEventType.directionallyExtendSelection:
         result = SelectionResult.end;
-        final extendSelectionEvent = event as DirectionallyExtendSelectionEvent;
+        final DirectionallyExtendSelectionEvent extendSelectionEvent =
+            event as DirectionallyExtendSelectionEvent;
         // Convert to local coordinates.
         final double horizontalBaseLine = globalToLocal(Offset(event.dx, 0)).dx;
         final Offset newOffset;
@@ -334,7 +336,7 @@ class _RenderSelectableAdapter extends RenderProxyBox
       return;
     }
     // Draw the selection highlight.
-    final selectionPaint = Paint()
+    final Paint selectionPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = _selectionColor;
     context.canvas.drawRect(

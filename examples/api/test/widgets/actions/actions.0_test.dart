@@ -24,7 +24,7 @@ void main() {
   testWidgets('Increments and decrements value', (WidgetTester tester) async {
     await tester.pumpWidget(const example.ActionsExampleApp());
 
-    var value = 0;
+    int value = 0;
 
     while (value < 10) {
       expect(find.text('Value: $value'), findsOneWidget);

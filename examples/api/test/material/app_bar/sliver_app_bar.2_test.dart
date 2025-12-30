@@ -13,7 +13,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.AppBarMediumApp());
 
-    const title = 'Medium App Bar';
+    const String title = 'Medium App Bar';
 
     expect(
       find.descendant(
