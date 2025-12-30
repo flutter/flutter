@@ -254,8 +254,9 @@ class RawTooltip extends StatefulWidget {
   /// This string is used by assistive technologies, most notably screen readers
   /// like TalkBack and VoiceOver, to describe the tooltip's purpose.
   ///
-  /// If non-null and non-empty, the tooltip will add a [Semantics] label that
-  /// is set to this value.
+  /// Providing a non-empty string adds a [Semantics] tooltip string for
+  /// assistive technologies. If the tooltip should not have a semantic
+  /// description, this property must be explicitly set to null.
   final String? semanticsTooltip;
 
   /// Builds the widget that will be displayed in the tooltip's overlay.
@@ -400,6 +401,8 @@ class RawTooltip extends StatefulWidget {
   ///
   /// To disable the tooltip show/hide animation, use
   /// [AnimationStyle.noAnimation].
+  // TODO(victorsanni): Add an example of chaining a physics-based animation to
+  // the tooltip's underlying animation.
   final AnimationStyle animationStyle;
 
   /// {@template flutter.widgets.RawTooltip.positionDelegate}
@@ -425,8 +428,8 @@ class RawTooltip extends StatefulWidget {
   /// }
   /// ```
   ///
-  /// If null, the default positioning behavior is used (above or below the
-  /// target).
+  /// If null, defaults to positioning the tooltip center-aligned and below the
+  /// target using [positionDependentBox].
   ///
   /// See also:
   ///
@@ -450,8 +453,8 @@ class RawTooltip extends StatefulWidget {
   /// Dismiss all of the tooltips that are currently shown on the screen,
   /// including those with mouse cursors currently hovering over them.
   ///
-  /// This method returns true if it successfully dismisses the tooltips. It
-  /// returns false if there is no tooltip shown on the screen.
+  /// This method returns true if it successfully dismisses at least one tooltip
+  /// and returns false if there is no tooltip currently displayed.
   /// {@endtemplate}
   static bool dismissAllToolTips() {
     if (_openedTooltips.isEmpty) {
@@ -482,12 +485,8 @@ class RawTooltip extends StatefulWidget {
             : kNoDefaultValue,
       ),
     );
-    properties.add(
-      DiagnosticsProperty<Duration>('hover delay', hoverDelay, defaultValue: null),
-    );
-    properties.add(
-      DiagnosticsProperty<Duration>('touch delay', touchDelay, defaultValue: null),
-    );
+    properties.add(DiagnosticsProperty<Duration>('hover delay', hoverDelay, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('touch delay', touchDelay, defaultValue: null));
     properties.add(
       DiagnosticsProperty<Duration>('dismiss delay', dismissDelay, defaultValue: null),
     );

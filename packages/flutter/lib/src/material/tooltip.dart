@@ -252,13 +252,13 @@ class Tooltip extends StatefulWidget {
   /// [TextAlign.start].
   final TextAlign? textAlign;
 
-  /// {@macro flutter.widgets.RawTooltip.waitDuration}
+  /// {@macro flutter.widgets.RawTooltip.hoverDelay}
   final Duration? waitDuration;
 
-  /// {@macro flutter.widgets.RawTooltip.showDuration}
+  /// {@macro flutter.widgets.RawTooltip.touchDelay}
   final Duration? showDuration;
 
-  /// {@macro flutter.widgets.RawTooltip.exitDuration}
+  /// {@macro flutter.widgets.RawTooltip.dismissDelay}
   final Duration? exitDuration;
 
   /// {@macro flutter.widgets.RawTooltip.enableTapToDismiss}
