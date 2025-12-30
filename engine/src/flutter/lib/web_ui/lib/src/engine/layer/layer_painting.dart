@@ -57,6 +57,9 @@ abstract class LayerImageFilter implements ui.ImageFilter {
   // The matrix image filter changes the position of the content, so when positioning
   // platform views and calculating occlusion we need to take its transform into account.
   Matrix4? get transform;
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 /// A [ui.Path] with a helper method to convert it to an SVG string.

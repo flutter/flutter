@@ -71,6 +71,9 @@ abstract class SkwasmImageFilter implements LayerImageFilter {
       return scope.convertIRectFromNative(rawRect);
     });
   });
+
+  @override
+  String toString() => 'ImageFilter.$debugShortDescription';
 }
 
 class SkwasmBlurFilter extends SkwasmImageFilter {
@@ -113,7 +116,7 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
 }
 
 class SkwasmDilateFilter extends SkwasmImageFilter {
@@ -148,7 +151,7 @@ class SkwasmDilateFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
+  String get debugShortDescription => 'dilate($radiusX, $radiusY)';
 }
 
 class SkwasmErodeFilter extends SkwasmImageFilter {
@@ -183,7 +186,7 @@ class SkwasmErodeFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
+  String get debugShortDescription => 'erode($radiusX, $radiusY)';
 }
 
 class SkwasmMatrixFilter extends SkwasmImageFilter {
@@ -223,7 +226,7 @@ class SkwasmMatrixFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(filterQuality, Object.hashAll(matrix4));
 
   @override
-  String toString() => 'ImageFilter.matrix($matrix4, $filterQuality)';
+  String get debugShortDescription => 'matrix($matrix4, $filterQuality)';
 }
 
 class SkwasmColorImageFilter extends SkwasmImageFilter {
@@ -255,6 +258,9 @@ class SkwasmColorImageFilter extends SkwasmImageFilter {
 
   @override
   int get hashCode => filter.hashCode;
+
+  @override
+  String get debugShortDescription => filter.toString();
 
   @override
   String toString() => filter.toString();
@@ -302,7 +308,11 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String toString() => 'ImageFilter.compose($outer, $inner)';
+  String get debugShortDescription =>
+      '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
+
+  @override
+  String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';
 }
 
 typedef ColorFilterHandleBorrow<T> = T Function(ColorFilterHandle handle);
