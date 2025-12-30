@@ -1312,7 +1312,8 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
-  /// Cursor width
+  /// Cursor width.
+  ///
   /// This value is used for calculating the position of the text selection
   /// handles.
   final double cursorWidth;
