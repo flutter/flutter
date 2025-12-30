@@ -2737,6 +2737,69 @@ void main() {
     expect(position, equals(20));
   });
 
+  testWidgets('TabBar accepts external TabBarController', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    tabScrollController.jumpTo(50);
+    await tester.pump();
+
+    expect(scrollableState.position.pixels, 50);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124608
+  testWidgets('TabBar can be wrapped with RawScrollbar', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: RawScrollbar(
+          controller: tabScrollController,
+          child: TabBar(
+            isScrollable: true,
+            controller: tabBarController,
+            scrollController: tabScrollController,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (
     WidgetTester tester,
   ) async {
