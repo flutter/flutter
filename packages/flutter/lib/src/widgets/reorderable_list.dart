@@ -927,20 +927,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
 
   void _dropCompleted() {
     final int oldIndex = _dragIndex!;
-    int newIndex = _insertIndex!;
+    final int newIndex = _insertIndex!;
 
-    if (widget.onReorder != null) {
-      if (oldIndex != newIndex) {
-        widget.onReorder?.call(oldIndex, newIndex);
-      }
-    } else {
-      // Removing an item at the old index shortens the list by one.
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-
-      widget.onReorderItem.call(oldIndex, newIndex);
-    }
+    _handleReorderItem(oldIndex, newIndex);
 
     setState(() {
       _dragReset();
@@ -971,6 +960,22 @@ class SliverReorderableListState extends State<SliverReorderableList>
   void _resetItemGap() {
     for (final _ReorderableItemState item in _items.values) {
       item.resetGap();
+    }
+  }
+
+  void _handleReorderItem(int oldIndex, int newIndex) {
+    if (widget.onReorder != null && oldIndex != newIndex) {
+      widget.onReorder?.call(oldIndex, newIndex);
+      return;
+    }
+
+    // Removing an item at the old index shortens the list by one.
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    if (oldIndex != newIndex) {
+      widget.onReorderItem?.call(oldIndex, newIndex);
     }
   }
 
@@ -1100,31 +1105,16 @@ class SliverReorderableListState extends State<SliverReorderableList>
   }
 
   Widget _wrapWithSemantics(Widget child, int index) {
-    void reorder(int oldIndex, int newIndex) {
-      if (widget.onReorder != null) {
-        if (oldIndex != newIndex) {
-          widget.onReorder?.call(oldIndex, newIndex);
-        }
-      } else {
-        // Removing an item at the old index shortens the list by one.
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-
-        widget.onReorderItem.call(oldIndex, newIndex);
-      }
-    }
-
     // First, determine which semantics actions apply.
     final semanticsActions = <CustomSemanticsAction, VoidCallback>{};
 
     // Create the appropriate semantics actions.
-    void moveToStart() => reorder(index, 0);
-    void moveToEnd() => reorder(index, widget.itemCount);
-    void moveBefore() => reorder(index, index - 1);
+    void moveToStart() => _handleReorderItem(index, 0);
+    void moveToEnd() => _handleReorderItem(index, widget.itemCount);
+    void moveBefore() => _handleReorderItem(index, index - 1);
     // To move after, go to index+2 because it is moved to the space
     // before index+2, which is after the space at index+1.
-    void moveAfter() => reorder(index, index + 2);
+    void moveAfter() => _handleReorderItem(index, index + 2);
 
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final isHorizontal = _scrollDirection == Axis.horizontal;
