@@ -328,6 +328,7 @@ void main() {
   });
   testWidgets('SwitchListTile forwards statesController to ListTile', (WidgetTester tester) async {
     final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(

@@ -84,6 +84,7 @@ void main() {
 
   testWidgets('RadioListTile forwards statesController to ListTile', (WidgetTester tester) async {
     final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       wrap(
