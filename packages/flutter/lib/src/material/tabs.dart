@@ -884,8 +884,14 @@ final class TabBarScrollController extends ScrollController {
   /// Is null if this controller is not attached to a [TabBar].
   _TabBarState? _tabBar;
 
-  void _attachToTabBar(_TabBarState tabBarState) {
+  set _tabBarState(_TabBarState tabBarState) {
     _tabBar = tabBarState;
+  }
+
+  _TabBarState get _tabBarState {
+    assert(_tabBar != null, 'TabBarScrollController is not attached to any TabBar.');
+
+    return _tabBar!;
   }
 
   @override
@@ -898,7 +904,7 @@ final class TabBarScrollController extends ScrollController {
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      tabBar: _tabBar!,
+      tabBar: _tabBarState,
     );
   }
 }
@@ -1701,6 +1707,8 @@ class _TabBarState extends State<TabBar> {
     super.didChangeDependencies();
     _updateTabController();
     _initIndicatorPainter();
+
+    _effectiveScrollController?._tabBarState = this;
   }
 
   @override
@@ -2116,7 +2124,7 @@ class _TabBarState extends State<TabBar> {
               start: _kStartOffset,
             ).add(widget.padding ?? EdgeInsets.zero)
           : widget.padding;
-      _effectiveScrollController?._attachToTabBar(this);
+
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
