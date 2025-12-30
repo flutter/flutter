@@ -1496,14 +1496,18 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.ensureGeometry');
       }
-      print('nodesToProcessGeometry ${nodesToProcessGeometry}');
+      // print('flush nodesToProcessGeometry $nodesToProcessGeometry');
       for (final node in nodesToProcessGeometry) {
-        if (node._semantics.parentDataDirty) {
-          // same as above.
+        if (node._semantics.geometryDirty ||
+            node._semantics._children.every((child) => !child.geometryDirty)) {
           continue;
         }
+        // print('process geometry for $node');
         node._semantics.ensureGeometry();
       }
+      // if (nodesToProcessGeometry.isNotEmpty) {
+      //   debugDumpRenderObjectSemanticsTree();
+      // }
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
@@ -2535,13 +2539,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     _needsLayout = true;
     if (owner case final PipelineOwner owner when (owner._semanticsOwner != null)) {
-      _semantics.geometry = null;
-      if (parent != null) {
-        owner._nodesNeedingSemanticsGeometryUpdate.remove(this);
-      }
-      if (parent?._semantics.geometry != null) {
-        owner._nodesNeedingSemanticsGeometryUpdate.add(parent!);
-      }
+      _semantics.markGeometryDirty();
     }
     if (owner case final PipelineOwner owner when (_isRelayoutBoundary ?? false)) {
       assert(() {
@@ -5469,11 +5467,21 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   @override
   _RenderObjectSemantics get owner => this;
 
+  // Parent in render object order.
+  _RenderObjectSemantics? get parent => renderObject.parent?._semantics;
+
   bool get parentDataDirty {
     if (isRoot) {
       return false;
     }
     return parentData == null;
+  }
+
+  bool get geometryDirty {
+    if (isRoot) {
+      return false;
+    }
+    return geometry == null;
   }
 
   /// If this forms a semantics node, all of the properties in config are
@@ -5489,7 +5497,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         isRoot;
   }
 
-  bool get isRoot => renderObject.parent == null;
+  bool get isRoot => parent == null;
 
   bool get shouldFormSemanticsNode {
     if (configProvider.effective.isSemanticBoundary) {
@@ -5567,6 +5575,21 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
       }
     }
+  }
+
+  void markGeometryDirty() {
+    // Geometry of semantics nodes below this render object tree will be inaccurate.
+    for (final _RenderObjectSemantics child in _children) {
+      child.geometry = null;
+    }
+
+    // Finds parent that forms a semantics node and recalculate geometry from there.
+    var target = this;
+    while (!target.shouldFormSemanticsNode) {
+      target = target.parent!;
+    }
+
+    renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(target.renderObject);
   }
 
   /// Updates the [parentData] for the [_RenderObjectSemantics]s in the
@@ -6105,6 +6128,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the semantics geometry of the cached semantics node.
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
+    if (geometry == null) {
+      debugDumpRenderObjectSemanticsTree();
+    }
     final _SemanticsGeometry nodeGeometry = geometry!;
     final bool isSemanticsHidden =
         configProvider.original.isHidden ||
@@ -6302,8 +6328,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     properties.add(
       FlagProperty('noParentData', value: parentData == null, ifTrue: 'NO PARENT DATA'),
     );
-    properties.add(
-      FlagProperty('geometry', value: geometry == null, ifTrue: 'NO GEOMETRY'));
+    properties.add(FlagProperty('geometry', value: geometry == null, ifTrue: 'NO GEOMETRY'));
     properties.add(
       FlagProperty(
         'semanticsBlock',
