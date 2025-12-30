@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final String language in kWidgetsSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = Locale(language);
+      final locale = Locale(language);
 
       expect(GlobalWidgetsLocalizations.delegate.isSupported(locale), isTrue);
 

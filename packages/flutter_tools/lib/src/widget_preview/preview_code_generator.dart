@@ -52,6 +52,35 @@ class PreviewCodeGenerator {
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
       fs.path.join('lib', 'src', 'generated_preview.dart');
 
+  static String getGeneratedDtdConnectionInfoFilePath(FileSystem fs) =>
+      fs.path.join('lib', 'src', 'dtd', 'dtd_connection_info.dart');
+
+  void populateDtdConnectionInfo(Uri dtdUri) {
+    final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
+    final lib = cb.Library(
+      (cb.LibraryBuilder b) => b
+        ..ignoreForFile.add('implementation_imports')
+        ..body.addAll(<cb.Spec>[
+          cb.Field((b) {
+            b
+              ..name = 'kWidgetPreviewDtdUri'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(dtdUri.toString()).code;
+          }),
+        ]),
+    );
+    final File generatedDtdConnectionInfoFile = fs.file(
+      widgetPreviewScaffoldProject.directory.uri.resolve(getGeneratedDtdConnectionInfoFilePath(fs)),
+    );
+    generatedDtdConnectionInfoFile.writeAsStringSync(
+      // Format the generated file for readability, particularly during feature development.
+      // Note: we don't really care _how_ this is formatted, just that it's formatted, so we don't
+      // specify a language version.
+      DartFormatter(languageVersion: Version.none).format(lib.accept(emitter).toString()),
+    );
+  }
+
   // TODO(bkonyi): update generated example now that we're computing constants
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
   /// [previews].

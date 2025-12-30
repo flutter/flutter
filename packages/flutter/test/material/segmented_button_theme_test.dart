@@ -22,7 +22,7 @@ void main() {
       const SegmentedButtonThemeData().copyWith().hashCode,
     );
 
-    const SegmentedButtonThemeData custom = SegmentedButtonThemeData(
+    const custom = SegmentedButtonThemeData(
       style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
       selectedIcon: Icon(Icons.error),
     );
@@ -35,12 +35,12 @@ void main() {
 
   test('SegmentedButtonThemeData lerp special cases', () {
     expect(SegmentedButtonThemeData.lerp(null, null, 0), const SegmentedButtonThemeData());
-    const SegmentedButtonThemeData theme = SegmentedButtonThemeData();
+    const theme = SegmentedButtonThemeData();
     expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
   testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -52,7 +52,7 @@ void main() {
   });
 
   testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -119,7 +119,7 @@ void main() {
   });
 
   testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -211,7 +211,7 @@ void main() {
   });
 
   testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
-    final SegmentedButtonThemeData global = SegmentedButtonThemeData(
+    final global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
@@ -235,7 +235,7 @@ void main() {
       ),
       selectedIcon: const Icon(Icons.error),
     );
-    final SegmentedButtonThemeData segmentedTheme = SegmentedButtonThemeData(
+    final segmentedTheme = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
@@ -259,7 +259,7 @@ void main() {
       ),
       selectedIcon: const Icon(Icons.plus_one),
     );
-    final ThemeData theme = ThemeData(segmentedButtonTheme: global);
+    final theme = ThemeData(segmentedButtonTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -346,7 +346,7 @@ void main() {
   testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (
     WidgetTester tester,
   ) async {
-    final SegmentedButtonThemeData global = SegmentedButtonThemeData(
+    final global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
@@ -370,7 +370,7 @@ void main() {
       ),
       selectedIcon: const Icon(Icons.error),
     );
-    final SegmentedButtonThemeData segmentedTheme = SegmentedButtonThemeData(
+    final segmentedTheme = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
@@ -394,7 +394,7 @@ void main() {
       ),
       selectedIcon: const Icon(Icons.plus_one),
     );
-    final ThemeData theme = ThemeData(segmentedButtonTheme: global);
+    final theme = ThemeData(segmentedButtonTheme: global);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -494,7 +494,7 @@ void main() {
   testWidgets(
     'SegmentedButtonTheme SegmentedButton.styleFrom overlayColor overrides default overlay color',
     (WidgetTester tester) async {
-      const Color overlayColor = Color(0xffff0000);
+      const overlayColor = Color(0xffff0000);
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(

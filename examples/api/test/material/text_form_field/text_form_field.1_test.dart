@@ -4,11 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/text_form_field/text_form_field.1.dart' as example;
+import 'package:flutter_api_samples/material/text_form_field/text_form_field.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Pressing space should focus the next field', (WidgetTester tester) async {
+  testWidgets('Pressing space should focus the next field', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.TextFormFieldExampleApp());
     final Finder textFormField = find.byType(TextFormField);
 
@@ -20,7 +23,10 @@ void main() {
     List<bool> getFocuses() {
       return editableText
           .evaluate()
-          .map((Element finderResult) => (finderResult.widget as EditableText).focusNode.hasFocus)
+          .map(
+            (Element finderResult) =>
+                (finderResult.widget as EditableText).focusNode.hasFocus,
+          )
           .toList();
     }
 

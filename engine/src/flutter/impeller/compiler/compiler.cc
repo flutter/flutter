@@ -525,7 +525,7 @@ static std::string JoinStrings(std::vector<std::string> items,
 
 std::string Compiler::GetDependencyNames(const std::string& separator) const {
   std::vector<std::string> dependencies = included_file_names_;
-  dependencies.push_back(options_.file_name);
+  dependencies.push_back(Utf8FromPath(options_.file_name));
   return JoinStrings(dependencies, separator);
 }
 

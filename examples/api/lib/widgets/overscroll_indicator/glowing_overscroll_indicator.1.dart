@@ -25,7 +25,9 @@ class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
   }
 }
 
-const Set<PointerDeviceKind> allPointers = <PointerDeviceKind>{...PointerDeviceKind.values};
+const Set<PointerDeviceKind> allPointers = <PointerDeviceKind>{
+  ...PointerDeviceKind.values,
+};
 
 // Passing this class into the MaterialApp constructor ensures that a
 // GlowingOverscrollIndicator is created, regardless of the target platform.
@@ -36,7 +38,11 @@ class AlwaysGlow extends MaterialScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => allPointers;
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: Colors.amberAccent,
@@ -52,7 +58,9 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return const <Widget>[SliverAppBar(title: Text('Custom NestedScrollViews'))];
+        return const <Widget>[
+          SliverAppBar(title: Text('Custom NestedScrollViews')),
+        ];
       },
       body: const CustomScrollView(
         slivers: <Widget>[
@@ -73,7 +81,9 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
               ),
             ),
           ),
-          SliverFillRemaining(child: Icon(Icons.sunny, color: Colors.amberAccent, size: 128)),
+          SliverFillRemaining(
+            child: Icon(Icons.sunny, color: Colors.amberAccent, size: 128),
+          ),
         ],
       ),
     );
