@@ -113,7 +113,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     return switch (type) {
       TextSelectionHandleType.collapsed => -Offset((cursorWidth - _kHandleSize) / 2, 5.0),

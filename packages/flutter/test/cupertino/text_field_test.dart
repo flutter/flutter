@@ -59,7 +59,7 @@ class MockTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     throw UnimplementedError();
   }

@@ -776,7 +776,6 @@ void main() {
       final Offset actual = materialTextSelectionControls.getHandleAnchor(
         TextSelectionHandleType.collapsed,
         0,
-        cursorWidth: 2.0,
       );
       expect(actual, equals(expected));
     });
@@ -786,7 +785,6 @@ void main() {
       final Offset actual = materialTextSelectionControls.getHandleAnchor(
         TextSelectionHandleType.left,
         0,
-        cursorWidth: 2.0,
       );
       expect(actual, equals(expected));
     });
@@ -796,7 +794,6 @@ void main() {
       final Offset actual = materialTextSelectionControls.getHandleAnchor(
         TextSelectionHandleType.right,
         0,
-        cursorWidth: 2.0,
       );
       expect(actual, equals(expected));
     });

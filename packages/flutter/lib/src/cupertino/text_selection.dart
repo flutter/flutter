@@ -158,7 +158,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     final Size handleSize = getHandleSize(textLineHeight);
 

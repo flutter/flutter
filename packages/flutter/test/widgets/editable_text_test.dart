@@ -17948,7 +17948,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     return Offset.zero;
   }
@@ -18057,7 +18057,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     return Offset.zero;
   }
@@ -18318,7 +18318,7 @@ class _FakeTextSelectionHandleControls extends TextSelectionControls
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     return Offset.zero;
   }

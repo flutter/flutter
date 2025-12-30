@@ -73,7 +73,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
-    required double cursorWidth,
+    double cursorWidth = 2.0,
   }) {
     return Offset.zero;
   }

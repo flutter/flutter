@@ -9804,7 +9804,7 @@ void main() {
 
     Widget buildFrame({
       double? stepWidth,
-      required double cursorWidth,
+      double cursorWidth = 2.0,
       required TextAlign textAlign,
     }) {
       return MaterialApp(
@@ -9830,7 +9830,7 @@ void main() {
     const text = '1234';
     double? stepWidth = 80.0;
     await tester.pumpWidget(
-      buildFrame(stepWidth: 80.0, cursorWidth: 2.0, textAlign: TextAlign.left),
+      buildFrame(stepWidth: 80.0, textAlign: TextAlign.left),
     );
     await tester.enterText(find.byType(TextField), text);
     await tester.pumpAndSettle();
