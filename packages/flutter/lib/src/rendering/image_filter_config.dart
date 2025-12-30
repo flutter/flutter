@@ -59,19 +59,19 @@ class ImageFilterContext {
 abstract class ImageFilterConfig {
   /// Creates a configuration that directly wraps an existing [ui.ImageFilter].
   ///
-  /// This constructor is used to adapt standard engine-level filters to APIs
-  /// that require an [ImageFilterConfig].
+  /// This constructor adapts standard engine-level filters to APIs that
+  /// require an [ImageFilterConfig].
   ///
-  /// Since the provided [ui.ImageFilter] is already instantiated,
-  /// it cannot automatically incorporate layout information (such as bounds) from the
+  /// Because the provided [ui.ImageFilter] is already instantiated, it cannot
+  /// incorporate layout information (such as bounds) from the
   /// [ImageFilterContext] during resolution. For example, wrapping a
-  /// [ui.ImageFilter.blur] with this constructor results in a static blur
-  /// with a fixed blur bounds. If you need a blur that adapts to its layout
-  /// (such as a "bounded blur"), use the [ImageFilterConfig.blur] constructor
-  /// directly instead.
+  /// [ui.ImageFilter.blur] results in a static blur with fixed parameters.
+  ///
+  /// For effects that must adapt to the layout, such as a "bounded" blur, use
+  /// the [ImageFilterConfig.blur] constructor instead.
   ///
   /// The [filter] property of an instance created with this constructor
-  /// will return the original filter.
+  /// returns the original filter.
   const factory ImageFilterConfig(ui.ImageFilter filter) = _DirectImageFilterConfig;
 
   /// Abstract const constructor. This constructor enables subclasses to provide
