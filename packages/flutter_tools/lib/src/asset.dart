@@ -535,7 +535,7 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
-    for (final HookAsset fontAsset in flutterHookResult?.fontAssets ?? <HookAsset>[]) {
+    for (final FontHookAsset fontAsset in flutterHookResult?.fontAssets ?? <FontHookAsset>[]) {
       final _Asset asset = _parseAsset(packageConfig, fontAsset, AssetKind.font);
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
@@ -689,14 +689,14 @@ class ManifestAssetBundle implements AssetBundle {
     return 0;
   }
 
-  _Asset _parseAsset(PackageConfig packageConfig, HookAsset dataAsset, AssetKind regular) {
-    final String filePath = dataAsset.file.toFilePath();
+  _Asset _parseAsset(PackageConfig packageConfig, HookAsset asset, AssetKind kind) {
+    final String filePath = asset.file.toFilePath();
     return _Asset(
       baseDir: _fileSystem.path.dirname(filePath),
       relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-      entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-      package: packageConfig[dataAsset.package],
-      kind: regular,
+      entryUri: Uri.parse(_fileSystem.path.join('packages', asset.package, asset.name)),
+      package: packageConfig[asset.package],
+      kind: kind,
     );
   }
 
