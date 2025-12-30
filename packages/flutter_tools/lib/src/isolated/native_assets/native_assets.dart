@@ -43,7 +43,7 @@ class FlutterCodeAsset {
 
 /// Matching [CodeAsset] and [DataAsset] in native assets - but Flutter could
 /// support more asset types in the future.
-enum SupportedAssetTypes { codeAssets, dataAssets }
+enum SupportedAssetTypes { codeAssets, dataAssets, fontAssets }
 
 /// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
@@ -69,6 +69,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled) SupportedAssetTypes.codeAssets,
     if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
+    SupportedAssetTypes.fontAssets,
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
