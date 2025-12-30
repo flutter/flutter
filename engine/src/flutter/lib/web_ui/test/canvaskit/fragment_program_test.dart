@@ -355,4 +355,69 @@ void testMain() {
     expect(program.uniforms, hasLength(7));
     expect(program.name, 'test');
   });
+
+  test('getUniformVec2 works with correct datatype', () {
+    final Uint8List data = utf8.encode(kJsonArrayIPLR);
+    final program = CkFragmentProgram.fromBytes('test', data);
+    final shader = program.fragmentShader() as CkFragmentShader;
+    shader.getUniformVec2('uSize').set(6.0, 7.0);
+  });
+  test('getUniformVec3 works with correct datatype', () {
+    final Uint8List data = utf8.encode(kJsonArrayIPLR);
+    final program = CkFragmentProgram.fromBytes('test', data);
+    final shader = program.fragmentShader() as CkFragmentShader;
+    shader.getUniformVec3('uLoneVector').set(11.0, 22.0, 19.96);
+  });
+
+  test('getUniformVec4 works with correct datatype', () {
+    final Uint8List data = utf8.encode(kJsonIPLR);
+    final program = CkFragmentProgram.fromBytes('test', data);
+    final shader = program.fragmentShader() as CkFragmentShader;
+    shader.getUniformVec4('u_color').set(0.8, 0.1, 0.3, 1.0);
+  });
+
+  group('Uniform by-name accessors throw errors with incorrect datatypes.', () {
+    late CkFragmentShader shader;
+    setUp(() {
+      final Uint8List data = utf8.encode(kJsonArrayIPLR);
+      final program = CkFragmentProgram.fromBytes('test', data);
+      shader = program.fragmentShader() as CkFragmentShader;
+    });
+    test('getUniformVec2', () {
+      expect(
+        () => shader.getUniformVec2('uLoneMatrix'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            'Uniform `uLoneMatrix` has size 16, not size 2.',
+          ),
+        ),
+      );
+    });
+    test('getUniformVec3', () {
+      expect(
+        () => shader.getUniformVec3('uSize'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            'Uniform `uSize` has size 2, not size 3.',
+          ),
+        ),
+      );
+    });
+    test('getUniformVec4', () {
+      expect(
+        () => shader.getUniformVec4('uLoneMatrix'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            'Uniform `uLoneMatrix` has size 16, not size 4.',
+          ),
+        ),
+      );
+    });
+  });
 }

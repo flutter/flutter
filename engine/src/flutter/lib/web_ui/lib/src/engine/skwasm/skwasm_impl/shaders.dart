@@ -250,12 +250,17 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
-  int _getShaderIndex(String name, int index) {
+  int _getShaderIndex(String name, int index, [int? expectedSize]) {
     var result = 0;
     for (final UniformData uniform in _shaderData.uniforms) {
       if (uniform.name == name) {
         if (index < 0 || index >= uniform.floatCount) {
           throw IndexError.withLength(index, uniform.floatCount);
+        }
+        if (expectedSize != null && uniform.floatCount != expectedSize) {
+          throw ArgumentError(
+            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
+          );
         }
         result += index;
         break;
@@ -383,8 +388,34 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _SkwasmUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
+    return List<SkwasmUniformFloatSlot>.generate(
+      size,
+      (i) => SkwasmUniformFloatSlot._(this, i, name, baseShaderIndex),
+    );
   }
 }
 
@@ -406,4 +437,43 @@ class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
 
   @override
   final int shaderIndex;
+}
+
+class _SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
+  _SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
+  _SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
+  _SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }
