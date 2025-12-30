@@ -71,9 +71,20 @@ void main(List<String> args) {
 /// [TestsCrossImportChecker.knownWidgetsCrossImports] and
 /// [TestsCrossImportChecker.knownCupertinoCrossImports].
 ///
-/// The Material library should contain tests that verify behaviors involving
-/// multiple libraries, such as platform adaptivity. Otherwise, these libraries
-/// should not import each other in tests.
+/// In short, the Material library should contain tests that verify behaviors
+/// involving multiple libraries, such as platform adaptivity. Otherwise, these
+/// libraries should not import each other in tests.
+///
+/// The guiding principles behind this organization of our tests are as follows:
+///
+///  - Cupertino should test its widgets under a full-Cupertino scenario. The
+///  Cupertino library and tests should never import Material.
+///  - The Material library should test its widgets in a full-Material scenario.
+///  - Design languages are responsible for testing their own interoperability
+///  with the Widgets library.
+///  - Tests that cover interoperability between Material and Cupertino should
+///  go in Material.
+///  - The Widgets library and tests should never import Cupertino or Material.
 class TestsCrossImportChecker {
   TestsCrossImportChecker({
     required this.testsDirectory,
