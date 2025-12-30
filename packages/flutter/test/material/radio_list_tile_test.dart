@@ -97,6 +97,8 @@ void main() {
       ),
     );
 
+    final ListTile tile = tester.widget(find.byType(ListTile));
+    expect(tile.statesController, controller);
     final ListTile tile = tester.widget<ListTile>(find.byType(ListTile));
 
     expect(tile.statesController, same(controller));
