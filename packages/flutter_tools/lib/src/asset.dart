@@ -678,19 +678,14 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   _Asset _parseAsset(PackageConfig packageConfig, HookAsset dataAsset, AssetKind regular) {
-    final Package package = packageConfig[dataAsset.package]!;
-    final Uri fileUri = dataAsset.file;
-
-    final String filePath = fileUri.toFilePath();
-
-    final asset = _Asset(
+    final String filePath = dataAsset.file.toFilePath();
+    return _Asset(
       baseDir: _fileSystem.path.dirname(filePath),
       relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
       entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-      package: package,
+      package: packageConfig[dataAsset.package],
       kind: regular,
     );
-    return asset;
   }
 
   @override
@@ -800,7 +795,7 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    return [];
+    return result;
   }
 
   List<_Asset> _getMaterialShaders() {
