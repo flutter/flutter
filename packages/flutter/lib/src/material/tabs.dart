@@ -1773,8 +1773,13 @@ class _TabBarState extends State<TabBar> {
     return clampDouble(tabCenter + paddingStart - viewportWidth / 2.0, minExtent, maxExtent);
   }
 
-  double _tabCenteredScrollOffset(int index) {
-    final ScrollPosition position = _scrollController!.position;
+  double? _tabCenteredScrollOffset(int index) {
+    final ScrollPosition? position = _effectiveScrollController?.position;
+
+    if (position == null) {
+      return null;
+    }
+
     return _tabScrollOffset(
       index,
       position.viewportDimension,
@@ -1788,18 +1793,27 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _scrollToCurrentIndex() {
-    final double offset = _tabCenteredScrollOffset(_currentIndex!);
-    _scrollController!.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
+    final double? offset = _tabCenteredScrollOffset(_currentIndex!);
+
+    if (offset == null) {
+      return;
+    }
+
+    _effectiveScrollController?.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
   }
 
   void _scrollToControllerValue() {
     final double? leadingPosition = _currentIndex! > 0
         ? _tabCenteredScrollOffset(_currentIndex! - 1)
         : null;
-    final double middlePosition = _tabCenteredScrollOffset(_currentIndex!);
+    final double? middlePosition = _tabCenteredScrollOffset(_currentIndex!);
     final double? trailingPosition = _currentIndex! < maxTabIndex
         ? _tabCenteredScrollOffset(_currentIndex! + 1)
         : null;
+
+    if (middlePosition == null) {
+      return;
+    }
 
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
@@ -1817,7 +1831,7 @@ class _TabBarState extends State<TabBar> {
             : lerpDouble(middlePosition, trailingPosition, value - index)!,
     };
 
-    _scrollController!.jumpTo(offset);
+    _effectiveScrollController?.jumpTo(offset);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -2102,14 +2116,14 @@ class _TabBarState extends State<TabBar> {
               start: _kStartOffset,
             ).add(widget.padding ?? EdgeInsets.zero)
           : widget.padding;
-      _scrollController ??= _TabBarScrollController(this);
+      _effectiveScrollController?._attachToTabBar(this);
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
         child: SingleChildScrollView(
           dragStartBehavior: widget.dragStartBehavior,
           scrollDirection: Axis.horizontal,
-          controller: _scrollController,
+          controller: _effectiveScrollController,
           padding: effectivePadding,
           physics: widget.physics,
           child: tabBar,
