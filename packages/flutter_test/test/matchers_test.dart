@@ -950,6 +950,8 @@ void main() {
         inputType: ui.SemanticsInputType.none,
         locale: null,
         hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
+        maxValue: '',
+        minValue: '',
       );
       final node = _FakeSemanticsNode(data);
 
@@ -1116,6 +1118,8 @@ void main() {
           inputType: ui.SemanticsInputType.none,
           locale: null,
           hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
+          minValue: '',
+          maxValue: '',
         );
         final node = _FakeSemanticsNode(data);
 
