@@ -201,7 +201,15 @@ class ReorderableList extends StatefulWidget {
   /// {@endtemplate}
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  /// {@template flutter.widgets.reorderable_list.onReorder}
+  /// A callback used by the list to report that a list item has been dragged
+  /// to a new location in the list and the application should update the order
+  /// of the items.
+  ///
+  /// If `oldIndex` is before `newIndex`, removing the item at `oldIndex` from the
+  /// list will reduce the list's length by one. Implementations will need to
+  /// account for this when inserting before `newIndex`.
+  /// {@endtemplate}
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
@@ -551,7 +559,7 @@ class SliverReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  /// {@macro flutter.widgets.reorderable_list.onReorder}
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '

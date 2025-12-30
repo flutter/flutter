@@ -23,7 +23,7 @@ import 'theme.dart';
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
-/// The [onReorderItem] parameter is required and will be called when a child
+/// The [onReorderItem] parameter will be called when a child
 /// widget is dragged to a new position.
 ///
 /// {@tool dartpad}
@@ -201,7 +201,7 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.reorderable_list.itemCount}
   final int itemCount;
 
-  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  /// {@macro flutter.widgets.reorderable_list.onReorder}
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
