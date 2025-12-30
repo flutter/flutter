@@ -2149,6 +2149,25 @@ void main() {
     expect(dragUpItems, orderedEquals(<int>[0, 1, 2, 3, 4]));
   });
 
+  testWidgets('ReorderableListView asserts if neither onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(() => ReorderableListView(children: const <Widget>[]), throwsAssertionError);
+  });
+
+  testWidgets('ReorderableListView asserts if both onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => ReorderableListView(
+        onReorder: (_, _) {},
+        onReorderItem: (_, _) {},
+        children: const <Widget>[],
+      ),
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('ReorderableListView.builder calls old onReorder callback correctly', (
     WidgetTester tester,
   ) async {
@@ -2265,6 +2284,31 @@ void main() {
 
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
   });
+
+  testWidgets(
+    'ReorderableListView.builder asserts if neither onReorder and onReorderItem are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => ReorderableListView.builder(itemBuilder: (_, _) => const SizedBox(), itemCount: 0),
+        throwsAssertionError,
+      );
+    },
+  );
+
+  testWidgets(
+    'ReorderableListView.builder asserts if both onReorder and onReorderItem are provided',
+    (WidgetTester tester) async {
+      expect(
+        () => ReorderableListView.builder(
+          itemBuilder: (_, _) => const SizedBox(),
+          itemCount: 0,
+          onReorder: (_, _) {},
+          onReorderItem: (_, _) {},
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
 
   testWidgets('ReorderableListView throws an error when key is not passed to its children', (
     WidgetTester tester,

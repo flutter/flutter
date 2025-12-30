@@ -1151,6 +1151,29 @@ void main() {
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
   });
 
+  testWidgets('SliverReorderableList asserts if neither onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => SliverReorderableList(itemBuilder: (_, _) => const SizedBox(), itemCount: 0),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('SliverReorderableList asserts if both onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => SliverReorderableList(
+        onReorder: (_, _) {},
+        onReorderItem: (_, _) {},
+        itemBuilder: (_, _) => const SizedBox(),
+        itemCount: 0,
+      ),
+      throwsAssertionError,
+    );
+  });
+
   testWidgets('ReorderableList calls old onReorder callback correctly', (
     WidgetTester tester,
   ) async {
@@ -1266,6 +1289,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(items, orderedEquals(<int>[0, 1, 2, 3, 4]));
+  });
+
+  testWidgets('ReorderableList asserts if neither onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => ReorderableList(itemBuilder: (_, _) => const SizedBox(), itemCount: 0),
+      throwsAssertionError,
+    );
+  });
+
+  testWidgets('ReorderableList asserts if both onReorder and onReorderItem are provided', (
+    WidgetTester tester,
+  ) async {
+    expect(
+      () => ReorderableList(
+        onReorder: (_, _) {},
+        onReorderItem: (_, _) {},
+        itemBuilder: (_, _) => const SizedBox(),
+        itemCount: 0,
+      ),
+      throwsAssertionError,
+    );
   });
 
   testWidgets('ReorderableList asserts on both non-null itemExtent and prototypeItem', (
