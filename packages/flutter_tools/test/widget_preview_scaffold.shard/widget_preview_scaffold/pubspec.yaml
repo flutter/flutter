@@ -22,7 +22,7 @@ dependencies:
 
   async: 2.13.0
   boolean_selector: 2.1.2
-  characters: 1.4.0
+  characters: 1.4.1
   clock: 1.1.2
   collection: 1.19.1
   convert: 3.1.2
@@ -45,7 +45,7 @@ dependencies:
   term_glyph: 1.2.2
   test_api: 0.7.8
   typed_data: 1.4.0
-  unified_analytics: 8.0.5
+  unified_analytics: 8.0.10
   url_launcher_android: 6.3.28
   url_launcher_ios: 6.3.6
   url_launcher_linux: 3.2.2
@@ -58,7 +58,7 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
-  webview_flutter: 4.9.0
+  webview_flutter: 4.13.0
   webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
@@ -68,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: ofd5s5
+# PUBSPEC CHECKSUM: 437hbt

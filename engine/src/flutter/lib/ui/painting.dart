@@ -1010,6 +1010,7 @@ enum BlendMode {
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
 ///    engine while using drawImage calls on a [Canvas].
 ///  * [ImageShader].
+///  * [FragmentShader.setImageSampler].
 ///  * [ImageFilter.matrix].
 ///  * [Canvas.drawImage].
 ///  * [Canvas.drawImageRect].
@@ -2741,6 +2742,31 @@ void decodeImageFromPixels(
   });
 }
 
+/// Decodes the given [pixels] into an [Image] synchronously.
+///
+/// The [pixels] are expected to be in the format specified by [format].
+///
+/// The [width] and [height] arguments specify the dimensions of the image.
+///
+/// This function returns an [Image] immediately. The image might not be
+/// fully decoded yet, but it can be drawn to a [Canvas].
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) {
+  final image = Image._(_Image._(), width, height);
+  _decodeImageFromPixelsSync(pixels, width, height, format.index, image._image);
+  return image;
+}
+
+@Native<Void Function(Handle, Int32, Int32, Int32, Handle)>(
+  symbol: 'Image::decodeImageFromPixelsSync',
+)
+external void _decodeImageFromPixelsSync(
+  Uint8List pixels,
+  int width,
+  int height,
+  int format,
+  _Image outImage,
+);
+
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
 ///
@@ -4236,8 +4262,39 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) {
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  ///
+  /// The `sigma_x` and `sigma_y` are the standard deviation of the Gaussian
+  /// kernel in the X direction and the Y direction, respectively.
+  ///
+  /// The `tile_mode` defines the behavior of sampling pixels at the edges when
+  /// performing a standard, unbounded blur.
+  ///
+  /// The `bounds` argument is optional and enables "bounded blur" mode. When
+  /// `bounds` is non-null, the image filter substitutes transparent black for
+  /// any sample it reads from outside the defined bounding rectangle. The final
+  /// weighted sum is then divided by the total weight of the non-transparent samples
+  /// (the effective alpha), resulting in opaque output.
+  ///
+  /// The bounded mode prevents color bleeding from content adjacent to the
+  /// bounds into the blurred area, and is typically used when the blur must be
+  /// strictly contained within a clipped region, such as for iOS-style frosted
+  /// glass effects.
+  ///
+  /// The `bounds` rectangle is specified in the canvas's current coordinate
+  /// space and is affected by the current transform; consequently, the bounds
+  /// may not be axis-aligned in the final canvas coordinates.
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) {
+    return _GaussianBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4381,11 +4438,17 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  _GaussianBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final TileMode? tileMode;
+  final Rect? bounds;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
@@ -4408,10 +4471,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   @override
   bool operator ==(Object other) {
@@ -4421,11 +4486,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
     return other is _GaussianBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -4558,7 +4624,17 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode?.index ?? -1);
+    final Rect bounds = filter.bounds ?? Rect.zero;
+    _initBlur(
+      filter.sigmaX,
+      filter.sigmaY,
+      filter.tileMode?.index ?? -1,
+      filter.bounds != null,
+      bounds.left,
+      bounds.top,
+      bounds.right,
+      bounds.bottom,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4610,11 +4686,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Int32)>(
-    symbol: 'ImageFilter::initBlur',
-    isLeaf: true,
-  )
-  external void _initBlur(double sigmaX, double sigmaY, int tileMode);
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Int32, Bool, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initBlur', isLeaf: true)
+  external void _initBlur(
+    double sigmaX,
+    double sigmaY,
+    int tileMode,
+    bool bounded,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   @Native<Void Function(Pointer<Void>, Double, Double)>(
     symbol: 'ImageFilter::initDilate',
@@ -5347,7 +5431,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index) {
+  int _getUniformFloatIndex(String name, int index, [int? expectedSize]) {
     if (index < 0) {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
     }
@@ -5361,6 +5445,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       if (entry['name'] == name) {
         if (index + 1 > sizeInFloats) {
           throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        if (expectedSize != null && sizeInFloats != expectedSize) {
+          throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
         }
         found = true;
         break;
@@ -5439,6 +5526,87 @@ base class UniformFloatSlot {
   final int index;
 }
 
+/// A binding to a uniform of type vec2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec2('uSize').set(100, 100);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
+///
+base class UniformVec2Slot {
+  UniformVec2Slot._(this._xSlot, this._ySlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot;
+}
+
+/// A binding to a uniform of type vec3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader, double time) {
+///   shader.getUniformVec3('uScaledTime').set(time, time*0.1, time*0.01);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
+///
+base class UniformVec3Slot {
+  UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+/// A binding to a uniform of type vec4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec4('uColor').set(1.0, 0.0, 1.0, 1.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
+///
+base class UniformVec4Slot {
+  UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
 /// A binding to a shader's image sampler. Calling [set] on this object updates
 /// a sampler's bound image.
 base class ImageSamplerSlot {
@@ -5489,6 +5657,17 @@ base class FragmentShader extends Shader {
 
   void _reinitialize() {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
+
+  List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
+    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0, size);
+    final slots = List<UniformFloatSlot>.generate(
+      size,
+      (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
+    );
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+    return slots;
   }
 
   /// Sets the float uniform at [index] to [value].
@@ -5571,6 +5750,66 @@ base class FragmentShader extends Shader {
     return result;
   }
 
+  /// Access the float binding for a vec2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec2 uMagnitude;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec2('uMagnitude');
+  /// }
+  /// ```
+  UniformVec2Slot getUniformVec2(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 2);
+    return UniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  /// Access the float binding for a vec3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec3 uScaledTime;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec3('uScaledTime');
+  /// }
+  /// ```
+  UniformVec3Slot getUniformVec3(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 3);
+    return UniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  /// Access the float binding for a vec4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec4('uColor');
+  /// }
+  /// ```
+  UniformVec4Slot getUniformVec4(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
   /// Access the [ImageSamplerSlot] binding associated with the sampler named
   /// [name].
   ///
@@ -5589,12 +5828,15 @@ base class FragmentShader extends Shader {
   /// The index provided to setImageSampler is the index of the sampler uniform defined
   /// in the fragment program, excluding all non-sampler uniforms.
   ///
+  /// The optional [filterQuality] argument may be provided to set the quality level used to sample
+  /// the image. By default, it is set to [FilterQuality.none].
+  ///
   /// All the sampler uniforms that a shader expects must be provided or the
   /// results will be undefined.
-  void setImageSampler(int index, Image image) {
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none}) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     assert(!image.debugDisposed, 'Image has been disposed');
-    _setImageSampler(index, image._image);
+    _setImageSampler(index, image._image, filterQuality.index);
   }
 
   /// Releases the native resources held by the [FragmentShader].
@@ -5616,10 +5858,10 @@ base class FragmentShader extends Shader {
     int samplerUniforms,
   );
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32)>(
     symbol: 'ReusableFragmentShader::SetImageSampler',
   )
-  external void _setImageSampler(int index, _Image sampler);
+  external void _setImageSampler(int index, _Image sampler, int filterQualityIndex);
 
   @Native<Bool Function(Pointer<Void>)>(symbol: 'ReusableFragmentShader::ValidateSamplers')
   external bool _validateSamplers();

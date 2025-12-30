@@ -427,9 +427,23 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// If null, this widget will create its own [TextEditingController].
   final TextEditingController? controller;
 
-  /// The value used to for an initial selection.
+  /// The value used for an initial selection.
+  ///
+  /// This property sets the initial value of the dropdown menu when the widget
+  /// is first created. If the value matches one of the [dropdownMenuEntries],
+  /// the corresponding label will be displayed in the text field.
+  ///
+  /// Setting this to null does not clear the text field.
+  ///
+  /// To programmatically clear the text field, use a [TextEditingController]
+  /// and call [TextEditingController.clear] on it.
   ///
   /// Defaults to null.
+  ///
+  /// See also:
+  ///
+  ///  * [controller], which is required to programmatically clear or modify
+  ///    the text field content.
   final T? initialSelection;
 
   /// The callback is called when a selection is made.
@@ -482,7 +496,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   /// by the [FocusNode.canRequestFocus] property.
   final FocusNode? focusNode;
 
-  /// Determine if the dropdown button requests focus and the on-screen virtual
+  /// Determine if the dropdown menu requests focus and the on-screen virtual
   /// keyboard is shown in response to a touch event.
   ///
   /// Ignored if a [focusNode] is explicitly provided (in which case,

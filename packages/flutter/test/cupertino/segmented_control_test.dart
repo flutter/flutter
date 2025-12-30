@@ -1893,4 +1893,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(sharedValue, 0);
   });
+
+  testWidgets('CupertinoSegmentedControl does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoSegmentedControl<int>(
+              onValueChanged: (_) {},
+              children: const <int, Widget>{1: Text('X'), 2: Text('Y')},
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSegmentedControl<int>)), Size.zero);
+  });
 }

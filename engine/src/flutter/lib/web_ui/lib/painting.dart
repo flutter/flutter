@@ -555,8 +555,17 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
 enum FilterQuality { none, low, medium, high }
 
 class ImageFilter {
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) =>
-      engine.renderer.createBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) => engine.renderer.createBlurImageFilter(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode,
+    bounds: bounds,
+  );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
       engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
@@ -791,6 +800,9 @@ void decodeImageFromPixels(
   allowUpscaling: allowUpscaling,
 );
 
+Image decodeImageFromPixelsSync(Uint8List pixels, int width, int height, PixelFormat format) =>
+    throw UnimplementedError('`decodeImageFromPixelsSync` is not implemented for web targets.');
+
 class Shadow {
   const Shadow({
     this.color = const Color(_kColorDefault),
@@ -1005,6 +1017,18 @@ abstract class UniformFloatSlot {
   final int index;
 }
 
+abstract class UniformVec2Slot {
+  void set(double x, double y);
+}
+
+abstract class UniformVec3Slot {
+  void set(double x, double y, double z);
+}
+
+abstract class UniformVec4Slot {
+  void set(double x, double y, double z, double w);
+}
+
 abstract class ImageSamplerSlot {
   void set(Image val);
   int get shaderIndex;
@@ -1014,7 +1038,7 @@ abstract class ImageSamplerSlot {
 abstract class FragmentShader implements Shader {
   void setFloat(int index, double value);
 
-  void setImageSampler(int index, Image image);
+  void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});
 
   @override
   void dispose();
@@ -1023,6 +1047,12 @@ abstract class FragmentShader implements Shader {
   bool get debugDisposed;
 
   UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  UniformVec2Slot getUniformVec2(String name);
+
+  UniformVec3Slot getUniformVec3(String name);
+
+  UniformVec4Slot getUniformVec4(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }
