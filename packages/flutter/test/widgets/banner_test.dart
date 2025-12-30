@@ -339,4 +339,16 @@ void main() {
     expect(painter.shadow.blurRadius, 8.0);
     debugDisableShadows = true;
   });
+
+  testWidgets('CheckedModeBanner does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: CheckedModeBanner(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckedModeBanner)), Size.zero);
+  });
 }
