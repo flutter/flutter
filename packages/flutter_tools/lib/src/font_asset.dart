@@ -1,3 +1,4 @@
+import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 
 class FontAsset {
@@ -31,4 +32,39 @@ class FontAsset {
 
 extension FontAssetExt on EncodedAsset {
   bool get isFontAsset => type == FontAsset._type;
+}
+
+/// The protocol extension for the `hook/build.dart` and `hook/link.dart`
+/// with [DataAsset]s.
+final class FontAssetsExtension implements ProtocolExtension {
+  FontAssetsExtension();
+
+  @override
+  void setupBuildInput(BuildInputBuilder input) {
+    _setupConfig(input);
+  }
+
+  @override
+  void setupLinkInput(LinkInputBuilder input) {
+    _setupConfig(input);
+  }
+
+  void _setupConfig(HookInputBuilder input) {
+    input.config.addBuildAssetTypes([FontAsset._type]);
+  }
+
+  @override
+  Future<ValidationErrors> validateBuildInput(BuildInput input) async => [];
+
+  @override
+  Future<ValidationErrors> validateLinkInput(LinkInput input) async => [];
+
+  @override
+  Future<ValidationErrors> validateBuildOutput(BuildInput input, BuildOutput output) async => [];
+
+  @override
+  Future<ValidationErrors> validateLinkOutput(LinkInput input, LinkOutput output) async => [];
+
+  @override
+  Future<ValidationErrors> validateApplicationAssets(List<EncodedAsset> assets) async => [];
 }

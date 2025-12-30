@@ -21,6 +21,7 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../font_asset.dart' show FontAssetsExtension;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
@@ -252,6 +253,7 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...codeAssetExtensions,
     ...dataAssetExtensions,
+    FontAssetsExtension(),
   ];
 }
 
