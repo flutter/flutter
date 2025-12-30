@@ -57,6 +57,7 @@ import 'outlined_button.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
+import 'predictive_back_page_transitions_builder.dart';
 import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
@@ -407,7 +408,14 @@ class ThemeData with Diagnosticable {
       case TargetPlatform.windows:
         materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
     }
-    pageTransitionsTheme ??= const PageTransitionsTheme();
+    final resolvedBuilders = <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: const PredictiveBackPageTransitionsBuilder(),
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: ZoomPageTransitionsBuilder(backgroundColor: colorScheme?.surface),
+      TargetPlatform.linux: ZoomPageTransitionsBuilder(backgroundColor: colorScheme?.surface),
+    };
+    pageTransitionsTheme ??= PageTransitionsTheme(builders: resolvedBuilders);
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= true;
