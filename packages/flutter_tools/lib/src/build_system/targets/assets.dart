@@ -12,7 +12,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
-import '../../flutter_manifest.dart' hide FontAsset;
+import '../../flutter_manifest.dart' show AssetTransformerEntry;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -73,6 +73,15 @@ Future<Depfile> copyAssets(
   ];
   final outputs = <File>[];
 
+  final iconTreeShaker = IconTreeShaker(
+    environment,
+    assetBundle.entries[kFontManifestJson]?.content as DevFSStringContent?,
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+    targetPlatform: targetPlatform,
+  );
   final shaderCompiler = ShaderCompiler(
     processManager: environment.processManager,
     logger: environment.logger,
@@ -148,8 +157,11 @@ Future<Depfile> copyAssets(
                 }
               }
             case AssetKind.font:
-              // stop bundling any fonts for now
-              doCopy = false;
+              doCopy = !await iconTreeShaker.subsetFont(
+                input: content.file as File,
+                outputPath: file.path,
+                relativePath: entry.key,
+              );
             case AssetKind.shader:
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
@@ -214,6 +226,13 @@ Future<Depfile> copyAssets(
               final DevFSContent content = entry.value.content;
               if (content is DevFSFileContent && content.file is File) {
                 inputs.add(content.file as File);
+                if (!await iconTreeShaker.subsetFont(
+                  input: content.file as File,
+                  outputPath: file.path,
+                  relativePath: entry.key,
+                )) {
+                  await (content.file as File).copy(file.path);
+                }
               } else {
                 await file.writeAsBytes(await entry.value.contentsAsBytes());
               }
@@ -225,7 +244,8 @@ Future<Depfile> copyAssets(
       }),
     );
   }
-  return Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  final depfile = Depfile(inputs + assetBundle.additionalDependencies, outputs);
+  return depfile;
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.
