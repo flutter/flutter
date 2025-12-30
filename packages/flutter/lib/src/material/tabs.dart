@@ -877,12 +877,16 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   }
 }
 
-// This class, and TabBarScrollPosition, only exist to handle the case
-// where a scrollable TabBar has a non-zero initialIndex.
-class _TabBarScrollController extends ScrollController {
-  _TabBarScrollController(this.tabBar);
+/// The [ScrollController] for a [TabBar] widget.
+final class TabBarScrollController extends ScrollController {
+  /// The state of the [TabBar] widget to which this controller is attached.
+  ///
+  /// Is null if this controller is not attached to a [TabBar].
+  _TabBarState? _tabBar;
 
-  final _TabBarState tabBar;
+  void _attachToTabBar(_TabBarState tabBarState) {
+    _tabBar = tabBarState;
+  }
 
   @override
   ScrollPosition createScrollPosition(
@@ -894,7 +898,7 @@ class _TabBarScrollController extends ScrollController {
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      tabBar: tabBar,
+      tabBar: _tabBar!,
     );
   }
 }
