@@ -1160,6 +1160,28 @@ void main() {
     expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
     expect(itemsSeparatorsTexts[2].data, 'item 1');
   });
+
+  testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ScrollController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedList(controller: controller, itemBuilder: (_, i, _) => Text('$i')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedList)), Size.zero);
+    await controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.bounceIn,
+    );
+    await tester.pump();
+  });
 }
 
 class _StatefulListItem extends StatefulWidget {
