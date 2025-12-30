@@ -6,6 +6,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:font_asset/font_asset.dart' show FontAsset, FontAssetExt;
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
@@ -20,7 +21,6 @@ import '../../build_system/exceptions.dart';
 import '../../cache.dart';
 import '../../convert.dart';
 import '../../features.dart';
-import '../../font_asset.dart';
 import '../../globals.dart' as globals;
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';

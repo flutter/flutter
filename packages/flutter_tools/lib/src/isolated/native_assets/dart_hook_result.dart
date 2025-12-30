@@ -4,10 +4,10 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:font_asset/font_asset.dart' show FontAsset;
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
-import '../../asset.dart' show FlutterHookResult, HookAsset;
-import '../../font_asset.dart';
+import '../../asset.dart' show FlutterHookResult, FontHookAsset, HookAsset;
 import 'native_assets.dart' show FlutterCodeAsset;
 
 /// The assets produced by a Dart hook run and the dependencies of those assets.
@@ -131,10 +131,14 @@ final class DartHooksResult {
               HookAsset(file: asset.file, name: asset.name, package: asset.package),
         )
         .toList();
-    final List<HookAsset> fontHookAssets = fontAssets
+    final List<FontHookAsset> fontHookAssets = fontAssets
         .map(
-          (FontAsset asset) =>
-              HookAsset(file: asset.file, name: asset.name, package: asset.package),
+          (FontAsset asset) => FontHookAsset(
+            file: asset.file,
+            fontFamily: asset.fontFamily,
+            package: asset.package,
+            weight: asset.weight,
+          ),
         )
         .toList();
     return FlutterHookResult(

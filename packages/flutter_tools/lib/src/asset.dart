@@ -39,12 +39,12 @@ class FlutterHookResult {
         buildStart: DateTime.fromMillisecondsSinceEpoch(0),
         buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
         dataAssets: <HookAsset>[],
-        fontAssets: <HookAsset>[],
+        fontAssets: <FontHookAsset>[],
         dependencies: <Uri>[],
       );
 
   final List<HookAsset> dataAssets;
-  final List<HookAsset> fontAssets;
+  final List<FontHookAsset> fontAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
@@ -104,6 +104,17 @@ class HookAsset {
   String toString() {
     return 'HookAsset(file: $file, name: $name, package: $package)';
   }
+}
+
+class FontHookAsset extends HookAsset {
+  FontHookAsset({
+    required super.file,
+    required String fontFamily,
+    required super.package,
+    this.weight,
+  }) : super(name: fontFamily);
+
+  final int? weight;
 }
 
 const defaultManifestPath = 'pubspec.yaml';
@@ -838,12 +849,14 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
-    List<HookAsset>? fontAssets,
+    List<FontHookAsset>? fontAssets,
   }) {
     return <Map<String, Object?>>[
       if (primary && manifest.usesMaterialDesign) ...kMaterialFonts,
       if (fontAssets != null)
-        ...fontAssets.map((e) => Font(e.name, [FontAsset(e.file)])).map((e) => e.descriptor),
+        ...fontAssets
+            .map((e) => Font(e.name, [FontAsset(e.file, weight: e.weight)]))
+            .map((e) => e.descriptor),
       if (packageName == null)
         ...manifest.fontsDescriptor
       else

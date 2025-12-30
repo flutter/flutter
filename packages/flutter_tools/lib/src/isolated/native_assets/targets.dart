@@ -5,6 +5,7 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show FileSystem;
+import 'package:font_asset/font_asset.dart' show FontAssetsExtension;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
@@ -21,7 +22,6 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
-import '../../font_asset.dart' show FontAssetsExtension;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
