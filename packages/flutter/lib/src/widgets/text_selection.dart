@@ -117,6 +117,7 @@ abstract class TextSelectionControls {
   ///
   /// The [cursorWidth] argument is the thickness of the cursor, which may be
   /// used to offset the anchor point.
+  ///
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
@@ -414,6 +415,7 @@ class TextSelectionOverlay {
   final TextSelectionControls? selectionControls;
 
   /// The width of the cursor.
+  ///
   final double cursorWidth;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
@@ -470,6 +472,8 @@ class TextSelectionOverlay {
   }
 
   // The duration for auto-dismissal of handles on Android.
+  // This matches the native Android behavior observed on physical devices
+  // (e.g., Pixel 9 running Android 16).
   static const Duration _androidHandlesDismissalDuration = Duration(seconds: 4);
 
   void _scheduleHandlesDismissal() {

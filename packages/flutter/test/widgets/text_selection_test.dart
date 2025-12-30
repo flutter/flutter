@@ -1972,21 +1972,26 @@ void main() {
     final Offset caretCenterGlobal = renderEditable.localToGlobal(caretRect.center);
 
     // Now find the handle.
-    // In Material, the collapsed handle uses _TextSelectionHandlePainter.
-    final Finder handleFinder = find
-        .byType(CustomPaint)
-        .last; // Usually the last one drawn in the overlay.
-    // To be safer, we can check the painter type if we could access the private class, but we can't easily.
-    // Let's assume the handle is the one that is visible and in the overlay.
+    // In Material, the collapsed handle uses _TextSelectionHandlePainter (a CustomPainter, not a Widget).
+    // Since _TextSelectionHandlePainter is private and is a CustomPainter (not a Widget),
+    // we cannot use find.byWidgetPredicate to search for it directly.
+    // Instead, we find the CustomPaint widget that uses this painter.
+    final Finder handleFinder = find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          widget.painter != null &&
+          '${widget.painter.runtimeType}' == '_TextSelectionHandlePainter',
+    );
 
+    expect(handleFinder, findsOneWidget);
     final RenderBox handleBox = tester.renderObject(handleFinder);
     final Offset handleCenter = handleBox.localToGlobal(handleBox.size.center(Offset.zero));
 
     // The handle's center x should match the caret's center x.
+    // This verifies that the visual center of the handle (the "onion" shape) properly
+    // points to the caret, confirming that getHandleAnchor correctly compensated for
+    // the handle size and the extra-large cursor width (50.0).
     expect(handleCenter.dx, closeTo(caretCenterGlobal.dx, 0.5));
-
-    // Also verify specifically that the visual center of the handle (which is the "onion" shape) points to the caret.
-    // The handle logic in getHandleAnchor should have compensated for the handle size and cursor width.
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 
