@@ -344,7 +344,7 @@ class TestsCrossImportChecker {
   /// Returns the Set of paths in `knownPaths` that are not in `files`.
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
-      final prefix = RegExp('packages.flutter.test');
+      final prefix = RegExp(r'packages[/\\]flutter[/\\]test');
       final int index = file.absolute.path.indexOf(prefix);
       if (index < 0) {
         throw ArgumentError('All files must include $prefix in their path.', 'files');
@@ -368,7 +368,7 @@ class TestsCrossImportChecker {
   /// Returns the Set of Files that are not in knownPaths.
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
-      final prefix = RegExp('packages.flutter.test');
+      final prefix = RegExp(r'packages[/\\]flutter[/\\]test');
       final int index = file.absolute.path.indexOf(prefix);
       if (index < 0) {
         throw ArgumentError('All files must include $prefix in their path.', 'files');
