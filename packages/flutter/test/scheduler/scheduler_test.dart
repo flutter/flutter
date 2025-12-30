@@ -331,7 +331,7 @@ void main() {
     }, Priority.idle);
 
     scheduler.handleEventLoopCallback();
-    await result;
+    result;
 
     expect(isCompleted, true);
   });

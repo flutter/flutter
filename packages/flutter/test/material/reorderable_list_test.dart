@@ -2026,10 +2026,10 @@ void main() {
   testWidgets(
     'ReorderableListView prefers old onReorder callback if provided along with onReorderItem callback',
     (WidgetTester tester) async {
-      const int itemCount = 5;
-      int onReorderCallCount = 0;
-      int onReorderItemCallCount = 0;
-      final List<Widget> children = <Widget>[
+      const itemCount = 5;
+      var onReorderCallCount = 0;
+      var onReorderItemCallCount = 0;
+      final children = <Widget>[
         for (int index = 0; index < itemCount; index++)
           SizedBox(
             key: ValueKey<int>(index),
@@ -2077,7 +2077,7 @@ void main() {
       expect(onReorderCallCount, 1);
       expect(onReorderItemCallCount, 0);
 
-      final List<int> dragDownItems = <int>[
+      final dragDownItems = <int>[
         for (final Widget child in children)
           if (child.key case final ValueKey<int> key) key.value,
       ];
@@ -2094,7 +2094,7 @@ void main() {
       await dragUp.up();
       await tester.pumpAndSettle();
 
-      final List<int> dragUpItems = <int>[
+      final dragUpItems = <int>[
         for (final Widget child in children)
           if (child.key case final ValueKey<int> key) key.value,
       ];
@@ -2108,8 +2108,8 @@ void main() {
   testWidgets('ReorderableListView calls onReorderItem callback correctly', (
     WidgetTester tester,
   ) async {
-    const int itemCount = 5;
-    final List<Widget> children = <Widget>[
+    const itemCount = 5;
+    final children = <Widget>[
       for (int index = 0; index < itemCount; index++)
         SizedBox(
           key: ValueKey<int>(index),
@@ -2138,7 +2138,7 @@ void main() {
     await dragDown.up();
     await tester.pumpAndSettle();
 
-    final List<int> dragDownItems = <int>[
+    final dragDownItems = <int>[
       for (final Widget child in children)
         if (child.key case final ValueKey<int> key) key.value,
     ];
@@ -2155,7 +2155,7 @@ void main() {
     await dragUp.up();
     await tester.pumpAndSettle();
 
-    final List<int> dragUpItems = <int>[
+    final dragUpItems = <int>[
       for (final Widget child in children)
         if (child.key case final ValueKey<int> key) key.value,
     ];
@@ -2166,10 +2166,10 @@ void main() {
   testWidgets(
     'ReorderableListView.builder prefers old onReorder callback if provided along with onReorderItem callback',
     (WidgetTester tester) async {
-      const int itemCount = 5;
-      int onReorderCallCount = 0;
-      int onReorderItemCallCount = 0;
-      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+      const itemCount = 5;
+      var onReorderCallCount = 0;
+      var onReorderItemCallCount = 0;
+      final items = List<int>.generate(itemCount, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
@@ -2240,8 +2240,8 @@ void main() {
   testWidgets('ReorderableListView.builder calls onReorderItem callback correctly', (
     WidgetTester tester,
   ) async {
-    const int itemCount = 5;
-    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+    const itemCount = 5;
+    final items = List<int>.generate(itemCount, (int index) => index);
 
     void handleReorderItem(int fromIndex, int toIndex) {
       items.insert(toIndex, items.removeAt(fromIndex));

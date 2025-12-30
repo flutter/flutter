@@ -49,7 +49,7 @@ void main() {
     final ImageFrameBuilder frameBuilder = image.frameBuilder!;
     final BuildContext context = tester.element(find.byType(Image));
 
-    const Key key = Key('child');
+    const key = Key('child');
 
     expect(
       frameBuilder(context, const SizedBox(key: key), null, true),

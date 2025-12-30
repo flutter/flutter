@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can show date range picker', (WidgetTester tester) async {
-    const String datePickerTitle = 'Select range';
+    const datePickerTitle = 'Select range';
 
     await tester.pumpWidget(const example.DatePickerApp());
 

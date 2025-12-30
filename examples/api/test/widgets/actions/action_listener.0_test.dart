@@ -12,7 +12,7 @@ void main() {
   testWidgets('ActionListener can be enabled, triggered, and disabled', (
     WidgetTester tester,
   ) async {
-    final List<String?> log = <String?>[];
+    final log = <String?>[];
 
     final DebugPrintCallback originalDebugPrint = debugPrint;
     debugPrint = (String? message, {int? wrapWidth}) {

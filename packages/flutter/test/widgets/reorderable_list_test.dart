@@ -1029,10 +1029,10 @@ void main() {
   testWidgets(
     'SliverReorderableList prefers old onReorder callback if provided along with onReorderItem callback',
     (WidgetTester tester) async {
-      const int itemCount = 5;
-      int onReorderCallCount = 0;
-      int onReorderItemCallCount = 0;
-      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+      const itemCount = 5;
+      var onReorderCallCount = 0;
+      var onReorderItemCallCount = 0;
+      final items = List<int>.generate(itemCount, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
@@ -1107,8 +1107,8 @@ void main() {
   testWidgets('SliverReorderableList calls onReorderItem callback correctly', (
     WidgetTester tester,
   ) async {
-    const int itemCount = 5;
-    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+    const itemCount = 5;
+    final items = List<int>.generate(itemCount, (int index) => index);
 
     void handleReorderItem(int fromIndex, int toIndex) {
       items.insert(toIndex, items.removeAt(fromIndex));
@@ -1165,10 +1165,10 @@ void main() {
   testWidgets(
     'ReorderableList prefers old onReorder callback if provided along with onReorderItem callback',
     (WidgetTester tester) async {
-      const int itemCount = 5;
-      int onReorderCallCount = 0;
-      int onReorderItemCallCount = 0;
-      final List<int> items = List<int>.generate(itemCount, (int index) => index);
+      const itemCount = 5;
+      var onReorderCallCount = 0;
+      var onReorderItemCallCount = 0;
+      final items = List<int>.generate(itemCount, (int index) => index);
 
       void handleReorder(int fromIndex, int toIndex) {
         onReorderCallCount += 1;
@@ -1239,8 +1239,8 @@ void main() {
   testWidgets('ReorderableList calls onReorderItem callback correctly', (
     WidgetTester tester,
   ) async {
-    const int itemCount = 5;
-    final List<int> items = List<int>.generate(itemCount, (int index) => index);
+    const itemCount = 5;
+    final items = List<int>.generate(itemCount, (int index) => index);
 
     void handleReorderItem(int fromIndex, int toIndex) {
       items.insert(toIndex, items.removeAt(fromIndex));

@@ -27,7 +27,7 @@ class ClipRRectExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const TextStyle style = TextStyle(color: Colors.white);
+    const style = TextStyle(color: Colors.white);
 
     return Center(
       child: Column(

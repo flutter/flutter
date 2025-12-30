@@ -136,7 +136,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
     // appear in the two columns to the right of the demo switches
     // Card are broken out below.
 
-    final List<Widget> columnOneButtons = <Widget>[
+    final columnOneButtons = <Widget>[
       TextButton(onPressed: () {}, child: const Text('Enabled')),
       verticalSpacer,
 
@@ -204,7 +204,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
       ),
     ];
 
-    final List<Widget> columnTwoButtons = <Widget>[
+    final columnTwoButtons = <Widget>[
       // Override the foregroundBuilder: apply a ShaderMask.
       //
       // Apply a ShaderMask to the button's child. This kind of thing

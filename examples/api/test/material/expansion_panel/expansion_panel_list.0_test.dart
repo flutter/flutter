@@ -29,7 +29,7 @@ void main() {
   });
 
   testWidgets('Tap to delete a ExpansionPanel', (WidgetTester tester) async {
-    const int index = 3;
+    const index = 3;
 
     await tester.pumpWidget(const example.ExpansionPanelListExampleApp());
 
@@ -62,7 +62,7 @@ void main() {
     expect(find.byType(SingleChildScrollView), findsOneWidget);
 
     // Expand all the tiles.
-    for (int i = 0; i < 8; i++) {
+    for (var i = 0; i < 8; i++) {
       await tester.tap(find.byType(ExpandIcon).at(i));
     }
     await tester.pumpAndSettle();

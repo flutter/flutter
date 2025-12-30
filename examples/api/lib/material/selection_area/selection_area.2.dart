@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
 
-    int currentOffset = 0;
+    var currentOffset = 0;
     // Map bulleted list span to a local range using its concrete length calculated
     // from the length of its title and each individual bullet.
     dataSourceMap[(
@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
       currentOffset += bullet.length;
     }
 
-    const TextSpan secondTextParagraph = TextSpan(
+    const secondTextParagraph = TextSpan(
       text: 'This is some text in a text widget.',
       children: <InlineSpan>[
         TextSpan(text: ' This is some more text in the same text widget.'),

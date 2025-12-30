@@ -31,7 +31,7 @@ void main() {
     ));
 
     // Scroll on the outer box.
-    final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
     pointer.hover(const Offset(100, 300));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 100.0)));
     await tester.pump();

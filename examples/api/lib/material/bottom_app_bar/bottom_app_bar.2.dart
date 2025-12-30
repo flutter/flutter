@@ -161,7 +161,7 @@ class _DemoBottomAppBar extends StatelessWidget {
               tooltip: 'Open popup menu',
               icon: const Icon(Icons.more_vert),
               onPressed: () {
-                final SnackBar snackBar = SnackBar(
+                final snackBar = SnackBar(
                   content: const Text('Yay! A SnackBar!'),
                   action: SnackBarAction(label: 'Undo', onPressed: () {}),
                 );

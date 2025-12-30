@@ -122,7 +122,7 @@ class _FakeMenuChannel implements MethodChannel {
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
-    final MethodCall call = MethodCall(method, arguments);
+    final call = MethodCall(method, arguments);
     outgoingCalls.add(call);
     return await outgoing(call) as T;
   }

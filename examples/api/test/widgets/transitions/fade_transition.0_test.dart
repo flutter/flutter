@@ -32,8 +32,8 @@ void main() {
       matching: find.byType(FadeTransition),
     );
 
-    const double beginOpacity = 0.0;
-    const double endOpacity = 1.0;
+    const beginOpacity = 0.0;
+    const endOpacity = 1.0;
 
     FadeTransition fadeTransition = tester.widget(fadeTransitionFinder);
     expect(fadeTransition.opacity.value, equals(beginOpacity));

@@ -238,7 +238,7 @@ abstract class RenderTextFlow extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    double width = 0.0;
+    var width = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMinIntrinsicWidth(height);
@@ -252,7 +252,7 @@ abstract class RenderTextFlow extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    double width = 0.0;
+    var width = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth = child.getMaxIntrinsicWidth(height);
@@ -275,7 +275,7 @@ abstract class RenderTextFlow extends RenderBox
   @override
   double computeMinIntrinsicHeight(double width) {
     String? previousCategory;
-    double height = 0.0;
+    var height = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final String category =
@@ -293,7 +293,7 @@ abstract class RenderTextFlow extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     String? previousCategory;
-    double height = 0.0;
+    var height = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final String category =
@@ -326,7 +326,7 @@ abstract class RenderTextFlow extends RenderBox
       width: constraints.maxWidth,
     );
     String? previousCategory;
-    double y = 0.0;
+    var y = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final String category =
@@ -353,7 +353,7 @@ abstract class RenderTextFlow extends RenderBox
       width: constraints.maxWidth,
     );
     String? previousCategory;
-    double y = 0.0;
+    var y = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
       final String category =

@@ -17,7 +17,7 @@ void main() {
     );
     expect(dataTable.columns.length, 3);
     expect(dataTable.rows.length, 3);
-    for (int i = 0; i < dataTable.rows.length; i++) {
+    for (var i = 0; i < dataTable.rows.length; i++) {
       expect(dataTable.rows[i].cells.length, 3);
     }
     expect(find.text('Name'), findsOneWidget);

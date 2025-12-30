@@ -45,7 +45,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
   @override
   Widget build(BuildContext context) {
     // Created by Google Bard from 'create a lyrical phrase of about 25 words that begins with "is a color"'.
-    const String longText =
+    const longText =
         'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
 
     return Scaffold(

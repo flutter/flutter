@@ -20,8 +20,7 @@ void main() {
       ),
     );
 
-    final RenderBox appBarContent =
-        tester.renderObject(find.byType(example.AppBarContent)) as RenderBox;
+    final appBarContent = tester.renderObject(find.byType(example.AppBarContent)) as RenderBox;
 
     expect(
       preferredSize.preferredSize.height,

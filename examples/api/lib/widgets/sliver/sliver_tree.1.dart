@@ -74,7 +74,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
     AnimationStyle toggleAnimationStyle,
   ) {
     final bool isParentNode = node.children.isNotEmpty;
-    final BorderSide border = BorderSide(width: 2, color: Colors.purple[300]!);
+    final border = BorderSide(width: 2, color: Colors.purple[300]!);
     return TreeSliver.wrapChildToToggleNode(
       node: node,
       child: Row(
@@ -140,7 +140,7 @@ class _TreeSliverExampleState extends State<TreeSliverExample> {
   Widget build(BuildContext context) {
     // This example assumes the full screen is available.
     final double screenWidth = MediaQuery.widthOf(context);
-    final List<Widget> selectedChildren = <Widget>[];
+    final selectedChildren = <Widget>[];
     if (_selectedNode != null) {
       selectedChildren.addAll(<Widget>[
         const Spacer(),

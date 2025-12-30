@@ -74,8 +74,8 @@ class CustomAppBarShape extends OutlinedBorder {
   const CustomAppBarShape({super.side});
 
   Path _getPath(Rect rect) {
-    final Path path = Path();
-    final Size size = Size(rect.width, rect.height * 1.5);
+    final path = Path();
+    final size = Size(rect.width, rect.height * 1.5);
 
     final double p0 = size.height * 0.75;
     path.lineTo(0.0, p0);

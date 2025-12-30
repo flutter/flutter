@@ -81,7 +81,7 @@ class _SettingsAppBarExampleState extends State<SettingsAppBarExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;

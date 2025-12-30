@@ -37,7 +37,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                const SnackBar snackBar = SnackBar(
+                const snackBar = SnackBar(
                   content: Text('A SnackBar has been shown.'),
                   behavior: SnackBarBehavior.floating,
                 );

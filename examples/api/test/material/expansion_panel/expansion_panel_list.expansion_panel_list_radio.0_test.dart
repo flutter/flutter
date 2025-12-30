@@ -18,12 +18,12 @@ void main() {
       findsOne,
     );
     expect(find.byType(ExpansionPanelList), findsOne);
-    for (int i = 0; i < 8; i++) {
+    for (var i = 0; i < 8; i++) {
       expect(find.widgetWithText(ListTile, 'Panel $i'), findsOne);
     }
 
     // The default expanded item is 2.
-    for (int i = 0; i < 8; i++) {
+    for (var i = 0; i < 8; i++) {
       expect(
         tester.widget<ExpandIcon>(find.byType(ExpandIcon).at(i)).isExpanded,
         i == 2,
@@ -32,11 +32,11 @@ void main() {
     }
 
     // Open all the panels one by one.
-    for (int index = 0; index < 8; index++) {
+    for (var index = 0; index < 8; index++) {
       await tester.ensureVisible(find.byType(ExpandIcon).at(index));
       await tester.tap(find.byType(ExpandIcon).at(index));
       await tester.pumpAndSettle();
-      for (int i = 0; i < 8; i++) {
+      for (var i = 0; i < 8; i++) {
         expect(
           tester.widget<ExpandIcon>(find.byType(ExpandIcon).at(i)).isExpanded,
           i == index,

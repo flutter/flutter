@@ -120,7 +120,7 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
 }
 
 Future<String?> validateUsernameFromServer(String username) async {
-  final Set<String> takenUsernames = <String>{'jack', 'alex'};
+  final takenUsernames = <String>{'jack', 'alex'};
 
   await Future<void>.delayed(kFakeHttpRequestDuration);
 

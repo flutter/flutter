@@ -36,8 +36,8 @@ void main() {
     expect(centerOfPositioned, equals(centerOfFlutterLogo));
 
     // Drag the magnifier and confirm its new position is expected.
-    const Offset dragDistance = Offset(10, 10);
-    final Offset updatedPositioned = Offset(
+    const dragDistance = Offset(10, 10);
+    final updatedPositioned = Offset(
       oldConcretePositioned.left ?? 0.0 + 10.0,
       oldConcretePositioned.top ?? 0.0 + 10.0,
     );
@@ -50,7 +50,7 @@ void main() {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
     final Offset centerOfPositioned = tester.getCenter(find.byType(Positioned));
-    const Offset dragDistance = Offset(10, 10);
+    const dragDistance = Offset(10, 10);
 
     await tester.dragFrom(centerOfPositioned, dragDistance);
     await tester.pump();

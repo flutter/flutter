@@ -13,10 +13,10 @@ void main() {
       const example.DropdownMenuEntryLabelWidgetExampleApp(),
     );
 
-    const String longText =
+    const longText =
         'is a color that sings of hope, A hue that shines like gold. It is the color of dreams, A shade that never grows old.';
     Finder findMenuItemText(String label) {
-      final String labelText = '$label $longText\n';
+      final labelText = '$label $longText\n';
       return find
           .descendant(
             of: find.widgetWithText(MenuItemButton, labelText),

@@ -99,7 +99,7 @@ class _SliverAutoScrollExampleState extends State<SliverAutoScrollExample> {
 
   @override
   Widget build(BuildContext context) {
-    const EdgeInsets horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
+    const horizontalPadding = EdgeInsets.symmetric(horizontal: 8);
 
     return Scaffold(
       body: SafeArea(

@@ -47,7 +47,7 @@ class _PageViewExampleState extends State<PageViewExample> {
             },
             childCount: items.length,
             findChildIndexCallback: (Key key) {
-              final ValueKey<String> valueKey = key as ValueKey<String>;
+              final valueKey = key as ValueKey<String>;
               final String data = valueKey.value;
               final int index = items.indexOf(data);
               if (index >= 0) {

@@ -22,7 +22,7 @@ void main() {
     // The table has two rows.
     expect(table.children.length, 2);
 
-    for (int i = 0; i < table.children.length; i++) {
+    for (var i = 0; i < table.children.length; i++) {
       // Each row has three containers.
       expect(table.children[i].children.length, 3);
 

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Show Adaptive Alert dialog', (WidgetTester tester) async {
-    const String dialogTitle = 'AlertDialog Title';
+    const dialogTitle = 'AlertDialog Title';
     await tester.pumpWidget(const example.AdaptiveAlertDialogApp());
 
     expect(find.text(dialogTitle), findsNothing);

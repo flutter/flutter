@@ -70,12 +70,12 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     final ColorScheme colorScheme = currentColorScheme;
     final Color selectedColor = currentColorScheme.primary;
 
-    final ThemeData lightTheme = ThemeData(
+    final lightTheme = ThemeData(
       colorSchemeSeed: selectedColor,
       brightness: Brightness.light,
       useMaterial3: false,
     );
-    final ThemeData darkTheme = ThemeData(
+    final darkTheme = ThemeData(
       colorSchemeSeed: selectedColor,
       brightness: Brightness.dark,
       useMaterial3: false,

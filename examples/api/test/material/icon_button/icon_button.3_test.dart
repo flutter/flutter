@@ -30,7 +30,7 @@ void main() {
     }
 
     // Select the icons buttons.
-    for (int i = 0; i <= 3; i++) {
+    for (var i = 0; i <= 3; i++) {
       await tester.tap(unselectedIconButtons.at(2 * i));
     }
     await tester.pump();
@@ -49,7 +49,7 @@ void main() {
     }
 
     // Unselect the icons buttons.
-    for (int i = 0; i <= 3; i++) {
+    for (var i = 0; i <= 3; i++) {
       await tester.tap(selectedIconButtons.at(2 * i));
     }
     await tester.pump();

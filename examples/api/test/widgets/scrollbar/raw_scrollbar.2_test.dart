@@ -22,7 +22,7 @@ void main() {
     expect(find.text('item 1'), findsOne);
     expect(find.text('item 2'), findsOne);
 
-    final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
     pointer.hover(tester.getCenter(find.byType(GridView).first));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 1000)));
     await tester.pumpAndSettle();

@@ -20,7 +20,7 @@ void main() {
     expect(find.text('Maria Reynolds'), findsOne);
     expect(find.text('Samuel Seabury'), findsOne);
 
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       await tester.tap(find.byType(Radio<int>).at(i));
       await tester.pump();
       expect(

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open popup menu', (WidgetTester tester) async {
-    const String menuItem = 'Item 1';
+    const menuItem = 'Item 1';
 
     await tester.pumpWidget(const example.PopupMenuApp());
 

@@ -16,7 +16,7 @@ void main() {
     expect(find.widgetWithText(AppBar, 'ScaffoldMessenger Demo'), findsOne);
     expect(find.text('You have pushed the button this many times:'), findsOne);
 
-    for (int i = 0; i < 9; i++) {
+    for (var i = 0; i < 9; i++) {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pump();
       expect(find.text('${i + 1}'), findsOne);

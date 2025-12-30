@@ -15,7 +15,7 @@ void main() {
       const example.SliverGridDelegateWithFixedCrossAxisCountExampleApp(),
     );
 
-    for (int i = 0; i < 20; i++) {
+    for (var i = 0; i < 20; i++) {
       expect(find.text('$i'), findsOne);
       final Element element = tester.element(find.text('$i'));
 

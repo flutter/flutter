@@ -57,7 +57,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
     ).toList();
     destinationFaders[selectedIndex].value = 1.0;
 
-    final CurveTween tween = CurveTween(curve: Curves.fastOutSlowIn);
+    final tween = CurveTween(curve: Curves.fastOutSlowIn);
     destinationViews = allDestinations.map<Widget>((Destination destination) {
       return FadeTransition(
         opacity: destinationFaders[destination.index].drive(tween),
@@ -249,7 +249,7 @@ class ListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const int itemCount = 50;
+    const itemCount = 50;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(

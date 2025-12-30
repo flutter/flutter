@@ -8,15 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('$CustomGridLayout', (WidgetTester tester) async {
-    const CustomGridLayout layout = CustomGridLayout(
-      crossAxisCount: 2,
-      fullRowPeriod: 3,
-      dimension: 100,
-    );
-    final List<double> scrollOffsets = List<double>.generate(
-      10,
-      (int i) => layout.computeMaxScrollOffset(i),
-    );
+    const layout = CustomGridLayout(crossAxisCount: 2, fullRowPeriod: 3, dimension: 100);
+    final scrollOffsets = List<double>.generate(10, (int i) => layout.computeMaxScrollOffset(i));
     expect(scrollOffsets, <double>[
       0.0,
       0.0,
@@ -29,17 +22,17 @@ void main() {
       400.0,
       500.0,
     ]);
-    final List<int> minOffsets = List<int>.generate(
+    final minOffsets = List<int>.generate(
       10,
       (int i) => layout.getMinChildIndexForScrollOffset(i * 80.0),
     );
     expect(minOffsets, <int>[0, 0, 2, 4, 5, 7, 7, 9, 10, 12]);
-    final List<int> maxOffsets = List<int>.generate(
+    final maxOffsets = List<int>.generate(
       10,
       (int i) => layout.getMaxChildIndexForScrollOffset(i * 80.0),
     );
     expect(maxOffsets, <double>[1, 1, 3, 4, 6, 8, 8, 9, 11, 13]);
-    final List<SliverGridGeometry> offsets = List<SliverGridGeometry>.generate(
+    final offsets = List<SliverGridGeometry>.generate(
       20,
       (int i) => layout.getGeometryForChildIndex(i),
     );

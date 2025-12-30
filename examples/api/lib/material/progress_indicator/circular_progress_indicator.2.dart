@@ -134,7 +134,7 @@ class ManyProgressIndicators extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child = const SizedBox();
-    for (int i = 0; i < indicatorNum; i++) {
+    for (var i = 0; i < indicatorNum; i++) {
       child = _nestIndicator(child: child);
     }
     return child;

@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/material/ink/ink.image_clip.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const List<int> kTransparentImage = <int>[
+  const kTransparentImage = <int>[
     0x89,
     0x50,
     0x4E,

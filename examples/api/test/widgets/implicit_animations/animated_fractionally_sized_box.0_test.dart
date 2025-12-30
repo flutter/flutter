@@ -22,10 +22,10 @@ void main() {
       matching: find.byType(FractionallySizedBox),
     );
 
-    const double beginWidthFactor = 0.75;
-    const double endWidthFactor = 0.25;
-    const double beginHeightFactor = 0.25;
-    const double endHeightFactor = 0.75;
+    const beginWidthFactor = 0.75;
+    const endWidthFactor = 0.25;
+    const beginHeightFactor = 0.25;
+    const endHeightFactor = 0.75;
     const Alignment beginAlignment = Alignment.bottomRight;
     const Alignment endAlignment = Alignment.topLeft;
 

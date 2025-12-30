@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/overlay/overlay_portal.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const String tooltipText = 'tooltip';
+  const tooltipText = 'tooltip';
   testWidgets('Tooltip is shown on press', (WidgetTester tester) async {
     await tester.pumpWidget(const example.OverlayPortalExampleApp());
     expect(find.text(tooltipText), findsNothing);

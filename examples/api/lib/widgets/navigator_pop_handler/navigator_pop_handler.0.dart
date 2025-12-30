@@ -94,7 +94,7 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
         restorationScopeId: 'nested-navigator',
         initialRoute: 'nested_navigators/one',
         onGenerateRoute: (RouteSettings settings) {
-          final BuildContext rootContext = context;
+          final rootContext = context;
           return switch (settings.name) {
             'nested_navigators/one' => MaterialPageRoute<void>(
               settings: const RouteSettings(name: 'nested_navigators/one'),

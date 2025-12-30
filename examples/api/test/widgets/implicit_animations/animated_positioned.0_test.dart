@@ -20,12 +20,12 @@ void main() {
       matching: find.byType(Positioned),
     );
 
-    const double beginWidth = 50.0;
-    const double endWidth = 200.0;
-    const double beginHeight = 200.0;
-    const double endHeight = 50.0;
-    const double beginTop = 150.0;
-    const double endTop = 50.0;
+    const beginWidth = 50.0;
+    const endWidth = 200.0;
+    const beginHeight = 200.0;
+    const endHeight = 50.0;
+    const beginTop = 150.0;
+    const endTop = 50.0;
 
     Positioned positioned = tester.widget(positionedFinder);
     expect(positioned.width, beginWidth);

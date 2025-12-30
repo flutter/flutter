@@ -11,27 +11,27 @@ void main() {
   testWidgets('When expansion tiles are expanded tile numbers are revealed', (
     WidgetTester tester,
   ) async {
-    const int totalTiles = 3;
+    const totalTiles = 3;
 
     await tester.pumpWidget(const example.ExpansionTileApp());
 
     expect(find.byType(ExpansionTile), findsNWidgets(totalTiles));
 
-    const String tileOne = 'This is tile number 1';
+    const tileOne = 'This is tile number 1';
     expect(find.text(tileOne), findsNothing);
 
     await tester.tap(find.text('ExpansionTile 1'));
     await tester.pumpAndSettle();
     expect(find.text(tileOne), findsOneWidget);
 
-    const String tileTwo = 'This is tile number 2';
+    const tileTwo = 'This is tile number 2';
     expect(find.text(tileTwo), findsNothing);
 
     await tester.tap(find.text('ExpansionTile 2'));
     await tester.pumpAndSettle();
     expect(find.text(tileTwo), findsOneWidget);
 
-    const String tileThree = 'This is tile number 3';
+    const tileThree = 'This is tile number 3';
     expect(find.text(tileThree), findsNothing);
 
     await tester.tap(find.text('ExpansionTile 3'));
