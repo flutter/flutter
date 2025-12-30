@@ -5391,6 +5391,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
+        if (!program._hasUniform(slot.name)) {
+          return true;
+        }
+
         slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
         return false;
       });
@@ -5407,6 +5411,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
       return false;
     });
+  }
+
+  bool _hasUniform(String name) {
+    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
   }
 
   int _getImageSamplerIndex(String name) {
