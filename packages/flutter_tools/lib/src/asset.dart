@@ -421,6 +421,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       packageConfig,
       primary: true,
+      fontAssets: flutterHookResult?.fontAssets,
     );
 
     // Add fonts, assets, and licenses from packages in the project's
@@ -837,9 +838,12 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
+    List<HookAsset>? fontAssets,
   }) {
     return <Map<String, Object?>>[
       if (primary && manifest.usesMaterialDesign) ...kMaterialFonts,
+      if (fontAssets != null)
+        ...fontAssets.map((e) => Font(e.name, [FontAsset(e.file)])).map((e) => e.descriptor),
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
