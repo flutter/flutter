@@ -84,7 +84,7 @@ class ReorderableListView extends StatefulWidget {
       'This feature was deprecated after v3.40.0-0.2.pre.',
     )
     this.onReorder,
-    required this.onReorderItem,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -119,6 +119,11 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'You must provide either onReorderItem or onReorder, but not both.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length;
@@ -161,7 +166,7 @@ class ReorderableListView extends StatefulWidget {
       'This feature was deprecated after v3.40.0-0.2.pre.',
     )
     this.onReorder,
-    required this.onReorderItem,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -193,6 +198,11 @@ class ReorderableListView extends StatefulWidget {
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'You must provide either onReorderItem or onReorder, but not both.',
        );
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
@@ -210,7 +220,7 @@ class ReorderableListView extends StatefulWidget {
   final ReorderCallback? onReorder;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderItem}
-  final ReorderCallback onReorderItem;
+  final ReorderCallback? onReorderItem;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int index)? onReorderStart;

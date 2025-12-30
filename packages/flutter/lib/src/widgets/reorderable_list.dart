@@ -149,7 +149,7 @@ class ReorderableList extends StatefulWidget {
       'This feature was deprecated after v3.40.0-0.2.pre.',
     )
     this.onReorder,
-    required this.onReorderItem,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -177,6 +177,11 @@ class ReorderableList extends StatefulWidget {
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'You must provide either onReorderItem or onReorder, but not both.',
        );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
@@ -222,7 +227,7 @@ class ReorderableList extends StatefulWidget {
   /// to a new location in the list and the application should update the order
   /// of the items.
   /// {@endtemplate}
-  final ReorderCallback onReorderItem;
+  final ReorderCallback? onReorderItem;
 
   /// {@template flutter.widgets.reorderable_list.onReorderStart}
   /// A callback that is called when an item drag has started.
@@ -529,7 +534,7 @@ class SliverReorderableList extends StatefulWidget {
       'This feature was deprecated after v3.40.0-0.2.pre.',
     )
     this.onReorder,
-    required this.onReorderItem,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -545,6 +550,11 @@ class SliverReorderableList extends StatefulWidget {
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'You must provide either onReorderItem or onReorder, but not both.',
        );
 
   // An eyeballed value for a smooth scrolling experience.
@@ -568,7 +578,7 @@ class SliverReorderableList extends StatefulWidget {
   final ReorderCallback? onReorder;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderItem}
-  final ReorderCallback onReorderItem;
+  final ReorderCallback? onReorderItem;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int)? onReorderStart;
