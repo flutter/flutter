@@ -2448,7 +2448,7 @@ void main() {
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color focusColor = Colors.orange;
+    const focusColor = Color(0xffffaaaa);
 
     final Color defaultDarkFocusColor = HSLColor.fromColor(
       focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
