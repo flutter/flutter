@@ -53,7 +53,7 @@ void main() {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
-    const StateMarker grandchild = StateMarker();
+    const grandchild = StateMarker();
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -70,16 +70,16 @@ void main() {
       ),
     );
 
-    final StateMarkerState leftState = left.currentState! as StateMarkerState;
+    final leftState = left.currentState! as StateMarkerState;
     leftState.marker = 'left';
-    final StateMarkerState rightState = right.currentState! as StateMarkerState;
+    final rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
-    const StateMarker newGrandchild = StateMarker();
+    const newGrandchild = StateMarker();
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -124,7 +124,7 @@ void main() {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
 
-    const StateMarker grandchild = StateMarker();
+    const grandchild = StateMarker();
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -135,16 +135,16 @@ void main() {
       ),
     );
 
-    final StateMarkerState leftState = left.currentState! as StateMarkerState;
+    final leftState = left.currentState! as StateMarkerState;
     leftState.marker = 'left';
-    final StateMarkerState rightState = right.currentState! as StateMarkerState;
+    final rightState = right.currentState! as StateMarkerState;
     rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = 'grandchild';
 
-    const StateMarker newGrandchild = StateMarker();
+    const newGrandchild = StateMarker();
     await tester.pumpWidget(
       Stack(
         textDirection: TextDirection.ltr,
@@ -184,7 +184,7 @@ void main() {
 
     await tester.pumpWidget(StateMarker(key: key));
 
-    final StateMarkerState keyState = key.currentState! as StateMarkerState;
+    final keyState = key.currentState! as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(
@@ -225,7 +225,7 @@ void main() {
       ),
     );
 
-    final StateMarkerState keyState = key.currentState! as StateMarkerState;
+    final keyState = key.currentState! as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(
@@ -269,7 +269,7 @@ void main() {
       ),
     );
 
-    final StateMarkerState keyState = key.currentState! as StateMarkerState;
+    final keyState = key.currentState! as StateMarkerState;
     keyState.marker = 'marked';
 
     await tester.pumpWidget(
@@ -329,8 +329,8 @@ void main() {
 
   testWidgets('Deactivate implies build', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    final List<String> log = <String>[];
-    final DeactivateLogger logger = DeactivateLogger(key: key, log: log);
+    final log = <String>[];
+    final logger = DeactivateLogger(key: key, log: log);
 
     await tester.pumpWidget(Container(key: UniqueKey(), child: logger));
 

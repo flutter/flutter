@@ -13,12 +13,12 @@ void main() {
     WidgetTester tester,
   ) async {
     RenderTestObject.paintCount = 0;
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     );
     addTearDown(controller.dispose);
-    final Tween<double> opacityTween = Tween<double>(begin: 0, end: 1);
+    final opacityTween = Tween<double>(begin: 0, end: 1);
     await tester.pumpWidget(
       ColoredBox(
         color: red,
@@ -49,12 +49,12 @@ void main() {
     WidgetTester tester,
   ) async {
     RenderTestObject.paintCount = 0;
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
     );
     addTearDown(controller.dispose);
-    final Tween<double> opacityTween = Tween<double>(begin: 0, end: 0.99); // Layer is dropped at 1
+    final opacityTween = Tween<double>(begin: 0, end: 0.99); // Layer is dropped at 1
     await tester.pumpWidget(
       ColoredBox(
         color: red,
@@ -85,12 +85,12 @@ void main() {
     'RenderAnimatedOpacityMixin allows opacity layer to be disposed when animating to 0 opacity',
     (WidgetTester tester) async {
       RenderTestObject.paintCount = 0;
-      final AnimationController controller = AnimationController(
+      final controller = AnimationController(
         vsync: const TestVSync(),
         duration: const Duration(seconds: 1),
       );
       addTearDown(controller.dispose);
-      final Tween<double> opacityTween = Tween<double>(begin: 0.99, end: 0);
+      final opacityTween = Tween<double>(begin: 0.99, end: 0);
 
       await tester.pumpWidget(
         ColoredBox(

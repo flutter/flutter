@@ -35,7 +35,6 @@ public class LocalizationPlugin {
         public String getStringResource(@NonNull String key, @Nullable String localeString) {
           Context localContext = context;
           String stringToReturn = null;
-          Locale savedLocale = null;
 
           if (localeString != null) {
             Locale locale = localeFromString(localeString);
@@ -105,8 +104,7 @@ public class LocalizationPlugin {
       if (platformResolvedLocale != null) {
         return platformResolvedLocale;
       }
-      return supportedLocales.get(0);
-    } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
+    } else {
       // Modern locale resolution without languageRange
       // https://developer.android.com/guide/topics/resources/multilingual-support#postN
       LocaleList localeList = context.getResources().getConfiguration().getLocales();
@@ -131,25 +129,6 @@ public class LocalizationPlugin {
           }
         }
       }
-      return supportedLocales.get(0);
-    }
-
-    // Legacy locale resolution
-    // https://developer.android.com/guide/topics/resources/multilingual-support#preN
-    Locale preferredLocale = context.getResources().getConfiguration().locale;
-    if (preferredLocale != null) {
-      // Look for exact match.
-      for (Locale locale : supportedLocales) {
-        if (preferredLocale.equals(locale)) {
-          return locale;
-        }
-      }
-      // Look for exact language only match.
-      for (Locale locale : supportedLocales) {
-        if (preferredLocale.getLanguage().equals(locale.toString())) {
-          return locale;
-        }
-      }
     }
     return supportedLocales.get(0);
   }
@@ -162,15 +141,11 @@ public class LocalizationPlugin {
   @SuppressWarnings("deprecation")
   public void sendLocalesToFlutter(@NonNull Configuration config) {
     List<Locale> locales = new ArrayList<>();
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      LocaleList localeList = config.getLocales();
-      int localeCount = localeList.size();
-      for (int index = 0; index < localeCount; ++index) {
-        Locale locale = localeList.get(index);
-        locales.add(locale);
-      }
-    } else {
-      locales.add(config.locale);
+    LocaleList localeList = config.getLocales();
+    int localeCount = localeList.size();
+    for (int index = 0; index < localeCount; ++index) {
+      Locale locale = localeList.get(index);
+      locales.add(locale);
     }
 
     localizationChannel.sendLocales(locales);

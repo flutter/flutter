@@ -79,9 +79,7 @@ class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure>
   ui.Tangent? getTangentForOffset(double distance) {
     return withStackScope((StackScope scope) {
       final Pointer<Float> outPosition = scope.allocFloatArray(4);
-      final Pointer<Float> outTangent = Pointer<Float>.fromAddress(
-        outPosition.address + sizeOf<Float>() * 2,
-      );
+      final outTangent = Pointer<Float>.fromAddress(outPosition.address + sizeOf<Float>() * 2);
       final bool result = contourMeasureGetPosTan(handle, distance, outPosition, outTangent);
       assert(result);
       return ui.Tangent(

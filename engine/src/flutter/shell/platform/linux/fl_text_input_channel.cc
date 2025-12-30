@@ -12,6 +12,7 @@ static constexpr char kChannelName[] = "flutter/textinput";
 static constexpr char kBadArgumentsError[] = "Bad Arguments";
 
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
+static constexpr char kUpdateConfigMethod[] = "TextInput.updateConfig";
 static constexpr char kShowMethod[] = "TextInput.show";
 static constexpr char kSetEditingStateMethod[] = "TextInput.setEditingState";
 static constexpr char kClearClientMethod[] = "TextInput.clearClient";
@@ -39,8 +40,19 @@ static constexpr char kComposingExtentKey[] = "composingExtent";
 
 static constexpr char kTransform[] = "transform";
 
+static constexpr char kTextInputType[] = "TextInputType.text";
 static constexpr char kMultilineInputType[] = "TextInputType.multiline";
+static constexpr char kNumberInputType[] = "TextInputType.number";
+static constexpr char kPhoneInputType[] = "TextInputType.phone";
+static constexpr char kDatetimeInputType[] = "TextInputType.datetime";
+static constexpr char kEmailAddressInputType[] = "TextInputType.emailAddress";
+static constexpr char kUrlInputType[] = "TextInputType.url";
+static constexpr char kPasswordInputType[] = "TextInputType.visiblePassword";
+static constexpr char kNameInputType[] = "TextInputType.name";
+static constexpr char kAddressInputType[] = "TextInputType.address";
 static constexpr char kNoneInputType[] = "TextInputType.none";
+static constexpr char kWebSearchInputType[] = "TextInputType.webSearch";
+static constexpr char kTwitterInputType[] = "TextInputType.twitter";
 
 static constexpr char kTextAffinityUpstream[] = "TextAffinity.upstream";
 static constexpr char kTextAffinityDownstream[] = "TextAffinity.downstream";
@@ -55,6 +67,9 @@ struct _FlTextInputChannel {
   gpointer user_data;
 };
 
+static FlMethodResponse* update_config(FlTextInputChannel* self,
+                                       FlValue* config_value);
+
 G_DEFINE_TYPE(FlTextInputChannel, fl_text_input_channel, G_TYPE_OBJECT)
 
 static const gchar* text_affinity_to_string(FlTextAffinity affinity) {
@@ -68,6 +83,50 @@ static const gchar* text_affinity_to_string(FlTextAffinity affinity) {
   }
 }
 
+static void fl_text_input_parse_input_type_name(const gchar* input_type_name,
+                                                FlTextInputType* input_type,
+                                                GtkInputPurpose* im_purpose,
+                                                GtkInputHints* im_hints) {
+  if (input_type_name == nullptr) {
+    input_type_name = kTextInputType;
+  }
+
+  if (g_strcmp0(input_type_name, kTextInputType) == 0) {
+    // default
+  } else if (g_strcmp0(input_type_name, kMultilineInputType) == 0) {
+    *im_hints = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
+                                           GTK_INPUT_HINT_UPPERCASE_SENTENCES);
+    *input_type = FL_TEXT_INPUT_TYPE_MULTILINE;
+  } else if (g_strcmp0(input_type_name, kNumberInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_NUMBER;
+  } else if (g_strcmp0(input_type_name, kPhoneInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_PHONE;
+  } else if (g_strcmp0(input_type_name, kDatetimeInputType) == 0) {
+    // Not in GTK 3
+  } else if (g_strcmp0(input_type_name, kEmailAddressInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_EMAIL;
+  } else if (g_strcmp0(input_type_name, kUrlInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_URL;
+  } else if (g_strcmp0(input_type_name, kPasswordInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_PASSWORD;
+  } else if (g_strcmp0(input_type_name, kNameInputType) == 0) {
+    *im_purpose = GTK_INPUT_PURPOSE_NAME;
+    *im_hints = GTK_INPUT_HINT_UPPERCASE_WORDS;
+  } else if (g_strcmp0(input_type_name, kAddressInputType) == 0) {
+    *im_hints = GTK_INPUT_HINT_UPPERCASE_WORDS;
+  } else if (g_strcmp0(input_type_name, kNoneInputType) == 0) {
+    // keep defaults
+    *input_type = FL_TEXT_INPUT_TYPE_NONE;
+  } else if (g_strcmp0(input_type_name, kWebSearchInputType) == 0) {
+    *im_hints = GTK_INPUT_HINT_LOWERCASE;
+  } else if (g_strcmp0(input_type_name, kTwitterInputType) == 0) {
+    *im_hints = static_cast<GtkInputHints>(GTK_INPUT_HINT_SPELLCHECK |
+                                           GTK_INPUT_HINT_UPPERCASE_SENTENCES);
+  } else {
+    g_warning("Unhandled input type name: %s", input_type_name);
+  }
+}
+
 // Called when the input method client is set up.
 static FlMethodResponse* set_client(FlTextInputChannel* self, FlValue* args) {
   if (fl_value_get_type(args) != FL_VALUE_TYPE_LIST ||
@@ -78,6 +137,14 @@ static FlMethodResponse* set_client(FlTextInputChannel* self, FlValue* args) {
 
   int64_t client_id = fl_value_get_int(fl_value_get_list_value(args, 0));
   FlValue* config_value = fl_value_get_list_value(args, 1);
+
+  self->vtable->set_client(client_id, self->user_data);
+
+  return update_config(self, config_value);
+}
+
+static FlMethodResponse* update_config(FlTextInputChannel* self,
+                                       FlValue* config_value) {
   const gchar* input_action = nullptr;
   FlValue* input_action_value =
       fl_value_lookup_string(config_value, kInputActionKey);
@@ -91,6 +158,8 @@ static FlMethodResponse* set_client(FlTextInputChannel* self, FlValue* args) {
 
   // Reset the input type, then set only if appropriate.
   FlTextInputType input_type = FL_TEXT_INPUT_TYPE_TEXT;
+  GtkInputPurpose im_purpose = GTK_INPUT_PURPOSE_FREE_FORM;
+  GtkInputHints im_hints = GTK_INPUT_HINT_NONE;
   FlValue* input_type_value =
       fl_value_lookup_string(config_value, kTextInputTypeKey);
   if (fl_value_get_type(input_type_value) == FL_VALUE_TYPE_MAP) {
@@ -98,16 +167,13 @@ static FlMethodResponse* set_client(FlTextInputChannel* self, FlValue* args) {
         fl_value_lookup_string(input_type_value, kTextInputTypeNameKey);
     if (fl_value_get_type(input_type_name_value) == FL_VALUE_TYPE_STRING) {
       const gchar* input_type_name = fl_value_get_string(input_type_name_value);
-      if (g_strcmp0(input_type_name, kMultilineInputType) == 0) {
-        input_type = FL_TEXT_INPUT_TYPE_MULTILINE;
-      } else if (g_strcmp0(input_type_name, kNoneInputType) == 0) {
-        input_type = FL_TEXT_INPUT_TYPE_NONE;
-      }
+      fl_text_input_parse_input_type_name(input_type_name, &input_type,
+                                          &im_purpose, &im_hints);
     }
   }
 
-  self->vtable->set_client(client_id, input_action, enable_delta_model,
-                           input_type, self->user_data);
+  self->vtable->configure(input_action, enable_delta_model, input_type,
+                          im_purpose, im_hints, self->user_data);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -218,6 +284,8 @@ static void method_call_cb(FlMethodChannel* channel,
     response = set_editable_size_and_transform(self, args);
   } else if (strcmp(method, kSetMarkedTextRect) == 0) {
     response = set_marked_text_rect(self, args);
+  } else if (strcmp(method, kUpdateConfigMethod) == 0) {
+    response = update_config(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }

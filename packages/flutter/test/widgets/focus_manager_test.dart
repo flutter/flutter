@@ -22,13 +22,13 @@ void main() {
   group(FocusNode, () {
     testWidgets('Can add children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusNode parent = FocusNode();
+      final parent = FocusNode();
       addTearDown(parent.dispose);
       final FocusAttachment parentAttachment = parent.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       parentAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -45,13 +45,13 @@ void main() {
 
     testWidgets('Can remove children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusNode parent = FocusNode();
+      final parent = FocusNode();
       addTearDown(parent.dispose);
       final FocusAttachment parentAttachment = parent.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       parentAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -73,9 +73,9 @@ void main() {
     });
 
     testWidgets('Geometry is transformed properly.', (WidgetTester tester) async {
-      final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+      final focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       addTearDown(focusNode1.dispose);
-      final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
+      final focusNode2 = FocusNode(debugLabel: 'Test Node 2');
       addTearDown(focusNode2.dispose);
 
       await tester.pumpWidget(
@@ -116,19 +116,19 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -171,19 +171,19 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
 
@@ -209,19 +209,19 @@ void main() {
 
     testWidgets("canRequestFocus doesn't affect traversalChildren", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -244,8 +244,8 @@ void main() {
     });
 
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-      final FocusNode focusNode = FocusNode(debugLabel: 'Label');
+      final builder = DiagnosticPropertiesBuilder();
+      final focusNode = FocusNode(debugLabel: 'Label');
       addTearDown(focusNode.dispose);
       focusNode.debugFillProperties(builder);
       final List<String> description = builder.properties
@@ -262,18 +262,18 @@ void main() {
     });
 
     testWidgets('onKeyEvent and onKey correctly cooperate', (WidgetTester tester) async {
-      final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+      final focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       addTearDown(focusNode1.dispose);
-      final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
+      final focusNode2 = FocusNode(debugLabel: 'Test Node 2');
       addTearDown(focusNode2.dispose);
-      final FocusNode focusNode3 = FocusNode(debugLabel: 'Test Node 3');
+      final focusNode3 = FocusNode(debugLabel: 'Test Node 3');
       addTearDown(focusNode3.dispose);
-      List<List<KeyEventResult>> results = <List<KeyEventResult>>[
+      var results = <List<KeyEventResult>>[
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
         <KeyEventResult>[KeyEventResult.ignored, KeyEventResult.ignored],
       ];
-      final List<int> logs = <int>[];
+      final logs = <int>[];
 
       await tester.pumpWidget(
         Focus(
@@ -365,10 +365,10 @@ void main() {
         }
 
         final BuildContext context = await setupWidget(tester);
-        final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+        final scope = FocusScopeNode(debugLabel: 'Scope');
         addTearDown(scope.dispose);
         final FocusAttachment scopeAttachment = scope.attach(context);
-        final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+        final focusNode = FocusNode(debugLabel: 'Focus Node');
         addTearDown(focusNode.dispose);
         final FocusAttachment focusNodeAttachment = focusNode.attach(context);
         scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -398,10 +398,10 @@ void main() {
       }
 
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      final focusNode = FocusNode(debugLabel: 'Focus Node');
       addTearDown(focusNode.dispose);
       final FocusAttachment focusNodeAttachment = focusNode.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -425,10 +425,10 @@ void main() {
       }
 
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      final focusNode = FocusNode(debugLabel: 'Focus Node');
       addTearDown(focusNode.dispose);
       final FocusAttachment focusNodeAttachment = focusNode.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -449,16 +449,16 @@ void main() {
   group(FocusScopeNode, () {
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       scope.attach(context);
-      final FocusScopeNode parent = FocusScopeNode(debugLabel: 'Parent');
+      final parent = FocusScopeNode(debugLabel: 'Parent');
       addTearDown(parent.dispose);
       parent.attach(context);
-      final FocusScopeNode child1 = FocusScopeNode(debugLabel: 'Child 1');
+      final child1 = FocusScopeNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusScopeNode child2 = FocusScopeNode(debugLabel: 'Child 2');
+      final child2 = FocusScopeNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       child2.attach(context);
       scope.setFirstFocus(parent);
@@ -478,16 +478,16 @@ void main() {
 
     testWidgets('Removing a node removes it from scope.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode();
+      final scope = FocusScopeNode();
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent = FocusNode();
+      final parent = FocusNode();
       addTearDown(parent.dispose);
       final FocusAttachment parentAttachment = parent.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -507,16 +507,16 @@ void main() {
 
     testWidgets('Can add children to scope and focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode();
+      final scope = FocusScopeNode();
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent = FocusNode();
+      final parent = FocusNode();
       addTearDown(parent.dispose);
       final FocusAttachment parentAttachment = parent.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -564,16 +564,16 @@ void main() {
       // child1
       //   |
       // child2
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope2Attachment = scope1.attach(context);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
 
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child2Attachment = child1.attach(context);
 
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child3Attachment = child2.attach(context);
 
@@ -595,10 +595,10 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode();
+      final scope = FocusScopeNode();
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode child = FocusNode();
+      final child = FocusNode();
       addTearDown(child.dispose);
       child.requestFocus();
       expect(child.hasPrimaryFocus, isFalse); // not attached yet.
@@ -620,16 +620,16 @@ void main() {
 
     testWidgets('Autofocus works.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent = FocusNode(debugLabel: 'Parent');
+      final parent = FocusNode(debugLabel: 'Parent');
       addTearDown(parent.dispose);
       final FocusAttachment parentAttachment = parent.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -663,16 +663,16 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode();
+      final scope1 = FocusScopeNode();
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode();
+      final scope2 = FocusScopeNode();
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -699,19 +699,19 @@ void main() {
 
     testWidgets('Can move node with focus without losing focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -740,7 +740,7 @@ void main() {
     });
 
     test('FocusScopeNode.canRequestFocus affects descendantsAreFocusable', () {
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
 
       scope.descendantsAreFocusable = false;
       expect(scope.descendantsAreFocusable, isFalse);
@@ -761,19 +761,19 @@ void main() {
 
     testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -806,19 +806,19 @@ void main() {
 
     testWidgets("skipTraversal doesn't affect children.", (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      final scope = FocusScopeNode(debugLabel: 'Scope');
       addTearDown(scope.dispose);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+      final child2 = FocusNode(debugLabel: 'Child 2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
       scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -846,28 +846,28 @@ void main() {
 
     testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+      final scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final parent1 = FocusNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final parent2 = FocusNode(debugLabel: 'parent2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final child3 = FocusNode(debugLabel: 'child3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final child4 = FocusNode(debugLabel: 'child4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -894,28 +894,28 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final parent1 = FocusNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final parent2 = FocusNode(debugLabel: 'parent2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final child3 = FocusNode(debugLabel: 'child3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final child4 = FocusNode(debugLabel: 'child4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -929,7 +929,7 @@ void main() {
       child4.requestFocus();
       await tester.pump();
       final FocusScopeNode rootScope = tester.binding.focusManager.rootScope;
-      final List<FocusNode> preamble = <FocusNode>[
+      final preamble = <FocusNode>[
         rootScope.children.first.children.first, // The View Node,
         rootScope.children.first, // The FocusTraversal node above the view
       ];
@@ -975,28 +975,28 @@ void main() {
 
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode();
+      final scope1 = FocusScopeNode();
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode();
+      final scope2 = FocusScopeNode();
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode();
+      final parent1 = FocusNode();
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode();
+      final parent2 = FocusNode();
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode();
+      final child1 = FocusNode();
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final child2 = FocusNode();
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode();
+      final child3 = FocusNode();
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode();
+      final child4 = FocusNode();
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1043,28 +1043,28 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+      final scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final parent1 = FocusNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final parent2 = FocusNode(debugLabel: 'parent2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final child3 = FocusNode(debugLabel: 'child3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final child4 = FocusNode(debugLabel: 'child4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1132,28 +1132,28 @@ void main() {
 
     testWidgets('Unfocus with disposition scope works properly', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+      final scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final parent1 = FocusNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final parent2 = FocusNode(debugLabel: 'parent2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final child3 = FocusNode(debugLabel: 'child3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final child4 = FocusNode(debugLabel: 'child4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1227,28 +1227,28 @@ void main() {
       WidgetTester tester,
     ) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+      final scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+      final parent1 = FocusNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+      final parent2 = FocusNode(debugLabel: 'parent2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(debugLabel: 'child2');
+      final child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'child3');
+      final child3 = FocusNode(debugLabel: 'child3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'child4');
+      final child4 = FocusNode(debugLabel: 'child4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1303,28 +1303,28 @@ void main() {
       'Requesting focus on a scope works properly when some focusedChild nodes are unfocusable',
       (WidgetTester tester) async {
         final BuildContext context = await setupWidget(tester);
-        final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
+        final scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
         addTearDown(scope1.dispose);
         final FocusAttachment scope1Attachment = scope1.attach(context);
-        final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+        final scope2 = FocusScopeNode(debugLabel: 'scope2');
         addTearDown(scope2.dispose);
         final FocusAttachment scope2Attachment = scope2.attach(context);
-        final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
+        final parent1 = FocusNode(debugLabel: 'parent1');
         addTearDown(parent1.dispose);
         final FocusAttachment parent1Attachment = parent1.attach(context);
-        final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
+        final parent2 = FocusNode(debugLabel: 'parent2');
         addTearDown(parent2.dispose);
         final FocusAttachment parent2Attachment = parent2.attach(context);
-        final FocusNode child1 = FocusNode(debugLabel: 'child1');
+        final child1 = FocusNode(debugLabel: 'child1');
         addTearDown(child1.dispose);
         final FocusAttachment child1Attachment = child1.attach(context);
-        final FocusNode child2 = FocusNode(debugLabel: 'child2');
+        final child2 = FocusNode(debugLabel: 'child2');
         addTearDown(child2.dispose);
         final FocusAttachment child2Attachment = child2.attach(context);
-        final FocusNode child3 = FocusNode(debugLabel: 'child3');
+        final child3 = FocusNode(debugLabel: 'child3');
         addTearDown(child3.dispose);
         final FocusAttachment child3Attachment = child3.attach(context);
-        final FocusNode child4 = FocusNode(debugLabel: 'child4');
+        final child4 = FocusNode(debugLabel: 'child4');
         addTearDown(child4.dispose);
         final FocusAttachment child4Attachment = child4.attach(context);
         scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1367,8 +1367,8 @@ void main() {
     testWidgets(
       'Key handling bubbles up and terminates when handled.',
       (WidgetTester tester) async {
-        final Set<FocusNode> receivedAnEvent = <FocusNode>{};
-        final Set<FocusNode> shouldHandle = <FocusNode>{};
+        final receivedAnEvent = <FocusNode>{};
+        final shouldHandle = <FocusNode>{};
         KeyEventResult handleEvent(FocusNode node, RawKeyEvent event) {
           if (shouldHandle.contains(node)) {
             receivedAnEvent.add(node);
@@ -1383,28 +1383,28 @@ void main() {
         }
 
         final BuildContext context = await setupWidget(tester);
-        final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+        final scope1 = FocusScopeNode(debugLabel: 'Scope 1');
         addTearDown(scope1.dispose);
         final FocusAttachment scope1Attachment = scope1.attach(context, onKey: handleEvent);
-        final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'Scope 2');
+        final scope2 = FocusScopeNode(debugLabel: 'Scope 2');
         addTearDown(scope2.dispose);
         final FocusAttachment scope2Attachment = scope2.attach(context, onKey: handleEvent);
-        final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
+        final parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
         addTearDown(parent1.dispose);
         final FocusAttachment parent1Attachment = parent1.attach(context);
-        final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
+        final parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
         addTearDown(parent2.dispose);
         final FocusAttachment parent2Attachment = parent2.attach(context);
-        final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+        final child1 = FocusNode(debugLabel: 'Child 1');
         addTearDown(child1.dispose);
         final FocusAttachment child1Attachment = child1.attach(context, onKey: handleEvent);
-        final FocusNode child2 = FocusNode(debugLabel: 'Child 2');
+        final child2 = FocusNode(debugLabel: 'Child 2');
         addTearDown(child2.dispose);
         final FocusAttachment child2Attachment = child2.attach(context, onKey: handleEvent);
-        final FocusNode child3 = FocusNode(debugLabel: 'Child 3');
+        final child3 = FocusNode(debugLabel: 'Child 3');
         addTearDown(child3.dispose);
         final FocusAttachment child3Attachment = child3.attach(context, onKey: handleEvent);
-        final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
+        final child4 = FocusNode(debugLabel: 'Child 4');
         addTearDown(child4.dispose);
         final FocusAttachment child4Attachment = child4.attach(context, onKey: handleEvent);
         scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1493,7 +1493,7 @@ void main() {
 
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
-      int callCount = 0;
+      var callCount = 0;
       FocusHighlightMode? lastMode;
       void handleModeChange(FocusHighlightMode mode) {
         lastMode = mode;
@@ -1539,9 +1539,9 @@ void main() {
     testWidgets('Scopes can be focused without sending focus to descendants.', (
       WidgetTester tester,
     ) async {
-      final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'Scope1');
+      final scopeNode = FocusScopeNode(debugLabel: 'Scope1');
       addTearDown(scopeNode.dispose);
-      final FocusNode childFocusNode = FocusNode(debugLabel: 'Child1');
+      final childFocusNode = FocusNode(debugLabel: 'Child1');
       addTearDown(childFocusNode.dispose);
       await tester.pumpWidget(
         FocusScope.withExternalFocusNode(
@@ -1571,8 +1571,8 @@ void main() {
     });
 
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope Label');
+      final builder = DiagnosticPropertiesBuilder();
+      final scope = FocusScopeNode(debugLabel: 'Scope Label');
       addTearDown(scope.dispose);
       scope.debugFillProperties(builder);
       final List<String> description = builder.properties
@@ -1590,28 +1590,28 @@ void main() {
 
     testWidgets('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+      final scope1 = FocusScopeNode(debugLabel: 'Scope 1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode(); // No label, Just to test that it works.
+      final scope2 = FocusScopeNode(); // No label, Just to test that it works.
       addTearDown(scope2.dispose);
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
+      final parent1 = FocusNode(debugLabel: 'Parent 1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
+      final parent2 = FocusNode(debugLabel: 'Parent 2');
       addTearDown(parent2.dispose);
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
+      final child1 = FocusNode(debugLabel: 'Child 1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode(); // No label, Just to test that it works.
+      final child2 = FocusNode(); // No label, Just to test that it works.
       addTearDown(child2.dispose);
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode(debugLabel: 'Child 3');
+      final child3 = FocusNode(debugLabel: 'Child 3');
       addTearDown(child3.dispose);
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
+      final child4 = FocusNode(debugLabel: 'Child 4');
       addTearDown(child4.dispose);
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1682,9 +1682,9 @@ void main() {
 
   group('Autofocus', () {
     testWidgets('works when the previous focused node is detached', (WidgetTester tester) async {
-      final FocusNode node1 = FocusNode();
+      final node1 = FocusNode();
       addTearDown(node1.dispose);
-      final FocusNode node2 = FocusNode();
+      final node2 = FocusNode();
       addTearDown(node2.dispose);
 
       await tester.pumpWidget(
@@ -1707,9 +1707,9 @@ void main() {
     });
 
     testWidgets('node detached before autofocus is applied', (WidgetTester tester) async {
-      final FocusScopeNode scopeNode = FocusScopeNode();
+      final scopeNode = FocusScopeNode();
       addTearDown(scopeNode.dispose);
-      final FocusNode node1 = FocusNode();
+      final node1 = FocusNode();
       addTearDown(node1.dispose);
 
       await tester.pumpWidget(
@@ -1731,11 +1731,11 @@ void main() {
     });
 
     testWidgets('autofocus the first candidate', (WidgetTester tester) async {
-      final FocusNode node1 = FocusNode();
+      final node1 = FocusNode();
       addTearDown(node1.dispose);
-      final FocusNode node2 = FocusNode();
+      final node2 = FocusNode();
       addTearDown(node2.dispose);
-      final FocusNode node3 = FocusNode();
+      final node3 = FocusNode();
       addTearDown(node3.dispose);
 
       await tester.pumpWidget(
@@ -1755,11 +1755,11 @@ void main() {
     });
 
     testWidgets('Autofocus works with global key reparenting', (WidgetTester tester) async {
-      final FocusNode node = FocusNode();
+      final node = FocusNode();
       addTearDown(node.dispose);
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
+      final scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
-      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
+      final scope2 = FocusScopeNode(debugLabel: 'scope2');
       addTearDown(scope2.dispose);
       final GlobalKey key = GlobalKey();
 
@@ -1807,16 +1807,16 @@ void main() {
     WidgetTester tester,
   ) async {
     final BuildContext context = await setupWidget(tester);
-    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final parent1 = FocusScopeNode(debugLabel: 'parent1');
     addTearDown(parent1.dispose);
-    final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
+    final parent2 = FocusScopeNode(debugLabel: 'parent2');
     addTearDown(parent2.dispose);
     final FocusAttachment parent1Attachment = parent1.attach(context);
     final FocusAttachment parent2Attachment = parent2.attach(context);
-    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final child1 = FocusNode(debugLabel: 'child1');
     addTearDown(child1.dispose);
     final FocusAttachment child1Attachment = child1.attach(context);
-    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final child2 = FocusNode(debugLabel: 'child2');
     addTearDown(child2.dispose);
     final FocusAttachment child2Attachment = child2.attach(context);
     parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1838,16 +1838,16 @@ void main() {
   testWidgets('Ancestors get notified exactly as often as needed if focused child changes focus.', (
     WidgetTester tester,
   ) async {
-    bool topFocus = false;
-    bool parent1Focus = false;
-    bool parent2Focus = false;
-    bool child1Focus = false;
-    bool child2Focus = false;
-    int topNotify = 0;
-    int parent1Notify = 0;
-    int parent2Notify = 0;
-    int child1Notify = 0;
-    int child2Notify = 0;
+    var topFocus = false;
+    var parent1Focus = false;
+    var parent2Focus = false;
+    var child1Focus = false;
+    var child2Focus = false;
+    var topNotify = 0;
+    var parent1Notify = 0;
+    var parent2Notify = 0;
+    var child1Notify = 0;
+    var child2Notify = 0;
     void clear() {
       topFocus = false;
       parent1Focus = false;
@@ -1862,19 +1862,19 @@ void main() {
     }
 
     final BuildContext context = await setupWidget(tester);
-    final FocusScopeNode top = FocusScopeNode(debugLabel: 'top');
+    final top = FocusScopeNode(debugLabel: 'top');
     addTearDown(top.dispose);
     final FocusAttachment topAttachment = top.attach(context);
-    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final parent1 = FocusScopeNode(debugLabel: 'parent1');
     addTearDown(parent1.dispose);
     final FocusAttachment parent1Attachment = parent1.attach(context);
-    final FocusScopeNode parent2 = FocusScopeNode(debugLabel: 'parent2');
+    final parent2 = FocusScopeNode(debugLabel: 'parent2');
     addTearDown(parent2.dispose);
     final FocusAttachment parent2Attachment = parent2.attach(context);
-    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final child1 = FocusNode(debugLabel: 'child1');
     addTearDown(child1.dispose);
     final FocusAttachment child1Attachment = child1.attach(context);
-    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final child2 = FocusNode(debugLabel: 'child2');
     addTearDown(child2.dispose);
     final FocusAttachment child2Attachment = child2.attach(context);
     topAttachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -1976,20 +1976,20 @@ void main() {
 
   testWidgets('Focus changes notify listeners.', (WidgetTester tester) async {
     final BuildContext context = await setupWidget(tester);
-    final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+    final parent1 = FocusScopeNode(debugLabel: 'parent1');
     addTearDown(parent1.dispose);
     final FocusAttachment parent1Attachment = parent1.attach(context);
-    final FocusNode child1 = FocusNode(debugLabel: 'child1');
+    final child1 = FocusNode(debugLabel: 'child1');
     addTearDown(child1.dispose);
     final FocusAttachment child1Attachment = child1.attach(context);
-    final FocusNode child2 = FocusNode(debugLabel: 'child2');
+    final child2 = FocusNode(debugLabel: 'child2');
     addTearDown(child2.dispose);
     final FocusAttachment child2Attachment = child2.attach(context);
     parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
     child1Attachment.reparent(parent: parent1);
     child2Attachment.reparent(parent: child1);
 
-    int notifyCount = 0;
+    var notifyCount = 0;
     void handleFocusChange() {
       notifyCount++;
     }
@@ -2037,9 +2037,9 @@ void main() {
   });
 
   testWidgets('FocusManager.addEarlyKeyEventHandler works', (WidgetTester tester) async {
-    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    final focusNode1 = FocusNode(debugLabel: 'Test Node 1');
     addTearDown(focusNode1.dispose);
-    final List<int> logs = <int>[];
+    final logs = <int>[];
     KeyEventResult earlyResult = KeyEventResult.ignored;
     KeyEventResult focusResult = KeyEventResult.ignored;
 
@@ -2116,9 +2116,9 @@ void main() {
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
-    final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
+    final focusNode1 = FocusNode(debugLabel: 'Test Node 1');
     addTearDown(focusNode1.dispose);
-    final List<int> logs = <int>[];
+    final logs = <int>[];
     KeyEventResult lateResult = KeyEventResult.ignored;
     KeyEventResult focusResult = KeyEventResult.ignored;
 
@@ -2197,9 +2197,9 @@ void main() {
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (
     WidgetTester tester,
   ) async {
-    final FocusNode nodeA = FocusNode(debugLabel: 'a');
+    final nodeA = FocusNode(debugLabel: 'a');
     addTearDown(nodeA.dispose);
-    final FocusNode nodeB = FocusNode(debugLabel: 'b');
+    final nodeB = FocusNode(debugLabel: 'b');
     addTearDown(nodeB.dispose);
 
     await tester.pumpWidget(
@@ -2213,7 +2213,7 @@ void main() {
         ),
       ),
     );
-    int notifyCount = 0;
+    var notifyCount = 0;
     void handleFocusChange() {
       notifyCount++;
     }
@@ -2246,23 +2246,23 @@ void main() {
   testWidgets('debugFocusChanges causes logging of focus changes', (WidgetTester tester) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
     final DebugPrintCallback oldDebugPrint = debugPrint;
-    final StringBuffer messages = StringBuffer();
+    final messages = StringBuffer();
     debugPrint = (String? message, {int? wrapWidth}) {
       messages.writeln(message ?? '');
     };
     debugFocusChanges = true;
     try {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final parent1 = FocusScopeNode(debugLabel: 'parent1');
       addTearDown(parent1.dispose);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode child1 = FocusNode(debugLabel: 'child1');
+      final child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child1Attachment = child1.attach(context);
       parent1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
       child1Attachment.reparent(parent: parent1);
 
-      int notifyCount = 0;
+      var notifyCount = 0;
       void handleFocusChange() {
         notifyCount++;
       }
@@ -2285,7 +2285,7 @@ void main() {
       debugFocusChanges = oldDebugFocusChanges;
       debugPrint = oldDebugPrint;
     }
-    final String messagesStr = messages.toString();
+    final messagesStr = messages.toString();
     expect(
       messagesStr,
       contains(RegExp(r'   └─Child \d+: FocusScopeNode#[a-f0-9]{5}\(parent1 \[PRIMARY FOCUS\]\)')),
@@ -2306,13 +2306,13 @@ void main() {
   ) async {
     final bool oldDebugFocusChanges = debugFocusChanges;
     final DebugPrintCallback oldDebugPrint = debugPrint;
-    final StringBuffer messages = StringBuffer();
+    final messages = StringBuffer();
     debugPrint = (String? message, {int? wrapWidth}) {
       messages.writeln(message ?? '');
     };
     Future<void> testDebugFocusChanges() async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode parent1 = FocusScopeNode(debugLabel: 'parent1');
+      final parent1 = FocusScopeNode(debugLabel: 'parent1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
       final FocusNode child1 = debugFocusChanges
           ? FocusNode(debugLabel: 'child1')

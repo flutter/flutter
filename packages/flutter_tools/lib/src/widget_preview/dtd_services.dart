@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
@@ -54,6 +55,7 @@ class WidgetPreviewDtdServices {
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+  static const kGetDevToolsUri = 'getDevToolsUri';
 
   static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
   static const kWidgetPreviewConnectedEvent = 'Connected';
@@ -69,6 +71,7 @@ class WidgetPreviewDtdServices {
     (kResolveUri, _resolveUri),
     (kSetPreference, _setPreference),
     (kGetPreference, _getPreference),
+    (kGetDevToolsUri, _getDevToolsUri),
   ];
 
   // END KEEP SYNCED
@@ -93,6 +96,10 @@ class WidgetPreviewDtdServices {
 
   DartToolingDaemon? _dtd;
 
+  @visibleForTesting
+  Future<Uri> get devToolsServerAddress => _devToolsServerAddress.future;
+  final _devToolsServerAddress = Completer<Uri>();
+
   /// The [Uri] pointing to the currently connected DTD instance.
   ///
   /// Returns `null` if there is no DTD connection.
@@ -112,6 +119,29 @@ class WidgetPreviewDtdServices {
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
     await _registerServices();
     logger.printTrace('Connected to DTD and registered services.');
+  }
+
+  /// Set the DevTools server URI to be used to embed the widget inspector within the
+  /// widget previewer.
+  ///
+  /// This must be called, otherwise the widget previewer will hang waiting for a DevTools URI.
+  void setDevToolsServerAddress({required Uri devToolsServerAddress, required Uri applicationUri}) {
+    if (_devToolsServerAddress.isCompleted) {
+      throw StateError('DevTools server address has already been set.');
+    }
+    _devToolsServerAddress.complete(
+      devToolsServerAddress.replace(
+        pathSegments: [
+          ...devToolsServerAddress.pathSegments.whereNot((s) => s.isEmpty),
+          'inspector',
+        ],
+        queryParameters: {
+          ...devToolsServerAddress.queryParameters,
+          'embedMode': 'one',
+          'uri': applicationUri.toString(),
+        },
+      ),
+    );
   }
 
   Future<void> _registerServices() async {
@@ -168,6 +198,10 @@ class WidgetPreviewDtdServices {
       return BoolResponse(value).toJson();
     }
     throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
+  }
+
+  Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
+    return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
   }
 }
 

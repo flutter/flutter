@@ -19,6 +19,7 @@ if (enable_unittests) {
     "no_builtin_redefinition.frag",
     "no_uniforms.frag",
     "simple.frag",
+    "texture.frag",
     "uniform_arrays.frag",
     "uniform_ordering.frag",
     "uniforms_inserted.frag",
@@ -42,9 +43,30 @@ if (enable_unittests) {
     iplr = true
   }
 
+  impellerc("compile_sdf_shaders") {
+    mnemonic = "IMPELLERC_SDF"
+    shaders = [
+      "circle_sdf.frag",
+      "sdf.frag",
+    ]
+    shader_target_flags = [
+      "--sksl",
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+      "--runtime-stage-vulkan",
+    ]
+    intermediates_subdir = "iplr"
+    sl_file_extension = "iplr"
+    iplr = true
+  }
+
   test_fixtures("fixtures") {
-    deps = [ ":compile_general_shaders" ]
-    fixtures = get_target_outputs(":compile_general_shaders")
+    deps = [
+      ":compile_general_shaders",
+      ":compile_sdf_shaders",
+    ]
+    fixtures = get_target_outputs(":compile_general_shaders") +
+               get_target_outputs(":compile_sdf_shaders")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }

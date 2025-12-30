@@ -101,7 +101,7 @@ class FilledButton extends ButtonStyleButton {
   /// If [icon] is null, this constructor will create a [FilledButton]
   /// that doesn't display an icon.
   ///
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  /// {@macro flutter.material.ButtonStyle.iconAlignment}
   ///
   FilledButton.icon({
     super.key,
@@ -475,7 +475,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final double defaultFontSize = theme.textTheme.labelLarge?.fontSize ?? 14.0;
   final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
-  final double padding1x = theme.useMaterial3 ? 24.0 : 16.0;
+  final padding1x = theme.useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
     EdgeInsets.symmetric(horizontal: padding1x),
     EdgeInsets.symmetric(horizontal: padding1x / 2),
