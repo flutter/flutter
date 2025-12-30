@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:font_asset/font_asset.dart' show FontAsset;
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -12,7 +13,6 @@ import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart' hide FontAsset;
-import '../../font_asset.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -102,7 +102,7 @@ Future<Depfile> copyAssets(
 
   for (final FontAsset fontAsset in dartHookResult.fontAssets) {
     final File file = environment.fileSystem.file(
-      environment.fileSystem.path.join(outputDirectory.path, fontAsset.name),
+      environment.fileSystem.path.join(outputDirectory.path, fontAsset.fontFamily),
     );
     outputs.add(file);
     await environment.fileSystem.file(fontAsset.file).copy(file.path);
