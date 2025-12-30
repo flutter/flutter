@@ -2669,7 +2669,7 @@ void main() {
                 Text(key: Key('x'), 'X'),
                 Text(key: Key('y'), 'Y'),
               ],
-              onReorder: (_, _) {},
+              onReorderItem: (_, _) {},
             ),
           ),
         ),
