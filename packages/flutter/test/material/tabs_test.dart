@@ -2737,7 +2737,7 @@ void main() {
     expect(position, equals(20));
   });
 
-  testWidgets('TabBar accepts external TabBarController', (WidgetTester tester) async {
+  testWidgets('TabBar accepts external TabBarScrollController', (WidgetTester tester) async {
     final tabs = List<Tab>.generate(6, (int index) {
       return Tab(text: 'TAB #$index');
     });
