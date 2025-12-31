@@ -2800,6 +2800,50 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/124608
+  testWidgets('TabBar can show scrollbar on hover', (WidgetTester tester) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: RawScrollbar(
+          controller: tabScrollController,
+          child: TabBar(
+            isScrollable: true,
+            controller: tabBarController,
+            scrollController: tabScrollController,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final Finder tab1 = find.text('TAB #1');
+    expect(tab1, findsOneWidget);
+
+    // Hover over the tab bar and verify that the scrollbar is shown.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(tab1));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RawScrollbar), paints..rect());
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (
     WidgetTester tester,
   ) async {
