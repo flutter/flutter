@@ -1335,18 +1335,19 @@ void main() {
 
   testWidgets(
     'Default iOS SystemContextMenu includes Share for non-empty selection',
-        (WidgetTester tester) async {
-      final List<List<IOSSystemContextMenuItemData>> itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+    (WidgetTester tester) async {
+      final List<List<IOSSystemContextMenuItemData>> itemsReceived =
+          <List<IOSSystemContextMenuItemData>>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
-            (MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
             final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
             final List<dynamic> untypedItems = arguments['items'] as List<dynamic>;
-            final List<IOSSystemContextMenuItemData> lastItems = untypedItems.map((dynamic value) {
-              final Map<String, dynamic> itemJson = value as Map<String, dynamic>;
-              return systemContextMenuItemDataFromJson(itemJson);
-            }).toList();
+            final List<IOSSystemContextMenuItemData> lastItems = <IOSSystemContextMenuItemData>[
+              for (final dynamic value in untypedItems)
+                systemContextMenuItemDataFromJson(value as Map<String, dynamic>),
+            ];
             itemsReceived.add(lastItems);
           }
           return;
@@ -1397,7 +1398,12 @@ void main() {
 
       // Assert that the platform message included a Share item.
       expect(itemsReceived, isNotEmpty);
-      expect(itemsReceived.last.any((e) => e is IOSSystemContextMenuItemDataShare), isTrue);
+      expect(
+        itemsReceived.last.any(
+          (IOSSystemContextMenuItemData e) => e is IOSSystemContextMenuItemDataShare,
+        ),
+        isTrue,
+      );
     },
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
