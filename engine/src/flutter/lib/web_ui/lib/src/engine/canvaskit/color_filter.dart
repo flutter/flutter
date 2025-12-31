@@ -95,6 +95,9 @@ abstract class CkColorFilter implements CkManagedSkImageFilterConvertible, Layer
     }, defaultBlurTileMode: ui.TileMode.decal);
     return result;
   }
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 /// A reusable identity transform matrix.
