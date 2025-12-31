@@ -526,8 +526,10 @@ class _MergingListenable extends Listenable {
 /// within the value itself. As a result, changes to mutable objects that do not
 /// affect their equality will not cause listeners to be notified.
 ///
-/// For example, a `ValueNotifier<List<int>>` will not notify its listeners when
-/// the contents of the list are modified without assigning a new value.
+/// For example, a `ValueNotifier<List<int>>` will not notify listeners when
+/// the contents of the existing list are modified in-place; it only notifies
+/// when a new value is assigned to the `value` property (i.e. `value = newValue`),
+/// where equality is determined by `==`.
 ///
 /// Because of this behavior, [ValueNotifier] is best used with immutable data
 /// types.
