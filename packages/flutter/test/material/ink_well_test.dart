@@ -2779,6 +2779,7 @@ void main() {
     expect(material, paintsNothing);
     await gesture.up();
   });
+
   testWidgets('implicit long press maintains WidgetState.pressed', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     WidgetState? lastState;
