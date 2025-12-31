@@ -114,4 +114,29 @@ void main() {
       );
     }
   });
+
+  testWidgets('LongPressDraggable does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (_) => LongPressDraggable<bool>(
+                    feedback: Text('Y'),
+                    child: Text('X'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(LongPressDraggable<bool>)), Size.zero);
+  });
 }
