@@ -39,6 +39,7 @@ class SliverFillViewport extends StatelessWidget {
     required this.delegate,
     this.viewportFraction = 1.0,
     this.padEnds = true,
+    this.allowImplicitScrolling = true,
   }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that each child should fill in the main axis.
@@ -64,12 +65,26 @@ class SliverFillViewport extends StatelessWidget {
   /// {@macro flutter.widgets.SliverMultiBoxAdaptorWidget.delegate}
   final SliverChildDelegate delegate;
 
+  /// Controls whether the widget's children will respond to
+  /// [RenderObject.showOnScreen], which will allow for implicit accessibility
+  /// scrolling.
+  ///
+  /// With this flag set to false, when accessibility focus reaches the end of
+  /// the current child and the user attempts to move it to the next element, the
+  /// focus will traverse to the next widget outside of this sliver.
+  ///
+  /// With this flag set to true, when accessibility focus reaches the end of
+  /// the current child and user attempts to move it to the next element, focus
+  /// will traverse to the next child in the sliver.
+  final bool allowImplicitScrolling;
+
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
       viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
+        allowImplicitScrolling: allowImplicitScrolling,
         delegate: delegate,
       ),
     );
@@ -80,19 +95,26 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
   const _SliverFillViewportRenderObjectWidget({
     required super.delegate,
     this.viewportFraction = 1.0,
+    this.allowImplicitScrolling = true,
   }) : assert(viewportFraction > 0.0);
 
   final double viewportFraction;
+  final bool allowImplicitScrolling;
 
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
     final element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
+    return RenderSliverFillViewport(
+      childManager: element,
+      viewportFraction: viewportFraction,
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
+    renderObject.allowImplicitScrolling = allowImplicitScrolling;
   }
 }
 
