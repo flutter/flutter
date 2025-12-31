@@ -444,6 +444,9 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
   factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -592,6 +595,8 @@ class ImageFilter {
   }
 
   static bool get isShaderFilterSupported => false;
+
+  String get debugShortDescription => toString();
 }
 
 enum ColorSpace { sRGB, extendedSRGB, displayP3 }
@@ -1017,6 +1022,18 @@ abstract class UniformFloatSlot {
   final int index;
 }
 
+abstract class UniformVec2Slot {
+  void set(double x, double y);
+}
+
+abstract class UniformVec3Slot {
+  void set(double x, double y, double z);
+}
+
+abstract class UniformVec4Slot {
+  void set(double x, double y, double z, double w);
+}
+
 abstract class ImageSamplerSlot {
   void set(Image val);
   int get shaderIndex;
@@ -1035,6 +1052,12 @@ abstract class FragmentShader implements Shader {
   bool get debugDisposed;
 
   UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  UniformVec2Slot getUniformVec2(String name);
+
+  UniformVec3Slot getUniformVec3(String name);
+
+  UniformVec4Slot getUniformVec4(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }
