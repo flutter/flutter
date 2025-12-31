@@ -1014,14 +1014,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
 
     // Update the appropriate WidgetState for this highlight type.
-    if (type == _HighlightType.pressed) {
-      statesController.update(WidgetState.pressed, value);
-    } else if (type == _HighlightType.hover) {
-      if (callOnHover) {
-        statesController.update(WidgetState.hovered, value);
-      }
-    } else {
-      // _HighlightType.focus: handled in handleFocusUpdate().
+    switch (type) {
+      case _HighlightType.pressed:
+        statesController.update(WidgetState.pressed, value);
+      case _HighlightType.hover:
+        if (callOnHover) {
+          statesController.update(WidgetState.hovered, value);
+        }
+      case _HighlightType.focus:
+        // _HighlightType.focus: handled in handleFocusUpdate().
+        break;
     }
 
     if (type == _HighlightType.pressed) {
@@ -1065,14 +1067,16 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     assert(value == (_highlights[type] != null && _highlights[type]!.active));
 
     // Notify listeners for the specific highlight type.
-    if (type == _HighlightType.pressed) {
-      widget.onHighlightChanged?.call(value);
-    } else if (type == _HighlightType.hover) {
-      if (callOnHover) {
-        widget.onHover?.call(value);
-      }
-    } else {
-      // _HighlightType.focus: no hover/highlight callback to call here.
+    switch (type) {
+      case _HighlightType.pressed:
+        widget.onHighlightChanged?.call(value);
+      case _HighlightType.hover:
+        if (callOnHover) {
+          widget.onHover?.call(value);
+        }
+      case _HighlightType.focus:
+        // _HighlightType.focus: no hover/highlight callback to call here.
+        break;
     }
   }
 
@@ -1107,7 +1111,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     void onRemoved() {
       if (_splashes != null) {
         assert(_splashes!.contains(splash));
-        _splashes?.remove(splash);
+        _splashes!.remove(splash);
         if (_currentSplash == splash) {
           _currentSplash = null;
         }
