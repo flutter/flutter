@@ -2617,6 +2617,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(InkWell)), Size.zero);
   });
+
   testWidgets('Persists splash on long press until user moves their finger', (
     WidgetTester tester,
   ) async {
