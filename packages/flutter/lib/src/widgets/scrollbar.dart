@@ -1720,7 +1720,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Begins the fade out animation and creates the thumb's DragScrollController.
   @protected
   @mustCallSuper
-  void handleThumbPressStart(Offset localPosition, {DragStartDetails? originalDetails}) {
+  void handleThumbPressStart(Offset localPosition, {required DragStartDetails originalDetails}) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1735,8 +1735,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final details = DragStartDetails(
       localPosition: localPosition,
       globalPosition: renderBox.localToGlobal(localPosition),
-      kind: originalDetails?.kind,
-      buttons: originalDetails?.buttons,
+      kind: originalDetails.kind,
+      buttons: originalDetails.buttons,
     );
     _thumbDrag = position.drag(details, _disposeThumbDrag);
     assert(_thumbDrag != null);
@@ -1752,7 +1752,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Updates the position of the child scrollable via the _drag ScrollDragController.
   @protected
   @mustCallSuper
-  void handleThumbPressUpdate(Offset localPosition, {DragUpdateDetails? originalDetails}) {
+  void handleThumbPressUpdate(Offset localPosition, {required DragUpdateDetails originalDetails}) {
     assert(_debugCheckHasValidScrollPosition());
     if (_lastDragUpdateOffset == localPosition) {
       return;
@@ -1786,8 +1786,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       primaryDelta: primaryDelta,
       globalPosition: renderBox.localToGlobal(localPosition),
       localPosition: localPosition,
-      kind: originalDetails?.kind,
-      buttons: originalDetails?.buttons,
+      kind: originalDetails.kind,
+      buttons: originalDetails.buttons,
     );
     _thumbDrag!.update(
       scrollDetails,

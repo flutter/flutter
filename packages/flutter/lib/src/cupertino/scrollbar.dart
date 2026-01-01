@@ -177,7 +177,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleThumbPressStart(Offset localPosition, {DragStartDetails? originalDetails}) {
+  void handleThumbPressStart(Offset localPosition, {required DragStartDetails originalDetails}) {
     super.handleThumbPressStart(localPosition, originalDetails: originalDetails);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {

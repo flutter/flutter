@@ -363,7 +363,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   @override
-  void handleThumbPressStart(Offset localPosition, {DragStartDetails? originalDetails}) {
+  void handleThumbPressStart(Offset localPosition, {required DragStartDetails originalDetails}) {
     super.handleThumbPressStart(localPosition, originalDetails: originalDetails);
     setState(() {
       _dragIsActive = true;

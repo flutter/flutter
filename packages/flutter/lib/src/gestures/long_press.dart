@@ -118,8 +118,8 @@ class LongPressDownDetails with Diagnosticable implements PositionedGestureDetai
   const LongPressDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -130,14 +130,13 @@ class LongPressDownDetails with Diagnosticable implements PositionedGestureDetai
   @override
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the long press.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be null for down events but synthetic events
-  /// might set it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -161,8 +160,8 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -173,14 +172,13 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
   @override
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the long press.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -206,8 +204,8 @@ class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestur
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition,
        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
@@ -229,14 +227,13 @@ class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestur
   /// present [localPosition]) when this callback is triggered.
   final Offset localOffsetFromOrigin;
 
-  /// The kind of input device for which the event was generated.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the long press.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -263,8 +260,8 @@ class LongPressEndDetails with Diagnosticable implements PositionedGestureDetail
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -280,14 +277,13 @@ class LongPressEndDetails with Diagnosticable implements PositionedGestureDetail
   /// Defaults to zero if not specified in the constructor.
   final Velocity velocity;
 
-  /// The kind of input device for which the event was generated.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the long press.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -790,14 +786,17 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkLongPressStart() {
+    final PointerDeviceKind kind = _initialKind ?? PointerDeviceKind.unknown;
+    final int buttons = _initialButtons ?? 0;
+
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressStart != null) {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _initialKind,
-            buttons: _initialButtons,
+            kind: kind,
+            buttons: buttons,
           );
           invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
         }
@@ -809,8 +808,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _initialKind,
-            buttons: _initialButtons,
+            kind: kind,
+            buttons: buttons,
           );
           invokeCallback<void>(
             'onSecondaryLongPressStart',
@@ -825,8 +824,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _initialKind,
-            buttons: _initialButtons,
+            kind: kind,
+            buttons: buttons,
           );
           invokeCallback<void>(
             'onTertiaryLongPressStart',

@@ -85,9 +85,9 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
   TapDragDownDetails({
     required this.globalPosition,
     required this.localPosition,
-    this.kind,
     required this.consecutiveTapCount,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -99,17 +99,16 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  final PointerDeviceKind kind;
 
   /// If this tap is in a series of taps, then this value represents
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -148,7 +147,7 @@ class TapDragUpDetails with Diagnosticable implements PositionedGestureDetails {
     required this.localPosition,
     required this.kind,
     required this.consecutiveTapCount,
-    this.buttons,
+    this.buttons = 0,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -166,11 +165,10 @@ class TapDragUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -208,9 +206,9 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
     required this.globalPosition,
     required this.localPosition,
     this.sourceTimeStamp,
-    this.kind,
+    this.kind = PointerDeviceKind.unknown,
     required this.consecutiveTapCount,
-    this.buttons,
+    this.buttons = 0,
   });
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -228,17 +226,16 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
   final Duration? sourceTimeStamp;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  final PointerDeviceKind kind;
 
   /// If this tap is in a series of taps, then this value represents
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -282,11 +279,11 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    this.kind,
+    this.kind = PointerDeviceKind.unknown,
     required this.offsetFromOrigin,
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
-    this.buttons,
+    this.buttons = 0,
   }) : assert(
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
@@ -331,7 +328,7 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
   final double? primaryDelta;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  final PointerDeviceKind kind;
 
   /// A delta offset from the point where the drag initially contacted
   /// the screen to the point where the pointer is currently located in global
@@ -353,11 +350,10 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
   /// the number in the series this tap is.
   final int consecutiveTapCount;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -402,8 +398,8 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
     this.velocity = Velocity.zero,
     this.primaryVelocity,
     required this.consecutiveTapCount,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : assert(
          primaryVelocity == null ||
              primaryVelocity == velocity.pixelsPerSecond.dx ||
@@ -441,13 +437,12 @@ class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails 
   final int consecutiveTapCount;
 
   /// The kind of input device for which the event was generated.
-  final PointerDeviceKind? kind;
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1361,7 +1356,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       localPosition: localPosition,
       primaryVelocity: 0.0,
       consecutiveTapCount: consecutiveTapCount,
-      buttons: pointer != null ? getButtonsForPointer(pointer) : null,
+      buttons: pointer != null ? getButtonsForPointer(pointer) : 0,
     );
 
     if (onDragEnd != null) {

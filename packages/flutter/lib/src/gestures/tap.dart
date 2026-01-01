@@ -34,8 +34,8 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   TapDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -46,14 +46,13 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   @override
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the tap.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -91,7 +90,7 @@ class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     required this.kind,
-    this.buttons,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -102,14 +101,13 @@ class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   @override
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
+  /// The kind of the device that initiated the tap.
   final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -134,7 +132,7 @@ class TapMoveDetails {
     this.globalPosition = Offset.zero,
     this.delta = Offset.zero,
     Offset? localPosition,
-    this.buttons,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
@@ -143,18 +141,17 @@ class TapMoveDetails {
   /// The local position at which the pointer contacted the screen.
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
+  /// The kind of the device that initiated the tap.
   final PointerDeviceKind kind;
 
   /// The amount the pointer has moved in the coordinate space of the
   /// event receiver since the previous update.
   final Offset delta;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  final int buttons;
 }
 
 /// {@template flutter.gestures.tap.GestureTapUpCallback}

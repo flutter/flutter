@@ -58,7 +58,9 @@ abstract class MultiDragPointerState {
   /// Used by subclasses to determine the appropriate hit slop, for example.
   final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
+  ///
+  /// For the format of this value, see [PointerEvent.buttons].
   final int buttons;
 
   Drag? _client;

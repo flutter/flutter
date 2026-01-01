@@ -27,8 +27,8 @@ class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   DragDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -39,20 +39,25 @@ class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   @override
   final Offset localPosition;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  ///
+  /// Subsequent changes to the buttons pressed during the same drag sequence
+  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
+  /// drag has started ([DragStartDetails]) or not.
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
   }
 }
 
@@ -78,8 +83,8 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.sourceTimeStamp,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
@@ -96,14 +101,17 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration? sourceTimeStamp;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  ///
+  /// Subsequent changes to the buttons pressed during the same drag sequence
+  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
+  /// drag has started ([DragStartDetails]) or not.
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -145,8 +153,8 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : assert(
          primaryDelta == null ||
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
@@ -191,14 +199,17 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
   /// Defaults to null if not specified in the constructor.
   final double? primaryDelta;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  ///
+  /// Subsequent changes to the buttons pressed during the same drag sequence
+  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
+  /// drag has started ([DragStartDetails]) or not.
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -243,8 +254,8 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
     Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-    this.kind,
-    this.buttons,
+    this.kind = PointerDeviceKind.unknown,
+    this.buttons = 0,
   }) : assert(
          primaryVelocity == null ||
              (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0) ||
@@ -277,14 +288,17 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// Defaults to null if not specified in the constructor.
   final double? primaryVelocity;
 
-  /// The kind of the device that initiated the event.
-  final PointerDeviceKind? kind;
+  /// The kind of the device that initiated the drag.
+  final PointerDeviceKind kind;
 
-  /// {@macro flutter.gestures.PointerEvent.buttons}
+  /// The buttons that were pressed when the device first contacted the screen.
   ///
-  /// NOTE: this will always be set by the platform but synthetic events might
-  /// not have it. It can be made required on future releases.
-  final int? buttons;
+  /// For the format of this value, see [PointerEvent.buttons].
+  ///
+  /// Subsequent changes to the buttons pressed during the same drag sequence
+  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
+  /// drag has started ([DragStartDetails]) or not.
+  final int buttons;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

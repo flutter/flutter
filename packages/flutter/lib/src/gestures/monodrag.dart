@@ -898,7 +898,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       primaryVelocity: 0.0,
       globalPosition: _lastPosition.global,
       localPosition: _lastPosition.local,
-      buttons: _initialButtons,
+      buttons: _initialButtons ?? 0,
     );
 
     invokeCallback<void>('onEnd', () => onEnd!(details!), debugReport: debugReport);
