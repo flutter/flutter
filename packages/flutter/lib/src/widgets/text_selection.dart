@@ -2459,7 +2459,9 @@ class TextSelectionGestureDetectorBuilder {
     // receiving a tap event?  Say a Windows device with a touchscreen.
     // https://github.com/flutter/flutter/issues/106586
     _shouldShowSelectionToolbar =
-        kind == PointerDeviceKind.unknown || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
+        kind == PointerDeviceKind.unknown ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
     _shouldShowSelectionHandles = _shouldShowSelectionToolbar;
 
     // It is impossible to extend the selection when the shift key is pressed, if the
@@ -3076,7 +3078,9 @@ class TextSelectionGestureDetectorBuilder {
     }
     final PointerDeviceKind kind = details.kind;
     _shouldShowSelectionToolbar =
-        kind == PointerDeviceKind.unknown || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
+        kind == PointerDeviceKind.unknown ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
     _shouldShowSelectionHandles = _shouldShowSelectionToolbar;
 
     _dragStartSelection = renderEditable.selection;
