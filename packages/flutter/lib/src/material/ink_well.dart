@@ -865,7 +865,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 
   static const Duration _activationDuration = Duration(milliseconds: 100);
   Timer? _activationTimer;
-  Timer? _tapCancelTimer;
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
@@ -1159,7 +1158,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _hasFocus = false;
-  bool _longPressAccepted = false;
   void handleFocusUpdate(bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
@@ -1179,8 +1177,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleTapDown(TapDownDetails details) {
-    // If the InkWell is previously disabled, it will have a null _actionMap.
-    // ...   _startNewSplash(details: details);
     handleAnyTapDown(details);
     widget.onTapDown?.call(details);
   }
@@ -1218,7 +1214,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     _splashes?.add(splash);
     _currentSplash?.cancel();
     _currentSplash = splash;
-    _longPressAccepted = false;
     updateKeepAlive();
     updateHighlight(_HighlightType.pressed, value: true);
   }
@@ -1263,21 +1258,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   void handleLongPress() {
-    // Always accept the long press logic to persist the splash.
-    // This must happen synchronously before any other event loop processing
-    _longPressAccepted = true;
-
     if (widget.onLongPress != null) {
       if (widget.enableFeedback) {
         Feedback.forLongPress(context);
       }
+      widget.onLongPress!();
     }
   }
 
   void handleLongPressCancel() {
-    // Always cancel the splash when long press is cancelled
-    // This handles both: post-accept drag and pre-accept scroll/drag
-    _longPressAccepted = false;
+    // Cancel the splash when long press is cancelled.
+    // This handles both: post-accept drag and pre-accept scroll/drag.
     _currentSplash?.cancel();
     _currentSplash = null;
     updateHighlight(_HighlightType.pressed, value: false);
@@ -1301,13 +1292,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       _currentSplash = null;
     }
 
-    // Fire callback if valid long press action was accepted
-    if (_longPressAccepted) {
-      if (object.paintBounds.contains(details.localPosition)) {
-        widget.onLongPress?.call();
-      }
-    }
-    _longPressAccepted = false;
     widget.onLongPressUp?.call();
     // Ensure the pressed highlight is removed when the long press ends.
     // This prevents the overlay (pressed) color from persisting after release.
@@ -1342,8 +1326,6 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   void deactivate() {
     _activationTimer?.cancel();
     _activationTimer = null;
-    _tapCancelTimer?.cancel();
-    _tapCancelTimer = null;
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes!;
       _splashes = null;
