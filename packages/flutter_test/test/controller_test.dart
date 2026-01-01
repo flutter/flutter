@@ -403,7 +403,10 @@ void main() {
       } else if (i != logs.length - 1) {
         expect(logs[i], 'move $b');
       } else {
-        expect(logs[i], 'up $b');
+        // The PointerData received from the engine with
+        // change = PointerChange.up, which translates to PointerUpEvent,
+        // doesn't provide the button field.
+        expect(logs[i], 'up 0');
       }
     }
   });
