@@ -11,9 +11,11 @@ import '../cmake_project.dart';
 /// ```cmake
 /// # Copy the native assets provided by the build.dart from all packages.
 /// set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
-/// install(DIRECTORY "${NATIVE_ASSETS_DIR}"
-///    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-///    COMPONENT Runtime)
+/// if(EXISTS "${NATIVE_ASSETS_DIR}")
+///   install(DIRECTORY "${NATIVE_ASSETS_DIR}"
+///     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+///     COMPONENT Runtime)
+/// endif()
 /// ```
 class CmakeNativeAssetsMigration extends ProjectMigrator {
   CmakeNativeAssetsMigration(CmakeBasedProject project, this.os, super.logger)
@@ -41,9 +43,11 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
-install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
-  DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
-  COMPONENT Runtime)
+if(EXISTS "\${NATIVE_ASSETS_DIR}")
+  install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
+    DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+endif()
 ''';
 
     // Insert the new command after the bundled libraries loop.
