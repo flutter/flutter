@@ -839,9 +839,7 @@ class SelectableRegionState extends State<SelectableRegion>
               _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
             }
           case TargetPlatform.iOS:
-            if (kIsWeb &&
-                !_isPrecisePointerDevice(details.kind) &&
-                _doubleTapOffset != null) {
+            if (kIsWeb && !_isPrecisePointerDevice(details.kind) && _doubleTapOffset != null) {
               // On iOS web a double tap does not select the word at the position,
               // until the drag has begun.
               _selectWordAt(offset: _doubleTapOffset!);
