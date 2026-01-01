@@ -239,7 +239,7 @@ void main() {
       } else if (i != logs.length - 1) {
         expect(logs[i], 'move $b');
       } else {
-        expect(logs[i], 'up 0');
+        expect(logs[i], 'up $b');
       }
     }
   });
