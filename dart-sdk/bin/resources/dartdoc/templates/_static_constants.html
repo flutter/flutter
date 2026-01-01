@@ -1,0 +1,14 @@
+{{! All constants on classes, enums, extensions, and mixins are static, but the
+    file is named this way for organization purposes. }}
+
+{{ #hasPublicConstantFields }}
+  <section class="summary offset-anchor" id="constants">
+    <h2>Constants</h2>
+
+    <dl class="properties">
+      {{ #publicConstantFieldsSorted }}
+        {{ >constant }}
+      {{ /publicConstantFieldsSorted }}
+    </dl>
+  </section>
+{{ /hasPublicConstantFields }}

@@ -1,0 +1,12 @@
+{{ #hasPublicSuperChainReversed }}
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark {{ relationshipsClass }}">
+      <li>{{{ linkedObjectType }}}</li>
+      {{ #publicSuperChainReversed }}
+        <li>{{{ linkedName }}}</li>
+      {{ /publicSuperChainReversed }}
+      <li>{{{ name }}}</li>
+    </ul>
+  </dd>
+{{ /hasPublicSuperChainReversed }}

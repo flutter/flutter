@@ -1,0 +1,92 @@
+<ol>
+  {{ #container }}
+
+    {{ #hasPublicConstructors }}
+      <li class="section-title"><a href="{{{ href }}}#constructors">Constructors</a></li>
+      {{ #publicConstructorsSorted }}
+        <li><a{{ #isDeprecated }} class="deprecated"{{ /isDeprecated }} href="{{{ href }}}">{{ shortName }}</a></li>
+      {{ /publicConstructorsSorted }}
+    {{ /hasPublicConstructors }}
+
+    {{ #isEnum }}
+      {{ #hasPublicEnumValues }}
+        <li class="section-title"><a href="{{{ href }}}#values">Values</a></li>
+        {{ #publicEnumValues }}
+          <li>{{{ linkedName }}}</li>
+        {{ /publicEnumValues }}
+      {{ /hasPublicEnumValues }}
+    {{ /isEnum }}
+
+    {{!-- Instance members which may or may not be inherited. --}}
+    {{ #isInterface }}
+      {{ #hasAvailableInstanceFields }}
+        <li class="section-title{{ #publicInheritedInstanceFields }} inherited{{ /publicInheritedInstanceFields }}">
+          <a href="{{{ href }}}#instance-properties">Properties</a>
+        </li>
+        {{ #availableInstanceFieldsSorted }}
+          {{ >container_sidebar_item }}
+        {{ /availableInstanceFieldsSorted }}
+      {{ /hasAvailableInstanceFields }}
+
+      {{ #hasAvailableInstanceMethods }}
+        <li class="section-title{{ #publicInheritedInstanceMethods }} inherited{{ /publicInheritedInstanceMethods }}"><a href="{{{ href }}}#instance-methods">Methods</a></li>
+        {{ #availableInstanceMethodsSorted }}
+          {{ >container_sidebar_item }}
+        {{ /availableInstanceMethodsSorted }}
+      {{ /hasAvailableInstanceMethods }}
+
+      {{ #hasAvailableInstanceOperators }}
+        <li class="section-title{{ #publicInheritedInstanceOperators }} inherited{{ /publicInheritedInstanceOperators }}"><a href="{{{ href }}}#operators">Operators</a></li>
+        {{ #availableInstanceOperatorsSorted }}
+          {{ >container_sidebar_item }}
+        {{ /availableInstanceOperatorsSorted }}
+      {{ /hasAvailableInstanceOperators }}
+    {{ /isInterface }}
+
+    {{!-- Instance members with no inheritance concept. --}}
+    {{ #isExtension }}
+      {{ #hasAvailableInstanceFields }}
+        <li class="section-title"> <a href="{{{ href }}}#instance-properties">Properties</a></li>
+        {{ #availableInstanceFieldsSorted }}
+          <li>{{{ linkedName }}}</li>
+        {{ /availableInstanceFieldsSorted }}
+      {{ /hasAvailableInstanceFields }}
+
+      {{ #hasAvailableInstanceMethods }}
+        <li class="section-title"><a href="{{{ href }}}#instance-methods">Methods</a></li>
+        {{ #availableInstanceMethodsSorted }}
+          <li>{{{ linkedName }}}</li>
+        {{ /availableInstanceMethodsSorted }}
+      {{ /hasAvailableInstanceMethods }}
+
+      {{ #hasAvailableInstanceOperators }}
+        <li class="section-title"><a href="{{{ href }}}#operators">Operators</a></li>
+        {{ #availableInstanceOperatorsSorted }}
+          <li>{{{ linkedName }}}</li>
+        {{ /availableInstanceOperatorsSorted }}
+      {{ /hasAvailableInstanceOperators }}
+    {{ /isExtension }}
+
+    {{!-- Static members. --}}
+    {{ #hasPublicVariableStaticFields }}
+      <li class="section-title"><a href="{{{ href }}}#static-properties">Static properties</a></li>
+      {{ #publicVariableStaticFieldsSorted }}
+        <li>{{{ linkedName }}}</li>
+      {{ /publicVariableStaticFieldsSorted }}
+    {{ /hasPublicVariableStaticFields }}
+
+    {{ #hasPublicStaticMethods }}
+      <li class="section-title"><a href="{{{ href }}}#static-methods">Static methods</a></li>
+      {{ #publicStaticMethodsSorted }}
+        <li>{{{ linkedName }}}</li>
+      {{ /publicStaticMethodsSorted }}
+    {{ /hasPublicStaticMethods }}
+
+    {{ #hasPublicConstantFields }}
+      <li class="section-title"><a href="{{{ href }}}#constants">Constants</a></li>
+      {{ #publicConstantFieldsSorted }}
+        <li>{{{ linkedName }}}</li>
+      {{ /publicConstantFieldsSorted }}
+    {{ /hasPublicConstantFields }}
+  {{ /container }}
+</ol>

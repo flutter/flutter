@@ -1,0 +1,10 @@
+{{ #hasPublicInterfaces }}
+  <dt>Implemented types</dt>
+  <dd>
+    <ul class="comma-separated {{ relationshipsClass }}">
+        {{ #publicInterfaces }}
+        <li>{{{ linkedName }}}</li>
+        {{ /publicInterfaces }}
+    </ul>
+  </dd>
+{{ /hasPublicInterfaces }}

@@ -1,0 +1,12 @@
+{{ #hasAvailableInstanceFields }}
+  <section
+      class="summary offset-anchor{{ #publicInheritedInstanceFields }} inherited{{ /publicInheritedInstanceFields }}"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+      {{ #availableInstanceFieldsSorted }}
+        {{ >property }}
+      {{ /availableInstanceFieldsSorted }}
+    </dl>
+  </section>
+{{ /hasAvailableInstanceFields }}

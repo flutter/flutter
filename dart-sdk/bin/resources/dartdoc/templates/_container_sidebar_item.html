@@ -1,0 +1,11 @@
+
+<li{{ #isInherited }} class="inherited"{{ /isInherited }}>
+  {{{ linkedName }}}
+  {{ #isProvidedByExtension }}
+    {{ #enclosingExtension }}
+      <sup
+          class="muted"
+          title="Available on {{ extendedElement.nameWithGenericsPlain }}">(ext)</sup>
+    {{ /enclosingExtension }}
+  {{ /isProvidedByExtension }}
+</li>

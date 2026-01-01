@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "experimentSets": {
+    "sdkExperiments": [],
+    "macros": [
+      "enhanced-parts",
+      "macros"
+    ]
+  },
+  "sdk": {
+    "default": {
+      "experimentSet": "sdkExperiments"
+    },
+    "_example_libraries": {
+      "ui": {
+        "experimentSet": "nullSafety"
+      }
+    }
+  },
+  "packages": {
+    "json": {
+      "experimentSet": "macros"
+    }
+  }
+}

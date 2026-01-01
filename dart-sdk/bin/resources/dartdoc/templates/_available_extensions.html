@@ -1,0 +1,8 @@
+{{ #hasPotentiallyApplicableExtensions }}
+  <dt>Available extensions</dt>
+  <dd><ul class="comma-separated clazz-relationships">
+    {{ #potentiallyApplicableExtensionsSorted }}
+      <li>{{{ linkedName }}}</li>
+    {{ /potentiallyApplicableExtensionsSorted }}
+  </ul></dd>
+{{ /hasPotentiallyApplicableExtensions }}
