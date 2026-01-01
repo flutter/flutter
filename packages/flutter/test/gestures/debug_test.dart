@@ -362,16 +362,16 @@ void main() {
         <String>['velocity: Velocity(0.0, 0.0)', 'scaleVelocity: 0.0', 'pointerCount: 0'],
       ),
       (
-        TapDownDetails(kind: PointerDeviceKind.unknown, buttons: 0),
+        TapDownDetails(kind: PointerDeviceKind.stylus),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
-          'kind: unknown',
+          'kind: stylus',
           'buttons: 0',
         ],
       ),
       (
-        TapUpDetails(kind: PointerDeviceKind.unknown, buttons: 0),
+        TapUpDetails(kind: PointerDeviceKind.unknown),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
@@ -433,7 +433,6 @@ void main() {
           offsetFromOrigin: Offset.zero,
           localOffsetFromOrigin: Offset.zero,
           consecutiveTapCount: 1,
-          buttons: 0,
         ),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
