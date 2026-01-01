@@ -2454,12 +2454,12 @@ class TextSelectionGestureDetectorBuilder {
     // through a touch screen (via either a finger or a stylus). A mouse shouldn't
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
-    final PointerDeviceKind? kind = details.kind;
+    final PointerDeviceKind kind = details.kind;
     // TODO(justinmc): Should a desktop platform show its selection toolbar when
     // receiving a tap event?  Say a Windows device with a touchscreen.
     // https://github.com/flutter/flutter/issues/106586
     _shouldShowSelectionToolbar =
-        kind == null || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
+        kind == PointerDeviceKind.unknown || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
     _shouldShowSelectionHandles = _shouldShowSelectionToolbar;
 
     // It is impossible to extend the selection when the shift key is pressed, if the
@@ -2921,7 +2921,7 @@ class TextSelectionGestureDetectorBuilder {
     );
     _shouldShowSelectionToolbar = true;
     _shouldShowSelectionHandles =
-        details.kind == null ||
+        details.kind == PointerDeviceKind.unknown ||
         details.kind == PointerDeviceKind.touch ||
         details.kind == PointerDeviceKind.stylus;
   }
@@ -3116,7 +3116,6 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-            case null:
           }
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
@@ -3140,7 +3139,6 @@ class TextSelectionGestureDetectorBuilder {
                 );
                 _showMagnifierIfSupportedByPlatform(details.globalPosition);
               }
-            case null:
           }
         case TargetPlatform.linux:
         case TargetPlatform.macOS:

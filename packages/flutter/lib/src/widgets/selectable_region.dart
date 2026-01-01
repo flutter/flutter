@@ -763,14 +763,14 @@ class SelectableRegionState extends State<SelectableRegion>
       case 2:
         switch (defaultTargetPlatform) {
           case TargetPlatform.iOS:
-            if (kIsWeb && details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (kIsWeb && !_isPrecisePointerDevice(details.kind)) {
               // Double tap on iOS web triggers when a drag begins after the double tap.
               _doubleTapOffset = details.globalPosition;
               break;
             }
             _selectWordAt(offset: details.globalPosition);
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (!_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.android:
@@ -786,7 +786,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (_isPrecisePointerDevice(details.kind)) {
               // Triple tap on static text is only supported on mobile
               // platforms using a precise pointer device.
               _selectParagraphAt(offset: details.globalPosition);
@@ -805,7 +805,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (!_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -818,7 +818,7 @@ class SelectableRegionState extends State<SelectableRegion>
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+        if (!_isPrecisePointerDevice(details.kind)) {
           // Drag to select is only enabled with a precise pointer device.
           return;
         }
@@ -830,7 +830,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.fuchsia:
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
-            if (!kIsWeb || details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (!kIsWeb || _isPrecisePointerDevice(details.kind)) {
               _selectEndTo(
                 offset: details.globalPosition,
                 continuous: true,
@@ -840,8 +840,7 @@ class SelectableRegionState extends State<SelectableRegion>
             }
           case TargetPlatform.iOS:
             if (kIsWeb &&
-                details.kind != null &&
-                !_isPrecisePointerDevice(details.kind!) &&
+                !_isPrecisePointerDevice(details.kind) &&
                 _doubleTapOffset != null) {
               // On iOS web a double tap does not select the word at the position,
               // until the drag has begun.
@@ -854,7 +853,7 @@ class SelectableRegionState extends State<SelectableRegion>
               textGranularity: TextGranularity.word,
             );
             _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
-            if (details.kind != null && !_isPrecisePointerDevice(details.kind!)) {
+            if (!_isPrecisePointerDevice(details.kind)) {
               _showHandles();
             }
           case TargetPlatform.macOS:
@@ -874,7 +873,7 @@ class SelectableRegionState extends State<SelectableRegion>
           case TargetPlatform.iOS:
             // Triple tap + drag is only supported on mobile devices when using
             // a precise pointer device.
-            if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            if (_isPrecisePointerDevice(details.kind)) {
               _selectEndTo(
                 offset: details.globalPosition,
                 continuous: true,

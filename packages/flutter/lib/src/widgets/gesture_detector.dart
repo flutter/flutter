@@ -1734,14 +1734,12 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         TapDownDetails(
           globalPosition: globalCenter,
           localPosition: localCenter,
-          kind: PointerDeviceKind.unknown,
         ),
       );
       tap.onTapUp?.call(
         TapUpDetails(
           globalPosition: globalCenter,
           localPosition: localCenter,
-          kind: PointerDeviceKind.unknown,
         ),
       );
       tap.onTap?.call();
