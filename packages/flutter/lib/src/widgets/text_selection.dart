@@ -3074,9 +3074,9 @@ class TextSelectionGestureDetectorBuilder {
     if (!delegate.selectionEnabled) {
       return;
     }
-    final PointerDeviceKind? kind = details.kind;
+    final PointerDeviceKind kind = details.kind;
     _shouldShowSelectionToolbar =
-        kind == null || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
+        kind == PointerDeviceKind.unknown || kind == PointerDeviceKind.touch || kind == PointerDeviceKind.stylus;
     _shouldShowSelectionHandles = _shouldShowSelectionToolbar;
 
     _dragStartSelection = renderEditable.selection;
@@ -3198,7 +3198,6 @@ class TextSelectionGestureDetectorBuilder {
             return _showMagnifierIfSupportedByPlatform(details.globalPosition);
           case PointerDeviceKind.mouse:
           case PointerDeviceKind.trackpad:
-          case null:
             return;
         }
       }
@@ -3224,7 +3223,6 @@ class TextSelectionGestureDetectorBuilder {
               case PointerDeviceKind.invertedStylus:
               case PointerDeviceKind.touch:
               case PointerDeviceKind.unknown:
-              case null:
                 // Triple tap to drag is not present on these platforms when using
                 // non-precise pointer devices at the moment.
                 break;
@@ -3264,7 +3262,6 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-            case null:
               break;
           }
           return;
@@ -3292,8 +3289,6 @@ class TextSelectionGestureDetectorBuilder {
                 );
                 return _showMagnifierIfSupportedByPlatform(details.globalPosition);
               }
-            case null:
-              break;
           }
           return;
         case TargetPlatform.macOS:
