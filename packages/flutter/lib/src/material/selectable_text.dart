@@ -374,10 +374,14 @@ class SelectableText extends StatefulWidget {
 
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
+  /// If null, defaults to [ui.BoxHeightStyle.tight].
+  ///
   /// See [ui.BoxHeightStyle] for details on available styles.
   final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// If null, defaults to [ui.BoxWidthStyle.tight].
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
   final ui.BoxWidthStyle? selectionWidthStyle;
@@ -784,8 +788,8 @@ class _SelectableTextState extends State<SelectableText>
         cursorHeight: widget.cursorHeight,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
-        selectionHeightStyle: widget.selectionHeightStyle,
-        selectionWidthStyle: widget.selectionWidthStyle,
+        selectionHeightStyle: widget.selectionHeightStyle ?? ui.BoxHeightStyle.tight,
+        selectionWidthStyle: widget.selectionWidthStyle ?? ui.BoxWidthStyle.tight,
         cursorOpacityAnimates: cursorOpacityAnimates,
         cursorOffset: cursorOffset,
         paintCursorAboveText: paintCursorAboveText,
