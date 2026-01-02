@@ -5585,7 +5585,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     // Finds parent that forms a semantics node and recalculate geometry from there.
     var target = this;
-    while (!target.shouldFormSemanticsNode) {
+    while (!target.parentDataDirty && !target.shouldFormSemanticsNode) {
       target = target.parent!;
     }
 
