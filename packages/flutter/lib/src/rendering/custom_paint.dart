@@ -1049,6 +1049,12 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.inputType != null) {
       config.inputType = properties.inputType!;
     }
+    if (properties.minValue != null) {
+      config.minValue = properties.minValue;
+    }
+    if (properties.maxValue != null) {
+      config.maxValue = properties.maxValue;
+    }
     if (properties.onTap != null) {
       config.onTap = properties.onTap;
     }

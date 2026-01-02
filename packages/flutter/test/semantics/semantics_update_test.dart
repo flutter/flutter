@@ -322,6 +322,8 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required ui.SemanticsInputType inputType,
     required ui.Locale? locale,
+    required String minValue,
+    required String maxValue,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
