@@ -177,7 +177,10 @@ final class WebAssetTarget extends AssetBuildTarget {
   WebAssetTarget({required super.supportedAssetTypes});
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    ...dataAssetExtensions,
+    FontAssetsExtension(),
+  ];
 
   @override
   String get targetString => 'web';
