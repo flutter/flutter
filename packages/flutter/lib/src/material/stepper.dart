@@ -914,25 +914,23 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       children: <Widget>[
         Material(
           elevation: widget.elevation ?? 2,
-          child: LayoutBuilder(builder: (context, constraints) {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: constraints.maxWidth
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: SizedBox(
-                    height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
-                    child: IntrinsicWidth(
-                      child: Row(children: children)
-                      ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: SizedBox(
+                      height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
+                      child: IntrinsicWidth(child: Row(children: children)),
+                    ),
                   ),
                 ),
-              ),
-            );
-          })
+              );
+            },
+          ),
         ),
         Expanded(
           child: ListView(
