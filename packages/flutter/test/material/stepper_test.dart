@@ -1251,6 +1251,41 @@ void main() {
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
 
+  testWidgets('Stepper horizontal size test with list of steps widgets', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 600);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stepper(
+            type: StepperType.horizontal,
+            steps: List<Step>.generate(
+              10,
+              (i) => Step(
+                title: Text('Step ${i + 1}'),
+                content: const SizedBox(width: 100.0, height: 100.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // 2. Check for the overflow exception
+    // If an overflow occurs, Flutter captures it in the summary
+    final dynamic exception = tester.takeException();
+
+    // Use this to fail the test if any overflow is detected
+    expect(exception, isNull, reason: 'Stepper should handle many steps without overflowing');
+
+    // 3. Reset the view size for other tests
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+
   testWidgets('Stepper Connector Style', (WidgetTester tester) async {
     const Color selectedColor = Colors.black;
     const Color disabledColor = Colors.white;
