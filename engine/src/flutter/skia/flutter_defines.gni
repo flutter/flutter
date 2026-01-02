@@ -13,6 +13,7 @@ flutter_defines = [
   "SK_DISABLE_LEGACY_PNG_WRITEBUFFER",
   "SK_DISABLE_LEGACY_IMAGE_READBUFFER",
   "SK_HIDE_PATH_EDIT_METHODS",
+  "SK_SUPPORT_LEGACY_UNSPANNED_GRADIENTS",
 
   # Fast low-precision software rendering isn't a priority for Flutter.
   "SK_DISABLE_LEGACY_SHADERCONTEXT",
