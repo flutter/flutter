@@ -13,7 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'multi_view_testing.dart';
 
 void main() {
-  const Color green = Color(0xff00ff00);
+  const green = Color(0xff00ff00);
 
   testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;

@@ -15,7 +15,7 @@ void verify(WidgetTester tester, List<Offset> answerKey) {
 }
 
 void main() {
-  const Color green = Color(0xff00ff00);
+  const green = Color(0xff00ff00);
 
   testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(

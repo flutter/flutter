@@ -95,7 +95,7 @@ void main() {
     var layoutBuilderChild = keyedWidget;
     Widget deepChild = Container();
 
-    const Color green = Color(0xff00ff00);
+    const green = Color(0xff00ff00);
 
     await tester.pumpWidget(
       MediaQuery(

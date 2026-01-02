@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Color red = Color(0xffff0000);
+  const red = Color(0xffff0000);
 
   testWidgets('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
     RenderTestObject.paintCount = 0;

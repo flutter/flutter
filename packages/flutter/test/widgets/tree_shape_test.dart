@@ -12,9 +12,9 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'multi_view_testing.dart';
 
 void main() {
-  const Color red = Color(0xffffff00);
-  const Color green = Color(0xff00ff00);
-  const Color yellow = Color(0xfffffde7);
+  const red = Color(0xffffff00);
+  const green = Color(0xff00ff00);
+  const yellow = Color(0xfffffde7);
 
   testWidgets('Providing a RenderObjectWidget directly to the RootWidget fails', (
     WidgetTester tester,

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  const Color red = Color(0xffff0000);
+  const red = Color(0xffff0000);
 
   testWidgets('ErrorWidget displays actual error when throwing during build', (
     WidgetTester tester,

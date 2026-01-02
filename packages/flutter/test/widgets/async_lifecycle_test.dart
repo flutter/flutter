@@ -49,8 +49,8 @@ class InvalidDidUpdateWidgetLifecycleWidgetState
 }
 
 void main() {
-  const Color red = Color(0xffff0000);
-  const Color green = Color(0xff00ff00);
+  const red = Color(0xffff0000);
+  const green = Color(0xff00ff00);
 
   testWidgets(
     'async onInit throws FlutterError',

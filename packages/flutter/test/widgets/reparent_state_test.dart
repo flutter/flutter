@@ -47,7 +47,7 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
-  const Color green = Color(0xff00ff00);
+  const green = Color(0xff00ff00);
 
   testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();

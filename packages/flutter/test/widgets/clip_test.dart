@@ -58,10 +58,10 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
-  const Color black = Color(0xff000000);
-  const Color white = Color(0xffffffff);
-  const Color red = Color(0xffff0000);
-  const Color blue = Color(0xff0000ff);
+  const black = Color(0xff000000);
+  const white = Color(0xffffffff);
+  const red = Color(0xffff0000);
+  const blue = Color(0xff0000ff);
 
   testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (
     WidgetTester tester,
