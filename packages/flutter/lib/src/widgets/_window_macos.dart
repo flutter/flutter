@@ -122,6 +122,20 @@ class WindowingOwnerMacOS extends WindowingOwner {
     throw UnimplementedError('Tooltip windows are not yet implemented on MacOS.');
   }
 
+  @internal
+  @override
+  OverlayWindowController createOverlayWindowController({
+    required OverlayWindowControllerDelegate delegate,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BoxConstraints contentSizeConstraints,
+    BaseWindowController? parent,
+    String? title,
+    bool alwaysOnTop = false,
+  }) {
+    throw UnimplementedError('Overlay windows are not yet implemented on MacOS.');
+  }
+
   final List<BaseWindowController> _activeControllers = <BaseWindowController>[];
 
   /// Returns the window handle for the given [view], or null is the window
