@@ -682,7 +682,7 @@ void main() {
     final stops = <double>[0.842, 0.959, 0.993, 1.0];
     const double scrollOffset = 1000;
 
-    await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+    await tester.pumpWidget(buildStatusBarTestApp(null));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(scrollOffset);
 

@@ -928,7 +928,18 @@ mixin WidgetsBinding
   Future<void> _handleStatusBarActions(MethodCall call) async {
     assert(call.method == 'handleScrollToTop');
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.handleStatusBarTap();
+      try {
+        observer.handleStatusBarTap();
+      } catch (exception, stack) {
+        final details = FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('handling status bar action'),
+        );
+        FlutterError.reportError(details);
+        // No error widget possible here since it wouldn't have a view to render into.
+      }
     }
   }
 

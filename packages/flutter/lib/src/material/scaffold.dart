@@ -2857,10 +2857,23 @@ class ScaffoldState extends State<Scaffold>
     super.didChangeDependencies();
   }
 
+  @override
+  void deactivate() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    if (widget.primary) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
+
   @protected
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _geometryNotifier.dispose();
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();

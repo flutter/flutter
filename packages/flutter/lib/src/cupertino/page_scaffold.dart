@@ -97,11 +97,18 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
   }
 
   @override
-  void dispose() {
+  void deactivate() {
     WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+    super.deactivate();
   }
 
+  @override
+  void activate() {
+    super.activate();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   @override
   void handleStatusBarTap() {
     super.handleStatusBarTap();
