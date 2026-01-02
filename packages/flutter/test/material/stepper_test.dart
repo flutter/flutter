@@ -1251,7 +1251,7 @@ void main() {
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
 
-// Regression test for https://github.com/flutter/flutter/issues/40601
+  // Regression test for https://github.com/flutter/flutter/issues/40601
   testWidgets('Horizontal stepper does not overflow with long step titles', (
     WidgetTester tester,
   ) async {
