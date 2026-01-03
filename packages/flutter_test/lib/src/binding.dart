@@ -1265,7 +1265,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return announcements;
   }
 
-  static const TextStyle _messageStyle = TextStyle(color: Color(0xFF917FFF), fontSize: 40.0);
+  static const TextStyle _messageStyle = TextStyle(color: Color(0xFF8F7FFF), fontSize: 40.0);
 
   static const Widget _preTestMessage = Center(
     child: Text('Test starting...', style: _messageStyle, textDirection: TextDirection.ltr),
