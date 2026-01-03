@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_widgets_app.dart';
 
 void main() {
   const forcePressOffset = Offset(400.0, 50.0);
@@ -177,8 +179,7 @@ void main() {
 
       Future<void> pumpWidgetTree(HitTestBehavior? behavior) {
         return tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
+          TestWidgetsApp(
             child: Stack(
               children: <Widget>[
                 Listener(
@@ -806,29 +807,27 @@ void main() {
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawGestureDetector(
-                key: key,
-                gestures: <Type, GestureRecognizerFactory>{
-                  TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-                    () => TapGestureRecognizer(postAcceptSlopTolerance: null),
-                    (TapGestureRecognizer instance) {
-                      instance.onTapDown = (TapDownDetails details) {
-                        receivedTapDownDetails = details;
-                      };
-                      instance.onTapUp = (TapUpDetails details) {
-                        receivedTapUpDetails = details;
-                      };
-                      instance.onTap = () {
-                        tapped = true;
-                      };
-                    },
-                  ),
-                },
-                child: const SizedBox(width: 20, height: 20),
-              ),
+        TestWidgetsApp(
+          child: Center(
+            child: RawGestureDetector(
+              key: key,
+              gestures: <Type, GestureRecognizerFactory>{
+                TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                  () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+                  (TapGestureRecognizer instance) {
+                    instance.onTapDown = (TapDownDetails details) {
+                      receivedTapDownDetails = details;
+                    };
+                    instance.onTapUp = (TapUpDetails details) {
+                      receivedTapUpDetails = details;
+                    };
+                    instance.onTap = () {
+                      tapped = true;
+                    };
+                  },
+                ),
+              },
+              child: const SizedBox(width: 20, height: 20),
             ),
           ),
         ),
@@ -854,36 +853,34 @@ void main() {
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawGestureDetector(
-                key: key,
-                gestures: <Type, GestureRecognizerFactory>{
-                  LongPressGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-                        () => LongPressGestureRecognizer(),
-                        (LongPressGestureRecognizer instance) {
-                          instance.onLongPressDown = (LongPressDownDetails details) {
-                            receivedLongPressDownDetails = details;
-                          };
-                          instance.onLongPressStart = (LongPressStartDetails details) {
-                            receivedLongPressStartDetails = details;
-                          };
-                          instance.onLongPressEnd = (LongPressEndDetails details) {
-                            receivedLongPressEndDetails = details;
-                          };
-                          instance.onLongPressUp = () {
-                            upped = true;
-                          };
-                          instance.onLongPress = () {
-                            pressed = true;
-                          };
-                        },
-                      ),
-                },
-                child: const SizedBox(width: 20, height: 20),
-              ),
+        TestWidgetsApp(
+          child: Center(
+            child: RawGestureDetector(
+              key: key,
+              gestures: <Type, GestureRecognizerFactory>{
+                LongPressGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                      () => LongPressGestureRecognizer(),
+                      (LongPressGestureRecognizer instance) {
+                        instance.onLongPressDown = (LongPressDownDetails details) {
+                          receivedLongPressDownDetails = details;
+                        };
+                        instance.onLongPressStart = (LongPressStartDetails details) {
+                          receivedLongPressStartDetails = details;
+                        };
+                        instance.onLongPressEnd = (LongPressEndDetails details) {
+                          receivedLongPressEndDetails = details;
+                        };
+                        instance.onLongPressUp = () {
+                          upped = true;
+                        };
+                        instance.onLongPress = () {
+                          pressed = true;
+                        };
+                      },
+                    ),
+              },
+              child: const SizedBox(width: 20, height: 20),
             ),
           ),
         ),
@@ -911,33 +908,31 @@ void main() {
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawGestureDetector(
-                key: key,
-                gestures: <Type, GestureRecognizerFactory>{
-                  HorizontalDragGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-                        () => HorizontalDragGestureRecognizer(),
-                        (HorizontalDragGestureRecognizer instance) {
-                          instance.onDown = (DragDownDetails details) {
-                            receivedDragDownDetails = details;
-                          };
-                          instance.onStart = (DragStartDetails details) {
-                            receivedDragStartDetails = details;
-                          };
-                          instance.onUpdate = (DragUpdateDetails details) {
-                            receivedDragUpdateDetails = details;
-                          };
-                          instance.onEnd = (DragEndDetails details) {
-                            receivedDragEndDetails = details;
-                          };
-                        },
-                      ),
-                },
-                child: const SizedBox(width: 20, height: 20),
-              ),
+        TestWidgetsApp(
+          child: Center(
+            child: RawGestureDetector(
+              key: key,
+              gestures: <Type, GestureRecognizerFactory>{
+                HorizontalDragGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+                      () => HorizontalDragGestureRecognizer(),
+                      (HorizontalDragGestureRecognizer instance) {
+                        instance.onDown = (DragDownDetails details) {
+                          receivedDragDownDetails = details;
+                        };
+                        instance.onStart = (DragStartDetails details) {
+                          receivedDragStartDetails = details;
+                        };
+                        instance.onUpdate = (DragUpdateDetails details) {
+                          receivedDragUpdateDetails = details;
+                        };
+                        instance.onEnd = (DragEndDetails details) {
+                          receivedDragEndDetails = details;
+                        };
+                      },
+                    ),
+              },
+              child: const SizedBox(width: 20, height: 20),
             ),
           ),
         ),
@@ -968,33 +963,31 @@ void main() {
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawGestureDetector(
-                key: key,
-                gestures: <Type, GestureRecognizerFactory>{
-                  VerticalDragGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-                        () => VerticalDragGestureRecognizer(),
-                        (VerticalDragGestureRecognizer instance) {
-                          instance.onDown = (DragDownDetails details) {
-                            receivedDragDownDetails = details;
-                          };
-                          instance.onStart = (DragStartDetails details) {
-                            receivedDragStartDetails = details;
-                          };
-                          instance.onUpdate = (DragUpdateDetails details) {
-                            receivedDragUpdateDetails = details;
-                          };
-                          instance.onEnd = (DragEndDetails details) {
-                            receivedDragEndDetails = details;
-                          };
-                        },
-                      ),
-                },
-                child: const SizedBox(width: 20, height: 20),
-              ),
+        TestWidgetsApp(
+          child: Center(
+            child: RawGestureDetector(
+              key: key,
+              gestures: <Type, GestureRecognizerFactory>{
+                VerticalDragGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+                      () => VerticalDragGestureRecognizer(),
+                      (VerticalDragGestureRecognizer instance) {
+                        instance.onDown = (DragDownDetails details) {
+                          receivedDragDownDetails = details;
+                        };
+                        instance.onStart = (DragStartDetails details) {
+                          receivedDragStartDetails = details;
+                        };
+                        instance.onUpdate = (DragUpdateDetails details) {
+                          receivedDragUpdateDetails = details;
+                        };
+                        instance.onEnd = (DragEndDetails details) {
+                          receivedDragEndDetails = details;
+                        };
+                      },
+                    ),
+              },
+              child: const SizedBox(width: 20, height: 20),
             ),
           ),
         ),
@@ -1025,32 +1018,30 @@ void main() {
       final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
       final key = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: RawGestureDetector(
-                key: key,
-                gestures: <Type, GestureRecognizerFactory>{
-                  PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                    () => PanGestureRecognizer(),
-                    (PanGestureRecognizer instance) {
-                      instance.onDown = (DragDownDetails details) {
-                        receivedDragDownDetails = details;
-                      };
-                      instance.onStart = (DragStartDetails details) {
-                        receivedDragStartDetails = details;
-                      };
-                      instance.onUpdate = (DragUpdateDetails details) {
-                        receivedDragUpdateDetails = details;
-                      };
-                      instance.onEnd = (DragEndDetails details) {
-                        receivedDragEndDetails = details;
-                      };
-                    },
-                  ),
-                },
-                child: const SizedBox(width: 20, height: 20),
-              ),
+        TestWidgetsApp(
+          child: Center(
+            child: RawGestureDetector(
+              key: key,
+              gestures: <Type, GestureRecognizerFactory>{
+                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                  () => PanGestureRecognizer(),
+                  (PanGestureRecognizer instance) {
+                    instance.onDown = (DragDownDetails details) {
+                      receivedDragDownDetails = details;
+                    };
+                    instance.onStart = (DragStartDetails details) {
+                      receivedDragStartDetails = details;
+                    };
+                    instance.onUpdate = (DragUpdateDetails details) {
+                      receivedDragUpdateDetails = details;
+                    };
+                    instance.onEnd = (DragEndDetails details) {
+                      receivedDragEndDetails = details;
+                    };
+                  },
+                ),
+              },
+              child: const SizedBox(width: 20, height: 20),
             ),
           ),
         ),
@@ -1221,8 +1212,7 @@ void main() {
       testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
         final key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
-          Directionality(
-            textDirection: TextDirection.ltr,
+          TestWidgetsApp(
             child: RawGestureDetector(key: key, child: const Text('Text')),
           ),
         );
@@ -1402,8 +1392,7 @@ void main() {
     ) async {
       final log = <String>[];
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
+        TestWidgetsApp(
           child: GestureDetector(
             onDoubleTap: () => log.add('double-tap'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
@@ -1423,8 +1412,7 @@ void main() {
     ) async {
       final log = <String>[];
       await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
+        TestWidgetsApp(
           child: GestureDetector(
             onDoubleTapDown: (_) => log.add('double-tap-down'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),

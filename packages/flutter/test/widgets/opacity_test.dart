@@ -9,11 +9,12 @@ library;
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'test_widgets_app.dart';
 
 void main() {
   testWidgets('Opacity', (WidgetTester tester) async {
@@ -151,22 +152,20 @@ void main() {
 
   testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: RepaintBoundary(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List<Widget>.generate(10, (int index) {
-                  return Opacity(
-                    opacity: 0.5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Container(color: Colors.blue, height: 50),
-                    ),
-                  );
-                }),
-              ),
+      TestWidgetsApp(
+        child: SingleChildScrollView(
+          child: RepaintBoundary(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: List<Widget>.generate(10, (int index) {
+                return const Opacity(
+                  opacity: 0.5,
+                  child: Padding(
+                    padding: EdgeInsets.all(5.0),
+                    child: ColoredBox(color: Color(0xFF2196F3), child: SizedBox(height: 50)),
+                  ),
+                );
+              }),
             ),
           ),
         ),
@@ -196,8 +195,7 @@ void main() {
     await tester.pumpWidget(
       RepaintBoundary(
         key: key,
-        child: Directionality(
-          textDirection: TextDirection.ltr,
+        child: const TestWidgetsApp(
           child: Stack(
             children: <Widget>[
               Positioned(
@@ -205,7 +203,10 @@ void main() {
                 left: 140,
                 child: Opacity(
                   opacity: .5,
-                  child: Container(height: 100, width: 100, color: Colors.red),
+                  child: ColoredBox(
+                    color: Color(0xFFF44336),
+                    child: SizedBox(height: 100, width: 100),
+                  ),
                 ),
               ),
             ],

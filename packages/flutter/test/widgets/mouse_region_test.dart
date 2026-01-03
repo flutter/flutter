@@ -4,10 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_widgets_app.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({super.key, this.onHover, this.child, this.onEnter, this.onExit});
@@ -53,8 +55,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
+    return TestWidgetsApp(
       child: HoverClient(
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
@@ -99,8 +100,7 @@ void main() {
     var onEnterRegion1 = false;
     var onEnterRegion2 = false;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestWidgetsApp(
         child: Stack(
           children: <Widget>[
             SizedBox(
@@ -139,8 +139,7 @@ void main() {
     var onEnterRegion1 = false;
     var onEnterRegion2 = false;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestWidgetsApp(
         child: Stack(
           children: <Widget>[
             SizedBox(
@@ -798,8 +797,8 @@ void main() {
     final events = <PointerEvent>[];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
+      TestWidgetsApp(
+        child: Center(
           child: Transform.scale(
             scale: scaleFactor,
             child: MouseRegion(
@@ -814,7 +813,7 @@ void main() {
               },
               child: Container(
                 key: key,
-                color: Colors.blue,
+                color: const Color(0xFF2196F3),
                 height: localHeight,
                 width: localWidth,
                 child: const Text('Hi'),
@@ -1052,8 +1051,7 @@ void main() {
   ) async {
     var paintCount = 0;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestWidgetsApp(
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
@@ -1080,8 +1078,7 @@ void main() {
     await gesture.addPointer();
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestWidgetsApp(
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
@@ -1299,8 +1296,7 @@ void main() {
         );
       }
 
-      return Directionality(
-        textDirection: TextDirection.ltr,
+      return TestWidgetsApp(
         child: Align(
           alignment: Alignment.topLeft,
           child: MouseRegion(
@@ -1477,8 +1473,7 @@ void main() {
   testWidgets('an empty opaque MouseRegion is effective', (WidgetTester tester) async {
     var bottomRegionIsHovered = false;
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
+      TestWidgetsApp(
         child: Stack(
           children: <Widget>[
             Align(
@@ -2006,13 +2001,26 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: Draggable<int>(
-            feedback: Container(width: 20, height: 20, color: Colors.blue),
-            childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
-            child: ElevatedButton(child: const Text('Drag me'), onPressed: () {}),
-          ),
+      TestWidgetsApp(
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Center(
+                child: DefaultTextStyle(
+                  style: const TextStyle(fontSize: 14),
+                  child: Draggable<int>(
+                    feedback: Container(width: 20, height: 20, color: const Color(0xFF2196F3)),
+                    childWhenDragging: Container(
+                      width: 20,
+                      height: 20,
+                      color: const Color(0xFFFFEB3B),
+                    ),
+                    child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -2043,9 +2051,10 @@ void main() {
     var onExit = false;
     var onHover = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MouseRegion(
+      TestWidgetsApp(
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: MouseRegion(
             onEnter: (_) => onEnter = true,
             onExit: (_) => onExit = true,
             onHover: (_) => onHover = true,
@@ -2089,8 +2098,7 @@ class _Scaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
+    return TestWidgetsApp(
       child: Stack(
         children: <Widget>[
           ?background,
@@ -2128,8 +2136,7 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
+    return TestWidgetsApp(
       child: MouseRegion(
         onEnter: (PointerEnterEvent _) {
           setState(() {
@@ -2155,8 +2162,7 @@ class _ColumnContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
+    return TestWidgetsApp(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
