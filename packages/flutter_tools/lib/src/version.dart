@@ -648,6 +648,7 @@ class _FlutterVersionGit extends FlutterVersion {
           ], workingDirectory: flutterRoot)
           .stdout
           .trim();
+      
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
