@@ -1,4 +1,0 @@
-docstring
-(?s)@copyright.*@sa
-@copyright Copyright \([cC]\) [\d-]+.*
-@sa https?://.*
