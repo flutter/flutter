@@ -2622,6 +2622,78 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    constexpr float corner_radius = 100.0;
+
+    // UI state.
+    static float logarithm_of_ratio = 1.5;  // ratio = size / corner_radius
+
+    float ratio = std::exp(logarithm_of_ratio);
+    constexpr size_t kMaxRatioLabelLength = 20;
+    char ratio_string[kMaxRatioLabelLength];
+    snprintf(ratio_string, kMaxRatioLabelLength, "%.2g", ratio);
+
+    float rect_size = corner_radius * ratio;
+    Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
+    constexpr float screen_canvas_padding = 100.0f;
+    constexpr float screen_canvas_size = 1000.0f;
+
+    // Scale so that "corner radius" is as long as half the canvas.
+    float scale = screen_canvas_size / 2 / corner_radius;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio,
+                         1.0, 7.0);
+      ImGui::LabelText("Ratio", "%s", ratio_string);
+      ImGui::Text("  where Ratio = RectSize / CornerRadius");
+    }
+    ImGui::End();
+
+    auto transform = Matrix::MakeTranslation(
+        Vector2(screen_canvas_padding, screen_canvas_padding)) *
+                     Matrix::MakeScale(Vector2(scale, scale));
+    bool success = true;
+
+    auto fill_geom = std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
+    // Fill
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Red());
+      contents->SetGeometry(fill_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Stroke
+    auto path = flutter::DlPath::MakeRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(rect, corner_radius));
+    auto stroke_geom = Geometry::MakeStrokePath(
+        path, {.width = 2 / scale});
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Blue());
+      contents->SetGeometry(stroke_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+
+      success = success && entity.Render(context, pass);
+    }
+
+    return success;
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(EntityTest, CanDrawRoundSuperEllipseWithTinyRadius) {
   // Regression test for https://github.com/flutter/flutter/issues/176894
   // Verify that a radius marginally below the minimum threshold can be
