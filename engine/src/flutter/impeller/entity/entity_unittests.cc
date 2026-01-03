@@ -2636,7 +2636,7 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
 
     float rect_size = corner_radius * ratio;
     Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
-    constexpr float screen_canvas_padding = 100.0f;
+    constexpr float screen_canvas_padding = 200.0f;
     constexpr float screen_canvas_size = 1000.0f;
 
     // Scale so that "corner radius" is as long as half the canvas.
@@ -2644,19 +2644,20 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
-      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio,
-                         1.0, 7.0);
+      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
       ImGui::LabelText("Ratio", "%s", ratio_string);
       ImGui::Text("  where Ratio = RectSize / CornerRadius");
     }
     ImGui::End();
 
-    auto transform = Matrix::MakeTranslation(
-        Vector2(screen_canvas_padding, screen_canvas_padding)) *
-                     Matrix::MakeScale(Vector2(scale, scale));
+    auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
+    auto transform = Matrix::MakeTranslation(top_right) *
+                     Matrix::MakeScale(Vector2(scale, scale)) *
+                     Matrix::MakeTranslation(Vector2(-rect_size, 0));
     bool success = true;
 
-    auto fill_geom = std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
+    auto fill_geom =
+        std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
     // Fill
     {
       auto contents = std::make_shared<SolidColorContents>();
@@ -2673,8 +2674,7 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
     // Stroke
     auto path = flutter::DlPath::MakeRoundSuperellipse(
         RoundSuperellipse::MakeRectRadius(rect, corner_radius));
-    auto stroke_geom = Geometry::MakeStrokePath(
-        path, {.width = 2 / scale});
+    auto stroke_geom = Geometry::MakeStrokePath(path, {.width = 2 / scale});
     {
       auto contents = std::make_shared<SolidColorContents>();
       contents->SetColor(Color::Blue());
@@ -2684,10 +2684,30 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
       entity.SetContents(contents);
       entity.SetTransform(transform);
 
-
       success = success && entity.Render(context, pass);
     }
 
+    auto screen_top_right =
+        Matrix::MakeScale(GetContentScale()).Invert() * top_right;
+    constexpr float font_size = 13.0f;
+    for (int i = -1; i < 100; i++) {
+      float screen_offset = static_cast<float>(i) * 20.0f;
+      std::string label;
+      if (i == -1) {
+        label = "Ruler: (in portion of rect size)";
+      } else if (i == 0) {
+        label = "- 0.0";
+      } else {
+        float portion_of_rect =
+            screen_offset * GetContentScale().y / scale / rect_size;
+        label = std::format("- {:.2g}", portion_of_rect);
+      }
+      ImGui::GetBackgroundDrawList()->AddText(
+          NULL, font_size,
+          {screen_top_right.x - 500,
+           screen_top_right.y + screen_offset - font_size / 2},
+          IM_COL32_WHITE, label.c_str());
+    }
     return success;
   };
 

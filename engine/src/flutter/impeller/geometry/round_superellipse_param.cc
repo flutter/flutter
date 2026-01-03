@@ -448,9 +448,14 @@ class RoundSuperellipseBuilder {
     constexpr Scalar kMaxN = kMinN + (kNumRecords - 1) * kStep;
 
     if (n >= kMaxN) {
-      // Heuristic formula derived from fitting.
-      return {1.07f - expf(1.307649835) * powf(n, -0.8568516731),
-              -0.01f + expf(-0.9287690322) * powf(n, -0.6120901398)};
+      // Heuristic formula derived from fitting, which works reasonably well
+      // until very high l/r ratio (~1e4). At very high ratio (hence high n),
+      // the formula can cause control points to over-shoot the corner, so we
+      // clamp the result, since the curve would be visually indistinguishable
+      // from a straight line anyway (difference < 1e-5 of the rect size).
+      return {
+          fmin(1.07f - expf(1.307649835) * powf(n, -0.8568516731), 1.0f),
+          fmax(-0.01f + expf(-0.9287690322) * powf(n, -0.6120901398), 0.0f)};
     }
 
     Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);

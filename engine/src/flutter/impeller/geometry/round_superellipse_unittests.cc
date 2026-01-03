@@ -779,5 +779,27 @@ TEST(RoundSuperellipseTest,
   rr.Dispatch(receiver);
 }
 
+TEST(RoundSuperellipseTest, PathForLongRseShouldBeCorrect) {
+  Rect bounds = Rect::MakeLTRB(0, 0, 300, 100000);
+  // Regression test for https://github.com/flutter/flutter/issues/170593.
+  // The issue was caused by incorrect calculation when building paths for
+  // rounded superellipses with sharp corners and unequal width and height.
+  // Since the most obvious symptom of the issue is some points being
+  // incorrectly placed out of bounds, this test case simply verifies that all
+  // points are within the bounds.
+
+  auto rr = RoundSuperellipseParam::MakeBoundsRadius(bounds, 100);
+  SpyPathReceiver receiver;
+  receiver.SpyLineTo(
+      [&](const Point& p2) { EXPECT_TRUE(bounds.ContainsInclusive(p2)); });
+  receiver.SpyCubicTo([&](const Point& cp1, const Point& cp2, const Point& p2) {
+    EXPECT_TRUE(bounds.ContainsInclusive(cp1));
+    EXPECT_TRUE(bounds.ContainsInclusive(cp2));
+    EXPECT_TRUE(bounds.ContainsInclusive(p2));
+  });
+
+  rr.Dispatch(receiver);
+}
+
 }  // namespace testing
 }  // namespace impeller
