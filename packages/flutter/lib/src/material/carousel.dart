@@ -1871,6 +1871,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   }
 
   /// Returns the length of one complete cycle in pixels.
+  ///
   /// A cycle is the scroll distance needed to return to the same visual state.
   double _getCycleLengthInPixels() {
     if (itemCount == null || itemCount! <= 0 || !hasViewportDimension || viewportDimension == 0) {
