@@ -670,7 +670,6 @@ if (slash != -1) {
       )
       .stdout
       .trim();
-}
 
 @override
 String get devToolsVersion => globals.cache.devToolsVersion;
