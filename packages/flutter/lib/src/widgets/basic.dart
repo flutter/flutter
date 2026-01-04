@@ -6108,7 +6108,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     final parentData = renderObject.parentData! as FlexParentData;
     var needsLayout = false;
 
-    final effectiveFlex = isFlexible ? flex : 0;
+    final int effectiveFlex = isFlexible ? flex : 0;
     if (parentData.flex != effectiveFlex) {
       parentData.flex = effectiveFlex;
       needsLayout = true;
@@ -6126,13 +6126,6 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
   @override
   Type get debugTypicalAncestorWidgetClass => Flex;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IntProperty('flex', flex));
-    properties.add(DiagnosticsProperty<bool>('isFlexible', isFlexible));
-  }
 }
 
 /// A widget that expands a child of a [Row], [Column], or [Flex]
