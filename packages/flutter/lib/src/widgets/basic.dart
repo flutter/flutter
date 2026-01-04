@@ -6045,7 +6045,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     super.key,
     this.flex = 1,
     this.fit = FlexFit.loose,
-    this.visible = true,
+    this.isFlexible = true,
     required super.child,
   });
 
@@ -6066,18 +6066,19 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// space (but is allowed to be smaller).
   final FlexFit fit;
 
-  /// Whether this flexible child participates in flex layout.
+  /// Whether this child participates in flex layout.
   ///
   /// If true, the child participates in flex layout according to [flex] and [fit].
-  /// If false, the child behaves as an inflexible child that determines its own size.
+  /// If false, the child becomes inflexible and takes its natural size without
+  /// expanding to fill available space.
   ///
   /// This can be useful for conditionally applying flex behavior based on screen
   /// size, device type, or other runtime conditions.
   ///
   /// {@tool dartpad}
-  /// This example shows how to use the [visible] parameter to conditionally
-  /// apply flex behavior. The flexible widget will only expand when [visible]
-  /// is true, otherwise it behaves like a regular child widget.
+  /// This example shows how to use the [isFlexible] parameter to conditionally
+  /// apply flex behavior. The flexible widget will only expand when [isFlexible]
+  /// is true, otherwise it takes its natural size.
   ///
   /// ```dart
   /// Row(
@@ -6087,7 +6088,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   ///
   ///     // This child will only expand on wide screens
   ///     Flexible(
-  ///       visible: MediaQuery.of(context).size.width > 600,
+  ///       isFlexible: MediaQuery.of(context).size.width > 600,
   ///       child: Container(height: 50, color: Colors.red),
   ///     ),
   ///
@@ -6099,7 +6100,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// )
   /// ```
   /// {@end-tool}
-  final bool visible;
+  final bool isFlexible;
 
   @override
   void applyParentData(RenderObject renderObject) {
@@ -6107,7 +6108,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     final parentData = renderObject.parentData! as FlexParentData;
     var needsLayout = false;
 
-    final effectiveFlex = visible ? flex : 0;
+    final effectiveFlex = isFlexible ? flex : 0;
     if (parentData.flex != effectiveFlex) {
       parentData.flex = effectiveFlex;
       needsLayout = true;
@@ -6130,7 +6131,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('flex', flex));
-    properties.add(DiagnosticsProperty<bool>('visible', visible));
+    properties.add(DiagnosticsProperty<bool>('isFlexible', isFlexible));
   }
 }
 
@@ -6168,9 +6169,9 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to use the [visible] parameter with [Expanded] to
+/// This example shows how to use the [isFlexible] parameter with [Expanded] to
 /// conditionally expand children based on screen size or other conditions.
-/// When [visible] is false, the child behaves as a regular inflexible widget.
+/// When [isFlexible] is false, the child becomes inflexible and takes its natural size.
 ///
 /// ```dart
 /// class ResponsiveLayout extends StatelessWidget {
@@ -6191,7 +6192,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 ///         // Content area that only expands on wide screens
 ///         Expanded(
-///           visible: isWideScreen,
+///           isFlexible: isWideScreen,
 ///           child: Container(
 ///             height: 100,
 ///             color: Colors.green,
@@ -6223,7 +6224,7 @@ class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// so that the child fills the available space along the flex widget's
   /// main axis.
-  const Expanded({super.key, super.flex, super.visible, required super.child})
+  const Expanded({super.key, super.flex, super.isFlexible, required super.child})
     : super(fit: FlexFit.tight);
 }
 
