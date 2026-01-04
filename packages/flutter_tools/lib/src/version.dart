@@ -651,7 +651,7 @@ _repositoryUrl = _git
     )
     .stdout
     .trim();
-
+            
 final int slash = gitChannel.indexOf('/');
 if (slash != -1) {
   final String remote = gitChannel.substring(0, slash);
@@ -670,7 +670,7 @@ if (slash != -1) {
       )
       .stdout
       .trim();
-
+}
 @override
 String get devToolsVersion => globals.cache.devToolsVersion;
 
