@@ -9,9 +9,7 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui'
-    as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -4105,7 +4103,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
     required SemanticsValidationResult validationResult,
-    required ui.SemanticsHitTestBehavior? hitTestBehavior,
+    required HitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
     required String? minValue,

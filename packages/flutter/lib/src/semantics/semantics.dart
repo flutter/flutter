@@ -28,7 +28,7 @@ import 'dart:ui'
         StringAttribute,
         TextDirection,
         Tristate;
-import 'dart:ui' as ui show SemanticsHitTestBehavior;
+import 'package:flutter/rendering.dart' show HitTestBehavior;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -1335,7 +1335,7 @@ class SemanticsData with Diagnosticable {
   final SemanticsValidationResult validationResult;
 
   /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  final ui.SemanticsHitTestBehavior hitTestBehavior;
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
@@ -2626,9 +2626,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@template flutter.semantics.SemanticsProperties.hitTestBehavior}
   /// Describes how the semantic node should behave during hit testing.
   ///
-  /// See [ui.SemanticsHitTestBehavior] for more details.
+  /// See [HitTestBehavior] for more details.
   /// {@endtemplate}
-  final ui.SemanticsHitTestBehavior? hitTestBehavior;
+  final HitTestBehavior? hitTestBehavior;
 
   /// {@template flutter.semantics.SemanticsProperties.inputType}
   /// The input type for of a editable widget.
@@ -3640,8 +3640,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
 
   /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
+  HitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  HitTestBehavior _hitTestBehavior = HitTestBehavior.deferToChild;
 
   /// {@template flutter.semantics.SemanticsNode.inputType}
   /// The input type for of a editable node.
@@ -3780,7 +3780,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
-    ui.SemanticsHitTestBehavior hitTestBehavior = _hitTestBehavior;
+    HitTestBehavior hitTestBehavior = _hitTestBehavior;
     SemanticsInputType inputType = _inputType;
     final Locale? locale = _locale;
     final customSemanticsActionIds = <int>{};
@@ -3847,7 +3847,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
-        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
+        if (hitTestBehavior == HitTestBehavior.deferToChild) {
           hitTestBehavior = node._hitTestBehavior;
         }
         if (tooltip == '') {
@@ -6547,9 +6547,9 @@ class SemanticsConfiguration {
   }
 
   /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
-  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
-  set hitTestBehavior(ui.SemanticsHitTestBehavior value) {
+  HitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  HitTestBehavior _hitTestBehavior = HitTestBehavior.deferToChild;
+  set hitTestBehavior(HitTestBehavior value) {
     _hitTestBehavior = value;
     _hasBeenAnnotated = true;
   }
@@ -6681,8 +6681,8 @@ class SemanticsConfiguration {
     if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
-    if (_hitTestBehavior != ui.SemanticsHitTestBehavior.defer ||
-        other._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+    if (_hitTestBehavior != HitTestBehavior.deferToChild ||
+        other._hitTestBehavior != HitTestBehavior.deferToChild) {
       return false;
     }
     if (_minValue != null && other._minValue != null) {
@@ -6803,8 +6803,8 @@ class SemanticsConfiguration {
     _minValue ??= child._minValue;
     _maxValue ??= child._maxValue;
 
-    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
-        child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+    if (_hitTestBehavior == HitTestBehavior.deferToChild &&
+        child._hitTestBehavior != HitTestBehavior.deferToChild) {
       _hitTestBehavior = child._hitTestBehavior;
     }
 
