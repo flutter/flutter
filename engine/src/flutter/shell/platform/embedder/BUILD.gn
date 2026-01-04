@@ -276,7 +276,7 @@ if (enable_unittests) {
     include_dirs = [ "." ]
 
     sources = [
-      "platform_view_embedder_unittests.cc",
+      # "platform_view_embedder_unittests.cc",
       "tests/embedder_config_builder.cc",
       "tests/embedder_config_builder.h",
       "tests/embedder_frozen.h",

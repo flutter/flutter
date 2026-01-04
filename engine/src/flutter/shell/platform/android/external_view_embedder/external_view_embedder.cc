@@ -215,6 +215,7 @@ void AndroidExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrepareFlutterView(
+    int64_t flutter_view_id,
     DlISize frame_size,
     double device_pixel_ratio) {
   Reset();

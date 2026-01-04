@@ -113,13 +113,14 @@ void AndroidExternalViewEmbedderWrapper::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::PrepareFlutterView(
+    int64_t flutter_view_id,
     DlISize frame_size,
     double device_pixel_ratio) {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->PrepareFlutterView(frame_size, device_pixel_ratio);
+    hcpp_view_embedder_->PrepareFlutterView(flutter_view_id, frame_size, device_pixel_ratio);
   } else {
-    non_hcpp_view_embedder_->PrepareFlutterView(frame_size, device_pixel_ratio);
+    non_hcpp_view_embedder_->PrepareFlutterView(flutter_view_id, frame_size, device_pixel_ratio);
   }
 }
 

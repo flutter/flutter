@@ -280,7 +280,6 @@ class PlatformDispatcher {
   // The implicit view must be added before [implicitView] is first called,
   // which is typically the main function.
   void _addView(int id, _ViewConfiguration viewConfiguration) {
-    assert(!_views.containsKey(id), 'View ID $id already exists.');
     _views[id] = FlutterView._(id, this, viewConfiguration);
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
@@ -292,10 +291,6 @@ class PlatformDispatcher {
   // The target view must must exist. The implicit view must not be removed,
   // or an assertion will be triggered.
   void _removeView(int id) {
-    assert(id != _implicitViewId, 'The implicit view #$id can not be removed.');
-    if (id == _implicitViewId) {
-      return;
-    }
     assert(_views.containsKey(id), 'View ID $id does not exist.');
     _views.remove(id);
     _invoke(onMetricsChanged, _onMetricsChangedZone);
