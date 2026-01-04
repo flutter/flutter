@@ -644,31 +644,36 @@ class _FlutterVersionGit extends FlutterVersion {
             'rev-parse',
             '--abbrev-ref',
             '--symbolic',
-            kGitTrackingUpstream,
-          ], workingDirectory: flutterRoot)
-          .stdout
-          .trim();
-      
-      final int slash = gitChannel.indexOf('/');
-      if (slash != -1) {
-        final String remote = gitChannel.substring(0, slash);
-           final Map<String, String> environment = Map<String, String>.of(globals.platform.environment)
-          ..remove('GIT_DIR')
-          ..remove('GIT_INDEX_FILE')
-          ..remove('GIT_WORK_TREE')
-          ..remove('GIT_OBJECT_DIRECTORY')
-          ..remove('GIT_ALTERNATE_OBJECT_DIRECTORIES');
-        _repositoryUrl = _git
-            .runSync(
-              <String>['ls-remote', '--get-url', remote],
-              environment: environment,
-              workingDirectory: flutterRoot,
-            )
-            .stdout
-            .trim();
-      }
-  @override
-  String get devToolsVersion => globals.cache.devToolsVersion;
+_repositoryUrl = _git
+    .runSync(
+      <String>[kGitTrackingUpstream],
+      workingDirectory: flutterRoot,
+    )
+    .stdout
+    .trim();
+
+final int slash = gitChannel.indexOf('/');
+if (slash != -1) {
+  final String remote = gitChannel.substring(0, slash);
+  final Map<String, String> environment = Map<String, String>.of(globals.platform.environment)
+    ..remove('GIT_DIR')
+    ..remove('GIT_INDEX_FILE')
+    ..remove('GIT_WORK_TREE')
+    ..remove('GIT_OBJECT_DIRECTORY')
+    ..remove('GIT_ALTERNATE_OBJECT_DIRECTORIES');
+
+  _repositoryUrl = _git
+      .runSync(
+        <String>['ls-remote', '--get-url', remote],
+        environment: environment,
+        workingDirectory: flutterRoot,
+      )
+      .stdout
+      .trim();
+}
+
+@override
+String get devToolsVersion => globals.cache.devToolsVersion;
 
   @override
   String get dartSdkVersion => globals.cache.dartSdkVersion;
