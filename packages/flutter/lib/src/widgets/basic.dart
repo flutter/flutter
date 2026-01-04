@@ -6041,7 +6041,13 @@ class Column extends Flex {
 class Flexible extends ParentDataWidget<FlexParentData> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
-  const Flexible({super.key, this.flex = 1, this.fit = FlexFit.loose, required super.child});
+  const Flexible({
+    super.key,
+    this.flex = 1,
+    this.fit = FlexFit.loose,
+    this.visible = true,
+    required super.child,
+  });
 
   /// The flex factor to use for this child.
   ///
@@ -6060,14 +6066,50 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// space (but is allowed to be smaller).
   final FlexFit fit;
 
+  /// Whether this flexible child participates in flex layout.
+  ///
+  /// If true, the child participates in flex layout according to [flex] and [fit].
+  /// If false, the child behaves as an inflexible child that determines its own size.
+  ///
+  /// This can be useful for conditionally applying flex behavior based on screen
+  /// size, device type, or other runtime conditions.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use the [visible] parameter to conditionally
+  /// apply flex behavior. The flexible widget will only expand when [visible]
+  /// is true, otherwise it behaves like a regular child widget.
+  ///
+  /// ```dart
+  /// Row(
+  ///   children: [
+  ///     // This child will always take its natural size
+  ///     Container(width: 100, height: 50, color: Colors.blue),
+  ///
+  ///     // This child will only expand on wide screens
+  ///     Flexible(
+  ///       visible: MediaQuery.of(context).size.width > 600,
+  ///       child: Container(height: 50, color: Colors.red),
+  ///     ),
+  ///
+  ///     // This child will always expand
+  ///     Flexible(
+  ///       child: Container(height: 50, color: Colors.green),
+  ///     ),
+  ///   ],
+  /// )
+  /// ```
+  /// {@end-tool}
+  final bool visible;
+
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
     final parentData = renderObject.parentData! as FlexParentData;
     var needsLayout = false;
 
-    if (parentData.flex != flex) {
-      parentData.flex = flex;
+    final effectiveFlex = visible ? flex : 0;
+    if (parentData.flex != effectiveFlex) {
+      parentData.flex = effectiveFlex;
       needsLayout = true;
     }
 
@@ -6088,6 +6130,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('flex', flex));
+    properties.add(DiagnosticsProperty<bool>('visible', visible));
   }
 }
 
@@ -6124,6 +6167,53 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// ** See code in examples/api/lib/widgets/basic/expanded.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to use the [visible] parameter with [Expanded] to
+/// conditionally expand children based on screen size or other conditions.
+/// When [visible] is false, the child behaves as a regular inflexible widget.
+///
+/// ```dart
+/// class ResponsiveLayout extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     final screenWidth = MediaQuery.of(context).size.width;
+///     final isWideScreen = screenWidth > 600;
+///
+///     return Row(
+///       children: [
+///         // Fixed width sidebar
+///         Container(
+///           width: 200,
+///           height: 100,
+///           color: Colors.blue,
+///           child: Center(child: Text('Sidebar')),
+///         ),
+///
+///         // Content area that only expands on wide screens
+///         Expanded(
+///           visible: isWideScreen,
+///           child: Container(
+///             height: 100,
+///             color: Colors.green,
+///             child: Center(child: Text('Content')),
+///           ),
+///         ),
+///
+///         // This always expands to fill remaining space
+///         Expanded(
+///           child: Container(
+///             height: 100,
+///             color: Colors.orange,
+///             child: Center(child: Text('Always Expanded')),
+///           ),
+///         ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
@@ -6133,7 +6223,8 @@ class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// so that the child fills the available space along the flex widget's
   /// main axis.
-  const Expanded({super.key, super.flex, required super.child}) : super(fit: FlexFit.tight);
+  const Expanded({super.key, super.flex, super.visible, required super.child})
+    : super(fit: FlexFit.tight);
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.
