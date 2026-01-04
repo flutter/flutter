@@ -718,7 +718,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
   DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
-    external_view_embedder_->PrepareFlutterView(layer_tree.frame_size(),
+    external_view_embedder_->PrepareFlutterView(view_id,
+                                                layer_tree.frame_size(),
                                                 device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
@@ -737,7 +738,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
   // root surface transformation is set by the embedder instead of
   // having to apply it here.
   DlMatrix root_surface_transformation =
-      embedder_root_canvas ? DlMatrix() : surface_->GetRootTransformation();
+  embedder_root_canvas ? DlMatrix() : surface_->GetRootTransformation();
 
   auto root_surface_canvas =
       embedder_root_canvas ? embedder_root_canvas : frame->Canvas();

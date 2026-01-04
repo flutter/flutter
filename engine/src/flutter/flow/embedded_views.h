@@ -481,8 +481,9 @@ class ExternalViewEmbedder {
   virtual DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) = 0;
 
   // Prepare for a view to be drawn.
-  virtual void PrepareFlutterView(DlISize frame_size,
-                                  double device_pixel_ratio) = 0;
+  virtual void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
+                          double device_pixel_ratio) = 0;
 
   // Submits the content stored since |PrepareFlutterView| to the specified
   // Flutter view.

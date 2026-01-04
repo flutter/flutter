@@ -15,13 +15,16 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(CAMetalLayer* layer,
-                                                 const std::shared_ptr<IOSContext>& context)
+IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(
+    CAMetalLayer* layer,
+    const std::shared_ptr<IOSContext>& context,
+    bool render_to_surface)
     : IOSSurface(context),
       GPUSurfaceMetalDelegate(MTLRenderTargetType::kCAMetalLayer),
       layer_(layer),
       impeller_context_(context ? context->GetImpellerContext() : nullptr),
-      aiks_context_(context ? context->GetAiksContext() : nullptr) {
+      aiks_context_(context ? context->GetAiksContext() : nullptr),
+      render_to_surface_(render_to_surface) {
   if (!impeller_context_ || !aiks_context_) {
     return;
   }
@@ -45,8 +48,9 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface() {
   impeller_context_->UpdateOffscreenLayerPixelFormat(
       impeller::FromMTLPixelFormat(layer_.pixelFormat));
-  return std::make_unique<GPUSurfaceMetalImpeller>(this,          //
-                                                   aiks_context_  //
+  return std::make_unique<GPUSurfaceMetalImpeller>(this,               //
+                                                   aiks_context_,      //
+                                                   render_to_surface_  //
   );
 }
 
@@ -62,6 +66,10 @@ GPUCAMetalLayerHandle IOSSurfaceMetalImpeller::GetCAMetalLayer(const DlISize& fr
   layer_.framebufferOnly = NO;
 
   return (__bridge GPUCAMetalLayerHandle)layer_;
+}
+
+MTLPixelFormat IOSSurfaceMetalImpeller::GetPixelFormat() const {
+  return layer_.pixelFormat;
 }
 
 // |GPUSurfaceMetalDelegate|
