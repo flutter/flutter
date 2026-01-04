@@ -2003,6 +2003,132 @@ void main() {
       );
     });
 
+    testWidgets(
+      'OutlineInputBorder with BorderSide.strokeAlignOutside should draw border outside bounds',
+      (WidgetTester tester) async {
+        const borderWidth = 4.0;
+        const borderRadius = 12.0;
+        const inputDecoratorWidth = 800.0;
+        const inputDecoratorHeight = 56.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              filled: true,
+              fillColor: Color(0xFF00FF00),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+                borderSide: BorderSide(
+                  width: borderWidth,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+        expect(
+          box,
+          paints..rrect(
+            style: PaintingStyle.stroke,
+            strokeWidth: borderWidth,
+            rrect: RRect.fromLTRBR(
+              -borderWidth / 2,
+              -borderWidth / 2,
+              inputDecoratorWidth + borderWidth / 2,
+              inputDecoratorHeight + borderWidth / 2,
+              const Radius.circular(borderRadius + borderWidth / 2),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'OutlineInputBorder with BorderSide.strokeAlignCenter should draw border between bounds',
+      (WidgetTester tester) async {
+        const borderWidth = 4.0;
+        const borderRadius = 12.0;
+        const inputDecoratorWidth = 800.0;
+        const inputDecoratorHeight = 56.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              filled: true,
+              fillColor: Color(0xFF00FF00),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+                borderSide: BorderSide(
+                  width: borderWidth,
+                  strokeAlign: BorderSide.strokeAlignCenter,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+        expect(
+          box,
+          paints..rrect(
+            style: PaintingStyle.stroke,
+            strokeWidth: borderWidth,
+            rrect: RRect.fromLTRBR(
+              0,
+              0,
+              inputDecoratorWidth,
+              inputDecoratorHeight,
+              const Radius.circular(borderRadius),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'OutlineInputBorder with BorderSide.strokeAlignInside should draw border inside bounds',
+      (WidgetTester tester) async {
+        const borderWidth = 4.0;
+        const borderRadius = 12.0;
+        const inputDecoratorWidth = 800.0;
+        const inputDecoratorHeight = 56.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              filled: true,
+              fillColor: Color(0xFF00FF00),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+                borderSide: BorderSide(width: borderWidth),
+              ),
+            ),
+          ),
+        );
+
+        final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+        expect(
+          box,
+          paints..rrect(
+            style: PaintingStyle.stroke,
+            strokeWidth: borderWidth,
+            rrect: RRect.fromLTRBR(
+              borderWidth / 2,
+              borderWidth / 2,
+              inputDecoratorWidth - borderWidth / 2,
+              inputDecoratorHeight - borderWidth / 2,
+              const Radius.circular(borderRadius - borderWidth / 2),
+            ),
+          ),
+        );
+      },
+    );
+
     testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (
       WidgetTester tester,
     ) async {
