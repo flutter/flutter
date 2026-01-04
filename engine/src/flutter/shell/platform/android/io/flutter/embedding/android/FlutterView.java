@@ -1081,7 +1081,7 @@ public class FlutterView extends FrameLayout
       if (getAccessibilityViewIdMethod.invoke(currentView).equals(accessibilityId)) {
         return currentView;
       }
-    } catch (IllegalAccessException | InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
     if (currentView instanceof ViewGroup) {
