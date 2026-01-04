@@ -2497,6 +2497,9 @@ class EditableTextStyle {
     required this.textAlign,
     required this.fontFamily,
     required this.fontWeight,
+    required this.letterSpacing,
+    required this.wordSpacing,
+    required this.lineHeight,
   });
 
   factory EditableTextStyle.fromFrameworkMessage(Map<String, dynamic> flutterStyle) {
@@ -2523,6 +2526,9 @@ class EditableTextStyle {
       textAlign: ui.TextAlign.values[textAlignIndex],
       textDirection: ui.TextDirection.values[textDirectionIndex],
       fontWeight: fontWeight,
+      letterSpacing: flutterStyle.tryDouble('letterSpacing'),
+      wordSpacing: flutterStyle.tryDouble('wordSpacing'),
+      lineHeight: flutterStyle.tryDouble('lineHeight'),
     );
   }
 
@@ -2533,6 +2539,9 @@ class EditableTextStyle {
   final String? fontFamily;
   final ui.TextAlign textAlign;
   final ui.TextDirection textDirection;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? lineHeight;
 
   String? get align => textAlignToCssValue(textAlign, textDirection);
 
@@ -2541,7 +2550,10 @@ class EditableTextStyle {
   void applyToDomElement(DomHTMLElement domElement) {
     domElement.style
       ..textAlign = align!
-      ..font = cssFont;
+      ..font = cssFont
+      ..letterSpacing = letterSpacing != null ? '${letterSpacing}px' : ''
+      ..wordSpacing = wordSpacing != null ? '${wordSpacing}px' : ''
+      ..lineHeight = lineHeight != null ? '${lineHeight}px' : 'normal';
   }
 }
 

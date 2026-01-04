@@ -5662,6 +5662,9 @@ void main() {
           'fontWeightIndex': 5,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5704,6 +5707,9 @@ void main() {
           'fontWeightIndex': FontWeight.bold.index,
           'textAlignIndex': 4,
           'textDirectionIndex': 0,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );
@@ -5782,6 +5788,9 @@ void main() {
           'fontWeightIndex': 6,
           'textAlignIndex': 4,
           'textDirectionIndex': 1,
+          'letterSpacing': null,
+          'wordSpacing': null,
+          'lineHeight': 20.0,
         },
       ),
     );

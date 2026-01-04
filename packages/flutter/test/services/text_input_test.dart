@@ -1352,14 +1352,14 @@ void main() {
       expect(sentList[0][5], TextDirection.rtl.index); // direction
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setSelectionRects');
 
-      connection.setStyle(
+      connection.setStyleWithMetrics(
         fontFamily: null,
         fontSize: null,
         fontWeight: null,
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.left,
       );
-      expectedMethodCalls.add('setStyle');
+      expectedMethodCalls.add('setStyleWithMetrics');
       expect(control.methodCalls, expectedMethodCalls);
       expect(fakeTextChannel.outgoingCalls.length, 9);
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setStyle');
@@ -1610,6 +1610,20 @@ class FakeTextInputControl with TextInputControl {
     required TextAlign textAlign,
   }) {
     methodCalls.add('setStyle');
+  }
+
+  @override
+  void setStyleWithMetrics({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? lineHeight,
+  }) {
+    methodCalls.add('setStyleWithMetrics');
   }
 
   @override
