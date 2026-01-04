@@ -1295,6 +1295,9 @@ abstract class DefaultTextEditingStrategy
   /// Size and transform of the editable text on the page.
   EditableTextGeometry? geometry;
 
+  /// The scroll top of the editable text on the page.
+  final Map<String, double> _preservedScrollTops = <String, double>{};
+
   OnChangeCallback? onChange;
   OnActionCallback? onAction;
 
@@ -1450,6 +1453,11 @@ abstract class DefaultTextEditingStrategy
   @override
   void disable() {
     assert(isEnabled);
+    // Preserve the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      _preservedScrollTops[key] = activeDomElement.scrollTop;
+    }
 
     isEnabled = false;
     lastEditingState = null;
@@ -1653,6 +1661,12 @@ abstract class DefaultTextEditingStrategy
 
     // Re-focuses after setting editing state.
     moveFocusToActiveDomElement();
+
+    // Restore the internal scroll position.
+    if (geometry != null && lastEditingState != null) {
+      final key = '${geometry!.hashCode}_${lastEditingState!.text.hashCode}';
+      activeDomElement.scrollTop = _preservedScrollTops.remove(key) ?? 0.0;
+    }
   }
 
   /// Prevent default behavior for mouse down, up and move.
@@ -2613,4 +2627,18 @@ class EditableTextGeometry {
       ..height = '${height}px'
       ..transform = cssTransform;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is EditableTextGeometry &&
+        other.width == width &&
+        other.height == height &&
+        listEquals<double>(other.globalTransform, globalTransform);
+  }
+
+  @override
+  int get hashCode => Object.hash(width, height, Object.hashAll(globalTransform));
 }
