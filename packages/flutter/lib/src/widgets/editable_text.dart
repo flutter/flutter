@@ -3409,12 +3409,15 @@ class EditableTextState extends State<EditableText>
           ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
           : widget.style;
       if (_hasInputConnection) {
-        _textInputConnection!.setStyle(
+        _textInputConnection!.setStyleWithMetrics(
           fontFamily: _style.fontFamily,
           fontSize: _style.fontSize,
           fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
+          letterSpacing: _style.letterSpacing,
+          wordSpacing: _style.wordSpacing,
+          lineHeight: renderEditable.preferredLineHeight,
         );
       }
     }
@@ -3959,12 +3962,15 @@ class EditableTextState extends State<EditableText>
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
-        ..setStyle(
+        ..setStyleWithMetrics(
           fontFamily: _style.fontFamily,
           fontSize: _style.fontSize,
           fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
+          letterSpacing: _style.letterSpacing,
+          wordSpacing: _style.wordSpacing,
+          lineHeight: renderEditable.preferredLineHeight,
         )
         ..setEditingState(localValue)
         ..show();
@@ -4029,12 +4035,15 @@ class EditableTextState extends State<EditableText>
 
     newConnection
       ..show()
-      ..setStyle(
+      ..setStyleWithMetrics(
         fontFamily: _style.fontFamily,
         fontSize: _style.fontSize,
         fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
+        letterSpacing: _style.letterSpacing,
+        wordSpacing: _style.wordSpacing,
+        lineHeight: renderEditable.preferredLineHeight,
       )
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
