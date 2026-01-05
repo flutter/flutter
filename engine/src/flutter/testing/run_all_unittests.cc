@@ -8,6 +8,7 @@
 #include <string>
 
 #include "flutter/fml/backtrace.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/testing/debugger_detection.h"
 #include "flutter/testing/test_args.h"
