@@ -253,7 +253,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   List<Widget> _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
     return <Widget>[
       Expanded(child: Center(child: active ? item.activeIcon : item.icon)),
-      if (item.label != null) Text(item.label!),
+      if (item.label != null) Text(item.label!, semanticsLabel: item.semanticsLabel),
     ];
   }
 
