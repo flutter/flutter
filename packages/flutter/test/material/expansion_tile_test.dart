@@ -811,7 +811,7 @@ void main() {
       // "Expanded".
       expect(
         tester.takeAnnouncements().first,
-        accessibilityAnnouncement(localizations.collapsedHint),
+        isAccessibilityAnnouncement(localizations.collapsedHint),
       );
 
       // Tap the title to collapse ExpansionTile.
@@ -823,7 +823,7 @@ void main() {
       // "Collapsed".
       expect(
         tester.takeAnnouncements().first,
-        accessibilityAnnouncement(localizations.expandedHint),
+        isAccessibilityAnnouncement(localizations.expandedHint),
       );
       handle.dispose();
     },
@@ -857,7 +857,7 @@ void main() {
 
       expect(
         tester.takeAnnouncements().first,
-        accessibilityAnnouncement(localizations.collapsedHint),
+        isAccessibilityAnnouncement(localizations.collapsedHint),
       );
 
       // Tap the title to collapse ExpansionTile.
@@ -866,7 +866,7 @@ void main() {
 
       expect(
         tester.takeAnnouncements().first,
-        accessibilityAnnouncement(localizations.expandedHint),
+        isAccessibilityAnnouncement(localizations.expandedHint),
       );
       handle.dispose();
     },

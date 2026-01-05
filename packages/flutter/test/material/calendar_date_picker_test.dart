@@ -1493,7 +1493,7 @@ void main() {
           // The initial date should be announced.
           expect(
             tester.takeAnnouncements().last,
-            accessibilityAnnouncement(
+            isAccessibilityAnnouncement(
               '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
             ),
           );
@@ -1505,7 +1505,7 @@ void main() {
           // The selected date should be announced.
           expect(
             tester.takeAnnouncements().last,
-            accessibilityAnnouncement(
+            isAccessibilityAnnouncement(
               '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
             ),
           );
@@ -1516,7 +1516,7 @@ void main() {
           // The initial date should be announced as selected.
           expect(
             tester.takeAnnouncements().first,
-            accessibilityAnnouncement(
+            isAccessibilityAnnouncement(
               '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
             ),
           );

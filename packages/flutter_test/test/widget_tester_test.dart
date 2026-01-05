@@ -705,13 +705,13 @@ void main() {
       await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
       expect(tester.takeAnnouncements(), [
-        accessibilityAnnouncement('announcement 1', textDirection: TextDirection.ltr),
-        accessibilityAnnouncement(
+        isAccessibilityAnnouncement('announcement 1', textDirection: TextDirection.ltr),
+        isAccessibilityAnnouncement(
           'announcement 2',
           textDirection: TextDirection.rtl,
           assertiveness: Assertiveness.assertive,
         ),
-        accessibilityAnnouncement(
+        isAccessibilityAnnouncement(
           'announcement 3',
           textDirection: TextDirection.rtl,
           assertiveness: Assertiveness.polite,

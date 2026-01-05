@@ -3417,7 +3417,7 @@ void main() {
     expect(lastOptions.length, kOptions.length);
     expect(
       tester.takeAnnouncements().first,
-      accessibilityAnnouncement(localizations.searchResultsFound),
+      isAccessibilityAnnouncement(localizations.searchResultsFound),
     );
 
     await tester.enterText(find.byKey(fieldKey), 'a');
@@ -3431,7 +3431,7 @@ void main() {
     expect(find.byKey(optionsKey), findsNothing);
     expect(
       tester.takeAnnouncements().first,
-      accessibilityAnnouncement(localizations.noResultsFound),
+      isAccessibilityAnnouncement(localizations.noResultsFound),
     );
 
     handle.dispose();

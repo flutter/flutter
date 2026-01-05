@@ -1044,14 +1044,14 @@ Matcher containsSemantics({
 ///
 /// ```dart
 /// await SemanticsService.sendAnnouncement(tester.view, 'Hello', TextDirection.ltr);
-/// expect(tester.takeAnnouncements(), contains(accessibilityAnnouncement('Hello')));
+/// expect(tester.takeAnnouncements(), contains(isAccessibilityAnnouncement('Hello')));
 /// ```
 ///
 /// See also:
 ///
-///  * [WidgetTester.takeAnnouncements], which retrieves the announcements.
+///  * [WidgetTester.takeAnnouncements], which retrieves the announcements in unit tests.
 ///  * [SemanticsService.sendAnnouncement], which sends an announcement.
-Matcher accessibilityAnnouncement(
+Matcher isAccessibilityAnnouncement(
   String message, {
   TextDirection? textDirection,
   Assertiveness? assertiveness,

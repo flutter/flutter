@@ -220,7 +220,7 @@ void main() {
 
       if (test.supportsAnnounce) {
         expect(tester.takeAnnouncements(), [
-          accessibilityAnnouncement(
+          isAccessibilityAnnouncement(
             'First error message',
             textDirection: TextDirection.ltr,
             assertiveness: Assertiveness.assertive,
@@ -444,7 +444,7 @@ void main() {
     expect(find.text('error'), findsOneWidget);
 
     expect(tester.takeAnnouncements(), [
-      accessibilityAnnouncement(
+      isAccessibilityAnnouncement(
         'error',
         textDirection: TextDirection.ltr,
         assertiveness: Assertiveness.assertive,
