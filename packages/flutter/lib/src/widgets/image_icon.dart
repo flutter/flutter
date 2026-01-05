@@ -26,7 +26,14 @@ class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const ImageIcon(this.image, {super.key, this.size, this.color, this.semanticLabel, this.renderOriginalImage = false});
+  const ImageIcon(
+    this.image, {
+    super.key,
+    this.size,
+    this.color,
+    this.semanticLabel,
+    this.renderOriginalImage = false,
+  });
 
   /// The image to display as the icon.
   ///
