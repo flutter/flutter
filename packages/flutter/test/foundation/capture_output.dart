@@ -10,8 +10,8 @@ import 'package:flutter/src/foundation/_error_dumper_io.dart'
 List<String> captureOutput(VoidCallback fn) {
   final log = <String>[];
 
-  bool capturedFromWeb = false;
-  bool capturedFromZone = false;
+  var capturedFromWeb = false;
+  var capturedFromZone = false;
 
   // On the web, error messages are directed to `console.error` and it's not possible to capture
   // them via `print` overrides. Therefore, we add a listener to capture those messages.

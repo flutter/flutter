@@ -8,7 +8,7 @@ import '../web.dart' as web;
 
 /// Dumps error messages to the console.
 class ErrorToConsoleDumper {
-  static final List<void Function(String message)> _listeners = <void Function(String message)>[];
+  static final _listeners = <void Function(String message)>[];
 
   /// Dumps the given error [message] to the console.
   static void dump(String message) {
