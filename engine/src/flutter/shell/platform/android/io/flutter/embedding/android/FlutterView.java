@@ -1127,7 +1127,6 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Mouse -------
   @Override
-  @RequiresApi(API_LEVELS.API_24)
   @NonNull
   public PointerIcon getSystemPointerIcon(int type) {
     return PointerIcon.getSystemIcon(getContext(), type);
@@ -1165,7 +1164,6 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #detachFromFlutterEngine()} for information on how to detach from a {@link
    * FlutterEngine}.
    */
-  @RequiresApi(API_LEVELS.API_24)
   public void attachToFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     Log.v(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
     if (isAttachedToFlutterEngine()) {
@@ -1293,7 +1291,6 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #attachToFlutterEngine(FlutterEngine)} for information on how to attach a {@link
    * FlutterEngine}.
    */
-  @RequiresApi(API_LEVELS.API_24)
   public void detachFromFlutterEngine() {
     Log.v(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
     if (!isAttachedToFlutterEngine()) {

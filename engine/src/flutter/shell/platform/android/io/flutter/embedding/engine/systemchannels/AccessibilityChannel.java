@@ -209,5 +209,12 @@ public class AccessibilityChannel {
 
     /** The user has opened a tooltip. */
     void onTooltip(@NonNull String message);
+
+    /**
+     * The framework has stopped compiling the accessibility tree.
+     *
+     * <p>The subclass needs to clean up any cached accessibility data from previous update.
+     */
+    void resetSemantics();
   }
 }
