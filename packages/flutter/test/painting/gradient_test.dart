@@ -370,6 +370,32 @@ void main() {
     );
   });
 
+  test('LinearGradient.scale preserves transform', () {
+    const testGradient = LinearGradient(
+      begin: Alignment.bottomRight,
+      end: Alignment.topLeft,
+      stops: [0, 0.5, 1],
+      colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00), Color(0xFF0000FF)],
+      tileMode: TileMode.decal,
+      transform: GradientRotation(math.pi / 4),
+    );
+    final LinearGradient actual = testGradient.scale(0.5);
+
+    expect(
+      actual,
+      _matchesLinearGradient(
+        const LinearGradient(
+          begin: Alignment.bottomRight,
+          end: Alignment.topLeft,
+          stops: [0, 0.5, 1],
+          colors: <Color>[Color(0x80FF0000), Color(0x8000FF00), Color(0x800000FF)],
+          tileMode: TileMode.decal,
+          transform: GradientRotation(math.pi / 4),
+        ),
+      ),
+    );
+  });
+
   test('RadialGradient with AlignmentDirectional', () {
     expect(() {
       return const RadialGradient(
@@ -624,6 +650,36 @@ void main() {
     );
   });
 
+  test('RadialGradient.scale preserves transform', () {
+    const testGradient = RadialGradient(
+      center: Alignment.topLeft,
+      focal: Alignment.centerLeft,
+      radius: 20.0,
+      focalRadius: 10.0,
+      stops: [0, 0.5, 1],
+      colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00), Color(0xFF0000FF)],
+      tileMode: TileMode.decal,
+      transform: GradientRotation(math.pi / 4),
+    );
+    final RadialGradient actual = testGradient.scale(0.5);
+
+    expect(
+      actual,
+      _matchesRadialGradient(
+        const RadialGradient(
+          center: Alignment.topLeft,
+          focal: Alignment.centerLeft,
+          radius: 20.0,
+          focalRadius: 10.0,
+          stops: [0, 0.5, 1],
+          colors: <Color>[Color(0x80FF0000), Color(0x8000FF00), Color(0x800000FF)],
+          tileMode: TileMode.decal,
+          transform: GradientRotation(math.pi / 4),
+        ),
+      ),
+    );
+  });
+
   test('SweepGradient lerp test', () {
     const testGradient1 = SweepGradient(
       center: Alignment.topLeft,
@@ -808,6 +864,34 @@ void main() {
         endAngle: math.pi / 2,
         colors: <Color>[Color(0x80FFFFFF), Color(0x80777777), Color(0x80444444)],
         transform: GradientRotation(1),
+      ),
+    );
+  });
+
+  test('SweepGradient.scale preserves transform', () {
+    const testGradient = SweepGradient(
+      center: Alignment.topLeft,
+      startAngle: math.pi / 4,
+      endAngle: math.pi * 3 / 4,
+      stops: [0, 0.5, 1],
+      colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00), Color(0xFF0000FF)],
+      tileMode: TileMode.decal,
+      transform: GradientRotation(math.pi / 4),
+    );
+    final SweepGradient actual = testGradient.scale(0.5);
+
+    expect(
+      actual,
+      _matchesSweepGradient(
+        const SweepGradient(
+          center: Alignment.topLeft,
+          startAngle: math.pi / 4,
+          endAngle: math.pi * 3 / 4,
+          stops: [0, 0.5, 1],
+          colors: <Color>[Color(0x80FF0000), Color(0x8000FF00), Color(0x800000FF)],
+          tileMode: TileMode.decal,
+          transform: GradientRotation(math.pi / 4),
+        ),
       ),
     );
   });
