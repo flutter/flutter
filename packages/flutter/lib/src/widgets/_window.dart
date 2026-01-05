@@ -682,7 +682,7 @@ mixin class TooltipWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
-/// {@tool dartpad}
+/// {@tool snippet}
 /// An example usage of [TooltipWindowController] looks like:
 ///
 /// ** See code in examples/api/lib/widgets/windows/tooltip.0.dart **
@@ -798,14 +798,14 @@ mixin class PopupWindowControllerDelegate {
 /// When the window is no longer needed, the user should call [destroy] on this
 /// controller to release the resources associated with the window.
 ///
-/// {@tool dartpad}
+/// {@tool snippet}
 /// An example usage of [PopupWindowController] looks like:
 ///
 /// ** See code in examples/api/lib/widgets/windows/popup.0.dart **
 /// {@end-tool}
 ///
 /// Children of a [PopupWindow] widget can access the [PopupWindowController]
-/// via the [WindowScope] inherited widget.
+/// via the [WindowScope] [InheritedWidget].
 ///
 /// {@macro flutter.widgets.windowing.experimental}
 abstract class PopupWindowController extends BaseWindowController {
@@ -878,8 +878,6 @@ abstract class PopupWindowController extends BaseWindowController {
   ///
   /// The platform may also give the window input focus and bring it to the
   /// top of the window stack. However, this behavior is platform-dependent.
-  ///
-  /// The window will be brought to the top of the window stack.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1277,7 +1275,7 @@ class TooltipWindow extends StatelessWidget {
 /// Widgets in the same tree as the [child] widget will have access to the
 /// [PopupWindowController] via the [WindowScope] widget.
 ///
-/// {@tool dartpad}
+/// {@tool snippet}
 /// An example usage of [PopupWindow] looks like:
 ///
 /// ** See code in examples/api/lib/widgets/windows/popup.0.dart **
