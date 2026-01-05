@@ -98,15 +98,15 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('ImageIcon renders original image colors when renderOriginalImage is true', (WidgetTester tester) async {
+  testWidgets('ImageIcon renders original image colors when renderOriginalImage is true', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: IconTheme(
           data: const IconThemeData(color: Color(0xFF0000FF)),
-          child: ImageIcon(
-            image,
-          ),
+          child: ImageIcon(image),
         ),
       ),
     );
@@ -118,10 +118,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: IconTheme(
           data: const IconThemeData(color: Color(0xFF0000FF)),
-          child: ImageIcon(
-            image,
-            renderOriginalImage: true,
-          ),
+          child: ImageIcon(image, renderOriginalImage: true),
         ),
       ),
     );
