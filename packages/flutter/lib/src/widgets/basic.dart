@@ -6066,8 +6066,31 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// [flex] and [fit]. If false, the child is laid out as if it were not wrapped
   /// in a Flexible widget, ignoring flex and fit properties.
   ///
-  /// This can be useful for conditionally enabling flex behavior based on
-  /// screen size or other runtime conditions.
+  /// {@tool snippet}
+  ///
+  /// This example shows a [Row] where a child becomes flexible on narrow
+  /// layouts and uses its intrinsic size on wider layouts.
+  ///
+  /// ```dart
+  /// class MyResponsiveWidget extends StatelessWidget {
+  ///   const MyResponsiveWidget({super.key});
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     final bool isNarrow = MediaQuery.of(context).size.width < 600;
+  ///     return Row(
+  ///       children: <Widget>[
+  ///         Flexible(
+  ///           enabled: isNarrow,
+  ///           child: const SizedBox(width: 100, height: 40),
+  ///         ),
+  ///         const SizedBox(width: 20),
+  ///       ],
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   final bool enabled;
 
   @override
