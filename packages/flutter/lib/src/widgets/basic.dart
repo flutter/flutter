@@ -6060,12 +6060,25 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// space (but is allowed to be smaller).
   final FlexFit fit;
 
-  /// If enabled is false, no flex layout behavior is applied.
+  /// Whether flex layout behavior is enabled for this child.
+  ///
+  /// If true (the default), this child participates in flex layout according to
+  /// [flex] and [fit]. If false, the child is laid out as if it were not wrapped
+  /// in a Flexible widget, ignoring flex and fit properties.
+  ///
+  /// This can be useful for conditionally enabling flex behavior based on
+  /// screen size or other runtime conditions.
   final bool enabled;
 
   @override
   void applyParentData(RenderObject renderObject) {
     if (!enabled) {
+      final FlexParentData parentData = renderObject.parentData! as FlexParentData;
+      if (parentData.flex != null || parentData.fit != null) {
+        parentData.flex = null;
+        parentData.fit = null;
+        renderObject.parent?.markNeedsLayout();
+      }
       return;
     }
     assert(renderObject.parentData is FlexParentData);

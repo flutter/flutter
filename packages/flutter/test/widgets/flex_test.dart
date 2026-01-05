@@ -436,4 +436,49 @@ void main() {
     expect(sizedBox.size.width, 50.0);
     expect(sizedBox.size.height, 50.0);
   });
+
+  testWidgets('Flexible toggling enabled updates layout correctly', (WidgetTester tester) async {
+    // Helper to create test widget with specific enabled state
+    Widget buildTestWidget(bool enabled) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              enabled: enabled,
+              flex: 2,
+              child: SizedBox(width: 100.0, height: 50.0),
+            ),
+            SizedBox(width: 50.0, height: 50.0),
+          ],
+        ),
+      );
+    }
+
+    // Start with enabled = true
+    await tester.pumpWidget(buildTestWidget(true));
+
+    RenderBox flexibleBox = tester.renderObject(find.byType(SizedBox).first);
+    expect(flexibleBox.size.height, 50.0);
+    expect(flexibleBox.size.width > 100.0, isTrue);
+
+    // Toggle to enabled = false
+    await tester.pumpWidget(buildTestWidget(false));
+
+    flexibleBox = tester.renderObject(find.byType(SizedBox).first);
+    expect(flexibleBox.size.width, 100.0);
+    expect(flexibleBox.size.height, 50.0);
+
+    // Toggle back to enabled = true
+    await tester.pumpWidget(buildTestWidget(true));
+
+    flexibleBox = tester.renderObject(find.byType(SizedBox).first);
+    expect(flexibleBox.size.height, 50.0);
+    expect(flexibleBox.size.width > 100.0, isTrue);
+
+    // Ensure Row still renders correctly after all toggles
+    final RenderBox sizedBox = tester.renderObject(find.byType(SizedBox).last);
+    expect(sizedBox.size.width, 50.0);
+    expect(sizedBox.size.height, 50.0);
+  });
 }
