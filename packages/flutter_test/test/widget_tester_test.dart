@@ -704,24 +704,21 @@ void main() {
       );
       await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
-      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
-      expect(list, hasLength(3));
-      final CapturedAccessibilityAnnouncement first = list[0];
-      expect(first.message, 'announcement 1');
-      expect(first.textDirection, TextDirection.ltr);
+      expect(tester.takeAnnouncements(), [
+        isAccessibilityAnnouncement('announcement 1', textDirection: TextDirection.ltr),
+        isAccessibilityAnnouncement(
+          'announcement 2',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.assertive,
+        ),
+        isAccessibilityAnnouncement(
+          'announcement 3',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.polite,
+        ),
+      ]);
 
-      final CapturedAccessibilityAnnouncement second = list[1];
-      expect(second.message, 'announcement 2');
-      expect(second.textDirection, TextDirection.rtl);
-      expect(second.assertiveness, Assertiveness.assertive);
-
-      final CapturedAccessibilityAnnouncement third = list[2];
-      expect(third.message, 'announcement 3');
-      expect(third.textDirection, TextDirection.rtl);
-      expect(third.assertiveness, Assertiveness.polite);
-
-      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
-      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+      expect(tester.takeAnnouncements(), <CapturedAccessibilityAnnouncement>[]);
     });
 
     testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {

@@ -3415,7 +3415,10 @@ void main() {
     await tester.pump();
     expect(find.byKey(optionsKey), findsOneWidget);
     expect(lastOptions.length, kOptions.length);
-    expect(tester.takeAnnouncements().first.message, localizations.searchResultsFound);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.searchResultsFound),
+    );
 
     await tester.enterText(find.byKey(fieldKey), 'a');
     await tester.pump();
@@ -3426,7 +3429,10 @@ void main() {
     await tester.enterText(find.byKey(fieldKey), 'zzzz');
     await tester.pump();
     expect(find.byKey(optionsKey), findsNothing);
-    expect(tester.takeAnnouncements().first.message, localizations.noResultsFound);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.noResultsFound),
+    );
 
     handle.dispose();
   });
