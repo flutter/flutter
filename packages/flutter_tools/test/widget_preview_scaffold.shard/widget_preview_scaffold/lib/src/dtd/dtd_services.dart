@@ -17,7 +17,6 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   //
   // START KEEP SYNCED
 
-  static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
   static const kResolveUri = 'resolveUri';
@@ -40,7 +39,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     dtd = await DartToolingDaemon.connect(dtdWsUri);
     unawaited(
       dtd.postEvent(
-        'WidgetPreviewScaffold',
+        kWidgetPreviewScaffoldStream,
         'Connected',
         const <String, Object?>{},
       ),
