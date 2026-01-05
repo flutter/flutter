@@ -2062,6 +2062,46 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itDoesNotCrashWhenEmbeddedViewIsNull() {
+    PlatformViewsAccessibilityDelegate accessibilityDelegate =
+        mock(PlatformViewsAccessibilityDelegate.class);
+    AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ null,
+            /* accessibilityChannel= */ null,
+            /* accessibilityManager= */ null,
+            /* contentResolver= */ null,
+            accessibilityViewEmbedder,
+            accessibilityDelegate);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode platformView = new TestSemanticsNode();
+    platformView.id = 1;
+    platformView.platformViewId = 1;
+    root.addChild(platformView);
+
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
+    when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(null);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // This should not crash.
+    AccessibilityNodeInfo result = accessibilityBridge.createAccessibilityNodeInfo(0);
+
+    // Verify that we fell back to adding the child as a virtual node (standard semantics node)
+    // instead of trying to add the null embedded view.
+    boolean hasChild = false;
+    for (int i = 0; i < result.getChildCount(); i++) {
+      hasChild = true;
+    }
+    assertTrue("Should have added the virtual child node", hasChild);
+  }
+
+  @Test
   public void testItSetsDisableAnimationsFlagBasedOnTransitionAnimationScale() {
     AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
     ContentResolver mockContentResolver = mock(ContentResolver.class);
