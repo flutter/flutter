@@ -1161,9 +1161,8 @@ void main() {
 
       const selection = TextSelection(baseOffset: 0, extentOffset: 3);
       controller.selection = selection;
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      expect(state.showToolbar(), true);
-      await tester.pump();
+      await tester.longPress(find.byType(TextField));
+      await tester.pumpAndSettle();
 
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
@@ -1264,15 +1263,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField).first);
-      await tester.pumpAndSettle();
-
-      const selection = TextSelection(baseOffset: 0, extentOffset: 3);
-      controller1.selection = selection;
-      final EditableTextState state1 = tester.state<EditableTextState>(
-        find.byType(EditableText).first,
-      );
-      expect(state1.showToolbar(), true);
+      await tester.longPress(find.byType(TextField).first);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
@@ -1305,13 +1296,7 @@ void main() {
 
       field1ActionCalled = false;
 
-      await tester.tap(find.byType(BasicTestTextField).last);
-      await tester.pumpAndSettle();
-      controller2.selection = selection;
-      final EditableTextState state2 = tester.state<EditableTextState>(
-        find.byType(EditableText).last,
-      );
-      expect(state2.showToolbar(), true);
+      await tester.longPress(find.byType(TextField).last);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 

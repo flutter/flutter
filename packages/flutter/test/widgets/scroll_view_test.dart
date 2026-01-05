@@ -373,7 +373,7 @@ void main() {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: focusNodes.map((FocusNode focusNode) {
-            return Container( 
+            return Container(
               height: 50,
               color: Colors.green,
               child: BasicTestTextField(
