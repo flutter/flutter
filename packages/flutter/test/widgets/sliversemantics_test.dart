@@ -2504,8 +2504,8 @@ void _tests() {
       node,
       matchesSemantics(
         children: <Matcher>[
-          containsSemantics(label: 'label1'),
-          containsSemantics(label: 'label2'),
+          isSemantics(label: 'label1'),
+          isSemantics(label: 'label2'),
         ],
       ),
     );
@@ -2547,8 +2547,8 @@ void _tests() {
         node,
         matchesSemantics(
           children: <Matcher>[
-            containsSemantics(label: 'label1'),
-            containsSemantics(label: 'label2'),
+            isSemantics(label: 'label1'),
+            isSemantics(label: 'label2'),
           ],
         ),
       );
@@ -2631,7 +2631,7 @@ void _tests() {
       final SemanticsNode result = tester.getSemantics(find.byKey(key));
       expect(
         result,
-        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+        isSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
       );
     }
 

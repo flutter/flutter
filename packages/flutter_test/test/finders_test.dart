@@ -1394,7 +1394,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
         );
       });
 
@@ -1411,7 +1411,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
         );
       });
 
@@ -1429,7 +1429,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
         );
       });
 
@@ -1447,7 +1447,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
         );
       });
 
