@@ -749,7 +749,7 @@ class MediaQueryData {
   /// The radii of the display corners in logical pixels.
   ///
   /// This is currently populated only on Android API 31+. On earlier Android
-  /// versions and other platforms this value is `null`.
+  /// versions, iOS, and other platforms, this value is `null`.
   ///
   /// See also:
   ///

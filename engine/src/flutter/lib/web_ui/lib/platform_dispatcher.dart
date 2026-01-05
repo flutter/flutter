@@ -407,7 +407,10 @@ class DisplayCornerRadii {
     required this.topRight,
     required this.bottomRight,
     required this.bottomLeft,
-  });
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
 
   final double topLeft;
 

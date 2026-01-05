@@ -2063,7 +2063,7 @@ class _ViewConfiguration {
   /// The radii of the display corners in physical pixels.
   ///
   /// This is currently populated only on Android API 31+. On earlier Android
-  /// versions and other platforms this value is null.
+  /// versions, iOS, and other platforms, this value is `null`.
   final DisplayCornerRadii? displayCornerRadii;
 
   @override
@@ -2774,7 +2774,10 @@ class DisplayCornerRadii {
     required this.topRight,
     required this.bottomRight,
     required this.bottomLeft,
-  });
+  }) : assert(topLeft >= 0),
+       assert(topRight >= 0),
+       assert(bottomRight >= 0),
+       assert(bottomLeft >= 0);
 
   /// The radius of the top-left corner of the display, in physical pixels.
   final double topLeft;
