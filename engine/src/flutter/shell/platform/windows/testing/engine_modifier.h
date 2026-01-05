@@ -95,6 +95,10 @@ class EngineModifier {
     engine_->next_view_id_ = view_id;
   }
 
+  void SetSemanticsEnabled(bool enabled) {
+    engine_->semantics_enabled_ = enabled;
+  }
+
  private:
   FlutterWindowsEngine* engine_;
 
