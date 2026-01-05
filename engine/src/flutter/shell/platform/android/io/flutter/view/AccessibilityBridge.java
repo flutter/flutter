@@ -34,7 +34,6 @@ import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
-import io.flutter.util.Predicate;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
@@ -45,6 +44,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -172,7 +172,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   //
   // See the Flutter docs on SemanticsNode:
   // https://api.flutter.dev/flutter/semantics/SemanticsNode-class.html
-  @NonNull private final Map<Integer, SemanticsNode> flutterSemanticsTree = new HashMap<>();
+  @NonNull @VisibleForTesting
+  final Map<Integer, SemanticsNode> flutterSemanticsTree = new HashMap<>();
 
   // The set of all custom Flutter accessibility actions that are present in the running
   // Flutter app, stored as a Map from each action's ID to the definition of the custom
@@ -271,7 +272,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   //                    not get left behind.
   @NonNull private final List<Integer> flutterNavigationStack = new ArrayList<>();
 
-  // TODO(mattcarroll): why do we need previouseRouteId if we have flutterNavigationStack
+  // TODO(mattcarroll): why do we need previousRouteId if we have flutterNavigationStack
   private int previousRouteId = ROOT_NODE_ID;
 
   // Tracks the left system inset of the screen because Flutter needs to manually adjust
@@ -309,7 +310,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private boolean isReleased = false;
 
   // Handler for all messages received from Flutter via the {@code accessibilityChannel}
-  private final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
+  final AccessibilityChannel.AccessibilityMessageHandler accessibilityMessageHandler =
       new AccessibilityChannel.AccessibilityMessageHandler() {
         /** The Dart application would like the given {@code message} to be announced. */
         @Override
@@ -386,6 +387,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         public void setLocale(String locale) {
           AccessibilityBridge.this.setLocale(locale);
         }
+
+        @Override
+        public void resetSemantics() {
+          AccessibilityBridge.this.reset();
+        }
       };
 
   // Listener that is notified when accessibility is turned on/off.
@@ -398,11 +404,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 return;
               }
               if (accessibilityEnabled) {
-                accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
                 accessibilityChannel.onAndroidAccessibilityEnabled();
               } else {
                 setAccessibleNavigation(false);
-                accessibilityChannel.setAccessibilityMessageHandler(null);
                 accessibilityChannel.onAndroidAccessibilityDisabled();
               }
 
@@ -478,6 +482,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.contentResolver = contentResolver;
     this.accessibilityViewEmbedder = accessibilityViewEmbedder;
     this.platformViewsAccessibilityDelegate = platformViewsAccessibilityDelegate;
+    accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
     // Tell Flutter whether accessibility is initially active or not. Then register a listener
     // to be notified of changes in the future.
     accessibilityStateChangeListener.onAccessibilityStateChanged(accessibilityManager.isEnabled());
@@ -516,7 +521,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
-    // setting, the configuration will change and trigger a re-build of the accessibilityBridge.
+    // setting, the configuration will change and trigger a re-build of the
+    // accessibilityBridge.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
       setBoldTextFlag();
     }
@@ -719,9 +725,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
       }
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-        result.setImportantForAccessibility(false);
-      }
+      result.setImportantForAccessibility(false);
       return result;
     }
 
@@ -755,9 +759,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
     // or skip this node.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      result.setImportantForAccessibility(isImportant(semanticsNode));
-    }
+    result.setImportantForAccessibility(isImportant(semanticsNode));
 
     // Work around for https://github.com/flutter/flutter/issues/21030
     result.setViewIdResourceName("");
@@ -2254,7 +2256,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    *   <li>Sends a {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event
    * </ul>
    */
-  // TODO(mattcarroll): under what conditions is this method expected to be invoked?
   public void reset() {
     flutterSemanticsTree.clear();
     if (accessibilityFocusedSemanticsNode != null) {
