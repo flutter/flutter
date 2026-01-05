@@ -97,4 +97,35 @@ void main() {
     );
     handle.dispose();
   });
+
+  testWidgets('ImageIcon renders original image colors when renderOriginalImage is true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: const IconThemeData(color: Color(0xFF0000FF)),
+          child: ImageIcon(
+            image,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<Image>(find.byType(Image)).color, const Color(0xFF0000FF));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: const IconThemeData(color: Color(0xFF0000FF)),
+          child: ImageIcon(
+            image,
+            renderOriginalImage: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<Image>(find.byType(Image)).color, null);
+  });
 }

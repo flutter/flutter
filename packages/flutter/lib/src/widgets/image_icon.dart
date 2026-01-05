@@ -26,7 +26,7 @@ class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const ImageIcon(this.image, {super.key, this.size, this.color, this.semanticLabel});
+  const ImageIcon(this.image, {super.key, this.size, this.color, this.semanticLabel, this.renderOriginalImage = false});
 
   /// The image to display as the icon.
   ///
@@ -61,6 +61,21 @@ class ImageIcon extends StatelessWidget {
   ///    underlying	 [Semantics] widget.
   final String? semanticLabel;
 
+  /// Whether to render the image using its original colors.
+  ///
+  /// If this is false (the default), the image will be colorized using the
+  /// color from the current [IconTheme], unless a [color] is explicitly provided.
+  ///
+  /// If this is true, the [IconTheme] color is ignored, and the image is
+  /// rendered with its intrinsic colors (passing null to the underlying [Image]
+  /// widget's color property).
+  ///
+  /// This is useful for icons that carry their own branding colors (like a
+  /// multi-colored logo) but still need to be sized and aligned like an icon.
+  ///
+  /// Defaults to false.
+  final bool renderOriginalImage;
+
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -86,7 +101,7 @@ class ImageIcon extends StatelessWidget {
         image: image!,
         width: iconSize,
         height: iconSize,
-        color: iconColor,
+        color: renderOriginalImage ? null : iconColor,
         fit: BoxFit.scaleDown,
         excludeFromSemantics: true,
       ),
