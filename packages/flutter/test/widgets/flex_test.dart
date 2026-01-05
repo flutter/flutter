@@ -12,7 +12,7 @@ void main() {
     required MainAxisAlignment mainAxisAlignment,
     required double spacing,
   }) {
-    return Directionality(
+    return const Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
         child: SizedBox(
@@ -22,7 +22,7 @@ void main() {
             direction: direction,
             mainAxisAlignment: mainAxisAlignment,
             spacing: spacing,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(width: 50.0, height: 50.0),
               SizedBox(width: 50.0, height: 50.0),
               SizedBox(width: 50.0, height: 50.0),
@@ -36,10 +36,10 @@ void main() {
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
     var didReceiveTap = false;
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: ColoredBox(
-          color: const Color(0xFF00FF00),
+          color: Color(0xFF00FF00),
           child: Stack(
             children: <Widget>[
               Positioned(
@@ -136,7 +136,7 @@ void main() {
     // Turn off intrinsics checking, which also fails with the same exception.
     debugCheckIntrinsicSizes = false;
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Column(children: <Widget>[Expanded(child: Container())]),
         ],
@@ -173,19 +173,17 @@ void main() {
 
   testWidgets('Can update Flex.spacing value', (WidgetTester tester) async {
     Widget buildFlex({required double spacing}) {
-      return Center(
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Flex(
-            spacing: spacing,
-            direction: Axis.vertical,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(height: 100.0, width: 100.0, color: const Color(0xFFFF0000)),
-              Container(height: 100.0, width: 100.0, color: const Color(0xFF0000FF)),
-              Container(height: 100.0, width: 100.0, color: const Color(0xff00FF00)),
-            ],
-          ),
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Flex(
+          spacing: spacing,
+          direction: Axis.vertical,
+          mainAxisSize: MainAxisSize.min,
+          children: const <Widget>[
+            SizedBox(height: 100.0, width: 100.0),
+            SizedBox(height: 100.0, width: 100.0),
+            SizedBox(height: 100.0, width: 100.0),
+          ],
         ),
       );
     }
@@ -351,7 +349,7 @@ void main() {
 
   testWidgets('Flexible(enabled: false) does not apply flex', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
           children: <Widget>[
@@ -380,7 +378,7 @@ void main() {
 
   testWidgets('Expanded(enabled: false) behaves like a normal child', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
           children: <Widget>[
@@ -409,12 +407,11 @@ void main() {
 
   testWidgets('Flexible(enabled: true) behaves exactly the same as before', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
           children: <Widget>[
             Flexible(
-              enabled: true,
               flex: 2,
               child: SizedBox(width: 100.0, height: 50.0),
             ),
@@ -447,9 +444,9 @@ void main() {
             Flexible(
               enabled: enabled,
               flex: 2,
-              child: SizedBox(width: 100.0, height: 50.0),
+              child: const SizedBox(width: 100.0, height: 50.0),
             ),
-            SizedBox(width: 50.0, height: 50.0),
+            const SizedBox(width: 50.0, height: 50.0),
           ],
         ),
       );
