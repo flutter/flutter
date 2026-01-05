@@ -24,7 +24,7 @@ class AppTheme {
         ),
       ),
       scaffoldBackgroundColor: const Color(0xFFF7F8FB),
-      cardTheme: const CardTheme(margin: EdgeInsets.zero, elevation: 0),
+      cardTheme: const CardThemeData(margin: EdgeInsets.zero, elevation: 0),
     );
   }
 }
