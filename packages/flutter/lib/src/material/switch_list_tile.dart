@@ -212,6 +212,10 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -275,6 +279,10 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -532,6 +540,18 @@ class SwitchListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// {@macro flutter.material.ListTile.horizontalTitleGap}
+  final double? horizontalTitleGap;
+
+  /// {@macro flutter.material.ListTile.minVerticalPadding}
+  final double? minVerticalPadding;
+
+  /// {@macro flutter.material.ListTile.minLeadingWidth}
+  final double? minLeadingWidth;
+
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
+
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
@@ -544,6 +564,7 @@ class SwitchListTile extends StatelessWidget {
   // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
   // the default value to true.
   final bool internalAddSemanticForOnTap;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -648,6 +669,10 @@ class SwitchListTile extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        horizontalTitleGap: horizontalTitleGap,
+        minVerticalPadding: minVerticalPadding,
+        minLeadingWidth: minLeadingWidth,
+        minTileHeight: minTileHeight,
         hoverColor: hoverColor,
         internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),
