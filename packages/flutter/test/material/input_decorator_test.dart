@@ -2021,10 +2021,7 @@ void main() {
               fillColor: const Color(0xFF00FF00),
               enabledBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
-                borderSide: BorderSide(
-                  width: borderWidth,
-                  strokeAlign: strokeAlign,
-                ),
+                borderSide: BorderSide(width: borderWidth, strokeAlign: strokeAlign),
               ),
             ),
           ),
@@ -2034,10 +2031,8 @@ void main() {
 
         expect(
           box,
-          paints..rrect(
-            style: PaintingStyle.stroke,
-            strokeWidth: borderWidth,
-            rrect: expectedRRect),
+          paints
+            ..rrect(style: PaintingStyle.stroke, strokeWidth: borderWidth, rrect: expectedRRect),
         );
       }
 
