@@ -11,6 +11,7 @@
 #include "flutter/impeller/base/validation.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/working_directory.h"
+#include "flutter/testing/interactive_test_helper.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -59,6 +60,11 @@ int main(int argc, char** argv) {
   std::cout << "working directory: "
             << impeller::testing::WorkingDirectory::Instance()->GetPath()
             << std::endl;
+
+  if (cmd.HasOption("interactive")) {
+    flutter::testing::RunInteractive("impeller_golden_tests_last_cmd.txt");
+    return 0;
+  }
 
   int return_code = RUN_ALL_TESTS();
   if (0 == return_code) {

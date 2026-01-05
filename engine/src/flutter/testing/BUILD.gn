@@ -21,6 +21,8 @@ source_set("testing_lib") {
     "debugger_detection.h",
     "display_list_testing.cc",
     "display_list_testing.h",
+    "interactive_test_helper.cc",
+    "interactive_test_helper.h",
     "logger_listener.cc",
     "logger_listener.h",
     "post_task_sync.cc",

@@ -94,6 +94,7 @@ if (is_mac) {
       "//flutter/impeller/display_list:display_list_unittests_golden",
       "//flutter/impeller/fixtures",
       "//flutter/impeller/renderer:renderer_unittests_golden",
+      "//flutter/testing:testing_lib",
       "//flutter/third_party/angle:libEGL",
       "//flutter/third_party/angle:libGLESv2",
       "//flutter/third_party/googletest:gtest",
