@@ -258,9 +258,19 @@ class Tooltip extends StatefulWidget {
   final Duration? waitDuration;
 
   /// {@macro flutter.widgets.RawTooltip.touchDelay}
+  ///
+  /// See also:
+  ///
+  ///  * [exitDuration], which allows configuring the time until a pointer
+  /// disappears when hovering.
   final Duration? showDuration;
 
   /// {@macro flutter.widgets.RawTooltip.dismissDelay}
+  ///
+  /// See also:
+  ///
+  ///  * [showDuration], which allows configuring the length of time that a
+  /// tooltip will be visible after touch events are released.
   final Duration? exitDuration;
 
   /// {@macro flutter.widgets.RawTooltip.enableTapToDismiss}

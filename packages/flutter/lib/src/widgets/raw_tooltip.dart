@@ -311,12 +311,12 @@ class RawTooltip extends StatefulWidget {
   ///
   /// Defaults to 1.5 seconds (the tooltip is shown 1.5 seconds after a tap or
   /// long press is released).
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [dismissDelay], which allows configuring the time until a pointer
   /// disappears when hovering.
-  /// {@endtemplate}
   final Duration touchDelay;
 
   /// {@template flutter.widgets.RawTooltip.dismissDelay}
@@ -324,12 +324,12 @@ class RawTooltip extends StatefulWidget {
   /// tooltip's widget before the tooltip will be hidden.
   ///
   /// Defaults to 100 milliseconds.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [touchDelay], which allows configuring the length of time that a
   /// tooltip will be visible after touch events are released.
-  /// {@endtemplate}
   final Duration dismissDelay;
 
   /// {@template flutter.widgets.RawTooltip.enableTapToDismiss}
