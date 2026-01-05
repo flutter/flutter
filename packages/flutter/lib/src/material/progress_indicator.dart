@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -143,11 +144,20 @@ abstract class ProgressIndicator extends StatefulWidget {
   }
 
   Widget _buildSemanticsWrapper({required BuildContext context, required Widget child}) {
+    var isProgressBar = false;
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
-      expandedSemanticsValue ??= '${(_effectiveValue! * 100).round()}%';
+      expandedSemanticsValue ??= '${(_effectiveValue! * 100).round()}';
+      isProgressBar = true;
     }
-    return Semantics(label: semanticsLabel, value: expandedSemanticsValue, child: child);
+    return Semantics(
+      label: semanticsLabel,
+      role: isProgressBar ? SemanticsRole.progressBar : SemanticsRole.loadingSpinner,
+      minValue: isProgressBar ? '0' : null,
+      maxValue: isProgressBar ? '100' : null,
+      value: expandedSemanticsValue,
+      child: child,
+    );
   }
 }
 
@@ -1194,28 +1204,32 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   @override
   Widget build(BuildContext context) {
-    switch (widget._indicatorType) {
-      case _ActivityIndicatorType.material:
-        if (widget._effectiveValue != null) {
-          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
-        }
-        return _buildAnimation();
-      case _ActivityIndicatorType.adaptive:
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return _buildCupertinoIndicator(context);
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
+    return Builder(
+      builder: (BuildContext context) {
+        switch (widget._indicatorType) {
+          case _ActivityIndicatorType.material:
             if (widget._effectiveValue != null) {
               return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
             }
             return _buildAnimation();
+          case _ActivityIndicatorType.adaptive:
+            final ThemeData theme = Theme.of(context);
+            switch (theme.platform) {
+              case TargetPlatform.iOS:
+              case TargetPlatform.macOS:
+                return _buildCupertinoIndicator(context);
+              case TargetPlatform.android:
+              case TargetPlatform.fuchsia:
+              case TargetPlatform.linux:
+              case TargetPlatform.windows:
+                if (widget._effectiveValue != null) {
+                  return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+                }
+                return _buildAnimation();
+            }
         }
-    }
+      },
+    );
   }
 }
 
