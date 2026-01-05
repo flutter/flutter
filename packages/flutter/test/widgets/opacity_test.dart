@@ -9,13 +9,17 @@ library;
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
+  const blue = Color(0xFF2196F3);
+  const red = Color(0xFFF44336);
+  const gray = Color(0xFFFEF7FF);
+
   testWidgets('Opacity', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
@@ -151,22 +155,21 @@ void main() {
 
   testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: RepaintBoundary(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List<Widget>.generate(10, (int index) {
-                  return Opacity(
-                    opacity: 0.5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Container(color: Colors.blue, height: 50),
-                    ),
-                  );
-                }),
-              ),
+      SingleChildScrollView(
+        child: RepaintBoundary(
+          child: ColoredBox(
+            color: gray,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: List<Widget>.generate(10, (int index) {
+                return Opacity(
+                  opacity: 0.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Container(color: blue, height: 50),
+                  ),
+                );
+              }),
             ),
           ),
         ),
@@ -203,10 +206,7 @@ void main() {
               Positioned(
                 top: 40,
                 left: 140,
-                child: Opacity(
-                  opacity: .5,
-                  child: Container(height: 100, width: 100, color: Colors.red),
-                ),
+                child: Opacity(opacity: .5, child: Container(height: 100, width: 100, color: red)),
               ),
             ],
           ),
