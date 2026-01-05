@@ -17,6 +17,7 @@
 .project
 .pub
 .pydevproject
+.zed
 compile_commands.json
 cscope.*
 Session.vim
