@@ -1010,7 +1010,9 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
-abstract class UniformFloatSlot {
+abstract class UniformType {}
+
+abstract class UniformFloatSlot extends UniformType {
   UniformFloatSlot(this.name, this.index);
 
   void set(double val);
@@ -1022,16 +1024,21 @@ abstract class UniformFloatSlot {
   final int index;
 }
 
-abstract class UniformVec2Slot {
+abstract class UniformVec2Slot extends UniformType {
   void set(double x, double y);
 }
 
-abstract class UniformVec3Slot {
+abstract class UniformVec3Slot extends UniformType {
   void set(double x, double y, double z);
 }
 
-abstract class UniformVec4Slot {
+abstract class UniformVec4Slot extends UniformType {
   void set(double x, double y, double z, double w);
+}
+
+abstract class UniformArray<T extends UniformType> {
+  T operator [](int index);
+  int get length;
 }
 
 abstract class ImageSamplerSlot {
@@ -1058,6 +1065,14 @@ abstract class FragmentShader implements Shader {
   UniformVec3Slot getUniformVec3(String name);
 
   UniformVec4Slot getUniformVec4(String name);
+
+  UniformArray<UniformFloatSlot> getUniformFloatArray(String name);
+
+  UniformArray<UniformVec2Slot> getUniformVec2Array(String name);
+
+  UniformArray<UniformVec3Slot> getUniformVec3Array(String name);
+
+  UniformArray<UniformVec4Slot> getUniformVec4Array(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }

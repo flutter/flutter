@@ -160,6 +160,77 @@ void main() async {
         expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 4.'));
       }
     });
+
+    test('FragmentProgram getUniformArray float', () async {
+      final UniformArray<UniformFloatSlot> slots = shader.getUniformFloatArray(
+        'iFloatArrayUniform',
+      );
+      slots[0].set(1.0);
+      slots[1].set(1.0);
+    });
+
+    test('FragmentProgram getUniformArray not found', () async {
+      try {
+        shader.getUniformFloatArray('unknown');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('No uniform named "unknown".'));
+      }
+    });
+
+    test('FragmentProgram getUniformArrayVec2', () async {
+      final UniformArray<UniformVec2Slot> slots = shader.getUniformVec2Array('iVec2ArrayUniform');
+
+      slots[0].set(1.0, 1.0);
+    });
+
+    test('FragmentProgram getUniformArrayVec2 wrong type', () async {
+      try {
+        shader.getUniformVec2Array('iVec3ArrayUniform');
+        fail('unreachable');
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
+        );
+      }
+    });
+
+    test('FragmentProgram getUniformArrayVec3', () async {
+      final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
+
+      slots[0].set(1.0, 1.0, 1.0);
+    });
+
+    test('FragmentProgram getUniformArrayVec3 wrong type', () async {
+      try {
+        shader.getUniformVec3Array('iFloatArrayUniform');
+        fail('unreachable');
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
+        );
+      }
+    });
+
+    test('FragmentProgram getUniformArrayVec4', () async {
+      final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
+
+      slots[0].set(1.0, 1.0, 1.0, 1.0);
+    });
+
+    test('FragmentProgram getUniformArrayVec4 wrong type', () async {
+      try {
+        shader.getUniformVec4Array('iFloatArrayUniform');
+        fail('unreachable');
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 4.'),
+        );
+      }
+    });
   });
 
   test('FragmentProgram getImageSampler', () async {
