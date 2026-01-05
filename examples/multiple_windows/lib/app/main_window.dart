@@ -102,6 +102,7 @@ class _WindowsTable extends StatelessWidget {
         controller: dialog,
       ),
       TooltipWindowController() => null,
+      PopupWindowController() => null,
     };
   }
 
@@ -110,6 +111,7 @@ class _WindowsTable extends StatelessWidget {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
       TooltipWindowController() => 'Tooltip',
+      PopupWindowController() => 'Popup',
     };
   }
 
