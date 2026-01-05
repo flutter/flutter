@@ -126,6 +126,7 @@ class HostWindow {
     std::optional<HWND> const& owner_window;
     int nCmdShow = SW_SHOWNORMAL;
     FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr;
+    bool is_sized_to_content = false;
   };
 
   // Initialize the underlying native window and the Flutter view.

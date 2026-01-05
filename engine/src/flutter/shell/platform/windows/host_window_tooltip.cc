@@ -19,7 +19,6 @@ HostWindowTooltip::HostWindowTooltip(
       get_position_callback_(get_position_callback),
       parent_(parent),
       isolate_(Isolate::Current()),
-      is_sized_to_content_(is_sized_to_content),
       view_alive_(std::make_shared<int>(0)) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kTooltip,
@@ -31,35 +30,9 @@ HostWindowTooltip::HostWindowTooltip(
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
       .sizing_delegate = this,
-  });
+      .is_sized_to_content = is_sized_to_content});
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
-}
-
-bool HostWindowTooltip::ViewIsSizedToContent() const {
-  return is_sized_to_content_;
-}
-
-BoxConstraints HostWindowTooltip::GetConstraints() const {
-  Size smallest = box_constraints_.smallest();
-  Size biggest = box_constraints_.biggest();
-  if (is_sized_to_content_) {
-    auto work_area = GetWorkArea();
-    double width = work_area.width;
-    width = std::min(width, box_constraints_.biggest().width());
-    if (positioner_size_constraints_.width > 0) {
-      width = std::min(width,
-                       static_cast<double>(positioner_size_constraints_.width));
-    }
-    double height = work_area.height;
-    height = std::min(height, box_constraints_.biggest().height());
-    if (positioner_size_constraints_.height > 0) {
-      height = std::min(
-          height, static_cast<double>(positioner_size_constraints_.height));
-    }
-    biggest = Size(width, height);
-  }
-  return BoxConstraints(smallest, biggest);
 }
 
 void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {

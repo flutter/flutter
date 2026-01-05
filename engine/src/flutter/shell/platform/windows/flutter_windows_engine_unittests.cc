@@ -769,7 +769,11 @@ class MockFlutterWindowsView : public FlutterWindowsView {
  public:
   MockFlutterWindowsView(FlutterWindowsEngine* engine,
                          std::unique_ptr<WindowBindingHandler> wbh)
-      : FlutterWindowsView(kImplicitViewId, engine, std::move(wbh), nullptr) {}
+      : FlutterWindowsView(kImplicitViewId,
+                           engine,
+                           false,
+                           BoxConstraints(),
+                           std::move(wbh)) {}
   ~MockFlutterWindowsView() {}
 
   MOCK_METHOD(void,
@@ -1428,15 +1432,16 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
   auto implicit_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
-      engine->CreateView(std::move(implicit_window));
+      engine->CreateView(std::move(implicit_window), false, BoxConstraints());
 
   EXPECT_TRUE(implicit_view);
 
   // Create a second view. The embedder attempts to add it to the engine.
   auto second_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
-  EXPECT_DEBUG_DEATH(engine->CreateView(std::move(second_window)),
-                     "FlutterEngineAddView returned an unexpected result");
+  EXPECT_DEBUG_DEATH(
+      engine->CreateView(std::move(second_window), false, BoxConstraints()),
+      "FlutterEngineAddView returned an unexpected result");
 }
 
 TEST_F(FlutterWindowsEngineTest, RemoveViewFailureDoesNotHang) {
@@ -1533,8 +1538,10 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   // We want to avoid adding an implicit view as the first view
   modifier.SetNextViewId(kImplicitViewId + 1);
 
-  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
-  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
+  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
+                                          false, BoxConstraints());
+  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
+                                          false, BoxConstraints());
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.

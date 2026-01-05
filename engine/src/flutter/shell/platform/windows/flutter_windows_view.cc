@@ -104,11 +104,15 @@ void DestroyWindowSurface(const FlutterWindowsEngine& engine,
 FlutterWindowsView::FlutterWindowsView(
     FlutterViewId view_id,
     FlutterWindowsEngine* engine,
+    bool is_sized_to_content,
+    const BoxConstraints& box_constraints,
     std::unique_ptr<WindowBindingHandler> window_binding,
     FlutterWindowsViewSizingDelegate* sizing_delegate,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
     : view_id_(view_id),
       engine_(engine),
+      is_sized_to_content_(is_sized_to_content),
+      box_constraints_(box_constraints),
       sizing_delegate_(sizing_delegate),
       windows_proc_table_(std::move(windows_proc_table)) {
   if (windows_proc_table_ == nullptr) {
@@ -389,7 +393,7 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   if (IsSizedToContent()) {
-    auto const constraints = sizing_delegate_->GetConstraints();
+    auto const constraints = GetConstraints();
     event.has_constraints = true;
     event.min_width_constraint =
         static_cast<size_t>(constraints.smallest().width());
@@ -422,7 +426,7 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   if (IsSizedToContent()) {
-    auto constraints = sizing_delegate_->GetConstraints();
+    auto constraints = GetConstraints();
     event.has_constraints = true;
     event.min_width_constraint =
         static_cast<size_t>(constraints.smallest().width());
@@ -903,11 +907,21 @@ bool FlutterWindowsView::NeedsVsync() const {
 }
 
 bool FlutterWindowsView::IsSizedToContent() const {
-  if (sizing_delegate_ != nullptr) {
-    return sizing_delegate_->ViewIsSizedToContent();
-  } else {
-    return false;
+  return is_sized_to_content_;
+}
+
+BoxConstraints FlutterWindowsView::GetConstraints() const {
+  Size smallest = box_constraints_.smallest();
+  Size biggest = box_constraints_.biggest();
+  if (is_sized_to_content_) {
+    auto const work_area = GetWorkArea();
+    double const width =
+        std::min(work_area.width, box_constraints_.biggest().width());
+    double const height =
+        std::min(work_area.height;, box_constraints_.biggest().height());
+    biggest = Size(width, height);
   }
+  return BoxConstraints(smallest, biggest);
 }
 
 }  // namespace flutter

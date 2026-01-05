@@ -199,6 +199,7 @@ void InternalFlutterWindows_WindowManager_SetFullscreen(
     HWND hwnd,
     const flutter::FullscreenRequest* request);
 
+// Invoked by the framework when the host window receives WM_DESTROY.
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd);
 

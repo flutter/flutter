@@ -134,6 +134,8 @@ class FlutterWindowsEngine {
   // Returns null on failure.
   std::unique_ptr<FlutterWindowsView> CreateView(
       std::unique_ptr<WindowBindingHandler> window,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
       FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Remove a view. The engine will no longer render into it.

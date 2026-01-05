@@ -250,7 +250,8 @@ void HostWindow::InitializeFlutterView(
       engine_->display_manager(), engine_->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
-      engine_->CreateView(std::move(view_window), params.sizing_delegate);
+      engine_->CreateView(std::move(view_window), params.is_sized_to_content,
+                          params.box_constraints, params.sizing_delegate);
   FML_CHECK(view != nullptr);
 
   view_controller_ =

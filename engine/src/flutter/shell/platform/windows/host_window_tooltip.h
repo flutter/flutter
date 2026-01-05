@@ -33,23 +33,22 @@ class HostWindowTooltip : public HostWindow,
                         LPARAM lparam) override;
 
  private:
-  bool ViewIsSizedToContent() const override;
-  BoxConstraints GetConstraints() const override;
   void DidUpdateViewSize(int32_t width, int32_t height) override;
   WindowRect GetWorkArea() const;
 
   GetWindowPositionCallback get_position_callback_;
   HWND parent_;
   Isolate isolate_;
-  bool is_sized_to_content_;
 
   // Used to track whether the view is still in tasks scheduled from raster
   // thread.
   std::shared_ptr<int> view_alive_;
 
+  // The current width of the tooltip.
   int width_ = 0;
+
+  // The current height of the tooltip.
   int height_ = 0;
-  WindowSize positioner_size_constraints_ = {0, 0};
 };
 }  // namespace flutter
 

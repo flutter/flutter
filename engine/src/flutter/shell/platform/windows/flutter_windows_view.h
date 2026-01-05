@@ -32,12 +32,6 @@ using FlutterViewId = int64_t;
 // Optional delegate for views that are sized to contents.
 class FlutterWindowsViewSizingDelegate {
  public:
-  // This method may be called from the platform or raster threads.
-  virtual bool ViewIsSizedToContent() const = 0;
-
-  // This method is called from the platform thread.
-  virtual BoxConstraints GetConstraints() const = 0;
-
   // This method is called from the raster thread
   // after the view's surface has been resized but
   // before the frame has been presented on the view.
@@ -53,6 +47,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   FlutterWindowsView(
       FlutterViewId view_id,
       FlutterWindowsEngine* engine,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
       std::unique_ptr<WindowBindingHandler> window_binding,
       FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr,
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
@@ -435,6 +431,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // This method can be called from the platform or raster threads.
   bool IsSizedToContent() const;
 
+  // Gets the constraints for this view.
+  BoxConstraints GetConstraints() const;
+
   // The view's unique identifier.
   FlutterViewId view_id_;
 
@@ -476,6 +475,12 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // The accessibility bridge associated with this view.
   std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;
+
+  // If `true`, the view is sized to its content via a sizing delegate.
+  bool is_sized_to_content_ = false;
+
+  // The constraints for this view.
+  BoxConstraints box_constraints_;
 
   // Optional sizing delegate for views that are sized to content.
   FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
