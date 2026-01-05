@@ -809,7 +809,10 @@ void main() {
       // The announcement should be the opposite of the current state.
       // The ExpansionTile is expanded, so the announcement should be
       // "Expanded".
-      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
 
       // Tap the title to collapse ExpansionTile.
       await tester.tap(find.text('Title'));
@@ -818,7 +821,10 @@ void main() {
       // The announcement should be the opposite of the current state.
       // The ExpansionTile is collapsed, so the announcement should be
       // "Collapsed".
-      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.expandedHint),
+      );
       handle.dispose();
     },
     // [intended] https://github.com/flutter/flutter/issues/122101.
@@ -849,13 +855,19 @@ void main() {
       await tester.tap(find.text('Title'));
       await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.collapsedHint),
+      );
 
       // Tap the title to collapse ExpansionTile.
       await tester.tap(find.text('Title'));
       await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+      expect(
+        tester.takeAnnouncements().first,
+        isAccessibilityAnnouncement(localizations.expandedHint),
+      );
       handle.dispose();
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
