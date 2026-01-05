@@ -27,7 +27,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 Future<void> main() async {
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
     await expectLater(
-      () => pumpWidgetWithBoilerplate(
+          () => pumpWidgetWithBoilerplate(
         tester,
         CupertinoTabBar(
           items: <BottomNavigationBarItem>[
@@ -40,7 +40,7 @@ Future<void> main() async {
       ),
       throwsA(
         isAssertionError.having(
-          (AssertionError error) => error.toString(),
+              (AssertionError error) => error.toString(),
           '.toString()',
           contains('items.length'),
         ),
@@ -389,8 +389,8 @@ Future<void> main() async {
   });
 
   testWidgets('Ensure bar height will not change when toggle keyboard', (
-    WidgetTester tester,
-  ) async {
+      WidgetTester tester,
+      ) async {
     const tabBarHeight = 56.0;
     final tabBar = CupertinoTabBar(
       height: tabBarHeight,
@@ -590,7 +590,7 @@ Future<void> main() async {
     expect(find.text('Tab 1'), findsOneWidget);
 
     final Finder finder = find.byWidgetPredicate(
-      (Widget widget) => widget is Image && widget.image == iconProvider,
+          (Widget widget) => widget is Image && widget.image == iconProvider,
     );
 
     await tester.tap(finder);
@@ -648,8 +648,8 @@ Future<void> main() async {
   });
 
   testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (
-    WidgetTester tester,
-  ) async {
+      WidgetTester tester,
+      ) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -701,5 +701,50 @@ Future<void> main() async {
       ),
     );
     expect(tester.getSize(find.byType(CupertinoTabBar)), Size.zero);
+  });
+
+  testWidgets('CupertinoTabBar item semanticsLabel overrides label for accessibility', (
+      WidgetTester tester,
+      ) async {
+    final semantics = SemanticsTester(tester);
+
+    await pumpWidgetWithBoilerplate(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoTabBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'A',
+              semanticsLabel: 'Custom A label',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+              label: 'B',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Tab A should use the custom semanticsLabel
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Custom A label',
+        hint: 'Tab 1 of 2',
+        flags: <SemanticsFlag>[SemanticsFlag.hasSelectedState, SemanticsFlag.isSelected],
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    // Tab B should use the default label since no semanticsLabel is provided
+    expect(
+      semantics,
+      includesNodeWith(label: 'B', hint: 'Tab 2 of 2', textDirection: TextDirection.ltr),
+    );
+
+    semantics.dispose();
   });
 }
