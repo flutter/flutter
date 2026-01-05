@@ -12,6 +12,8 @@ import 'list_tile_test_utils.dart';
 
 import 'multi_view_testing.dart';
 
+import 'editable_text_utils.dart';
+
 class User {
   const User({required this.email, required this.name});
 
@@ -74,7 +76,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return BasicTestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,

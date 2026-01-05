@@ -185,9 +185,9 @@ void main() {
   testWidgets(
     'Cursor animates on iOS',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
+      await tester.pumpWidget(const MaterialApp(home: Material(child: BasicTestTextField())));
 
-      final Finder textFinder = find.byType(TextField);
+      final Finder textFinder = find.byType(BasicTestTextField);
       await tester.tap(textFinder);
       await tester.pump();
 
@@ -234,9 +234,11 @@ void main() {
   testWidgets(
     'Cursor does not animate on non-iOS platforms',
     (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(maxLines: 3))));
+      await tester.pumpWidget(
+        const MaterialApp(home: Material(child: BasicTestTextField(maxLines: 3))),
+      );
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(BasicTestTextField));
       await tester.pump();
       // Wait for the current animation to finish. If the cursor never stops its
       // blinking animation the test will timeout.
@@ -442,11 +444,11 @@ void main() {
 
   testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
     const Widget widget = MaterialApp(
-      home: Material(child: TextField(showCursor: false, maxLines: 3)),
+      home: Material(child: BasicTestTextField(showCursor: false, maxLines: 3)),
     );
     await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(BasicTestTextField));
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));

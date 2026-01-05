@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart';
+
 final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
 final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);
 
@@ -13,8 +15,8 @@ void main() {
     const outerKey = Key('outer');
     const innerKey = Key('inner');
 
-    const client1 = TextField(autofillHints: <String>['1']);
-    const client2 = TextField(autofillHints: <String>['2']);
+    const client1 = BasicTestTextField(autofillHints: <String>['1']);
+    const client2 = BasicTestTextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -26,7 +28,9 @@ void main() {
                 client1,
                 AutofillGroup(
                   key: innerKey,
-                  child: Column(children: <Widget>[client2, TextField(autofillHints: null)]),
+                  child: Column(
+                    children: <Widget>[client2, BasicTestTextField(autofillHints: null)],
+                  ),
                 ),
               ],
             ),
@@ -38,12 +42,16 @@ void main() {
     final AutofillGroupState innerState = tester.state<AutofillGroupState>(find.byKey(innerKey));
     final AutofillGroupState outerState = tester.state<AutofillGroupState>(find.byKey(outerKey));
 
-    final State<TextField> clientState1 = tester.state<State<TextField>>(find.byWidget(client1));
-    final State<TextField> clientState2 = tester.state<State<TextField>>(find.byWidget(client2));
+    final State<EditableText> clientState1 = tester.state<State<EditableText>>(
+      find.descendant(of: find.byWidget(client1), matching: find.byType(EditableText)),
+    );
+    final State<EditableText> clientState2 = tester.state<State<EditableText>>(
+      find.descendant(of: find.byWidget(client2), matching: find.byType(EditableText)),
+    );
 
-    expect(outerState.autofillClients.toList(), <State<TextField>>[clientState1]);
+    expect(outerState.autofillClients.toList(), <State<EditableText>>[clientState1]);
     // The second TextField in the AutofillGroup doesn't have autofill enabled.
-    expect(innerState.autofillClients.toList(), <State<TextField>>[clientState2]);
+    expect(innerState.autofillClients.toList(), <State<EditableText>>[clientState2]);
   });
 
   testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {

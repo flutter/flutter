@@ -150,6 +150,11 @@ class BasicTestTextField extends StatefulWidget {
     this.autofocus = false,
     this.contextMenuBuilder,
     this.readOnly = false,
+    this.onChanged,
+    this.maxLines = 1,
+    this.showCursor,
+    this.autofillHints = const <String>[],
+    this.groupId = EditableText,
   });
 
   final bool autofocus;
@@ -158,6 +163,11 @@ class BasicTestTextField extends StatefulWidget {
   final TextStyle? style;
   final EditableTextContextMenuBuilder? contextMenuBuilder;
   final bool readOnly;
+  final ValueChanged<String>? onChanged;
+  final int? maxLines;
+  final bool? showCursor;
+  final Iterable<String>? autofillHints;
+  final Object groupId;
 
   @override
   State<BasicTestTextField> createState() => _BasicTestTextFieldState();
@@ -181,7 +191,14 @@ class _BasicTestTextFieldState extends State<BasicTestTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final bool cursorOpacityAnimates = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => true,
+      _ => false,
+    };
     return EditableText(
+      autofillHints: widget.autofillHints,
+      maxLines: widget.maxLines,
+      onChanged: widget.onChanged,
       readOnly: widget.readOnly,
       autofocus: widget.autofocus,
       controller: _effectiveController,
@@ -191,6 +208,9 @@ class _BasicTestTextFieldState extends State<BasicTestTextField> {
       cursorColor: _red, // Colors.red
       backgroundCursorColor: _red, // Colors.red
       selectionControls: basicTestTextSelectionHandleControls,
+      cursorOpacityAnimates: cursorOpacityAnimates,
+      showCursor: widget.showCursor,
+      groupId: widget.groupId,
     );
   }
 }
