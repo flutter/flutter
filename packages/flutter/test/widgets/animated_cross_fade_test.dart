@@ -396,6 +396,25 @@ void main() {
 
     expect(numberOfTouchEventNoticed, 1);
   });
+
+  testWidgets('AnimatedCrossFade does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedCrossFade(
+              firstChild: Text('X'),
+              secondChild: Text('Y'),
+              crossFadeState: CrossFadeState.showFirst,
+              duration: Duration(seconds: 1),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedCrossFade)), Size.zero);
+  });
 }
 
 class _TickerWatchingWidget extends StatefulWidget {
