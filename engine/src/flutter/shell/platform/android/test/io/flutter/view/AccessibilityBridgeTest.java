@@ -2148,7 +2148,7 @@ public class AccessibilityBridgeTest {
     // instead of trying to add the null embedded view.
     boolean hasChild = false;
     for (int i = 0; i < result.getChildCount(); i++) {
-        hasChild = true;
+      hasChild = true;
     }
     assertTrue("Should have added the virtual child node", hasChild);
   }
