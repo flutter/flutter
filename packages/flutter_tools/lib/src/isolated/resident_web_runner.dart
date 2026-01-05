@@ -96,6 +96,7 @@ class ResidentWebRunner extends ResidentRunner {
     String? target,
     bool stayResident = true,
     bool machine = false,
+    String? projectRootPath,
     required this.flutterProject,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
@@ -125,6 +126,7 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
+         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;
@@ -311,6 +313,7 @@ class ResidentWebRunner extends ResidentRunner {
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
           platform: _platform,
@@ -933,8 +936,8 @@ class ResidentWebRunner extends ResidentRunner {
           connectionInfoCompleter?.complete(
             DebugConnectionInfo(
               wsUri: websocketUri,
-              devToolsUri: Uri.tryParse(debugConnection.devToolsUri ?? ''),
-              dtdUri: Uri.tryParse(debugConnection.dtdUri ?? ''),
+              devToolsUri: debugConnection.devToolsUri?.toUri(),
+              dtdUri: debugConnection.dtdUri?.toUri(),
             ),
           );
         }),

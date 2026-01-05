@@ -263,6 +263,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The currently running instance of the widget preview scaffold.
   ResidentRunner? _widgetPreviewApp;
 
+  /// The location of the widget_preview_scaffold for the current execution of the command.
+  ///
+  /// This is only meant for testing as there's no simple mapping from the target project to the
+  /// scaffold project.
+  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
+  @visibleForTesting
+  static late Directory widgetPreviewScaffold;
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(_logger is WidgetPreviewMachineAwareLogger);
@@ -272,7 +280,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     logger.sendInitializingEvent();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -393,6 +401,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
       await _dtdService.connect(dtdWsUri: existingDtdUri);
     }
+    _previewCodeGenerator.populateDtdConnectionInfo(_dtdService.dtdUri!);
   }
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
@@ -455,12 +464,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           BuildMode.debug,
           null,
           treeShakeIcons: false,
-          // Provide the DTD connection information directly to the preview scaffold.
-          // This could, in theory, be provided via a follow up call to a service extension
-          // registered by the preview scaffold, but there's some uncertainty around how service
-          // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
-          // connection.
-          dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
           packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
           packageConfig: PackageConfig.parseBytes(
             widgetPreviewScaffoldProject.packageConfig.readAsBytesSync(),
@@ -472,8 +475,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           webEnableHotReload: true,
         ),
         webEnableExposeUrl: false,
+        webEnableExpressionEvaluation: true,
         webRunHeadless: boolArg(kHeadless),
-        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         devToolsServerAddress: devToolsServerAddress,
       );
       final String target = bundle.defaultMainPath;
@@ -486,6 +489,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
       if (boolArg(kLaunchPreviewer)) {
         final appStarted = Completer<void>();
+        final connectionInfo = Completer<DebugConnectionInfo>();
         _widgetPreviewApp = ResidentWebRunner(
           flutterDevice,
           target: target,
@@ -498,10 +502,33 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           platform: platform,
           outputPreferences: globals.outputPreferences,
           systemClock: globals.systemClock,
+          // Explicitly provide the project root path rather than relying on the current directory
+          // as the current directory exists within $TMP. At least on MacOS, when setting the
+          // current directory to the widget_preview_scaffold project created under
+          // `/var/folders/...`, the underlying chdir call actually changes the directory to
+          // `/private/var/folders/...`. These directories are identical, but confuse the package
+          // config resolution logic.
+          // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
+          // See https://github.com/flutter/flutter/issues/179036
+          projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
         );
-        unawaited(_widgetPreviewApp!.run(appStartedCompleter: appStarted));
+        unawaited(
+          _widgetPreviewApp!.run(
+            appStartedCompleter: appStarted,
+            connectionInfoCompleter: connectionInfo,
+          ),
+        );
         await appStarted.future;
         logger.sendStartedEvent(applicationUrl: flutterDevice.devFS!.baseUri!);
+        final DebugConnectionInfo debugConnection = await connectionInfo.future;
+        final Uri? devToolsUri = devToolsServerAddress ?? debugConnection.devToolsUri;
+        if (devToolsUri == null) {
+          throwToolExit('Could not determine DevTools server address for the widget inspector.');
+        }
+        _dtdService.setDevToolsServerAddress(
+          devToolsServerAddress: devToolsServerAddress ?? debugConnection.devToolsUri!,
+          applicationUri: debugConnection.wsUri!,
+        );
       }
     } on Exception catch (error) {
       throwToolExit(error.toString());
@@ -673,7 +700,9 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     if (!machine) {
       return;
     }
-    super.printStatus(
+    // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
+    // provided.
+    globals.stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),

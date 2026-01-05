@@ -197,6 +197,10 @@ class PathTessellator {
   static void PathToFilledVertices(const PathSource& source,
                                    VertexWriter& writer,
                                    Scalar scale);
+
+  static void PathToTransformedFilledVertices(const PathSource& source,
+                                              VertexWriter& writer,
+                                              const Matrix& matrix);
 };
 
 }  // namespace impeller

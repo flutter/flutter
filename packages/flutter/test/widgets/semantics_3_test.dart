@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,7 +9,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(
@@ -109,7 +108,7 @@ void main() {
       ),
     );
 
-    int changeCount = 0;
+    var changeCount = 0;
     tester.binding.pipelineOwner.semanticsOwner!.addListener(() {
       changeCount += 1;
     });

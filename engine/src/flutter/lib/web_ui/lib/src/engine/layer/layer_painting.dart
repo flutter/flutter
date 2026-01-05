@@ -31,6 +31,11 @@ abstract class LayerCanvas implements ui.Canvas {
 abstract class LayerPicture implements ui.Picture {
   // This is a conservative bounding box of all the drawing primitives in this picture.
   ui.Rect get cullRect;
+
+  /// Creates a copy of this picture.
+  ///
+  /// The copy points to the same underlying Skia picture as this picture.
+  LayerPicture clone();
 }
 
 /// A [ui.PictureRecorder] which allows callers to know if it has been disposed.
@@ -52,6 +57,9 @@ abstract class LayerImageFilter implements ui.ImageFilter {
   // The matrix image filter changes the position of the content, so when positioning
   // platform views and calculating occlusion we need to take its transform into account.
   Matrix4? get transform;
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 /// A [ui.Path] with a helper method to convert it to an SVG string.

@@ -21,10 +21,12 @@ class ValueListenableBuilderExample extends StatefulWidget {
   const ValueListenableBuilderExample({super.key});
 
   @override
-  State<ValueListenableBuilderExample> createState() => _ValueListenableBuilderExampleState();
+  State<ValueListenableBuilderExample> createState() =>
+      _ValueListenableBuilderExampleState();
 }
 
-class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderExample> {
+class _ValueListenableBuilderExampleState
+    extends State<ValueListenableBuilderExample> {
   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 
   @override
@@ -55,7 +57,11 @@ class _ValueListenableBuilderExampleState extends State<ValueListenableBuilderEx
               // the notifier.
               child: const Padding(
                 padding: EdgeInsets.all(10.0),
-                child: SizedBox(width: 40, height: 40, child: FlutterLogo(size: 40)),
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: FlutterLogo(size: 40),
+                ),
               ),
             ),
           ],

@@ -215,7 +215,7 @@ void main() {
     final _TickerWatchingWidgetState state = findState();
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
-    for (int i = 0; i < 3; i += 1) {
+    for (var i = 0; i < 3; i += 1) {
       await tester.pump(const Duration(milliseconds: 25));
       expect(findState(), same(state));
     }
@@ -240,7 +240,7 @@ void main() {
     expect(findSemantics().excluding, false);
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       await tester.pump(const Duration(milliseconds: 25));
       // Animations are kept alive in the middle of cross-fade
       expect(state.ticker.muted, false);
@@ -351,7 +351,7 @@ void main() {
   testWidgets('AnimatedCrossFade second child do not receive touch events', (
     WidgetTester tester,
   ) async {
-    int numberOfTouchEventNoticed = 0;
+    var numberOfTouchEventNoticed = 0;
 
     Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
       return tester.pumpWidget(
@@ -395,6 +395,25 @@ void main() {
     await touchSecondButton();
 
     expect(numberOfTouchEventNoticed, 1);
+  });
+
+  testWidgets('AnimatedCrossFade does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedCrossFade(
+              firstChild: Text('X'),
+              secondChild: Text('Y'),
+              crossFadeState: CrossFadeState.showFirst,
+              duration: Duration(seconds: 1),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedCrossFade)), Size.zero);
   });
 }
 

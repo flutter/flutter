@@ -101,7 +101,7 @@ void testMain() {
     });
 
     test('segments correctly', () {
-      const String text = 'Lorem-ipsum 你好🙂\nDolor sit';
+      const text = 'Lorem-ipsum 你好🙂\nDolor sit';
       final SegmentationResult segmentation = segmentText(text);
       expect(segmentation.words, fragmentUsingIntlSegmenter(text, IntlSegmenterGranularity.word));
       expect(
@@ -112,12 +112,12 @@ void testMain() {
     });
 
     test('caches segmentation results in LRU fashion', () {
-      const String text1 = 'hello';
+      const text1 = 'hello';
       segmentText(text1);
       expect(segmentationCache.small.debugItemQueue, hasLength(1));
       expect(segmentationCache.small[text1], isNotNull);
 
-      const String text2 = 'world';
+      const text2 = 'world';
       segmentText(text2);
       expect(segmentationCache.small.debugItemQueue, hasLength(2));
       expect(segmentationCache.small[text2], isNotNull);
@@ -171,7 +171,7 @@ void testMain() {
 
 void testCacheCapacity(LruCache<String, SegmentationResult> cache, SegmentationCacheSpec spec) {
   // 1. Fill the cache.
-  for (int i = 0; i < spec.cacheSize; i++) {
+  for (var i = 0; i < spec.cacheSize; i++) {
     final String text = _randomString(spec.maxTextLength);
     segmentText(text);
     // The segmented text should have been added to the cache.
@@ -184,7 +184,7 @@ void testCacheCapacity(LruCache<String, SegmentationResult> cache, SegmentationC
   expect(cache.length, spec.cacheSize);
 
   // 3. Add more items to the cache.
-  for (int i = 0; i < 10; i++) {
+  for (var i = 0; i < 10; i++) {
     final String text = _randomString(spec.maxTextLength);
     segmentText(text);
     // The cache size should remain the same.
@@ -198,7 +198,7 @@ void testCacheCapacity(LruCache<String, SegmentationResult> cache, SegmentationC
 int _seed = 0;
 
 String _randomString(int length) {
-  const String allChars =
+  const allChars =
       ' 1234567890'
       'abcdefghijklmnopqrstuvwxyz'
       'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -251,7 +251,7 @@ class UnderlineInputBorder extends InputBorder {
 
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
       // This prevents the border from leaking the color due to anti-aliasing rounding errors.
-      final BorderRadius updatedBorderRadius = BorderRadius.only(
+      final updatedBorderRadius = BorderRadius.only(
         bottomLeft: borderRadius.bottomLeft.clamp(maximum: Radius.circular(rect.height / 2)),
         bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
       );
@@ -265,7 +265,7 @@ class UnderlineInputBorder extends InputBorder {
         color: borderSide.color,
       );
     } else {
-      final Offset alignInsideOffset = Offset(0, borderSide.width / 2);
+      final alignInsideOffset = Offset(0, borderSide.width / 2);
       canvas.drawLine(
         rect.bottomLeft - alignInsideOffset,
         rect.bottomRight - alignInsideOffset,
@@ -438,25 +438,25 @@ class OutlineInputBorder extends InputBorder {
     // size of the width/height of the RRect.
     final RRect scaledRRect = center.scaleRadii();
 
-    final Rect tlCorner = Rect.fromLTWH(
+    final tlCorner = Rect.fromLTWH(
       scaledRRect.left,
       scaledRRect.top,
       scaledRRect.tlRadiusX * 2.0,
       scaledRRect.tlRadiusY * 2.0,
     );
-    final Rect trCorner = Rect.fromLTWH(
+    final trCorner = Rect.fromLTWH(
       scaledRRect.right - scaledRRect.trRadiusX * 2.0,
       scaledRRect.top,
       scaledRRect.trRadiusX * 2.0,
       scaledRRect.trRadiusY * 2.0,
     );
-    final Rect brCorner = Rect.fromLTWH(
+    final brCorner = Rect.fromLTWH(
       scaledRRect.right - scaledRRect.brRadiusX * 2.0,
       scaledRRect.bottom - scaledRRect.brRadiusY * 2.0,
       scaledRRect.brRadiusX * 2.0,
       scaledRRect.brRadiusY * 2.0,
     );
-    final Rect blCorner = Rect.fromLTWH(
+    final blCorner = Rect.fromLTWH(
       scaledRRect.left,
       scaledRRect.bottom - scaledRRect.blRadiusY * 2.0,
       scaledRRect.blRadiusX * 2.0,
@@ -466,7 +466,7 @@ class OutlineInputBorder extends InputBorder {
     // This assumes that the radius is circular (x and y radius are equal).
     // Currently, BorderRadius only supports circular radii.
     const double cornerArcSweep = math.pi / 2.0;
-    final Path path = Path();
+    final path = Path();
 
     // Top left corner
     if (scaledRRect.tlRadius != Radius.zero) {
@@ -487,7 +487,7 @@ class OutlineInputBorder extends InputBorder {
 
     // Draw top border from gap end to top right corner and draw top right corner.
     const double trCornerArcStart = (3 * math.pi) / 2.0;
-    const double trCornerArcSweep = cornerArcSweep;
+    const trCornerArcSweep = cornerArcSweep;
     if (start + extent < outerWidth - scaledRRect.trRadiusX) {
       path.moveTo(start + extent, scaledRRect.top);
       path.lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top);

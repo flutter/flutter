@@ -20,7 +20,7 @@ void doTests() {
   late EngineFlutterView view;
   late DomElement rootElement;
   late DomElement eventSource;
-  final StreamController<DomEvent> events = StreamController<DomEvent>.broadcast();
+  final events = StreamController<DomEvent>.broadcast();
 
   /// Dispatches an event `e` on `target`, and returns it after it's gone through the browser.
   Future<DomPointerEvent> dispatchAndCatch(DomElement target, DomPointerEvent e) async {
@@ -107,7 +107,7 @@ void doTests() {
     });
 
     test('eventTarget takes precedence', () async {
-      final input = view.dom.textEditingHost.appendChild(createDomElement('input'));
+      final DomNode input = view.dom.textEditingHost.appendChild(createDomElement('input'));
 
       textEditing.strategy.enable(
         InputConfiguration(viewId: view.viewId),
@@ -119,7 +119,7 @@ void doTests() {
         textEditing.strategy.disable();
       });
 
-      final moveEvent = createDomPointerEvent('pointermove', <String, Object>{
+      final DomPointerEvent moveEvent = createDomPointerEvent('pointermove', <String, Object>{
         'bubbles': true,
         'clientX': 10,
         'clientY': 20,

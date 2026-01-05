@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,9 +11,9 @@ void main() {
   testWidgets('can change semantics in a branch blocked by BlockSemantics', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,

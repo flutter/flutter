@@ -9,12 +9,12 @@ import 'package:test/test.dart';
 
 void main() {
   test('Scene.toImageSync succeeds', () async {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    const Color color = Color(0xFF123456);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    const color = Color(0xFF123456);
     canvas.drawPaint(Paint()..color = color);
     final Picture picture = recorder.endRecording();
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.pushOffset(10, 10);
     builder.addPicture(const Offset(5, 5), picture);
     final Scene scene = builder.build();
@@ -37,7 +37,7 @@ void main() {
   });
 
   test('Scene.toImageSync succeeds with texture layer', () async {
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.pushOffset(10, 10);
     builder.addTexture(0, width: 10, height: 10);
 
@@ -59,15 +59,15 @@ void main() {
   });
 
   test('addPicture with disposed picture does not crash', () {
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
     canvas.drawPaint(Paint());
     final Picture picture = recorder.endRecording();
     picture.dispose();
 
     expect(picture.debugDisposed, isTrue);
 
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     expect(
       () => builder.addPicture(Offset.zero, picture),
       throwsA(const isInstanceOf<AssertionError>()),
@@ -78,28 +78,11 @@ void main() {
   });
 
   test('pushTransform validates the matrix', () {
-    final SceneBuilder builder = SceneBuilder();
-    final Float64List matrix4 = Float64List.fromList(<double>[
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    ]);
+    final builder = SceneBuilder();
+    final matrix4 = Float64List.fromList(<double>[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     expect(builder.pushTransform(matrix4), isNotNull);
 
-    final Float64List matrix4WrongLength = Float64List.fromList(<double>[
+    final matrix4WrongLength = Float64List.fromList(<double>[
       1,
       0,
       0,
@@ -117,7 +100,7 @@ void main() {
     ]);
     expect(() => builder.pushTransform(matrix4WrongLength), throwsA(isA<AssertionError>()));
 
-    final Float64List matrix4NaN = Float64List.fromList(<double>[
+    final matrix4NaN = Float64List.fromList(<double>[
       1,
       0,
       0,
@@ -137,7 +120,7 @@ void main() {
     ]);
     expect(() => builder.pushTransform(matrix4NaN), throwsA(isA<AssertionError>()));
 
-    final Float64List matrix4Infinity = Float64List.fromList(<double>[
+    final matrix4Infinity = Float64List.fromList(<double>[
       1,
       0,
       0,
@@ -159,13 +142,13 @@ void main() {
   });
 
   test('SceneBuilder accepts typed layers', () {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final OpacityEngineLayer opacity1 = builder1.pushOpacity(100);
     expect(opacity1, isNotNull);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     final OpacityEngineLayer opacity2 = builder2.pushOpacity(200, oldLayer: opacity1);
     expect(opacity2, isNotNull);
     builder2.pop();
@@ -174,12 +157,12 @@ void main() {
 
   // Attempts to use the same layer first as `oldLayer` then in `addRetained`.
   void testPushThenIllegalRetain(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
 
@@ -200,12 +183,12 @@ void main() {
 
   // Attempts to use the same layer first in `addRetained` then as `oldLayer`.
   void testAddRetainedThenIllegalPush(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     builder2.addRetained(layer);
 
     expect(
@@ -225,12 +208,12 @@ void main() {
 
   // Attempts to retain the same layer twice in the same scene.
   void testDoubleAddRetained(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     builder2.addRetained(layer);
     expect(
       () {
@@ -249,12 +232,12 @@ void main() {
 
   // Attempts to use the same layer as `oldLayer` twice in the same scene.
   void testPushOldLayerTwice(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     expect(
       () {
@@ -273,14 +256,14 @@ void main() {
 
   // Attempts to use a child of a retained layer as an `oldLayer`.
   void testPushChildLayerOfRetainedLayer(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     final OpacityEngineLayer childLayer = builder1.pushOpacity(123);
     builder1.pop();
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     builder2.addRetained(layer);
     expect(
       () {
@@ -299,14 +282,14 @@ void main() {
 
   // Attempts to retain a layer whose child is already used as `oldLayer` elsewhere in the scene.
   void testRetainParentLayerOfPushedChild(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     final OpacityEngineLayer childLayer = builder1.pushOpacity(123);
     builder1.pop();
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     builder2.pushOpacity(234, oldLayer: childLayer);
     builder2.pop();
     expect(
@@ -326,17 +309,17 @@ void main() {
 
   // Attempts to retain a layer that has been used as `oldLayer` in a previous frame.
   void testRetainOldLayer(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
     expect(
       () {
-        final SceneBuilder builder3 = SceneBuilder();
+        final builder3 = SceneBuilder();
         builder3.addRetained(layer);
       },
       throwsA(
@@ -352,17 +335,17 @@ void main() {
 
   // Attempts to pass layer as `oldLayer` that has been used as `oldLayer` in a previous frame.
   void testPushOldLayer(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer layer = pushFunction(builder1, null);
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
     expect(
       () {
-        final SceneBuilder builder3 = SceneBuilder();
+        final builder3 = SceneBuilder();
         pushFunction(builder3, layer);
       },
       throwsA(
@@ -378,19 +361,19 @@ void main() {
 
   // Attempts to retain a parent of a layer used as `oldLayer` in a previous frame.
   void testRetainsParentOfOldLayer(_TestNoSharingFunction pushFunction) {
-    final SceneBuilder builder1 = SceneBuilder();
+    final builder1 = SceneBuilder();
     final EngineLayer parentLayer = pushFunction(builder1, null);
     final OpacityEngineLayer childLayer = builder1.pushOpacity(123);
     builder1.pop();
     builder1.pop();
     builder1.build();
 
-    final SceneBuilder builder2 = SceneBuilder();
+    final builder2 = SceneBuilder();
     builder2.pushOpacity(321, oldLayer: childLayer);
     builder2.pop();
     expect(
       () {
-        final SceneBuilder builder3 = SceneBuilder();
+        final builder3 = SceneBuilder();
         builder3.addRetained(parentLayer);
       },
       throwsA(
