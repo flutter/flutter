@@ -28,7 +28,6 @@ workspace:
   - dev/integration_tests/external_textures
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
-  - dev/integration_tests/high_bitrate_images
   - dev/integration_tests/hook_user_defines
   - dev/integration_tests/ios_add2app_life_cycle/flutterapp
   - dev/integration_tests/ios_app_with_extensions
@@ -185,7 +184,7 @@ dependencies:
   url_launcher_windows: 3.1.5
   vector_math: 2.2.0
   video_player: 2.10.1
-  video_player_android: 2.9.0
+  video_player_android: 2.9.1
   video_player_avfoundation: 2.8.8
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
@@ -213,4 +212,4 @@ dependencies:
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.3
-# PUBSPEC CHECKSUM: d43r46
+# PUBSPEC CHECKSUM: 27md0
