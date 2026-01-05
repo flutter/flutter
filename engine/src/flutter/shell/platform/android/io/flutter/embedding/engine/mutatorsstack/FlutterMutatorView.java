@@ -195,7 +195,6 @@ public class FlutterMutatorView extends FrameLayout {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
-    requestUnbufferedDispatch(event);
     final Matrix screenMatrix = new Matrix();
     screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
