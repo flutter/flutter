@@ -348,4 +348,92 @@ void main() {
     // 50.0 * 3 (children) + 100.0 * 2 (spacing) = 350.0 > 300.0 (constraints)
     expect(tester.takeException(), isAssertionError);
   });
+
+  testWidgets('Flexible(enabled: false) does not apply flex', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              enabled: false,
+              flex: 2,
+              child: SizedBox(width: 100.0, height: 50.0),
+            ),
+            SizedBox(width: 50.0, height: 50.0),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox flexibleBox = tester.renderObject(find.byType(SizedBox).first);
+    final RenderBox sizedBox = tester.renderObject(find.byType(SizedBox).last);
+
+    // The Flexible child should maintain its intrinsic size, not flex
+    expect(flexibleBox.size.width, 100.0);
+    expect(flexibleBox.size.height, 50.0);
+
+    // The layout should not crash and should work normally
+    expect(sizedBox.size.width, 50.0);
+    expect(sizedBox.size.height, 50.0);
+  });
+
+  testWidgets('Expanded(enabled: false) behaves like a normal child', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              enabled: false,
+              flex: 2,
+              child: SizedBox(width: 100.0, height: 50.0),
+            ),
+            SizedBox(width: 50.0, height: 50.0),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox expandedBox = tester.renderObject(find.byType(SizedBox).first);
+    final RenderBox sizedBox = tester.renderObject(find.byType(SizedBox).last);
+
+    // The Expanded child should maintain its intrinsic size, not expand
+    expect(expandedBox.size.width, 100.0);
+    expect(expandedBox.size.height, 50.0);
+
+    // The layout should work normally
+    expect(sizedBox.size.width, 50.0);
+    expect(sizedBox.size.height, 50.0);
+  });
+
+  testWidgets('Flexible(enabled: true) behaves exactly the same as before', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              enabled: true,
+              flex: 2,
+              child: SizedBox(width: 100.0, height: 50.0),
+            ),
+            SizedBox(width: 50.0, height: 50.0),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox flexibleBox = tester.renderObject(find.byType(SizedBox).first);
+    final RenderBox sizedBox = tester.renderObject(find.byType(SizedBox).last);
+
+    // The Flexible child should flex as expected
+    expect(flexibleBox.size.height, 50.0);
+    // The exact width will depend on the Row constraints, but it should be more than intrinsic
+    expect(flexibleBox.size.width > 100.0, isTrue);
+
+    // The layout should work normally
+    expect(sizedBox.size.width, 50.0);
+    expect(sizedBox.size.height, 50.0);
+  });
 }

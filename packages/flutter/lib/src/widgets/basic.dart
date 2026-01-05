@@ -6041,7 +6041,7 @@ class Column extends Flex {
 class Flexible extends ParentDataWidget<FlexParentData> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
-  const Flexible({super.key, this.flex = 1, this.fit = FlexFit.loose, required super.child});
+  const Flexible({super.key, this.flex = 1, this.fit = FlexFit.loose, this.enabled = true, required super.child});
 
   /// The flex factor to use for this child.
   ///
@@ -6060,8 +6060,14 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   /// space (but is allowed to be smaller).
   final FlexFit fit;
 
+  /// If enabled is false, no flex layout behavior is applied.
+  final bool enabled;
+
   @override
   void applyParentData(RenderObject renderObject) {
+    if (!enabled) {
+      return;
+    }
     assert(renderObject.parentData is FlexParentData);
     final parentData = renderObject.parentData! as FlexParentData;
     var needsLayout = false;
@@ -6133,7 +6139,7 @@ class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// so that the child fills the available space along the flex widget's
   /// main axis.
-  const Expanded({super.key, super.flex, required super.child}) : super(fit: FlexFit.tight);
+  const Expanded({super.key, super.flex, super.enabled, required super.child}) : super(fit: FlexFit.tight);
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.
