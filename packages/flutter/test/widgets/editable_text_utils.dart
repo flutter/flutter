@@ -144,30 +144,30 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 class BasicTestTextField extends StatefulWidget {
   const BasicTestTextField({
     super.key,
-    this.controller,
-    this.focusNode,
-    this.style,
+    this.autofillHints = const <String>[],
     this.autofocus = false,
     this.contextMenuBuilder,
-    this.readOnly = false,
-    this.onChanged,
-    this.maxLines = 1,
-    this.showCursor,
-    this.autofillHints = const <String>[],
+    this.focusNode,
     this.groupId = EditableText,
+    this.maxLines = 1,
+    this.onChanged,
+    this.readOnly = false,
+    this.showCursor,
+    this.style,
+    this.controller,
   });
 
-  final bool autofocus;
-  final TextEditingController? controller;
-  final FocusNode? focusNode;
-  final TextStyle? style;
-  final EditableTextContextMenuBuilder? contextMenuBuilder;
-  final bool readOnly;
-  final ValueChanged<String>? onChanged;
-  final int? maxLines;
-  final bool? showCursor;
   final Iterable<String>? autofillHints;
+  final bool autofocus;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final FocusNode? focusNode;
   final Object groupId;
+  final int? maxLines;
+  final ValueChanged<String>? onChanged;
+  final bool readOnly;
+  final bool? showCursor;
+  final TextStyle? style;
+  final TextEditingController? controller;
 
   @override
   State<BasicTestTextField> createState() => _BasicTestTextFieldState();
@@ -226,21 +226,21 @@ class _BasicTestTextFieldState extends State<BasicTestTextField>
       child: EditableText(
         key: editableTextKey,
         autofillHints: widget.autofillHints,
+        autofocus: widget.autofocus,
+        backgroundCursorColor: _red, // Colors.red
+        contextMenuBuilder: widget.contextMenuBuilder,
+        cursorColor: _red, // Colors.red
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        focusNode: _effectiveFocusNode,
+        groupId: widget.groupId,
         maxLines: widget.maxLines,
         onChanged: widget.onChanged,
         readOnly: widget.readOnly,
-        autofocus: widget.autofocus,
-        controller: _effectiveController,
-        focusNode: _effectiveFocusNode,
-        style: widget.style ?? const TextStyle(),
-        contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: _red, // Colors.red
-        backgroundCursorColor: _red, // Colors.red
-        selectionControls: basicTestTextSelectionHandleControls,
-        cursorOpacityAnimates: cursorOpacityAnimates,
-        showCursor: widget.showCursor,
-        groupId: widget.groupId,
         rendererIgnoresPointer: true, // for gestures.
+        selectionControls: basicTestTextSelectionHandleControls,
+        showCursor: widget.showCursor,
+        style: widget.style ?? const TextStyle(),
+        controller: _effectiveController,
       ),
     );
   }
