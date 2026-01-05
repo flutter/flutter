@@ -357,13 +357,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 14';
+  String get versionText => 'Xcode 16';
 
   @override
-  Version get version => Version(14, null, null);
+  Version get version => Version(16, null, null);
 
   @override
-  String get build => '14A309';
+  String get build => '16A242D';
 
   @override
   Future<Map<String, String>> getBuildSettings(

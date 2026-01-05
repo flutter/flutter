@@ -35,7 +35,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({
     this.overrides = const <String, String>{},
     Version? version,
-  }) : version = version ?? Version(14, 0, 0);
+  }) : version = version ?? Version(16, 0, 0);
 
   final Map<String, String> overrides;
   @override
