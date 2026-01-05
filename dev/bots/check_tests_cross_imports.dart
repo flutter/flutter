@@ -245,7 +245,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/simple_semantics_test.dart',
     'packages/flutter/test/widgets/image_filter_test.dart',
     'packages/flutter/test/widgets/navigator_on_did_remove_page_test.dart',
-    'packages/flutter/test/widgets/opacity_test.dart',
     'packages/flutter/test/widgets/baseline_test.dart',
     'packages/flutter/test/widgets/selection_container_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
