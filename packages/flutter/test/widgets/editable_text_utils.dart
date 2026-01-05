@@ -173,12 +173,34 @@ class BasicTestTextField extends StatefulWidget {
   State<BasicTestTextField> createState() => _BasicTestTextFieldState();
 }
 
-class _BasicTestTextFieldState extends State<BasicTestTextField> {
+class _BasicTestTextFieldState extends State<BasicTestTextField>
+    implements TextSelectionGestureDetectorBuilderDelegate {
   TextEditingController? _controller;
   TextEditingController get _effectiveController =>
       widget.controller ?? (_controller ??= TextEditingController());
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
+
+  late _BasicTestTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+
+  // API for TextSelectionGestureDetectorBuilderDelegate.
+  @override
+  late bool forcePressEnabled;
+
+  @override
+  final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+
+  @override
+  bool get selectionEnabled => true;
+  // End of API for TextSelectionGestureDetectorBuilderDelegate.
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionGestureDetectorBuilder = _BasicTestTextFieldSelectionGestureDetectorBuilder(
+      state: this,
+    );
+  }
 
   @override
   void dispose() {
@@ -195,24 +217,47 @@ class _BasicTestTextFieldState extends State<BasicTestTextField> {
       TargetPlatform.iOS => true,
       _ => false,
     };
-    return EditableText(
-      autofillHints: widget.autofillHints,
-      maxLines: widget.maxLines,
-      onChanged: widget.onChanged,
-      readOnly: widget.readOnly,
-      autofocus: widget.autofocus,
-      controller: _effectiveController,
-      focusNode: _effectiveFocusNode,
-      style: widget.style ?? const TextStyle(),
-      contextMenuBuilder: widget.contextMenuBuilder,
-      cursorColor: _red, // Colors.red
-      backgroundCursorColor: _red, // Colors.red
-      selectionControls: basicTestTextSelectionHandleControls,
-      cursorOpacityAnimates: cursorOpacityAnimates,
-      showCursor: widget.showCursor,
-      groupId: widget.groupId,
+    forcePressEnabled = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => true,
+      _ => false,
+    };
+    return _selectionGestureDetectorBuilder.buildGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: EditableText(
+        key: editableTextKey,
+        autofillHints: widget.autofillHints,
+        maxLines: widget.maxLines,
+        onChanged: widget.onChanged,
+        readOnly: widget.readOnly,
+        autofocus: widget.autofocus,
+        controller: _effectiveController,
+        focusNode: _effectiveFocusNode,
+        style: widget.style ?? const TextStyle(),
+        contextMenuBuilder: widget.contextMenuBuilder,
+        cursorColor: _red, // Colors.red
+        backgroundCursorColor: _red, // Colors.red
+        selectionControls: basicTestTextSelectionHandleControls,
+        cursorOpacityAnimates: cursorOpacityAnimates,
+        showCursor: widget.showCursor,
+        groupId: widget.groupId,
+        rendererIgnoresPointer: true, // for gestures.
+      ),
     );
   }
+}
+
+class _BasicTestTextFieldSelectionGestureDetectorBuilder
+    extends TextSelectionGestureDetectorBuilder {
+  _BasicTestTextFieldSelectionGestureDetectorBuilder({required _BasicTestTextFieldState state})
+    : super(delegate: state);
+
+  @override
+  void onUserTap() {
+    // BasicTestTextField does not have an onTap callback.
+  }
+
+  @override
+  bool get onUserTapAlwaysCalled => false;
 }
 
 class BasicTestTextSelectionHandleControls extends TextSelectionControls
