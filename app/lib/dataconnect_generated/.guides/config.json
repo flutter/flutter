@@ -1,0 +1,9 @@
+{
+  "description": "A set of guides for interacting with the generated firebase dataconnect sdk",
+  "mcpServers": {
+    "firebase": {
+      "command": "npx",
+      "args": ["-y", "firebase-tools@latest", "experimental:mcp"]
+    }
+  }
+}

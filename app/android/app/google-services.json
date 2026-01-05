@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "97120825720",
+    "project_id": "studio-3328096157-e3f79",
+    "storage_bucket": "studio-3328096157-e3f79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97120825720:android:da981368d25ebd338bd88d",
+        "android_client_info": {
+          "package_name": "com.scholesa.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97120825720-bbnvrtprshupk1qglnrtl34nj5jd1s5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM26X4EXiP3c4uqmLiF1yqXSnRlnWRePY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97120825720-bbnvrtprshupk1qglnrtl34nj5jd1s5d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

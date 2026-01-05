@@ -1,11 +1,11 @@
 part of 'generated.dart';
 
 class UpdatePlayerJerseyNumberVariablesBuilder {
+  UpdatePlayerJerseyNumberVariablesBuilder(this._dataConnect, {required  this.id,required  this.jerseyNumber,});
   String id;
   int jerseyNumber;
 
   final FirebaseDataConnect _dataConnect;
-  UpdatePlayerJerseyNumberVariablesBuilder(this._dataConnect, {required  this.id,required  this.jerseyNumber,});
   Deserializer<UpdatePlayerJerseyNumberData> dataDeserializer = (dynamic json)  => UpdatePlayerJerseyNumberData.fromJson(jsonDecode(json));
   Serializer<UpdatePlayerJerseyNumberVariables> varsSerializer = (UpdatePlayerJerseyNumberVariables vars) => jsonEncode(vars.toJson());
   Future<OperationResult<UpdatePlayerJerseyNumberData, UpdatePlayerJerseyNumberVariables>> execute() {
@@ -13,17 +13,21 @@ class UpdatePlayerJerseyNumberVariablesBuilder {
   }
 
   MutationRef<UpdatePlayerJerseyNumberData, UpdatePlayerJerseyNumberVariables> ref() {
-    UpdatePlayerJerseyNumberVariables vars= UpdatePlayerJerseyNumberVariables(id: id,jerseyNumber: jerseyNumber,);
-    return _dataConnect.mutation("UpdatePlayerJerseyNumber", dataDeserializer, varsSerializer, vars);
+    final UpdatePlayerJerseyNumberVariables vars= UpdatePlayerJerseyNumberVariables(id: id,jerseyNumber: jerseyNumber,);
+    return _dataConnect.mutation('UpdatePlayerJerseyNumber', dataDeserializer, varsSerializer, vars);
   }
 }
 
 @immutable
 class UpdatePlayerJerseyNumberPlayerUpdate {
-  final String id;
   UpdatePlayerJerseyNumberPlayerUpdate.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']);
+
+  UpdatePlayerJerseyNumberPlayerUpdate({
+    required this.id,
+  });
+  final String id;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -42,22 +46,22 @@ class UpdatePlayerJerseyNumberPlayerUpdate {
   
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
+    final Map<String, dynamic> json = <String, dynamic>{};
     json['id'] = nativeToJson<String>(id);
     return json;
   }
-
-  UpdatePlayerJerseyNumberPlayerUpdate({
-    required this.id,
-  });
 }
 
 @immutable
 class UpdatePlayerJerseyNumberData {
-  final UpdatePlayerJerseyNumberPlayerUpdate? player_update;
   UpdatePlayerJerseyNumberData.fromJson(dynamic json):
   
   player_update = json['player_update'] == null ? null : UpdatePlayerJerseyNumberPlayerUpdate.fromJson(json['player_update']);
+
+  UpdatePlayerJerseyNumberData({
+    this.player_update,
+  });
+  final UpdatePlayerJerseyNumberPlayerUpdate? player_update;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -76,27 +80,28 @@ class UpdatePlayerJerseyNumberData {
   
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
+    final Map<String, dynamic> json = <String, dynamic>{};
     if (player_update != null) {
       json['player_update'] = player_update!.toJson();
     }
     return json;
   }
-
-  UpdatePlayerJerseyNumberData({
-    this.player_update,
-  });
 }
 
 @immutable
 class UpdatePlayerJerseyNumberVariables {
-  final String id;
-  final int jerseyNumber;
   @Deprecated('fromJson is deprecated for Variable classes as they are no longer required for deserialization.')
   UpdatePlayerJerseyNumberVariables.fromJson(Map<String, dynamic> json):
   
   id = nativeFromJson<String>(json['id']),
   jerseyNumber = nativeFromJson<int>(json['jerseyNumber']);
+
+  UpdatePlayerJerseyNumberVariables({
+    required this.id,
+    required this.jerseyNumber,
+  });
+  final String id;
+  final int jerseyNumber;
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -112,19 +117,14 @@ class UpdatePlayerJerseyNumberVariables {
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, jerseyNumber.hashCode]);
+  int get hashCode => Object.hashAll(<Object?>[id.hashCode, jerseyNumber.hashCode]);
   
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
+    final Map<String, dynamic> json = <String, dynamic>{};
     json['id'] = nativeToJson<String>(id);
     json['jerseyNumber'] = nativeToJson<int>(jerseyNumber);
     return json;
   }
-
-  UpdatePlayerJerseyNumberVariables({
-    required this.id,
-    required this.jerseyNumber,
-  });
 }
 
