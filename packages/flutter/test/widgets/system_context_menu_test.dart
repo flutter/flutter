@@ -1161,7 +1161,7 @@ void main() {
 
       const selection = TextSelection(baseOffset: 0, extentOffset: 3);
       controller.selection = selection;
-      await tester.longPress(find.byType(TextField));
+      await tester.longPress(find.byType(BasicTestTextField));
       await tester.pumpAndSettle();
 
       expect(find.byType(SystemContextMenu), findsOneWidget);
@@ -1263,7 +1263,7 @@ void main() {
         ),
       );
 
-      await tester.longPress(find.byType(TextField).first);
+      await tester.longPress(find.byType(BasicTestTextField).first);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
@@ -1296,7 +1296,7 @@ void main() {
 
       field1ActionCalled = false;
 
-      await tester.longPress(find.byType(TextField).last);
+      await tester.longPress(find.byType(BasicTestTextField).last);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
