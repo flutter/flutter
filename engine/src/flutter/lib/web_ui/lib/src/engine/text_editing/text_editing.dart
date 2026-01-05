@@ -67,6 +67,7 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     ..position = 'absolute'
     ..top = '0'
     ..left = '0'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
@@ -107,6 +108,7 @@ void _styleAutofillElements(
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
+    ..margin = '0'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
