@@ -290,12 +290,14 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
   Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
+  Variants<ShadowVerticesShader> shadow_vertices_;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
+  Variants<TextureDownsampleBoundedPipeline> texture_downsample_bounded;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -700,6 +702,8 @@ ContentContext::ContentContext(
     }
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_bounded.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
                                                  options_trianglestrip);
@@ -712,6 +716,7 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
+    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
     pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
                                                {supports_decal});
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
@@ -1410,6 +1415,11 @@ PipelineRef ContentContext::GetDownsamplePipeline(
   return GetPipeline(this, pipelines_->texture_downsample, opts);
 }
 
+PipelineRef ContentContext::GetDownsampleBoundedPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_bounded, opts);
+}
+
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
@@ -1498,6 +1508,11 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
+}
+
+PipelineRef ContentContext::GetDrawShadowVerticesPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->shadow_vertices_, opts);
 }
 
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(

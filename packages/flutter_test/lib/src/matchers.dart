@@ -687,6 +687,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -772,6 +774,8 @@ Matcher matchesSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -887,6 +891,8 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -972,6 +978,8 @@ Matcher containsSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -2404,6 +2412,8 @@ class _MatchesSemanticsData extends Matcher {
     required this.currentValueLength,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2551,6 +2561,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult? validationResult;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///
@@ -2564,37 +2576,41 @@ class _MatchesSemanticsData extends Matcher {
   Description describe(Description description, [String? index]) {
     description.add('${index == null ? '' : 'Child $index '}has semantics');
     if (label != null) {
-      description.add(' with label: $label');
+      description.add(' with label: ${_escape(label!)}');
     }
     if (attributedLabel != null) {
-      description.add(' with attributedLabel: $attributedLabel');
+      description.add(' with attributedLabel: ${_escapeAttributedString(attributedLabel!)}');
     }
     if (value != null) {
-      description.add(' with value: $value');
+      description.add(' with value: ${_escape(value!)}');
     }
     if (attributedValue != null) {
-      description.add(' with attributedValue: $attributedValue');
+      description.add(' with attributedValue: ${_escapeAttributedString(attributedValue!)}');
     }
     if (hint != null) {
-      description.add(' with hint: $hint');
+      description.add(' with hint: ${_escape(hint!)}');
     }
     if (attributedHint != null) {
-      description.add(' with attributedHint: $attributedHint');
+      description.add(' with attributedHint: ${_escapeAttributedString(attributedHint!)}');
     }
     if (increasedValue != null) {
-      description.add(' with increasedValue: $increasedValue ');
+      description.add(' with increasedValue: ${_escape(increasedValue!)} ');
     }
     if (attributedIncreasedValue != null) {
-      description.add(' with attributedIncreasedValue: $attributedIncreasedValue');
+      description.add(
+        ' with attributedIncreasedValue: ${_escapeAttributedString(attributedIncreasedValue!)}',
+      );
     }
     if (decreasedValue != null) {
-      description.add(' with decreasedValue: $decreasedValue ');
+      description.add(' with decreasedValue: ${_escape(decreasedValue!)} ');
     }
     if (attributedDecreasedValue != null) {
-      description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+      description.add(
+        ' with attributedDecreasedValue: ${_escapeAttributedString(attributedDecreasedValue!)}',
+      );
     }
     if (tooltip != null) {
-      description.add(' with tooltip: $tooltip');
+      description.add(' with tooltip: ${_escape(tooltip!)}');
     }
     if (inputType != null) {
       description.add(' with inputType: $inputType');
@@ -2660,6 +2676,12 @@ class _MatchesSemanticsData extends Matcher {
     if (validationResult != null) {
       description.add(' with validation result: $validationResult');
     }
+    if (minValue != null) {
+      description.add(' with minValue: $minValue');
+    }
+    if (maxValue != null) {
+      description.add(' with maxValue: $maxValue');
+    }
     if (children != null) {
       description.add(' with children:\n  ');
       final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
@@ -2695,6 +2717,27 @@ class _MatchesSemanticsData extends Matcher {
     return true;
   }
 
+  static String _escape(String string) => string.replaceAll('\u202f', r'\u202f');
+
+  static AttributedString _escapeAttributedString(AttributedString attributedString) {
+    return AttributedString(
+      _escape(attributedString.string),
+      attributes: attributedString.attributes,
+    );
+  }
+
+  bool _checkStringMismatch(Map<dynamic, dynamic> matchState, String prefixText, String actual) {
+    return failWithDescription(matchState, '$prefixText was ${_escape(actual)}');
+  }
+
+  bool _checkStringAttributeMismatch(
+    Map<dynamic, dynamic> matchState,
+    String prefixText,
+    AttributedString actual,
+  ) {
+    return failWithDescription(matchState, '$prefixText was: ${_escapeAttributedString(actual)}');
+  }
+
   @override
   bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
     if (node == null) {
@@ -2712,7 +2755,7 @@ class _MatchesSemanticsData extends Matcher {
     };
 
     if (label != null && label != data.label) {
-      return failWithDescription(matchState, 'label was: ${data.label}');
+      return _checkStringMismatch(matchState, 'label', data.label);
     }
     if (attributedLabel != null &&
         (attributedLabel!.string != data.attributedLabel.string ||
@@ -2720,18 +2763,18 @@ class _MatchesSemanticsData extends Matcher {
               attributedLabel!.attributes,
               data.attributedLabel.attributes,
             ))) {
-      return failWithDescription(matchState, 'attributedLabel was: ${data.attributedLabel}');
+      return _checkStringAttributeMismatch(matchState, 'attributedLabel', data.attributedLabel);
     }
     if (hint != null && hint != data.hint) {
-      return failWithDescription(matchState, 'hint was: ${data.hint}');
+      return _checkStringMismatch(matchState, 'hint', data.hint);
     }
     if (attributedHint != null &&
         (attributedHint!.string != data.attributedHint.string ||
             !_stringAttributesEqual(attributedHint!.attributes, data.attributedHint.attributes))) {
-      return failWithDescription(matchState, 'attributedHint was: ${data.attributedHint}');
+      return _checkStringAttributeMismatch(matchState, 'attributedHint', data.attributedHint);
     }
     if (value != null && value != data.value) {
-      return failWithDescription(matchState, 'value was: ${data.value}');
+      return _checkStringMismatch(matchState, 'value', data.value);
     }
     if (attributedValue != null &&
         (attributedValue!.string != data.attributedValue.string ||
@@ -2739,10 +2782,10 @@ class _MatchesSemanticsData extends Matcher {
               attributedValue!.attributes,
               data.attributedValue.attributes,
             ))) {
-      return failWithDescription(matchState, 'attributedValue was: ${data.attributedValue}');
+      return _checkStringAttributeMismatch(matchState, 'attributedValue', data.attributedValue);
     }
     if (increasedValue != null && increasedValue != data.increasedValue) {
-      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+      return _checkStringMismatch(matchState, 'increasedValue', data.increasedValue);
     }
     if (attributedIncreasedValue != null &&
         (attributedIncreasedValue!.string != data.attributedIncreasedValue.string ||
@@ -2750,13 +2793,14 @@ class _MatchesSemanticsData extends Matcher {
               attributedIncreasedValue!.attributes,
               data.attributedIncreasedValue.attributes,
             ))) {
-      return failWithDescription(
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedIncreasedValue was: ${data.attributedIncreasedValue}',
+        'attributedIncreasedValue',
+        data.attributedIncreasedValue,
       );
     }
     if (decreasedValue != null && decreasedValue != data.decreasedValue) {
-      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
+      return _checkStringMismatch(matchState, 'decreasedValue', data.decreasedValue);
     }
     if (attributedDecreasedValue != null &&
         (attributedDecreasedValue!.string != data.attributedDecreasedValue.string ||
@@ -2764,13 +2808,14 @@ class _MatchesSemanticsData extends Matcher {
               attributedDecreasedValue!.attributes,
               data.attributedDecreasedValue.attributes,
             ))) {
-      return failWithDescription(
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedDecreasedValue was: ${data.attributedDecreasedValue}',
+        'attributedDecreasedValue',
+        data.attributedDecreasedValue,
       );
     }
     if (tooltip != null && tooltip != data.tooltip) {
-      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
+      return _checkStringMismatch(matchState, 'tooltip', data.tooltip);
     }
     if (textDirection != null && textDirection != data.textDirection) {
       return failWithDescription(matchState, 'textDirection was: $textDirection');
@@ -2795,6 +2840,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (inputType != null && inputType != data.inputType) {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
+    }
+    if (minValue != null && minValue != data.minValue) {
+      return failWithDescription(matchState, 'minValue was: ${data.minValue}');
+    }
+    if (maxValue != null && maxValue != data.maxValue) {
+      return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
     }
     if (actions.isNotEmpty) {
       final unexpectedActions = <SemanticsAction>[];

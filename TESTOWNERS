@@ -79,7 +79,6 @@
 /dev/devicelab/bin/tasks/gradient_dynamic_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradient_static_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/gradle_java8_compile_test.dart @jesswrd @flutter/android
-/dev/devicelab/bin/tasks/high_bitrate_images_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_linux__benchmark.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/image_list_jit_reported_duration.dart @jtmcdole @flutter/engine

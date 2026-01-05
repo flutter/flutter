@@ -4165,7 +4165,7 @@ class ColorFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription {
+  String get debugShortDescription {
     switch (_type) {
       case _kTypeMode:
         return 'ColorFilter.mode($_color, $_blendMode)';
@@ -4262,8 +4262,39 @@ abstract class ImageFilter {
   ImageFilter._(); // ignore: unused_element
 
   /// Creates an image filter that applies a Gaussian blur.
-  factory ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0, TileMode? tileMode}) {
-    return _GaussianBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  ///
+  /// The `sigma_x` and `sigma_y` are the standard deviation of the Gaussian
+  /// kernel in the X direction and the Y direction, respectively.
+  ///
+  /// The `tile_mode` defines the behavior of sampling pixels at the edges when
+  /// performing a standard, unbounded blur.
+  ///
+  /// The `bounds` argument is optional and enables "bounded blur" mode. When
+  /// `bounds` is non-null, the image filter substitutes transparent black for
+  /// any sample it reads from outside the defined bounding rectangle. The final
+  /// weighted sum is then divided by the total weight of the non-transparent samples
+  /// (the effective alpha), resulting in opaque output.
+  ///
+  /// The bounded mode prevents color bleeding from content adjacent to the
+  /// bounds into the blurred area, and is typically used when the blur must be
+  /// strictly contained within a clipped region, such as for iOS-style frosted
+  /// glass effects.
+  ///
+  /// The `bounds` rectangle is specified in the canvas's current coordinate
+  /// space and is affected by the current transform; consequently, the bounds
+  /// may not be axis-aligned in the final canvas coordinates.
+  factory ImageFilter.blur({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    TileMode? tileMode,
+    Rect? bounds,
+  }) {
+    return _GaussianBlurImageFilter(
+      sigmaX: sigmaX,
+      sigmaY: sigmaY,
+      tileMode: tileMode,
+      bounds: bounds,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4370,9 +4401,9 @@ abstract class ImageFilter {
   // subclasses for the exact type of DlImageFilter this method converts to.
   _ImageFilter _toNativeImageFilter();
 
-  // The description text to show when the filter is part of a composite
-  // [ImageFilter] created using [ImageFilter.compose].
-  String get _shortDescription;
+  /// The description text to show when the filter is part of a composite
+  /// [ImageFilter] created using [ImageFilter.compose].
+  String get debugShortDescription => toString();
 }
 
 class _MatrixImageFilter implements ImageFilter {
@@ -4387,7 +4418,7 @@ class _MatrixImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'matrix($data, $filterQuality)';
+  String get debugShortDescription => 'matrix($data, $filterQuality)';
 
   @override
   String toString() => 'ImageFilter.matrix($data, $filterQuality)';
@@ -4407,11 +4438,17 @@ class _MatrixImageFilter implements ImageFilter {
 }
 
 class _GaussianBlurImageFilter implements ImageFilter {
-  _GaussianBlurImageFilter({required this.sigmaX, required this.sigmaY, required this.tileMode});
+  _GaussianBlurImageFilter({
+    required this.sigmaX,
+    required this.sigmaY,
+    required this.tileMode,
+    this.bounds,
+  });
 
   final double sigmaX;
   final double sigmaY;
   final TileMode? tileMode;
+  final Rect? bounds;
 
   // MakeBlurFilter
   late final _ImageFilter nativeFilter = _ImageFilter.blur(this);
@@ -4434,10 +4471,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString)';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+
+  String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString)';
+  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   @override
   bool operator ==(Object other) {
@@ -4447,11 +4486,12 @@ class _GaussianBlurImageFilter implements ImageFilter {
     return other is _GaussianBlurImageFilter &&
         other.sigmaX == sigmaX &&
         other.sigmaY == sigmaY &&
+        other.bounds == bounds &&
         other.tileMode == tileMode;
   }
 
   @override
-  int get hashCode => Object.hash(sigmaX, sigmaY);
+  int get hashCode => Object.hash(sigmaX, sigmaY, bounds, tileMode);
 }
 
 class _DilateImageFilter implements ImageFilter {
@@ -4465,7 +4505,7 @@ class _DilateImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'dilate($radiusX, $radiusY)';
+  String get debugShortDescription => 'dilate($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
@@ -4493,7 +4533,7 @@ class _ErodeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'erode($radiusX, $radiusY)';
+  String get debugShortDescription => 'erode($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
@@ -4522,11 +4562,11 @@ class _ComposeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription =>
-      '${innerFilter._shortDescription} -> ${outerFilter._shortDescription}';
+  String get debugShortDescription =>
+      '${innerFilter.debugShortDescription} -> ${outerFilter.debugShortDescription}';
 
   @override
-  String toString() => 'ImageFilter.compose(source -> $_shortDescription -> result)';
+  String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';
 
   @override
   bool operator ==(Object other) {
@@ -4553,7 +4593,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'shader';
+  String get debugShortDescription => 'shader';
 
   @override
   String toString() => 'ImageFilter.shader(Shader#${shader.hashCode})';
@@ -4584,7 +4624,17 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   /// Creates an image filter that applies a Gaussian blur.
   _ImageFilter.blur(_GaussianBlurImageFilter filter) : creator = filter {
     _constructor();
-    _initBlur(filter.sigmaX, filter.sigmaY, filter.tileMode?.index ?? -1);
+    final Rect bounds = filter.bounds ?? Rect.zero;
+    _initBlur(
+      filter.sigmaX,
+      filter.sigmaY,
+      filter.tileMode?.index ?? -1,
+      filter.bounds != null,
+      bounds.left,
+      bounds.top,
+      bounds.right,
+      bounds.bottom,
+    );
   }
 
   /// Creates an image filter that dilates each input pixel's channel values
@@ -4636,11 +4686,19 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
   external void _constructor();
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Int32)>(
-    symbol: 'ImageFilter::initBlur',
-    isLeaf: true,
-  )
-  external void _initBlur(double sigmaX, double sigmaY, int tileMode);
+  @Native<
+    Void Function(Pointer<Void>, Double, Double, Int32, Bool, Double, Double, Double, Double)
+  >(symbol: 'ImageFilter::initBlur', isLeaf: true)
+  external void _initBlur(
+    double sigmaX,
+    double sigmaY,
+    int tileMode,
+    bool bounded,
+    double boundsLeft,
+    double boundsTop,
+    double boundsRight,
+    double boundsBottom,
+  );
 
   @Native<Void Function(Pointer<Void>, Double, Double)>(
     symbol: 'ImageFilter::initDilate',
@@ -5333,6 +5391,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
+        if (!program._hasUniform(slot.name)) {
+          return true;
+        }
+
         slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
         return false;
       });
@@ -5349,6 +5411,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
       return false;
     });
+  }
+
+  bool _hasUniform(String name) {
+    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
   }
 
   int _getImageSamplerIndex(String name) {
@@ -5373,7 +5439,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index) {
+  int _getUniformFloatIndex(String name, int index, [int? expectedSize]) {
     if (index < 0) {
       throw ArgumentError('Index `$index` out of bounds for `$name`.');
     }
@@ -5387,6 +5453,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       if (entry['name'] == name) {
         if (index + 1 > sizeInFloats) {
           throw ArgumentError('Index `$index` out of bounds for `$name`.');
+        }
+        if (expectedSize != null && sizeInFloats != expectedSize) {
+          throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
         }
         found = true;
         break;
@@ -5465,6 +5534,87 @@ base class UniformFloatSlot {
   final int index;
 }
 
+/// A binding to a uniform of type vec2. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec2('uSize').set(100, 100);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
+///
+base class UniformVec2Slot {
+  UniformVec2Slot._(this._xSlot, this._ySlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot;
+}
+
+/// A binding to a uniform of type vec3. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader, double time) {
+///   shader.getUniformVec3('uScaledTime').set(time, time*0.1, time*0.01);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
+///
+base class UniformVec3Slot {
+  UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+/// A binding to a uniform of type vec4. Calling [set] on this object updates
+/// the uniform's value.
+///
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   shader.getUniformVec4('uColor').set(1.0, 0.0, 1.0, 1.0);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
+///
+base class UniformVec4Slot {
+  UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  /// Set the float value of the bound uniform.
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
 /// A binding to a shader's image sampler. Calling [set] on this object updates
 /// a sampler's bound image.
 base class ImageSamplerSlot {
@@ -5515,6 +5665,17 @@ base class FragmentShader extends Shader {
 
   void _reinitialize() {
     _floats = _constructor(_program, _program._uniformFloatCount, _program._samplerCount);
+  }
+
+  List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
+    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0, size);
+    final slots = List<UniformFloatSlot>.generate(
+      size,
+      (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
+    );
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+    _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+    return slots;
   }
 
   /// Sets the float uniform at [index] to [value].
@@ -5595,6 +5756,66 @@ base class FragmentShader extends Shader {
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
+  }
+
+  /// Access the float binding for a vec2 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec2 uMagnitude;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec2('uMagnitude');
+  /// }
+  /// ```
+  UniformVec2Slot getUniformVec2(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 2);
+    return UniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  /// Access the float binding for a vec3 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec3 uScaledTime;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec3('uScaledTime');
+  /// }
+  /// ```
+  UniformVec3Slot getUniformVec3(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 3);
+    return UniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  /// Access the float binding for a vec4 uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float uScale;
+  /// uniform vec4 uColor;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   shader.getUniformFloat('uScale');
+  ///   shader.getUniformVec4('uColor');
+  /// }
+  /// ```
+  UniformVec4Slot getUniformVec4(String name) {
+    final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
+    return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   /// Access the [ImageSamplerSlot] binding associated with the sampler named

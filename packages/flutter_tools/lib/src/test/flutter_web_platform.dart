@@ -58,7 +58,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       file.openRead(),
       headers: <String, String>{
         'Content-Type': ?contentType,
-        if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
+        if (needsCrossOriginIsolated) ...kCrossOriginIsolationHeaders,
       },
     );
   };
@@ -84,6 +84,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
+    required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
   }) : _fileSystem = fileSystem,
        _buildDirectory = buildDirectory,
@@ -99,7 +100,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             fileSystem.directory(
               fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
             ),
-            crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+            crossOriginIsolated: crossOriginIsolation,
           ),
         )
         .add(_handleStaticArtifact)
@@ -110,7 +111,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(
           createDirectoryHandler(
             fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
-            crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+            crossOriginIsolated: crossOriginIsolation,
           ),
         )
         .add(_packageFilesHandler);
@@ -145,6 +146,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final String _root;
   final WebRendererMode webRenderer;
   final bool useWasm;
+  final bool crossOriginIsolation;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -174,6 +176,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required ProcessManager processManager,
     required WebRendererMode webRenderer,
     required bool useWasm,
+    required bool crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
     Future<shelf.Server> Function() serverFactory = defaultServerFactory,
@@ -215,6 +218,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       processManager: processManager,
       webRenderer: webRenderer,
       useWasm: useWasm,
+      crossOriginIsolation: crossOriginIsolation,
       testTimeRecorder: testTimeRecorder,
     );
   }
@@ -419,7 +423,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         final String basename = _fileSystem.path.basename(fileUri.toFilePath());
         final shelf.Handler handler = createDirectoryHandler(
           _fileSystem.directory(dirname),
-          crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+          crossOriginIsolated: crossOriginIsolation,
         );
         final modifiedRequest = shelf.Request(
           request.method,
@@ -543,7 +547,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
-          if (webRenderer == WebRendererMode.skwasm) ...kMultiThreadedHeaders,
+          if (webRenderer == WebRendererMode.skwasm) ...kCrossOriginIsolationHeaders,
         },
       );
     }
