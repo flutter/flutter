@@ -98,6 +98,11 @@ class DataColumn {
 
   /// Called when the user asks to sort the table using this column.
   ///
+  /// If non-null, space is reserved in the column header for the sort
+  /// indicator (the arrow icon), even when this column is not currently
+  /// the active sort column and no arrow is painted. This can affect
+  /// the layout and width of the column.
+  ///
   /// If null, the column will not be considered sortable.
   ///
   /// See [DataTable.sortColumnIndex] and [DataTable.sortAscending].
@@ -240,7 +245,7 @@ class DataRow {
   /// DataRow(
   ///   color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -588,7 +593,7 @@ class DataTable extends StatelessWidget {
   /// DataTable(
   ///   dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.selected)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -663,7 +668,7 @@ class DataTable extends StatelessWidget {
   ///   rows: _rows,
   ///   headingRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.hovered)) {
-  ///       return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+  ///       return Theme.of(context).colorScheme.primary.withValues(alpha: 0.08);
   ///     }
   ///     return null;  // Use the default value.
   ///   }),
@@ -932,8 +937,6 @@ class DataTable extends StatelessWidget {
       label = Tooltip(message: tooltip, child: label);
     }
 
-    // TODO(dkwingsmt): Only wrap Inkwell if onSort != null. Blocked by
-    // https://github.com/flutter/flutter/issues/51152
     label = InkWell(
       onTap: onSort,
       overlayColor: overlayColor,

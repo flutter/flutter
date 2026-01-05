@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
+
 /// @docImport 'dart:io';
 ///
 /// @docImport 'controller.dart';
@@ -19,6 +22,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
+import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart' show fail;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
@@ -146,6 +152,605 @@ class CapturedAccessibilityAnnouncement {
 
   /// Determines the assertiveness level of the accessibility announcement.
   final Assertiveness assertiveness;
+}
+
+class _TestFlutterView implements FlutterView {
+  _TestFlutterView({required this.controller, required TestPlatformDispatcher platformDispatcher})
+    : _platformDispatcher = platformDispatcher,
+      _viewId = _nextViewId++ {
+    platformDispatcher.addTestView(this);
+  }
+
+  static int _nextViewId = 1;
+  final BaseWindowController controller;
+  final TestPlatformDispatcher _platformDispatcher;
+  final int _viewId;
+
+  @override
+  double get devicePixelRatio => display.devicePixelRatio;
+
+  @override
+  ui.Display get display => platformDispatcher.displays.first;
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => List<ui.DisplayFeature>.empty();
+
+  @override
+  ui.GestureSettings get gestureSettings => const ui.GestureSettings();
+
+  @override
+  ui.ViewPadding get padding => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewConstraints get physicalConstraints => ui.ViewConstraints.tight(physicalSize);
+
+  @override
+  ui.Size get physicalSize => controller.contentSize * devicePixelRatio;
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
+
+  @override
+  ui.ViewPadding get systemGestureInsets => ui.ViewPadding.zero;
+
+  @override
+  int get viewId => _viewId;
+
+  @override
+  ui.ViewPadding get viewInsets => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
+
+  @override
+  void render(ui.Scene scene, {ui.Size? size}) {}
+
+  @override
+  void updateSemantics(ui.SemanticsUpdate update) {}
+}
+
+mixin _ChildWindowHierarchyMixin {
+  final List<BaseWindowController> _children = <BaseWindowController>[];
+
+  /// Tracks a child window controller.
+  void addChild(BaseWindowController child) {
+    _children.add(child);
+  }
+
+  /// Stops tracking a child window controller.
+  void removeChild(BaseWindowController child) {
+    _children.remove(child);
+  }
+
+  /// Removes and destroys all child window controllers.
+  void removeAllChildren() {
+    for (final BaseWindowController child in _children) {
+      child.destroy();
+    }
+    _children.clear();
+  }
+
+  /// Returns the first activateable window in this window's hierarchy.
+  BaseWindowController getFirstActivatableChild() {
+    // If there are no children, this window is the first activateable window.
+    if (_children.isEmpty) {
+      return this as BaseWindowController;
+    }
+
+    // Otherwise, traverse the children to find the first activateable window.
+    //
+    // Modal dialogs have focus precedence over popups.
+    // Popups have focus precedence over regular windows.
+    // Regular windows have the lowest precedence.
+    // Tooltips cannot be activated at all, so they are skipped.
+    var activateable = this as BaseWindowController;
+    var foundPopup = false;
+    for (final BaseWindowController child in _children) {
+      switch (child) {
+        case final RegularWindowController regularChild:
+          if (foundPopup) {
+            // Already found a popup, skip anything else.
+            break;
+          }
+          activateable = (regularChild as _TestRegularWindowController).getFirstActivatableChild();
+        case final DialogWindowController dialogChild:
+          // Always return the first dialog found.
+          return (dialogChild as _TestDialogWindowController).getFirstActivatableChild();
+        case final TooltipWindowController _: // Tooltips cannot be activated.
+          break;
+        case final PopupWindowController popupChild:
+          if (foundPopup) {
+            // Already found a popup, skip anything else.
+            break;
+          }
+          activateable = (popupChild as _TestPopupWindowController).getFirstActivatableChild();
+          foundPopup = true;
+      }
+    }
+
+    return activateable;
+  }
+}
+
+class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
+  _TestRegularWindowController({
+    required RegularWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) : _delegate = delegate,
+       _size = preferredSize ?? const Size(800, 600),
+       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _title = title ?? 'Test Window',
+       super.empty() {
+    _constrainToBounds();
+    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+
+    // Automatically activate the window when created.
+    activate();
+  }
+
+  final RegularWindowControllerDelegate _delegate;
+  final _TestWindowingOwner windowingOwner;
+  Size _size;
+  BoxConstraints _constraints;
+  String _title;
+  bool _isMaximized = false;
+  bool _isMinimized = false;
+  bool _isFullscreen = false;
+
+  @override
+  Size get contentSize => isFullscreen || isMaximized ? rootView.display.size : _size;
+
+  @override
+  String get title => _title;
+
+  @override
+  bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  bool get isMaximized => _isMaximized;
+
+  @override
+  bool get isMinimized => _isMinimized;
+
+  @override
+  bool get isFullscreen => _isFullscreen;
+
+  @override
+  void setSize(Size size) {
+    _size = size;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setTitle(String title) {
+    _title = title;
+    notifyListeners();
+  }
+
+  @override
+  void activate() {
+    final BaseWindowController activated = windowingOwner.activateWindowController(this);
+    activated.notifyListeners();
+  }
+
+  @override
+  void setMaximized(bool maximized) {
+    _isMaximized = maximized;
+    if (_isMaximized) {
+      _isMinimized = false;
+      _isFullscreen = false;
+    }
+    notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    _isMinimized = minimized;
+    if (_isMinimized) {
+      windowingOwner.deactivateWindowController(this);
+    }
+    notifyListeners();
+  }
+
+  @override
+  void setFullscreen(bool fullscreen, {ui.Display? display}) {
+    _isFullscreen = fullscreen;
+    if (_isFullscreen) {
+      _isMaximized = false;
+      _isMinimized = false;
+    }
+    notifyListeners();
+  }
+
+  void _constrainToBounds() {
+    final double width = _constraints.constrainWidth(_size.width);
+    final double height = _constraints.constrainHeight(_size.height);
+    _size = Size(width, height);
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+  }
+}
+
+void _addChildToParent(BaseWindowController? parent, BaseWindowController child) {
+  if (parent != null) {
+    switch (parent) {
+      case final DialogWindowController testParent:
+        (testParent as _TestDialogWindowController).addChild(child);
+      case final RegularWindowController testParent:
+        (testParent as _TestRegularWindowController).addChild(child);
+      case final PopupWindowController testParent:
+        (testParent as _TestPopupWindowController).addChild(child);
+      case TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of another window controller.');
+    }
+  }
+}
+
+void _removeChildFromParent(BaseWindowController? parent, BaseWindowController child) {
+  if (parent != null) {
+    switch (parent) {
+      case final DialogWindowController testParent:
+        (testParent as _TestDialogWindowController).removeChild(child);
+      case final RegularWindowController testParent:
+        (testParent as _TestRegularWindowController).removeChild(child);
+      case final PopupWindowController testParent:
+        (testParent as _TestPopupWindowController).removeChild(child);
+      case TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of another window controller.');
+    }
+  }
+}
+
+class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
+  _TestDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    BaseWindowController? parent,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) : _delegate = delegate,
+       _parent = parent,
+       _size = preferredSize ?? const Size(800, 600),
+       _constraints = preferredConstraints ?? BoxConstraints.loose(const Size(1920, 1080)),
+       _title = title ?? 'Test Window',
+       super.empty() {
+    _constrainToBounds();
+    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    _addChildToParent(parent, this);
+
+    // Automatically activate the window when created.
+    activate();
+  }
+
+  final DialogWindowControllerDelegate _delegate;
+  final BaseWindowController? _parent;
+  final _TestWindowingOwner windowingOwner;
+  Size _size;
+  BoxConstraints _constraints;
+  String _title;
+  bool _isMinimized = false;
+
+  @override
+  Size get contentSize => _size;
+
+  @override
+  BaseWindowController? get parent => _parent;
+
+  @override
+  String get title => _title;
+
+  @override
+  bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  bool get isMinimized => _isMinimized;
+
+  @override
+  void setSize(Size size) {
+    _size = size;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    _constrainToBounds();
+    notifyListeners();
+  }
+
+  @override
+  void setTitle(String title) {
+    _title = title;
+    notifyListeners();
+  }
+
+  @override
+  void activate() {
+    final BaseWindowController activated = windowingOwner.activateWindowController(this);
+    activated.notifyListeners();
+  }
+
+  @override
+  void setMinimized(bool minimized) {
+    if (_parent != null && minimized) {
+      fail('Cannot minimize a modal dialog window.');
+    }
+
+    _isMinimized = minimized;
+    if (_isMinimized) {
+      windowingOwner.deactivateWindowController(this);
+    }
+    notifyListeners();
+  }
+
+  void _constrainToBounds() {
+    final double width = _constraints.constrainWidth(_size.width);
+    final double height = _constraints.constrainHeight(_size.height);
+    _size = Size(width, height);
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(_parent, this);
+  }
+}
+
+class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
+  _TestPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    required BoxConstraints preferredConstraints,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _delegate = delegate,
+       _constraints = preferredConstraints,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       _parent = parent,
+       super.empty() {
+    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    _addChildToParent(parent, this);
+
+    // Automatically activate the window when created.
+    activate();
+  }
+
+  final PopupWindowControllerDelegate _delegate;
+  final _TestWindowingOwner windowingOwner;
+  BoxConstraints _constraints;
+  // ignore: unused_field
+  final ui.Rect _anchorRect;
+  // ignore: unused_field
+  final WindowPositioner _positioner;
+  final BaseWindowController _parent;
+
+  @override
+  Size get contentSize => _constraints.biggest;
+
+  @override
+  BaseWindowController get parent => _parent;
+
+  @override
+  bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  void activate() {
+    final BaseWindowController activated = windowingOwner.activateWindowController(this);
+    activated.notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    notifyListeners();
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(parent, this);
+  }
+}
+
+/// A [WindowingOwner] used for tests.
+///
+/// This windowing owner will behave as a perfect windowing system, with no
+/// delays or failures.
+///
+/// See also:
+/// * [TestWidgetsFlutterBinding], which uses this class to create window controllers
+/// for tests.
+/// * [WindowingOwner], the base class.
+class _TestWindowingOwner extends WindowingOwner {
+  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
+    : _platformDispatcher = platformDispatcher;
+
+  final TestPlatformDispatcher _platformDispatcher;
+  BaseWindowController? _activeWindowController;
+
+  /// Activates the given [controller].
+  ///
+  /// If the controller has children, the first activateable window in its hierarchy
+  /// will be activated.
+  ///
+  /// Tooltips cannot be activated, so if a [TooltipWindowController] is passed in,
+  /// this method will throw an error.
+  ///
+  /// Returns the activated [BaseWindowController].
+  BaseWindowController activateWindowController(BaseWindowController controller) {
+    switch (controller) {
+      case final RegularWindowController regularController:
+        final BaseWindowController leaf = (regularController as _TestRegularWindowController)
+            .getFirstActivatableChild();
+        _activeWindowController = leaf;
+        return _activeWindowController!;
+      case final DialogWindowController dialogController:
+        final BaseWindowController leaf = (dialogController as _TestDialogWindowController)
+            .getFirstActivatableChild();
+        _activeWindowController = leaf;
+        return _activeWindowController!;
+      case final TooltipWindowController _:
+        fail('Tooltips cannot be activated. Activate the parent window instead.');
+      case final PopupWindowController _:
+        final BaseWindowController leaf = (controller as _TestPopupWindowController)
+            .getFirstActivatableChild();
+        _activeWindowController = leaf;
+        return _activeWindowController!;
+    }
+  }
+
+  bool _tryActivateParent(BaseWindowController? parent) {
+    if (parent == null) {
+      return false;
+    }
+
+    switch (parent) {
+      case final RegularWindowController regularParent:
+        regularParent.activate();
+      case final DialogWindowController dialogParent:
+        dialogParent.activate();
+      case final TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of DialogWindowController.');
+      case final PopupWindowController popupParent:
+        popupParent.activate();
+    }
+
+    return true;
+  }
+
+  /// Deactivates the given [controller] if it is currently active.
+  ///
+  /// If the controller is not currently active, this method does nothing.
+  ///
+  /// If the controller is a [DialogWindowController] with a parent, the parent
+  /// will be activated upon deactivation of the dialog.
+  ///
+  /// If the controller is a [TooltipWindowController], this method will throw
+  /// an error, as tooltips cannot be deactivated because they cannot be activated.
+  void deactivateWindowController(BaseWindowController controller) {
+    if (_activeWindowController != controller) {
+      return;
+    }
+
+    switch (controller) {
+      case final RegularWindowController _:
+        _activeWindowController = null;
+      case final DialogWindowController dialogController:
+        if (!_tryActivateParent(dialogController.parent)) {
+          _activeWindowController = null;
+        }
+      case final TooltipWindowController tooltipController:
+        fail(
+          'Tooltips cannot be deactivated. Deactivate the parent window instead: '
+          '${tooltipController.parent}.',
+        );
+      case final PopupWindowController popupController:
+        if (!_tryActivateParent(popupController.parent)) {
+          _activeWindowController = null;
+        }
+    }
+  }
+
+  /// Returns whether the given [controller] is the currently active window.
+  bool isWindowControllerActive(BaseWindowController controller) {
+    return _activeWindowController == controller;
+  }
+
+  @internal
+  @override
+  RegularWindowController createRegularWindowController({
+    required RegularWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    String? title,
+  }) {
+    return _TestRegularWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+    );
+  }
+
+  @internal
+  @override
+  DialogWindowController createDialogWindowController({
+    required DialogWindowControllerDelegate delegate,
+    Size? preferredSize,
+    BoxConstraints? preferredConstraints,
+    BaseWindowController? parent,
+    String? title,
+  }) {
+    return _TestDialogWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      parent: parent,
+      preferredSize: preferredSize,
+      preferredConstraints: preferredConstraints,
+      title: title,
+    );
+  }
+
+  @override
+  TooltipWindowController createTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    // TODO(mattkae): implement createTooltipWindowController
+    throw UnimplementedError();
+  }
+
+  @override
+  PopupWindowController createPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    return _TestPopupWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      preferredConstraints: preferredConstraints,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
+  }
 }
 
 // Examples can assume:
@@ -332,6 +937,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get registerTestTextInput => true;
 
+  /// Determines whether the binding automatically registers [windowingOwner] to
+  /// the fake windowing owner implementation.
+  ///
+  /// Unit tests make use of this to mock out windowing system communication for
+  /// widgets. An integration test would set this to false, to test real windowing
+  /// system input.
+  ///
+  /// This property should not change the value it returns during the lifetime
+  /// of the binding. Changing the value of this property risks very confusing
+  /// behavior as the [WindowingOwner] may be inconsistently registered or
+  /// unregistered.
+  @protected
+  bool get registerTestWindowingOwner => true;
+
   /// Delay for `duration` of time.
   ///
   /// In the automated test environment ([AutomatedTestWidgetsFlutterBinding],
@@ -400,6 +1019,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+
+    if (isWindowingEnabled && registerTestWindowingOwner) {
+      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+    }
   }
 
   @override

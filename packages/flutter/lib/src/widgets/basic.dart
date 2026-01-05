@@ -9,7 +9,9 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
+import 'dart:ui'
+    as ui
+    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -46,6 +48,7 @@ export 'package:flutter/rendering.dart'
         FlowPaintingContext,
         FractionalOffsetTween,
         HitTestBehavior,
+        ImageFilterConfig,
         LayerLink,
         MainAxisAlignment,
         MainAxisSize,
@@ -529,7 +532,7 @@ class BackdropGroup extends InheritedWidget {
 ///                sigmaY: 40,
 ///              ),
 ///              child: Container(
-///                color: Colors.black.withOpacity(0.2),
+///                color: Colors.black.withValues(alpha: 0.2),
 ///                height: 200,
 ///                child: const Text('Blur item'),
 ///              ),
@@ -633,14 +636,26 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
   /// null if provided.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : _useSharedKey = false;
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
   /// [BackdropGroup].
@@ -651,20 +666,48 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter.grouped({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : backdropGroupKey = null,
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       backdropGroupKey = null,
        _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  ///
+  /// The [filter] parameter is equivalent to [filterConfig] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ui.ImageFilter? filter;
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filterConfig] parameter is equivalent to [filter] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ImageFilterConfig? filterConfig;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -694,10 +737,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     return backdropGroupKey;
   }
 
+  ImageFilterConfig get _effectiveFilterConfig {
+    return filterConfig ?? ImageFilterConfig(filter!);
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
-      filter: filter,
+      filterConfig: _effectiveFilterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -707,10 +754,21 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
-      ..filter = filter
+      ..filterConfig = _effectiveFilterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
@@ -4047,8 +4105,11 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
     required SemanticsValidationResult validationResult,
+    required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
+    required String? minValue,
+    required String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4132,7 +4193,10 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
+           hitTestBehavior: hitTestBehavior,
            inputType: inputType,
+           minValue: minValue,
+           maxValue: maxValue,
          ),
        );
 
@@ -4150,11 +4214,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -4381,8 +4441,11 @@ class SliverSemantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -7963,8 +8026,11 @@ class Semantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -8358,17 +8424,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 groupValue: selectedRadio,
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),

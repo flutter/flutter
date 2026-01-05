@@ -1650,14 +1650,24 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     supportedLocales: widget.supportedLocales,
   );
 
-  void _updateLocalizations({WidgetsApp? oldWidget}) {
-    _localizationsResolver.update(
-      locale: widget.locale,
-      localeListResolutionCallback: widget.localeListResolutionCallback,
-      localeResolutionCallback: widget.localeResolutionCallback,
-      supportedLocales: widget.supportedLocales,
-      localizationsDelegates: widget.localizationsDelegates,
-    );
+  bool _shouldUpdateLocalizations(WidgetsApp oldWidget) {
+    return widget.locale != oldWidget.locale ||
+        widget.localeListResolutionCallback != oldWidget.localeListResolutionCallback ||
+        widget.localeResolutionCallback != oldWidget.localeResolutionCallback ||
+        widget.supportedLocales != oldWidget.supportedLocales ||
+        widget.localizationsDelegates != oldWidget.localizationsDelegates;
+  }
+
+  void _updateLocalizations({required WidgetsApp oldWidget}) {
+    if (_shouldUpdateLocalizations(oldWidget)) {
+      _localizationsResolver.update(
+        locale: widget.locale,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localizationsDelegates: widget.localizationsDelegates,
+        supportedLocales: widget.supportedLocales,
+      );
+    }
   }
 
   // BUILDER

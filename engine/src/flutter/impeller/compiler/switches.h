@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_COMPILER_SWITCHES_H_
 
 #include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 
@@ -22,25 +23,26 @@ class Switches {
  public:
   std::shared_ptr<fml::UniqueFD> working_directory = nullptr;
   std::vector<IncludeDir> include_directories = {};
-  std::string source_file_name = "";
+  std::filesystem::path source_file_name;
   SourceType input_type = SourceType::kUnknown;
   /// The raw shader file output by the compiler. For --iplr and
   /// --shader-bundle modes, this is used as the filename for the output
   /// flatbuffer output.
-  std::string sl_file_name = "";
+  std::filesystem::path sl_file_name;
   bool iplr = false;
   std::string shader_bundle = "";
-  std::string spirv_file_name = "";
-  std::string reflection_json_name = "";
-  std::string reflection_header_name = "";
-  std::string reflection_cc_name = "";
-  std::string depfile_path = "";
+  std::filesystem::path spirv_file_name;
+  std::filesystem::path reflection_json_name;
+  std::filesystem::path reflection_header_name;
+  std::filesystem::path reflection_cc_name;
+  std::filesystem::path depfile_path;
   std::vector<std::string> defines = {};
   bool json_format = false;
   SourceLanguage source_language = SourceLanguage::kUnknown;
   uint32_t gles_language_version = 0;
   std::string metal_version = "";
   std::string entry_point = "";
+  std::string entry_point_prefix = "";
   bool use_half_textures = false;
   bool require_framebuffer_fetch = false;
 

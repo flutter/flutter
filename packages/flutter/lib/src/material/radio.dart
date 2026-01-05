@@ -216,7 +216,9 @@ class Radio<T> extends StatefulWidget {
   /// ```dart
   /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -275,7 +277,7 @@ class Radio<T> extends StatefulWidget {
   ///   value: 1,
   ///   fillColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
   ///     if (states.contains(WidgetState.disabled)) {
-  ///       return Colors.orange.withOpacity(.32);
+  ///       return Colors.orange.withValues(alpha: .32);
   ///     }
   ///     return Colors.orange;
   ///   })
@@ -427,9 +429,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.backgroundColor] of [ThemeData.radioTheme]
-  /// is used. If that is also null the default value is transparent in all
-  /// states.
+  /// If null, then the ambient [RadioThemeData.backgroundColor] is used.
+  /// If that is also null the default value is transparent in all states.
   final WidgetStateProperty<Color?>? backgroundColor;
 
   /// {@template flutter.material.Radio.side}
@@ -446,8 +447,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.side] of [ThemeData.radioTheme] is used. If
-  /// that is also null, the default value is a border using the fill color.
+  /// If null, then the ambient [RadioThemeData.side] is used. If that is
+  /// also null, the default value is a border using the fill color.
   final BorderSide? side;
 
   /// {@template flutter.material.Radio.innerRadius}
@@ -459,8 +460,8 @@ class Radio<T> extends StatefulWidget {
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
   ///
-  /// If null, then [RadioThemeData.innerRadius] of [ThemeData.radioTheme] is
-  /// used. If that is also null, the default value is `4.5` in all states.
+  /// If null, then the ambient [RadioThemeData.innerRadius] is used.
+  /// If that is also null, the default value is `4.5` in all states.
   final WidgetStateProperty<double?>? innerRadius;
 
   @override

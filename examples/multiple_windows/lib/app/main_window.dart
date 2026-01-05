@@ -102,6 +102,7 @@ class _WindowsTable extends StatelessWidget {
         controller: dialog,
       ),
       TooltipWindowController() => null,
+      PopupWindowController() => null,
     };
   }
 
@@ -110,6 +111,7 @@ class _WindowsTable extends StatelessWidget {
       RegularWindowController() => 'Regular',
       DialogWindowController() => 'Dialog',
       TooltipWindowController() => 'Tooltip',
+      PopupWindowController() => 'Popup',
     };
   }
 
@@ -161,7 +163,7 @@ class _WindowCreatorCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OutlinedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     final UniqueKey key = UniqueKey();
                     windowManager.add(
                       KeyedWindow(
@@ -180,7 +182,7 @@ class _WindowCreatorCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     final UniqueKey key = UniqueKey();
                     windowManager.add(
                       KeyedWindow(

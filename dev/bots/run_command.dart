@@ -100,11 +100,18 @@ Future<Command> startCommand(
 
   final time = Stopwatch()..start();
   print('workingDirectory: $workingDirectory, executable: $executable, arguments: $arguments');
+
+  // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also dev/devicelab/lib/framework/utils.dart.
+  final finalEnvironment = <String, String>{
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+  };
   final io.Process process = await io.Process.start(
     executable,
     arguments,
     workingDirectory: workingDirectory,
-    environment: environment,
+    environment: finalEnvironment,
   );
   return Command._(
     process,
@@ -141,6 +148,76 @@ Future<Command> startCommand(
         })
         .join('\n'),
   );
+}
+
+String? _bestNdkPath;
+String? _discoverBestNdkPath() {
+  if (_bestNdkPath != null) {
+    return _bestNdkPath;
+  }
+  // If we found a valid NDK, return it.
+  // Otherwise return empty string to clear any bad inherited value.
+  final Map<String, String> env = io.Platform.environment;
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (io.Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (io.Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (io.Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
+  if (androidHome == null) {
+    return _bestNdkPath = null;
+  }
+  final ndkDir = io.Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return _bestNdkPath = null;
+  }
+  final versions = <String>[];
+  for (final io.FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is io.Directory) {
+      final String name = path.basename(entity.path);
+      // flutter_tools ignores non-SemVer directories. NDK versions should start with a number.
+      if (int.tryParse(name.split('.').first) != null) {
+        versions.add(name);
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return _bestNdkPath = null;
+  }
+  // Sort numerically/lexicographically to find the "highest" version.
+  // We assume versions are like "21.4.7075529" or "23.1.7779620".
+  // A simple sort works for major versions if they have the same number of digits,
+  // but to be safe we parse the major version.
+  versions.sort((String a, String b) {
+    // Try to parse major version.
+    final int? aMajor = int.tryParse(a.split('.').first);
+    final int? bMajor = int.tryParse(b.split('.').first);
+    if (aMajor != null && bMajor != null) {
+      if (aMajor != bMajor) {
+        return aMajor.compareTo(bMajor);
+      }
+    }
+    // Fallback to string comparison.
+    return a.compareTo(b);
+  });
+
+  return _bestNdkPath = path.join(ndkDir.path, versions.last);
 }
 
 /// Runs the `executable` and waits until the process exits.

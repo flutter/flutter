@@ -83,6 +83,7 @@ impeller_component("geometry_unittests") {
     "geometry_unittests.cc",
     "matrix_unittests.cc",
     "path_source_unittests.cc",
+    "point_unittests.cc",
     "rational_unittests.cc",
     "rect_unittests.cc",
     "round_rect_unittests.cc",

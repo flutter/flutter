@@ -18,7 +18,10 @@ void main() {
       RegularWindow(
         controller: RegularWindowController(
           preferredSize: const Size(800, 600),
-          preferredConstraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+          preferredConstraints: const BoxConstraints(
+            minWidth: 640,
+            minHeight: 480,
+          ),
           title: 'Example Window',
         ),
         child: const MaterialApp(home: MyApp()),
@@ -65,7 +68,10 @@ class _MyAppState extends State<MyApp> {
           child: Container(
             padding: const EdgeInsets.all(8),
             color: Colors.black,
-            child: const Text('This is a tooltip', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'This is a tooltip',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ),
       );
@@ -97,7 +103,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Rect? _getAnchorRect() {
-    final RenderBox? renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        _key.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       final Offset position = renderBox.localToGlobal(Offset.zero);
       final Size size = renderBox.size;
