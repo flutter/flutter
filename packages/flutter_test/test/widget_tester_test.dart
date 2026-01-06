@@ -832,6 +832,8 @@ void main() {
       managerByServices.addListener(() => counterByServices++);
       managerByServices.notifyListeners();
       expect(counterByServices, 1);
+
+      // Passes if no leaks are detected.
     });
   });
 }
