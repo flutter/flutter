@@ -7,13 +7,12 @@
 #include <flutter/runtime_effect.glsl>
 
 out vec4 fragColor;
-
 uniform vec2 uSize;
-uniform sampler2D uTex;
 
 void main() {
-    vec2 p = FlutterFragCoord().xy / uSize;
-    float d = texture(uTex, p).r;
-    vec3 col = d > 0.0 ? vec3(0.0) : vec3(1.0);
-    fragColor = vec4(col, 1.0);
+  vec2 p = FlutterFragCoord().xy / uSize;
+  vec2 center = vec2(0.5, 0.5);
+  float radius = 0.25;
+  float d = length(p - center) - radius;
+  fragColor = vec4(d, 0.0, 0.0, 1.0);
 }

@@ -29,7 +29,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
-/// {@template flutter.material.ButtonStyleButton.iconAlignment}
+/// {@template flutter.material.ButtonStyle.iconAlignment}
 /// Determines the alignment of the icon within the widgets such as:
 ///   - [ElevatedButton.icon],
 ///   - [FilledButton.icon],
@@ -48,7 +48,7 @@ import 'tooltip.dart';
 /// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
 /// or the end of the button.
 ///
-/// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
+/// ** See code in examples/api/lib/material/icon_alignment/icon_alignment.0.dart **
 /// {@end-tool}
 ///
 /// {@endtemplate}
@@ -163,7 +163,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
   /// Defaults to true.
   final bool? isSemanticButton;
 
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  /// {@macro flutter.material.ButtonStyle.iconAlignment}
   @Deprecated(
     'Remove this parameter as it is now ignored. '
     'Use ButtonStyle.iconAlignment instead. '

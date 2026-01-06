@@ -219,15 +219,15 @@ void main() {
       expect(find.text('Second error message'), findsOneWidget);
 
       if (test.supportsAnnounce) {
-        final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-        expect(announcement.message, 'First error message');
-        expect(announcement.textDirection, TextDirection.ltr);
-        expect(announcement.assertiveness, Assertiveness.assertive);
+        expect(tester.takeAnnouncements(), [
+          isAccessibilityAnnouncement(
+            'First error message',
+            textDirection: TextDirection.ltr,
+            assertiveness: Assertiveness.assertive,
+          ),
+        ]);
       } else {
-        final CapturedAccessibilityAnnouncement? announcement = tester
-            .takeAnnouncements()
-            .firstOrNull;
-        expect(announcement, null);
+        expect(tester.takeAnnouncements(), isEmpty);
       }
     });
   }
@@ -443,10 +443,13 @@ void main() {
     await tester.pump();
     expect(find.text('error'), findsOneWidget);
 
-    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-    expect(announcement.message, 'error');
-    expect(announcement.textDirection, TextDirection.ltr);
-    expect(announcement.assertiveness, Assertiveness.assertive);
+    expect(tester.takeAnnouncements(), [
+      isAccessibilityAnnouncement(
+        'error',
+        textDirection: TextDirection.ltr,
+        assertiveness: Assertiveness.assertive,
+      ),
+    ]);
   });
 
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
