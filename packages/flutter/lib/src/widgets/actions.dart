@@ -234,6 +234,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// Gets the type of intent this action responds to.
   Type get intentType => T;
 
+  bool _canHandleIntentType(Intent intent) => intent is T;
+
   /// Returns true if the action is enabled and is ready to be invoked.
   ///
   /// This will be called by the [ActionDispatcher] before attempting to invoke
@@ -956,14 +958,22 @@ class Actions extends StatefulWidget {
     Object? returnValue;
 
     final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
-      final actions = element.widget as _ActionsScope;
-      final Action<T>? result = _castAction(actions, intent: intent);
-      if (result != null && result._isEnabled(intent, context)) {
+      final actionsScope = element.widget as _ActionsScope;
+      final Action<Intent>? result = actionsScope.actions[intent.runtimeType];
+      if (result == null) {
+        return false;
+      }
+      if (!result._canHandleIntentType(intent)) {
+        assert(false, '$T cannot be handled by an Action of runtime type ${result.runtimeType}.');
+        return false;
+      }
+
+      if (result._isEnabled(intent, context)) {
         // Invoke the action we found using the relevant dispatcher from the Actions
         // Element we found.
         returnValue = _findDispatcher(element).invokeAction(result, intent, context);
       }
-      return result != null;
+      return true;
     });
 
     assert(() {
