@@ -63,7 +63,7 @@ def print_divider(char: str = '=') -> None:
 
 
 def is_asan(build_dir: str) -> bool:
-  with open(os.path.join(build_dir, 'args.gn')) as args:
+  with open(os.path.join(build_dir, 'args.gn'), encoding='utf-8') as args:
     if 'is_asan = true' in args.read():
       return True
 
@@ -91,7 +91,7 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   start_time = time.time()
 
-  process = subprocess.Popen(
+  with subprocess.Popen(
       cmd,
       cwd=cwd,
       stdout=subprocess.PIPE,
@@ -99,14 +99,14 @@ def run_cmd( # pylint: disable=too-many-arguments
       env=env,
       universal_newlines=True,
       **kwargs
-  )
-  output = ''
+  ) as process:
+    output = ''
 
-  for line in iter(process.stdout.readline, ''):
-    output += line
-    logger.info(line.rstrip())
+    for line in iter(process.stdout.readline, ''):
+      output += line
+      logger.info(line.rstrip())
 
-  process.wait()
+    process.wait()
   end_time = time.time()
 
   if process.returncode != 0 and not expect_failure:
@@ -126,7 +126,7 @@ def run_cmd( # pylint: disable=too-many-arguments
 
     if not allowed_failure:
       raise RuntimeError(
-          'Command "%s" (in %s) exited with code %s.' % (command_string, cwd, process.returncode)
+          f'Command "{command_string}" (in {cwd}) exited with code {process.returncode}.'
       )
 
   for forbidden_string in forbidden_output:
@@ -183,7 +183,7 @@ def find_executable_path(path: str) -> str:
     if os.path.exists(bat_path):
       return bat_path
 
-  raise Exception('Executable %s does not exist!' % path)
+  raise Exception(f'Executable {path} does not exist!')
 
 
 def vulkan_validation_env(build_dir: str) -> typing.Dict[str, str]:
@@ -243,7 +243,7 @@ def build_engine_executable_command(
         '-t', executable, '-o',
         os.path.join(build_dir, 'coverage', executable_name), '-f', 'html'
     ]
-    updated_flags = ['--args=%s' % ' '.join(flags)]
+    updated_flags = [f'--args={" ".join(flags)}']
     test_command = [coverage_script] + coverage_flags + updated_flags
   else:
     test_command = [executable] + flags
@@ -337,7 +337,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
       dump_path = os.path.join(
-          luci_test_outputs_path, '%s_%s.txt' % (executable_name, sys_platform)
+          luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt'
       )
       logger.error('Writing core dump analysis to %s', dump_path)
       subprocess.call([
@@ -485,10 +485,10 @@ def run_cc_tests(
 
   if is_linux():
     flow_flags = [
-        '--golden-dir=%s' % GOLDEN_DIR,
-        '--font-file=%s' % ROBOTO_FONT_PATH,
+        f'--golden-dir={GOLDEN_DIR}',
+        f'--font-file={ROBOTO_FONT_PATH}',
     ]
-    icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+    icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
     unittests += [
         make_test('flow_unittests', flags=repeat_flags + ['--'] + flow_flags),
         make_test('flutter_glfw_unittests'),
@@ -608,7 +608,7 @@ def run_engine_benchmarks(
 ) -> None:
   logger.info('Running Engine Benchmarks.')
 
-  icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+  icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
 
   run_engine_executable(build_dir, 'shell_benchmarks', executable_filter, icu_flags)
 
@@ -673,8 +673,9 @@ def gather_dart_test(
 ) -> EngineExecutableTask:
   kernel_file_name = os.path.basename(dart_file) + '.dill'
   kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
-  error_message = "%s doesn't exist. Please run the build that populates %s" % (
-      kernel_file_output, build_dir
+  error_message = (
+      f"{kernel_file_output} doesn't exist. "
+      f'Please run the build that populates {build_dir}'
   )
   assert os.path.isfile(kernel_file_output), error_message
 
@@ -682,15 +683,14 @@ def gather_dart_test(
 
   options.apply_args(command_args)
 
-  dart_file_contents = open(dart_file, 'r')
-  custom_options = re.findall('// FlutterTesterOptions=(.*)', dart_file_contents.read())
-  dart_file_contents.close()
+  with open(dart_file, 'r', encoding='utf-8') as dart_file_contents:
+    custom_options = re.findall('// FlutterTesterOptions=(.*)', dart_file_contents.read())
   command_args.extend(custom_options)
 
   command_args += [
       '--use-test-fonts',
-      '--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat'),
-      '--flutter-assets-dir=%s' % os.path.join(build_dir, 'gen', 'flutter', 'lib', 'ui', 'assets'),
+      f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}',
+      f'--flutter-assets-dir={os.path.join(build_dir, "gen", "flutter", "lib", "ui", "assets")}',
       '--disable-asset-fonts',
       kernel_file_output,
   ]
@@ -717,9 +717,10 @@ def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   ios_test_lib = os.path.join(tmp_out_dir, 'libios_test_flutter.dylib')
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
-  message.append('ninja -C %s ios_test_flutter' % ios_out_dir)
-  final_message = "%s or %s doesn't exist. Please run the following commands: \n%s" % (
-      ios_out_dir, ios_test_lib, '\n'.join(message)
+  message.append(f'ninja -C {ios_out_dir} ios_test_flutter')
+  final_message = (
+      f"{ios_out_dir} or {ios_test_lib} doesn't exist. "
+      f'Please run the following commands: \n{chr(10).join(message)}'
   )
   assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
@@ -767,14 +768,14 @@ def run_java_tests(
   test_class = executable_filter if executable_filter else '*'
   command = [
       gradle_bin,
-      '-Pflutter_jar=%s' % flutter_jar,
-      '-Pbuild_dir=%s' % build_dir,
+      f'-Pflutter_jar={flutter_jar}',
+      f'-Pbuild_dir={build_dir}',
       'testDebugUnitTest',
-      '--tests=%s' % test_class,
+      f'--tests={test_class}',
       '--rerun-tasks',
       '--no-daemon',
-      '--project-cache-dir=%s' % gradle_cache_dir,
-      '--gradle-user-home=%s' % gradle_cache_dir,
+      f'--project-cache-dir={gradle_cache_dir}',
+      f'--gradle-user-home={gradle_cache_dir}',
   ]
 
   env = dict(os.environ, ANDROID_HOME=android_home, JAVA_HOME=java_home())
@@ -796,10 +797,10 @@ def run_android_unittest(
   except:
     luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
     if luci_test_outputs_path:
-      print('>>>>> Test %s failed. Capturing logcat.' % test_runner_name)
-      logcat_path = os.path.join(luci_test_outputs_path, '%s_logcat' % test_runner_name)
-      logcat_file = open(logcat_path, 'w')
-      subprocess.run([adb_path, 'logcat', '-d'], stdout=logcat_file, check=False)
+      print(f'>>>>> Test {test_runner_name} failed. Capturing logcat.')
+      logcat_path = os.path.join(luci_test_outputs_path, f'{test_runner_name}_logcat')
+      with open(logcat_path, 'w', encoding='utf-8') as logcat_file:
+        subprocess.run([adb_path, 'logcat', '-d'], stdout=logcat_file, check=False)
     raise
 
 
@@ -834,7 +835,7 @@ def run_objc_tests(
       'xcrun '
       'simctl '
       'create '
-      '%s com.apple.CoreSimulator.SimDeviceType.iPhone-11' % new_simulator_name
+      f'{new_simulator_name} com.apple.CoreSimulator.SimDeviceType.iPhone-11'
   ]
   run_cmd(create_simulator, shell=True)
 
@@ -858,7 +859,7 @@ def run_objc_tests(
           'FLUTTER_ENGINE=' + ios_variant
       ]
       if test_filter is not None:
-        test_command[0] = test_command[0] + ' -only-testing:%s' % test_filter
+        test_command[0] = test_command[0] + f' -only-testing:{test_filter}'
       try:
         run_cmd(test_command, cwd=ios_unit_test_dir, shell=True)
 
@@ -910,8 +911,8 @@ def gather_dart_tests(
       cwd=dart_tests_dir,
   )
 
-  dart_vm_service_tests = glob.glob('%s/vm_service/*_test.dart' % dart_tests_dir)
-  dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
+  dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
+  dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
@@ -982,9 +983,9 @@ def gather_dart_package_tests(
         cwd=package_path,
     )
   else:
-    dart_tests = glob.glob('%s/test/*_test.dart' % package_path)
+    dart_tests = glob.glob(f'{package_path}/test/*_test.dart')
     if not dart_tests:
-      raise Exception('No tests found for Dart package at %s' % package_path)
+      raise Exception(f'No tests found for Dart package at {package_path}')
     for dart_test_file in dart_tests:
       opts = [dart_test_file]
       yield EngineExecutableTask(
@@ -999,7 +1000,7 @@ def uses_package_test_runner(package: str) -> bool:
   pubspec = os.path.join(package, 'pubspec.yaml')
   if not os.path.exists(pubspec):
     return False
-  with open(pubspec, 'r') as file:
+  with open(pubspec, 'r', encoding='utf-8') as file:
     # Check if either "dependencies" or "dev_dependencies" contains "test".
     data = yaml.safe_load(file)
     if data is None:
@@ -1043,7 +1044,7 @@ def build_dart_host_test_list() -> typing.List[str]:
 
 def run_benchmark_tests(build_dir: str) -> None:
   test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'benchmark')
-  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+  dart_tests = glob.glob(f'{test_dir}/test/*_test.dart')
   for dart_test_file in dart_tests:
     opts = [dart_test_file]
     run_engine_executable(
@@ -1151,8 +1152,8 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
   tests_path: str = os.path.join(build_dir, 'impeller_golden_tests')
   if not os.path.exists(tests_path):
     raise Exception(
-        'Cannot find the "impeller_golden_tests" executable in "%s". You may need to build it.' %
-        (build_dir)
+        f'Cannot find the "impeller_golden_tests" executable in "{build_dir}". '
+        'You may need to build it.'
     )
   harvester_path: Path = Path(SCRIPT_DIR).parent.joinpath('tools'
                                                          ).joinpath('golden_tests_harvester')
@@ -1228,7 +1229,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       '--type',
       type=str,
       default='all',
-      help='A list of test types, default is "all" (equivalent to "%s")' % (','.join(all_types))
+      help=f'A list of test types, default is "all" (equivalent to "{",".join(all_types)}")'
   )
   parser.add_argument(
       '--engine-filter', type=str, default='', help='A list of engine test executables to run.'
@@ -1350,8 +1351,8 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     print('Warning: using "android" in variant. Did you mean to use --android-variant?')
 
   build_dir = os.path.join(OUT_DIR, args.variant)
-  if args.type != 'java' and args.type != 'android':
-    assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
+  if args.type not in ('java', 'android'):
+    assert os.path.exists(build_dir), f'Build variant directory {build_dir} does not exist!'
 
   if args.sanitizer_suppressions:
     assert is_linux() or is_mac(
@@ -1359,13 +1360,13 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     file_dir = os.path.dirname(os.path.abspath(__file__))
     command = [
         'env', '-i', 'bash', '-c',
-        'source {}/sanitizer_suppressions.sh >/dev/null && env'.format(file_dir)
+        f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
     ]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    for line in process.stdout:
-      key, _, value = line.decode('utf8').strip().partition('=')
-      os.environ[key] = value
-    process.communicate()  # Avoid pipe deadlock while waiting for termination.
+    with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
+      for line in process.stdout:
+        key, _, value = line.decode('utf8').strip().partition('=')
+        os.environ[key] = value
+      process.communicate()  # Avoid pipe deadlock while waiting for termination.
 
   success = True
 
