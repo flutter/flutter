@@ -5279,6 +5279,613 @@ void main() {
       shouldFocusPrevious: textInputAction == TextInputAction.previous,
     );
   }, variant: focusVariants);
+
+  group('DropdownMenu.clearOnBlur', () {
+    testWidgets('clearOnBlur defaults to false and does not reset text on blur', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      // Focus the dropdown and enter text
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+
+      // Lose focus by focusing the button
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'foo');
+    });
+
+    testWidgets('clearOnBlur resets text on blur when true', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, isNull);
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+
+      // Lose focus triggers clearOnBlur behavior
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Text should reset to the last selected value and onSelected should be called
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, TestMenu.mainMenu0);
+    });
+
+    testWidgets('clearOnBlur resets when search text does not match any option', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      // Enter text that doesn't match any menu option
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Should reset to initial selection since 'foo' was never selected
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, TestMenu.mainMenu0);
+    });
+
+    testWidgets('clearOnBlur resets when search text matches option but is not selected', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      // Enter text that matches an option but don't select it from the menu
+      await tester.enterText(find.byType(TextField).first, 'Item 2');
+      await tester.pump();
+      expect(controller.text, 'Item 2');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Should reset to initial selection since 'Item 2' was typed but not selected
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, TestMenu.mainMenu0);
+    });
+
+    testWidgets('clearOnBlur does not reset when text matches selected value', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      // Type the same text as the selected value
+      await tester.enterText(find.byType(TextField).first, 'Item 0');
+      await tester.pump();
+      expect(controller.text, 'Item 0');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // No reset needed since text already matches the selected value
+      expect(controller.text, 'Item 0');
+      expect(selectedValue, TestMenu.mainMenu0);
+    });
+
+    testWidgets('clearOnBlur does not reset after new selection', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      // Select a new item from the menu
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pumpAndSettle();
+      await tester.tap(findMenuItemButton('Item 2'));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'Item 2');
+      expect(selectedValue, TestMenu.mainMenu2);
+
+      // After a valid selection, losing focus should not reset the text
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'Item 2');
+      expect(selectedValue, TestMenu.mainMenu2);
+    });
+
+    testWidgets('clearOnBlur does not reset on Enter when false', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              clearOnBlur: false,
+              controller: controller,
+              focusNode: focusNode,
+              initialSelection: TestMenu.mainMenu0,
+              dropdownMenuEntries: menuChildren,
+              requestFocusOnTap: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'foo');
+    });
+
+    testWidgets('clearOnBlur handles null initial selection', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      TestMenu? selectedValue;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    selectedValue = value;
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, '');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'Item 0');
+      await tester.pump();
+      expect(controller.text, 'Item 0');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // With no initial selection, onSelected is called with null
+      expect(selectedValue, isNull);
+    });
+
+    testWidgets('clearOnBlur calls onSelected with correct value on blur', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+      final onSelectedCalls = <TestMenu?>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                  onSelected: (TestMenu? value) {
+                    onSelectedCalls.add(value);
+                  },
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+      expect(onSelectedCalls, isEmpty);
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+      expect(onSelectedCalls, isEmpty);
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // onSelected should be called once with the restored value
+      expect(onSelectedCalls, hasLength(1));
+      expect(onSelectedCalls[0], TestMenu.mainMenu0);
+      expect(controller.text, 'Item 0');
+    });
+
+    testWidgets('clearOnBlur works with enableSearch', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  enableSearch: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'Item');
+      await tester.pump();
+      expect(controller.text, 'Item');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'Item 0');
+    });
+
+    testWidgets('clearOnBlur works with enableFilter', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  enableFilter: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'Item 2');
+      await tester.pump();
+      expect(controller.text, 'Item 2');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(controller.text, 'Item 0');
+    });
+
+    testWidgets('clearOnBlur works correctly with multiple focus changes', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final otherFocusNode = FocusNode();
+      addTearDown(otherFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                DropdownMenu<TestMenu>(
+                  clearOnBlur: true,
+                  controller: controller,
+                  focusNode: focusNode,
+                  initialSelection: TestMenu.mainMenu0,
+                  dropdownMenuEntries: menuChildren,
+                ),
+                ElevatedButton(
+                  focusNode: otherFocusNode,
+                  onPressed: () {},
+                  child: const Text('Other'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'foo');
+      await tester.pump();
+      expect(controller.text, 'foo');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+      expect(controller.text, 'Item 0');
+
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).first, 'bar');
+      await tester.pump();
+      expect(controller.text, 'bar');
+
+      otherFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+      expect(controller.text, 'Item 0');
+    });
+  });
 }
 
 enum TestMenu {

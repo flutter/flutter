@@ -199,6 +199,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
+    this.clearOnBlur = false,
     this.keyboardType,
     this.textStyle,
     this.textAlign = TextAlign.start,
@@ -368,6 +369,25 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   ///
   /// Defaults to true as the search function could be commonly used.
   final bool enableSearch;
+
+  /// Whether to reset the text field to the currently selected value when the
+  /// widget loses focus or when the user submits the form (e.g., presses Enter).
+  ///
+  /// When this is true, if the user types text in the search field but does
+  /// not select a new option, the text field will automatically reset to the
+  /// label of the last selected value when:
+  /// * The field loses focus, or
+  /// * The user submits the form (e.g., presses Enter).
+  ///
+  /// Example scenarios:
+  ///
+  /// * If "A1" is selected and the user types "foo" but doesn't select it,
+  ///   the field will reset to "A1" when focus is lost or when Enter is pressed.
+  /// * If "A1" is selected and the user types "A2" but doesn't select it,
+  ///   the field will reset to "A1" when focus is lost or when Enter is pressed.
+  ///
+  /// Defaults to false.
+  final bool clearOnBlur;
 
   /// The type of keyboard to use for editing the text.
   ///
@@ -731,6 +751,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
       widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
+  FocusNode get _effectiveTextFieldFocusNode => widget.focusNode ?? _internalFocudeNode;
+  T? _lastSelectedValue;
 
   @override
   void initState() {
@@ -747,13 +769,16 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
         text: filteredEntries[index].label,
         selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
       );
+      _lastSelectedValue = widget.initialSelection;
     }
     refreshLeadingPadding();
     _controller = widget.menuController ?? MenuController();
+    _effectiveTextFieldFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
+    _effectiveTextFieldFocusNode.removeListener(_handleFocusChange);
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
@@ -798,10 +823,19 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           text: filteredEntries[index].label,
           selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
         );
+        _lastSelectedValue = widget.initialSelection;
       }
     }
     if (oldWidget.menuController != widget.menuController) {
       _controller = widget.menuController ?? MenuController();
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      final FocusNode oldEffectiveFocusNode = oldWidget.focusNode ?? _internalFocudeNode;
+      final FocusNode newEffectiveFocusNode = widget.focusNode ?? _internalFocudeNode;
+      if (oldEffectiveFocusNode != newEffectiveFocusNode) {
+        oldEffectiveFocusNode.removeListener(_handleFocusChange);
+        newEffectiveFocusNode.addListener(_handleFocusChange);
+      }
     }
   }
 
@@ -1000,6 +1034,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                         text: entry.label,
                         selection: TextSelection.collapsed(offset: entry.label.length),
                       );
+                      _lastSelectedValue = entry.value;
                       widget.onSelected?.call(entry.value);
                       return;
                     }
@@ -1008,6 +1043,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
                     currentHighlight = widget.enableSearch ? i : null;
+                    _lastSelectedValue = entry.value;
                     widget.onSelected?.call(entry.value);
                     _enableFilter = false;
                     if (widget.closeBehavior == DropdownMenuCloseBehavior.self) {
@@ -1100,19 +1136,66 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     setState(() {});
   }
 
-  void _handleSubmitted() {
-    if (currentHighlight != null) {
-      final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
-      if (entry.enabled) {
-        _effectiveTextEditingController.value = TextEditingValue(
-          text: entry.label,
-          selection: TextSelection.collapsed(offset: entry.label.length),
-        );
-        widget.onSelected?.call(entry.value);
+  void _handleFocusChange() {
+    if (!_effectiveTextFieldFocusNode.hasFocus) {
+      if (widget.clearOnBlur) {
+        final T? restoredValue = _restoreSelectionFromText();
+        widget.onSelected?.call(restoredValue);
       }
+      if (!widget.enableSearch) {
+        currentHighlight = null;
+      }
+      _controller.close();
+    }
+  }
+
+  T? _restoreSelectionFromText() {
+    final String currentText = _effectiveTextEditingController.text;
+    final bool textMatchesLastSelected =
+        _lastSelectedValue != null &&
+        widget.dropdownMenuEntries.any(
+          (DropdownMenuEntry<T> entry) =>
+              entry.value == _lastSelectedValue && entry.label == currentText,
+        );
+
+    if (textMatchesLastSelected) {
+      return _lastSelectedValue;
     } else {
-      if (_controller.isOpen) {
-        widget.onSelected?.call(null);
+      if (_lastSelectedValue != null) {
+        final int index = widget.dropdownMenuEntries.indexWhere(
+          (DropdownMenuEntry<T> entry) => entry.value == _lastSelectedValue,
+        );
+        if (index != -1) {
+          final DropdownMenuEntry<T> entry = widget.dropdownMenuEntries[index];
+          _effectiveTextEditingController.value = TextEditingValue(
+            text: entry.label,
+            selection: TextSelection.collapsed(offset: entry.label.length),
+          );
+          return _lastSelectedValue;
+        }
+      }
+      return null;
+    }
+  }
+
+  void _handleSubmitted() {
+    if (widget.clearOnBlur) {
+      final T? restoredValue = _restoreSelectionFromText();
+      widget.onSelected?.call(restoredValue);
+    } else {
+      if (currentHighlight != null) {
+        final DropdownMenuEntry<T> entry = filteredEntries[currentHighlight!];
+        if (entry.enabled) {
+          _effectiveTextEditingController.value = TextEditingValue(
+            text: entry.label,
+            selection: TextSelection.collapsed(offset: entry.label.length),
+          );
+          widget.onSelected?.call(entry.value);
+        }
+      } else {
+        if (_controller.isOpen) {
+          widget.onSelected?.call(null);
+        }
       }
     }
     if (!widget.enableSearch) {
@@ -1216,6 +1299,13 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       controller: _controller,
       menuChildren: menu,
       crossAxisUnconstrained: false,
+      onClose: () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _effectiveTextFieldFocusNode.hasFocus && !_controller.isOpen) {
+            _effectiveTextFieldFocusNode.unfocus();
+          }
+        });
+      },
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final DropdownMenuDecorationBuilder decorationBuilder =
@@ -1269,7 +1359,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               key: _anchorKey,
               enabled: widget.enabled,
               mouseCursor: effectiveMouseCursor,
-              focusNode: widget.focusNode,
+              focusNode: _effectiveTextFieldFocusNode,
               canRequestFocus: canRequestFocus(),
               enableInteractiveSelection: !isButton,
               readOnly: isButton,
