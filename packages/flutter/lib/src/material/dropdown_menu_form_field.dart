@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'dropdown_menu.dart';
+import 'input_decorator.dart';
 import 'menu_style.dart';
 
 /// A [FormField] that contains a [DropdownMenu].
@@ -71,11 +72,35 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     super.validator,
     super.forceErrorText,
+    super.errorBuilder,
   }) : super(
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
            final state = field as _DropdownMenuFormFieldState<T>;
+
+           InputDecoration effectiveDecorationBuilder(
+             BuildContext context,
+             MenuController menuController,
+           ) {
+             final InputDecoration decoration =
+                 decorationBuilder?.call(context, menuController) ?? const InputDecoration();
+             final InputDecoration decorationWithLabels = decoration.copyWith(
+               label: label,
+               hintText: hintText,
+               helperText: helperText,
+             );
+
+             final String? errorText = state.errorText;
+             if (errorText == null) {
+               return decorationWithLabels;
+             }
+
+             return errorBuilder != null
+                 ? decorationWithLabels.copyWith(error: errorBuilder(state.context, errorText))
+                 : decorationWithLabels.copyWith(errorText: errorText);
+           }
+
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: DropdownMenu<T>(
@@ -85,10 +110,6 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                menuHeight: menuHeight,
                leadingIcon: leadingIcon,
                trailingIcon: trailingIcon,
-               label: label,
-               hintText: hintText,
-               helperText: helperText,
-               errorText: state.errorText,
                selectedTrailingIcon: selectedTrailingIcon,
                enableFilter: enableFilter,
                enableSearch: enableSearch,
@@ -96,7 +117,7 @@ class DropdownMenuFormField<T extends Object> extends FormField<T> {
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
-               decorationBuilder: decorationBuilder,
+               decorationBuilder: effectiveDecorationBuilder,
                menuStyle: menuStyle,
                controller: state.textFieldController,
                initialSelection: state.value,
