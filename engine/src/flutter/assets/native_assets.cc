@@ -45,6 +45,8 @@ namespace flutter {
 
 void NativeAssetsManager::RegisterNativeAssets(const uint8_t* manifest,
                                                size_t manifest_size) {
+  // Note that this format is also expected by build tools for Apple
+  // platforms in packages/flutter_tools/bin/xcode_backend.dart.
   parsed_mapping_.clear();
 
   rapidjson::Document document;
