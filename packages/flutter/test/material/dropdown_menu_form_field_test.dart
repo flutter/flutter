@@ -1164,7 +1164,6 @@ void main() {
           body: DropdownMenuFormField<MenuItem>(
             key: fieldKey,
             dropdownMenuEntries: menuEntries,
-            autovalidateMode: AutovalidateMode.always,
             validator: (MenuItem? item) => validationError,
             errorBuilder: (context, errorText) {
               errorBuilderCalled = true;
@@ -1174,6 +1173,9 @@ void main() {
         ),
       ),
     );
+
+    expect(errorBuilderCalled, false);
+    expect(find.byKey(errorKey), findsNothing);
 
     fieldKey.currentState!.validate();
     await tester.pump();
