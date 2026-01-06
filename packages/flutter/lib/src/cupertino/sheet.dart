@@ -95,13 +95,11 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// {@youtube 560 315 https://www.youtube.com/watch?v=5H-WvH5O29I}
 ///
 /// This is a convenience method for displaying [CupertinoSheetRoute] for most
-/// use cases. There are two different build methods that are provided by the method
-/// for building the content of the [CupertinoSheetRoute]. Use `builder` if there
-/// is no content within the sheet that needs to scroll vertically. This
-/// is good for sheets with a simple display, however scrolling gestures will
-/// conflict with the drag to dismiss gesture. `scrollableBuilder` will enable
-/// scrollable content within the sheet. See [CupertinoSheetRoute.scrollable] for more
-/// information.
+/// use cases. The Widget returned from `scrollableBuilder` will be used to display
+/// the content on the [CupertinoSheetRoute]. If the content of the sheet has a
+/// scrollable view, the [ScrollController] provided by `scrollableBuilder` can be
+/// used to enable the drag-to-dimiss gesture to work with the scrolling of the
+/// content. See [CupertinoSheetRoute] for an example.
 ///
 /// `useNestedNavigation` allows new routes to be pushed inside of a [CupertinoSheetRoute]
 /// by adding a new [Navigator] inside of the [CupertinoSheetRoute].

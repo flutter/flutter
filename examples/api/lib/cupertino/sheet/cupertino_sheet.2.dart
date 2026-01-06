@@ -71,7 +71,7 @@ class _RestorableSheetState extends State<RestorableSheet>
     Object? arguments,
   ) {
     return CupertinoSheetRoute<int?>(
-      builder: (BuildContext context) {
+      scrollableBuilder: (BuildContext context, ScrollController _) {
         return Navigator(
           restorationScopeId: 'nested-nav',
           onGenerateRoute: (RouteSettings settings) {
