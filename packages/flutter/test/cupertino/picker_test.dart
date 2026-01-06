@@ -697,6 +697,8 @@ void main() {
     );
   });
 
+  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildCupertinoPicker(Brightness brightness) {
       return MaterialApp(
