@@ -4334,6 +4334,20 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
+  /// > [!WARNING]
+  /// > This API is only supported when using the Impeller rendering engine.
+  /// > On other backends, an [UnsupportedError] will be thrown.
+  ///
+  /// > To check at runtime whether this API is supported, use [isShaderFilterSupported].
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// if (ui.ImageFilter.isShaderFilterSupported) {
+  ///   // Use the filter...
+  /// }
+  /// ```
+  ///
   /// The fragment shader provided here has additional requirements to be used
   /// by the engine for filtering. The first uniform value must be a vec2, this
   /// will be set by the engine to the size of the bound texture. There must
@@ -4369,10 +4383,6 @@ abstract class ImageFilter {
   /// }
   ///
   /// ```
-  ///
-  /// This API is only supported when using the Impeller rendering engine. On
-  /// other backends a [UnsupportedError] will be thrown. To check at runtime
-  /// whether this API is suppored use [isShaderFilterSupported].
   factory ImageFilter.shader(FragmentShader shader) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
@@ -4395,6 +4405,10 @@ abstract class ImageFilter {
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
+  ///
+  /// > [!WARNING]
+  /// > This property will only return true when the Impeller rendering engine is enabled.
+  /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
