@@ -91,16 +91,23 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   start_time = time.time()
 
-  with subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
-                        universal_newlines=True, **kwargs) as process:
-    output = ''
+  process = subprocess.Popen(
+      cmd,
+      cwd=cwd,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT,
+      env=env,
+      universal_newlines=True,
+      **kwargs
+  )
+  output = ''
 
-    if process.stdout:
-      for line in iter(process.stdout.readline, ''):
-        output += line
-        logger.info(line.rstrip())
+  if process.stdout:
+    for line in iter(process.stdout.readline, ''):
+      output += line
+      logger.info(line.rstrip())
 
-    process.wait()
+  process.wait()
   end_time = time.time()
 
   if process.returncode != 0 and not expect_failure:
@@ -705,9 +712,10 @@ def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
   message.append(f'ninja -C {ios_out_dir} ios_test_flutter')
+  joined_message = '\n'.join(message)
   final_message = (
       f"{ios_out_dir} or {ios_test_lib} doesn't exist. "
-      f'Please run the following commands: \n{chr(10).join(message)}'
+      f'Please run the following commands: \n{joined_message}'
   )
   assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
@@ -1337,12 +1345,12 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     command = [
         'env', '-i', 'bash', '-c', f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
     ]
-    with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
-      if process.stdout:
-        for line in process.stdout:
-          key, _, value = line.decode('utf8').strip().partition('=')
-          os.environ[key] = value
-      process.communicate()  # Avoid pipe deadlock while waiting for termination.
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    if process.stdout:
+      for line in process.stdout:
+        key, _, value = line.decode('utf8').strip().partition('=')
+        os.environ[key] = value
+    process.communicate()  # Avoid pipe deadlock while waiting for termination.
 
   success = True
 
