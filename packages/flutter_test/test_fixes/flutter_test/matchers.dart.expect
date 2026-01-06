@@ -14,6 +14,9 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.text('label')), isSemantics(label: 'semantics label'));
+    expect(
+      tester.getSemantics(find.text('label')),
+      isSemantics(label: 'semantics label'),
+    );
   });
 }
