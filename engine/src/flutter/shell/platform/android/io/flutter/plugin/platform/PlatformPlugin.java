@@ -484,7 +484,6 @@ public class PlatformPlugin {
       // Consider using the
       // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
       // or other Android 15+ APIs for system UI styling.
-      //
       if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
         window.setStatusBarColor(systemChromeStyle.statusBarColor);
       }
@@ -527,7 +526,6 @@ public class PlatformPlugin {
         // Consider using the
         // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
         // or other Android 15+ APIs for system UI styling.
-        //
         if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
           window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
         }
@@ -541,11 +539,9 @@ public class PlatformPlugin {
     // Consider using the
     // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
     // or other Android 15+ APIs for system UI styling.
-    //
     if (systemChromeStyle.systemNavigationBarDividerColor != null
         && Build.VERSION.SDK_INT >= API_LEVELS.API_28
         && Build.VERSION.SDK_INT < API_LEVELS.API_35) {
-
       window.setNavigationBarDividerColor(systemChromeStyle.systemNavigationBarDividerColor);
     }
 
