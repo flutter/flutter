@@ -16,14 +16,16 @@ import 'package:flutter/widgets.dart';
 ///
 /// Example usage:
 /// ```dart
-/// await tester.pumpWidget(
-///   TestWidgetsApp(
-///     child: GestureDetector(
-///       onTap: () {},
-///       child: Container(),
+/// testWidgets('my test', (WidgetTester tester) async {
+///   await tester.pumpWidget(
+///     TestWidgetsApp(
+///       child: GestureDetector(
+///         onTap: () {},
+///         child: Container(),
+///       ),
 ///     ),
-///   ),
-/// );
+///   );
+/// });
 /// ```
 class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
@@ -43,6 +45,16 @@ class TestWidgetsApp extends StatelessWidget {
       color: color,
       builder: (BuildContext context, Widget? navigatorChild) {
         return child;
+      },
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
+        );
       },
     );
   }
