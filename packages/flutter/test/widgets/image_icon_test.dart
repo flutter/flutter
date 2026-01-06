@@ -124,5 +124,7 @@ void main() {
     );
 
     expect(tester.widget<Image>(find.byType(Image)).color, null);
+
+    imageCache.clear();
   });
 }
