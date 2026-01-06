@@ -521,8 +521,7 @@ public class PlatformPlugin {
 
       if (systemChromeStyle.systemNavigationBarColor != null) {
         // setNavigationBarColor has no effect on Android 15 and above, meaning calls to this method
-        // will
-        // have no effect on those versions.
+        // will have no effect on those versions.
         // Consider using the
         // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
         // or other Android 15+ APIs for system UI styling.
