@@ -1314,13 +1314,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   void _sortByXIndex() {
-    _currentChildVicinities.sort((a, b) {
-      if (a.xIndex == b.xIndex) {
-        return a.yIndex.compareTo(b.yIndex);
-      } else {
-        return a.xIndex.compareTo(b.xIndex);
-      }
-    });
+    _currentChildVicinities.sort();
   }
 
   // Ensures all children have a layoutOffset, sets paintExtent & paintOffset,
@@ -1342,10 +1336,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         // through in the horizontal case below.
         // Minor
         _sortByYIndex();
+        break;
       case Axis.horizontal:
         // Column major traversal
         // Minor
         _sortByXIndex();
+        break;
     }
     for (final ChildVicinity vicinity in _currentChildVicinities) {
       previousChild = _completeChildParentData(
