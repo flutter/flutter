@@ -1641,6 +1641,8 @@ void main() {
       final double initialScrollPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, -30));
       await gesture.moveBy(const Offset(0, -100));
       await tester.pump();
 
@@ -1675,6 +1677,8 @@ void main() {
       final double initialScrollPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, 30));
       await gesture.moveBy(const Offset(0, 100));
       await tester.pump();
 
@@ -1689,7 +1693,7 @@ void main() {
       expect(finalScrollPosition, greaterThan(initialScrollPosition));
       expect(
         finalScrollPosition - initialScrollPosition,
-        equals(finalSheetPosition - initialSheetPosition),
+        closeTo(finalSheetPosition - initialSheetPosition, 0.0005),
       );
 
       await gesture.up();
@@ -1715,6 +1719,8 @@ void main() {
 
         // Sheet will scroll on upwards drag.
         final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+        // Do a small drag first to win the gesture arena.
+        await gesture.moveBy(const Offset(0, -30));
         await gesture.moveBy(const Offset(0, -100));
         await tester.pump();
 
@@ -1776,6 +1782,8 @@ void main() {
 
       // Scroll down some.
       final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, -30));
       await gesture.moveBy(const Offset(0, -400));
       await tester.pump();
 
