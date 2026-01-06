@@ -411,10 +411,8 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   @override
   void didUpdateWidget(covariant CupertinoSheetTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('didUpdateWidget');
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
         oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation) {
-      print('dispose curve');
       _disposeCurve();
       _setupAnimation();
     }

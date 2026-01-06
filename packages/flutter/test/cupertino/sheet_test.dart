@@ -1971,28 +1971,35 @@ void main() {
   testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
     WidgetTester tester,
   ) async {
-    final GlobalKey scaffoldKey = GlobalKey();
+    final animation = AnimationController(vsync: const TestVSync());
+    final secondaryAnimation = AnimationController(vsync: const TestVSync());
 
-    await tester.pumpWidget(_RebuildingPage(scaffoldKey: scaffoldKey));
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: secondaryAnimation,
+        topGap: 0.08,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
 
-    await tester.tap(find.text('Push Page 2'));
+    final newAnimation = AnimationController(vsync: const TestVSync());
+
+    // Should not throw an exception.
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: newAnimation,
+        secondaryRouteAnimation: secondaryAnimation,
+        topGap: 0.08,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
     await tester.pumpAndSettle();
-
-    expect(find.text('Increase Count'), findsOneWidget);
-    Navigator.of(scaffoldKey.currentContext!).pop();
-
-    // await tester.pump();
-
-    await tester.tap(find.text('Increase Count'));
-
-    // await tester.tap(find.text('Increase Count'));
-    // Navigator.of(scaffoldKey.currentContext!).push(
-    //   CupertinoPageRoute(
-    //     builder: (BuildContext context) => const CupertinoPageScaffold(child: Text('Page 3')),
-    //   ),
-    // );
-    await tester.pumpAndSettle();
-
-    // expect(find.text('Increase Count'), findsOneWidget);
+    animation.dispose();
+    secondaryAnimation.dispose();
+    newAnimation.dispose();
   });
 }
