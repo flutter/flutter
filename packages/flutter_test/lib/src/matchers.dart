@@ -687,6 +687,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -772,6 +774,8 @@ Matcher matchesSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -887,6 +891,8 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -972,6 +978,8 @@ Matcher containsSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1031,6 +1039,35 @@ Matcher containsSemantics({
     children: children,
     onLongPressHint: onLongPressHint,
     onTapHint: onTapHint,
+  );
+}
+
+/// Asserts that a [CapturedAccessibilityAnnouncement] matches the expected message.
+///
+/// The [message] argument matches the [CapturedAccessibilityAnnouncement.message].
+/// The [textDirection] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.textDirection].
+/// The [assertiveness] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.assertiveness].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await SemanticsService.sendAnnouncement(tester.view, 'Hello', TextDirection.ltr);
+/// expect(tester.takeAnnouncements(), contains(isAccessibilityAnnouncement('Hello')));
+/// ```
+///
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which retrieves the announcements in unit tests.
+///  * [SemanticsService.sendAnnouncement], which sends an announcement.
+Matcher isAccessibilityAnnouncement(
+  String message, {
+  TextDirection? textDirection,
+  Assertiveness? assertiveness,
+}) {
+  return _MatchesAccessibilityAnnouncement(
+    expectedMessage: message,
+    expectedTextDirection: textDirection,
+    expectedAssertiveness: assertiveness,
   );
 }
 
@@ -2404,6 +2441,8 @@ class _MatchesSemanticsData extends Matcher {
     required this.currentValueLength,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2551,6 +2590,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult? validationResult;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///
@@ -2663,6 +2704,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (validationResult != null) {
       description.add(' with validation result: $validationResult');
+    }
+    if (minValue != null) {
+      description.add(' with minValue: $minValue');
+    }
+    if (maxValue != null) {
+      description.add(' with maxValue: $maxValue');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2823,6 +2870,12 @@ class _MatchesSemanticsData extends Matcher {
     if (inputType != null && inputType != data.inputType) {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
+    if (minValue != null && minValue != data.minValue) {
+      return failWithDescription(matchState, 'minValue was: ${data.minValue}');
+    }
+    if (maxValue != null && maxValue != data.maxValue) {
+      return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
+    }
     if (actions.isNotEmpty) {
       final unexpectedActions = <SemanticsAction>[];
       final missingActions = <SemanticsAction>[];
@@ -2939,6 +2992,40 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createSemanticsActionSummary(List<SemanticsAction> enums) {
     return '[${enums.map((ui.SemanticsAction d) => d.name).join(', ')}]';
+  }
+}
+
+class _MatchesAccessibilityAnnouncement extends Matcher {
+  const _MatchesAccessibilityAnnouncement({
+    required this.expectedMessage,
+    required this.expectedTextDirection,
+    required this.expectedAssertiveness,
+  });
+
+  final String expectedMessage;
+  final TextDirection? expectedTextDirection;
+  final Assertiveness? expectedAssertiveness;
+
+  @override
+  bool matches(
+    covariant CapturedAccessibilityAnnouncement event,
+    Map<dynamic, dynamic> matchState,
+  ) {
+    return event.message == expectedMessage &&
+        (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness);
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('Semantic announcement with message "$expectedMessage"');
+    if (expectedTextDirection != null) {
+      description.add(', textDirection: $expectedTextDirection');
+    }
+    if (expectedAssertiveness != null) {
+      description.add(', assertiveness: $expectedAssertiveness');
+    }
+    return description;
   }
 }
 
