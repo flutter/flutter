@@ -48,6 +48,7 @@ class WindowContent extends StatelessWidget {
           child: TooltipWindowContent(controller: tooltip),
         ),
       ),
+      PopupWindowController() => throw UnimplementedError(),
     };
   }
 }

@@ -605,6 +605,18 @@ class WindowingOwnerLinux extends WindowingOwner {
   }) {
     throw UnimplementedError('Tooltip windows are not yet implemented on Linux.');
   }
+
+  @internal
+  @override
+  PopupWindowController createPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Popup windows are not yet implemented on Linux.');
+  }
 }
 
 /// Implementation of [RegularWindowController] for the Linux platform.
