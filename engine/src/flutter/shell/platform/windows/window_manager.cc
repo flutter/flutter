@@ -83,7 +83,7 @@ void WindowManager::OnEngineShutdown() {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
-    InternalFlutterWindows_WindowManager_DestroyWindow(hwnd);
+    InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
 }
 
@@ -190,7 +190,7 @@ void InternalFlutterWindows_WindowManager_SetWindowSize(
   }
 }
 
-void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd) {
+void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   HWND flutter_view_handle = nullptr;
   if (window) {

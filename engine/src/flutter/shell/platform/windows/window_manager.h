@@ -201,7 +201,7 @@ void InternalFlutterWindows_WindowManager_SetFullscreen(
 
 // Invoked by the framework when the host window receives WM_DESTROY.
 FLUTTER_EXPORT
-void InternalFlutterWindows_WindowManager_DestroyWindow(HWND hwnd);
+void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd);
 
 FLUTTER_EXPORT
 bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd);
