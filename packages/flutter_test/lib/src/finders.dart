@@ -361,7 +361,7 @@ class CommonFinders {
     );
   }
 
-  /// Finds [RawTooltip] widgets with the given `message`.
+  /// Finds [RawTooltip] or [Tooltip] widgets with the given `message`.
   ///
   /// ## Sample code
   ///
