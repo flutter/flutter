@@ -97,7 +97,7 @@ KernelAsset _targetLocationAndroid(FlutterCodeAsset asset) {
 /// Should only be invoked if a native assets build is performed. If the native
 /// assets feature is disabled, or none of the packages have native assets, a
 /// missing NDK is okay.
-Future<CCompilerConfig> cCompilerConfigAndroid() async {
+Future<CCompilerConfig?> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
@@ -106,7 +106,7 @@ Future<CCompilerConfig> cCompilerConfigAndroid() async {
   final Uri? archiver = _toOptionalFileUri(androidSdk.getNdkArPath());
   final Uri? linker = _toOptionalFileUri(androidSdk.getNdkLdPath());
   if (compiler == null || archiver == null || linker == null) {
-    throwToolExit('Android NDK Clang could not be found.');
+    return null;
   }
   final result = CCompilerConfig(compiler: compiler, archiver: archiver, linker: linker);
   return result;
