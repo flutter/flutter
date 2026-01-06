@@ -82,20 +82,6 @@ TEST_F(WindowManagerTest, WindowingInitialize) {
   EXPECT_TRUE(received_message);
 }
 
-TEST_F(WindowManagerTest, HasTopLevelWindows) {
-  IsolateScope isolate_scope(isolate());
-
-  bool has_top_level_windows =
-      InternalFlutterWindows_WindowManager_HasTopLevelWindows(engine_id());
-  EXPECT_FALSE(has_top_level_windows);
-
-  InternalFlutterWindows_WindowManager_CreateRegularWindow(
-      engine_id(), regular_creation_request());
-  has_top_level_windows =
-      InternalFlutterWindows_WindowManager_HasTopLevelWindows(engine_id());
-  EXPECT_TRUE(has_top_level_windows);
-}
-
 TEST_F(WindowManagerTest, CreateRegularWindow) {
   IsolateScope isolate_scope(isolate());
 

@@ -30,7 +30,7 @@ import 'theme.dart';
 /// [DatePickerDialog] widgets.
 ///
 /// Descendant widgets obtain the current [DatePickerThemeData] object with
-/// [DatePickerTheme.of]. Instances of [DatePickerTheme] can
+/// [DatePickerTheme.of]. Instances of [DatePickerThemeData] can
 /// be customized with [DatePickerThemeData.copyWith].
 ///
 /// Typically a [DatePickerTheme] is specified as part of the overall
@@ -218,13 +218,13 @@ class DatePickerThemeData with Diagnosticable {
   /// ```dart
   /// dayOverlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
   ///   if (states.contains(WidgetState.pressed)) {
-  ///     return Colors.blue.withOpacity(0.12);
+  ///     return Colors.blue.withValues(alpha: 0.12);
   ///   }
   ///   if (states.contains(WidgetState.hovered)) {
-  ///     return Colors.blue.withOpacity(0.08);
+  ///     return Colors.blue.withValues(alpha: 0.08);
   ///   }
   ///   if (states.contains(WidgetState.focused)) {
-  ///     return Colors.blue.withOpacity(0.12);
+  ///     return Colors.blue.withValues(alpha: 0.12);
   ///   }
   ///   return null; // Use the default color.
   /// })

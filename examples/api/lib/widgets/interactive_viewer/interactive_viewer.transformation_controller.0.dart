@@ -21,14 +21,17 @@ class TransformationControllerExample extends StatefulWidget {
   const TransformationControllerExample({super.key});
 
   @override
-  State<TransformationControllerExample> createState() => _TransformationControllerExampleState();
+  State<TransformationControllerExample> createState() =>
+      _TransformationControllerExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _TransformationControllerExampleState extends State<TransformationControllerExample>
+class _TransformationControllerExampleState
+    extends State<TransformationControllerExample>
     with TickerProviderStateMixin {
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
   Animation<Matrix4>? _animationReset;
   late final AnimationController _controllerReset;
 
@@ -87,7 +90,10 @@ class _TransformationControllerExampleState extends State<TransformationControll
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      appBar: AppBar(automaticallyImplyLeading: false, title: const Text('Controller demo')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('Controller demo'),
+      ),
       body: Center(
         child: InteractiveViewer(
           boundaryMargin: const EdgeInsets.all(double.infinity),

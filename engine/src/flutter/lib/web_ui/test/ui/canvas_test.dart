@@ -28,8 +28,8 @@ Future<void> testMain() async {
     void transformsClose(Float64List value, Float64List expected) {
       expect(expected.length, equals(16));
       expect(value.length, equals(16));
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
+      for (var r = 0; r < 4; r++) {
+        for (var c = 0; c < 4; c++) {
           expect(value[r * 4 + c], within(from: expected[r * 4 + c]));
         }
       }
@@ -50,8 +50,8 @@ Future<void> testMain() async {
     }
 
     test('ui.Canvas.translate affects canvas.getTransform', () {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.translate(12, 14.5);
       final Float64List matrix = Matrix4.translationValues(12, 14.5, 0).toFloat64();
       final Float64List curMatrix = canvas.getTransform();
@@ -63,8 +63,8 @@ Future<void> testMain() async {
     });
 
     test('ui.Canvas.scale affects canvas.getTransform', () {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.scale(12, 14.5);
       final Float64List matrix = Matrix4.diagonal3Values(12, 14.5, 1).toFloat64();
       final Float64List curMatrix = canvas.getTransform();
@@ -76,8 +76,8 @@ Future<void> testMain() async {
     });
 
     test('Canvas.rotate affects canvas.getTransform', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.rotate(pi);
       final Float64List matrix = Matrix4.rotationZ(pi).toFloat64();
       final Float64List curMatrix = canvas.getTransform();
@@ -89,8 +89,8 @@ Future<void> testMain() async {
     });
 
     test('Canvas.skew affects canvas.getTransform', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.skew(12, 14.5);
       final Float64List matrix =
           (Matrix4.identity()
@@ -106,8 +106,8 @@ Future<void> testMain() async {
     });
 
     test('Canvas.transform affects canvas.getTransform', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       final Float64List matrix =
           (Matrix4.identity()
                 ..translate(12.0, 14.5)
@@ -141,10 +141,10 @@ Future<void> testMain() async {
 
   group('ui.Canvas clip tests', () {
     test('Canvas.clipRect affects canvas.getClipBounds', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
-      const ui.Rect clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-      const ui.Rect clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      const clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+      const clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
       canvas.clipRect(clipRawBounds);
 
       // Save initial return values for testing restored values
@@ -169,7 +169,7 @@ Future<void> testMain() async {
 
       canvas.save();
       canvas.scale(2, 2);
-      const ui.Rect scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
+      const scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
       rectsClose(canvas.getLocalClipBounds(), scaledExpandedBounds);
       // Destination bounds are unaffected by transform
       rectsClose(canvas.getDestinationClipBounds(), clipExpandedBounds);
@@ -181,11 +181,11 @@ Future<void> testMain() async {
     });
 
     test('Canvas.clipRRect affects canvas.getClipBounds', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
-      const ui.Rect clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-      const ui.Rect clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
-      final ui.RRect clip = ui.RRect.fromRectAndRadius(clipRawBounds, const ui.Radius.circular(3));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      const clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+      const clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
+      final clip = ui.RRect.fromRectAndRadius(clipRawBounds, const ui.Radius.circular(3));
       canvas.clipRRect(clip);
 
       // Save initial return values for testing restored values
@@ -210,7 +210,7 @@ Future<void> testMain() async {
 
       canvas.save();
       canvas.scale(2, 2);
-      const ui.Rect scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
+      const scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
       rectsClose(canvas.getLocalClipBounds(), scaledExpandedBounds);
       // Destination bounds are unaffected by transform
       rectsClose(canvas.getDestinationClipBounds(), clipExpandedBounds);
@@ -222,11 +222,11 @@ Future<void> testMain() async {
     });
 
     test('Canvas.clipPath affects canvas.getClipBounds', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
-      const ui.Rect clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-      const ui.Rect clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
-      final ui.Path clip = ui.Path()
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      const clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+      const clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
+      final clip = ui.Path()
         ..addRect(clipRawBounds)
         ..addOval(clipRawBounds);
       canvas.clipPath(clip);
@@ -253,7 +253,7 @@ Future<void> testMain() async {
 
       canvas.save();
       canvas.scale(2, 2);
-      const ui.Rect scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
+      const scaledExpandedBounds = ui.Rect.fromLTRB(5, 5.5, 10.5, 13);
       rectsClose(canvas.getLocalClipBounds(), scaledExpandedBounds);
       // Destination bounds are unaffected by transform
       rectsClose(canvas.getDestinationClipBounds(), clipExpandedBounds);
@@ -265,10 +265,10 @@ Future<void> testMain() async {
     });
 
     test('Canvas.clipRect(diff) does not affect canvas.getClipBounds', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
-      const ui.Rect clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
-      const ui.Rect clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      const clipRawBounds = ui.Rect.fromLTRB(10.2, 11.3, 20.4, 25.7);
+      const clipExpandedBounds = ui.Rect.fromLTRB(10, 11, 21, 26);
       canvas.clipRect(clipRawBounds);
 
       // Save initial return values for testing restored values
@@ -285,8 +285,8 @@ Future<void> testMain() async {
 
   group('RestoreToCount function tests', () {
     test('RestoreToCount can work', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.save();
       canvas.save();
       canvas.save();
@@ -300,8 +300,8 @@ Future<void> testMain() async {
     });
 
     test('RestoreToCount count less than 1, the stack should be reset', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.save();
       canvas.save();
       canvas.save();
@@ -313,8 +313,8 @@ Future<void> testMain() async {
     });
 
     test('RestoreToCount count greater than current [getSaveCount]', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
       canvas.save();
       canvas.save();
       canvas.save();

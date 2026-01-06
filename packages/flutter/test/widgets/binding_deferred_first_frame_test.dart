@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +17,7 @@ void main() {
   ) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -54,8 +53,8 @@ void main() {
   testWidgets('Two widgets can defer frames', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
 
-    final Completer<void> completer1 = Completer<void>();
-    final Completer<void> completer2 = Completer<void>();
+    final completer1 = Completer<void>();
+    final completer2 = Completer<void>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

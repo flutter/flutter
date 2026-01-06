@@ -104,7 +104,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'WebParagraphStyle('
@@ -228,9 +228,9 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Paint? background;
   final List<ui.Shadow>? shadows;
   final ui.TextDecoration? decoration;
-  final ui.Color? decorationColor;
-  final ui.TextDecorationStyle? decorationStyle;
-  final double? decorationThickness;
+  final ui.Color? decorationColor; // Defaults to foreground color
+  final ui.TextDecorationStyle? decorationStyle; // Defaults to none
+  final double? decorationThickness; // Defaults to 1
   final double? letterSpacing;
   final double? wordSpacing;
   final double? height;
@@ -336,8 +336,6 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   ui.Color getForegroundColor() {
-    //print('foreground: ${foreground == null ? 'null' : foreground!.color.toCssString()}');
-    //print('color: ${color == null ? 'null' : color!.toCssString()}');
     return foreground != null
         ? foreground!.color
         : (color != null ? color! : const ui.Color(0xFFFFFFFF));
@@ -352,7 +350,7 @@ class WebTextStyle implements ui.TextStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final double? fontSize = this.fontSize;
       result =
@@ -426,7 +424,7 @@ class WebTextStyle implements ui.TextStyle {
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    bool optimizeLegibility = false;
+    var optimizeLegibility = false;
 
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
@@ -469,11 +467,17 @@ class WebTextStyle implements ui.TextStyle {
   bool hasElement(StyleElements element) {
     switch (element) {
       case StyleElements.background:
-        return background != null;
+        // Transparent background is equivalent to no background
+        // We do not check for transparency in other paints (like foreground) because
+        // it seems unnatural to have a transparent paint on them
+        return background != null && background!.color.a != 0;
       case StyleElements.shadows:
         return shadows != null && shadows!.isNotEmpty;
       case StyleElements.decorations:
-        return decoration != null && decoration! != ui.TextDecoration.none;
+        return decoration != null &&
+            decoration! != ui.TextDecoration.none &&
+            decorationStyle != null &&
+            decorationColor != null;
       case StyleElements.text:
         return true;
     }
@@ -610,9 +614,19 @@ class PlaceholderSpan extends ParagraphSpan {
 }
 
 class TextSpan extends ParagraphSpan {
-  TextSpan({required super.start, required super.end, required super.style, required this.text});
+  TextSpan({
+    required super.start,
+    required super.end,
+    required super.style,
+    required this.text,
+    required this.textDirection,
+  });
 
   final String text;
+  // We use TextSpan to get metrics from Chrome in many places,
+  // including empty spans (for example when measuring strut) and
+  // ellipsis span (which inherits textDirection from the span it attaches to).
+  final ui.TextDirection? textDirection;
 
   late final DomTextMetrics _metrics = _getMetrics();
 
@@ -623,11 +637,16 @@ class TextSpan extends ParagraphSpan {
   late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
 
   DomTextMetrics _getMetrics() {
-    // TODO(jlavrova): Is this necessary?
-    // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
-
     style.applyToContext(layoutContext);
+    // We need to set in up because we otherwise in RTL text without textDirection
+    // Canvas2D will return all clusters placed right to left starting from 0.
+    // Also, we have a separate (possibly, different) textDirection for the ellipsis.
+    layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
     return layoutContext.measureText(text);
+  }
+
+  double? advanceWidth() {
+    return _metrics.width;
   }
 
   @override
@@ -649,16 +668,16 @@ class TextSpan extends ParagraphSpan {
 
   ui.Rect getTextRangeSelectionInBlock(LineBlock block, ui.TextRange textRange) {
     // Let's normalize the ranges
-    final intersect = block.textRange.intersect(textRange);
+    final ui.TextRange intersect = block.textRange.intersect(textRange);
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final beforeSelection = _metrics.getSelection(
+    final ui.Rect beforeSelection = _metrics.getSelection(
       block.textRange.start - start,
       intersect.start - start,
     );
-    final intersectSelection = _metrics.getSelection(
+    final ui.Rect intersectSelection = _metrics.getSelection(
       intersect.start - start,
       intersect.end - start,
     );
@@ -674,7 +693,7 @@ class TextSpan extends ParagraphSpan {
 
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final selection = _metrics.getSelection(
+    final ui.Rect selection = _metrics.getSelection(
       block.textRange.start - start,
       block.textRange.end - start,
     );
@@ -865,7 +884,12 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    final result = _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
+    final List<ui.TextBox> result = _layout.getBoxesForRange(
+      start,
+      end,
+      boxHeightStyle,
+      boxWidthStyle,
+    );
     WebParagraphDebug.apiTrace(
       'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
     );
@@ -883,9 +907,9 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
-    final position = getPositionForOffset(offset);
+    final ui.TextPosition position = getPositionForOffset(offset);
     assert(position.offset < text.length || text.isEmpty);
-    final result = getGlyphInfoAt(position.offset);
+    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
@@ -910,7 +934,7 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    final result = _layout.getGlyphInfoAt(codeUnitOffset);
+    final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
     WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
     return result;
   }
@@ -927,18 +951,13 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
     }
-    final result = _layout.getWordBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
     return result;
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    // We need to set in up because we otherwise in RTL text without textDirection
-    // Canvas2D will return all clusters placed right to left starting from 0.
-    // If we go with that we will have to take it in account EVERYWHERE (lots of places)
-    layoutContext.direction = paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-
     _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
@@ -950,8 +969,16 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    for (final line in _layout.lines) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    for (final TextLine line in _layout.lines) {
       _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+    }
+  }
+
+  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
+    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    for (final TextLine line in _layout.lines) {
+      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
   }
 
@@ -962,15 +989,15 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.downstream => position.offset,
     };
 
-    final result = _layout.getLineBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
     return result;
   }
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    final List<ui.LineMetrics> metrics = <ui.LineMetrics>[];
-    for (final line in _layout.lines) {
+    final metrics = <ui.LineMetrics>[];
+    for (final TextLine line in _layout.lines) {
       metrics.add(line.getMetrics());
     }
     WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
@@ -1005,7 +1032,7 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    for (final line in _layout.lines) {
+    for (final TextLine line in _layout.lines) {
       if (line.allLineTextRange.isBefore(codeUnitOffset)) {
         continue;
       }
@@ -1052,12 +1079,7 @@ class WebParagraph implements ui.Paragraph {
     return _layout;
   }
 
-  // TODO(mdebbar): Remove this in favor of `getText1`.
-  String getText(ui.TextRange textRange) {
-    return getText1(textRange.start, textRange.end);
-  }
-
-  String getText1(int start, int end) {
+  String getText(int start, int end) {
     if (text.isEmpty) {
       return text;
     }
@@ -1133,7 +1155,7 @@ class WebLineMetrics implements ui.LineMetrics {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       result =
           'LineMetrics(hardBreak: $hardBreak, '
@@ -1192,9 +1214,9 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
     _closeTextSpan();
 
-    final start = _fullTextBuffer.length;
+    final int start = _fullTextBuffer.length;
     addText(kPlaceholderChar);
-    final end = _fullTextBuffer.length;
+    final int end = _fullTextBuffer.length;
 
     _spans.add(
       PlaceholderSpan(
@@ -1256,6 +1278,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
         end: _fullTextBuffer.length,
         style: _spanStyle!,
         text: _spanTextBuffer.toString(),
+        textDirection: _paragraphStyle.textDirection,
       ),
     );
 
@@ -1270,7 +1293,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   WebParagraph build() {
     _closeTextSpan();
-    final String text = _fullTextBuffer.toString();
+    final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
     WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
@@ -1298,7 +1321,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void pushStyle(ui.TextStyle textStyle) {
-    final newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
+    final ChildStyleNode newNode = _styleStack.last.createChild(textStyle as WebTextStyle);
     _styleStack.add(newNode);
   }
 }

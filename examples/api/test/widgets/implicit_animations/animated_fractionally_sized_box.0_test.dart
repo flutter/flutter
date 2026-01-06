@@ -10,8 +10,12 @@ import 'package:flutter_api_samples/widgets/implicit_animations/animated_fractio
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedFractionallySizedBox animates on tap', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.AnimatedFractionallySizedBoxExampleApp());
+  testWidgets('AnimatedFractionallySizedBox animates on tap', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.AnimatedFractionallySizedBoxExampleApp(),
+    );
 
     final Finder fractionallySizedBoxFinder = find.descendant(
       of: find.byType(AnimatedFractionallySizedBox),
@@ -25,7 +29,9 @@ void main() {
     const Alignment beginAlignment = Alignment.bottomRight;
     const Alignment endAlignment = Alignment.topLeft;
 
-    FractionallySizedBox fractionallySizedBox = tester.widget(fractionallySizedBoxFinder);
+    FractionallySizedBox fractionallySizedBox = tester.widget(
+      fractionallySizedBoxFinder,
+    );
     expect(fractionallySizedBox.widthFactor, beginWidthFactor);
     expect(fractionallySizedBox.heightFactor, beginHeightFactor);
     expect(fractionallySizedBox.alignment, beginAlignment);
@@ -41,17 +47,31 @@ void main() {
     expect(fractionallySizedBox.alignment, beginAlignment);
 
     // Advance animation to the middle.
-    await tester.pump(example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2);
+    await tester.pump(
+      example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2,
+    );
 
-    final double t = example.AnimatedFractionallySizedBoxExampleApp.curve.transform(0.5);
+    final double t = example.AnimatedFractionallySizedBoxExampleApp.curve
+        .transform(0.5);
 
     fractionallySizedBox = tester.widget(fractionallySizedBoxFinder);
-    expect(fractionallySizedBox.widthFactor, lerpDouble(beginWidthFactor, endWidthFactor, t));
-    expect(fractionallySizedBox.heightFactor, lerpDouble(beginHeightFactor, endHeightFactor, t));
-    expect(fractionallySizedBox.alignment, Alignment.lerp(beginAlignment, endAlignment, t));
+    expect(
+      fractionallySizedBox.widthFactor,
+      lerpDouble(beginWidthFactor, endWidthFactor, t),
+    );
+    expect(
+      fractionallySizedBox.heightFactor,
+      lerpDouble(beginHeightFactor, endHeightFactor, t),
+    );
+    expect(
+      fractionallySizedBox.alignment,
+      Alignment.lerp(beginAlignment, endAlignment, t),
+    );
 
     // Advance animation to the end.
-    await tester.pump(example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2);
+    await tester.pump(
+      example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2,
+    );
 
     fractionallySizedBox = tester.widget(fractionallySizedBoxFinder);
     expect(fractionallySizedBox.widthFactor, endWidthFactor);
@@ -69,15 +89,28 @@ void main() {
     expect(fractionallySizedBox.alignment, endAlignment);
 
     // Advance animation to the middle.
-    await tester.pump(example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2);
+    await tester.pump(
+      example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2,
+    );
 
     fractionallySizedBox = tester.widget(fractionallySizedBoxFinder);
-    expect(fractionallySizedBox.widthFactor, lerpDouble(endWidthFactor, beginWidthFactor, t));
-    expect(fractionallySizedBox.heightFactor, lerpDouble(endHeightFactor, beginHeightFactor, t));
-    expect(fractionallySizedBox.alignment, Alignment.lerp(endAlignment, beginAlignment, t));
+    expect(
+      fractionallySizedBox.widthFactor,
+      lerpDouble(endWidthFactor, beginWidthFactor, t),
+    );
+    expect(
+      fractionallySizedBox.heightFactor,
+      lerpDouble(endHeightFactor, beginHeightFactor, t),
+    );
+    expect(
+      fractionallySizedBox.alignment,
+      Alignment.lerp(endAlignment, beginAlignment, t),
+    );
 
     // Advance animation to the end.
-    await tester.pump(example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2);
+    await tester.pump(
+      example.AnimatedFractionallySizedBoxExampleApp.duration ~/ 2,
+    );
 
     fractionallySizedBox = tester.widget(fractionallySizedBoxFinder);
     expect(fractionallySizedBox.widthFactor, beginWidthFactor);
