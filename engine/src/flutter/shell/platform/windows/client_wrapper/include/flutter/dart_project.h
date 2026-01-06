@@ -35,6 +35,17 @@ enum class UIThreadPolicy {
   RunOnSeparateThread,
 };
 
+// Configures the accessibility implementation used by Flutter.
+enum class AccessibilityMode {
+  // Default value. Flutter will automatically select the best available
+  // implementation.
+  Default,
+  // Use the IAccessible implementation.
+  IAccessible,
+  // Use the experimental IAccessibleEx implementation.
+  IAccessibleEx,
+};
+
 // A set of Flutter and Dart assets used to initialize a Flutter engine.
 class DartProject {
  public:
@@ -114,12 +125,14 @@ class DartProject {
   // Defaults to UIThreadPolicy::Default.
   UIThreadPolicy ui_thread_policy() const { return ui_thread_policy_; }
 
-  // Sets whether to enable IAccessibleEx support for accessibility.
-  void set_iaccessibleex_enabled(bool enabled) {
-    iaccessibleex_enabled_ = enabled;
+  // Sets the accessibility implementation used by Flutter.
+  void set_accessibility_mode(AccessibilityMode accessibility_mode) {
+    accessibility_mode_ = accessibility_mode;
   }
 
-  bool iaccessibleex_enabled() const { return iaccessibleex_enabled_; }
+  // Returns the accessibility implementation used by Flutter.
+  // Defaults to AccessibilityMode::IAccessibleEx.
+  AccessibilityMode accessibility_mode() const { return accessibility_mode_; }
 
  private:
   // Accessors for internals are private, so that they can be changed if more
@@ -149,8 +162,8 @@ class DartProject {
   GpuPreference gpu_preference_ = GpuPreference::NoPreference;
   // Thread policy for UI isolate.
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
-  // Whether to enable IAccessibleEx support for accessibility.
-  bool iaccessibleex_enabled_ = true;
+  // The accessibility implementation used by Flutter.
+  AccessibilityMode accessibility_mode_ = AccessibilityMode::IAccessibleEx;
 };
 
 }  // namespace flutter
