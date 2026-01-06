@@ -60,4 +60,38 @@ cert-key-path: /path/to/key''')
       },
     );
   });
+
+  group('copyWith', () {
+    test('returns new HttpsConfig with overridden certPath', () {
+      const original = HttpsConfig(certPath: '/original/cert', certKeyPath: '/original/key');
+      final HttpsConfig copied = original.copyWith(certPath: '/new/cert');
+
+      expect(copied.certPath, '/new/cert');
+      expect(copied.certKeyPath, '/original/key');
+    });
+
+    test('returns new HttpsConfig with overridden certKeyPath', () {
+      const original = HttpsConfig(certPath: '/original/cert', certKeyPath: '/original/key');
+      final HttpsConfig copied = original.copyWith(certKeyPath: '/new/key');
+
+      expect(copied.certPath, '/original/cert');
+      expect(copied.certKeyPath, '/new/key');
+    });
+
+    test('returns new HttpsConfig with both paths overridden', () {
+      const original = HttpsConfig(certPath: '/original/cert', certKeyPath: '/original/key');
+      final HttpsConfig copied = original.copyWith(certPath: '/new/cert', certKeyPath: '/new/key');
+
+      expect(copied.certPath, '/new/cert');
+      expect(copied.certKeyPath, '/new/key');
+    });
+
+    test('returns copy with same values when no overrides provided', () {
+      const original = HttpsConfig(certPath: '/original/cert', certKeyPath: '/original/key');
+      final HttpsConfig copied = original.copyWith();
+
+      expect(copied.certPath, '/original/cert');
+      expect(copied.certKeyPath, '/original/key');
+    });
+  });
 }
