@@ -130,8 +130,8 @@ void main() {
     expect(
       tester
           .firstWidget<Transform>(
-        find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
-      )
+            find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
+          )
           .transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
     );
@@ -199,8 +199,8 @@ void main() {
     expect(
       tester
           .firstWidget<Transform>(
-        find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
-      )
+            find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
+          )
           .transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
     );
@@ -256,8 +256,8 @@ void main() {
     expect(
       tester
           .firstWidget<Transform>(
-        find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
-      )
+            find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
+          )
           .transform,
       equals(
         Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!)),
@@ -298,8 +298,8 @@ void main() {
     expect(
       tester
           .firstWidget<Transform>(
-        find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
-      )
+            find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
+          )
           .transform,
       equals(
         Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize! / selectedTextStyle.fontSize!)),
@@ -336,8 +336,8 @@ void main() {
   });
 
   testWidgets('color on icon theme overrides selected and unselected item colors', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
     const unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
     const selectedItemColor = Color(0x00000003);
@@ -414,8 +414,8 @@ void main() {
   });
 
   testWidgets('Padding is calculated properly on items - selected labels only', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const selectedFontSize = 16.0;
     const selectedIconSize = 36.0;
     const unselectedIconSize = 20.0;
@@ -589,8 +589,8 @@ void main() {
     expect(
       tester
           .firstWidget<Transform>(
-        find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
-      )
+            find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform)),
+          )
           .transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
     );
@@ -664,7 +664,7 @@ void main() {
 
   testWidgets(
     'label style color should override itemColor only for the label for BottomNavigationBarType.fixed',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const primaryColor = Color(0xFF000000);
       const unselectedWidgetColor = Color(0xFFD501FF);
       const selectedColor = Color(0xFF0004FF);
@@ -713,7 +713,7 @@ void main() {
 
   testWidgets(
     'label style color should override itemColor only for the label for BottomNavigationBarType.shifting',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const primaryColor = Color(0xFF000000);
       const unselectedWidgetColor = Color(0xFFD501FF);
       const selectedColor = Color(0xFF0004FF);
@@ -761,8 +761,8 @@ void main() {
   );
 
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.fixed', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const primaryColor = Color(0xFF000000);
     const unselectedWidgetColor = Color(0xFFD501FF);
     const selectedColor = Color(0xFF0004FF);
@@ -806,8 +806,8 @@ void main() {
   });
 
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const primaryColor = Color(0xFF000000);
     const unselectedWidgetColor = Color(0xFFD501FF);
     const selectedLabelColor = Color(0xFFFF9900);
@@ -847,8 +847,8 @@ void main() {
   });
 
   testWidgets('iconTheme color should override itemColor color for BottomNavigationBarType.fixed', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const primaryColor = Color(0xFF000000);
     const unselectedWidgetColor = Color(0xFFD501FF);
     const selectedIconThemeColor = Color(0xFF1E7723);
@@ -882,8 +882,8 @@ void main() {
   });
 
   testWidgets('iconTheme color should override itemColor for BottomNavigationBarType.shifted', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const primaryColor = Color(0xFF000000);
     const unselectedWidgetColor = Color(0xFFD501FF);
     const selectedColor = Color(0xFF0004FF);
@@ -962,8 +962,8 @@ void main() {
   });
 
   testWidgets('Shifting BottomNavigationBar background color is overridden by item color', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const Color itemColor = Colors.yellow;
     const Color backgroundColor = Colors.blue;
 
@@ -990,8 +990,8 @@ void main() {
   });
 
   testWidgets('Specifying both selectedItemColor and fixedColor asserts', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     expect(() {
       return BottomNavigationBar(
         selectedItemColor: Colors.black,
@@ -1005,8 +1005,8 @@ void main() {
   });
 
   testWidgets('Fixed BottomNavigationBar uses fixedColor when selectedItemColor not provided', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const Color fixedColor = Colors.black;
 
     await tester.pumpWidget(
@@ -1052,8 +1052,8 @@ void main() {
   });
 
   testWidgets('Material2 - BottomNavigationBar adds bottom padding to height', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1076,8 +1076,8 @@ void main() {
   });
 
   testWidgets('Material3 - BottomNavigationBar adds bottom padding to height', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -1099,8 +1099,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar adds bottom padding to height with a custom font size', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
@@ -1123,8 +1123,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar height will not change when toggle keyboard', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final Widget child = Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         selectedFontSize: 8,
@@ -1259,8 +1259,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar inherits shadowed app theme for shifting navbar', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.light),
@@ -1287,8 +1287,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar inherits shadowed app theme for fixed navbar', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.light),
@@ -1345,8 +1345,8 @@ void main() {
   });
 
   testWidgets('Material2 - BottomNavigationBar responds to textScaleFactor', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1400,8 +1400,8 @@ void main() {
   });
 
   testWidgets('Material3 - BottomNavigationBar responds to textScaleFactor', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1460,7 +1460,7 @@ void main() {
 
   testWidgets(
     'Material2 - BottomNavigationBar does not grow with textScaleFactor when labels are provided',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -1519,7 +1519,7 @@ void main() {
 
   testWidgets(
     'Material3 - BottomNavigationBar does not grow with textScaleFactor when labels are provided',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1580,7 +1580,7 @@ void main() {
 
   testWidgets(
     'Material2 - BottomNavigationBar shows tool tips with text scaling on long press when labels are provided',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const label = 'Foo';
 
       Widget buildApp({required double textScaleFactor}) {
@@ -1639,7 +1639,7 @@ void main() {
 
   testWidgets(
     'Material3 - BottomNavigationBar shows tool tips with text scaling on long press when labels are provided',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       const label = 'Foo';
 
       Widget buildApp({required TextScaler textScaler}) {
@@ -1695,8 +1695,8 @@ void main() {
   );
 
   testWidgets('Different behaviour of tool tip in BottomNavigationBarItem', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1725,8 +1725,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar limits width of tiles with long labels', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final longTextA = List<String>.generate(100, (int index) => 'A').toString();
     final longTextB = List<String>.generate(100, (int index) => 'B').toString();
 
@@ -2273,7 +2273,7 @@ void main() {
 
   testWidgets(
     'BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
           textDirection: TextDirection.ltr,
@@ -2318,7 +2318,7 @@ void main() {
 
   testWidgets(
     'BottomNavigationBar.shifting [showSelectedLabels]=false and [showUnselectedLabels]=false semantics',
-        (WidgetTester tester) async {
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         boilerplate(
           textDirection: TextDirection.ltr,
@@ -2363,8 +2363,8 @@ void main() {
   );
 
   testWidgets('BottomNavigationBar changes mouse cursor when the tile is hovered over', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     // Test BottomNavigationBar() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -2470,8 +2470,8 @@ void main() {
     });
 
     testWidgets('BottomNavigationBar with enabled feedback by default', (
-        WidgetTester tester,
-        ) async {
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(feedbackBoilerplate());
 
       await tester.tap(find.byType(InkResponse).first);
@@ -2481,8 +2481,8 @@ void main() {
     });
 
     testWidgets('BottomNavigationBar with disabled feedback using BottomNavigationBarTheme', (
-        WidgetTester tester,
-        ) async {
+      WidgetTester tester,
+    ) async {
       const enableFeedbackTheme = false;
 
       await tester.pumpWidget(feedbackBoilerplate(enableFeedbackTheme: enableFeedbackTheme));
@@ -2495,7 +2495,7 @@ void main() {
 
     testWidgets(
       'BottomNavigationBar.enableFeedback overrides BottomNavigationBarTheme.enableFeedback',
-          (WidgetTester tester) async {
+      (WidgetTester tester) async {
         const enableFeedbackTheme = false;
         const enableFeedback = true;
 
@@ -2718,8 +2718,8 @@ void main() {
   });
 
   testWidgets('Material2 - BottomNavigationBar centered landscape layout', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final Key icon0 = UniqueKey();
     final Key icon1 = UniqueKey();
 
@@ -2772,8 +2772,8 @@ void main() {
   });
 
   testWidgets('Material3 - BottomNavigationBar centered landscape layout', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final Key icon0 = UniqueKey();
     final Key icon1 = UniqueKey();
     const double iconWidth = 200;
@@ -2862,8 +2862,8 @@ void main() {
   });
 
   testWidgets('Material2 - BottomNavigationBar linear landscape layout', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final Key icon0 = UniqueKey();
     final Key icon1 = UniqueKey();
 
@@ -2911,8 +2911,8 @@ void main() {
   });
 
   testWidgets('Material3 - BottomNavigationBar linear landscape layout', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final Key icon0 = UniqueKey();
     final Key icon1 = UniqueKey();
     const double iconWidth = 100;
@@ -3002,8 +3002,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     //Regression test for https://github.com/flutter/flutter/issues/112163
 
     tester.view.physicalSize = const Size(540, 340);
@@ -3082,8 +3082,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar and BottomNavigationBarItem render at zero size', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -3103,10 +3103,12 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+}
+
 
   testWidgets('BottomNavigationBarItem.semanticsLabel overrides Text semantics', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       boilerplate(
         textDirection: TextDirection.ltr,
@@ -3183,13 +3185,13 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
 EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
   return tester
       .widget<Padding>(
-    find
-        .descendant(
-      of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
-      matching: find.byType(Padding),
-    )
-        .first,
-  )
+        find
+            .descendant(
+              of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
+              matching: find.byType(Padding),
+            )
+            .first,
+      )
       .padding
       .resolve(TextDirection.ltr);
 }

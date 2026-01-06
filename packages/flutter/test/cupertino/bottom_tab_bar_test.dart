@@ -27,7 +27,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 Future<void> main() async {
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
     await expectLater(
-          () => pumpWidgetWithBoilerplate(
+      () => pumpWidgetWithBoilerplate(
         tester,
         CupertinoTabBar(
           items: <BottomNavigationBarItem>[
@@ -40,7 +40,7 @@ Future<void> main() async {
       ),
       throwsA(
         isAssertionError.having(
-              (AssertionError error) => error.toString(),
+          (AssertionError error) => error.toString(),
           '.toString()',
           contains('items.length'),
         ),
@@ -389,8 +389,8 @@ Future<void> main() async {
   });
 
   testWidgets('Ensure bar height will not change when toggle keyboard', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     const tabBarHeight = 56.0;
     final tabBar = CupertinoTabBar(
       height: tabBarHeight,
@@ -590,7 +590,7 @@ Future<void> main() async {
     expect(find.text('Tab 1'), findsOneWidget);
 
     final Finder finder = find.byWidgetPredicate(
-          (Widget widget) => widget is Image && widget.image == iconProvider,
+      (Widget widget) => widget is Image && widget.image == iconProvider,
     );
 
     await tester.tap(finder);
@@ -648,8 +648,8 @@ Future<void> main() async {
   });
 
   testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
