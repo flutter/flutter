@@ -2,7 +2,10 @@
 #define _LIBCPP_CONFIG_SITE
 
 #define _LIBCPP_ABI_VERSION 1
-#define _LIBCPP_ABI_NAMESPACE _fl
+
+// LLDB's type formatters for libcxx expect the namespace to have
+// two leading underscores
+#define _LIBCPP_ABI_NAMESPACE __fl
 
 #define _LIBCPP_REMOVE_TRANSITIVE_INCLUDES
 

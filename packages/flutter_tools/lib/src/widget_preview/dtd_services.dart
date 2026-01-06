@@ -10,6 +10,7 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
+import 'package:uuid/uuid.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -37,6 +38,7 @@ class WidgetPreviewDtdServices {
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
     required this.project,
+    required this.addUuidToServiceName,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -44,12 +46,35 @@ class WidgetPreviewDtdServices {
     });
   }
 
+  /// The name of the widget preview service, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewServiceRoot = 'widget-preview';
+
+  /// The actual name of the registered widget preview service.
+  late final String widgetPreviewService = _withUuid(kWidgetPreviewServiceRoot);
+
+  /// The name of the widget preview stream, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewScaffoldStreamRoot = 'WidgetPreviewScaffold';
+
+  /// The actual name of the widget preview stream.
+  late final String widgetPreviewScaffoldStream = _withUuid(kWidgetPreviewScaffoldStreamRoot);
+
+  /// The unique identifier added to registered service and stream names if [addUuidToServiceName]
+  /// is true.
+  late final String serviceUuid = const Uuid().v4();
+
+  /// Adds a unique identifier to the service and stream registered by the widget previewer to
+  /// avoid conflicts with other widget previewer instances connected to DTD.
+  ///
+  /// If false, no UUID is added to the registered service and stream names.
+  final bool addUuidToServiceName;
+
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
   // START KEEP SYNCED
 
-  static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
   static const kResolveUri = 'resolveUri';
@@ -57,7 +82,6 @@ class WidgetPreviewDtdServices {
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
 
-  static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
   static const kWidgetPreviewConnectedEvent = 'Connected';
 
   /// Error code for RpcException thrown when attempting to load a key from
@@ -144,21 +168,20 @@ class WidgetPreviewDtdServices {
     );
   }
 
+  String _withUuid(String name) => addUuidToServiceName ? '$name-$serviceUuid' : name;
+
   Future<void> _registerServices() async {
     final DartToolingDaemon dtd = _dtd!;
-    dtd.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
-      if (event case DTDEvent(
-        stream: kWidgetPreviewScaffoldStream,
-        kind: kWidgetPreviewConnectedEvent,
-      )) {
+    dtd.onEvent(widgetPreviewScaffoldStream).listen((DTDEvent event) {
+      if (event.kind == kWidgetPreviewConnectedEvent) {
         previewAnalytics.reportPreviewerConnected();
       }
     });
     await Future.wait(<Future<void>>[
-      dtd.streamListen(kWidgetPreviewScaffoldStream),
+      dtd.streamListen(widgetPreviewScaffoldStream),
       for (final (String method, DTDServiceCallback callback) in services)
         dtd
-            .registerService(kWidgetPreviewService, method, callback)
+            .registerService(widgetPreviewService, method, callback)
             .then((_) => logger.printTrace('Registered DTD method: $method')),
     ]);
   }
