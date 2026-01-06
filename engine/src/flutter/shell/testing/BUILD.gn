@@ -27,7 +27,7 @@ executable("testing") {
   sources = [
     "tester_main.cc",
     "tester_context.h",
-    "tester_vk.h",
+    "tester_context_vk_factory.h",
   ]
   libs = []
   if (is_win) {
@@ -60,7 +60,7 @@ executable("testing") {
       "//flutter/impeller",
       "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
     ]
-    sources += [ "tester_vk.cc" ]
+    sources += [ "tester_context_vk_factory.cc" ]
   }
 
   metadata = {

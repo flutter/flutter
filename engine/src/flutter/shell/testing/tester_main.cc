@@ -31,7 +31,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 #include "flutter/shell/testing/tester_context.h"
-#include "flutter/shell/testing/tester_vk.h"
+#include "flutter/shell/testing/tester_context_vk_factory.h"
 
 #if defined(FML_OS_WIN)
 #include <combaseapi.h>

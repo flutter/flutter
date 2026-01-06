@@ -4,7 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#include "flutter/shell/testing/tester_vk.h"
+#include "flutter/shell/testing/tester_context_vk_factory.h"
 
 #include <vulkan/vulkan.h>
 
