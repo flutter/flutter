@@ -6,24 +6,19 @@
 #define FLUTTER_SHELL_TESTING_TESTER_VK_H_
 
 #include <memory>
-
-#include "flutter/fml/build_config.h"
-#include "flutter/fml/macros.h"
+#include "flutter/shell/testing/tester_context.h"
 
 // Impeller should only be enabled if the Vulkan backend is enabled.
 #define TESTER_ENABLE_VULKAN \
   (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN)
 
-namespace impeller {
-class ContextVK;
-class SurfaceContextVK;
-}  // namespace impeller
+namespace flutter {
 
-struct ImpellerVulkanContextHolder {
-  std::shared_ptr<impeller::ContextVK> context;
-  std::shared_ptr<impeller::SurfaceContextVK> surface_context;
-
-  bool Initialize(bool enable_validation);
+class TesterContextVKFactory {
+ public:
+  static std::unique_ptr<TesterContext> Create(bool enable_validation);
 };
+
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_TESTING_TESTER_VK_H_

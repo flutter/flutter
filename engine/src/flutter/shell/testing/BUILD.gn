@@ -26,6 +26,7 @@ executable("testing") {
 
   sources = [
     "tester_main.cc",
+    "tester_context.h",
     "tester_vk.h",
   ]
   libs = []

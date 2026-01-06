@@ -30,14 +30,8 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
+#include "flutter/shell/testing/tester_context.h"
 #include "flutter/shell/testing/tester_vk.h"
-
-#if TESTER_ENABLE_VULKAN
-#include "impeller/renderer/backend/vulkan/context_vk.h"          // nogncheck
-#include "impeller/renderer/backend/vulkan/surface_context_vk.h"  // nogncheck
-#include "impeller/renderer/context.h"                            // nogncheck
-#include "shell/gpu/gpu_surface_vulkan_impeller.h"                // nogncheck
-#endif  // TESTER_ENABLE_VULKAN
 
 #if defined(FML_OS_WIN)
 #include <combaseapi.h>
@@ -119,39 +113,28 @@ class TesterPlatformView : public PlatformView,
  public:
   TesterPlatformView(Delegate& delegate,
                      const TaskRunners& task_runners,
-                     ImpellerVulkanContextHolder&& impeller_context_holder)
+                     std::unique_ptr<TesterContext> tester_context)
       : PlatformView(delegate, task_runners),
-        impeller_context_holder_(std::move(impeller_context_holder)) {}
+        tester_context_(std::move(tester_context)) {}
 
   ~TesterPlatformView() {
-#if TESTER_ENABLE_VULKAN
-    if (impeller_context_holder_.context) {
-      impeller_context_holder_.context->Shutdown();
-    }
-#endif
+    // TesterContext destructor handles shutdown
   }
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override {
-#if TESTER_ENABLE_VULKAN
-    return std::static_pointer_cast<impeller::Context>(
-        impeller_context_holder_.context);
-#else
+    if (tester_context_) {
+      return tester_context_->GetImpellerContext();
+    }
     return nullptr;
-#endif  // TESTER_ENABLE_VULKAN
   }
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override {
-#if TESTER_ENABLE_VULKAN
-    if (delegate_.OnPlatformViewGetSettings().enable_impeller) {
-      FML_DCHECK(impeller_context_holder_.context);
-      auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(
-          nullptr, impeller_context_holder_.surface_context);
-      FML_DCHECK(surface->IsValid());
-      return surface;
+    if (tester_context_ &&
+        delegate_.OnPlatformViewGetSettings().enable_impeller) {
+      return tester_context_->CreateRenderingSurface();
     }
-#endif  // TESTER_ENABLE_VULKAN
     auto surface = std::make_unique<TesterGPUSurfaceSoftware>(
         this, true /* render to surface */);
     FML_DCHECK(surface->IsValid());
@@ -192,7 +175,8 @@ class TesterPlatformView : public PlatformView,
 
  private:
   sk_sp<SkSurface> sk_surface_ = nullptr;
-  [[maybe_unused]] ImpellerVulkanContextHolder impeller_context_holder_;
+
+  std::shared_ptr<TesterContext> tester_context_;
   std::shared_ptr<TesterExternalViewEmbedder> external_view_embedder_ =
       std::make_shared<TesterExternalViewEmbedder>();
 };
@@ -311,23 +295,24 @@ int RunTester(const flutter::Settings& settings,
                                           io_task_runner         // io
   );
 
-  ImpellerVulkanContextHolder impeller_context_holder;
+  std::unique_ptr<TesterContext> tester_context;
 
 #if TESTER_ENABLE_VULKAN
   if (settings.enable_impeller) {
-    if (!impeller_context_holder.Initialize(
-            settings.enable_vulkan_validation)) {
+    tester_context =
+        TesterContextVKFactory::Create(settings.enable_vulkan_validation);
+    if (!tester_context) {
       return EXIT_FAILURE;
     }
   }
 #endif  // TESTER_ENABLE_VULKAN
 
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      fml::MakeCopyable([impeller_context_holder = std::move(
-                             impeller_context_holder)](Shell& shell) mutable {
-        return std::make_unique<TesterPlatformView>(
-            shell, shell.GetTaskRunners(), std::move(impeller_context_holder));
-      });
+      fml::MakeCopyable(
+          [tester_context = std::move(tester_context)](Shell& shell) mutable {
+            return std::make_unique<TesterPlatformView>(
+                shell, shell.GetTaskRunners(), std::move(tester_context));
+          });
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
     return std::make_unique<Rasterizer>(
@@ -492,10 +477,15 @@ EXPORTED void Spawn(const char* entrypoint, const char* route) {
 
     Shell::CreateCallback<PlatformView> on_create_platform_view =
         fml::MakeCopyable([](Shell& shell) mutable {
-          ImpellerVulkanContextHolder impeller_context_holder;
+          std::unique_ptr<TesterContext> tester_context;
+#if TESTER_ENABLE_VULKAN
+          if (shell.GetSettings().enable_impeller) {
+            tester_context = TesterContextVKFactory::Create(
+                shell.GetSettings().enable_vulkan_validation);
+          }
+#endif
           return std::make_unique<TesterPlatformView>(
-              shell, shell.GetTaskRunners(),
-              std::move(impeller_context_holder));
+              shell, shell.GetTaskRunners(), std::move(tester_context));
         });
 
     Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {

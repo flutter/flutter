@@ -21,6 +21,9 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/vk/compute_shaders_vk.h"
+#include "shell/gpu/gpu_surface_vulkan_impeller.h"
+
+namespace flutter {
 
 static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   return {
@@ -36,41 +39,81 @@ static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   };
 }
 
-bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
-  impeller::ContextVK::Settings context_settings;
-  context_settings.proc_address_callback = &vkGetInstanceProcAddr;
-  context_settings.shader_libraries_data = ShaderLibraryMappings();
-  context_settings.cache_directory = fml::paths::GetCachesDirectory();
-  context_settings.enable_validation = enable_validation;
-  // Enable lazy shader mode for faster test execution as most tests
-  // will never render anything at all.
-  context_settings.flags.lazy_shader_mode = true;
+class TesterContextVK : public TesterContext {
+ public:
+  TesterContextVK() = default;
 
-  context = impeller::ContextVK::Create(std::move(context_settings));
-  if (!context || !context->IsValid()) {
-    VALIDATION_LOG << "Could not create Vulkan context.";
-    return false;
+  ~TesterContextVK() override {
+    if (context_) {
+      context_->Shutdown();
+    }
   }
 
-  impeller::vk::SurfaceKHR vk_surface;
-  impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
-  auto res = context->GetInstance().createHeadlessSurfaceEXT(
-      &surface_create_info,  // surface create info
-      nullptr,               // allocator
-      &vk_surface            // surface
-  );
-  if (res != impeller::vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create surface for tester "
-                   << impeller::vk::to_string(res);
-    return false;
+  bool Initialize(bool enable_validation) {
+    impeller::ContextVK::Settings context_settings;
+    context_settings.proc_address_callback = &vkGetInstanceProcAddr;
+    context_settings.shader_libraries_data = ShaderLibraryMappings();
+    context_settings.cache_directory = fml::paths::GetCachesDirectory();
+    context_settings.enable_validation = enable_validation;
+    // Enable lazy shader mode for faster test execution as most tests
+    // will never render anything at all.
+    context_settings.flags.lazy_shader_mode = true;
+
+    context_ = impeller::ContextVK::Create(std::move(context_settings));
+    if (!context_ || !context_->IsValid()) {
+      VALIDATION_LOG << "Could not create Vulkan context.";
+      return false;
+    }
+
+    impeller::vk::SurfaceKHR vk_surface;
+    impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
+    auto res = context_->GetInstance().createHeadlessSurfaceEXT(
+        &surface_create_info,  // surface create info
+        nullptr,               // allocator
+        &vk_surface            // surface
+    );
+    if (res != impeller::vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not create surface for tester "
+                     << impeller::vk::to_string(res);
+      return false;
+    }
+
+    impeller::vk::UniqueSurfaceKHR surface{vk_surface, context_->GetInstance()};
+    surface_context_ = context_->CreateSurfaceContext();
+    if (!surface_context_->SetWindowSurface(std::move(surface),
+                                            impeller::ISize{1, 1})) {
+      VALIDATION_LOG << "Could not set up surface for context.";
+      return false;
+    }
+    return true;
   }
 
-  impeller::vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
-  surface_context = context->CreateSurfaceContext();
-  if (!surface_context->SetWindowSurface(std::move(surface),
-                                         impeller::ISize{1, 1})) {
-    VALIDATION_LOG << "Could not set up surface for context.";
-    return false;
+  // |TesterContext|
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override {
+    return context_;
   }
-  return true;
+
+  // |TesterContext|
+  std::unique_ptr<Surface> CreateRenderingSurface() override {
+    FML_DCHECK(context_);
+    auto surface =
+        std::make_unique<GPUSurfaceVulkanImpeller>(nullptr, surface_context_);
+    FML_DCHECK(surface->IsValid());
+    return surface;
+  }
+
+ private:
+  std::shared_ptr<impeller::ContextVK> context_;
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context_;
+};
+
+std::unique_ptr<TesterContext> TesterContextVKFactory::Create(
+    bool enable_validation) {
+  auto context = std::make_unique<TesterContextVK>();
+  if (!context->Initialize(enable_validation)) {
+    return nullptr;
+  }
+  return context;
 }
+
+}  // namespace flutter
