@@ -815,6 +815,25 @@ void main() {
     );
     expect(find.byType(View), findsOne);
   });
+
+  group('Leak tests', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169119.
+    testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
+      var counterByWidgets = 0;
+      final RestorationManager managerByWidgets = WidgetsBinding.instance.restorationManager;
+      expect(managerByWidgets, isA<TestRestorationManager>());
+      managerByWidgets.addListener(() => counterByWidgets++);
+      managerByWidgets.notifyListeners();
+      expect(counterByWidgets, 1);
+
+      var counterByServices = 0;
+      final RestorationManager managerByServices = ServicesBinding.instance.restorationManager;
+      expect(managerByServices, isA<TestRestorationManager>());
+      managerByServices.addListener(() => counterByServices++);
+      managerByServices.notifyListeners();
+      expect(counterByServices, 1);
+    });
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
