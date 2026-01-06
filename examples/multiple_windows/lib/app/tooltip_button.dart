@@ -28,7 +28,7 @@ class _ElementPositionTrackerManager {
   }
 
   static final _instance = _ElementPositionTrackerManager._();
-  factory _ElementPositionTrackerManager() => _instance;
+  static _ElementPositionTrackerManager get instance => _instance;
   final List<_ElementPositionTracker> _trackers = <_ElementPositionTracker>[];
 
   void add(_ElementPositionTracker tracker) {
@@ -76,7 +76,7 @@ class _ElementPositionTracker {
   void _updateSelf() {
     final rect = _getGlobalRect();
     if (rect == null) {
-      _ElementPositionTrackerManager().remove(this);
+      _ElementPositionTrackerManager.instance.remove(this);
       return;
     }
     if (_lastReportedRect != rect) {
@@ -103,7 +103,7 @@ class _TooltipButtonState extends State<TooltipButton> {
   @override
   void dispose() {
     if (_tooltipTracker != null) {
-      _ElementPositionTrackerManager().remove(_tooltipTracker!);
+      _ElementPositionTrackerManager.instance.remove(_tooltipTracker!);
     }
     super.dispose();
   }
@@ -116,7 +116,7 @@ class _TooltipButtonState extends State<TooltipButton> {
     if (_tooltipController != null) {
       _tooltipController!.destroy();
       if (_tooltipTracker != null) {
-        _ElementPositionTrackerManager().remove(_tooltipTracker!);
+        _ElementPositionTrackerManager.instance.remove(_tooltipTracker!);
       }
       setState(() {
         _tooltipController = null;
@@ -127,7 +127,7 @@ class _TooltipButtonState extends State<TooltipButton> {
       final tracker = _ElementPositionTracker(
         element: _tooltipButtonKey.currentContext!,
       );
-      _ElementPositionTrackerManager().add(tracker);
+      _ElementPositionTrackerManager.instance.add(tracker);
       final UniqueKey key = UniqueKey();
       final controller = TooltipWindowController(
         anchorRect: tracker.getGlobalRect()!,
@@ -135,7 +135,7 @@ class _TooltipButtonState extends State<TooltipButton> {
         delegate: _TooltipWindowControllerDelegate(
           onDestroyed: () {
             windowManager.remove(key);
-            _ElementPositionTrackerManager().remove(tracker);
+            _ElementPositionTrackerManager.instance.remove(tracker);
             if (mounted) {
               setState(() {
                 _tooltipController = null;

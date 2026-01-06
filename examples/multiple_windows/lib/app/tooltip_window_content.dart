@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
-class TooltipWindowContent extends StatefulWidget {
+class TooltipWindowContent extends StatelessWidget {
   /// Creates a tooltip window widget.
   const TooltipWindowContent({super.key, required this.controller});
 
@@ -16,35 +16,21 @@ class TooltipWindowContent extends StatefulWidget {
   final TooltipWindowController controller;
 
   @override
-  State<TooltipWindowContent> createState() => _TooltipWindowContentState();
-}
-
-class _TooltipWindowContentState extends State<TooltipWindowContent>
-    with SingleTickerProviderStateMixin {
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  late final AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-    _animationController.repeat(reverse: true);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, _) {
-        final double padding = 20 + _animationController.value * 16;
+    return RepeatingAnimationBuilder(
+      animatable: TweenSequence<double>([
+        TweenSequenceItem(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          weight: 50.0,
+        ),
+        TweenSequenceItem(
+          tween: Tween<double>(begin: 1.0, end: 0.0),
+          weight: 50.0,
+        ),
+      ]),
+      duration: const Duration(seconds: 1),
+      builder: (context, double value, Widget? child) {
+        final double padding = 20 + value * 16;
         return Container(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
