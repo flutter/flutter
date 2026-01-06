@@ -220,7 +220,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
 
-  // It can't use NSDictionary, because the values need to be weak references.
+  // Maps from view IDs to view controllers registered to this engine.
+  //
+  // The view controllers are kept as weak references, since they are managed by the user app.
+  // Therefore this table must be a `NSMapTable`.
   NSMapTable* _viewControllers;
 
   // View identifier for the next view to be created.
