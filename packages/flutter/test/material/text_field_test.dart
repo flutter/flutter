@@ -9361,6 +9361,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   label: 'label',
+                  hint: 'hint',
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   maxValueLength: 10,
@@ -9402,6 +9403,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics.rootChild(
                   label: 'label',
+                  hint: 'hint', // hintText is now passed to semantics hint
                   textDirection: TextDirection.ltr,
                   textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   inputType: ui.SemanticsInputType.text,
@@ -9477,6 +9479,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   label: 'label',
+                  hint: 'hint',
                   textDirection: TextDirection.ltr,
                   inputType: ui.SemanticsInputType.text,
                   currentValueLength: 0,
@@ -9539,6 +9542,7 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics.rootChild(
                     label: 'label',
+                    hint: 'oh no!',
                     textDirection: TextDirection.ltr,
                     actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                     flags: <SemanticsFlag>[
@@ -9571,6 +9575,87 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
   }
+
+  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+            errorText: 'Email is required',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    // The semantics hint should be the error text (error takes priority over hintText)
+    expect(node.hint, 'Email is required');
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField passes hintText to semantics hint when no error', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Email', hintText: 'Enter your email'),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+
+    // The semantics hint should be the hintText when no error
+    expect(node.hint, 'Enter your email');
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField errorText takes priority over hintText for semantics hint', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    // When both hintText and errorText are present, errorText should be used
+    // for the semantics hint since errors require immediate user action
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+            errorText: 'Email is required',
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    expect(node.hint, 'Email is required'); // Error takes priority over hint
+
+    semantics.dispose();
+  });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
