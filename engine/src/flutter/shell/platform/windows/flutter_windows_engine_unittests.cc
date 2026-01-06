@@ -1432,7 +1432,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
   auto implicit_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
-      engine->CreateView(std::move(implicit_window), false, BoxConstraints());
+      engine->CreateView(std::move(implicit_window),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
   EXPECT_TRUE(implicit_view);
 
@@ -1440,7 +1441,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
   auto second_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
   EXPECT_DEBUG_DEATH(
-      engine->CreateView(std::move(second_window), false, BoxConstraints()),
+      engine->CreateView(std::move(second_window),
+                         /*is_sized_to_content=*/false, BoxConstraints()),
       "FlutterEngineAddView returned an unexpected result");
 }
 
@@ -1539,9 +1541,11 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   modifier.SetNextViewId(kImplicitViewId + 1);
 
   auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
-                                          false, BoxConstraints());
+                                          /*is_sized_to_content=*/false,
+                                          BoxConstraints());
   auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
-                                          false, BoxConstraints());
+                                          /*is_sized_to_content=*/false,
+                                          BoxConstraints());
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.
