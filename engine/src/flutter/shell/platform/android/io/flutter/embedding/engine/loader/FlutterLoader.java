@@ -390,6 +390,9 @@ public class FlutterLoader {
               .getApplicationInfo(
                   applicationContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle metaData = applicationInfo.metaData;
+      if (metaData != null) {
+        Log.e("CAMILLE BUNDLE CHECKPOINT", metaData.toString());
+      }
       int oldGenHeapSizeMegaBytes =
           metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
       if (oldGenHeapSizeMegaBytes == 0) {

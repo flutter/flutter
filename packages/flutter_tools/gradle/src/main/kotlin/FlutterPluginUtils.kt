@@ -12,6 +12,7 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.ManifestModifierTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -815,11 +816,26 @@ object FlutterPluginUtils {
         }
     }
 
-    /** TODO(camsim99) */
+    /** TODO(camsim99): add another task for verifying sensitive flags have info that stay the same like all string inputs vs booleans */
     @JvmStatic
     @JvmName("addTaskForEngineShellArgumentManifestInjection")
     internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
-        
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val manifestModifier = project.tasks.register("${variant.name}AddAndroidEngineShellArgsToManifest", ManifestModifierTask::class.java) {
+                println("CAMILLE: androidEngineShellArgs print out 1:")
+                println(androidEngineShellArgs)
+                androidEngineShellArgsStr.set(androidEngineShellArgs)
+            }
+            
+            variant.artifacts.use(manifestModifier)
+                .wiredWithFiles(
+                    ManifestModifierTask::manifestFile,
+                    ManifestModifierTask::updatedManifestFile
+                )
+                .toTransform(SingleArtifact.MERGED_MANIFEST)
+        }
     }
 }
 
