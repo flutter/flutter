@@ -6,8 +6,6 @@
 
 #include "flutter/shell/testing/tester_vk.h"
 
-#if TESTER_ENABLE_VULKAN
-
 #include <vulkan/vulkan.h>
 
 #include <iostream>
@@ -76,5 +74,3 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   }
   return true;
 }
-
-#endif  // TESTER_ENABLE_VULKAN
