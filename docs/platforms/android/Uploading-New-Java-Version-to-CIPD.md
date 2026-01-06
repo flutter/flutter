@@ -68,5 +68,5 @@ Some links in the instructions below are Google-internal.
 ### Troubleshooting CIPD (Optional)
 
 If you accidentally uploaded the incorrect package to CIPD, you can delete the tag using these
-instructions [here](go/flutter-luci-playbook#remove-duplicated-cipd-tags).
+instructions [here](https://g3doc.corp.google.com/company/teams/flutter/infrastructure/playbook.md?cl=head).
 Then, re-upload the correct Java version pacakge to CIPD.
