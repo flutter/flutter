@@ -36,6 +36,9 @@ class FlutterWindowsViewSizingDelegate {
   // after the view's surface has been resized but
   // before the frame has been presented on the view.
   virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;
+
+  // Return the work area that the view can be laid out within.
+  virtual WindowRect GetWorkArea() const = 0;
 };
 
 // An OS-windowing neutral abstration for a Flutter view that works
@@ -47,9 +50,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   FlutterWindowsView(
       FlutterViewId view_id,
       FlutterWindowsEngine* engine,
+      std::unique_ptr<WindowBindingHandler> window_binding,
       bool is_sized_to_content,
       const BoxConstraints& box_constraints,
-      std::unique_ptr<WindowBindingHandler> window_binding,
       FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr,
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
 

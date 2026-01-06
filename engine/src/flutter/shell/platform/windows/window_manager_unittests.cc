@@ -591,6 +591,7 @@ TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
                                 .view_min_height = 50,
                                 .view_max_width = 300,
                                 .view_max_height = 200},
+      .is_sized_to_content = true,
       .parent = parent_window_handle,
       .get_position_callback = position_callback};
 

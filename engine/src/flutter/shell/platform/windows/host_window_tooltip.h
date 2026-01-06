@@ -34,7 +34,7 @@ class HostWindowTooltip : public HostWindow,
 
  private:
   void DidUpdateViewSize(int32_t width, int32_t height) override;
-  WindowRect GetWorkArea() const;
+  WindowRect GetWorkArea() const override;
 
   GetWindowPositionCallback get_position_callback_;
   HWND parent_;

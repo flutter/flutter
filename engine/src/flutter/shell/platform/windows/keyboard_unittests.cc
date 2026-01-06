@@ -342,9 +342,9 @@ class TestFlutterWindowsView : public FlutterWindowsView {
       : on_key_call_(on_key_call),
         FlutterWindowsView(kImplicitViewId,
                            engine,
+                           std::move(window),
                            false,
-                           BoxConstraints(),
-                           std::move(window)) {}
+                           BoxConstraints()) {}
 
   void OnText(const std::u16string& text) override {
     on_key_call_(KeyCall{

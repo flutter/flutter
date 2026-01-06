@@ -1140,10 +1140,10 @@ TEST(FlutterWindowsViewTest, WindowRepaintTests) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());
 
-  FlutterWindowsView view{kImplicitViewId, engine.get(), false,
-                          BoxConstraints(),
+  FlutterWindowsView view{kImplicitViewId, engine.get(),
                           std::make_unique<flutter::FlutterWindow>(
-                              100, 100, engine->display_manager())};
+                              100, 100, engine->display_manager()),
+                          false, BoxConstraints()};
 
   bool schedule_frame_called = false;
   modifier.embedder_api().ScheduleFrame =
@@ -1763,8 +1763,9 @@ TEST(FlutterWindowsViewTest, WindowMetricsEventContainsDisplayId) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   EXPECT_CALL(*window_binding_handler, GetDisplayId)
       .WillOnce(testing::Return(12));
-  FlutterWindowsView view{kImplicitViewId, engine.get(), false,
-                          BoxConstraints(), std::move(window_binding_handler)};
+  FlutterWindowsView view{kImplicitViewId, engine.get(),
+                          std::move(window_binding_handler), false,
+                          BoxConstraints()};
 
   FlutterWindowMetricsEvent event = view.CreateWindowMetricsEvent();
   EXPECT_EQ(event.display_id, 12);
@@ -1778,8 +1779,9 @@ TEST(FlutterWindowsViewTest, SizeChangeTriggersMetricsEventWhichHasDisplayId) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   EXPECT_CALL(*window_binding_handler, GetDisplayId)
       .WillOnce(testing::Return(12));
-  FlutterWindowsView view{kImplicitViewId, engine.get(), false,
-                          BoxConstraints(), std::move(window_binding_handler)};
+  FlutterWindowsView view{kImplicitViewId, engine.get(),
+                          std::move(window_binding_handler), false,
+                          BoxConstraints()};
 
   bool received_metrics = false;
   modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(

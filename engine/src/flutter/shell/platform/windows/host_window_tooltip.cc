@@ -103,8 +103,6 @@ void HostWindowTooltip::UpdatePosition() {
   // The positioner constrained the dimensions more than current size, apply
   // positioner constraints.
   if (rect->width < width_ || rect->height < height_) {
-    positioner_size_constraints_.width = rect->width;
-    positioner_size_constraints_.height = rect->height;
     auto metrics_event = view_controller_->view()->CreateWindowMetricsEvent();
     view_controller_->engine()->SendWindowMetricsEvent(metrics_event);
   }

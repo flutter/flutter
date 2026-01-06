@@ -104,9 +104,9 @@ void DestroyWindowSurface(const FlutterWindowsEngine& engine,
 FlutterWindowsView::FlutterWindowsView(
     FlutterViewId view_id,
     FlutterWindowsEngine* engine,
+    std::unique_ptr<WindowBindingHandler> window_binding,
     bool is_sized_to_content,
     const BoxConstraints& box_constraints,
-    std::unique_ptr<WindowBindingHandler> window_binding,
     FlutterWindowsViewSizingDelegate* sizing_delegate,
     std::shared_ptr<WindowsProcTable> windows_proc_table)
     : view_id_(view_id),
@@ -913,12 +913,12 @@ bool FlutterWindowsView::IsSizedToContent() const {
 BoxConstraints FlutterWindowsView::GetConstraints() const {
   Size smallest = box_constraints_.smallest();
   Size biggest = box_constraints_.biggest();
-  if (is_sized_to_content_) {
-    auto const work_area = GetWorkArea();
-    double const width =
-        std::min(work_area.width, box_constraints_.biggest().width());
-    double const height =
-        std::min(work_area.height;, box_constraints_.biggest().height());
+  if (is_sized_to_content_ && sizing_delegate_) {
+    auto const work_area = sizing_delegate_->GetWorkArea();
+    double const width = std::min(static_cast<double>(work_area.width),
+                                  box_constraints_.biggest().width());
+    double const height = std::min(static_cast<double>(work_area.height),
+                                   box_constraints_.biggest().height());
     biggest = Size(width, height);
   }
   return BoxConstraints(smallest, biggest);

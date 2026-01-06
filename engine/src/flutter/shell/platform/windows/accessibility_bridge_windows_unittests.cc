@@ -93,9 +93,9 @@ class FlutterWindowsViewSpy : public FlutterWindowsView {
                         std::unique_ptr<WindowBindingHandler> handler)
       : FlutterWindowsView(kImplicitViewId,
                            engine,
+                           std::move(handler),
                            false,
-                           BoxConstraints(),
-                           std::move(handler)) {}
+                           BoxConstraints()) {}
 
  protected:
   virtual std::shared_ptr<AccessibilityBridgeWindows>
