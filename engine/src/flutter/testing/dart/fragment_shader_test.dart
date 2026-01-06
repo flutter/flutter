@@ -59,54 +59,107 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
-  test('FragmentProgram uniform info', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    final List<UniformFloatSlot> slots = [
-      shader.getUniformFloat('iFloatUniform'),
-      shader.getUniformFloat('iVec2Uniform', 0),
-      shader.getUniformFloat('iVec2Uniform', 1),
-      shader.getUniformFloat('iMat2Uniform', 0),
-      shader.getUniformFloat('iMat2Uniform', 1),
-      shader.getUniformFloat('iMat2Uniform', 2),
-      shader.getUniformFloat('iMat2Uniform', 3),
-    ];
-    for (var i = 0; i < slots.length; ++i) {
-      expect(slots[i].shaderIndex, equals(i));
-    }
-  });
+  group('FragmentProgram getUniform*', () {
+    late FragmentShader shader;
 
-  test('FragmentProgram getUniformFloat unknown', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('unknown');
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('No uniform named "unknown".'));
-    }
-  });
+    setUpAll(() async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+      shader = program.fragmentShader();
+    });
 
-  test('FragmentProgram getUniformFloat offset overflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('iVec2Uniform', 2);
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
-    }
-  });
+    test('FragmentProgram uniform info', () async {
+      final List<UniformFloatSlot> slots = [
+        shader.getUniformFloat('iFloatUniform'),
+        shader.getUniformFloat('iVec2Uniform', 0),
+        shader.getUniformFloat('iVec2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 0),
+        shader.getUniformFloat('iMat2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 2),
+        shader.getUniformFloat('iMat2Uniform', 3),
+      ];
+      for (var i = 0; i < slots.length; ++i) {
+        expect(slots[i].shaderIndex, equals(i));
+      }
+    });
 
-  test('FragmentProgram getUniformFloat offset underflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('iVec2Uniform', -1);
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
-    }
+    test('FragmentProgram getUniformFloat unknown', () async {
+      try {
+        shader.getUniformFloat('unknown');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('No uniform named "unknown".'));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat offset overflow', () async {
+      try {
+        shader.getUniformFloat('iVec2Uniform', 2);
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat offset underflow', () async {
+      try {
+        shader.getUniformFloat('iVec2Uniform', -1);
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec2', () async {
+      final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
+      slot.set(6.0, 7.0);
+    });
+
+    test('FragmentProgram getUniformVec2 wrong size', () async {
+      try {
+        shader.getUniformVec2('iVec3Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 2.'));
+      }
+      try {
+        shader.getUniformVec2('iFloatUniform');
+      } catch (e) {
+        expect(e.toString(), contains('`iFloatUniform` has size 1, not size 2.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec3', () async {
+      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+      slot.set(0.8, 0.1, 0.3);
+    });
+
+    test('FragmentProgram getUniformVec3 wrong size', () async {
+      try {
+        shader.getUniformVec3('iVec2Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec2Uniform` has size 2, not size 3.'));
+      }
+      try {
+        shader.getUniformVec3('iVec4Uniform');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec4Uniform` has size 4, not size 3.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec4', () async {
+      final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
+      slot.set(11.0, 22.0, 19.0, 96.0);
+    });
+
+    test('FragmentProgram getUniformVec4 wrong size', () async {
+      try {
+        shader.getUniformVec4('iVec3Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 4.'));
+      }
+    });
   });
 
   test('FragmentProgram getImageSampler', () async {
