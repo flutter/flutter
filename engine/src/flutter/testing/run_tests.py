@@ -31,7 +31,7 @@ import xvfb
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 sys_path.insert(0, os.path.join(THIS_DIR, '..', 'third_party', 'pyyaml', 'lib'))
-import yaml  # pylint: disable=import-error, wrong-import-position
+import yaml  # type: ignore # pylint: disable=import-error, wrong-import-position
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
@@ -72,11 +72,11 @@ def is_asan(build_dir: str) -> bool:
 
 def run_cmd( # pylint: disable=too-many-arguments
     cmd: typing.List[str],
-    cwd: str = None,
-    forbidden_output: typing.List[str] = None,
+    cwd: typing.Optional[str] = None,
+    forbidden_output: typing.Optional[typing.List[str]] = None,
     expect_failure: bool = False,
-    env: typing.Dict[str, str] = None,
-    allowed_failure_output: typing.List[str] = None,
+    env: typing.Optional[typing.Dict[str, str]] = None,
+    allowed_failure_output: typing.Optional[typing.List[str]] = None,
     **kwargs
 ) -> None:
   if forbidden_output is None:
@@ -95,9 +95,10 @@ def run_cmd( # pylint: disable=too-many-arguments
                         universal_newlines=True, **kwargs) as process:
     output = ''
 
-    for line in iter(process.stdout.readline, ''):
-      output += line
-      logger.info(line.rstrip())
+    if process.stdout:
+      for line in iter(process.stdout.readline, ''):
+        output += line
+        logger.info(line.rstrip())
 
     process.wait()
   end_time = time.time()
@@ -665,7 +666,7 @@ def gather_dart_test(
   )
   assert os.path.isfile(kernel_file_output), error_message
 
-  command_args = []
+  command_args: typing.List[str] = []
 
   options.apply_args(command_args)
 
@@ -715,10 +716,10 @@ def assert_expected_xcode_version() -> None:
   """Checks that the user has a version of Xcode installed"""
   version_output = subprocess.check_output(['xcodebuild', '-version'])
   # TODO ricardoamador: remove this check when python 2 is deprecated.
-  version_output = version_output if isinstance(version_output,
-                                                str) else version_output.decode(ENCODING)
-  version_output = version_output.strip()
-  match = re.match(r'Xcode (\d+)', version_output)
+  version_output_str = version_output if isinstance(version_output,
+                                                    str) else version_output.decode(ENCODING)
+  version_output_str = version_output_str.strip()
+  match = re.match(r'Xcode (\d+)', version_output_str)
   message = 'Xcode must be installed to run the iOS embedding unit tests'
   assert match, message
 
@@ -1050,7 +1051,7 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
   if sys_platform.startswith(('cygwin', 'win')) and max_processes > 60:
     max_processes = 60
 
-  queue = multiprocessing.Queue()
+  queue: multiprocessing.Queue = multiprocessing.Queue()
   queue_listener = logging.handlers.QueueListener(
       queue,
       console_logger_handler,
@@ -1074,8 +1075,8 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
 
   if len(failures) > 0:
     logger.error('The following commands failed:')
-    for task, exn in failures:
-      logger.error('%s\n  %s\n\n', str(task), str(exn))
+    for task, failure_exn in failures:
+      logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
     return False
 
   return True
@@ -1169,7 +1170,7 @@ for more information.
       )
       return
 
-    with DirectoryChange(harvester_path):
+    with DirectoryChange(str(harvester_path)):
       bin_path = Path('.').joinpath('bin').joinpath('golden_tests_harvester.dart')
       run_cmd([dart_bin, str(bin_path), temp_dir])
 
@@ -1337,9 +1338,10 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
         'env', '-i', 'bash', '-c', f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
     ]
     with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
-      for line in process.stdout:
-        key, _, value = line.decode('utf8').strip().partition('=')
-        os.environ[key] = value
+      if process.stdout:
+        for line in process.stdout:
+          key, _, value = line.decode('utf8').strip().partition('=')
+          os.environ[key] = value
       process.communicate()  # Avoid pipe deadlock while waiting for termination.
 
   success = True
