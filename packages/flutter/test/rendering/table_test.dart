@@ -405,7 +405,7 @@ void main() {
   test('Empty table intrinsic dimensions should not crash', () {
     // Test that empty tables (0 rows x 0 columns) don't cause division by zero
     // when intrinsic size methods are called with non-zero constraints.
-    final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
+    final table = RenderTable(textDirection: TextDirection.ltr);
 
     // Verify table is empty
     expect(table.rows, equals(0));
