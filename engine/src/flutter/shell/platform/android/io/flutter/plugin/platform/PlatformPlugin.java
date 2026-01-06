@@ -429,8 +429,9 @@ public class PlatformPlugin {
    * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
    *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
    *     Android 15 and above, meaning calls to this method will have no effect on those versions.
-   *     Consider using the [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController) or other Android 15+ APIs for system UI
-   *     styling.
+   *     Consider using the
+   *     [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+   *     or other Android 15+ APIs for system UI styling.
    */
   @Deprecated
   private void setSystemChromeSystemUIOverlayStyle(
@@ -478,6 +479,12 @@ public class PlatformPlugin {
     }
 
     if (systemChromeStyle.statusBarColor != null) {
+      // setStatusBarColor has no effect on Android 15 and above, meaning calls to this method will
+      // have no effect on those versions.
+      // Consider using the
+      // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+      // or other Android 15+ APIs for system UI styling.
+      //
       if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
         window.setStatusBarColor(systemChromeStyle.statusBarColor);
       }
@@ -514,15 +521,31 @@ public class PlatformPlugin {
       }
 
       if (systemChromeStyle.systemNavigationBarColor != null) {
+        // setNavigationBarColor has no effect on Android 15 and above, meaning calls to this method
+        // will
+        // have no effect on those versions.
+        // Consider using the
+        // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+        // or other Android 15+ APIs for system UI styling.
+        //
         if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
           window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
         }
       }
     }
     // You can't change the color of the navigation bar divider color until SDK 28.
+
+    // setNavigationBarDividerColor has no effect on Android 15 and above, meaning calls to this
+    // method will
+    // have no effect on those versions.
+    // Consider using the
+    // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+    // or other Android 15+ APIs for system UI styling.
+    //
     if (systemChromeStyle.systemNavigationBarDividerColor != null
         && Build.VERSION.SDK_INT >= API_LEVELS.API_28
         && Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+
       window.setNavigationBarDividerColor(systemChromeStyle.systemNavigationBarDividerColor);
     }
 
