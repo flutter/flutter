@@ -3,3 +3,5 @@
 // found in the LICENSE file.
 
 const String kWidgetPreviewDtdUri = '';
+const String kWidgetPreviewService = 'widget-preview';
+const String kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
