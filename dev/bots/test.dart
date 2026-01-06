@@ -244,6 +244,10 @@ Future<void> _runIntegrationToolTests() async {
     testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
+
+  await runFlutterTest(
+    path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'),
+  );
 }
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {
