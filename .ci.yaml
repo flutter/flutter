@@ -4824,7 +4824,6 @@ targets:
 
   # mac mokey test
   - name: Mac_arm64_mokey native_assets_android
-    bringup: true # Flakey https://github.com/flutter/flutter/issues/179514
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5400,16 +5399,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
-
-  - name: Mac_ios high_bitrate_images
-    recipe: devicelab/devicelab_drone
-    presubmit: true
-    bringup: true
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: high_bitrate_images_ios
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone

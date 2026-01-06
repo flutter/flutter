@@ -30,6 +30,10 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                std::vector<std::vector<uint8_t>> string_attribute_args),
               (override));
   MOCK_METHOD(void,
+              FlutterViewSetSemanticsTreeEnabled,
+              (bool enabled),
+              (override));
+  MOCK_METHOD(void,
               FlutterViewSetApplicationLocale,
               (const std::string locale),
               (override));
