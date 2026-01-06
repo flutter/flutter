@@ -568,7 +568,6 @@ void main() {
             localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
               _LongCupertinoLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
-              DefaultMaterialLocalizations.delegate,
             ],
             home: Directionality(
               textDirection: TextDirection.ltr,
