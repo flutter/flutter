@@ -6,9 +6,11 @@
 
 namespace flutter {
 
-std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(DlScalar sigma_x,
-                                                       DlScalar sigma_y,
-                                                       DlTileMode tile_mode) {
+std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(
+    DlScalar sigma_x,
+    DlScalar sigma_y,
+    DlTileMode tile_mode,
+    std::optional<DlRect> bounds) {
   if (!std::isfinite(sigma_x) || !std::isfinite(sigma_y)) {
     return nullptr;
   }
@@ -17,7 +19,8 @@ std::shared_ptr<DlImageFilter> DlBlurImageFilter::Make(DlScalar sigma_x,
   }
   sigma_x = (sigma_x < SK_ScalarNearlyZero) ? 0 : sigma_x;
   sigma_y = (sigma_y < SK_ScalarNearlyZero) ? 0 : sigma_y;
-  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode);
+  return std::make_shared<DlBlurImageFilter>(sigma_x, sigma_y, tile_mode,
+                                             bounds);
 }
 
 DlRect* DlBlurImageFilter::map_local_bounds(const DlRect& input_bounds,
@@ -46,7 +49,7 @@ bool DlBlurImageFilter::equals_(const DlImageFilter& other) const {
   auto that = static_cast<const DlBlurImageFilter*>(&other);
   return (DlScalarNearlyEqual(sigma_x_, that->sigma_x_) &&
           DlScalarNearlyEqual(sigma_y_, that->sigma_y_) &&
-          tile_mode_ == that->tile_mode_);
+          tile_mode_ == that->tile_mode_ && bounds_ == that->bounds_);
 }
 
 }  // namespace flutter
