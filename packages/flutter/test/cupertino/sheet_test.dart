@@ -1617,7 +1617,6 @@ void main() {
     },
   );
 
-<<<<<<< HEAD
   group('topGap parameter tests', () {
     testWidgets('sheet uses default topGap when not specified', (WidgetTester tester) async {
       final GlobalKey scaffoldKey = GlobalKey();
@@ -1968,7 +1967,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     });
-=======
+  });
   testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
     WidgetTester tester,
   ) async {
@@ -1995,6 +1994,5 @@ void main() {
     await tester.pumpAndSettle();
 
     // expect(find.text('Increase Count'), findsOneWidget);
->>>>>>> 7fab17d486f (Do not dispose of controller on update)
   });
 }
