@@ -144,6 +144,7 @@ void main() {
         'xcrun',
         'xcresulttool',
         'get',
+        'build-results',
         '--path',
         _xcBundleFilePath,
         '--format',
@@ -420,7 +421,7 @@ void main() {
       ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-      expect(logger.statusText, contains('Building ad-hoc IPA'));
+      expect(logger.statusText, contains('Building release-testing IPA'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -434,7 +435,7 @@ void main() {
   );
 
   testUsingContext(
-    'ipa build uses new "debugging" export method when on Xcode versions > 15.3',
+    'ipa build uses "debugging" export method for development distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -484,13 +485,13 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
 
   testUsingContext(
-    'ipa build uses new "release-testing" export method when on Xcode versions > 15.3',
+    'ipa build uses new "release-testing" export method for app-store distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -540,13 +541,13 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
 
   testUsingContext(
-    'ipa build uses new "app-store-connect" export method when on Xcode versions > 15.3',
+    'ipa build uses "app-store-connect" export method for app-store distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -596,46 +597,13 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
 
   testUsingContext(
-    'ipa build accepts "enterprise" export method when on Xcode versions <= 15.3',
-    () async {
-      final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        logger: logger,
-        fileSystem: fileSystem,
-        osUtils: FakeOperatingSystemUtils(),
-      );
-      fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(),
-        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-      ]);
-      createMinimalMockProjectFiles();
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
-      expect(logger.statusText, contains('Building enterprise IPA'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      Logger: () => logger,
-      ProcessManager: () => fakeProcessManager,
-      Pub: ThrowingPub.new,
-      Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
-      Artifacts: () => Artifacts.test(),
-    },
-  );
-
-  testUsingContext(
-    'ipa build accepts "enterprise" export method when on Xcode versions > 15.3',
+    'ipa build accepts "enterprise" export method',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
       final command = BuildCommand(
@@ -685,40 +653,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
-      Artifacts: () => Artifacts.test(),
-    },
-  );
-
-  testUsingContext(
-    'ipa build accepts legacy methods when on Xcode versions <= 15.3',
-    () async {
-      final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        logger: logger,
-        fileSystem: fileSystem,
-        osUtils: FakeOperatingSystemUtils(),
-      );
-      fakeProcessManager.addCommands(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(),
-        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-      ]);
-      createMinimalMockProjectFiles();
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
-      expect(logger.statusText, contains('Building App Store IPA'));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      Logger: () => logger,
-      ProcessManager: () => fakeProcessManager,
-      Pub: ThrowingPub.new,
-      Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -889,7 +824,7 @@ void main() {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>app-store</string>
+        <string>app-store-connect</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -950,7 +885,7 @@ void main() {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>ad-hoc</string>
+        <string>release-testing</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -963,9 +898,9 @@ void main() {
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-      expect(logger.statusText, contains('Building ad-hoc IPA'));
+      expect(logger.statusText, contains('Building release-testing IPA'));
       expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
-      // Don'ltruct how to upload to the App Store.
+      // Don't instruct how to upload to the App Store.
       expect(logger.statusText, isNot(contains('To upload')));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },

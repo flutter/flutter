@@ -134,6 +134,7 @@ void main() {
         'xcrun',
         'xcresulttool',
         'get',
+        'build-results',
         '--path',
         _xcBundleDirectoryPath,
         '--format',
