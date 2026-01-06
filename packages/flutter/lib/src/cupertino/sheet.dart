@@ -124,9 +124,8 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// means the sheet takes up only the bottom 10% of the screen. If not provided, defaults
 /// to 0.08 (8% of screen height).
 ///
-/// When `showDragHandle` is set to `true`, then an iOS-style drag handle will
-/// be placed at the top of the sheet. If a value is not provided, then it will
-/// default to false.
+/// When `showDragHandle` is set to `true`, then a drag handle will be placed at
+/// the top of the sheet. This flag will default to false.
 ///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
@@ -611,19 +610,23 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   /// Defaults to false.
   final bool showDragHandle;
 
-  Widget _dragHandleBuilder(BuildContext context) {
+  Widget _sheetWithDragHandle(BuildContext context) {
     if (!showDragHandle) {
       return builder(context);
     }
 
+    // Values derived from Apple's Figma files and a simulator running iOS 18.2.
     const dragHandleTopPadding = 5.0;
     const dragHandleHeight = 5.0;
     const dragHandleWidth = 36.0;
+    const dragHandleViewInset = 15.0;
 
     return Stack(
       children: <Widget>[
         MediaQuery(
-          data: MediaQuery.of(context).copyWith(viewInsets: const EdgeInsets.only(top: 30)),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(viewInsets: const EdgeInsets.only(top: dragHandleViewInset)),
           child: builder(context),
         ),
         const Align(
@@ -654,7 +657,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: _dragHandleBuilder(context)),
+          child: _CupertinoSheetScope(child: _sheetWithDragHandle(context)),
         ),
       ),
     );
