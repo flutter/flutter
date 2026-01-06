@@ -18,6 +18,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_target.h"
@@ -124,6 +125,7 @@ class Variants : public GenericVariants {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
     }
+    context.GetPipelineLibrary()->LogPipelineCreation(*desc);
     options.ApplyToPipelineDescriptor(*desc);
     desc_ = desc;
     if (context.GetFlags().lazy_shader_mode) {
@@ -229,6 +231,7 @@ struct ContentContext::Pipelines {
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
   Variants<BorderMaskBlurPipeline> border_mask_blur;
+  Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
   Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill;
@@ -287,12 +290,14 @@ struct ContentContext::Pipelines {
   Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill;
   Variants<RRectBlurPipeline> rrect_blur;
   Variants<RSuperellipseBlurPipeline> rsuperellipse_blur;
+  Variants<ShadowVerticesShader> shadow_vertices_;
   Variants<SolidFillPipeline> solid_fill;
   Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter;
   Variants<SweepGradientFillPipeline> sweep_gradient_fill;
   Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill;
   Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill;
   Variants<TextureDownsamplePipeline> texture_downsample;
+  Variants<TextureDownsampleBoundedPipeline> texture_downsample_bounded;
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
@@ -300,10 +305,14 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+// Web doesn't support external texture OpenGL extensions
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   Variants<TiledTextureExternalPipeline> tiled_texture_external;
-  Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
   Variants<TiledTextureUvExternalPipeline> tiled_texture_uv_external;
+#endif
+
+#if defined(IMPELLER_ENABLE_OPENGLES)
+  Variants<TextureDownsampleGlesPipeline> texture_downsample_gles;
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
 };
@@ -466,6 +475,12 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.stencil_failure = StencilOperation::kDecrementWrap;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
+      case StencilMode::kStencilIncrementAll:
+        // The stencil ref should be 0 on commands that use this mode.
+        front_stencil.stencil_compare = CompareFunction::kEqual;
+        front_stencil.depth_stencil_pass = StencilOperation::kIncrementWrap;
+        desc.SetStencilAttachmentDescriptors(front_stencil);
+        break;
       case StencilMode::kCoverCompare:
         // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kNotEqual;
@@ -477,17 +492,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         // The stencil ref should be 0 on commands that use this mode.
         front_stencil.stencil_compare = CompareFunction::kEqual;
         front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kOverdrawPreventionIncrement:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kIncrementClamp;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kOverdrawPreventionRestore:
-        front_stencil.stencil_compare = CompareFunction::kLess;
-        front_stencil.depth_stencil_pass =
-            StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
     }
@@ -550,7 +554,8 @@ ContentContext::ContentContext(
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
       pipelines_(new Pipelines()),
-      tessellator_(std::make_shared<Tessellator>()),
+      tessellator_(std::make_shared<Tessellator>(
+          context_->GetCapabilities()->Supports32BitPrimitiveIndices())),
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
@@ -628,6 +633,7 @@ ContentContext::ContentContext(
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
+    pipelines_->circle.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
       pipelines_->linear_gradient_ssbo_fill.CreateDefault(*context_, options);
@@ -696,6 +702,8 @@ ContentContext::ContentContext(
     }
     pipelines_->texture_downsample.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
+    pipelines_->texture_downsample_bounded.CreateDefault(
+        *context_, options_no_msaa_no_depth_stencil);
     pipelines_->rrect_blur.CreateDefault(*context_, options_trianglestrip);
     pipelines_->rsuperellipse_blur.CreateDefault(*context_,
                                                  options_trianglestrip);
@@ -708,6 +716,7 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
+    pipelines_->shadow_vertices_.CreateDefault(*context_, options);
     pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
                                                {supports_decal});
     pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
@@ -849,17 +858,19 @@ ContentContext::ContentContext(
                                                   options_trianglestrip);
   pipelines_->yuv_to_rgb_filter.CreateDefault(*context_, options_trianglestrip);
 
-#if defined(IMPELLER_ENABLE_OPENGLES)
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
-#if !defined(FML_OS_MACOSX)
-    // GLES only shader that is unsupported on macOS.
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_MACOSX) && \
+    !defined(FML_OS_EMSCRIPTEN)
+    // GLES only shader that is unsupported on macOS and web.
     pipelines_->tiled_texture_external.CreateDefault(*context_, options);
     pipelines_->tiled_texture_uv_external.CreateDefault(*context_, options);
 #endif  // !defined(FML_OS_MACOSX)
+
+#if defined(IMPELLER_ENABLE_OPENGLES)
     pipelines_->texture_downsample_gles.CreateDefault(*context_,
                                                       options_trianglestrip);
-  }
 #endif  // IMPELLER_ENABLE_OPENGLES
+  }
 
   is_valid_ = true;
   InitializeCommonlyUsedShadersIfNeeded();
@@ -892,9 +903,17 @@ fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
 
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
     subpass_target = GetRenderTargetCache()->CreateOffscreenMSAA(
-        *context, texture_size,
-        /*mip_count=*/mip_count, label,
-        RenderTarget::kDefaultColorAttachmentConfigMSAA, depth_stencil_config);
+        /*context=*/*context,
+        /*size=*/texture_size,
+        /*mip_count=*/mip_count,
+        /*label=*/label,
+        /*color_attachment_config=*/
+        RenderTarget::kDefaultColorAttachmentConfigMSAA,
+        /*stencil_attachment_config=*/depth_stencil_config,
+        /*existing_color_msaa_texture=*/nullptr,
+        /*existing_color_resolve_texture=*/nullptr,
+        /*existing_depth_stencil_texture=*/nullptr,
+        /*target_pixel_format=*/std::nullopt);
   } else {
     subpass_target = GetRenderTargetCache()->CreateOffscreen(
         *context, texture_size,
@@ -1396,6 +1415,11 @@ PipelineRef ContentContext::GetDownsamplePipeline(
   return GetPipeline(this, pipelines_->texture_downsample, opts);
 }
 
+PipelineRef ContentContext::GetDownsampleBoundedPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->texture_downsample_bounded, opts);
+}
+
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
@@ -1486,6 +1510,11 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
 }
 
+PipelineRef ContentContext::GetDrawShadowVerticesPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->shadow_vertices_, opts);
+}
+
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(
     BlendMode blend_mode,
     ContentContextOptions opts) const {
@@ -1496,14 +1525,22 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
   }
 }
 
+PipelineRef ContentContext::GetCirclePipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->circle, opts);
+}
+
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->line, opts);
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
-PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
+
+#if !defined(FML_OS_EMSCRIPTEN)
+PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->texture_downsample_gles, opts);
+  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
+  return GetPipeline(this, pipelines_->tiled_texture_uv_external, opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureExternalPipeline(
@@ -1511,12 +1548,13 @@ PipelineRef ContentContext::GetTiledTextureExternalPipeline(
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
   return GetPipeline(this, pipelines_->tiled_texture_external, opts);
 }
+#endif
 
-PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
+PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
     ContentContextOptions opts) const {
-  FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(this, pipelines_->tiled_texture_uv_external, opts);
+  return GetPipeline(this, pipelines_->texture_downsample_gles, opts);
 }
+
 #endif  // IMPELLER_ENABLE_OPENGLES
 
 }  // namespace impeller

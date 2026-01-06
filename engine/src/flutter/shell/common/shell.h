@@ -798,6 +798,11 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 
+  // Service protocol handler
+  bool OnServiceProtocolGetPipelineUsage(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document* response);
+
   // Send a system font change notification.
   void SendFontChangeNotification();
 

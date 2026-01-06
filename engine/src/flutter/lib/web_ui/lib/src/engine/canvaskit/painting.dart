@@ -40,12 +40,12 @@ class CkPaint implements ui.Paint {
     skPaint.setColorInt(_colorValue);
     skPaint.setStrokeMiter(strokeMiterLimit);
 
-    final effectiveColorFilter = _effectiveColorFilter;
+    final ManagedSkColorFilter? effectiveColorFilter = _effectiveColorFilter;
     if (effectiveColorFilter != null) {
       skPaint.setColorFilter(effectiveColorFilter.skiaObject);
     }
 
-    final shader = _shader;
+    final CkShader? shader = _shader;
     if (shader != null) {
       skPaint.setShader(shader.getSkShader(filterQuality));
       if (shader.isGradient) {
@@ -53,7 +53,7 @@ class CkPaint implements ui.Paint {
       }
     }
 
-    final localMaskFilter = maskFilter;
+    final ui.MaskFilter? localMaskFilter = maskFilter;
     if (localMaskFilter != null) {
       // CanvasKit returns `null` if the sigma is `0` or infinite.
       if (localMaskFilter.webOnlySigma.isFinite && localMaskFilter.webOnlySigma > 0) {
@@ -63,7 +63,7 @@ class CkPaint implements ui.Paint {
       }
     }
 
-    final localImageFilter = _imageFilter;
+    final CkManagedSkImageFilterConvertible? localImageFilter = _imageFilter;
     if (localImageFilter != null) {
       localImageFilter.withSkImageFilter((skImageFilter) {
         skPaint.setImageFilter(skImageFilter);
@@ -216,11 +216,11 @@ class CkPaint implements ui.Paint {
 
   @override
   String toString() {
-    String resultString = 'Paint()';
+    var resultString = 'Paint()';
 
     assert(() {
-      final StringBuffer result = StringBuffer();
-      String semicolon = '';
+      final result = StringBuffer();
+      var semicolon = '';
       result.write('Paint(');
       if (style == ui.PaintingStyle.stroke) {
         result.write('$style');
@@ -300,7 +300,7 @@ class CkFragmentProgram implements ui.FragmentProgram {
   CkFragmentProgram(this.name, this.effect, this.uniforms, this.floatCount, this.textureCount);
 
   factory CkFragmentProgram.fromBytes(String name, Uint8List data) {
-    final ShaderData shaderData = ShaderData.fromBytes(data);
+    final shaderData = ShaderData.fromBytes(data);
     final SkRuntimeEffect? effect = MakeRuntimeEffect(shaderData.source);
     if (effect == null) {
       throw const FormatException('Invalid Shader Source');
@@ -323,21 +323,42 @@ class CkFragmentProgram implements ui.FragmentProgram {
 
   @override
   ui.FragmentShader fragmentShader() {
-    return CkFragmentShader(name, effect, floatCount, textureCount);
+    return CkFragmentShader(name, effect, this);
+  }
+
+  int _getShaderIndex(String name, int index, [int? expectedSize]) {
+    var result = 0;
+    for (final UniformData uniform in uniforms) {
+      if (uniform.name == name) {
+        if (index < 0 || index >= uniform.floatCount) {
+          throw IndexError.withLength(index, uniform.floatCount);
+        }
+        if (expectedSize != null && uniform.floatCount != expectedSize) {
+          throw ArgumentError(
+            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
+          );
+        }
+        result += index;
+        break;
+      }
+      result += uniform.floatCount;
+    }
+    return result;
   }
 }
 
 class CkFragmentShader implements ui.FragmentShader, CkShader {
-  CkFragmentShader(this.name, this.effect, int floatCount, int textureCount)
-    : floats = mallocFloat32List(floatCount + textureCount * 2),
-      samplers = List<SkShader?>.filled(textureCount, null),
-      lastFloatIndex = floatCount;
+  CkFragmentShader(this.name, this.effect, this._program)
+    : floats = mallocFloat32List(_program.floatCount + _program.textureCount * 2),
+      samplers = List<SkShader?>.filled(_program.textureCount, null),
+      lastFloatIndex = _program.floatCount;
 
   final String name;
   final SkRuntimeEffect effect;
   final int lastFloatIndex;
   final SkFloat32List floats;
   final List<SkShader?> samplers;
+  final CkFragmentProgram _program;
 
   @visibleForTesting
   UniqueRef<SkShader>? ref;
@@ -372,15 +393,19 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     assert(!_debugDisposed, 'FragmentShader has been disposed of.');
-    final ui.ImageShader sampler = ui.ImageShader(
+    final sampler = ui.ImageShader(
       image,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       toMatrix64(Matrix4.identity().storage),
     );
-    samplers[index] = (sampler as CkShader).getSkShader(ui.FilterQuality.none);
+    samplers[index] = (sampler as CkShader).getSkShader(filterQuality);
     setFloat(lastFloatIndex + 2 * index, (sampler as CkImageShader).imageWidth.toDouble());
     setFloat(lastFloatIndex + 2 * index + 1, sampler.imageHeight.toDouble());
   }
@@ -404,6 +429,98 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
-    throw UnsupportedError('getUniformFloat is not supported on the web.');
+    index ??= 0;
+    final int shaderIndex = _program._getShaderIndex(name, index);
+    return CkUniformFloatSlot._(this, index, name, shaderIndex);
   }
+
+  @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _CkUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _CkUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _CkUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
+    return List<CkUniformFloatSlot>.generate(
+      size,
+      (i) => CkUniformFloatSlot._(this, i, name, baseShaderIndex),
+    );
+  }
+}
+
+class CkUniformFloatSlot implements ui.UniformFloatSlot {
+  CkUniformFloatSlot._(this._shader, this.index, this.name, this.shaderIndex);
+
+  final CkFragmentShader _shader;
+
+  @override
+  final int index;
+
+  @override
+  final String name;
+
+  @override
+  void set(double val) {
+    _shader.setFloat(shaderIndex, val);
+  }
+
+  @override
+  final int shaderIndex;
+}
+
+class _CkUniformVec2Slot implements ui.UniformVec2Slot {
+  _CkUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _CkUniformVec3Slot implements ui.UniformVec3Slot {
+  _CkUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _CkUniformVec4Slot implements ui.UniformVec4Slot {
+  _CkUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }

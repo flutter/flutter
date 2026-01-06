@@ -52,13 +52,12 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
 
   std::optional<Snapshot> snapshot =
       yuv_to_rgb_filter_contents->RenderToSnapshot(
-          renderer,      // renderer
-          entity,        // entity
-          std::nullopt,  // coverage_limit
-          std::nullopt,  // sampler_descriptor
-          true,          // msaa_enabled
-          /*mip_count=*/1,
-          "MakeYUVToRGBFilter Snapshot");  // label
+          renderer, entity,
+          {.coverage_limit = std::nullopt,
+           .sampler_descriptor = std::nullopt,
+           .msaa_enabled = true,
+           .mip_count = 1,
+           .label = "MakeYUVToRGBFilter Snapshot"});
   if (!snapshot.has_value()) {
     return nullptr;
   }

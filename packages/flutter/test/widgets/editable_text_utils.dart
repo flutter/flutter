@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// On web, the context menu (aka toolbar) is provided by the browser.
@@ -56,7 +56,7 @@ Future<void> sendKeys(
   bool shortcutModifier = false,
   required TargetPlatform targetPlatform,
 }) async {
-  final String targetPlatformString = targetPlatform.toString();
+  final targetPlatformString = targetPlatform.toString();
   final String platform = targetPlatformString
       .substring(targetPlatformString.indexOf('.') + 1)
       .toLowerCase();
@@ -87,7 +87,7 @@ Future<void> sendKeys(
       platform: platform,
     );
   }
-  for (final LogicalKeyboardKey key in keys) {
+  for (final key in keys) {
     await tester.sendKeyEvent(key, platform: platform);
     await tester.pump();
   }
@@ -135,7 +135,7 @@ class OverflowWidgetTextEditingController extends TextEditingController {
       style: style,
       children: <InlineSpan>[
         const TextSpan(text: 'Hi'),
-        WidgetSpan(child: Container(color: Colors.redAccent, height: 100.0)),
+        WidgetSpan(child: Container(color: const Color(0xffff0000), height: 100.0)),
       ],
     );
   }

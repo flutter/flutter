@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -1013,16 +1014,16 @@ class AndroidMemoryInfo extends MemoryInfo {
 
   // Realtime is time since the system was booted includes deep sleep. Clock
   // is monotonic, and ticks even when the CPU is in power saving modes.
-  var realTime = 0;
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
-  var javaHeap = 0;
-  var nativeHeap = 0;
-  var code = 0;
-  var stack = 0;
-  var graphics = 0;
-  var privateOther = 0;
-  var system = 0;
+  int javaHeap = 0;
+  int nativeHeap = 0;
+  int code = 0;
+  int stack = 0;
+  int graphics = 0;
+  int privateOther = 0;
+  int system = 0;
 
   @override
   Map<String, Object> toJson() {
@@ -1119,12 +1120,12 @@ class AdbLogReader extends DeviceLogReader {
     // see: https://github.com/flutter/flutter/pull/8864.
     const decoder = Utf8Decoder(reportErrors: false);
     _adbProcess.stdout
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
         .listen(_onLine);
     _adbProcess.stderr
-        .transform<String>(decoder)
-        .transform<String>(const LineSplitter())
+        .transformWithCallSite(decoder)
+        .transform(const LineSplitter())
         .listen(_onLine);
     unawaited(
       _adbProcess.exitCode.whenComplete(() {
@@ -1153,6 +1154,11 @@ class AdbLogReader extends DeviceLogReader {
     // Some versions of Android spew this out. It is inactionable to the end user
     // and causes no problems for the application.
     RegExp(r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+'),
+    // E/FrameEvents(26685): updateAcquireFence: Did not find frame.
+    // This is a HWUI bug that spams the console when using platform views like Google Maps.
+    // It is not an actual error and causes no problems for the application.
+    // See https://github.com/flutter/flutter/issues/104268
+    RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame\.$'),
     // See https://github.com/flutter/flutter/issues/160598
     RegExp(r'ViewPostIme pointer'),
     RegExp(r'mali.instrumentation.graph.work'),

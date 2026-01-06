@@ -14,6 +14,7 @@
 /// @docImport 'scaffold.dart';
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 
@@ -250,7 +251,7 @@ class Drawer extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
-    switch (Theme.of(context).platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         break;
@@ -261,7 +262,7 @@ class Drawer extends StatelessWidget {
         label = semanticLabel ?? MaterialLocalizations.of(context).drawerLabel;
     }
     final bool useMaterial3 = Theme.of(context).useMaterial3;
-    final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
+    final isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults = useMaterial3
         ? _DrawerDefaultsM3(context)
         : _DrawerDefaultsM2(context);
@@ -578,7 +579,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox? box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _drawerKey.currentContext?.findRenderObject() as RenderBox?;
     // return _kWidth if drawer not being shown currently
     return box?.size.width ?? _kWidth;
   }
@@ -685,7 +686,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       }
     } else {
       final bool platformHasBackButton;
-      switch (Theme.of(context).platform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
         case TargetPlatform.iOS:

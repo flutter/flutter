@@ -460,7 +460,7 @@ class CupertinoPageTransition extends StatefulWidget {
     bool allowSnapshotting,
     Widget? child,
   ) {
-    final CurvedAnimation animation = CurvedAnimation(
+    final animation = CurvedAnimation(
       parent: secondaryAnimation,
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.easeInToLinear,
@@ -1074,12 +1074,12 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
       TextDirection.ltr => (-1, offset.dx),
     };
 
-    int bandColorIndex = 0;
-    for (int dx = 0; dx < shadowWidth; dx += 1) {
+    var bandColorIndex = 0;
+    for (var dx = 0; dx < shadowWidth; dx += 1) {
       if (dx ~/ bandWidth != bandColorIndex) {
         bandColorIndex += 1;
       }
-      final Paint paint = Paint()
+      final paint = Paint()
         ..color = Color.lerp(
           colors[bandColorIndex],
           colors[bandColorIndex + 1],
@@ -1200,7 +1200,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Simulation createSimulation({required bool forward}) {
     assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
-    final double end = forward ? 1.0 : 0.0;
+    final end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
       controller!.value,
@@ -1506,7 +1506,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   @override
   Simulation createSimulation({required bool forward}) {
     assert(!debugTransitionCompleted(), 'Cannot reuse a $runtimeType after disposing it.');
-    final double end = forward ? 1.0 : 0.0;
+    final end = forward ? 1.0 : 0.0;
     return SpringSimulation(
       _kStandardSpring,
       controller!.value,

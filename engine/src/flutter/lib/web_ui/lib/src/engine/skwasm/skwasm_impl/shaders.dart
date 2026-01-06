@@ -215,28 +215,24 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
 
 class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     implements ui.FragmentProgram {
-  SkwasmFragmentProgram._(
-    this.name,
-    RuntimeEffectHandle handle,
-    this.floatUniformCount,
-    this.childShaderCount,
-  ) : super(handle, _registry);
+  SkwasmFragmentProgram._(this.name, RuntimeEffectHandle handle, this._shaderData)
+    : super(handle, _registry);
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
-    final ShaderData shaderData = ShaderData.fromBytes(bytes);
+    final shaderData = ShaderData.fromBytes(bytes);
 
     // TODO(jacksongardner): Can we avoid this copy?
     final List<int> sourceData = utf8.encode(shaderData.source);
     final SkStringHandle sourceString = skStringAllocate(sourceData.length);
     final Pointer<Int8> sourceBuffer = skStringGetData(sourceString);
-    int i = 0;
-    for (final int byte in sourceData) {
+    var i = 0;
+    for (final byte in sourceData) {
       sourceBuffer[i] = byte;
       i++;
     }
     final RuntimeEffectHandle handle = runtimeEffectCreate(sourceString);
     skStringFree(sourceString);
-    return SkwasmFragmentProgram._(name, handle, shaderData.floatCount, shaderData.textureCount);
+    return SkwasmFragmentProgram._(name, handle, shaderData);
   }
 
   static final SkwasmFinalizationRegistry<RawRuntimeEffect> _registry =
@@ -245,13 +241,34 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
       );
 
   final String name;
-  final int floatUniformCount;
-  final int childShaderCount;
+  int get floatUniformCount => _shaderData.floatCount;
+  int get childShaderCount => _shaderData.textureCount;
+  final ShaderData _shaderData;
 
   @override
   ui.FragmentShader fragmentShader() => SkwasmFragmentShader(this);
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
+
+  int _getShaderIndex(String name, int index, [int? expectedSize]) {
+    var result = 0;
+    for (final UniformData uniform in _shaderData.uniforms) {
+      if (uniform.name == name) {
+        if (index < 0 || index >= uniform.floatCount) {
+          throw IndexError.withLength(index, uniform.floatCount);
+        }
+        if (expectedSize != null && uniform.floatCount != expectedSize) {
+          throw ArgumentError(
+            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
+          );
+        }
+        result += index;
+        break;
+      }
+      result += uniform.floatCount;
+    }
+    return result;
+  }
 }
 
 class SkwasmShaderData extends SkwasmObjectWrapper<RawUniformData> {
@@ -284,7 +301,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
         Pointer<ShaderHandle> childShaders = nullptr;
         if (_childShaders.isNotEmpty) {
           childShaders = s.allocPointerArray(_childShaders.length).cast<ShaderHandle>();
-          for (int i = 0; i < _childShaders.length; i++) {
+          for (var i = 0; i < _childShaders.length; i++) {
             final SkwasmShader? child = _childShaders[i];
             childShaders[i] = child != null ? child.handle : nullptr;
           }
@@ -335,7 +352,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     if (_nativeShader != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // child shaders.
@@ -343,12 +364,12 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader = null;
     }
 
-    final SkwasmImageShader shader = SkwasmImageShader.imageShader(
+    final shader = SkwasmImageShader.imageShader(
       image as SkwasmImage,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       null,
-      ui.FilterQuality.none,
+      filterQuality,
     );
     final SkwasmShader? oldShader = _childShaders[index];
     _childShaders[index] = shader;
@@ -361,6 +382,98 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
-    throw UnsupportedError('getUniformFloat is not supported on the web.');
+    index ??= 0;
+    final int shaderIndex = _program._getShaderIndex(name, index);
+    return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
   }
+
+  @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _SkwasmUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  @override
+  ui.ImageSamplerSlot getImageSampler(String name) {
+    throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
+    return List<SkwasmUniformFloatSlot>.generate(
+      size,
+      (i) => SkwasmUniformFloatSlot._(this, i, name, baseShaderIndex),
+    );
+  }
+}
+
+class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
+  SkwasmUniformFloatSlot._(this._shader, this.index, this.name, this.shaderIndex);
+
+  final SkwasmFragmentShader _shader;
+
+  @override
+  final int index;
+
+  @override
+  final String name;
+
+  @override
+  void set(double val) {
+    _shader.setFloat(shaderIndex, val);
+  }
+
+  @override
+  final int shaderIndex;
+}
+
+class _SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
+  _SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
+  _SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
+  _SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
 }

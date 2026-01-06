@@ -271,7 +271,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] is used.
   final MouseCursor? mouseCursor;
 
   /// Configures the minimum size of the area within which the buttons may
@@ -713,7 +713,7 @@ class ToggleButtons extends StatelessWidget {
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
-    final List<Widget> buttons = List<Widget>.generate(children.length, (int index) {
+    final buttons = List<Widget>.generate(children.length, (int index) {
       final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(
         index,
         children.length,
@@ -735,7 +735,7 @@ class ToggleButtons extends StatelessWidget {
         toggleButtonsTheme,
       );
 
-      final Set<WidgetState> states = <WidgetState>{
+      final states = <WidgetState>{
         if (isSelected[index] && onPressed != null) WidgetState.selected,
         if (onPressed == null) WidgetState.disabled,
       };
@@ -1201,10 +1201,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
+    final childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
-      Axis.vertical => childOffset + leadingBorderSide.width,
+      Axis.vertical =>
+        childOffset +
+            switch (verticalDirection) {
+              VerticalDirection.down => leadingBorderSide.width,
+              VerticalDirection.up => trailingBorderSide.width,
+            },
     }.offset;
   }
 
@@ -1287,7 +1292,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     if (child == null) {
       return;
     }
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     if (direction == Axis.horizontal) {
       childParentData.offset = switch (textDirection) {
         TextDirection.ltr => Offset(leadingBorderSide.width, borderSide.width),
@@ -1304,7 +1309,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     final RenderBox? child = this.child;
     if (child == null) {
-      final Size horizontalSize = Size(
+      final horizontalSize = Size(
         leadingBorderSide.width + trailingBorderSide.width,
         borderSide.width * 2.0,
       );
@@ -1323,7 +1328,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
     final Offset bottomRight = size.bottomRight(offset);
-    final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
+    final outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
     final Rect center = outer.deflate(borderSide.width / 2.0);
     const double sweepAngle = math.pi / 2.0;
     final RRect rrect = RRect.fromRectAndCorners(
@@ -1342,25 +1347,25 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           : Radius.zero,
     ).scaleRadii();
 
-    final Rect tlCorner = Rect.fromLTWH(
+    final tlCorner = Rect.fromLTWH(
       rrect.left,
       rrect.top,
       rrect.tlRadiusX * 2.0,
       rrect.tlRadiusY * 2.0,
     );
-    final Rect blCorner = Rect.fromLTWH(
+    final blCorner = Rect.fromLTWH(
       rrect.left,
       rrect.bottom - (rrect.blRadiusY * 2.0),
       rrect.blRadiusX * 2.0,
       rrect.blRadiusY * 2.0,
     );
-    final Rect trCorner = Rect.fromLTWH(
+    final trCorner = Rect.fromLTWH(
       rrect.right - (rrect.trRadiusX * 2),
       rrect.top,
       rrect.trRadiusX * 2,
       rrect.trRadiusY * 2,
     );
-    final Rect brCorner = Rect.fromLTWH(
+    final brCorner = Rect.fromLTWH(
       rrect.right - (rrect.brRadiusX * 2),
       rrect.bottom - (rrect.brRadiusY * 2),
       rrect.brRadiusX * 2,
@@ -1370,7 +1375,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final Paint leadingPaint = leadingBorderSide.toPaint();
     // Only one button.
     if (isFirstButton && isLastButton) {
-      final Path leadingPath = Path();
+      final leadingPath = Path();
       final double startX = (rrect.brRadiusX == 0.0) ? outer.right : rrect.right - rrect.brRadiusX;
       leadingPath
         ..moveTo(startX, rrect.bottom)
@@ -1390,14 +1395,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       switch (textDirection) {
         case TextDirection.ltr:
           if (isLastButton) {
-            final Path leftPath = Path();
+            final leftPath = Path();
             leftPath
               ..moveTo(rrect.left, rrect.bottom + leadingBorderSide.width / 2)
               ..lineTo(rrect.left, rrect.top - leadingBorderSide.width / 2);
             context.canvas.drawPath(leftPath, leadingPaint);
 
             final Paint endingPaint = trailingBorderSide.toPaint();
-            final Path endingPath = Path();
+            final endingPath = Path();
             endingPath
               ..moveTo(rrect.left + borderSide.width / 2.0, rrect.top)
               ..lineTo(rrect.right - rrect.trRadiusX, rrect.top)
@@ -1407,7 +1412,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.left + borderSide.width / 2.0, rrect.bottom);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(outer.right, rrect.bottom)
               ..lineTo(rrect.left + rrect.blRadiusX, rrect.bottom)
@@ -1417,14 +1422,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.right, rrect.top);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(rrect.left, rrect.bottom + leadingBorderSide.width / 2)
               ..lineTo(rrect.left, rrect.top - leadingBorderSide.width / 2);
             context.canvas.drawPath(leadingPath, leadingPaint);
 
             final Paint horizontalPaint = borderSide.toPaint();
-            final Path horizontalPaths = Path();
+            final horizontalPaths = Path();
             horizontalPaths
               ..moveTo(rrect.left + borderSide.width / 2.0, rrect.top)
               ..lineTo(outer.right - rrect.trRadiusX, rrect.top)
@@ -1434,14 +1439,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           }
         case TextDirection.rtl:
           if (isLastButton) {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(rrect.right, rrect.bottom + leadingBorderSide.width / 2)
               ..lineTo(rrect.right, rrect.top - leadingBorderSide.width / 2);
             context.canvas.drawPath(leadingPath, leadingPaint);
 
             final Paint endingPaint = trailingBorderSide.toPaint();
-            final Path endingPath = Path();
+            final endingPath = Path();
             endingPath
               ..moveTo(rrect.right - borderSide.width / 2.0, rrect.top)
               ..lineTo(rrect.left + rrect.tlRadiusX, rrect.top)
@@ -1451,7 +1456,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right - borderSide.width / 2.0, rrect.bottom);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(outer.left, rrect.bottom)
               ..lineTo(rrect.right - rrect.brRadiusX, rrect.bottom)
@@ -1461,14 +1466,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.left, rrect.top);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(rrect.right, rrect.bottom + leadingBorderSide.width / 2)
               ..lineTo(rrect.right, rrect.top - leadingBorderSide.width / 2);
             context.canvas.drawPath(leadingPath, leadingPaint);
 
             final Paint horizontalPaint = borderSide.toPaint();
-            final Path horizontalPaths = Path();
+            final horizontalPaths = Path();
             horizontalPaths
               ..moveTo(rrect.right - borderSide.width / 2.0, rrect.top)
               ..lineTo(outer.left - rrect.tlRadiusX, rrect.top)
@@ -1481,14 +1486,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       switch (verticalDirection) {
         case VerticalDirection.down:
           if (isLastButton) {
-            final Path topPath = Path();
+            final topPath = Path();
             topPath
               ..moveTo(outer.left, outer.top + leadingBorderSide.width / 2)
               ..lineTo(outer.right, outer.top + leadingBorderSide.width / 2);
             context.canvas.drawPath(topPath, leadingPaint);
 
             final Paint endingPaint = trailingBorderSide.toPaint();
-            final Path endingPath = Path();
+            final endingPath = Path();
             endingPath
               ..moveTo(rrect.left, rrect.top + leadingBorderSide.width / 2.0)
               ..lineTo(rrect.left, rrect.bottom - rrect.blRadiusY)
@@ -1498,7 +1503,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, rrect.top + leadingBorderSide.width / 2.0);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(rrect.left, outer.bottom)
               ..lineTo(rrect.left, rrect.top + rrect.tlRadiusX)
@@ -1508,14 +1513,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            final Path topPath = Path();
+            final topPath = Path();
             topPath
               ..moveTo(outer.left, outer.top + leadingBorderSide.width / 2)
               ..lineTo(outer.right, outer.top + leadingBorderSide.width / 2);
             context.canvas.drawPath(topPath, leadingPaint);
 
             final Paint paint = borderSide.toPaint();
-            final Path paths = Path(); // Left and right borders.
+            final paths = Path(); // Left and right borders.
             paths
               ..moveTo(rrect.left, outer.top + leadingBorderSide.width)
               ..lineTo(rrect.left, outer.bottom)
@@ -1525,14 +1530,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           }
         case VerticalDirection.up:
           if (isLastButton) {
-            final Path bottomPath = Path();
+            final bottomPath = Path();
             bottomPath
               ..moveTo(outer.left, outer.bottom - leadingBorderSide.width / 2.0)
               ..lineTo(outer.right, outer.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(bottomPath, leadingPaint);
 
             final Paint endingPaint = trailingBorderSide.toPaint();
-            final Path endingPath = Path();
+            final endingPath = Path();
             endingPath
               ..moveTo(rrect.left, rrect.bottom - leadingBorderSide.width / 2.0)
               ..lineTo(rrect.left, rrect.top + rrect.tlRadiusY)
@@ -1542,7 +1547,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, rrect.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(endingPath, endingPaint);
           } else if (isFirstButton) {
-            final Path leadingPath = Path();
+            final leadingPath = Path();
             leadingPath
               ..moveTo(rrect.left, outer.top)
               ..lineTo(rrect.left, rrect.bottom - rrect.blRadiusY)
@@ -1552,14 +1557,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.top);
             context.canvas.drawPath(leadingPath, leadingPaint);
           } else {
-            final Path bottomPath = Path();
+            final bottomPath = Path();
             bottomPath
               ..moveTo(outer.left, outer.bottom - leadingBorderSide.width / 2.0)
               ..lineTo(outer.right, outer.bottom - leadingBorderSide.width / 2.0);
             context.canvas.drawPath(bottomPath, leadingPaint);
 
             final Paint paint = borderSide.toPaint();
-            final Path paths = Path(); // Left and right borders.
+            final paths = Path(); // Left and right borders.
             paths
               ..moveTo(rrect.left, outer.top)
               ..lineTo(rrect.left, outer.bottom - leadingBorderSide.width)
@@ -1657,9 +1662,9 @@ class _RenderInputPadding extends RenderShiftedBox {
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
-      final double height = math.max(childSize.width, minSize.width);
-      final double width = math.max(childSize.height, minSize.height);
-      return constraints.constrain(Size(height, width));
+      final double width = math.max(childSize.width, minSize.width);
+      final double height = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(width, height));
     }
     return Size.zero;
   }
@@ -1679,16 +1684,18 @@ class _RenderInputPadding extends RenderShiftedBox {
     if (result == null) {
       return null;
     }
+    // Calculate the size and child offset using the same logic as performLayout
+    final Size drySize = getDryLayout(constraints);
     final Size childSize = child.getDryLayout(constraints);
-    return result +
-        Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+    final Offset childOffset = Alignment.center.alongOffset(drySize - childSize as Offset);
+    return result + childOffset.dy;
   }
 
   @override
   void performLayout() {
     size = _computeSize(constraints: constraints, layoutChild: ChildLayoutHelper.layoutChild);
     if (child != null) {
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     }
   }

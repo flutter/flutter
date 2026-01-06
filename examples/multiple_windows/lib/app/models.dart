@@ -64,8 +64,8 @@ class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
 /// Settings that control the behavior of newly created windows.
 class WindowSettings {
   WindowSettings({
-    this.regularSize = const Size(400, 300),
-    this.dialogSize = const Size(200, 200),
+    this.regularSize = const Size(800, 600),
+    this.dialogSize = const Size(400, 400),
   });
 
   /// The initial size for newly created regular windows.
@@ -96,4 +96,17 @@ class WindowSettingsAccessor extends InheritedWidget {
   bool updateShouldNotify(WindowSettingsAccessor oldWidget) {
     return windowSettings != oldWidget.windowSettings;
   }
+}
+
+class CallbackDialogWindowControllerDelegate
+    with DialogWindowControllerDelegate {
+  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
+
+  @override
+  void onWindowDestroyed() {
+    onDestroyed();
+    super.onWindowDestroyed();
+  }
+
+  final VoidCallback onDestroyed;
 }

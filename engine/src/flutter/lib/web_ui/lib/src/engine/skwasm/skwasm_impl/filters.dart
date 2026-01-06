@@ -71,6 +71,9 @@ abstract class SkwasmImageFilter implements LayerImageFilter {
       return scope.convertIRectFromNative(rawRect);
     });
   });
+
+  @override
+  String toString() => 'ImageFilter.$debugShortDescription';
 }
 
 class SkwasmBlurFilter extends SkwasmImageFilter {
@@ -85,7 +88,7 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
     ImageFilterHandleBorrow<T> borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final rawImageFilter = imageFilterCreateBlur(
+    final ImageFilterHandle rawImageFilter = imageFilterCreateBlur(
       sigmaX,
       sigmaY,
       (tileMode ?? defaultBlurTileMode).index,
@@ -113,7 +116,7 @@ class SkwasmBlurFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(sigmaX, sigmaY, tileMode);
 
   @override
-  String toString() => 'ImageFilter.blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, ${tileModeString(tileMode)})';
 }
 
 class SkwasmDilateFilter extends SkwasmImageFilter {
@@ -127,7 +130,7 @@ class SkwasmDilateFilter extends SkwasmImageFilter {
     ImageFilterHandleBorrow<T> borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final rawImageFilter = imageFilterCreateDilate(radiusX, radiusY);
+    final ImageFilterHandle rawImageFilter = imageFilterCreateDilate(radiusX, radiusY);
     final T result = borrow(rawImageFilter);
     imageFilterDispose(rawImageFilter);
     return result;
@@ -148,7 +151,7 @@ class SkwasmDilateFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
+  String get debugShortDescription => 'dilate($radiusX, $radiusY)';
 }
 
 class SkwasmErodeFilter extends SkwasmImageFilter {
@@ -162,7 +165,7 @@ class SkwasmErodeFilter extends SkwasmImageFilter {
     ImageFilterHandleBorrow<T> borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) {
-    final rawImageFilter = imageFilterCreateErode(radiusX, radiusY);
+    final ImageFilterHandle rawImageFilter = imageFilterCreateErode(radiusX, radiusY);
     final T result = borrow(rawImageFilter);
     imageFilterDispose(rawImageFilter);
     return result;
@@ -183,7 +186,7 @@ class SkwasmErodeFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(radiusX, radiusY);
 
   @override
-  String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
+  String get debugShortDescription => 'erode($radiusX, $radiusY)';
 }
 
 class SkwasmMatrixFilter extends SkwasmImageFilter {
@@ -197,7 +200,7 @@ class SkwasmMatrixFilter extends SkwasmImageFilter {
     ImageFilterHandleBorrow<T> borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) => withStackScope((scope) {
-    final rawImageFilter = imageFilterCreateMatrix(
+    final ImageFilterHandle rawImageFilter = imageFilterCreateMatrix(
       scope.convertMatrix4toSkMatrix(matrix4),
       filterQuality.index,
     );
@@ -223,7 +226,7 @@ class SkwasmMatrixFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(filterQuality, Object.hashAll(matrix4));
 
   @override
-  String toString() => 'ImageFilter.matrix($matrix4, $filterQuality)';
+  String get debugShortDescription => 'matrix($matrix4, $filterQuality)';
 }
 
 class SkwasmColorImageFilter extends SkwasmImageFilter {
@@ -236,7 +239,7 @@ class SkwasmColorImageFilter extends SkwasmImageFilter {
     ImageFilterHandleBorrow<T> borrow, {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) => filter.withRawColorFilter((colorFilterHandle) {
-    final rawImageFilter = imageFilterCreateFromColorFilter(colorFilterHandle);
+    final ImageFilterHandle rawImageFilter = imageFilterCreateFromColorFilter(colorFilterHandle);
     final T result = borrow(rawImageFilter);
     imageFilterDispose(rawImageFilter);
     return result;
@@ -257,6 +260,9 @@ class SkwasmColorImageFilter extends SkwasmImageFilter {
   int get hashCode => filter.hashCode;
 
   @override
+  String get debugShortDescription => filter.toString();
+
+  @override
   String toString() => filter.toString();
 }
 
@@ -272,7 +278,7 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
     ui.TileMode defaultBlurTileMode = ui.TileMode.clamp,
   }) => outer.withRawImageFilter(
     (outerHandle) => inner.withRawImageFilter((innerHandle) {
-      final rawImageFilter = imageFilterCompose(outerHandle, innerHandle);
+      final ImageFilterHandle rawImageFilter = imageFilterCompose(outerHandle, innerHandle);
       final T result = borrow(rawImageFilter);
       imageFilterDispose(rawImageFilter);
       return result;
@@ -282,8 +288,8 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
 
   @override
   Matrix4? get transform {
-    final outerTransform = outer.transform;
-    final innerTransform = inner.transform;
+    final Matrix4? outerTransform = outer.transform;
+    final Matrix4? innerTransform = inner.transform;
     if (outerTransform != null && innerTransform != null) {
       return outerTransform.multiplied(innerTransform);
     }
@@ -302,7 +308,11 @@ class SkwasmComposedImageFilter extends SkwasmImageFilter {
   int get hashCode => Object.hash(outer, inner);
 
   @override
-  String toString() => 'ImageFilter.compose($outer, $inner)';
+  String get debugShortDescription =>
+      '${inner.debugShortDescription} -> ${outer.debugShortDescription}';
+
+  @override
+  String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';
 }
 
 typedef ColorFilterHandleBorrow<T> = T Function(ColorFilterHandle handle);
@@ -334,7 +344,7 @@ class SkwasmModeColorFilter extends SkwasmColorFilter {
 
   @override
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow) {
-    final rawColorFilter = colorFilterCreateMode(color.value, blendMode.index);
+    final ColorFilterHandle rawColorFilter = colorFilterCreateMode(color.value, blendMode.index);
     final T result = borrow(rawColorFilter);
     colorFilterDispose(rawColorFilter);
     return result;
@@ -360,7 +370,7 @@ class SkwasmLinearToSrgbGammaColorFilter extends SkwasmColorFilter {
 
   /// This filter does not need to be deleted, because the same instance can
   /// reused everywhere (it's not configurable).
-  static final _rawColorFilter = colorFilterCreateLinearToSRGBGamma();
+  static final ColorFilterHandle _rawColorFilter = colorFilterCreateLinearToSRGBGamma();
 
   @override
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow) => borrow(_rawColorFilter);
@@ -380,7 +390,7 @@ class SkwasmSrgbToLinearGammaColorFilter extends SkwasmColorFilter {
 
   /// This filter does not need to be deleted, because the same instance can
   /// reused everywhere (it's not configurable).
-  static final _rawColorFilter = colorFilterCreateSRGBToLinearGamma();
+  static final ColorFilterHandle _rawColorFilter = colorFilterCreateSRGBToLinearGamma();
 
   @override
   T withRawColorFilter<T>(ColorFilterHandleBorrow<T> borrow) => borrow(_rawColorFilter);
@@ -413,7 +423,7 @@ class SkwasmMatrixColorFilter extends SkwasmColorFilter {
     for (final i in <int>[4, 9, 14, 19]) {
       rawMatrix[i] /= 255.0;
     }
-    final rawColorFilter = colorFilterCreateMatrix(rawMatrix);
+    final ColorFilterHandle rawColorFilter = colorFilterCreateMatrix(rawMatrix);
     final T result = borrow(rawColorFilter);
     colorFilterDispose(rawColorFilter);
     return result;

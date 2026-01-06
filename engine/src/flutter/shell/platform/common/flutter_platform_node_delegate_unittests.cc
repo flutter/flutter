@@ -60,6 +60,7 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -108,6 +109,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   root.tooltip = "";
   root.child_count = 0;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -133,6 +135,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -148,6 +151,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateBoundsCorrectly) {
   child1.child_count = 0;
   child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   child1.rect = {0, 0, 50, 50};  // LTRB
   child1.transform = {0.5, 0, 0, 0, 0.5, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -182,6 +186,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -197,6 +202,7 @@ TEST(FlutterPlatformNodeDelegateTest, canCalculateOffScreenBoundsCorrectly) {
   child1.child_count = 0;
   child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   child1.rect = {90, 90, 100, 100};  // LTRB
   child1.transform = {2, 0, 0, 0, 2, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -231,6 +237,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   root.rect = {0, 0, 100, 100};  // LTRB
   root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(root);
@@ -246,6 +253,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   child1.child_count = 0;
   child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   child1.rect = {0, 0, 50, 50};  // LTRB
   child1.transform = {0.5, 0, 0, 0, 0.5, 0, 0, 0, 1};
   bridge->AddFlutterSemanticsNodeUpdate(child1);
@@ -254,7 +262,7 @@ TEST(FlutterPlatformNodeDelegateTest, canUseOwnerBridge) {
   auto child1_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
   auto owner_bridge = child1_node->GetOwnerBridge().lock();
 
-  bool result;
+  bool result = false;
   gfx::RectF bounds = owner_bridge->RelativeToGlobalBounds(
       child1_node->GetAXNode(), result, true);
   EXPECT_EQ(bounds.x(), 0);
@@ -280,6 +288,7 @@ TEST(FlutterPlatformNodeDelegateTest, selfIsLowestPlatformAncestor) {
   root.flags2 = &flags;
   root.children_in_traversal_order = nullptr;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   bridge->CommitUpdates();
@@ -305,6 +314,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(root);
 
   FlutterSemanticsNode2 child1;
@@ -318,6 +328,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetFromNodeID) {
   child1.child_count = 0;
   child1.flags2 = &flags;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
   bridge->AddFlutterSemanticsNodeUpdate(child1);
 
   bridge->CommitUpdates();

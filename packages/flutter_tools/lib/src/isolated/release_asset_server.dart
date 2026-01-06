@@ -13,7 +13,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../web/web_constants.dart';
 
-import 'web_server_utlities.dart';
+import 'web_server_utilities.dart';
 
 class ReleaseAssetServer {
   ReleaseAssetServer(
@@ -92,7 +92,7 @@ class ReleaseAssetServer {
           'Cross-Origin-Resource-Policy': 'cross-origin',
           'Access-Control-Allow-Origin': '*',
           if (_needsCoopCoep && _fileSystem.path.extension(file.path) == '.html')
-            ...kMultiThreadedHeaders,
+            ...kCrossOriginIsolationHeaders,
         },
       );
     }
@@ -102,7 +102,7 @@ class ReleaseAssetServer {
       file.readAsBytesSync(),
       headers: <String, String>{
         'Content-Type': 'text/html',
-        if (_needsCoopCoep) ...kMultiThreadedHeaders,
+        if (_needsCoopCoep) ...kCrossOriginIsolationHeaders,
       },
     );
   }

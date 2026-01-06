@@ -26,12 +26,12 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '8.4.0', gradleVersion: '8.6', kotlinVersion: '1.8.22'),
   VersionTuple(agpVersion: '8.6.0', gradleVersion: '8.7', kotlinVersion: '1.8.22'),
   VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '2.1.0'),
-  VersionTuple(agpVersion: '8.11.0', gradleVersion: '8.13', kotlinVersion: '2.2.0'),
+  VersionTuple(agpVersion: '8.11.1', gradleVersion: '8.14', kotlinVersion: '2.2.20'),
 ]; // Max length is 7 entries until this test is split See https://github.com/flutter/flutter/issues/167495.
 
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.
-  const LocalFileSystem fileSystem = LocalFileSystem();
+  const fileSystem = LocalFileSystem();
 
   /// The temp [Directory] purposedly has a space in it.
   final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(

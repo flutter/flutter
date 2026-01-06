@@ -721,6 +721,81 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(DisplayListTest, CanDrawBoundedBlur) {
+  auto texture = CreateTextureForFixture("kalimba.jpg");
+  const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+  const flutter::DlTileMode tile_modes[] = {
+      flutter::DlTileMode::kClamp, flutter::DlTileMode::kRepeat,
+      flutter::DlTileMode::kMirror, flutter::DlTileMode::kDecal};
+
+  auto callback = [&]() {
+    static float sigma = 20;
+    static float bg_scale = 2.1;
+    static float rotate_degree = 0;
+    static float bounds_scale = 1.0;
+    static bool use_bounds = true;
+    static int selected_tile_mode = 0;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
+    ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+    ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
+    ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    ImGui::NewLine();
+    ImGui::Checkbox("Bounded blur", &use_bounds);
+    ImGui::End();
+
+    // Draw from top right to bottom left.
+    static PlaygroundPoint blur_point_a(Point(410, 30), 10, Color::White());
+    static PlaygroundPoint blur_point_b(Point(150, 320), 10, Color::White());
+    auto [p1_raw, p2_raw] = DrawPlaygroundLine(blur_point_a, blur_point_b);
+    Matrix content_scale_transform = Matrix::MakeScale(GetContentScale());
+    Point p1_global = content_scale_transform * p1_raw;
+    Point p2_global = content_scale_transform * p2_raw;
+
+    flutter::DisplayListBuilder builder;
+
+    builder.Save();
+    builder.Scale(bg_scale, bg_scale);
+    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
+                      flutter::DlImageSampling::kNearestNeighbor, nullptr);
+    builder.Restore();
+
+    Matrix transform =
+        Matrix::MakeRotationZ(Radians(rotate_degree / 180.0f * kPi));
+    Matrix inverse_transform = transform.Invert();
+
+    builder.Transform(transform);
+
+    Point p1 = inverse_transform * p1_global;
+    Point p2 = inverse_transform * p2_global;
+    DlRect bounds =
+        DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y).Scale(bounds_scale);
+
+    builder.ClipRect(bounds);
+    builder.Save();
+
+    flutter::DlPaint save_paint;
+    save_paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
+
+    std::optional<DlRect> blur_bounds;
+    if (use_bounds) {
+      blur_bounds = bounds;
+    }
+    auto filter = flutter::DlBlurImageFilter(
+        sigma, sigma, tile_modes[selected_tile_mode], blur_bounds);
+    builder.SaveLayer(std::nullopt, &save_paint, &filter);
+    builder.Restore();
+    builder.Restore();
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(DisplayListTest, CanDrawNinePatchImage) {
   // Image is drawn with corners to scale and center pieces stretched to fit.
   auto texture = CreateTextureForFixture("embarcadero.jpg");
@@ -806,6 +881,22 @@ TEST_P(DisplayListTest, NinePatchImagePrecision) {
                         DlIRect::MakeXYWH(10, 10, 1, 1),
                         DlRect::MakeXYWH(0, 0, 200, 100),
                         flutter::DlFilterMode::kNearest, nullptr);
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, NinePatchImageColorFilter) {
+  auto texture = CreateTextureForFixture("nine_patch2.png");
+
+  auto filter = flutter::DlColorFilter::MakeBlend(flutter::DlColor::kGreen(),
+                                                  flutter::DlBlendMode::kSrcIn);
+  flutter::DlPaint paint;
+  paint.setColorFilter(filter);
+
+  flutter::DisplayListBuilder builder;
+  builder.DrawImageNine(DlImageImpeller::Make(texture),
+                        DlIRect::MakeXYWH(10, 10, 1, 1),
+                        DlRect::MakeXYWH(0, 0, 200, 100),
+                        flutter::DlFilterMode::kNearest, &paint);
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
@@ -1342,6 +1433,51 @@ TEST_P(DisplayListTest, DrawShapes) {
     builder.Translate(0, 300);
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, DrawCirclesWithTransformations) {
+  auto callback = [&]() {
+    static float filled_radius = 100.0;
+    static float filled_alpha = 255.0;
+    static float filled_scale[2] = {1.0, 1.0};
+    static float stroked_radius = 20.0;
+    static float stroke_width = 10.0;
+    static float stroked_alpha = 255.0;
+    static float stroked_scale[2] = {1.0, 1.0};
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("Filled Radius", &filled_radius, 0, 500);
+      ImGui::SliderFloat("Filled Alpha", &filled_alpha, 0, 255);
+      ImGui::SliderFloat2("Filled Scale", filled_scale, 0, 10.0);
+      ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 10.0);
+      ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
+      ImGui::SliderFloat("Stroked Alpha", &stroked_alpha, 0, 10.0);
+      ImGui::SliderFloat2("Stroked Scale", stroked_scale, 0, 10.0);
+    }
+    ImGui::End();
+
+    flutter::DisplayListBuilder builder;
+    flutter::DlPaint paint;
+
+    paint.setColor(flutter::DlColor::kBlue().withAlpha(filled_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kFill);
+    builder.Save();
+    builder.Scale(filled_scale[0], filled_scale[1]);
+    builder.DrawCircle(DlPoint(500, 750), filled_radius, paint);
+    builder.Restore();
+
+    paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
+    paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
+    paint.setStrokeWidth(stroke_width);
+    builder.Save();
+    builder.Scale(stroked_scale[0], stroked_scale[1]);
+    builder.DrawCircle(DlPoint(1250, 750), stroked_radius, paint);
+    builder.Restore();
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(DisplayListTest, ClipDrawRRectWithNonCircularRadii) {
