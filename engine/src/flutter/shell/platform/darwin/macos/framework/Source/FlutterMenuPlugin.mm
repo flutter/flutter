@@ -260,7 +260,7 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
       [item setTitle:[[item title] stringByReplacingOccurrencesOfString:kAppName
                                                              withString:appName]];
     }
-    if ([item toolTip] && [[item toolTip] containsString:kAppName]) {
+    if ([[item toolTip] containsString:kAppName]) {
       [item setToolTip:[[item toolTip] stringByReplacingOccurrencesOfString:kAppName
                                                                  withString:appName]];
     }
