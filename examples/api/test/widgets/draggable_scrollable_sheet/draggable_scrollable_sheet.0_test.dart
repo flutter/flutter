@@ -162,4 +162,20 @@ void main() {
     },
     variant: TargetPlatformVariant.desktop(),
   );
+
+  testWidgets('DraggableScrollableSheet does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: DraggableScrollableSheet(builder: (_, _) => Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DraggableScrollableSheet)), Size.zero);
+  });
 }
