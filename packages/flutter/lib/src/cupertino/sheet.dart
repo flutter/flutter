@@ -156,7 +156,6 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 ///
 ///  * [CupertinoSheetRoute] the basic route version of the sheet view.
 ///  * [showCupertinoDialog] which displays an iOS-styled dialog.
-///  * [CupertinoSheetDragArea] for watching for drag gestures on a specific area of the sheet.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/sheets>
 Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
