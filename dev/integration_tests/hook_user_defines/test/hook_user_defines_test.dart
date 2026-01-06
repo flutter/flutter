@@ -9,5 +9,6 @@ void main() {
   test('invoke native function', () {
     const magicValue = 1000;
     expect(sum(24, 18), 42 + magicValue);
+    fail('does it fail in CI');
   });
 }
