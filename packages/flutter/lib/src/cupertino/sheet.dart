@@ -619,14 +619,15 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     const dragHandleTopPadding = 5.0;
     const dragHandleHeight = 5.0;
     const dragHandleWidth = 36.0;
-    const dragHandleViewInset = 15.0;
+    const dragHandlePadding = 15.0;
 
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         MediaQuery(
           data: MediaQuery.of(
             context,
-          ).copyWith(viewInsets: const EdgeInsets.only(top: dragHandleViewInset)),
+          ).copyWith(padding: const EdgeInsets.only(top: dragHandlePadding)),
           child: builder(context),
         ),
         const Align(
