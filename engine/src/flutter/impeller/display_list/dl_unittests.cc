@@ -721,6 +721,81 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(DisplayListTest, CanDrawBoundedBlur) {
+  auto texture = CreateTextureForFixture("kalimba.jpg");
+  const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
+  const flutter::DlTileMode tile_modes[] = {
+      flutter::DlTileMode::kClamp, flutter::DlTileMode::kRepeat,
+      flutter::DlTileMode::kMirror, flutter::DlTileMode::kDecal};
+
+  auto callback = [&]() {
+    static float sigma = 20;
+    static float bg_scale = 2.1;
+    static float rotate_degree = 0;
+    static float bounds_scale = 1.0;
+    static bool use_bounds = true;
+    static int selected_tile_mode = 0;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Background scale", &bg_scale, 0, 10);
+    ImGui::SliderFloat("Sigma", &sigma, 0, 100);
+    ImGui::SliderFloat("Bounds rotate", &rotate_degree, -200, 200);
+    ImGui::SliderFloat("Bounds scale", &bounds_scale, 0.5f, 2.0f);
+    ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
+                 sizeof(tile_mode_names) / sizeof(char*));
+    ImGui::NewLine();
+    ImGui::Checkbox("Bounded blur", &use_bounds);
+    ImGui::End();
+
+    // Draw from top right to bottom left.
+    static PlaygroundPoint blur_point_a(Point(410, 30), 10, Color::White());
+    static PlaygroundPoint blur_point_b(Point(150, 320), 10, Color::White());
+    auto [p1_raw, p2_raw] = DrawPlaygroundLine(blur_point_a, blur_point_b);
+    Matrix content_scale_transform = Matrix::MakeScale(GetContentScale());
+    Point p1_global = content_scale_transform * p1_raw;
+    Point p2_global = content_scale_transform * p2_raw;
+
+    flutter::DisplayListBuilder builder;
+
+    builder.Save();
+    builder.Scale(bg_scale, bg_scale);
+    builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(0, 0),
+                      flutter::DlImageSampling::kNearestNeighbor, nullptr);
+    builder.Restore();
+
+    Matrix transform =
+        Matrix::MakeRotationZ(Radians(rotate_degree / 180.0f * kPi));
+    Matrix inverse_transform = transform.Invert();
+
+    builder.Transform(transform);
+
+    Point p1 = inverse_transform * p1_global;
+    Point p2 = inverse_transform * p2_global;
+    DlRect bounds =
+        DlRect::MakeLTRB(p2.x, p1.y, p1.x, p2.y).Scale(bounds_scale);
+
+    builder.ClipRect(bounds);
+    builder.Save();
+
+    flutter::DlPaint save_paint;
+    save_paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
+
+    std::optional<DlRect> blur_bounds;
+    if (use_bounds) {
+      blur_bounds = bounds;
+    }
+    auto filter = flutter::DlBlurImageFilter(
+        sigma, sigma, tile_modes[selected_tile_mode], blur_bounds);
+    builder.SaveLayer(std::nullopt, &save_paint, &filter);
+    builder.Restore();
+    builder.Restore();
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(DisplayListTest, CanDrawNinePatchImage) {
   // Image is drawn with corners to scale and center pieces stretched to fit.
   auto texture = CreateTextureForFixture("embarcadero.jpg");
