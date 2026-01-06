@@ -793,6 +793,18 @@ void main() {
     );
     expect(tester.getSize(find.byType(Container)), Size.zero);
   });
+
+  testWidgets('DecoratedBox does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: DecoratedBox(decoration: BoxDecoration())),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DecoratedBox)), Size.zero);
+  });
 }
 
 class _MockPaintingContext extends Fake implements PaintingContext {

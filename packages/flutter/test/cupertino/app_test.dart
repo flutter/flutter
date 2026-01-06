@@ -579,6 +579,8 @@ void main() {
     debugBrightnessOverride = null;
   });
 
+  // TODO(justinmc): Cupertino tests should not import Material.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets('CupertinoApp creates a Material theme with colors based off of Cupertino theme', (
     WidgetTester tester,
   ) async {
