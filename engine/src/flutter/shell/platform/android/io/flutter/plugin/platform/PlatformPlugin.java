@@ -533,8 +533,7 @@ public class PlatformPlugin {
     // You can't change the color of the navigation bar divider color until SDK 28.
 
     // setNavigationBarDividerColor has no effect on Android 15 and above, meaning calls to this
-    // method will
-    // have no effect on those versions.
+    // method will have no effect on those versions.
     // Consider using the
     // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
     // or other Android 15+ APIs for system UI styling.
