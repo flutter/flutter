@@ -725,6 +725,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   bool _hasVisualOverflow = false;
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
+  final List<ChildVicinity> _currentChildVicinities = <ChildVicinity>[];
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -1301,6 +1303,26 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
   }
 
+  void _sortByYIndex() {
+    _currentChildVicinities.sort((a, b) {
+      if (a.yIndex == b.yIndex) {
+        return a.xIndex.compareTo(b.xIndex);
+      } else {
+        return a.yIndex.compareTo(b.yIndex);
+      }
+    });
+  }
+
+  void _sortByXIndex() {
+    _currentChildVicinities.sort((a, b) {
+      if (a.xIndex == b.xIndex) {
+        return a.yIndex.compareTo(b.yIndex);
+      } else {
+        return a.xIndex.compareTo(b.xIndex);
+      }
+    });
+  }
+
   // Ensures all children have a layoutOffset, sets paintExtent & paintOffset,
   // and arranges children in paint order.
   void _reifyChildren() {
@@ -1319,25 +1341,17 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         // typical default for matrices, which is why the inverse follows
         // through in the horizontal case below.
         // Minor
-        for (int minorIndex = _leadingYIndex!; minorIndex <= _trailingYIndex!; minorIndex++) {
-          // Major
-          for (int majorIndex = _leadingXIndex!; majorIndex <= _trailingXIndex!; majorIndex++) {
-            final vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
-            previousChild =
-                _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
-          }
-        }
+        _sortByYIndex();
       case Axis.horizontal:
         // Column major traversal
         // Minor
-        for (int minorIndex = _leadingXIndex!; minorIndex <= _trailingXIndex!; minorIndex++) {
-          // Major
-          for (int majorIndex = _leadingYIndex!; majorIndex <= _trailingYIndex!; majorIndex++) {
-            final vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
-            previousChild =
-                _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
-          }
-        }
+        _sortByXIndex();
+    }
+    for (final ChildVicinity vicinity in _currentChildVicinities) {
+      previousChild = _completeChildParentData(
+        vicinity,
+        previousChild: previousChild,
+      ) ?? previousChild;
     }
     _lastChild = previousChild;
     if (_lastChild != null) {
@@ -1348,6 +1362,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _trailingXIndex = null;
     _leadingYIndex = null;
     _trailingYIndex = null;
+    _currentChildVicinities.clear();
   }
 
   RenderBox? _completeChildParentData(ChildVicinity vicinity, {RenderBox? previousChild}) {
@@ -1461,6 +1476,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final RenderBox child = _children[vicinity]!;
     _activeChildrenForLayoutPass[vicinity] = child;
     parentDataOf(child).vicinity = vicinity;
+    _currentChildVicinities.add(vicinity);
     return child;
   }
 

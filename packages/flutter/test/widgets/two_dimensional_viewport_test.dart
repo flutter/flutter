@@ -2966,6 +2966,111 @@ void main() {
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
       expect(tester.state(find.byKey(const ValueKey<int>(2))), stateBeforeReordering);
     }, variant: TargetPlatformVariant.all());
+
+
+
+    testWidgets('Child sorting and layout logic remain consistent', (WidgetTester tester) async {
+      // Verify that sorting rules are unchanged after removing nested loops:
+      // - Main axis vertical → Row-major order (y-index first, then x-index)
+      // - Main axis horizontal → Column-major order (x-index first, then y-index)
+      final childKeys = <ChildVicinity, UniqueKey>{};
+
+      // Configure grid dimensions: create a dense grid of child widgets to simulate the original nested loop scenario
+      const maxXCount = 5; // Total number of columns (x-axis)
+      const maxYCount = 10; // Total number of rows (y-axis)
+
+      // Create delegate to build child widgets with fixed size (200x200)
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: maxXCount - 1,
+        maxYIndex: maxYCount - 1,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
+          return SizedBox.square(
+            key: childKeys[vicinity],
+            dimension: 200,
+          );
+        },
+      );
+
+      // Set viewport size to fit all children exactly (no overflow, no partial visibility)
+      tester.view.physicalSize = Size(
+        200 * maxXCount.toDouble(),
+        200 * maxYCount.toDouble(),
+      );
+      tester.view.devicePixelRatio = 1.0;
+      // Clean up resources after test: dispose delegate and reset viewport settings
+      addTearDown(() {
+        delegate.dispose();
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      // 1. Test with main axis set to vertical (default behavior)
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      await tester.pumpAndSettle();
+      RenderTwoDimensionalViewport viewport = getViewport(tester, childKeys.values.first);
+      final verticalOrder = <ChildVicinity>[];
+      RenderBox? child = viewport.firstChild;
+
+      // Traverse all children in the viewport's paint order
+      while (child != null) {
+        final ParentData? parentData = child.parentData;
+        if (parentData is TwoDimensionalViewportParentData) {
+          verticalOrder.add(parentData.vicinity);
+        }
+        child = viewport.childAfter(child);
+      }
+
+      // Verify row-major order for vertical main axis
+      for (var y = 0; y < maxYCount; y++) {
+        for (var x = 0; x < maxXCount; x++) {
+          final expectedVicinity = ChildVicinity(xIndex: x, yIndex: y);
+          final int expectedListIndex = y * maxXCount + x;
+          expect(
+            verticalOrder[expectedListIndex],
+            expectedVicinity,
+            reason: 'Vertical main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+                'got ${verticalOrder[expectedListIndex]}',
+          );
+        }
+      }
+
+      // 2. Test with main axis set to horizontal
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate,
+          mainAxis: Axis.horizontal,
+        ),
+      );
+      await tester.pumpAndSettle();
+      viewport = getViewport(tester, childKeys.values.first);
+      final horizontalOrder = <ChildVicinity>[];
+      child = viewport.firstChild;
+
+      // Traverse all children in the viewport's paint order
+      while (child != null) {
+        final ParentData? parentData = child.parentData;
+        if (parentData is TwoDimensionalViewportParentData) {
+          horizontalOrder.add(parentData.vicinity);
+        }
+        child = viewport.childAfter(child);
+      }
+
+      // Verify column-major order for horizontal main axis
+      for (var x = 0; x < maxXCount; x++) {
+        for (var y = 0; y < maxYCount; y++) {
+          final expectedVicinity = ChildVicinity(xIndex: x, yIndex: y);
+          // Calculate expected index in the horizontalOrder list (column * rows + row)
+          final int expectedListIndex = x * maxYCount + y;
+          expect(
+            horizontalOrder[expectedListIndex],
+            expectedVicinity,
+            reason: 'Horizontal main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+                'got ${horizontalOrder[expectedListIndex]}',
+          );
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
   });
 }
 
