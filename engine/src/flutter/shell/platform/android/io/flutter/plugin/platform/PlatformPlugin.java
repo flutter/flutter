@@ -428,7 +428,7 @@ public class PlatformPlugin {
   /**
    * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
    *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
-   *     Android 15 and above , meaning calls to this method will have no effect on those versions.
+   *     Android 15 and above, meaning calls to this method will have no effect on those versions.
    *     Consider using the new WindowInsetsController or other Android 15+ APIs for system UI
    *     styling.
    */
