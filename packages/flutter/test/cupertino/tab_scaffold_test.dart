@@ -43,10 +43,6 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  tearDown(() {
-    imageCache.clear();
-  });
-
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -1369,6 +1365,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
+    imageCache.clear();
   });
 }
 
