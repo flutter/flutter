@@ -1,0 +1,32 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_TESTING_TESTER_VK_H_
+#define FLUTTER_SHELL_TESTING_TESTER_VK_H_
+
+#include <memory>
+
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/macros.h"
+
+// Impeller should only be enabled if the Vulkan backend is enabled.
+#define TESTER_ENABLE_VULKAN (IMPELLER_SUPPORTS_RENDERING && IMPELLER_ENABLE_VULKAN)
+
+#if TESTER_ENABLE_VULKAN
+namespace impeller {
+class ContextVK;
+class SurfaceContextVK;
+}  // namespace impeller
+#endif  // TESTER_ENABLE_VULKAN
+
+struct ImpellerVulkanContextHolder {
+#if TESTER_ENABLE_VULKAN
+  std::shared_ptr<impeller::ContextVK> context;
+  std::shared_ptr<impeller::SurfaceContextVK> surface_context;
+
+  bool Initialize(bool enable_validation);
+#endif  // TESTER_ENABLE_VULKAN
+};
+
+#endif  // FLUTTER_SHELL_TESTING_TESTER_VK_H_

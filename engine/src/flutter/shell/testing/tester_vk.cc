@@ -1,0 +1,80 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#define FML_USED_ON_EMBEDDER
+
+#include "flutter/shell/testing/tester_vk.h"
+
+#if TESTER_ENABLE_VULKAN
+
+#include <vulkan/vulkan.h>
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "flutter/fml/mapping.h"
+#include "flutter/fml/paths.h"
+#include "impeller/base/validation.h"
+#include "impeller/entity/vk/entity_shaders_vk.h"
+#include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
+#include "impeller/entity/vk/modern_shaders_vk.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/vk/compute_shaders_vk.h"
+
+static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
+  return {
+      std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
+                                             impeller_entity_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(impeller_modern_shaders_vk_data,
+                                             impeller_modern_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_framebuffer_blend_shaders_vk_data,
+          impeller_framebuffer_blend_shaders_vk_length),
+      std::make_shared<fml::NonOwnedMapping>(
+          impeller_compute_shaders_vk_data, impeller_compute_shaders_vk_length),
+  };
+}
+
+bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = &vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  context_settings.cache_directory = fml::paths::GetCachesDirectory();
+  context_settings.enable_validation = enable_validation;
+  // Enable lazy shader mode for faster test execution as most tests
+  // will never render anything at all.
+  context_settings.flags.lazy_shader_mode = true;
+
+  context = impeller::ContextVK::Create(std::move(context_settings));
+  if (!context || !context->IsValid()) {
+    VALIDATION_LOG << "Could not create Vulkan context.";
+    return false;
+  }
+
+  impeller::vk::SurfaceKHR vk_surface;
+  impeller::vk::HeadlessSurfaceCreateInfoEXT surface_create_info;
+  auto res = context->GetInstance().createHeadlessSurfaceEXT(
+      &surface_create_info,  // surface create info
+      nullptr,               // allocator
+      &vk_surface            // surface
+  );
+  if (res != impeller::vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create surface for tester "
+                   << impeller::vk::to_string(res);
+    return false;
+  }
+
+  impeller::vk::UniqueSurfaceKHR surface{vk_surface, context->GetInstance()};
+  surface_context = context->CreateSurfaceContext();
+  if (!surface_context->SetWindowSurface(std::move(surface),
+                                         impeller::ISize{1, 1})) {
+    VALIDATION_LOG << "Could not set up surface for context.";
+    return false;
+  }
+  return true;
+}
+
+#endif  // TESTER_ENABLE_VULKAN
