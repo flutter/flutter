@@ -17,7 +17,6 @@ import 'package:package_config/package_config.dart';
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart' hide FakeProcess;
-import 'base/error_handling_io_test.dart';
 
 void main() {
   testWithoutContext('StdoutHandler can produce output message', () async {
@@ -177,7 +176,7 @@ void main() {
             processManager: FakeProcessManager.any(),
             artifacts: Artifacts.test(),
             platform: FakePlatform(),
-            fileSystem: FakeFileSystem(),
+            fileSystem: MemoryFileSystem.test(),
             shutdownHooks: FakeShutdownHooks(),
             targetModel: target,
             includeUnsupportedPlatformLibraryStubs: true,
@@ -201,7 +200,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
         platform: FakePlatform(),
-        fileSystem: FakeFileSystem(),
+        fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
         targetModel: TargetModel.dartdevc,
         includeUnsupportedPlatformLibraryStubs: true,
@@ -242,7 +241,7 @@ void main() {
         processManager: processManager,
         artifacts: Artifacts.test(),
         platform: FakePlatform(),
-        fileSystem: FakeFileSystem(),
+        fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
         targetModel: TargetModel.dartdevc,
         // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
@@ -313,7 +312,7 @@ void main() {
         processManager: processManager,
         artifacts: Artifacts.test(),
         platform: FakePlatform(),
-        fileSystem: FakeFileSystem(),
+        fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
         targetModel: TargetModel.dartdevc,
         // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
