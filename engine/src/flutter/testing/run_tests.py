@@ -91,15 +91,8 @@ def run_cmd( # pylint: disable=too-many-arguments
 
   start_time = time.time()
 
-  with subprocess.Popen(
-      cmd,
-      cwd=cwd,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT,
-      env=env,
-      universal_newlines=True,
-      **kwargs
-  ) as process:
+  with subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
+                        universal_newlines=True, **kwargs) as process:
     output = ''
 
     for line in iter(process.stdout.readline, ''):
@@ -336,9 +329,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
-      dump_path = os.path.join(
-          luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt'
-      )
+      dump_path = os.path.join(luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt')
       logger.error('Writing core dump analysis to %s', dump_path)
       subprocess.call([
           os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'analyze_core_dump.sh'),
@@ -409,9 +400,7 @@ repeat_flags = [
 
 
 def run_cc_tests(
-    build_dir: str,
-    executable_filter: typing.Optional[typing.List[str]],
-    coverage: bool,
+    build_dir: str, executable_filter: typing.Optional[typing.List[str]], coverage: bool,
     capture_core_dump: bool
 ) -> None:
   logger.info('Running Engine Unit-tests.')
@@ -603,8 +592,7 @@ def run_cc_tests(
 
 
 def run_engine_benchmarks(
-    build_dir: str,
-    executable_filter: typing.Optional[typing.List[str]]
+    build_dir: str, executable_filter: typing.Optional[typing.List[str]]
 ) -> None:
   logger.info('Running Engine Benchmarks.')
 
@@ -667,9 +655,7 @@ class FlutterTesterOptions():
 
 
 def gather_dart_test(
-    build_dir: str,
-    dart_file: str,
-    options: FlutterTesterOptions
+    build_dir: str, dart_file: str, options: FlutterTesterOptions
 ) -> EngineExecutableTask:
   kernel_file_name = os.path.basename(dart_file) + '.dill'
   kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
@@ -749,8 +735,7 @@ def java_bin() -> str:
 
 
 def run_java_tests(
-    executable_filter: typing.Optional[str],
-    android_variant: str = 'android_debug_unopt'
+    executable_filter: typing.Optional[str], android_variant: str = 'android_debug_unopt'
 ) -> None:
   """Runs the Java JUnit unit tests for the Android embedding"""
   test_runner_dir = os.path.join(
@@ -782,11 +767,7 @@ def run_java_tests(
   run_cmd(command, cwd=test_runner_dir, env=env)
 
 
-def run_android_unittest(
-    test_runner_name: str,
-    android_variant: str,
-    adb_path: str
-) -> None:
+def run_android_unittest(test_runner_name: str, android_variant: str, adb_path: str) -> None:
   tests_path = os.path.join(OUT_DIR, android_variant, test_runner_name)
   remote_path = '/data/local/tmp'
   remote_tests_path = os.path.join(remote_path, test_runner_name)
@@ -805,8 +786,7 @@ def run_android_unittest(
 
 
 def run_android_tests(
-    android_variant: str = 'android_debug_unopt',
-    adb_path: typing.Optional[str] = None
+    android_variant: str = 'android_debug_unopt', adb_path: typing.Optional[str] = None
 ) -> None:
   if adb_path is None:
     adb_path = 'adb'
@@ -817,8 +797,7 @@ def run_android_tests(
 
 
 def run_objc_tests(
-    ios_variant: str = 'ios_debug_sim_unopt',
-    test_filter: typing.Optional[str] = None
+    ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
 ) -> None:
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   assert_expected_xcode_version()
@@ -892,8 +871,7 @@ def delete_simulator(simulator_name: str) -> None:
 
 
 def gather_dart_tests(
-    build_dir: str,
-    test_filter: typing.Optional[typing.List[str]]
+    build_dir: str, test_filter: typing.Optional[typing.List[str]]
 ) -> typing.Generator[EngineExecutableTask, None, None]:
   dart_tests_dir = os.path.join(
       BUILDROOT_DIR,
@@ -948,8 +926,7 @@ def gather_dart_tests(
 
 
 def gather_dart_smoke_test(
-    build_dir: str,
-    test_filter: typing.Optional[typing.List[str]]
+    build_dir: str, test_filter: typing.Optional[typing.List[str]]
 ) -> typing.Generator[EngineExecutableTask, None, None]:
   smoke_test = os.path.join(
       BUILDROOT_DIR,
@@ -970,8 +947,7 @@ def gather_dart_smoke_test(
 
 
 def gather_dart_package_tests(
-    build_dir: str,
-    package_path: str
+    build_dir: str, package_path: str
 ) -> typing.Generator[EngineExecutableTask, None, None]:
   if uses_package_test_runner(package_path):
     opts = ['test', '--reporter=expanded']
@@ -1120,8 +1096,7 @@ class DirectoryChange():
     os.chdir(self.new_cwd)
 
   def __exit__(
-      self,
-      exception_type: typing.Optional[typing.Type[BaseException]],
+      self, exception_type: typing.Optional[typing.Type[BaseException]],
       exception_value: typing.Optional[BaseException],
       exception_traceback: typing.Optional[typing.Any]
   ) -> None:
@@ -1359,8 +1334,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     ), 'The sanitizer suppressions flag is only supported on Linux and Mac.'
     file_dir = os.path.dirname(os.path.abspath(__file__))
     command = [
-        'env', '-i', 'bash', '-c',
-        f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
+        'env', '-i', 'bash', '-c', f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
     ]
     with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
       for line in process.stdout:
