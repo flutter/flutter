@@ -107,9 +107,7 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
-    command: <String>['xattr', '-cr', '/'],
-  );
+  const xattrCommand = FakeCommand(command: <String>['xattr', '-cr', '/']);
 
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
     return FakeCommand(

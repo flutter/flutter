@@ -132,9 +132,7 @@ void main() {
             appFrameworkPath,
           ],
         ),
-        FakeCommand(
-          command: <String>['xattr', '-cr', appFrameworkPath],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', appFrameworkPath]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -184,9 +182,7 @@ void main() {
             appFrameworkPath,
           ],
         ),
-        FakeCommand(
-          command: <String>['xattr', '-cr', appFrameworkPath],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', appFrameworkPath]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -254,9 +250,7 @@ void main() {
           stderr: 'plutil: error: invalid argument',
         ),
 
-        FakeCommand(
-          command: <String>['xattr', '-cr', frameworkBinary.path],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkBinary.path]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -321,13 +315,7 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-cr',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkDirectoryBinary.path]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -411,13 +399,7 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-cr',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkDirectoryBinary.path]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -511,13 +493,7 @@ void main() {
           ],
         ),
         createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-cr',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkDirectoryBinary.path]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -585,13 +561,7 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-cr',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkDirectoryBinary.path]),
         FakeCommand(
           command: <String>[
             'codesign',
@@ -653,13 +623,7 @@ void main() {
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
       processManager.addCommands(<FakeCommand>[
         createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-cr',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', frameworkDirectoryBinary.path]),
         FakeCommand(
           command: <String>['codesign', '--force', '--sign', '-', frameworkDirectoryBinary.path],
         ),
@@ -841,9 +805,7 @@ void main() {
         command: <String>['lipo', binary.path, '-verify_arch', 'arm64'],
       );
 
-      xattrCommand = FakeCommand(
-        command: <String>['xattr', '-cr', binary.path],
-      );
+      xattrCommand = FakeCommand(command: <String>['xattr', '-cr', binary.path]);
 
       adHocCodesignCommand = FakeCommand(
         command: <String>['codesign', '--force', '--sign', '-', '--timestamp=none', binary.path],

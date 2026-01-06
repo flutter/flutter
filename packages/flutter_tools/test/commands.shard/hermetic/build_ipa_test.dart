@@ -131,9 +131,7 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
-    command: <String>['xattr', '-cr', '/'],
-  );
+  const xattrCommand = FakeCommand(command: <String>['xattr', '-cr', '/']);
 
   FakeCommand setUpXCResultCommand({
     String stdout = '',

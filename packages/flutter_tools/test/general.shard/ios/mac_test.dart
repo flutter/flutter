@@ -770,9 +770,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
 
     testWithoutContext('removes xattr', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>['xattr', '-cr', projectDirectory.path],
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', projectDirectory.path]),
       ]);
 
       await removeExtendedAttributes(
@@ -785,10 +783,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
 
     testWithoutContext('ignores errors', () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <String>['xattr', '-cr', projectDirectory.path],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['xattr', '-cr', projectDirectory.path], exitCode: 1),
       ]);
 
       await removeExtendedAttributes(
