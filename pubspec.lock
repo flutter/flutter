@@ -126,10 +126,10 @@ packages:
     dependency: "direct main"
     description:
       name: code_assets
-      sha256: ae0db647e668cbb295a3527f0938e4039e004c80099dce2f964102373f5ce0b5
+      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.10"
+    version: "1.0.0"
   collection:
     dependency: "direct main"
     description:
@@ -186,6 +186,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+  data_assets:
+    dependency: transitive
+    description:
+      name: data_assets
+      sha256: d8b93648a338f471e576e0ba05f6b5d63a4e0fa447ca839a500267421d9245ba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.6"
   device_info:
     dependency: "direct main"
     description:
@@ -258,6 +266,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  flutter_hook_config:
+    dependency: "direct main"
+    description:
+      name: flutter_hook_config
+      sha256: aa0e9c49b1d0f76ab74cdc8f58fa3efc0d6308a0a208e29812c4e67add0a9094
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   flutter_lints:
     dependency: "direct main"
     description:
@@ -282,6 +298,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
+  font_asset:
+    dependency: "direct main"
+    description:
+      name: font_asset
+      sha256: "49e3380d1de3e48ac380204ee194e46974de3127d34b0280da88f22f323661a7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
   frontend_server_client:
     dependency: "direct main"
     description:
@@ -350,10 +374,10 @@ packages:
     dependency: "direct main"
     description:
       name: hooks
-      sha256: "5410b9f4f6c9f01e8ff0eb81c9801ea13a3c3d39f8f0b1613cda08e27eab3c18"
+      sha256: "5d309c86e7ce34cd8e37aa71cb30cb652d3829b900ab145e4d9da564b31d59f7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.5"
+    version: "1.0.0"
   html:
     dependency: "direct main"
     description:
@@ -510,10 +534,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_toolchain_c
-      sha256: f8872ea6c7a50ce08db9ae280ca2b8efdd973157ce462826c82f3c3051d154ce
+      sha256: "89e83885ba09da5fdf2cdacc8002a712ca238c28b7f717910b34bcd27b0d03ac"
       url: "https://pub.dev"
     source: hosted
-    version: "0.17.2"
+    version: "0.17.4"
   nested:
     dependency: "direct main"
     description:
@@ -1096,5 +1120,5 @@ packages:
     source: hosted
     version: "2.2.3"
 sdks:
-  dart: ">=3.9.0 <4.0.0"
+  dart: ">=3.10.0 <4.0.0"
   flutter: ">=3.35.0"

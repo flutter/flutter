@@ -23,6 +23,7 @@ import '../../build_info.dart'
         kIosArchs,
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
+import '../../cache.dart' show Cache;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart'
     show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
@@ -196,7 +197,7 @@ final class WebAssetTarget extends AssetBuildTarget {
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...dataAssetExtensions,
     FontAssetsExtension(),
-    FlutterConfigAssetsExtension(appDill: appDill),
+    FlutterConfigAssetsExtension(appDill: appDill, flutterRoot: Cache.flutterRoot!),
   ];
 
   @override
@@ -279,7 +280,7 @@ final class LinuxAssetTarget extends CodeAssetTarget {
     ...codeAssetExtensions,
     ...dataAssetExtensions,
     FontAssetsExtension(),
-    FlutterConfigAssetsExtension(appDill: appDill),
+    FlutterConfigAssetsExtension(appDill: appDill, flutterRoot: Cache.flutterRoot!),
   ];
 }
 

@@ -4,11 +4,11 @@ import 'package:hooks/hooks.dart';
 void main(List<String> arguments) {
   build(arguments, (input, output) async {
     addFontAsset(
-      output,
       input,
+      output,
       filePath: 'fonts/BBHBartle-Regular.ttf',
       fontFamily: 'BBHBartle',
     );
-    addMaterialFont(output, input);
+    addMaterialFont(input, output);
   });
 }

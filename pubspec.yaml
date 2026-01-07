@@ -37,6 +37,7 @@ workspace:
   - dev/integration_tests/new_gallery
   - dev/integration_tests/platform_interaction
   - dev/integration_tests/release_smoke_test
+  - dev/integration_tests/font_assets
   - dev/integration_tests/spell_check
   - dev/integration_tests/ui
   - dev/integration_tests/web
@@ -90,7 +91,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: 1.1.2
-  code_assets: 0.19.10
+  code_assets: 1.0.0
   collection: 1.19.1
   convert: 3.1.2
   coverage: 1.15.0
@@ -107,6 +108,8 @@ dependencies:
   flutter_localized_locales: 2.0.5
   flutter_staggered_grid_view: 0.7.0
   frontend_server_client: 4.0.0
+  flutter_hook_config: 0.0.3
+  font_asset: 0.0.8
   gcloud: 0.8.19
   glob: 2.1.3
   google_fonts: 6.3.3
@@ -114,7 +117,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 12.0.0
   googleapis_auth: 1.6.0
-  hooks: 0.20.5
+  hooks: 1.0.0
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -133,7 +136,7 @@ dependencies:
   meta: 1.17.0
   metrics_center: 1.0.13
   mime: 2.0.0
-  native_toolchain_c: 0.17.2
+  native_toolchain_c: 0.17.4
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
