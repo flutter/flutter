@@ -14,6 +14,7 @@ Below is a guide to ensuring Flutter apps on Android work on the new API. It is 
 Please update this doc whenever there is a new Android API.
 
 #### Umbrella Issue for Updating to the new API
+
 Updating from API 35 to API 36: <https://github.com/flutter/flutter/issues/163071>
 
 #### New Android features
@@ -33,9 +34,10 @@ Example PR: https://github.com/flutter/samples/pull/2368
 Robolectric is a dependency that allows us to write unit tests that run on a local development machine against the Android API surface without being on an Android device.
 
 1. Check online for the Robolectric release notes. It is possible that a Robolectric version supporting the new Android API has not been released yet. You are blocked until that new version is released.
+
 2. Find all usages of Robolectric in `flutter/flutter` (including the engine) and `flutter/packages` and update them.
 
-Example: [https://github.com/flutter/flutter/issues/177674](https://github.com/flutter/flutter/issues/177674)
+- Example: <https://github.com/flutter/flutter/issues/177674>.
 
 ---
 
@@ -43,29 +45,32 @@ Example: [https://github.com/flutter/flutter/issues/177674](https://github.com/f
 
 To ensure Flutter is properly tested against the new Android API, we must update the Flutter CI accordingly.
 
-#### Update Local Tooling/Devices to the new API Version
+#### Update local tooling/devices to the new API Version
 
 First, find the new Android API release notes online and follow the instructions outlined in the notes to upgrade the following tooling to the new Android API version:
 
-* Update Android Studio
-* Add at least one emulator on the new Android API (for testing)
-* Upgrade at least one physical device to the new Android API (for testing)
+- Update Android Studio
+- Add at least one emulator on the new Android API (for testing)
+- Upgrade at least one physical device to the new Android API (for testing)
 
-#### Upload new Android API to CIPD
-
-Upload the new Android SDK to CIPD, then update what we test against in ci.yaml to that new version.
+#### Upload new SDK and other dependencies to [CIPD](https://chrome-infra-packages.appspot.com/p/flutter/android)
 
 Flutter now includes a script to download, package, and upload the Android SDK to CIPD. These CIPD packages are then used as dependencies by the Flutter engine and recipes (go/flutter-luci-recipes) so that there is a stable archived version of the Android SDK to depend on. The script is located in the flutter/flutter repo under `engine/src/flutter/tools/android_sdk/create_cipd_packages.sh`.
 
 > Before uploading to CIPD, please double-check that the Android SDK configurations in the text file are correct.
-> Be cautious when uploading new packages to CIPD because it is difficult to undo. If you need to remove an uploaded CIPD tag, follow the documentation [here](https://g3doc.corp.google.com/company/teams/flutter/infrastructure/playbook.md?cl=head).
+> Be cautious when uploading new packages to CIPD because it is difficult to undo. If you need to remove an uploaded CIPD tag, follow the documentation [here](http://go/flutter-luci-playbook#remove-duplicated-cipd-tags).
 
 Please do not manually upload a new android api version to cipd. Instead, follow these steps:
 
-1. Reference the new Android API release notes for new SDK Tooling minimum configuration versions (NDK, build tools, CMake, etc.).
-2. To update the Android SDK tooling configurations to the versions you want, edit [`tools/android-sdk/packages.txt`](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/packages.txt) . The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each `<package_name>` should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk.
-3. Execute this script [here](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/create_cipd_packages.sh) by running the following command: `cd tools/android_sdk && ./create_cipd_packages.sh <your-tag-version> <your-local-sdk-path>`
-4. Make a PR with the updated SDK tooling configurations. Although you do not need to merge a PR with the tooling script changes to successfully upload to CIPD, you should still make a PR so we have a paper trail of the SDK configuration changes made to CIPD (assuming only this script was used to upload Android SDKs to CIPD). That way we do not have to download previous CIPD versions or revisions to check the history of configurations.
+1. To upload packages to CIPD (either with the script or manually), the  `flutter-cipd-writers` role is required in order to complete this operation. Googlers can apply for access [here](https://grants.corp.google.com/#/grants?request=8h%2Fflutter-cipd-writers). Once this role is granted, `cipd auth-login` must be run in order for cipd to update the user's available roles.
+
+2. Reference the new Android API release notes for new SDK Tooling minimum configuration versions (NDK, build tools, CMake, etc.).
+
+3. To update the Android SDK tooling configurations to the versions you want, edit [`tools/android-sdk/packages.txt`](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/packages.txt) . The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each `<package_name>` should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk.
+
+4. Execute this script [here](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/create_cipd_packages.sh) by running the following command: `cd tools/android_sdk && ./create_cipd_packages.sh <your-tag-version> <your-local-sdk-path>`
+
+5. Make a PR with the updated SDK tooling configurations. Although you do not need to merge a PR with the tooling script changes to successfully upload to CIPD, you should still make a PR so we have a paper trail of the SDK configuration changes made to CIPD (assuming only this script was used to upload Android SDKs to CIPD). That way we do not have to download previous CIPD versions or revisions to check the history of configurations.
 
 Note: It is no longer recommended to upload CIPD Android SDK packages manually, but if it must be done, run the following commands to zip and upload each package to CIPD:
 
@@ -115,6 +120,7 @@ This list may become outdated, so be sure to change any references to the old SD
 #### Update all existing Flutter on Android apps in our repos
 
 1. Reference the new Android API release notes to see the required dependency version minimums.
+
 2. Update the build dependencies accordingly (new API and dependencies).
 
 * `flutter/flutter` example PR: <https://github.com/flutter/flutter/pull/176858>.
@@ -123,15 +129,16 @@ This list may become outdated, so be sure to change any references to the old SD
 #### Update Versions in the Flutter Android Template
 
 1. Reference the new Android API release notes to see the required dependency version minimums.
+
 2. Update the Flutter templates to use the new Android API and new dependency versioning minimums. Note: Do not update the template `targetSdk` in this change because additional infra changes may be necessary. Please update the `targetSdk` in a different PR.
 
 Once you update the templates, the new versions should show up in a newly created Flutter app (even with nothing merged). As a sanity check, you should verify that a Flutter app successfully builds to Android with these new updates.
 
 Before merging, verify that Flutter apps can build successfully with the new minimums:
 
-* `flutter create <new-app-name>`
-* Run `flutter analyze --suggestions` (to check dependency versioning compatibility)
-* Run `flutter build apk` (to ensure the app builds successfully)
+1. `flutter create <new-app-name>`
+2. Run `flutter analyze --suggestions` (to check dependency versioning compatibility)
+3. Run `flutter build apk` (to ensure the app builds successfully)
 
 - Example PR: <https://github.com/flutter/flutter/pull/166464>
 
@@ -146,14 +153,16 @@ To check if a physical device with the new API version is available, run the com
 We test against a physical device only in the framework CI.
 - Example PR: <https://github.com/flutter/flutter/pull/136736>.
 
-#### Update AVD
+### Update AVD
 
 Flutter managed emulators (engine) require a new AVD image to one that supports the new API.
 
 Update CI to test against the new Android API AVD for framework, engine, and packages. Be sure to use the same AVD for framework, engine, and packages. Steps to update CI:
 
 1. Locate the latest uploaded AVD [here](https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64/) and verify that it has the desired generic\_android\<API\#\>.textpb for the new API version you are supporting.
+
 2. Determine the instance identifier.
+
 3. Update the emulator configurations. For example, update the .ci.yaml entry within framework like so:
 ```yaml
   linux_android_emu:
