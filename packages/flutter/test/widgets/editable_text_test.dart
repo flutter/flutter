@@ -17693,7 +17693,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: basicTestTextSelectionHandleControls,
+        selectionControls: testTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },
@@ -17766,7 +17766,7 @@ void main() {
         cursorColor: cursorColor,
         backgroundCursorColor: const Color(0xFF424242), // grey.
         focusNode: focusNode,
-        selectionControls: basicTestTextSelectionHandleControls,
+        selectionControls: testTextSelectionHandleControls,
         contextMenuBuilder: (context, editableTextState) {
           return const SizedBox.shrink();
         },

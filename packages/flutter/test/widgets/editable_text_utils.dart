@@ -181,7 +181,7 @@ class _TestTextFieldState extends State<TestTextField>
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  late _BasicTestTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+  late _TestTextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
@@ -197,9 +197,7 @@ class _TestTextFieldState extends State<TestTextField>
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _BasicTestTextFieldSelectionGestureDetectorBuilder(
-      state: this,
-    );
+    _selectionGestureDetectorBuilder = _TestTextFieldSelectionGestureDetectorBuilder(state: this);
   }
 
   @override
@@ -237,7 +235,7 @@ class _TestTextFieldState extends State<TestTextField>
         onChanged: widget.onChanged,
         readOnly: widget.readOnly,
         rendererIgnoresPointer: true, // for gestures.
-        selectionControls: basicTestTextSelectionHandleControls,
+        selectionControls: testTextSelectionHandleControls,
         showCursor: widget.showCursor,
         style: widget.style ?? const TextStyle(),
         controller: _effectiveController,
@@ -246,9 +244,8 @@ class _TestTextFieldState extends State<TestTextField>
   }
 }
 
-class _BasicTestTextFieldSelectionGestureDetectorBuilder
-    extends TextSelectionGestureDetectorBuilder {
-  _BasicTestTextFieldSelectionGestureDetectorBuilder({required _TestTextFieldState state})
+class _TestTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+  _TestTextFieldSelectionGestureDetectorBuilder({required _TestTextFieldState state})
     : super(delegate: state);
 
   @override
@@ -260,7 +257,7 @@ class _BasicTestTextFieldSelectionGestureDetectorBuilder
   bool get onUserTapAlwaysCalled => false;
 }
 
-class BasicTestTextSelectionHandleControls extends TextSelectionControls
+class TestTextSelectionHandleControls extends TextSelectionControls
     with TextSelectionHandleControls {
   @override
   Widget buildHandle(
@@ -283,5 +280,4 @@ class BasicTestTextSelectionHandleControls extends TextSelectionControls
   }
 }
 
-final TextSelectionControls basicTestTextSelectionHandleControls =
-    BasicTestTextSelectionHandleControls();
+final TextSelectionControls testTextSelectionHandleControls = TestTextSelectionHandleControls();
