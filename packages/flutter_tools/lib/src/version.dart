@@ -597,44 +597,44 @@ class _FlutterVersionFromFile extends FlutterVersion {
   }
 }
 
-class _FlutterVersionGit extends FlutterVersion {
-  _FlutterVersionGit._({
-    required super.clock,
-    required super.flutterRoot,
-    required this.frameworkRevision,
-    required this.frameworkVersion,
-    required this.gitTagVersion,
-    required super.fs,
-    required super.git,
-  }) : super._();
 
-  late final FlutterEngineStampFromFile? _engineStamp = FlutterEngineStampFromFile.tryParseFromFile(
-    fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'engine_stamp.json')),
-  );
+@kumarprashant94395
+kumarprashant94395 authored 3 days ago
+Commits on Jan 5, 2026
+Merge branch 'master' into master
 
-  @override
-  final GitTagVersion gitTagVersion;
+@kumarprashant94395
+kumarprashant94395 authored 2 days ago
+Update version.dart
 
-  @override
-  final String frameworkRevision;
+@kumarprashant94395
+kumarprashant94395 authored 2 days ago
+Commits on Jan 6, 2026
+Update version.dart
 
-  @override
-  String get frameworkCommitDate =>
-      _gitCommitDate(git: _git, lenient: true, workingDirectory: flutterRoot);
-
-  // This uses 'late final' instead of 'String get' because unlike frameworkCommitDate, it is
-  // operating based on a 'gitRef: ...', which we can assume to be immutable in the context of
-  // this invocation (possibly HEAD could change, but gitRef should not).
-  @override
-  late final String engineCommitDate =
-      _engineStamp?.gitRevisionDate.toString() ??
-      _gitCommitDate(
-        git: _git,
-        gitRef: engineRevision,
-        lenient: true,
+@kumarprashant94395
+kumarprashant94395 authored yesterday
+ Showing  with 15 additions and 21 deletions.
+  36 changes: 15 additions & 21 deletions36  
+packages/flutter_tools/lib/src/version.dart
+Original file line number	Diff line number	Diff line change
+@@ -635,33 +635,27 @@ class _FlutterVersionGit extends FlutterVersion {
         workingDirectory: flutterRoot,
       );
 
+    String? _repositoryUrl;
+  @override
+  String? get repositoryUrl {
+    if (_repositoryUrl == null) {
+      final String gitChannel = _git
+          .runSync(<String>[
+            'rev-parse',
+            '--abbrev-ref',
+            '--symbolic',
+            kGitTrackingUpstream,
+          ], workingDirectory: flutterRoot)
+          .stdout
+          .trim();
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
@@ -652,10 +652,10 @@ class _FlutterVersionGit extends FlutterVersion {
       }
     }
     return _repositoryUrl;
-}
-// ← closes get repositoryUrl {
-@override
-String get devToolsVersion => globals.cache.devToolsVersion;
+  }
+
+  @override
+  String get devToolsVersion => globals.cache.devToolsVersion;
 
   @override
   String get dartSdkVersion => globals.cache.dartSdkVersion;
@@ -665,6 +665,7 @@ String get devToolsVersion => globals.cache.devToolsVersion;
 
   @override
   final String frameworkVersion;
+    
 
   /// The channel is the current branch if we recognize it, or "[user-branch]" (kUserBranch).
   /// `master`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, `dev`, ...
