@@ -172,7 +172,6 @@ def GetVisualStudioVersion():
   # Also look for the numeric version folder (e.g. "18")
   search_versions = list(supported_versions) + list(MSVS_VERSIONS.values())
 
-
   for version in search_versions:
     for path in (
         os.environ.get('vs%s_install' % version),
