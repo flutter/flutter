@@ -23,9 +23,10 @@ HostWindowTooltip::HostWindowTooltip(
   // Use minimum constraints as initial size to ensure the view can be created
   // with valid metrics. If is_sized_to_content is true, the size will be
   // updated when content is rendered.
-  int32_t initial_width = static_cast<int32_t>(constraints.smallest().width());
-  int32_t initial_height =
-      static_cast<int32_t>(constraints.smallest().height());
+  auto const initial_width =
+      static_cast<double>(constraints.smallest().width());
+  auto const initial_height =
+      static_cast<double>(constraints.smallest().height());
 
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kTooltip,
