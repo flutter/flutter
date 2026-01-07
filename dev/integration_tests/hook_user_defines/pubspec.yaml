@@ -2,7 +2,7 @@ name: hook_user_defines
 description: 'Project for testing user-defines.'
 version: 0.0.1
 
-# This packages is not part of the workspace on purpose to test the user-defines
+# This package is not part of the workspace on purpose to test the user-defines
 # in this pubspec.
 # resolution: workspace
 
