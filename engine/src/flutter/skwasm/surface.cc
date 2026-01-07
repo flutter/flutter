@@ -94,8 +94,8 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
   if (render_context_) {
     render_context_.reset();
   }
-  canvas_width_ = 0;
-  canvas_height_ = 0;
+  canvas_width_ = 1;
+  canvas_height_ = 1;
   gl_context_ = skwasm_getGlContextForCanvas(canvas, this);
   if (!gl_context_) {
     printf("Failed to create context!\n");
