@@ -5457,6 +5457,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(crossAxisAlignment, equals('start'));
       });
 
+      // TODO(justinmc): Don't test Cupertino interactions in Widgets tests.
+      // https://github.com/flutter/flutter/issues/177028
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode does not throw StackOverflowError', (
         WidgetTester tester,
       ) async {

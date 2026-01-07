@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -286,12 +287,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> run(Iterable<String> args) {
+    var exitWithCodeOne = false;
+
     // Have invocations of 'build', 'custom-devices', and 'pub' print out
     // their sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1) {
       if (args.first == 'build') {
         args = <String>['build', '-h'];
+        exitWithCodeOne = true;
       } else if (args.first == 'custom-devices') {
         args = <String>['custom-devices', '-h'];
       } else if (args.first == 'pub') {
@@ -300,7 +304,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
-    return super.run(args);
+    return super.run(args).then((_) async {
+      if (exitWithCodeOne) {
+        // No need to print anything because the help was already printed.
+        await exitWithHooks(1, shutdownHooks: globals.shutdownHooks);
+      }
+    });
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.

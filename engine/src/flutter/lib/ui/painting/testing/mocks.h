@@ -49,6 +49,10 @@ class MockSnapshotDelegate : public SnapshotDelegate {
               ConvertToRasterImage,
               (sk_sp<SkImage>),
               (override));
+  MOCK_METHOD(sk_sp<DlImage>,
+              MakeTextureImage,
+              (sk_sp<SkImage>, SnapshotPixelFormat),
+              (override));
   MOCK_METHOD(void,
               CacheRuntimeStage,
               (const std::shared_ptr<impeller::RuntimeStage>&),

@@ -27,6 +27,9 @@ class SnapshotControllerSkia : public SnapshotController {
       DlISize size,
       SnapshotPixelFormat pixel_format) override;
 
+  sk_sp<DlImage> MakeTextureImage(sk_sp<SkImage> image,
+                                  SnapshotPixelFormat pixel_format) override;
+
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
   void CacheRuntimeStage(
