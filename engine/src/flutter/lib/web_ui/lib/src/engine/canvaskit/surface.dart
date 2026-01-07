@@ -137,7 +137,7 @@ class Surface extends DisplayCanvas {
   }
 
   Future<void> rasterizeToCanvas(
-    BitmapSize bitmapSize,
+    BitmapSize frameSize,
     RenderCanvas canvas,
     ui.Picture picture,
   ) async {
@@ -155,12 +155,12 @@ class Surface extends DisplayCanvas {
         bitmapSource = _canvasElement!;
         bitmap = await createImageBitmap(bitmapSource, (
           x: 0,
-          y: _pixelHeight - bitmapSize.height,
-          width: bitmapSize.width,
-          height: bitmapSize.height,
+          y: _pixelHeight - frameSize.height,
+          width: frameSize.width,
+          height: frameSize.height,
         ));
       }
-      canvas.render(bitmap);
+      canvas.render(bitmap, frameSize);
     } else {
       // If the browser doesn't support `createImageBitmap` (e.g. Safari 14)
       // then render using `drawImage` instead.
@@ -170,7 +170,7 @@ class Surface extends DisplayCanvas {
       } else {
         imageSource = _canvasElement! as DomCanvasImageSource;
       }
-      canvas.renderWithNoBitmapSupport(imageSource, _pixelHeight, bitmapSize);
+      canvas.renderWithNoBitmapSupport(imageSource, _pixelHeight, frameSize);
     }
   }
 
