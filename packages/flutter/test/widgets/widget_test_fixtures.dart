@@ -31,3 +31,35 @@ class BasicDivider extends StatelessWidget {
     );
   }
 }
+
+/// A very basic widget that acts as a focusable button.
+@visibleForTesting
+class BasicButton extends StatelessWidget {
+  const BasicButton({
+    required this.child,
+    this.focusNode,
+    this.autofocus = false,
+    this.onPressed,
+    super.key,
+  });
+
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      onTap: onPressed,
+      child: FocusableActionDetector(
+        enabled: onPressed != null,
+        focusNode: focusNode,
+        autofocus: autofocus,
+        child: GestureDetector(onTap: onPressed, child: child),
+      ),
+    );
+  }
+}

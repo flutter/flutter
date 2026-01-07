@@ -568,7 +568,7 @@ void main() {
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
-                  return ElevatedButton(
+                  return BasicButton(
                     key: key1,
                     focusNode: testNode1,
                     autofocus: true,
@@ -577,7 +577,7 @@ void main() {
                         _TestPageRoute<void>(
                           builder: (BuildContext context) {
                             return Center(
-                              child: ElevatedButton(
+                              child: BasicButton(
                                 key: key2,
                                 focusNode: testNode2,
                                 autofocus: true,
@@ -1666,7 +1666,7 @@ void main() {
                 builder: (BuildContext context) {
                   return FocusTraversalOrder(
                     order: const NumericFocusOrder(0),
-                    child: ElevatedButton(
+                    child: BasicButton(
                       key: key1,
                       focusNode: testNode1,
                       autofocus: true,
@@ -1677,7 +1677,7 @@ void main() {
                               return Center(
                                 child: FocusTraversalOrder(
                                   order: const NumericFocusOrder(0),
-                                  child: ElevatedButton(
+                                  child: BasicButton(
                                     key: key2,
                                     focusNode: testNode2,
                                     autofocus: true,
@@ -3793,8 +3793,8 @@ void main() {
         color: blueColor,
         home: Column(
           children: <Widget>[
-            TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
-            TextButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
+            BasicButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+            BasicButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
           ],
         ),
       ),
@@ -3870,8 +3870,8 @@ void main() {
           focusNode: scope,
           child: Column(
             children: <Widget>[
-              TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
-              TextButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
+              BasicButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+              BasicButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
             ],
           ),
         ),
@@ -3969,7 +3969,7 @@ void main() {
       WidgetsApp(
         color: blueColor,
         home: SingleChildScrollView(
-          child: TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+          child: BasicButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
         ),
       ),
     );
@@ -4200,30 +4200,24 @@ void main() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                MaterialButton(
+                BasicButton(
                   focusNode: enabledButton1Node,
-                  onPressed: () {}, // enabled
+                  onPressed: () {},
                   child: const Text('Enabled Button 1'),
                 ),
                 FocusTraversalGroup(
                   child: const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      MaterialButton(
-                        onPressed: null, // disabled
-                        child: Text('Disabled Button 1'),
-                      ),
+                      BasicButton(child: Text('Disabled Button 1')),
                       SizedBox(height: 16),
-                      MaterialButton(
-                        onPressed: null, // disabled
-                        child: Text('Disabled Button 2'),
-                      ),
+                      BasicButton(child: Text('Disabled Button 2')),
                     ],
                   ),
                 ),
-                MaterialButton(
+                BasicButton(
                   focusNode: enabledButton2Node,
-                  onPressed: () {}, // enabled
+                  onPressed: () {},
                   child: const Text('Enabled Button 2'),
                 ),
               ],
