@@ -23,7 +23,8 @@
 
 namespace flutter {
 
-static std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
+namespace {
+std::vector<std::shared_ptr<fml::Mapping>> ShaderLibraryMappings() {
   return {
       std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_vk_data,
                                              impeller_entity_shaders_vk_length),
@@ -104,6 +105,8 @@ class TesterContextVK : public TesterContext {
   std::shared_ptr<impeller::ContextVK> context_;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_;
 };
+
+}  // namespace
 
 std::unique_ptr<TesterContext> TesterContextVKFactory::Create(
     bool enable_validation) {
