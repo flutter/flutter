@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
+  const red = Color(0xffff0000);
+
   testWidgets('ErrorWidget displays actual error when throwing during build', (
     WidgetTester tester,
   ) async {
@@ -17,7 +19,7 @@ void main() {
     await tester.pumpWidget(
       Container(
         key: container,
-        color: Colors.red,
+        color: red,
         padding: const EdgeInsets.all(10),
         child: Builder(
           builder: (BuildContext context) {
@@ -53,7 +55,7 @@ void main() {
       await tester.pumpWidget(
         Container(
           key: container,
-          color: Colors.red,
+          color: red,
           padding: const EdgeInsets.all(10),
           // This widget throws during build, which causes the construction of an
           // ErrorWidget with the build error. However, during construction of

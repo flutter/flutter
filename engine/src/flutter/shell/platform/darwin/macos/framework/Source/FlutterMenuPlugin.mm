@@ -21,6 +21,7 @@ static NSString* const kMenuClosedMethod = @"Menu.closed";
 // Serialization keys for menu objects
 static NSString* const kIdKey = @"id";
 static NSString* const kLabelKey = @"label";
+static NSString* const kTooltipKey = @"tooltip";
 static NSString* const kEnabledKey = @"enabled";
 static NSString* const kChildrenKey = @"children";
 static NSString* const kDividerKey = @"isDivider";
@@ -259,6 +260,10 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
       [item setTitle:[[item title] stringByReplacingOccurrencesOfString:kAppName
                                                              withString:appName]];
     }
+    if ([[item toolTip] containsString:kAppName]) {
+      [item setToolTip:[[item toolTip] stringByReplacingOccurrencesOfString:kAppName
+                                                                 withString:appName]];
+    }
     if ([item hasSubmenu]) {
       [self replaceAppName:[[item submenu] itemArray]];
     }
@@ -340,6 +345,10 @@ static NSEventModifierFlags KeyEquivalentModifierMaskForModifiers(NSNumber* modi
   NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:title
                                                 action:action
                                          keyEquivalent:keyEquivalent];
+  if (representation[kTooltipKey]) {
+    item.toolTip = [representation[kTooltipKey] stringByReplacingOccurrencesOfString:kAppName
+                                                                          withString:appName];
+  }
   if ([keyEquivalent length] > 0) {
     item.keyEquivalentModifierMask =
         KeyEquivalentModifierMaskForModifiers(representation[kShortcutModifiersKey]);

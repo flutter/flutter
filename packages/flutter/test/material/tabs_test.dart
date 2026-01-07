@@ -4378,6 +4378,22 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  test('Tab throws clear error when both text and child are set', () {
+    // Wrap in a closure so the assertion is checked at runtime
+    expect(
+      () {
+        Tab(text: 'Hi', child: const Text('World')); // no const
+      },
+      throwsA(
+        const TypeMatcher<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          contains('Provide either text or child, not both, when creating a Tab.'),
+        ),
+      ),
+    );
+  });
+
   testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
     final tabs = <String>['A', 'B'];
     await tester.pumpWidget(

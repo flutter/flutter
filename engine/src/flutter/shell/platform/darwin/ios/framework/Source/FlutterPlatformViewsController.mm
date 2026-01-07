@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
+#include "display_list/geometry/dl_geometry_types.h"
+#include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
-#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -23,11 +23,6 @@ using flutter::DlRect;
 using flutter::DlRoundRect;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
-
-static NSString* const kGestureBlockingPolicyEagerValue = @"eager";
-static NSString* const kGestureBlockingPolicyWaitUntilTouchesEndedValue = @"waitUntilTouchesEnded";
-static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbackToPluginDefault";
-static NSString* const kGestureBlockingPolicyTouchBlockingOnly = @"touchBlockingOnly";
 
 struct LayerData {
   DlRect rect;
@@ -108,7 +103,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
 @property(nonatomic, readonly)
     std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
-        gestureRecognizersBlockingPoliciesByType;
+        gestureRecognizersBlockingPolicies;
 
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
@@ -243,7 +238,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>> _slices;
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      _gestureRecognizersBlockingPoliciesByType;
+      _gestureRecognizersBlockingPolicies;
   fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
@@ -334,32 +329,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Set a unique view identifier, so the platform view can be identified in unit tests.
   platformView.accessibilityIdentifier = [NSString stringWithFormat:@"platform_view[%lld]", viewId];
 
-  NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
-  FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
-  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyTouchBlockingOnly]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyTouchBlockingOnly;
-  } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
-    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
-  } else if ([gestureBlockingPolicyValue
-                 isEqualToString:kGestureBlockingPolicyWaitUntilTouchesEndedValue]) {
-    gestureBlockingPolicy =
-        FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
-  } else if ([gestureBlockingPolicyValue
-                 isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
-  } else {
-    NSString* errorMessage =
-        [NSString stringWithFormat:@"Unsupported gesture blocking policy: %@, so we fallback to "
-                                   @"use the policy set via engine API.",
-                                   gestureBlockingPolicyValue];
-    [FlutterLogger logError:errorMessage];
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
-  }
-
-  FlutterTouchInterceptingView* touchInterceptor =
-      [[FlutterTouchInterceptingView alloc] initWithEmbeddedView:platformView
-                                         platformViewsController:self
-                                gestureRecognizersBlockingPolicy:gestureBlockingPolicy];
+  FlutterTouchInterceptingView* touchInterceptor = [[FlutterTouchInterceptingView alloc]
+                  initWithEmbeddedView:platformView
+               platformViewsController:self
+      gestureRecognizersBlockingPolicy:self.gestureRecognizersBlockingPolicies[viewType]];
 
   ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clippingView addSubview:touchInterceptor];
@@ -429,7 +402,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::string idString([factoryId UTF8String]);
   FML_CHECK(self.factories.count(idString) == 0);
   self.factories[idString] = factory;
-  self.gestureRecognizersBlockingPoliciesByType[idString] = gestureRecognizerBlockingPolicy;
+  self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
 }
 
 - (void)beginFrameWithSize:(DlISize)frameSize {
@@ -525,6 +498,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   DlMatrix transformMatrix;
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
+  NSMutableArray<PendingRRectClip*>* pendingClipRRects = [[NSMutableArray alloc] init];
+
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
   if (clipView.maskView) {
@@ -605,14 +580,51 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+
+        // TODO(https://github.com/flutter/flutter/issues/179126)
+        CGFloat cornerRadius = 0.0;
+        if ([pendingClipRRects count] > 0) {
+          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          [pendingClipRRects removeAllObjects];
+        }
+        visualEffectView.layer.cornerRadius = cornerRadius;
+        visualEffectView.clipsToBounds = YES;
+
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
+                                                                  cornerRadius:cornerRadius
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
         } else {
           [blurFilters addObject:filter];
         }
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRect: {
+        // The frame already handles cropping into the rect so this can
+        // no-op
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRRect: {
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        DlRoundRect rrect = (*iter)->GetBackdropClipRRect().rrect;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rrect.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        [pendingClipRRects addObject:clip];
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRSuperellipse: {
+        // TODO(https://github.com/flutter/flutter/issues/179125)
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipPath: {
+        // TODO(https://github.com/flutter/flutter/issues/179127)
         break;
       }
     }
@@ -1001,6 +1013,38 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.visitedPlatformViews.push_back(viewId);
 }
 
+- (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRect(clipRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRRect(clipRRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRSuperellipseToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRSuperellipse(clipRse);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipPath(clipPath);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {
   return self.currentCompositionParams.find(viewId)->second;
 }
@@ -1018,10 +1062,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*>&)factories {
   return _factories;
 }
-
 - (std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
-    gestureRecognizersBlockingPoliciesByType {
-  return _gestureRecognizersBlockingPoliciesByType;
+    gestureRecognizersBlockingPolicies {
+  return _gestureRecognizersBlockingPolicies;
 }
 
 - (std::unordered_map<int64_t, PlatformViewData>&)platformViews {

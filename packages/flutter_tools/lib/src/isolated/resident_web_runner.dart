@@ -313,6 +313,7 @@ class ResidentWebRunner extends ResidentRunner {
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
           platform: _platform,
