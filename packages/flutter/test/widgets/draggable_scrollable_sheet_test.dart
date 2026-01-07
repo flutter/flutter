@@ -96,10 +96,9 @@ void main() {
                 );
                 return ScrollConfiguration(
                   behavior: behavior,
-                  child: ListView.separated(
+                  child: ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder: (_, int index) => SizedBox(
                       height: 100,
@@ -411,10 +410,9 @@ void main() {
                 maxChildSize: 0.9,
                 expand: false,
                 builder: (_, ScrollController scrollController) {
-                  return ListView.separated(
+                  return ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder: (_, int index) => SizedBox(
                       height: 100,
