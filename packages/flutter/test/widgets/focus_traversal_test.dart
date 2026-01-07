@@ -134,6 +134,13 @@ void main() {
     return genericWidgetTestColors[index % genericWidgetTestColors.length];
   }
 
+  Widget buildWidgetsApp(Widget child) {
+    return WidgetsApp(
+      color: blueColor,
+      onGenerateRoute: (RouteSettings settings) => _TestPageRouteBuilder(child: child),
+    );
+  }
+
   group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -561,9 +568,8 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        WidgetsApp(
-          color: blueColor,
-          home: FocusTraversalGroup(
+        buildWidgetsApp(
+          FocusTraversalGroup(
             policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(
@@ -1657,9 +1663,8 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        WidgetsApp(
-          color: blueColor,
-          home: FocusTraversalGroup(
+        buildWidgetsApp(
+          FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: Center(
               child: Builder(
@@ -2486,47 +2491,42 @@ void main() {
         final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: const Color(0xFFFFFFFF),
-            onGenerateRoute: (RouteSettings settings) {
-              return _TestPageRouteBuilder(
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: FocusScope(
-                    debugLabel: 'scope',
-                    child: Column(
+          buildWidgetsApp(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                debugLabel: 'scope',
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              autofocus: true,
-                              debugLabel: 'upperLeft',
-                              child: SizedBox(width: 100, height: 100, key: upperLeftKey),
-                            ),
-                            Focus(
-                              debugLabel: 'upperRight',
-                              child: SizedBox(width: 100, height: 100, key: upperRightKey),
-                            ),
-                          ],
+                        Focus(
+                          autofocus: true,
+                          debugLabel: 'upperLeft',
+                          child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              debugLabel: 'lowerLeft',
-                              child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
-                            ),
-                            Focus(
-                              debugLabel: 'lowerRight',
-                              child: SizedBox(width: 100, height: 100, key: lowerRightKey),
-                            ),
-                          ],
+                        Focus(
+                          debugLabel: 'upperRight',
+                          child: SizedBox(width: 100, height: 100, key: upperRightKey),
                         ),
                       ],
                     ),
-                  ),
+                    Row(
+                      children: <Widget>[
+                        Focus(
+                          debugLabel: 'lowerLeft',
+                          child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
+                        ),
+                        Focus(
+                          debugLabel: 'lowerRight',
+                          child: SizedBox(width: 100, height: 100, key: lowerRightKey),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
 
@@ -2580,40 +2580,35 @@ void main() {
         final GlobalKey key3 = GlobalKey(debugLabel: 'key3');
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: const Color(0xFFFFFFFF),
-            onGenerateRoute: (RouteSettings settings) {
-              return _TestPageRouteBuilder(
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: FocusScope(
-                    debugLabel: 'scope',
-                    child: Column(
+          buildWidgetsApp(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                debugLabel: 'scope',
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              autofocus: true,
-                              skipTraversal: true,
-                              debugLabel: '1',
-                              child: SizedBox(width: 100, height: 100, key: key1),
-                            ),
-                            Focus(
-                              debugLabel: '2',
-                              child: SizedBox(width: 100, height: 100, key: key2),
-                            ),
-                            Focus(
-                              debugLabel: '3',
-                              child: SizedBox(width: 100, height: 100, key: key3),
-                            ),
-                          ],
+                        Focus(
+                          autofocus: true,
+                          skipTraversal: true,
+                          debugLabel: '1',
+                          child: SizedBox(width: 100, height: 100, key: key1),
+                        ),
+                        Focus(
+                          debugLabel: '2',
+                          child: SizedBox(width: 100, height: 100, key: key2),
+                        ),
+                        Focus(
+                          debugLabel: '3',
+                          child: SizedBox(width: 100, height: 100, key: key3),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
 
@@ -2654,9 +2649,8 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: blueColor,
-            home: Column(
+          buildWidgetsApp(
+            Column(
               children: <Widget>[
                 Focus(focusNode: topNode, child: Container(height: 100)),
                 Expanded(
@@ -2779,9 +2773,8 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: blueColor,
-            home: Row(
+          buildWidgetsApp(
+            Row(
               children: <Widget>[
                 Focus(focusNode: leftNode, child: Container(width: 100)),
                 Expanded(
@@ -2925,9 +2918,8 @@ void main() {
         });
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: blueColor,
-            home: Column(
+          buildWidgetsApp(
+            Column(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
@@ -3053,9 +3045,8 @@ void main() {
         });
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: blueColor,
-            home: Row(
+          buildWidgetsApp(
+            Row(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
@@ -3186,9 +3177,8 @@ void main() {
             ),
           };
 
-          return WidgetsApp(
-            color: blueColor,
-            home: Shortcuts(
+          return buildWidgetsApp(
+            Shortcuts(
               shortcuts: shortcuts,
               child: FocusScope(
                 debugLabel: 'scope',
@@ -3293,7 +3283,7 @@ void main() {
       (WidgetTester tester) async {
         final events = <Object>[];
 
-        await tester.pumpWidget(WidgetsApp(color: blueColor, home: Container()));
+        await tester.pumpWidget(buildWidgetsApp(Container()));
 
         HardwareKeyboard.instance.addHandler((KeyEvent event) {
           events.add(event);
@@ -3789,9 +3779,8 @@ void main() {
     }
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: blueColor,
-        home: Column(
+      buildWidgetsApp(
+        Column(
           children: <Widget>[
             BasicButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
             BasicButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
@@ -3864,9 +3853,8 @@ void main() {
     }
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: blueColor,
-        home: Focus(
+      buildWidgetsApp(
+        Focus(
           focusNode: scope,
           child: Column(
             children: <Widget>[
@@ -3966,9 +3954,8 @@ void main() {
     addTearDown(nodeA.dispose);
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: blueColor,
-        home: SingleChildScrollView(
+      buildWidgetsApp(
+        SingleChildScrollView(
           child: BasicButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
         ),
       ),
@@ -4065,7 +4052,7 @@ void main() {
           child: home,
         );
       }
-      await tester.pumpWidget(WidgetsApp(color: blueColor, home: home));
+      await tester.pumpWidget(buildWidgetsApp(home));
     }
 
     await pumpApp();
@@ -4194,9 +4181,8 @@ void main() {
       addTearDown(enabledButton2Node.dispose);
 
       await tester.pumpWidget(
-        WidgetsApp(
-          color: blueColor,
-          home: Center(
+        buildWidgetsApp(
+          Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
