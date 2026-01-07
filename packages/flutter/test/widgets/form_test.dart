@@ -64,7 +64,7 @@ void main() {
             child: Center(
               child: Material(
                 child: Form(
-                  child: BasicTestTextField(
+                  child: TestTextField(
                     onChanged: (String value) {
                       fieldValue = value;
                     },
@@ -82,7 +82,7 @@ void main() {
     expect(fieldValue, isNull);
 
     Future<void> checkText(String testValue) async {
-      await tester.enterText(find.byType(BasicTestTextField), testValue);
+      await tester.enterText(find.byType(TestTextField), testValue);
       // Pumping is unnecessary because callback happens regardless of frames.
       expect(fieldValue, equals(testValue));
     }

@@ -569,7 +569,7 @@ void main() {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (_, int index) =>
-                        index == 0 ? const BasicTestTextField() : const SizedBox(height: 50),
+                        index == 0 ? const TestTextField() : const SizedBox(height: 50),
                     childCount: 200,
                     addAutomaticKeepAlives: false,
                   ),
@@ -583,7 +583,7 @@ void main() {
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       // Start a long press, don't release it, and don't completely reach kLongPressTimeout so the
       // gesture is not accepted and is cancelled when the recognizer is disposed.
-      await tester.startGesture(tester.getCenter(find.byType(BasicTestTextField)));
+      await tester.startGesture(tester.getCenter(find.byType(TestTextField)));
       await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpAndSettle();
 

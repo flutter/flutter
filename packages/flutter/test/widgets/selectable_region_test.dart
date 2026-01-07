@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
-import 'editable_text_utils.dart' show BasicTestTextField;
+import 'editable_text_utils.dart' show TestTextField;
 import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
@@ -3633,7 +3633,7 @@ void main() {
                   children: <Widget>[
                     const Text('How are you?'),
                     const Text('Good, and you?'),
-                    BasicTestTextField(controller: controller, focusNode: textFieldFocus),
+                    TestTextField(controller: controller, focusNode: textFieldFocus),
                   ],
                 ),
               ),
@@ -3705,7 +3705,7 @@ void main() {
                   children: <Widget>[
                     const Text('How are you?'),
                     const Text('Good, and you?'),
-                    BasicTestTextField(controller: controller, focusNode: textFieldFocus),
+                    TestTextField(controller: controller, focusNode: textFieldFocus),
                   ],
                 ),
               ),

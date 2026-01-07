@@ -964,7 +964,7 @@ void main() {
             home: Material(
               child: Shortcuts.manager(
                 manager: testManager,
-                child: BasicTestTextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1003,7 +1003,7 @@ void main() {
                     },
                   ),
                 },
-                child: BasicTestTextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1045,7 +1045,7 @@ void main() {
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{TestIntent: DoNothingAction(consumesKey: false)},
-                  child: BasicTestTextField(key: textFieldKey, autofocus: true),
+                  child: TestTextField(key: textFieldKey, autofocus: true),
                 ),
               ),
             ),
@@ -1090,7 +1090,7 @@ void main() {
                       LogicalKeySet(LogicalKeyboardKey.keyA):
                           const DoNothingAndStopPropagationIntent(),
                     },
-                    child: BasicTestTextField(key: textFieldKey, autofocus: true),
+                    child: TestTextField(key: textFieldKey, autofocus: true),
                   ),
                 ),
               ),
@@ -1844,7 +1844,7 @@ void main() {
                     SelectionChangedCause.keyboard,
                   ),
                 },
-                child: BasicTestTextField(autofocus: true, controller: controller),
+                child: TestTextField(autofocus: true, controller: controller),
               ),
             ),
           ),

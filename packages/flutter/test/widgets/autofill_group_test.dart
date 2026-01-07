@@ -15,8 +15,8 @@ void main() {
     const outerKey = Key('outer');
     const innerKey = Key('inner');
 
-    const client1 = BasicTestTextField(autofillHints: <String>['1']);
-    const client2 = BasicTestTextField(autofillHints: <String>['2']);
+    const client1 = TestTextField(autofillHints: <String>['1']);
+    const client2 = TestTextField(autofillHints: <String>['2']);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -29,7 +29,7 @@ void main() {
                 AutofillGroup(
                   key: innerKey,
                   child: Column(
-                    children: <Widget>[client2, BasicTestTextField(autofillHints: null)],
+                    children: <Widget>[client2, TestTextField(autofillHints: null)],
                   ),
                 ),
               ],

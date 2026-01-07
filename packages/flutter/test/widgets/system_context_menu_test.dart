@@ -23,7 +23,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: BasicTestTextField(
+              child: TestTextField(
                 controller: controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return SystemContextMenu.editableText(editableTextState: editableTextState);
@@ -34,7 +34,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -73,7 +73,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Center(
-              child: BasicTestTextField(
+              child: TestTextField(
                 controller: controller,
                 contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
                   return SystemContextMenu.editableText(editableTextState: editableTextState);
@@ -84,7 +84,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -109,7 +109,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -128,7 +128,7 @@ void main() {
 
       expect(find.byType(SystemContextMenu), findsNothing);
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -187,7 +187,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -208,7 +208,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -272,7 +272,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -295,7 +295,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       expect(tester.takeException(), isNull);
@@ -355,7 +355,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -376,7 +376,7 @@ void main() {
       expect(find.byType(SystemContextMenu), findsNothing);
       expect(itemsReceived, hasLength(0));
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -438,7 +438,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -457,7 +457,7 @@ void main() {
 
       expect(targetRects, isEmpty);
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -493,7 +493,7 @@ void main() {
                     child: StatefulBuilder(
                       builder: (BuildContext context, StateSetter localSetState) {
                         setState = localSetState;
-                        return BasicTestTextField(
+                        return TestTextField(
                           controller: controller,
                           contextMenuBuilder:
                               (BuildContext context, EditableTextState editableTextState) {
@@ -512,7 +512,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -548,7 +548,7 @@ void main() {
                   body: Center(
                     child: Column(
                       children: <Widget>[
-                        BasicTestTextField(
+                        TestTextField(
                           key: field1Key,
                           controller: controller1,
                           contextMenuBuilder:
@@ -559,7 +559,7 @@ void main() {
                                 );
                               },
                         ),
-                        BasicTestTextField(
+                        TestTextField(
                           key: field2Key,
                           controller: controller2,
                           contextMenuBuilder:
@@ -752,7 +752,7 @@ void main() {
                   body: Builder(
                     builder: (BuildContext context) {
                       buildContext = context;
-                      return BasicTestTextField(
+                      return TestTextField(
                         controller: controller,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -793,7 +793,7 @@ void main() {
                   body: Builder(
                     builder: (BuildContext context) {
                       buildContext = context;
-                      return BasicTestTextField(
+                      return TestTextField(
                         controller: controller,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -831,7 +831,7 @@ void main() {
               return MediaQuery(
                 data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
                 child: MaterialApp(
-                  home: Scaffold(body: BasicTestTextField(readOnly: readOnly)),
+                  home: Scaffold(body: TestTextField(readOnly: readOnly)),
                 ),
               );
             },
@@ -864,7 +864,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -883,7 +883,7 @@ void main() {
 
       expect(find.byType(SystemContextMenu), findsNothing);
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -953,7 +953,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -971,7 +971,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -1046,7 +1046,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -1071,7 +1071,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.showToolbar(), true);
       await tester.pump();
@@ -1138,7 +1138,7 @@ void main() {
               child: MaterialApp(
                 home: Scaffold(
                   body: Center(
-                    child: BasicTestTextField(
+                    child: TestTextField(
                       controller: controller,
                       contextMenuBuilder:
                           (BuildContext context, EditableTextState editableTextState) {
@@ -1156,12 +1156,12 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(BasicTestTextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
       const selection = TextSelection(baseOffset: 0, extentOffset: 3);
       controller.selection = selection;
-      await tester.longPress(find.byType(BasicTestTextField));
+      await tester.longPress(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
       expect(find.byType(SystemContextMenu), findsOneWidget);
@@ -1220,7 +1220,7 @@ void main() {
                 home: Scaffold(
                   body: Column(
                     children: <Widget>[
-                      BasicTestTextField(
+                      TestTextField(
                         controller: controller1,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -1237,7 +1237,7 @@ void main() {
                               );
                             },
                       ),
-                      BasicTestTextField(
+                      TestTextField(
                         controller: controller2,
                         contextMenuBuilder:
                             (BuildContext context, EditableTextState editableTextState) {
@@ -1263,7 +1263,7 @@ void main() {
         ),
       );
 
-      await tester.longPress(find.byType(BasicTestTextField).first);
+      await tester.longPress(find.byType(TestTextField).first);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 
@@ -1296,7 +1296,7 @@ void main() {
 
       field1ActionCalled = false;
 
-      await tester.longPress(find.byType(BasicTestTextField).last);
+      await tester.longPress(find.byType(TestTextField).last);
       await tester.pump();
       expect(find.byType(SystemContextMenu), findsOneWidget);
 

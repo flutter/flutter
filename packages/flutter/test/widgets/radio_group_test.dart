@@ -7,7 +7,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'editable_text_utils.dart' show BasicTestTextField;
+import 'editable_text_utils.dart' show TestTextField;
 
 void main() {
   testWidgets('Radio group control test', (WidgetTester tester) async {
@@ -245,7 +245,7 @@ void main() {
         home: Material(
           child: Column(
             children: <Widget>[
-              BasicTestTextField(focusNode: textFieldBefore),
+              TestTextField(focusNode: textFieldBefore),
               TestRadioGroup<int>(
                 child: Column(
                   children: <Widget>[
@@ -255,7 +255,7 @@ void main() {
                   ],
                 ),
               ),
-              BasicTestTextField(focusNode: textFieldAfter),
+              TestTextField(focusNode: textFieldAfter),
             ],
           ),
         ),
@@ -414,7 +414,7 @@ void main() {
                   Radio<int>(focusNode: firstRadioFocusNode, value: 0),
                   const RadioListTile<int>(value: 1),
                   const Radio<int>(value: 2),
-                  BasicTestTextField(focusNode: textFieldFocusNode),
+                  TestTextField(focusNode: textFieldFocusNode),
                 ],
               ),
             ),

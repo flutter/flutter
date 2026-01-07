@@ -139,7 +139,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -149,8 +149,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -262,7 +262,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -272,8 +272,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -299,7 +299,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -309,8 +309,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -338,7 +338,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -348,8 +348,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -376,7 +376,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -386,8 +386,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -415,7 +415,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -425,8 +425,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -453,7 +453,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -463,8 +463,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -491,7 +491,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -501,8 +501,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -529,7 +529,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -539,8 +539,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -565,7 +565,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -575,8 +575,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -602,7 +602,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -612,8 +612,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -638,7 +638,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -648,8 +648,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -676,7 +676,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -686,8 +686,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -713,7 +713,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -723,8 +723,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -751,7 +751,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -761,8 +761,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -788,7 +788,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -798,8 +798,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -825,7 +825,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -835,8 +835,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -862,7 +862,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: BasicTestTextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -872,8 +872,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -973,7 +973,7 @@ void main() {
                 return Container(
                   height: 50,
                   color: Colors.green,
-                  child: BasicTestTextField(
+                  child: TestTextField(
                     focusNode: focusNode,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -985,8 +985,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(BasicTestTextField).first;
-    final BasicTestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -1788,7 +1788,7 @@ void main() {
           drawer: Container(),
           body: Column(
             children: <Widget>[
-              const BasicTestTextField(),
+              const TestTextField(),
               Expanded(
                 child: ListView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -1804,7 +1804,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(BasicTestTextField).first;
+    final Finder finder = find.byType(TestTextField).first;
     await tester.tap(finder);
     expect(tester.testTextInput.isVisible, isTrue);
 

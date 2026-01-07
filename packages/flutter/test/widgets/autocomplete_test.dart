@@ -76,7 +76,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return BasicTestTextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,

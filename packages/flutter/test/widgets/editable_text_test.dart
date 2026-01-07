@@ -209,9 +209,9 @@ void main() {
       final groupIds = <String>['Group A', 'Group B', 'Group C'];
       final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
       final inputFields = <Widget>[
-        BasicTestTextField(key: keys[0], groupId: groupIds[0]),
-        BasicTestTextField(key: keys[1], groupId: groupIds[1]),
-        BasicTestTextField(key: keys[2], groupId: groupIds[2]),
+        TestTextField(key: keys[0], groupId: groupIds[0]),
+        TestTextField(key: keys[1], groupId: groupIds[1]),
+        TestTextField(key: keys[2], groupId: groupIds[2]),
       ];
 
       await tester.pumpWidget(
@@ -242,9 +242,9 @@ void main() {
       (WidgetTester tester) async {
         final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
         final inputFields = <Widget>[
-          BasicTestTextField(key: keys[0]),
-          BasicTestTextField(key: keys[1]),
-          BasicTestTextField(key: keys[2]),
+          TestTextField(key: keys[0]),
+          TestTextField(key: keys[1]),
+          TestTextField(key: keys[2]),
         ];
 
         await tester.pumpWidget(

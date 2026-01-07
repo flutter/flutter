@@ -141,8 +141,8 @@ class OverflowWidgetTextEditingController extends TextEditingController {
   }
 }
 
-class BasicTestTextField extends StatefulWidget {
-  const BasicTestTextField({
+class TestTextField extends StatefulWidget {
+  const TestTextField({
     super.key,
     this.autofillHints = const <String>[],
     this.autofocus = false,
@@ -170,10 +170,10 @@ class BasicTestTextField extends StatefulWidget {
   final TextEditingController? controller;
 
   @override
-  State<BasicTestTextField> createState() => _BasicTestTextFieldState();
+  State<TestTextField> createState() => _TestTextFieldState();
 }
 
-class _BasicTestTextFieldState extends State<BasicTestTextField>
+class _TestTextFieldState extends State<TestTextField>
     implements TextSelectionGestureDetectorBuilderDelegate {
   TextEditingController? _controller;
   TextEditingController get _effectiveController =>
@@ -248,7 +248,7 @@ class _BasicTestTextFieldState extends State<BasicTestTextField>
 
 class _BasicTestTextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
-  _BasicTestTextFieldSelectionGestureDetectorBuilder({required _BasicTestTextFieldState state})
+  _BasicTestTextFieldSelectionGestureDetectorBuilder({required _TestTextFieldState state})
     : super(delegate: state);
 
   @override
