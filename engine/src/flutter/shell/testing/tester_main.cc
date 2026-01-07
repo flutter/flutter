@@ -45,6 +45,19 @@ namespace flutter {
 
 static absl::NoDestructor<std::unique_ptr<Shell>> g_shell;
 
+namespace {
+std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
+  std::unique_ptr<TesterContext> tester_context;
+#if TESTER_ENABLE_VULKAN
+  if (settings.enable_impeller) {
+    tester_context =
+        TesterContextVKFactory::Create(settings.enable_vulkan_validation);
+  }
+#endif
+  return tester_context;
+}
+}  // namespace
+
 static constexpr int64_t kImplicitViewId = 0ll;
 
 static void ConfigureShell(Shell* shell) {
@@ -295,17 +308,10 @@ int RunTester(const flutter::Settings& settings,
                                           io_task_runner         // io
   );
 
-  std::unique_ptr<TesterContext> tester_context;
-
-#if TESTER_ENABLE_VULKAN
-  if (settings.enable_impeller) {
-    tester_context =
-        TesterContextVKFactory::Create(settings.enable_vulkan_validation);
-    if (!tester_context) {
-      return EXIT_FAILURE;
-    }
+  std::unique_ptr<TesterContext> tester_context = CreateTesterContext(settings);
+  if (settings.enable_impeller && !tester_context) {
+    return EXIT_FAILURE;
   }
-#endif  // TESTER_ENABLE_VULKAN
 
   Shell::CreateCallback<PlatformView> on_create_platform_view =
       fml::MakeCopyable(
@@ -477,13 +483,8 @@ EXPORTED void Spawn(const char* entrypoint, const char* route) {
 
     Shell::CreateCallback<PlatformView> on_create_platform_view =
         fml::MakeCopyable([](Shell& shell) mutable {
-          std::unique_ptr<TesterContext> tester_context;
-#if TESTER_ENABLE_VULKAN
-          if (shell.GetSettings().enable_impeller) {
-            tester_context = TesterContextVKFactory::Create(
-                shell.GetSettings().enable_vulkan_validation);
-          }
-#endif
+          std::unique_ptr<TesterContext> tester_context =
+              CreateTesterContext(shell.GetSettings());
           return std::make_unique<TesterPlatformView>(
               shell, shell.GetTaskRunners(), std::move(tester_context));
         });
