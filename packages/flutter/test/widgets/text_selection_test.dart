@@ -1980,9 +1980,14 @@ void main() {
         );
         expect(endpoints.length, 2);
 
+        // Determine the text direction at each endpoint.
+        final TextDirection startDirection = endpoints[0].direction ?? testCase.ambientDirection;
+        final TextDirection endDirection = endpoints[1].direction ?? testCase.ambientDirection;
+
         // Identify which endpoint is physically to the left.
-        final double point1X = endpoints[0].point.dx;
-        final double point2X = endpoints[1].point.dx;
+        final double startX = endpoints[0].point.dx;
+        final double endX = endpoints[1].point.dx;
+        final bool isStartBeforeEnd = startX <= endX;
 
         // Find handles.
         final Finder leftHandleFinder = find.byKey(
@@ -1992,11 +1997,13 @@ void main() {
           const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.right),
         );
 
+        expect(leftHandleFinder, findsOneWidget, reason: 'Should find a left handle');
+        expect(rightHandleFinder, findsOneWidget, reason: 'Should find a right handle');
+
         final Offset leftHandlePos = tester.getCenter(leftHandleFinder);
         final Offset rightHandlePos = tester.getCenter(rightHandleFinder);
 
-        // Verification:
-        // The handle type `left` should be physically to the left of `right`.
+        // Verification 1: The handle type `left` should be physically to the left of `right`.
         expect(
           leftHandlePos.dx,
           lessThan(rightHandlePos.dx),
@@ -2005,19 +2012,16 @@ void main() {
               'Found LeftType at $leftHandlePos, RightType at $rightHandlePos.',
         );
 
-        // Also verify they align generally with endpoints
-        // One handle should be near point1X, one near point2X.
-        final double minEndpointX = math.min(point1X, point2X);
-        final double maxEndpointX = math.max(point1X, point2X);
+        // Verification 2: Handles should align with their respective endpoints.
+        final double minEndpointX = math.min(startX, endX);
+        final double maxEndpointX = math.max(startX, endX);
 
-        // Left Handle should be near minEndpointX.
         expect(
           (leftHandlePos.dx - minEndpointX).abs(),
           lessThan(50.0),
           reason: 'Left handle should be near left endpoint',
         );
 
-        // Right Handle should be near maxEndpointX.
         expect(
           (rightHandlePos.dx - maxEndpointX).abs(),
           lessThan(50.0),

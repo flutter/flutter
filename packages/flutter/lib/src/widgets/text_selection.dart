@@ -545,11 +545,25 @@ class TextSelectionOverlay {
     TextSelectionHandleType endHandleType = TextSelectionHandleType.collapsed;
 
     if (!_selection.isCollapsed) {
-      final bool isStartBeforeEnd = endpoints.length == 2 && endpoints[0].point.dx <= endpoints[1].point.dx;
       if (endpoints.length == 2) {
-        startHandleType = isStartBeforeEnd ? TextSelectionHandleType.left : TextSelectionHandleType.right;
-        endHandleType = isStartBeforeEnd ? TextSelectionHandleType.right : TextSelectionHandleType.left;
+        final TextDirection startDirection = endpoints[0].direction ?? renderObject.textDirection;
+        final TextDirection endDirection = endpoints[1].direction ?? renderObject.textDirection;
+
+        switch (startDirection) {
+          case TextDirection.ltr:
+            startHandleType = TextSelectionHandleType.left;
+          case TextDirection.rtl:
+            startHandleType = TextSelectionHandleType.right;
+        }
+
+        switch (endDirection) {
+          case TextDirection.ltr:
+            endHandleType = TextSelectionHandleType.right;
+          case TextDirection.rtl:
+            endHandleType = TextSelectionHandleType.left;
+        }
       } else {
+        // Fallback for single endpoint (shouldn't happen for non-collapsed selection).
         startHandleType = _chooseType(
           renderObject.textDirection,
           TextSelectionHandleType.left,
