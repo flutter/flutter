@@ -12,133 +12,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 import 'widget_test_fixtures.dart';
-
-class _TestPageRoute<T> extends PageRoute<T> {
-  _TestPageRoute({
-    required this.builder,
-    super.settings,
-    super.requestFocus,
-    this.maintainState = true,
-    super.fullscreenDialog,
-    super.allowSnapshotting = true,
-    super.barrierDismissible = false,
-    super.traversalEdgeBehavior,
-    super.directionalTraversalEdgeBehavior,
-  });
-
-  final WidgetBuilder builder;
-
-  @override
-  final bool maintainState;
-
-  @override
-  String get debugLabel => '${super.debugLabel}(${settings.name})';
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => '_TestPageRoute barrier';
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return builder(context);
-  }
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-}
-
-class _TestPageRouteBuilder extends PageRouteBuilder<void> {
-  _TestPageRouteBuilder({required Widget child})
-    : super(
-        pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
-          return child;
-        },
-      );
-}
-
-class _TestPage<T> extends Page<T> {
-  const _TestPage({
-    required this.child,
-    this.maintainState = true,
-    this.fullscreenDialog = false,
-    this.allowSnapshotting = true,
-    super.key,
-    super.canPop,
-    super.onPopInvoked,
-    super.name,
-    super.arguments,
-    super.restorationId,
-  });
-
-  final Widget child;
-  final bool maintainState;
-  final bool fullscreenDialog;
-  final bool allowSnapshotting;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return _PageBasedTestPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
-  }
-}
-
-// A page-based version of _TestPageRoute.
-//
-// This route uses the builder from the page to build its content. This ensures
-// the content is up to date after page updates.
-class _PageBasedTestPageRoute<T> extends PageRoute<T> {
-  _PageBasedTestPageRoute({required _TestPage<T> page, super.allowSnapshotting})
-    : super(settings: page) {
-    assert(opaque);
-  }
-
-  _TestPage<T> get _page => settings as _TestPage<T>;
-
-  @override
-  bool get maintainState => _page.maintainState;
-
-  @override
-  bool get fullscreenDialog => _page.fullscreenDialog;
-
-  @override
-  String get debugLabel => '${super.debugLabel}(${_page.name})';
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => '_TestPageRoute barrier';
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return _page.child;
-  }
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-}
+import 'widget_test_route_fixtures.dart';
 
 void main() {
-  const blueColor = Color(0xFF2196F3);
-
   Color getRandomColor(int index) {
     return genericWidgetTestColors[index % genericWidgetTestColors.length];
-  }
-
-  Widget buildWidgetsApp(Widget child) {
-    return WidgetsApp(
-      color: blueColor,
-      onGenerateRoute: (RouteSettings settings) => _TestPageRouteBuilder(child: child),
-    );
   }
 
   group(WidgetOrderTraversalPolicy, () {
@@ -580,7 +458,7 @@ void main() {
                     autofocus: true,
                     onPressed: () {
                       Navigator.of(context).push<void>(
-                        _TestPageRoute<void>(
+                        TestPageRoute<void>(
                           builder: (BuildContext context) {
                             return Center(
                               child: BasicButton(
@@ -698,7 +576,7 @@ void main() {
                   height: 100,
                   child: Navigator(
                     pages: <Page<void>>[
-                      _TestPage<void>(
+                      TestPage<void>(
                         child: Focus(
                           focusNode: node2,
                           child: const SizedBox(width: 100, height: 100),
@@ -1677,7 +1555,7 @@ void main() {
                       autofocus: true,
                       onPressed: () {
                         Navigator.of(context).push<void>(
-                          _TestPageRoute<void>(
+                          TestPageRoute<void>(
                             builder: (BuildContext context) {
                               return Center(
                                 child: FocusTraversalOrder(
@@ -2923,7 +2801,7 @@ void main() {
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(height: cellHeight, color: blueColor),
+                  child: Container(height: cellHeight, color: const Color(0xFF2196F3)),
                 ),
                 Expanded(
                   child: ListView.separated(
@@ -3050,7 +2928,7 @@ void main() {
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(width: cellWidth, color: blueColor),
+                  child: Container(width: cellWidth, color: const Color(0xFF2196F3)),
                 ),
                 Expanded(
                   child: ListView.separated(
