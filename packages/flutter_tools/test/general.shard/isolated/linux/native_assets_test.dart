@@ -58,6 +58,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutClang(),
+        appDill: Uri.file('does_not_exist'),
       );
       expect(
         (globals.logger as BufferLogger).traceText,

@@ -5,6 +5,7 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show FileSystem;
+import 'package:flutter_hook_config/flutter_hook_config.dart' show FlutterConfigAssetsExtension;
 import 'package:font_asset/font_asset.dart' show FontAssetsExtension;
 import 'package:hooks/hooks.dart';
 
@@ -62,6 +63,7 @@ sealed class AssetBuildTarget {
     required Map<String, String> environmentDefines,
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
+    required Uri appDill,
   }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
@@ -82,7 +84,7 @@ sealed class AssetBuildTarget {
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
       case TargetPlatform.web_javascript:
-        return _webTarget(supportedAssetTypes);
+        return _webTarget(supportedAssetTypes, appDill);
       case TargetPlatform.tester:
         return _flutterTesterTarget(supportedAssetTypes);
       case TargetPlatform.fuchsia_arm64:
@@ -163,8 +165,12 @@ sealed class AssetBuildTarget {
         .toList();
   }
 
-  static List<AssetBuildTarget> _webTarget(List<SupportedAssetTypes> supportedAssetTypes) =>
-      <AssetBuildTarget>[WebAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+  static List<AssetBuildTarget> _webTarget(
+    List<SupportedAssetTypes> supportedAssetTypes,
+    Uri appDill,
+  ) => <AssetBuildTarget>[
+    WebAssetTarget(supportedAssetTypes: supportedAssetTypes, appDill: appDill),
+  ];
 
   static List<AssetBuildTarget> _flutterTesterTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
@@ -174,12 +180,15 @@ sealed class AssetBuildTarget {
 }
 
 final class WebAssetTarget extends AssetBuildTarget {
-  WebAssetTarget({required super.supportedAssetTypes});
+  WebAssetTarget({required super.supportedAssetTypes, required this.appDill});
+
+  final Uri appDill;
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...dataAssetExtensions,
     FontAssetsExtension(),
+    FlutterConfigAssetsExtension(appDill: appDill),
   ];
 
   @override

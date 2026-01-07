@@ -79,6 +79,7 @@ void main() {
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         ),
+        appDill: Uri.file('does_not_exist'),
       );
       await installCodeAssets(
         dartHookResult: dartHookResult,
@@ -112,6 +113,7 @@ void main() {
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
+          appDill: Uri.file('does_not_exist'),
         ),
         throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
@@ -138,6 +140,7 @@ void main() {
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
         ),
+        appDill: Uri.file('does_not_exist'),
       );
       await installCodeAssets(
         dartHookResult: dartHookResult,
@@ -178,6 +181,7 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: null,
           ),
+          appDill: Uri.file('does_not_exist'),
         ),
         throwsToolExit(message: 'Building native assets failed. See the logs for more details.'),
       );
@@ -228,6 +232,7 @@ void main() {
             ],
           ),
         ),
+        appDill: Uri.file('does_not_exist'),
       );
       expect(
         result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
@@ -278,6 +283,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: target,
+        appDill: Uri.file('does_not_exist'),
       );
 
       expect(target.didSetCCompilerConfig, isTrue);

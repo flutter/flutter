@@ -64,6 +64,7 @@ void main() {
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
+          appDill: Uri.file('does_not_exist'),
         ),
         throwsToolExit(
           message: 'Enable data assets using `flutter config --enable-dart-data-assets`',
@@ -115,6 +116,7 @@ void main() {
                 ],
               ),
             ),
+            appDill: Uri.file('does_not_exist'),
           ),
           buildMode == BuildMode.release
               ? throwsToolExit(message: 'Found duplicates')

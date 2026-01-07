@@ -191,6 +191,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          appDill: Uri.file('does_not_exist'),
         );
         await installCodeAssets(
           dartHookResult: dartHookResult,

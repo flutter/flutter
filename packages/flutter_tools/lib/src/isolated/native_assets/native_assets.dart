@@ -49,6 +49,7 @@ enum SupportedAssetTypes { codeAssets, dataAssets, fontAssets }
 /// to be included in the native build.
 Future<DartHooksResult> runFlutterSpecificHooks({
   required Map<String, String> environmentDefines,
+  required Uri appDill,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
   required Uri projectUri,
@@ -74,6 +75,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
     environmentDefines: environmentDefines,
+    appDill: appDill,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
   );
