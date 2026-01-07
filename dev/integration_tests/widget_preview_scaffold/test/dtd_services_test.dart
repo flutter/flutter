@@ -62,6 +62,7 @@ void main() {
       ),
       onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),
+      addUuidToServiceName: false,
     );
     await server.launchAndConnect();
     return server;
