@@ -304,18 +304,20 @@ void main() {
             maxWidth: double.infinity,
             maxHeight: double.infinity,
             alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(50.0),
-              child: Container(
-                height: 300,
-                width: 1e5,
-                decoration: const ShapeDecoration(
-                  color: Color.fromARGB(255, 120, 120, 120),
-                  shape: RoundedSuperellipseBorder(
-                    side: BorderSide(color: Color.fromARGB(255, 255, 0, 0), width: 0.5),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(30),
-                      bottomRight: Radius.elliptical(5e4, 30),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(50.0),
+                child: Container(
+                  width: 1e5,
+                  height: 500,
+                  decoration: const ShapeDecoration(
+                    color: Color.fromARGB(255, 120, 120, 120),
+                    shape: RoundedSuperellipseBorder(
+                      side: BorderSide(color: Color.fromARGB(255, 255, 0, 0), width: 1),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(100),
+                        bottomRight: Radius.circular(30),
+                      ),
                     ),
                   ),
                 ),
