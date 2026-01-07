@@ -36,7 +36,8 @@ FlutterProjectBundle::FlutterProjectBundle(
   ui_thread_policy_ =
       static_cast<FlutterUIThreadPolicy>(properties.ui_thread_policy);
 
-  iaccessibleex_enabled_ = properties.iaccessibleex_enabled;
+  accessibility_mode_ =
+      static_cast<FlutterAccessibilityMode>(properties.accessibility_mode);
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
