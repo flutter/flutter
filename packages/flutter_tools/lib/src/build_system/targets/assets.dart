@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:font_asset/font_asset.dart' show FontAsset;
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -11,7 +12,7 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
-import '../../flutter_manifest.dart';
+import '../../flutter_manifest.dart' show AssetTransformerEntry;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -107,6 +108,14 @@ Future<Depfile> copyAssets(
       );
     }),
   };
+
+  for (final FontAsset fontAsset in dartHookResult.fontAssets) {
+    final File file = environment.fileSystem.file(
+      environment.fileSystem.path.join(outputDirectory.path, fontAsset.fontFamily),
+    );
+    outputs.add(file);
+    await environment.fileSystem.file(fontAsset.file).copy(file.path);
+  }
 
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, AssetBundleEntry> entry) async {

@@ -296,6 +296,7 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            appDill: Uri.file('does_not_exist'),
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(

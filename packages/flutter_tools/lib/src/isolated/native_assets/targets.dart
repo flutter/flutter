@@ -5,6 +5,8 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show FileSystem;
+import 'package:flutter_hook_config/flutter_hook_config.dart' show FlutterConfigAssetsExtension;
+import 'package:font_asset/font_asset.dart' show FontAssetsExtension;
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
@@ -61,14 +63,15 @@ sealed class AssetBuildTarget {
     required Map<String, String> environmentDefines,
     required FileSystem fileSystem,
     required List<SupportedAssetTypes> supportedAssetTypes,
+    required Uri appDill,
   }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return _linuxTarget(supportedAssetTypes, Architecture.x64);
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, appDill);
       case TargetPlatform.linux_arm64:
-        return _linuxTarget(supportedAssetTypes, Architecture.arm64);
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, appDill);
       case TargetPlatform.windows_arm64:
         return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
@@ -81,9 +84,9 @@ sealed class AssetBuildTarget {
       case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
       case TargetPlatform.web_javascript:
-        return _webTarget(supportedAssetTypes);
+        return _webTarget(supportedAssetTypes, appDill);
       case TargetPlatform.tester:
-        return _flutterTesterTarget(supportedAssetTypes);
+        return _flutterTesterTarget(supportedAssetTypes, appDill);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.unsupported:
@@ -94,9 +97,14 @@ sealed class AssetBuildTarget {
   static List<AssetBuildTarget> _linuxTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
     Architecture architecture,
+    Uri appDill,
   ) {
     return <AssetBuildTarget>[
-      LinuxAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
+      LinuxAssetTarget(
+        architecture: architecture,
+        supportedAssetTypes: supportedAssetTypes,
+        appDill: appDill,
+      ),
     ];
   }
 
@@ -162,21 +170,34 @@ sealed class AssetBuildTarget {
         .toList();
   }
 
-  static List<AssetBuildTarget> _webTarget(List<SupportedAssetTypes> supportedAssetTypes) =>
-      <AssetBuildTarget>[WebAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+  static List<AssetBuildTarget> _webTarget(
+    List<SupportedAssetTypes> supportedAssetTypes,
+    Uri appDill,
+  ) => <AssetBuildTarget>[
+    WebAssetTarget(supportedAssetTypes: supportedAssetTypes, appDill: appDill),
+  ];
 
   static List<AssetBuildTarget> _flutterTesterTarget(
     List<SupportedAssetTypes> supportedAssetTypes,
+    Uri appDill,
   ) {
-    return <AssetBuildTarget>[FlutterTesterAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+    return <AssetBuildTarget>[
+      FlutterTesterAssetTarget(supportedAssetTypes: supportedAssetTypes, appDill: appDill),
+    ];
   }
 }
 
 final class WebAssetTarget extends AssetBuildTarget {
-  WebAssetTarget({required super.supportedAssetTypes});
+  WebAssetTarget({required super.supportedAssetTypes, required this.appDill});
+
+  final Uri appDill;
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    ...dataAssetExtensions,
+    FontAssetsExtension(),
+    FlutterConfigAssetsExtension(appDill: appDill),
+  ];
 
   @override
   String get targetString => 'web';
@@ -241,8 +262,13 @@ class WindowsAssetTarget extends CodeAssetTarget {
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
-  LinuxAssetTarget({required super.supportedAssetTypes, required super.architecture})
-    : super(os: OS.linux);
+  LinuxAssetTarget({
+    required super.supportedAssetTypes,
+    required super.architecture,
+    required this.appDill,
+  }) : super(os: OS.linux);
+
+  final Uri appDill;
 
   @override
   Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
@@ -252,6 +278,8 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
     ...codeAssetExtensions,
     ...dataAssetExtensions,
+    FontAssetsExtension(),
+    FlutterConfigAssetsExtension(appDill: appDill),
   ];
 }
 
@@ -350,12 +378,13 @@ final class AndroidAssetTarget extends CodeAssetTarget {
 }
 
 final class FlutterTesterAssetTarget extends CodeAssetTarget {
-  FlutterTesterAssetTarget({required super.supportedAssetTypes})
+  FlutterTesterAssetTarget({required super.supportedAssetTypes, required Uri appDill})
     : super(architecture: Architecture.current, os: OS.current) {
     subtarget = switch (os) {
       OS.linux => LinuxAssetTarget(
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
+        appDill: appDill,
       ),
       OS.windows => WindowsAssetTarget(
         supportedAssetTypes: supportedAssetTypes,

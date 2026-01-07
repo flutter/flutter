@@ -6,6 +6,7 @@
 
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
+import 'package:font_asset/font_asset.dart' show FontAsset, FontAssetExt;
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
@@ -42,12 +43,13 @@ class FlutterCodeAsset {
 
 /// Matching [CodeAsset] and [DataAsset] in native assets - but Flutter could
 /// support more asset types in the future.
-enum SupportedAssetTypes { codeAssets, dataAssets }
+enum SupportedAssetTypes { codeAssets, dataAssets, fontAssets }
 
 /// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
 Future<DartHooksResult> runFlutterSpecificHooks({
   required Map<String, String> environmentDefines,
+  required Uri appDill,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
   required Uri projectUri,
@@ -68,10 +70,12 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled) SupportedAssetTypes.codeAssets,
     if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
+    SupportedAssetTypes.fontAssets,
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
     environmentDefines: environmentDefines,
+    appDill: appDill,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
   );
@@ -521,6 +525,7 @@ Future<DartHooksResult> _runDartHooks({
 
   final codeAssets = <FlutterCodeAsset>[];
   final dataAssets = <DataAsset>[];
+  final fontAssets = <FontAsset>[];
   final dependencies = <Uri>{};
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
@@ -545,6 +550,7 @@ Future<DartHooksResult> _runDartHooks({
         );
       }
       dataAssets.addAll(_filterDataAssets(linkResult.encodedAssets));
+      fontAssets.addAll(_filterFontAssets(linkResult.encodedAssets));
       dependencies.addAll(linkResult.dependencies);
     }
     if (target is CodeAssetTarget) {
@@ -556,6 +562,7 @@ Future<DartHooksResult> _runDartHooks({
       );
     }
     dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
+    fontAssets.addAll(_filterFontAssets(buildResult.encodedAssets));
     dependencies.addAll(buildResult.dependencies);
   }
   if (codeAssets.isNotEmpty) {
@@ -585,6 +592,7 @@ Future<DartHooksResult> _runDartHooks({
     buildEnd: DateTime.now(),
     codeAssets: codeAssets,
     dataAssets: dataAssets,
+    fontAssets: fontAssets,
     dependencies: dependencies.toList(),
   );
 }
@@ -598,6 +606,9 @@ Iterable<FlutterCodeAsset> _filterCodeAssets(Iterable<EncodedAsset> assets, Targ
 
 Iterable<DataAsset> _filterDataAssets(Iterable<EncodedAsset> assets) =>
     assets.where((EncodedAsset asset) => asset.isDataAsset).map<DataAsset>(DataAsset.fromEncoded);
+
+Iterable<FontAsset> _filterFontAssets(Iterable<EncodedAsset> assets) =>
+    assets.where((EncodedAsset asset) => asset.isFontAsset).map<FontAsset>(FontAsset.fromEncoded);
 
 Future<BuildResult> _build(
   FlutterNativeAssetsBuildRunner buildRunner,

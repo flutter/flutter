@@ -91,6 +91,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          appDill: Uri.file('does_not_exist'),
         );
         await installCodeAssets(
           dartHookResult: result,
@@ -132,6 +133,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
+        appDill: Uri.file('does_not_exist'),
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -157,6 +159,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+          appDill: Uri.file('does_not_exist'),
         ),
         isA<DartHooksResult>(),
       );

@@ -30,6 +30,7 @@ class FlutterHookResult {
     required this.buildStart,
     required this.buildEnd,
     required this.dataAssets,
+    required this.fontAssets,
     required this.dependencies,
   });
 
@@ -38,10 +39,12 @@ class FlutterHookResult {
         buildStart: DateTime.fromMillisecondsSinceEpoch(0),
         buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
         dataAssets: <HookAsset>[],
+        fontAssets: <FontHookAsset>[],
         dependencies: <Uri>[],
       );
 
   final List<HookAsset> dataAssets;
+  final List<FontHookAsset> fontAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
@@ -101,6 +104,17 @@ class HookAsset {
   String toString() {
     return 'HookAsset(file: $file, name: $name, package: $package)';
   }
+}
+
+class FontHookAsset extends HookAsset {
+  FontHookAsset({
+    required super.file,
+    required String fontFamily,
+    required super.package,
+    this.weight,
+  }) : super(name: fontFamily);
+
+  final int? weight;
 }
 
 const defaultManifestPath = 'pubspec.yaml';
@@ -418,6 +432,7 @@ class ManifestAssetBundle implements AssetBundle {
       flutterManifest,
       packageConfig,
       primary: true,
+      fontAssets: flutterHookResult?.fontAssets,
     );
 
     // Add fonts, assets, and licenses from packages in the project's
@@ -510,17 +525,18 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
-      final Package package = packageConfig[dataAsset.package]!;
-      final Uri fileUri = dataAsset.file;
+      final _Asset asset = _parseAsset(packageConfig, dataAsset, AssetKind.regular);
+      if (assetVariants.containsKey(asset)) {
+        _logger.printError(
+          'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
+        );
+        return 1;
+      }
+      assetVariants[asset] = <_Asset>[asset];
+    }
 
-      final String filePath = fileUri.toFilePath();
-
-      final asset = _Asset(
-        baseDir: _fileSystem.path.dirname(filePath),
-        relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
-        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
-        package: package,
-      );
+    for (final FontHookAsset fontAsset in flutterHookResult?.fontAssets ?? <FontHookAsset>[]) {
+      final _Asset asset = _parseAsset(packageConfig, fontAsset, AssetKind.font);
       if (assetVariants.containsKey(asset)) {
         _logger.printError(
           'Conflicting assets: The asset "$asset" was declared in the pubspec and the hook.',
@@ -673,6 +689,17 @@ class ManifestAssetBundle implements AssetBundle {
     return 0;
   }
 
+  _Asset _parseAsset(PackageConfig packageConfig, HookAsset asset, AssetKind kind) {
+    final String filePath = asset.file.toFilePath();
+    return _Asset(
+      baseDir: _fileSystem.path.dirname(filePath),
+      relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
+      entryUri: Uri.parse(_fileSystem.path.join('packages', asset.package, asset.name)),
+      package: packageConfig[asset.package],
+      kind: kind,
+    );
+  }
+
   @override
   List<File> additionalDependencies = <File>[];
   void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
@@ -822,9 +849,14 @@ class ManifestAssetBundle implements AssetBundle {
     PackageConfig packageConfig, {
     String? packageName,
     required bool primary,
+    List<FontHookAsset>? fontAssets,
   }) {
     return <Map<String, Object?>>[
       if (primary && manifest.usesMaterialDesign) ...kMaterialFonts,
+      if (fontAssets != null)
+        ...fontAssets
+            .map((e) => Font(e.name, [FontAsset(e.file, weight: e.weight)]))
+            .map((e) => e.descriptor),
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
