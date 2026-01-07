@@ -11,9 +11,10 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'widget_test_fixtures.dart';
 
 class LinkedScrollController extends ScrollController {
   LinkedScrollController({this.before, this.after});
@@ -341,7 +342,7 @@ class _TestState extends State<Test> {
               ],
             ),
           ),
-          const Divider(),
+          const BasicDivider(),
           Expanded(
             child: ListView(
               controller: _afterController,
