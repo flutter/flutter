@@ -4378,6 +4378,22 @@ void main() {
     expect(() => Tab(text: 'foo', child: Container()), throwsAssertionError);
   });
 
+  test('Tab throws clear error when both text and child are set', () {
+    // Wrap in a closure so the assertion is checked at runtime
+    expect(
+      () {
+        Tab(text: 'Hi', child: const Text('World')); // no const
+      },
+      throwsA(
+        const TypeMatcher<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          contains('Provide either text or child, not both, when creating a Tab.'),
+        ),
+      ),
+    );
+  });
+
   testWidgets('Tabs changes mouse cursor when a tab is hovered', (WidgetTester tester) async {
     final tabs = <String>['A', 'B'];
     await tester.pumpWidget(
@@ -9420,5 +9436,67 @@ void main() {
     controller.animateTo(1);
     await tester.pump();
     await tester.pumpAndSettle();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/59143.
+  testWidgets('TabBar indicator image should be rendered at initialIndex for the first time', (
+    WidgetTester tester,
+  ) async {
+    // TabBar indicators with asynchronously loaded images (e.g. from network)
+    // should trigger a repaint when the image finishes loading, even on the initial tab.
+    final decoration = TabBarAsyncImageIndicatorDecoration();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                indicator: decoration,
+                tabs: const <Widget>[
+                  Tab(text: 'One'),
+                  Tab(text: 'Two'),
+                  Tab(text: 'Three'),
+                ],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[
+                Center(child: Text('Page One')),
+                Center(child: Text('Page Two')),
+                Center(child: Text('Page Three')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial paint - indicator should be painted once.
+    expect(decoration.paintCount, 1);
+
+    // Pump with duration to allow the event queue (async image load simulation) to complete.
+    // Future.delayed(Duration.zero) schedules in the event queue, so we need to advance time.
+    await tester.pump(const Duration(milliseconds: 1));
+
+    // After async image loads, the indicator should be repainted.
+    // This verifies that the markNeedsPaint callback properly triggers a repaint.
+    expect(
+      decoration.paintCount,
+      greaterThan(1),
+      reason: 'Indicator should be repainted after async image loads',
+    );
+
+    // Verify the indicator repaints when switching tabs.
+    final int initialPaintCount = decoration.paintCount;
+    await tester.tap(find.text('Two'));
+    await tester.pumpAndSettle();
+
+    expect(
+      decoration.paintCount,
+      greaterThan(initialPaintCount),
+      reason: 'Indicator should repaint when switching tabs',
+    );
   });
 }

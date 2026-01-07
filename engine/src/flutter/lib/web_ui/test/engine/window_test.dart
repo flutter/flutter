@@ -11,6 +11,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import '../common/test_initialization.dart';
@@ -25,7 +26,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-Future<void> testMain() async {
+void testMain() {
   setUpImplicitView();
 
   test('onTextScaleFactorChanged preserves the zone', () {
@@ -520,33 +521,30 @@ Future<void> testMain() async {
     domWindow['screen'] = original;
   });
 
-  test(
-    'SingletonFlutterWindow implements locale, locales, and locale change notifications',
-    () async {
-      // This will count how many times we notified about locale changes.
-      var localeChangedCount = 0;
-      myWindow.onLocaleChanged = () {
-        localeChangedCount += 1;
-      };
+  test('SingletonFlutterWindow implements locale, locales, and locale change notifications', () {
+    // This will count how many times we notified about locale changes.
+    var localeChangedCount = 0;
+    myWindow.onLocaleChanged = () {
+      localeChangedCount += 1;
+    };
 
-      // We populate the initial list of locales automatically (only test that we
-      // got some locales; some contributors may be in different locales, so we
-      // can't test the exact contents).
-      expect(myWindow.locale, isA<ui.Locale>());
-      expect(myWindow.locales, isNotEmpty);
+    // We populate the initial list of locales automatically (only test that we
+    // got some locales; some contributors may be in different locales, so we
+    // can't test the exact contents).
+    expect(myWindow.locale, isA<ui.Locale>());
+    expect(myWindow.locales, isNotEmpty);
 
-      // Trigger a change notification (reset locales because the notification
-      // doesn't actually change the list of languages; the test only observes
-      // that the list is populated again).
-      EnginePlatformDispatcher.instance.debugResetLocales();
-      expect(myWindow.locales, isEmpty);
-      expect(myWindow.locale, equals(const ui.Locale.fromSubtags()));
-      expect(localeChangedCount, 0);
-      domWindow.dispatchEvent(createDomEvent('Event', 'languagechange'));
-      expect(myWindow.locales, isNotEmpty);
-      expect(localeChangedCount, 1);
-    },
-  );
+    // Trigger a change notification (reset locales because the notification
+    // doesn't actually change the list of languages; the test only observes
+    // that the list is populated again).
+    EnginePlatformDispatcher.instance.debugResetLocales();
+    expect(myWindow.locales, isEmpty);
+    expect(myWindow.locale, equals(const ui.Locale.fromSubtags()));
+    expect(localeChangedCount, 0);
+    domWindow.dispatchEvent(createDomEvent('Event', 'languagechange'));
+    expect(myWindow.locales, isNotEmpty);
+    expect(localeChangedCount, 1);
+  });
 
   test('dispatches browser event on flutter/service_worker channel', () async {
     final completer = Completer<void>();
@@ -741,7 +739,7 @@ Future<void> testMain() async {
         ..height = 'auto';
 
       // Resize the host to 20x20 (physical pixels).
-      view.resize(const ui.Size.square(50));
+      view.handleFrameworkResize(const ui.Size.square(50));
 
       // The view's physicalSize should be updated too.
       expect(view.physicalSize, const ui.Size(50.0, 50.0));
@@ -775,7 +773,7 @@ Future<void> testMain() async {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
     });
 
-    test('JsViewConstraints are passed and used to compute physicalConstraints', () async {
+    test('JsViewConstraints are passed and used to compute physicalConstraints', () {
       view = EngineFlutterView(
         EnginePlatformDispatcher.instance,
         host,
@@ -797,6 +795,30 @@ Future<void> testMain() async {
             ) *
             dpr,
       );
+    });
+  });
+
+  group('keyboard resize behavior', () {
+    setUp(() {
+      // Simulate keyboard being up.
+      textEditing.isEditing = true;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+    });
+
+    tearDown(() {
+      textEditing.isEditing = false;
+      ui_web.browser.debugOperatingSystemOverride = null;
+    });
+
+    test('physicalSize remains unchanged when keyboard is up', () {
+      final ui.Size initialPhysicalSize = myWindow.physicalSize;
+
+      // Pick a smaller size.
+      final ui.Size newSize = initialPhysicalSize ~/ 2;
+      myWindow.handleFrameworkResize(newSize);
+
+      // View's `physicalSize` should remain unchanged.
+      expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
 }

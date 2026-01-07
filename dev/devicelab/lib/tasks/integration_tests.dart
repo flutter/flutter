@@ -247,14 +247,6 @@ TaskFunction createWideGamutTest() {
   ).call;
 }
 
-TaskFunction createHighBitrateImagesTest() {
-  return IntegrationTest(
-    '${flutterDirectory.path}/dev/integration_tests/high_bitrate_images',
-    'integration_test/app_test.dart',
-    createPlatforms: <String>['ios'],
-  ).call;
-}
-
 class DriverTest {
   DriverTest(
     this.testDirectory,
