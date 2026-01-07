@@ -412,15 +412,23 @@ class RawTooltip extends StatefulWidget {
   /// If provided, this function will be called with a [TooltipPositionContext]
   /// containing all the necessary information for positioning the tooltip. The
   /// function should return an [Offset] indicating where to place the tooltip
-  /// relative to the overlay.
+  /// in the closest [Overlay].
   ///
   /// This allows for custom positioning such as left/right positioning, or any
   /// other arbitrary positioning logic.
   ///
-  /// Example:
+  /// For example, if the [Overlay] takes up the entire screen, returning
+  /// [Offset.zero] will position the tooltip at the top-left corner of the
+  /// screen.
+  ///
+  /// The [TooltipPositionContext] provides information that can be used to
+  /// position the tooltip relative to the target/child.
+  ///
+  /// For example:
   /// ```dart
   /// positionDelegate: (TooltipPositionContext context) {
-  ///   // Position tooltip to the right of the target
+  ///   // Use the context information to position the tooltip to the right of
+  ///   // the target.
   ///   return Offset(
   ///     context.target.dx + context.targetSize.width / 2,
   ///     context.target.dy - context.tooltipSize.height / 2,
