@@ -235,7 +235,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
     await _pubGet(widgetPreviewScaffoldProject, false);
-    await _pubGet(hooksUserDefineIntegrationTestDirectory, false);
+    await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();
 
