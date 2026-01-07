@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.platform;
 
-import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -22,7 +21,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
@@ -40,7 +38,6 @@ import io.flutter.util.ViewUtils;
  * <p>Since the view is in the Android view hierarchy, keyboard and accessibility interactions
  * behave normally.
  */
-@RequiresApi(API_LEVELS.API_23)
 public class PlatformViewWrapper extends FrameLayout {
   private static final String TAG = "PlatformViewWrapper";
 
