@@ -19069,6 +19069,50 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+
+  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/19523
+    final pageController = PageController(initialPage: 1);
+    final controller = TextEditingController();
+    addTearDown(pageController.dispose);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: PageView(
+                controller: pageController,
+                children: <Widget>[
+                  Container(color: Colors.red),
+                  ColoredBox(
+                    color: Colors.green,
+                    child: TextField(controller: controller),
+                  ),
+                  Container(color: Colors.red),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.pumpAndSettle();
+    expect(controller.text, '');
+    tester.testTextInput.enterText('H');
+    final int frames = await tester.pumpAndSettle();
+
+    // The text input should not trigger any animations, which would indicate
+    // that the surrounding PageView is incorrectly scrolling back-and-forth.
+    expect(frames, 1);
+
+    expect(controller.text, 'H');
+  });
 }
 
 /// A Simple widget for testing the obscure text.
