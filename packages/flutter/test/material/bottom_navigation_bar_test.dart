@@ -3126,13 +3126,15 @@ void main() {
       ),
     );
 
-    // Verify that the Text widget for 'A' has the custom semanticsLabel
-    final Text aText = tester.widget<Text>(find.text('A'));
-    expect(aText.semanticsLabel, 'Custom A label');
+    expect(
+      tester.getSemantics(find.text('A')),
+      containsSemantics(label: 'Custom A label\nTab 1 of 2'),
+    );
 
-    // Verify that the Text widget for 'B' has no custom semanticsLabel
-    final Text bText = tester.widget<Text>(find.text('B'));
-    expect(bText.semanticsLabel, isNull);
+    expect(
+      tester.getSemantics(find.text('B')),
+      containsSemantics(label: 'B\nTab 2 of 2'),
+    );
   });
 }
 
