@@ -270,8 +270,9 @@ class Container extends StatelessWidget {
     this.clipBehavior = Clip.none,
   }) : assert(
          color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".',
+         'Cannot provide both a color and a decoration.\n'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".\n'
+         'To use both a color and other decoration properties, set the color in the BoxDecoration instead.',
        );
 
   /// The [child] contained by the container.
@@ -386,12 +387,16 @@ class Container extends StatelessWidget {
     assert(decoration == null || decoration!.debugAssertIsValid());
     assert(constraints == null || constraints!.debugAssertIsValid());
     assert(decoration != null || clipBehavior == Clip.none);
+
+    // Resolve constraints with width/height at the start of build (moved from constructor)
+    final BoxConstraints? effectiveConstraints = (width != null || height != null)
+        ? constraints?.tighten(width: width, height: height) ??
+              BoxConstraints.tightFor(width: width, height: height)
+        : constraints;
+
     Widget? current = child;
 
-    if (child == null &&
-        (constraints == null || !constraints!.isTight) &&
-        width == null &&
-        height == null) {
+    if (child == null && (effectiveConstraints == null || !effectiveConstraints.isTight)) {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
@@ -433,12 +438,6 @@ class Container extends StatelessWidget {
         child: current,
       );
     }
-
-    // Effective constraints calculation (moved from constructor)
-    final BoxConstraints? effectiveConstraints = (width != null || height != null)
-        ? constraints?.tighten(width: width, height: height) ??
-              BoxConstraints.tightFor(width: width, height: height)
-        : constraints;
 
     if (effectiveConstraints != null) {
       current = ConstrainedBox(constraints: effectiveConstraints, child: current);
