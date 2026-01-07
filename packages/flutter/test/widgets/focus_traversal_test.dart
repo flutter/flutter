@@ -6,18 +6,20 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 import 'widget_test_fixtures.dart';
 
-Color _getRandomColor(int index) {
-  return genericWidgetTestColors[index % genericWidgetTestColors.length];
-}
-
 void main() {
+  const blueColor = Color(0xFF2196F3);
+
+  Color getRandomColor(int index) {
+    return genericWidgetTestColors[index % genericWidgetTestColors.length];
+  }
+
   group(WidgetOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -445,7 +447,8 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        WidgetsApp(
+          color: blueColor,
           home: FocusTraversalGroup(
             policy: WidgetOrderTraversalPolicy(),
             child: Center(
@@ -1540,7 +1543,8 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        WidgetsApp(
+          color: blueColor,
           home: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: Center(
@@ -1942,7 +1946,7 @@ void main() {
             // checks for the closest node.
             width: index == 3 ? 150 : 100,
             height: index == 1 ? 150 : 100,
-            color: _getRandomColor(index),
+            color: getRandomColor(index),
             child: Text('[$row, $col]'),
           ),
         );
@@ -2074,7 +2078,7 @@ void main() {
             child: Container(
               width: row == 1 ? 150 : 100,
               height: 100,
-              color: _getRandomColor(row),
+              color: getRandomColor(row),
               child: Text('[$row]'),
             ),
           ),
@@ -2165,7 +2169,7 @@ void main() {
             child: Container(
               width: 100,
               height: col == 1 ? 150 : 100,
-              color: _getRandomColor(col),
+              color: getRandomColor(col),
               child: Text('[$col]'),
             ),
           ),
@@ -2536,7 +2540,8 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          WidgetsApp(
+            color: blueColor,
             home: Column(
               children: <Widget>[
                 Focus(focusNode: topNode, child: Container(height: 100)),
@@ -2660,7 +2665,8 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          WidgetsApp(
+            color: blueColor,
             home: Row(
               children: <Widget>[
                 Focus(focusNode: leftNode, child: Container(width: 100)),
@@ -2805,12 +2811,13 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MaterialApp(
+          WidgetsApp(
+            color: blueColor,
             home: Column(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(height: cellHeight, color: Colors.blue),
+                  child: Container(height: cellHeight, color: blueColor),
                 ),
                 Expanded(
                   child: ListView.separated(
@@ -2830,7 +2837,7 @@ void main() {
                               child: Container(
                                 width: cellHeight,
                                 height: cellHeight,
-                                color: _getRandomColor(rowIndex),
+                                color: getRandomColor(rowIndex),
                               ),
                             );
                           },
@@ -2932,12 +2939,13 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MaterialApp(
+          WidgetsApp(
+            color: blueColor,
             home: Row(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(width: cellWidth, color: Colors.blue),
+                  child: Container(width: cellWidth, color: blueColor),
                 ),
                 Expanded(
                   child: ListView.separated(
@@ -2957,7 +2965,7 @@ void main() {
                               child: Container(
                                 width: cellWidth,
                                 height: cellWidth,
-                                color: Colors.red,
+                                color: const Color(0xFFF44336),
                               ),
                             );
                           },
@@ -3064,7 +3072,8 @@ void main() {
             ),
           };
 
-          return MaterialApp(
+          return WidgetsApp(
+            color: blueColor,
             home: Shortcuts(
               shortcuts: shortcuts,
               child: FocusScope(
@@ -3170,7 +3179,7 @@ void main() {
       (WidgetTester tester) async {
         final events = <Object>[];
 
-        await tester.pumpWidget(MaterialApp(home: Container()));
+        await tester.pumpWidget(WidgetsApp(color: blueColor, home: Container()));
 
         HardwareKeyboard.instance.addHandler((KeyEvent event) {
           events.add(event);
@@ -3190,8 +3199,9 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: ListTile(title: Text('title'))),
+        WidgetsApp(
+          color: blueColor,
+          home: Scaffold(body: ListTile(title: const Text('title'))),
         ),
       );
       final FocusNode? initialFocus = primaryFocus;
@@ -3207,7 +3217,7 @@ void main() {
 
         await tester.pumpWidget(
           WidgetsApp(
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
               settings: settings,
               pageBuilder:
@@ -3665,7 +3675,8 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: blueColor,
         home: Column(
           children: <Widget>[
             TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
@@ -3739,7 +3750,8 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: blueColor,
         home: Focus(
           focusNode: scope,
           child: Column(
@@ -3840,7 +3852,8 @@ void main() {
     addTearDown(nodeA.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: blueColor,
         home: SingleChildScrollView(
           child: TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
         ),
@@ -3938,7 +3951,7 @@ void main() {
           child: home,
         );
       }
-      await tester.pumpWidget(MaterialApp(home: home));
+      await tester.pumpWidget(WidgetsApp(color: blueColor, home: home));
     }
 
     await pumpApp();
@@ -4067,7 +4080,8 @@ void main() {
       addTearDown(enabledButton2Node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        WidgetsApp(
+          color: blueColor,
           home: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
