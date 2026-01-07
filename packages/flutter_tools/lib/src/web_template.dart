@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/utils.dart';
 
 /// Placeholder for base href
 const kBaseHrefPlaceholder = r'$FLUTTER_BASE_HREF';
@@ -106,6 +107,7 @@ class WebTemplate {
     String? buildConfig,
     String? flutterBootstrapJs,
     String? staticAssetsUrl,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
     String newContent = _content;
 
@@ -131,24 +133,68 @@ class WebTemplate {
             "navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* $_kServiceWorkerDeprecationNotice */",
           );
     }
-    newContent = newContent.replaceAll(
-      '{{flutter_service_worker_version}}',
-      serviceWorkerVersion != null
+    newContent = _applyVariableSubstitutions(newContent, <String, String>{
+      ...webDefines,
+      if (buildConfig != null) 'flutter_build_config': buildConfig,
+      if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
+      'flutter_js': flutterJsFile.readAsStringSync(),
+      'flutter_service_worker_version': serviceWorkerVersion != null
           ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'
           : 'null /* $_kServiceWorkerDeprecationNotice */',
-    );
-    if (buildConfig != null) {
-      newContent = newContent.replaceAll('{{flutter_build_config}}', buildConfig);
-    }
+    });
 
-    if (newContent.contains('{{flutter_js}}')) {
-      newContent = newContent.replaceAll('{{flutter_js}}', flutterJsFile.readAsStringSync());
-    }
-
-    if (flutterBootstrapJs != null) {
-      newContent = newContent.replaceAll('{{flutter_bootstrap_js}}', flutterBootstrapJs);
-    }
     return newContent;
+  }
+
+  /// Applies web-define variable substitutions and validates all variables are provided.
+  ///
+  /// Replaces {{VARIABLE}} placeholders with values from webDefines. Built-in Flutter
+  /// variables are preserved if missing; user-defined variables throw ToolExit.
+  String _applyVariableSubstitutions(String content, Map<String, String> webDefines) {
+    final variablePattern = RegExp(r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}');
+    final missingVariables = <String>{};
+
+    // Framework-provided variables added by withSubstitutions(). These don't trigger
+    // errors if missing, unlike user --web-define variables.
+    // - flutter_js: flutter.js loader content (always added)
+    // - flutter_build_config: build config JSON (optional, build-mode dependent)
+    // - flutter_service_worker_version: SW version hash (optional)
+    // - flutter_bootstrap_js: full bootstrap script (optional)
+    const builtInVariables = <String>{
+      'flutter_js',
+      'flutter_build_config',
+      'flutter_service_worker_version',
+      'flutter_bootstrap_js',
+    };
+
+    final String result = content.replaceAllMapped(variablePattern, (Match match) {
+      final String variableName = match.group(1)!;
+      if (webDefines.containsKey(variableName)) {
+        return webDefines[variableName]!;
+      }
+      // Skip built-in Flutter variables and only validate user-defined web-define variables
+      if (!builtInVariables.contains(variableName)) {
+        missingVariables.add(variableName);
+      }
+      // Return the original match for missing variables.
+      return match.group(0)!;
+    });
+    if (missingVariables.isEmpty) {
+      return result;
+    }
+
+    final String variables = missingVariables.join(', ');
+    final String suggestion = missingVariables
+        .map((String name) => '--web-define=$name=VALUE')
+        .join(' ');
+    final String variablesList = pluralize('variable', missingVariables.length);
+    throwToolExit(
+      'Missing web-define $variablesList: $variables\n\n'
+      'Please provide the missing $variablesList using:\n'
+      'flutter run $suggestion\n'
+      'or\n'
+      'flutter build web $suggestion',
+    );
   }
 }
 
