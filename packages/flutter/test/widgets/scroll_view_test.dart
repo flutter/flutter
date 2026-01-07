@@ -10,6 +10,7 @@ import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
+import 'widget_test_fixtures.dart';
 
 class ItemWidget extends StatefulWidget {
   const ItemWidget({super.key, required this.value});
@@ -332,7 +333,7 @@ void main() {
           padding: EdgeInsets.zero,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const Divider(),
+          separatorBuilder: (BuildContext context, int index) => const BasicDivider(),
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
@@ -670,7 +671,7 @@ void main() {
         child: ListView.separated(
           padding: EdgeInsets.zero,
           itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const Divider(),
+          separatorBuilder: (BuildContext context, int index) => const BasicDivider(),
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
@@ -1449,11 +1450,7 @@ void main() {
               return Text(listOfValues[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return firstSeparator;
-              } else {
-                return const Divider();
-              }
+              return index == 0 ? firstSeparator : const BasicDivider();
             },
             itemCount: listOfValues.length,
           ),
@@ -1461,8 +1458,8 @@ void main() {
       );
     }
 
-    // A separatorBuilder that always returns a Divider is fine
-    await tester.pumpWidget(buildFrame(const Divider()));
+    // A separatorBuilder that always returns a divider is fine
+    await tester.pumpWidget(buildFrame(const BasicDivider()));
     expect(tester.takeException(), isNull);
   });
 
@@ -1513,7 +1510,7 @@ void main() {
               if (index == 0 && throwOnFirstSeparator) {
                 throw Exception('separatorBuilder fail');
               }
-              return const Divider();
+              return const SizedBox();
             },
             itemCount: listOfValues.length,
           ),
@@ -1831,7 +1828,7 @@ void main() {
             itemBuilder: (BuildContext context, int index) {
               return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
             },
-            separatorBuilder: (BuildContext context, int index) => const Divider(),
+            separatorBuilder: (BuildContext context, int index) => const BasicDivider(),
           ),
         ),
       );
@@ -1880,7 +1877,7 @@ void main() {
                 itemBuilder: (BuildContext context, int index) {
                   return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
                 },
-                separatorBuilder: (BuildContext context, int index) => const Divider(),
+                separatorBuilder: (BuildContext context, int index) => const BasicDivider(),
               ),
             ],
           ),
