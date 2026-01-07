@@ -13,6 +13,7 @@ from pathlib import Path
 import argparse
 import errno
 import glob
+import io
 import logging
 import logging.handlers
 import multiprocessing
@@ -55,11 +56,13 @@ def print(*args, **kwargs):  # pylint: disable=redefined-builtin
   _logger.info(*args, **kwargs)
 
 
-def print_divider(char: str = '=') -> None:
-  _logger.info('\n')
+def print_divider(char: str = '=', logger: typing.Optional[logging.Logger] = None) -> None:
+  if logger is None:
+    logger = _logger
+  logger.info('\n')
   for _ in range(4):
-    _logger.info(''.join([char for _ in range(80)]))
-  _logger.info('\n')
+    logger.info(''.join([char for _ in range(80)]))
+  logger.info('\n')
 
 
 def is_asan(build_dir: str) -> bool:
@@ -77,17 +80,20 @@ def run_cmd( # pylint: disable=too-many-arguments
     expect_failure: bool = False,
     env: typing.Optional[typing.Dict[str, str]] = None,
     allowed_failure_output: typing.Optional[typing.List[str]] = None,
+    logger: typing.Optional[logging.Logger] = None,
     **kwargs
 ) -> None:
   if forbidden_output is None:
     forbidden_output = []
   if allowed_failure_output is None:
     allowed_failure_output = []
+  if logger is None:
+    logger = _logger
 
   command_string = ' '.join(cmd)
 
-  print_divider('>')
-  _logger.info('Running command "%s" in "%s"', command_string, cwd)
+  print_divider('>', logger=logger)
+  logger.info('Running command "%s" in "%s"', command_string, cwd)
 
   start_time = time.time()
 
@@ -105,15 +111,15 @@ def run_cmd( # pylint: disable=too-many-arguments
   if process.stdout:
     for line in iter(process.stdout.readline, ''):
       output += line
-      _logger.info(line.rstrip())
+      logger.info(line.rstrip())
 
   process.wait()
   end_time = time.time()
 
   if process.returncode != 0 and not expect_failure:
-    print_divider('!')
+    print_divider('!', logger=logger)
 
-    _logger.error(
+    logger.error(
         'Failed Command:\n\n%s\n\nExit Code: %s\n\nOutput:\n%s', command_string, process.returncode,
         output
     )
@@ -138,8 +144,7 @@ def run_cmd( # pylint: disable=too-many-arguments
           f'command "{command_string}" contained forbidden string "{forbidden_string}": {matches}'
       )
 
-  print_divider('<')
-  _logger.info(
+  logger.info(
       'Command run successfully in %.2f seconds: %s (in %s)', end_time - start_time, command_string,
       cwd
   )
@@ -269,9 +274,12 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     coverage: bool = False,
     extra_env: typing.Optional[typing.Dict[str, str]] = None,
     gtest: bool = False,
+    logger: typing.Optional[logging.Logger] = None,
 ) -> None:
+  if logger is None:
+    logger = _logger
   if executable_filter is not None and executable_name not in executable_filter:
-    _logger.info('Skipping %s due to filter.', executable_name)
+    logger.info('Skipping %s due to filter.', executable_name)
     return
 
   if flags is None:
@@ -306,7 +314,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
   else:
     env['PATH'] = build_dir + ':' + env['PATH']
 
-  _logger.info('Running %s in %s', executable_name, cwd)
+  logger.info('Running %s in %s', executable_name, cwd)
 
   test_command = build_engine_executable_command(
       build_dir,
@@ -328,6 +336,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
         expect_failure=expect_failure,
         env=env,
         allowed_failure_output=allowed_failure_output,
+        logger=logger,
     )
   except:
     # The LUCI environment may provide a variable containing a directory path
@@ -338,7 +347,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
       dump_path = os.path.join(luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt')
-      _logger.error('Writing core dump analysis to %s', dump_path)
+      logger.error('Writing core dump analysis to %s', dump_path)
       subprocess.call([
           os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'analyze_core_dump.sh'),
           BUILDROOT_DIR,
@@ -376,19 +385,45 @@ class EngineExecutableTask():  # pylint: disable=too-many-instance-attributes
     self.coverage = coverage
     self.extra_env = extra_env
 
-  def __call__(self, *args: typing.Any) -> None:
-    run_engine_executable(
-        self.build_dir,
-        self.executable_name,
-        self.executable_filter,
-        flags=self.flags,
-        cwd=self.cwd,
-        forbidden_output=self.forbidden_output,
-        allowed_failure_output=self.allowed_failure_output,
-        expect_failure=self.expect_failure,
-        coverage=self.coverage,
-        extra_env=self.extra_env,
-    )
+  def __call__(self,
+               *args: typing.Any) -> typing.Tuple[typing.Optional[Exception], typing.List[str]]:
+    # Create a pipe to capture the logs/stdout/stderr from the executed task.
+    # We used to depend on the main process to capture the logs, but this
+    # caused interleaved output which is hard to read.
+    #
+    # We prefer to use a pipe over a StringIO buffer because the latter didn't seem
+    # to play nice with the multiprocessing library or the way we are using it.
+    #
+    # We also rely on the fact that logging is thread-safe.
+    # Using a string IO buffer failed to capture the logs.
+    log_capture_string = io.StringIO()
+    stream_handler = logging.StreamHandler(log_capture_string)
+    stream_handler.setLevel(logging.INFO)
+
+    # Create a logger for this task.
+    logger = logging.getLogger(f'{self.executable_name}-{os.getpid()}')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(stream_handler)
+    # Don't propagate to the root logger to avoid double logging
+    logger.propagate = False
+
+    try:
+      run_engine_executable(
+          self.build_dir,
+          self.executable_name,
+          self.executable_filter,
+          flags=self.flags,
+          cwd=self.cwd,
+          forbidden_output=self.forbidden_output,
+          allowed_failure_output=self.allowed_failure_output,
+          expect_failure=self.expect_failure,
+          coverage=self.coverage,
+          extra_env=self.extra_env,
+          logger=logger,
+      )
+      return (None, log_capture_string.getvalue().splitlines())
+    except Exception as exn:  # pylint: disable=broad-except
+      return (exn, log_capture_string.getvalue().splitlines())
 
   def __str__(self) -> str:
     command = build_engine_executable_command(
@@ -1075,7 +1110,11 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
       async_results = [(t, pool.apply_async(t, ())) for t in tasks]
       for task, async_result in async_results:
         try:
-          async_result.get()
+          exception, logs = async_result.get()
+          for line in logs:
+            _logger.info(line)
+          if exception is not None:
+            failures += [(task, exception)]
         except Exception as exn:  # pylint: disable=broad-except
           failures += [(task, exn)]
   finally:
