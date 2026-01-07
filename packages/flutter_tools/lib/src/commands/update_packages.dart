@@ -181,6 +181,13 @@ class UpdatePackagesCommand extends FlutterCommand {
           .childDirectory('widget_preview_scaffold.shard')
           .childDirectory('widget_preview_scaffold'),
     );
+    // This package is intentionally not part of the workspace to test
+    // user-defines in its local pubspec.
+    final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
+        .childDirectory('dev')
+        .childDirectory('integration_tests')
+        .childDirectory('hook_user_defines');
+
     final packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
@@ -208,6 +215,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
+        hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
       }
@@ -220,11 +228,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkWithFlutterTools(rootDirectory);
     _checkPins(rootDirectory);
 
+    // Pub get for the workspace.
     await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
 
+    // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
     await _pubGet(widgetPreviewScaffoldProject, false);
+    await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();
 
