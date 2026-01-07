@@ -13,69 +13,6 @@ import '../widgets/navigator_utils.dart';
 // Matches _kTopGapRatio in cupertino/sheet.dart.
 const double _kTopGapRatio = 0.08;
 
-class _RebuildingPage extends StatefulWidget {
-  const _RebuildingPage({required this.scaffoldKey});
-
-  final GlobalKey scaffoldKey;
-
-  @override
-  _RebuildingPageState createState() => _RebuildingPageState();
-}
-
-class _RebuildingPageState extends State<_RebuildingPage> {
-  late int counter;
-
-  @override
-  void initState() {
-    super.initState();
-    counter = 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoApp(
-      home: CupertinoPageScaffold(
-        key: widget.scaffoldKey,
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              const Text('Page 1'),
-              CupertinoButton(
-                onPressed: () {
-                  Navigator.push<void>(
-                    widget.scaffoldKey.currentContext!,
-                    CupertinoSheetRoute<void>(
-                      builder: (BuildContext context) {
-                        return CupertinoPageScaffold(
-                          child: Center(
-                            child: Column(
-                              children: <Widget>[
-                                const Text('Page two'),
-                                Text('Counter Value: $counter'),
-                                CupertinoButton(
-                                  onPressed: () => setState(() {
-                                    counter++;
-                                  }),
-                                  child: const Text('Increase Count'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: const Text('Push Page 2'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 void main() {
   testWidgets('Sheet route does not cover the whole screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
