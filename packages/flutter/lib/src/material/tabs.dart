@@ -494,6 +494,12 @@ class _IndicatorPainter extends CustomPainter {
     required TabIndicatorAnimation indicatorAnimation,
     required TextDirection textDirection,
   }) {
+    /// Initializing [_IndicatorPainterNotifier] here that allows the
+    /// repaint notifier to be used in the super constructor call
+    /// (within [Listenable.merge]) while also being stored as a private field.
+    ///
+    /// The notifier is to trigger a repaint when asynchronous resources,
+    /// like images in the indicator [Decoration], are finished loading.
     return _IndicatorPainter._(
       controller: controller,
       indicator: indicator,
