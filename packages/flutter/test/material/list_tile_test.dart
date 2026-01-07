@@ -1938,6 +1938,38 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
   });
 
+  testWidgets('ListTile computeMinIntrinsicHeight respects minTileHeight and padding', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame({double? minTileHeight}) {
+      return MaterialApp(
+        theme: ThemeData(listTileTheme: ListTileThemeData(minTileHeight: minTileHeight)),
+        home: const Material(
+          type: MaterialType.transparency,
+          child: Column(
+            children: [
+              IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(children: [ListTile(title: Text('item.label'))]),
+                    ),
+                    Expanded(
+                      child: Column(children: [ListTile(title: Text('item.label'))]),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(minTileHeight: 30));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('colors are applied to leading and trailing text widgets', (
     WidgetTester tester,
   ) async {

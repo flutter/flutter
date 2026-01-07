@@ -940,6 +940,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1047,6 +1048,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
@@ -1159,6 +1161,7 @@ void main() {
           fileSystem: globals.fs,
           logger: globals.logger,
           platform: globals.platform,
+          webCrossOriginIsolation: false,
         );
         webDevFS.requireJS.createSync(recursive: true);
         webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1234,6 +1237,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
 
@@ -1282,6 +1286,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1336,6 +1341,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1380,6 +1386,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1419,6 +1426,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        crossOriginIsolation: false,
       );
 
       expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
@@ -1513,6 +1521,7 @@ void main() {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
+        webCrossOriginIsolation: false,
       );
       webDevFS.requireJS.createSync(recursive: true);
       webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1526,6 +1535,139 @@ void main() {
 
       await webDevFS.destroy();
     }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()}),
+  );
+
+  test(
+    'WebAssetServer serves index.html with web-define variables',
+    () => testbed.run(() async {
+      // Simple test case with no custom variables - should work like before
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+      expect(response.statusCode, 200);
+    }),
+  );
+
+  test(
+    'WebAssetServer throws error for missing web-define variables in index.html',
+    () => testbed.run(() async {
+      const htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{MISSING_VAR}}';
+  </script>
+</body>
+</html>''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(htmlContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{}, // Empty webDefines
+      );
+
+      expect(
+        () async => webAssetServer.handleRequest(Request('GET', Uri.parse('http://foobar/'))),
+        throwsToolExit(message: 'Missing web-define variable: MISSING_VAR'),
+      );
+    }),
+  );
+
+  test(
+    'WebAssetServer serves flutter_bootstrap.js with web-define variables',
+    () => testbed.run(() async {
+      const bootstrapContent = '''
+// Flutter bootstrap script
+const config = {
+  api: '{{API_URL}}',
+  debug: {{DEBUG_MODE}}
+};
+''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('flutter_bootstrap.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(bootstrapContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/flutter_bootstrap.js')),
+      );
+      expect(response.statusCode, 200);
+
+      final String body = await response.readAsString();
+      expect(body, contains("api: 'https://test.api.com'"));
+      expect(body, contains('debug: true'));
+    }),
   );
 }
 
