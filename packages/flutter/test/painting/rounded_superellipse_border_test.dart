@@ -313,7 +313,7 @@ void main() {
                   decoration: const ShapeDecoration(
                     color: Color.fromARGB(255, 120, 120, 120),
                     shape: RoundedSuperellipseBorder(
-                      side: BorderSide(color: Color.fromARGB(255, 255, 0, 0), width: 1),
+                      side: BorderSide(color: Color.fromARGB(255, 255, 0, 0)),
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(100),
                         bottomRight: Radius.circular(30),
