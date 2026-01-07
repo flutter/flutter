@@ -11,14 +11,14 @@ import '../web/devfs_proxy.dart';
 const _kLogEntryPrefix = '[proxyMiddleware]';
 
 const Set<String> _kCookieAttributes = <String>{
-  'path',
   'domain',
   'expires',
-  'max-age',
-  'secure',
   'httponly',
-  'samesite',
+  'max-age',
   'partitioned',
+  'path',
+  'samesite',
+  'secure',
 };
 
 List<String> splitSetCookieHeader(String headerValue) {
@@ -28,19 +28,18 @@ List<String> splitSetCookieHeader(String headerValue) {
 
   final cookies = <String>[];
   final currentCookie = StringBuffer();
-  final List<String> parts = headerValue.split(', ');
+  final List<String> parts = headerValue.split(',');
 
-  for (var i = 0; i < parts.length; i++) {
-    final String part = parts[i];
-
+  for (final part in parts) {
+    final String trimmedPart = part.trim();
     if (currentCookie.isEmpty) {
-      currentCookie.write(part);
-    } else if (_isNewCookie(part)) {
+      currentCookie.write(trimmedPart);
+    } else if (_isNewCookie(trimmedPart)) {
       cookies.add(currentCookie.toString());
       currentCookie.clear();
-      currentCookie.write(part);
+      currentCookie.write(trimmedPart);
     } else {
-      currentCookie.write(', $part');
+      currentCookie.write(', $trimmedPart');
     }
   }
 
@@ -107,10 +106,6 @@ Future<shelf.Response> _applyProxyRules(
       shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
-      if (proxyResponse.statusCode == 404) {
-        logger.printTrace('$_kLogEntryPrefix "$finalTargetUrl" responded with status 404');
-        return innerHandler(request);
-      }
       proxyResponse = _fixSetCookieHeaders(proxyResponse);
       return proxyResponse;
     } on Exception catch (e) {
@@ -121,6 +116,12 @@ Future<shelf.Response> _applyProxyRules(
   return innerHandler(request);
 }
 
+/// Fixes Set-Cookie headers that were incorrectly merged into a single header.
+///
+/// The shelf_proxy package merges multiple Set-Cookie headers into one
+/// comma-separated value, but Set-Cookie is one of the few HTTP headers
+/// that cannot be safely combined this way because cookie values and
+/// Expires dates can contain commas.
 shelf.Response _fixSetCookieHeaders(shelf.Response response) {
   final String? setCookieHeader = response.headers['set-cookie'];
   if (setCookieHeader == null) {
@@ -132,9 +133,7 @@ shelf.Response _fixSetCookieHeaders(shelf.Response response) {
     return response;
   }
 
-  final newHeaders = Map<String, Object>.from(response.headers);
-  newHeaders['set-cookie'] = cookies;
-  return response.change(headers: newHeaders);
+  return response.change(headers: <String, Object>{...response.headers, 'set-cookie': cookies});
 }
 
 /// Creates a [shelf.Middleware] that proxies requests based on a list of [ProxyRule]s.
