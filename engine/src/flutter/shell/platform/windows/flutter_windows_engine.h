@@ -261,7 +261,8 @@ class FlutterWindowsEngine {
   bool semantics_enabled() const { return semantics_enabled_; }
 
   bool iaccessibleex_enabled() const {
-    return project_->iaccessibleex_enabled();
+    return project_->accessibility_mode() ==
+           FlutterAccessibilityMode::IAccessibleEx;
   }
 
   // Refresh accessibility features and send them to the engine.
