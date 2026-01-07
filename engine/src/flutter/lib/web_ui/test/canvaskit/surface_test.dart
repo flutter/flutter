@@ -36,7 +36,7 @@ void testMain() {
       expect(canvasSize.width, 1);
       expect(canvasSize.height, 1);
 
-      await surface.setSize(const BitmapSize(9, 19));
+      surface.setSize(const BitmapSize(9, 19));
       canvasSize = getCssSize(canvas);
 
       // Expect exact requested dimensions.
@@ -46,7 +46,7 @@ void testMain() {
       expect(canvasSize.height, 19);
 
       // Shrinking causes us to resize the canvas.
-      await surface.setSize(const BitmapSize(5, 15));
+      surface.setSize(const BitmapSize(5, 15));
       canvasSize = getCssSize(canvas);
       expect(canvas.width, 5);
       expect(canvas.height, 15);
@@ -54,7 +54,7 @@ void testMain() {
       expect(canvasSize.height, 15);
 
       // Increasing the size causes us to resize the canvas.
-      await surface.setSize(const BitmapSize(10, 20));
+      surface.setSize(const BitmapSize(10, 20));
       canvasSize = getCssSize(canvas);
 
       // Expect exact dimensions
@@ -64,7 +64,7 @@ void testMain() {
       expect(canvasSize.height, 20);
 
       // Subsequent increases also cause canvas resizing.
-      await surface.setSize(const BitmapSize(11, 22));
+      surface.setSize(const BitmapSize(11, 22));
       canvasSize = getCssSize(canvas);
 
       expect(canvas.width, 11);
@@ -73,7 +73,7 @@ void testMain() {
       expect(canvasSize.height, 22);
 
       // Increases beyond the 40% limit will cause a canvas resize. STATIC_ASSERT_FOR_WEB
-      await surface.setSize(const BitmapSize(20, 40));
+      surface.setSize(const BitmapSize(20, 40));
       canvasSize = getCssSize(canvas);
 
       // Also exact
@@ -83,7 +83,7 @@ void testMain() {
       expect(canvasSize.height, 40);
 
       // Shrink again. Resize the canvas.
-      await surface.setSize(const BitmapSize(5, 15));
+      surface.setSize(const BitmapSize(5, 15));
       canvasSize = getCssSize(canvas);
 
       expect(canvas.width, 5);
@@ -94,7 +94,7 @@ void testMain() {
       // Doubling the DPR should halve the CSS width, height, and translation of the canvas.
       // This tests https://github.com/flutter/flutter/issues/77084
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
-      await surface.setSize(const BitmapSize(5, 15));
+      surface.setSize(const BitmapSize(5, 15));
       canvasSize = getCssSize(canvas);
 
       expect(canvas.width, 5);
@@ -133,9 +133,9 @@ void testMain() {
       );
       final surface = surfaceProvider.createSurface() as CkOnscreenSurface;
       await surface.initialized;
-      await surface.setSize(const BitmapSize(10, 20));
+      surface.setSize(const BitmapSize(10, 20));
       final SkSurface? skSurface1 = surface.skSurface;
-      await surface.setSize(const BitmapSize(10, 20));
+      surface.setSize(const BitmapSize(10, 20));
       final SkSurface? skSurface2 = surface.skSurface;
       expect(skSurface1, same(skSurface2));
     });

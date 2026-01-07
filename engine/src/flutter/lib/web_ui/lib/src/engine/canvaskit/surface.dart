@@ -190,7 +190,7 @@ abstract class CkSurface extends Surface {
   double _currentDevicePixelRatio = -1;
 
   @override
-  Future<void> setSize(BitmapSize size) async {
+  void setSize(BitmapSize size) {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     if (_skSurface != null &&
         _currentSize == size &&

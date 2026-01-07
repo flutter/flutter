@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../compositing/surface.dart';
 import '../layer/layer_painting.dart';
 import '../util.dart';
 import 'canvas.dart';
@@ -114,10 +113,9 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   }) {
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
     surface.setSize(BitmapSize(width, height));
-    final ckSurface = surface as CkSurface;
-    final SkSurface skiaSurface = ckSurface.skSurface!;
+    final SkSurface skiaSurface = surface.skSurface!;
 
     final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));

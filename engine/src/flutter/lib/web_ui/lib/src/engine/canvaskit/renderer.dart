@@ -44,7 +44,7 @@ class CanvasKitRenderer extends Renderer {
   @override
   void debugResetRasterizer() {
     rasterizer = _createRasterizer();
-    _pictureToImageSurface = rasterizer.createPictureToImageSurface();
+    _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
   }
 
   @override
@@ -60,7 +60,7 @@ class CanvasKitRenderer extends Renderer {
         windowFlutterCanvasKit = canvasKit;
       }
       rasterizer = _createRasterizer();
-      _pictureToImageSurface = rasterizer.createPictureToImageSurface();
+      _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
       _instance = this;
       await super.initialize();
     }();
@@ -502,8 +502,8 @@ class CanvasKitRenderer extends Renderer {
     }
   }
 
-  late Surface _pictureToImageSurface;
+  late CkSurface _pictureToImageSurface;
 
   @override
-  Surface get pictureToImageSurface => _pictureToImageSurface;
+  CkSurface get pictureToImageSurface => _pictureToImageSurface;
 }

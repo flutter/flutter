@@ -551,11 +551,10 @@ class CkImage implements ui.Image, StackTraceDebugger {
     return data;
   }
 
-  Future<ByteData> _readPixelsFromImageViaSurface(ui.ImageByteFormat format) async {
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    await surface.setSize(BitmapSize(width, height));
-    final ckSurface = surface as CkSurface;
-    final SkSurface skiaSurface = ckSurface.skSurface!;
+  ByteData _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    surface.setSize(BitmapSize(width, height));
+    final SkSurface skiaSurface = surface.skSurface!;
 
     final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));

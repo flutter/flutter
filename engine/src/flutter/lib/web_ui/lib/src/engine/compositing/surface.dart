@@ -61,7 +61,7 @@ class OnscreenSurfaceProvider extends SurfaceProvider<OnscreenSurface, OnscreenC
 /// The base interface for a rendering surface.
 abstract class Surface {
   /// Sets the size of the underlying canvas.
-  Future<void> setSize(BitmapSize size);
+  FutureOr<void> setSize(BitmapSize size);
 
   /// Converts a `ui.Image` into a `ByteData` object in the specified format.
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format);
