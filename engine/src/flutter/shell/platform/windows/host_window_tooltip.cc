@@ -20,12 +20,19 @@ HostWindowTooltip::HostWindowTooltip(
       parent_(parent),
       isolate_(Isolate::Current()),
       view_alive_(std::make_shared<int>(0)) {
+  // Use minimum constraints as initial size to ensure the view can be created
+  // with valid metrics. If is_sized_to_content is true, the size will be
+  // updated when content is rendered.
+  int32_t initial_width = static_cast<int32_t>(constraints.smallest().width());
+  int32_t initial_height =
+      static_cast<int32_t>(constraints.smallest().height());
+
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kTooltip,
       .window_style = WS_POPUP,
       .extended_window_style = WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
       .box_constraints = constraints,
-      .initial_window_rect = {{0, 0}, {0, 0}},
+      .initial_window_rect = {{0, 0}, {initial_width, initial_height}},
       .title = L"",
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
