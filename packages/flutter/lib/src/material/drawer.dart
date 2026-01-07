@@ -221,7 +221,7 @@ class Drawer extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// Typically a [SliverList].
+  /// Typically a [ListView].
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
