@@ -1797,7 +1797,7 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(
+      isSemantics(
         isTextField: true,
         isFocusable: true,
         validationResult: SemanticsValidationResult.valid,
@@ -1809,7 +1809,7 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(
+      isSemantics(
         isTextField: true,
         isFocusable: true,
         validationResult: SemanticsValidationResult.invalid,

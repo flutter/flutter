@@ -703,11 +703,7 @@ void main() {
     expect(find.text('suffix'), findsOneWidget);
     expect(
       tester.semantics.find(find.byKey(suffix)),
-      containsSemantics(
-        label: 'suffix',
-        identifier: 'myId',
-        rect: const Rect.fromLTWH(0, 0, 50, 50),
-      ),
+      isSemantics(label: 'suffix', identifier: 'myId', rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
   });
 
