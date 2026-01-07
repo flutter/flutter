@@ -63,7 +63,7 @@ dependencies:
 
 dev_dependencies:
   flutter_tools:
-    path: ../../../
+    path: ../../../packages/flutter_tools/
   test: 1.28.0
 
 flutter:

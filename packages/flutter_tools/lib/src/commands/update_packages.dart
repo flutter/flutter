@@ -169,16 +169,6 @@ class UpdatePackagesCommand extends FlutterCommand {
     final FlutterProject toolProject = FlutterProject.fromDirectory(
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
-    // This needs to be special cased, as it is below flutter_tools, so cannot
-    // be in the flutter pub workspace.
-    final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
-      rootProject.directory
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
-          .childDirectory('widget_preview_scaffold'),
-    );
     final packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
@@ -207,7 +197,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
-        widgetPreviewScaffoldProject.directory,
       ]) {
         _updatePubspec(package, deps);
       }
@@ -224,7 +213,6 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
-    await _pubGet(widgetPreviewScaffoldProject, false);
 
     await _downloadCoverageData();
 

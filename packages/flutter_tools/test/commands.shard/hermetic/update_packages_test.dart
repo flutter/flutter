@@ -227,15 +227,6 @@ void main() {
       flutterSdk.childFile('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
-      flutterSdk
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
-          .childDirectory('widget_preview_scaffold')
-          .childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(kWidgetTestPubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub();
       processManager = FakeProcessManager.empty();
