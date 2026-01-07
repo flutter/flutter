@@ -125,6 +125,7 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
+        includeUnsupportedPlatformLibraryStubs: buildInfo.includeUnsupportedPlatformLibraryStubs,
         fileSystemRoots: buildInfo.fileSystemRoots,
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.

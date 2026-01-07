@@ -53,6 +53,7 @@ class BuildInfo {
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
+    this.includeUnsupportedPlatformLibraryStubs = false,
     this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
@@ -180,6 +181,11 @@ class BuildInfo {
 
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
+
+  /// If set, unsupported core libraries can be imported without causing a compile time error.
+  ///
+  /// This should only be used by developer tooling as unsupported APIs will throw at runtime.
+  final bool includeUnsupportedPlatformLibraryStubs;
 
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;

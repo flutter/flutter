@@ -220,6 +220,8 @@ template("_compile_platform") {
     skwasm_library = "dart:_skwasm_stub"
     if (invoker.kernel_target == "dart2wasm") {
       skwasm_library = "dart:_skwasm_impl"
+    } else if (invoker.kernel_target == "ddc") {
+      args += [ "--include-unsupported-platform-library-stubs" ]
     }
 
     args += [
