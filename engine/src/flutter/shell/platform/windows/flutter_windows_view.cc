@@ -392,6 +392,8 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
   FlutterEngineDisplayId display_id = binding_handler_->GetDisplayId();
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
+  event.width = width;
+  event.height = height;
   event.has_constraints = true;
   auto const constraints = GetConstraints();
   event.min_width_constraint =
@@ -402,13 +404,6 @@ void FlutterWindowsView::SendWindowMetrics(size_t width,
       static_cast<size_t>(constraints.biggest().width());
   event.max_height_constraint =
       static_cast<size_t>(constraints.biggest().height());
-  if (IsSizedToContent()) {
-    event.width = event.min_width_constraint;
-    event.height = event.min_height_constraint;
-  } else {
-    event.width = width;
-    event.height = height;
-  }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;
@@ -422,6 +417,8 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
+  event.width = bounds.width;
+  event.height = bounds.height;
   auto constraints = GetConstraints();
   event.has_constraints = true;
   event.min_width_constraint =
@@ -432,13 +429,6 @@ FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
       static_cast<size_t>(constraints.biggest().width());
   event.max_height_constraint =
       static_cast<size_t>(constraints.biggest().height());
-  if (IsSizedToContent()) {
-    event.width = event.min_width_constraint;
-    event.height = event.min_height_constraint;
-  } else {
-    event.width = bounds.width;
-    event.height = bounds.height;
-  }
   event.pixel_ratio = pixel_ratio;
   event.display_id = display_id;
   event.view_id = view_id_;

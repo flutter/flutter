@@ -480,6 +480,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;
 
   // If `true`, the view is sized to its content via a sizing delegate.
+  // If `false`, the view is sized by its parent HWND.
   bool is_sized_to_content_ = false;
 
   // The constraints for this view.

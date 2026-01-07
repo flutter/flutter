@@ -36,6 +36,7 @@ HostWindowTooltip::HostWindowTooltip(
 }
 
 void HostWindowTooltip::DidUpdateViewSize(int32_t width, int32_t height) {
+  // This is called from the raster thread.
   std::weak_ptr<int> weak_view_alive = view_alive_;
   engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
     auto const view_alive = weak_view_alive.lock();
