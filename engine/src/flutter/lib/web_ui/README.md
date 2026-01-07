@@ -315,8 +315,9 @@ Once you know the version for the Emscripten SDK, change the line in
 
 In order to use a locally built Dart SDK, you simply set the `DART_SDK_DIR` environment variable like so:
 ```
-DART_SDK_DIR=path/to/dart-sdk/ felt ...
+DART_SDK_DIR=path/to/dart-sdk/ felt test
 ```
+Note: The provided Dart SDK is used to run the `felt` tool itself, and to compile and run tests. But `felt build` invokes the `gn` build which is unaffected by the `DART_SDK_DIR` environment variable.
 
 
 [1]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md
