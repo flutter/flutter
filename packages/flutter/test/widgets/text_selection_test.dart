@@ -2010,14 +2010,14 @@ void main() {
         final double minEndpointX = math.min(point1X, point2X);
         final double maxEndpointX = math.max(point1X, point2X);
 
-        // Left Handle should be near minEndpointX
+        // Left Handle should be near minEndpointX.
         expect(
           (leftHandlePos.dx - minEndpointX).abs(),
           lessThan(50.0),
           reason: 'Left handle should be near left endpoint',
         );
 
-        // Right Handle should be near maxEndpointX
+        // Right Handle should be near maxEndpointX.
         expect(
           (rightHandlePos.dx - maxEndpointX).abs(),
           lessThan(50.0),
