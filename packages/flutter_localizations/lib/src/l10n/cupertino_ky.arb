@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Жыйыштыруу",
   "expansionTileCollapsedTapHint": "Толук маалымат алуу үчүн жайып көрүңүз",
   "expandedHint": "Жыйыштырылды",
-  "collapsedHint": "Жайылып көрсөтүлдү"
+  "collapsedHint": "Жайылып көрсөтүлдү",
+  "translateButtonLabel": "Translate"
 }

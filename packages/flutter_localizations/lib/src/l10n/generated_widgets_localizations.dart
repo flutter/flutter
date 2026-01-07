@@ -75,6 +75,9 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Deel';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Amharic (`am`).
@@ -131,6 +134,9 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'አጋራ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Arabic (`ar`).
@@ -187,6 +193,9 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'مشاركة';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Assamese (`as`).
@@ -243,6 +252,9 @@ class WidgetsLocalizationAs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'শ্বেয়াৰ কৰক';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Azerbaijani (`az`).
@@ -299,6 +311,9 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Paylaşın';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Belarusian (`be`).
@@ -355,6 +370,9 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Абагуліць';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bulgarian (`bg`).
@@ -411,6 +429,9 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Споделяне';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bengali Bangla (`bn`).
@@ -467,6 +488,9 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'শেয়ার করুন';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -523,6 +547,9 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Dijeli';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Catalan Valencian (`ca`).
@@ -579,6 +606,9 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Comparteix';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Czech (`cs`).
@@ -635,6 +665,9 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Sdílet';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Welsh (`cy`).
@@ -691,6 +724,9 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Rhannu';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Danish (`da`).
@@ -747,6 +783,9 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Del';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for German (`de`).
@@ -803,6 +842,9 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Teilen';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for German, as used in Switzerland (`de_CH`).
@@ -867,6 +909,9 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Κοινή χρήση';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for English (`en`).
@@ -923,6 +968,9 @@ class WidgetsLocalizationEn extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Share';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -1112,6 +1160,9 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Compartir';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -1448,6 +1499,9 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Jagamine';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Basque (`eu`).
@@ -1504,6 +1558,9 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Partekatu';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Persian (`fa`).
@@ -1560,6 +1617,9 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'هم‌رسانی کردن';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Finnish (`fi`).
@@ -1616,6 +1676,9 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Jaa';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Filipino Pilipino (`fil`).
@@ -1672,6 +1735,9 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'I-share';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for French (`fr`).
@@ -1728,6 +1794,9 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Partager';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
@@ -1801,6 +1870,9 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Compartir';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Swiss German Alemannic Alsatian (`gsw`).
@@ -1857,6 +1929,9 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Teilen';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Gujarati (`gu`).
@@ -1913,6 +1988,9 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'શેર કરો';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hebrew (`he`).
@@ -1969,6 +2047,9 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'שיתוף';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hindi (`hi`).
@@ -2025,6 +2106,9 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'शेयर करें';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Croatian (`hr`).
@@ -2081,6 +2165,9 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Dijeli';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Hungarian (`hu`).
@@ -2137,6 +2224,9 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Megosztás';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Armenian (`hy`).
@@ -2193,6 +2283,9 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Կիսվել';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Indonesian (`id`).
@@ -2249,6 +2342,9 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Bagikan';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Icelandic (`is`).
@@ -2305,6 +2401,9 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Deila';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Italian (`it`).
@@ -2361,6 +2460,9 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Condividi';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Japanese (`ja`).
@@ -2417,6 +2519,9 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => '共有';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Georgian (`ka`).
@@ -2473,6 +2578,9 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'გაზიარება';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kazakh (`kk`).
@@ -2529,6 +2637,9 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Бөлісу';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Khmer Central Khmer (`km`).
@@ -2585,6 +2696,9 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'ចែករំលែក';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kannada (`kn`).
@@ -2641,6 +2755,9 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => '\u{cb9}\u{c82}\u{c9a}\u{cbf}\u{c95}\u{cca}\u{cb3}\u{ccd}\u{cb3}\u{cbf}';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Korean (`ko`).
@@ -2697,6 +2814,9 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => '공유';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Kirghiz Kyrgyz (`ky`).
@@ -2753,6 +2873,9 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Бөлүшүү';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Lao (`lo`).
@@ -2809,6 +2932,9 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'ແບ່ງປັນ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Lithuanian (`lt`).
@@ -2865,6 +2991,9 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Bendrinti';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Latvian (`lv`).
@@ -2921,6 +3050,9 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Kopīgot';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Macedonian (`mk`).
@@ -2977,6 +3109,9 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Сподели';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Malayalam (`ml`).
@@ -3033,6 +3168,9 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'പങ്കിടുക';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Mongolian (`mn`).
@@ -3089,6 +3227,9 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Хуваалцах';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Marathi (`mr`).
@@ -3145,6 +3286,9 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'शेअर करा';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Malay (`ms`).
@@ -3201,6 +3345,9 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Kongsi';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Burmese (`my`).
@@ -3257,6 +3404,9 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'မျှဝေရန်';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
@@ -3313,6 +3463,9 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Del';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Nepali (`ne`).
@@ -3369,6 +3522,9 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'सेयर गर्नुहोस्';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Dutch Flemish (`nl`).
@@ -3425,6 +3581,9 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Delen';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Norwegian (`no`).
@@ -3481,6 +3640,9 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Del';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Oriya (`or`).
@@ -3537,6 +3699,9 @@ class WidgetsLocalizationOr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'ସେୟାର କରନ୍ତୁ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Panjabi Punjabi (`pa`).
@@ -3593,6 +3758,9 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'ਸਾਂਝਾ ਕਰੋ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Polish (`pl`).
@@ -3649,6 +3817,9 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Udostępnij';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Pushto Pashto (`ps`).
@@ -3705,6 +3876,9 @@ class WidgetsLocalizationPs extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Share...';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Portuguese (`pt`).
@@ -3761,6 +3935,9 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Compartilhar';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Portuguese, as used in Portugal (`pt_PT`).
@@ -3834,6 +4011,9 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Trimiteți';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Russian (`ru`).
@@ -3890,6 +4070,9 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Поделиться';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Sinhala Sinhalese (`si`).
@@ -3946,6 +4129,9 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'බෙදා ගන්න';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Slovak (`sk`).
@@ -4002,6 +4188,9 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Zdieľať';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Slovenian (`sl`).
@@ -4058,6 +4247,9 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Deli';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Albanian (`sq`).
@@ -4114,6 +4306,9 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Ndaj';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Serbian (`sr`).
@@ -4170,6 +4365,9 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Дели';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Serbian, using the Cyrillic script (`sr_Cyrl`).
@@ -4281,6 +4479,9 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Dela';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Swahili (`sw`).
@@ -4337,6 +4538,9 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Tuma';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Tamil (`ta`).
@@ -4393,6 +4597,9 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'பகிர்';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Telugu (`te`).
@@ -4449,6 +4656,9 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'షేర్ చేయండి';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Thai (`th`).
@@ -4505,6 +4715,9 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'แชร์';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Tagalog (`tl`).
@@ -4561,6 +4774,9 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'I-share';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Turkish (`tr`).
@@ -4617,6 +4833,9 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Paylaş';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Ukrainian (`uk`).
@@ -4673,6 +4892,9 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Поділитися';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Urdu (`ur`).
@@ -4729,6 +4951,9 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'اشتراک کریں';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Uzbek (`uz`).
@@ -4785,6 +5010,9 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Ulashish';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Vietnamese (`vi`).
@@ -4841,6 +5069,9 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Chia sẻ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Chinese (`zh`).
@@ -4897,6 +5128,9 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => '分享';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -5030,6 +5264,9 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Yabelana';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The set of supported languages, as language code strings.

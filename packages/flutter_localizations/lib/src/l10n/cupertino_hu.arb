@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Összecsukás",
   "expansionTileCollapsedTapHint": "Bontsa ki a további részletek megtekintéséhez",
   "expandedHint": "Összecsukva",
-  "collapsedHint": "Kibontva"
+  "collapsedHint": "Kibontva",
+  "translateButtonLabel": "Translate"
 }

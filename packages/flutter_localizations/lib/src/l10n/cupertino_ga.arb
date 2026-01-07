@@ -50,5 +50,6 @@
   "expansionTileExpandedTapHint": "Laghdaigh",
   "expansionTileCollapsedTapHint": "Leathnaigh chun tuilleadh sonraí a fháil",
   "expandedHint": "Laghdaithe",
-  "collapsedHint": "Leathnaithe"
+  "collapsedHint": "Leathnaithe",
+  "translateButtonLabel": "Translate"
 }

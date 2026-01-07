@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Goqa",
   "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
   "expandedHint": "Kugoqiwe",
-  "collapsedHint": "Kunwetshiwe"
+  "collapsedHint": "Kunwetshiwe",
+  "translateButtonLabel": "Translate"
 }

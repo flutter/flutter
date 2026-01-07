@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Skjul",
   "expansionTileCollapsedTapHint": "Vis for å se mer informasjon",
   "expandedHint": "Skjules",
-  "collapsedHint": "Vises"
+  "collapsedHint": "Vises",
+  "translateButtonLabel": "Translate"
 }

@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Réduire",
   "expansionTileCollapsedTapHint": "Développer pour en savoir plus",
   "expandedHint": "Réduit",
-  "collapsedHint": "Développé"
+  "collapsedHint": "Développé",
+  "translateButtonLabel": "Translate"
 }

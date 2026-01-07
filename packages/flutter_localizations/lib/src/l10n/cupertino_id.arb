@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Ciutkan",
   "expansionTileCollapsedTapHint": "Luaskan untuk mengetahui detail selengkapnya",
   "expandedHint": "Diciutkan",
-  "collapsedHint": "Diluaskan"
+  "collapsedHint": "Diluaskan",
+  "translateButtonLabel": "Translate"
 }

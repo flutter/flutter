@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Yığcamlaşdırın",
   "expansionTileCollapsedTapHint": "Daha çox detallar üçün genişləndirin",
   "expandedHint": "Yığcamlaşdırıldı",
-  "collapsedHint": "Genişləndirildi"
+  "collapsedHint": "Genişləndirildi",
+  "translateButtonLabel": "Translate"
 }

@@ -40,5 +40,6 @@
   "expansionTileExpandedTapHint": "Sakļaut",
   "expansionTileCollapsedTapHint": "Izvērst, lai iegūtu plašāku informāciju",
   "expandedHint": "Sakļauts",
-  "collapsedHint": "Izvērsts"
+  "collapsedHint": "Izvērsts",
+  "translateButtonLabel": "Translate"
 }

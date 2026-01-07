@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "छोटा करें",
   "expansionTileCollapsedTapHint": "ज़्यादा जानकारी के लिए बड़ा करें",
   "expandedHint": "छोटा किया गया",
-  "collapsedHint": "बड़ा किया गया"
+  "collapsedHint": "बड़ा किया गया",
+  "translateButtonLabel": "Translate"
 }

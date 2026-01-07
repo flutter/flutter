@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Vou in",
   "expansionTileCollapsedTapHint": "Vou uit vir meer besonderhede",
   "expandedHint": "Ingevou",
-  "collapsedHint": "Uitgevou"
+  "collapsedHint": "Uitgevou",
+  "translateButtonLabel": "Translate"
 }

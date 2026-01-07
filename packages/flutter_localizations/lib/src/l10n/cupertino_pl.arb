@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Zwiń",
   "expansionTileCollapsedTapHint": "Rozwiń, aby wyświetlić więcej informacji",
   "expandedHint": "Zwinięto",
-  "collapsedHint": "Rozwinięto"
+  "collapsedHint": "Rozwinięto",
+  "translateButtonLabel": "Translate"
 }

@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "يىغىش",
   "expansionTileCollapsedTapHint": "تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ",
   "expandedHint": "يىغىلدى",
-  "collapsedHint": "يېيىلدى"
+  "collapsedHint": "يېيىلدى",
+  "translateButtonLabel": "Translate"
 }

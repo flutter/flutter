@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "전체 선택",
   "searchResultsFound": "Search results found",
   "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Not selected",
+  "translateButtonLabel": "Translate"
 }

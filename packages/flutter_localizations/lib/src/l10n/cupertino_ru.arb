@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Свернуть",
   "expansionTileCollapsedTapHint": "Развернуть дополнительные сведения",
   "expandedHint": "Свернуто",
-  "collapsedHint": "Развернуто"
+  "collapsedHint": "Развернуто",
+  "translateButtonLabel": "Translate"
 }

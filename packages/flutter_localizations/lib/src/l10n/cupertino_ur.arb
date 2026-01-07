@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "سکیڑیں",
   "expansionTileCollapsedTapHint": "مزید تفصیلات کے لیے پھیلائیں",
   "expandedHint": "سکڑا ہوا",
-  "collapsedHint": "پھیلا ہوا"
+  "collapsedHint": "پھیلا ہوا",
+  "translateButtonLabel": "Translate"
 }

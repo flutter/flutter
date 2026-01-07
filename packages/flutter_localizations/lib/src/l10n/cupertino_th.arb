@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ยุบ",
   "expansionTileCollapsedTapHint": "ขยายเพื่อดูรายละเอียดเพิ่มเติม",
   "expandedHint": "ยุบ",
-  "collapsedHint": "ขยาย"
+  "collapsedHint": "ขยาย",
+  "translateButtonLabel": "Translate"
 }
