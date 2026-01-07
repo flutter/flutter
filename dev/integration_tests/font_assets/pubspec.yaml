@@ -1,0 +1,34 @@
+name: font_assets
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_hook_config: any
+  font_asset: any
+  hooks: any
+
+dev_dependencies:
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true
+  config:
+    enable-dart-data-assets: true
+  # fonts:
+  #   - family: RobotoMono
+  #     fonts:
+  #       - asset: fonts/Roboto-Regular.ttf
+  #       - asset: fonts/Roboto-Bold.ttf
+  #         weight: 700
+  #   - family: BBHBartle
+  #     fonts:
+  #       - asset: fonts/BBHBartle-Regular.ttf
+  #   - family: DancingScript
+  #     fonts:
+  #     - asset: fonts/dancing_script.ttf
