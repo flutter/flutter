@@ -3303,10 +3303,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        WidgetsApp(
-          color: blueColor,
-          home: Scaffold(body: ListTile(title: const Text('title'))),
-        ),
+        buildWidgetsApp(const SizedBox.expand(child: Center(child: Text('title')))),
       );
       final FocusNode? initialFocus = primaryFocus;
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
