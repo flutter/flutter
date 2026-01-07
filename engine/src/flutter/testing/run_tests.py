@@ -21,7 +21,7 @@ import re
 import shutil
 import subprocess
 # Explicitly import the parts of sys that are needed. This is to avoid using
-# sys.stdout and sys.stderr directly. Instead, only the logger defined below
+# sys.stdout and sys.stderr directly. Instead, only the _logger defined below
 # should be used for output.
 from sys import exit as sys_exit, platform as sys_platform, path as sys_path, stdout as sys_stdout
 import tempfile
@@ -44,22 +44,22 @@ FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 ENCODING = 'UTF-8'
 
 LOG_FILE = os.path.join(OUT_DIR, 'run_tests.log')
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 # Write console logs to stdout (by default StreamHandler uses stderr)
-console_logger_handler = logging.StreamHandler(sys_stdout)
-file_logger_handler = logging.FileHandler(LOG_FILE)
+_console_logger_handler = logging.StreamHandler(sys_stdout)
+_file_logger_handler = logging.FileHandler(LOG_FILE)
 
 
-# Override print so that it uses the logger instead of stdout directly.
+# Override print so that it uses the _logger instead of stdout directly.
 def print(*args, **kwargs):  # pylint: disable=redefined-builtin
-  logger.info(*args, **kwargs)
+  _logger.info(*args, **kwargs)
 
 
 def print_divider(char: str = '=') -> None:
-  logger.info('\n')
+  _logger.info('\n')
   for _ in range(4):
-    logger.info(''.join([char for _ in range(80)]))
-  logger.info('\n')
+    _logger.info(''.join([char for _ in range(80)]))
+  _logger.info('\n')
 
 
 def is_asan(build_dir: str) -> bool:
@@ -87,7 +87,7 @@ def run_cmd( # pylint: disable=too-many-arguments
   command_string = ' '.join(cmd)
 
   print_divider('>')
-  logger.info('Running command "%s" in "%s"', command_string, cwd)
+  _logger.info('Running command "%s" in "%s"', command_string, cwd)
 
   start_time = time.time()
 
@@ -105,7 +105,7 @@ def run_cmd( # pylint: disable=too-many-arguments
   if process.stdout:
     for line in iter(process.stdout.readline, ''):
       output += line
-      logger.info(line.rstrip())
+      _logger.info(line.rstrip())
 
   process.wait()
   end_time = time.time()
@@ -113,7 +113,7 @@ def run_cmd( # pylint: disable=too-many-arguments
   if process.returncode != 0 and not expect_failure:
     print_divider('!')
 
-    logger.error(
+    _logger.error(
         'Failed Command:\n\n%s\n\nExit Code: %s\n\nOutput:\n%s', command_string, process.returncode,
         output
     )
@@ -139,7 +139,7 @@ def run_cmd( # pylint: disable=too-many-arguments
       )
 
   print_divider('<')
-  logger.info(
+  _logger.info(
       'Command run successfully in %.2f seconds: %s (in %s)', end_time - start_time, command_string,
       cwd
   )
@@ -271,7 +271,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     gtest: bool = False,
 ) -> None:
   if executable_filter is not None and executable_name not in executable_filter:
-    logger.info('Skipping %s due to filter.', executable_name)
+    _logger.info('Skipping %s due to filter.', executable_name)
     return
 
   if flags is None:
@@ -306,7 +306,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
   else:
     env['PATH'] = build_dir + ':' + env['PATH']
 
-  logger.info('Running %s in %s', executable_name, cwd)
+  _logger.info('Running %s in %s', executable_name, cwd)
 
   test_command = build_engine_executable_command(
       build_dir,
@@ -338,7 +338,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
       dump_path = os.path.join(luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt')
-      logger.error('Writing core dump analysis to %s', dump_path)
+      _logger.error('Writing core dump analysis to %s', dump_path)
       subprocess.call([
           os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'analyze_core_dump.sh'),
           BUILDROOT_DIR,
@@ -411,7 +411,7 @@ def run_cc_tests(
     build_dir: str, executable_filter: typing.Optional[typing.List[str]], coverage: bool,
     capture_core_dump: bool
 ) -> None:
-  logger.info('Running Engine Unit-tests.')
+  _logger.info('Running Engine Unit-tests.')
 
   if capture_core_dump and is_linux():
     import resource  # pylint: disable=import-outside-toplevel
@@ -602,7 +602,7 @@ def run_cc_tests(
 def run_engine_benchmarks(
     build_dir: str, executable_filter: typing.Optional[typing.List[str]]
 ) -> None:
-  logger.info('Running Engine Benchmarks.')
+  _logger.info('Running Engine Benchmarks.')
 
   icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
 
@@ -690,7 +690,7 @@ def gather_dart_test(
   ]
 
   tester_name = 'flutter_tester'
-  logger.info(
+  _logger.info(
       "Running test '%s' using '%s' (%s, %s)", kernel_file_name, tester_name,
       options.threading_description(), options.impeller_enabled()
   )
@@ -905,9 +905,9 @@ def gather_dart_tests(
     for dart_test_file in dart_vm_service_tests:
       dart_test_basename = os.path.basename(dart_test_file)
       if test_filter is not None and dart_test_basename not in test_filter:
-        logger.info("Skipping '%s' due to filter.", dart_test_file)
+        _logger.info("Skipping '%s' due to filter.", dart_test_file)
       else:
-        logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
+        _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
           for enable_impeller in [False, True]:
             yield gather_dart_test(
@@ -923,9 +923,9 @@ def gather_dart_tests(
 
   for dart_test_file in dart_tests:
     if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
-      logger.info("Skipping '%s' due to filter.", dart_test_file)
+      _logger.info("Skipping '%s' due to filter.", dart_test_file)
     else:
-      logger.info("Gathering dart test '%s'", dart_test_file)
+      _logger.info("Gathering dart test '%s'", dart_test_file)
       for multithreaded in [False, True]:
         for enable_impeller in [False, True]:
           yield gather_dart_test(
@@ -945,7 +945,7 @@ def gather_dart_smoke_test(
       'fail_test.dart',
   )
   if test_filter is not None and os.path.basename(smoke_test) not in test_filter:
-    logger.info("Skipping '%s' due to filter.", smoke_test)
+    _logger.info("Skipping '%s' due to filter.", smoke_test)
   else:
     yield gather_dart_test(
         build_dir, smoke_test, FlutterTesterOptions(multithreaded=True, expect_failure=True)
@@ -1062,8 +1062,8 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
   queue: multiprocessing.Queue = multiprocessing.Queue()
   queue_listener = logging.handlers.QueueListener(
       queue,
-      console_logger_handler,
-      file_logger_handler,
+      _console_logger_handler,
+      _file_logger_handler,
       respect_handler_level=True,
   )
   queue_listener.start()
@@ -1071,7 +1071,7 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
   failures = []
   try:
     with multiprocessing.Pool(max_processes, worker_init,
-                              [queue, logger.getEffectiveLevel()]) as pool:
+                              [queue, _logger.getEffectiveLevel()]) as pool:
       async_results = [(t, pool.apply_async(t, ())) for t in tasks]
       for task, async_result in async_results:
         try:
@@ -1082,9 +1082,9 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
     queue_listener.stop()
 
   if len(failures) > 0:
-    logger.error('The following commands failed:')
+    _logger.error('The following commands failed:')
     for task, failure_exn in failures:
-      logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
+      _logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
     return False
 
   return True
@@ -1317,14 +1317,14 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   args = parser.parse_args()
 
-  logger.addHandler(console_logger_handler)
-  logger.addHandler(file_logger_handler)
-  logger.setLevel(logging.INFO)
+  _logger.addHandler(_console_logger_handler)
+  _logger.addHandler(_file_logger_handler)
+  _logger.setLevel(logging.INFO)
   if args.quiet:
-    file_logger_handler.setLevel(logging.INFO)
-    console_logger_handler.setLevel(logging.WARNING)
+    _file_logger_handler.setLevel(logging.INFO)
+    _console_logger_handler.setLevel(logging.WARNING)
   else:
-    console_logger_handler.setLevel(logging.INFO)
+    _console_logger_handler.setLevel(logging.INFO)
 
   if args.type == 'all':
     types = all_types
@@ -1401,7 +1401,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     assert not is_windows(), "Android engine files can't be compiled on Windows."
     java_filter = args.java_filter
     if ',' in java_filter or '*' in java_filter:
-      logger.warning(
+      _logger.warning(
           'Can only filter JUnit4 tests by single entire class name, '
           'eg "io.flutter.SmokeTest". Ignoring filter=%s', java_filter
       )

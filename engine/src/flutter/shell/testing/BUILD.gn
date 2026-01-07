@@ -25,9 +25,9 @@ executable("testing") {
   ]
 
   sources = [
-    "tester_main.cc",
     "tester_context.h",
     "tester_context_vk_factory.h",
+    "tester_main.cc",
   ]
   libs = []
   if (is_win) {
