@@ -103,6 +103,8 @@ class SkwasmSurface implements OffscreenSurface {
   Completer<void> _initializedCompleter;
   late Completer<void>? _handledContextLostEvent;
 
+  /// Handles the context lost event by acquiring a new canvas and recreating the
+  /// context.
   void onContextLost() {
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete();

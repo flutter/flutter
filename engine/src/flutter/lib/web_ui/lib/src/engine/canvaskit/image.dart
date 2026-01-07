@@ -500,7 +500,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
     assert(_debugCheckIsNotDisposed());
     switch (imageSource) {
       case ImageElementImageSource():
@@ -530,12 +530,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
       case null:
     }
     ByteData? data = _readPixelsFromSkImage(format);
-    data ??= _readPixelsFromImageViaSurface(format);
-    if (data == null) {
-      return Future<ByteData>.error('Failed to encode the image into bytes.');
-    } else {
-      return Future<ByteData>.value(data);
-    }
+    data ??= await _readPixelsFromImageViaSurface(format);
+    return data;
   }
 
   @override
@@ -555,9 +551,9 @@ class CkImage implements ui.Image, StackTraceDebugger {
     return data;
   }
 
-  ByteData? _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
+  Future<ByteData> _readPixelsFromImageViaSurface(ui.ImageByteFormat format) async {
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    surface.setSize(BitmapSize(width, height));
+    await surface.setSize(BitmapSize(width, height));
     final ckSurface = surface as CkSurface;
     final SkSurface skiaSurface = ckSurface.skSurface!;
 

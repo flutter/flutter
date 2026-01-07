@@ -69,6 +69,7 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
     return displayFactory.baseCanvas.setSize(currentFrameSize);
   }
 
+  /// Rasterizes the given [picture] directly to the given [canvas].
   Future<void> rasterizeToCanvas(OnscreenSurface canvas, ui.Picture picture) {
     canvas.setSize(currentFrameSize);
     return canvas.rasterizeToCanvas(picture);

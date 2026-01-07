@@ -93,6 +93,8 @@ abstract class CkSurface extends Surface {
   /// The underlying Skia graphics context.
   SkGrContext? _grContext;
 
+  /// Handles the context lost event by acquiring a new canvas and recreating
+  /// the graphics context.
   void onContextLost() {
     _handledContextLostEvent?.complete();
     final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
