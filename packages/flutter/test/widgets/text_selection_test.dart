@@ -1964,7 +1964,7 @@ void main() {
             .first;
         expect(renderEditable.textDirection, testCase.ambientDirection);
 
-        // Focus and set selection
+        // Focus and set selection.
         focusNode.requestFocus();
         await tester.pump();
 
@@ -1974,17 +1974,17 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Get selection endpoints
+        // Get selection endpoints.
         final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
           controller.selection,
         );
         expect(endpoints.length, 2);
 
-        // Identify which endpoint is physically to the left
+        // Identify which endpoint is physically to the left.
         final double point1X = endpoints[0].point.dx;
         final double point2X = endpoints[1].point.dx;
 
-        // Find handles handles
+        // Find handles.
         final Finder leftHandleFinder = find.byKey(
           const ValueKey<TextSelectionHandleType>(TextSelectionHandleType.left),
         );
