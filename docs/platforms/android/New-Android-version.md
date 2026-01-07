@@ -66,9 +66,9 @@ Please do not manually upload a new android api version to cipd. Instead, follow
 
 2. Reference the new Android API release notes for new SDK Tooling minimum configuration versions (NDK, build tools, CMake, etc.).
 
-3. To update the Android SDK tooling configurations to the versions you want, edit [`tools/android-sdk/packages.txt`](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/packages.txt) . The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each `<package_name>` should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk.
+3. To update the Android SDK tooling configurations to the versions you want, edit [`tools/android-sdk/packages.txt`](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/android_sdk/packages.txt) . The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each `<package_name>` should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk.
 
-4. Execute this script [here](https://github.com/flutter/flutter/blob/master/engine/src/flutter/tools/android_sdk/create_cipd_packages.sh) by running the following command: `cd tools/android_sdk && ./create_cipd_packages.sh <your-tag-version> <your-local-sdk-path>`
+4. Execute this script [here](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/android_sdk/create_cipd_packages.sh) by running the following command: `cd tools/android_sdk && ./create_cipd_packages.sh <your-tag-version> <your-local-sdk-path>`
 
 5. Make a PR with the updated SDK tooling configurations. Although you do not need to merge a PR with the tooling script changes to successfully upload to CIPD, you should still make a PR so we have a paper trail of the SDK configuration changes made to CIPD (assuming only this script was used to upload Android SDKs to CIPD). That way we do not have to download previous CIPD versions or revisions to check the history of configurations.
 
