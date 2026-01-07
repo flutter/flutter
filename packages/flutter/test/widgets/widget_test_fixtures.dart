@@ -6,8 +6,20 @@
 
 import 'package:flutter/widgets.dart';
 
+/// A small set of colors for widget tests, inspired by the original Material 2 primary colors.
+@visibleForTesting
+const List<Color> genericWidgetTestColors = [
+  Color(0xFFF44336),
+  Color(0xFF9C27B0),
+  Color(0xFF2196F3),
+  Color(0xFF4CAF50),
+  Color(0xFFFFEB3B),
+  Color(0xFFFF9800),
+];
+
 /// A basic divider widget, which draws a black horizontal line
 /// and is surrounded by some padding.
+@visibleForTesting
 class BasicDivider extends StatelessWidget {
   const BasicDivider({super.key});
 
