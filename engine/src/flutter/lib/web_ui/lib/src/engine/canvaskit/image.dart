@@ -530,7 +530,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
       case null:
     }
     ByteData? data = _readPixelsFromSkImage(format);
-    data ??= await _readPixelsFromImageViaSurface(format);
+    data ??= _readPixelsFromImageViaSurface(format);
     return data;
   }
 

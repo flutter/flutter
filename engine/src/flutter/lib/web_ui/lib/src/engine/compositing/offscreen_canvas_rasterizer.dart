@@ -65,8 +65,8 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   );
 
   @override
-  Future<void> prepareToDraw() {
-    return rasterizer.offscreenSurface.setSize(currentFrameSize);
+  Future<void> prepareToDraw() async {
+    await rasterizer.offscreenSurface.setSize(currentFrameSize);
   }
 
   @override

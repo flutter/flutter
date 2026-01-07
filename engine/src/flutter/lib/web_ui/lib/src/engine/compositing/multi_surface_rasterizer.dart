@@ -65,8 +65,8 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
       DisplayCanvasFactory<OnscreenSurface>(createCanvas: surfaceProvider.createSurface);
 
   @override
-  Future<void> prepareToDraw() {
-    return displayFactory.baseCanvas.setSize(currentFrameSize);
+  Future<void> prepareToDraw() async {
+    await displayFactory.baseCanvas.setSize(currentFrameSize);
   }
 
   /// Rasterizes the given [picture] directly to the given [canvas].
