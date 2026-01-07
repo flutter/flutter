@@ -1305,11 +1305,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   void _sortByYIndex() {
     _currentChildVicinities.sort((a, b) {
-      if (a.yIndex == b.yIndex) {
-        return a.xIndex.compareTo(b.xIndex);
-      } else {
-        return a.yIndex.compareTo(b.yIndex);
+      final int yComparison = a.yIndex.compareTo(b.yIndex);
+      if (yComparison != 0) {
+        return yComparison;
       }
+      return a.xIndex.compareTo(b.xIndex);
     });
   }
 
