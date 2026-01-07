@@ -401,4 +401,26 @@ void main() {
     expect(table.size, equals(size));
     expect(table.defaultVerticalAlignment, TableCellVerticalAlignment.intrinsicHeight);
   });
+
+  test('Empty table intrinsic dimensions should not crash', () {
+    // Test that empty tables (0 rows x 0 columns) don't cause division by zero
+    // when intrinsic size methods are called with non-zero constraints.
+    final table = RenderTable(textDirection: TextDirection.ltr);
+
+    // Verify table is empty
+    expect(table.rows, equals(0));
+    expect(table.columns, equals(0));
+
+    // These should all return 0.0 without crashing (previously caused division by zero)
+    expect(table.getMinIntrinsicWidth(100.0), equals(0.0));
+    expect(table.getMaxIntrinsicWidth(100.0), equals(0.0));
+    expect(table.getMinIntrinsicHeight(100.0), equals(0.0));
+    expect(table.getMaxIntrinsicHeight(100.0), equals(0.0));
+
+    // Also test with infinite constraints
+    expect(table.getMinIntrinsicWidth(double.infinity), equals(0.0));
+    expect(table.getMaxIntrinsicWidth(double.infinity), equals(0.0));
+    expect(table.getMinIntrinsicHeight(double.infinity), equals(0.0));
+    expect(table.getMaxIntrinsicHeight(double.infinity), equals(0.0));
+  });
 }
