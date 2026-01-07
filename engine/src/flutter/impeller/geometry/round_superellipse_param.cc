@@ -378,7 +378,8 @@ class RoundSuperellipseBuilder {
     Scalar kJ = -powf(J.x / J.y, param.se_n - 1);
     Scalar kH = -powf(H.x / H.y, param.se_n - 1);
 
-    // The control points are determined by the intersection of the tangents.
+    // The control points are determined by the intersection of the tangents for
+    // smoothness.
     return std::array<_ConicParam, 2>{
         _ConicParam{.p1 = A,
                     .c = Intersection(A, kA, H, kH),

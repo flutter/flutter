@@ -2623,6 +2623,9 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
 }
 
 TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
+  // This playground shows the enlarged corner of a rounded superellipse to
+  // compare pathing algorithm against the filling algorithm (benchmark) at very
+  // large ratio.
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     constexpr float corner_radius = 100.0;
 
