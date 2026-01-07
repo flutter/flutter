@@ -183,7 +183,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     // This package is intentionally not part of the workspace to test
     // user-defines in its local pubspec.
-    final hooksUserDefineIntegrationTestDirectory = rootDirectory
+    final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
         .childDirectory('dev')
         .childDirectory('integration_tests')
         .childDirectory('hook_user_defines');
