@@ -26,8 +26,7 @@ class SpyPathReceiver : public PathReceiver {
   using CubicSegment =
       std::function<void(const Point&, const Point&, const Point&)>;
 
-  using ConicSegment =
-      std::function<void(const Point&, const Point&, Scalar)>;
+  using ConicSegment = std::function<void(const Point&, const Point&, Scalar)>;
 
   void SpyLineTo(LineSegment line_to) { line_to_ = std::move(line_to); }
 
@@ -51,8 +50,7 @@ class SpyPathReceiver : public PathReceiver {
       cubic_to_(cp1, cp2, p2);
     }
   }
-  bool ConicTo(const Point& cp, const Point& p2,
-               Scalar weight) override {
+  bool ConicTo(const Point& cp, const Point& p2, Scalar weight) override {
     if (conic_to_) {
       conic_to_(cp, p2, weight);
       return true;

@@ -17,6 +17,11 @@ MATCHER_P(PointEq, p, "") {
   return arg.GetDistance(p) <= kEhCloseEnough;
 }
 
+MATCHER_P(ScalarEq, a, "") {
+  *result_listener << "isn't equal to " << a;
+  return abs(arg - a) <= kEhCloseEnough;
+}
+
 class DlPathReceiverMock : public DlPathReceiver {
  public:
   MOCK_METHOD(void,
