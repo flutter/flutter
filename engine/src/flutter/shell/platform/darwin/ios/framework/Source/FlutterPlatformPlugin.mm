@@ -156,6 +156,9 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   } else if ([method isEqualToString:@"LookUp.invoke"]) {
     [self showLookUpViewController:args];
     result(nil);
+  } else if ([method isEqualToString:@"Translate.invoke"]) {
+     [self showTranslateViewController:args];
+     result(nil);
   } else if ([method isEqualToString:@"Share.invoke"]) {
     [self showShareViewController:args];
     result(nil);

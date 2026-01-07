@@ -1008,6 +1008,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                    selector:@selector(captureTextFromCamera:)
                               suggestedMenu:suggestedMenu];
       }
+    } else if ([type isEqualToString:@"translate"]) {
+      if (@available(ios 17.0, *)) {
+        [self addAdditionalBasicCommandToItems:items
+                                          type:type
+                                      selector:@selector(handleTranslateAction)
+                                   encodedItem:encodedItem];
+      }
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];
       NSString* title = encodedItem[@"title"];

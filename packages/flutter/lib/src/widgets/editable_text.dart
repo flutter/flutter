@@ -2731,7 +2731,13 @@ class EditableTextState extends State<EditableText>
 
   @override
   bool get translateEnabled {
-    return true;
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText &&
+        !textEditingValue.selection.isCollapsed &&
+        textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
   }
 
   void _onChangedClipboardStatus() {
