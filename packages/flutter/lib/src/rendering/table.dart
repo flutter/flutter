@@ -963,8 +963,8 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       return 0.0;
     }
-    double totalMinWidth = 0.0;
-    for (int x = 0; x < columns; x += 1) {
+    var totalMinWidth = 0.0;
+    for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.infinity);
@@ -978,8 +978,8 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       return 0.0;
     }
-    double totalMaxWidth = 0.0;
-    for (int x = 0; x < columns; x += 1) {
+    var totalMaxWidth = 0.0;
+    for (var x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.infinity);
