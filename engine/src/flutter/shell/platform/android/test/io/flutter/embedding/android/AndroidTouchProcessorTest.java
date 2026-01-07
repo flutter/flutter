@@ -55,7 +55,7 @@ public class AndroidTouchProcessorTest {
   }
 
   private long readTimeStamp(ByteBuffer buffer) {
-    return buffer.getLong(AndroidTouchProcessor.BYTES_PER_FIELD);
+    return buffer.getLong(1 * AndroidTouchProcessor.BYTES_PER_FIELD);
   }
 
   private long readPointerChange(ByteBuffer buffer) {
