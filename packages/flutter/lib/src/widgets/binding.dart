@@ -187,7 +187,9 @@ abstract mixin class WidgetsBindingObserver {
       Uri.decodeComponent(
         Uri(
           path: uri.path.isEmpty ? '/' : uri.path,
-          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          queryParameters: uri.queryParametersAll.isEmpty
+              ? null
+              : uri.queryParametersAll,
           fragment: uri.fragment.isEmpty ? null : uri.fragment,
         ).toString(),
       ),
@@ -455,9 +457,13 @@ mixin WidgetsBinding
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.backGesture.setMethodCallHandler(_handleBackGestureInvocation);
+    SystemChannels.backGesture.setMethodCallHandler(
+      _handleBackGestureInvocation,
+    );
     assert(() {
-      FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
+      FlutterErrorDetails.propertiesTransformers.add(
+        debugTransformDebugCreator,
+      );
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
@@ -492,7 +498,9 @@ mixin WidgetsBinding
 
   /// Notifier for [debugShowWidgetInspectorOverride].
   ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier =>
-      _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
+      _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(
+        false,
+      );
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
   /// The notifier for whether or not taps on the device are treated as widget
@@ -501,7 +509,8 @@ mixin WidgetsBinding
   /// - If true, taps in the app are intercepted by the widget inspector.
   /// - If false, taps in the app are not intercepted by the widget inspector.
   ValueNotifier<bool> get debugWidgetInspectorSelectionOnTapEnabled =>
-      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??= ValueNotifier<bool>(true);
+      _debugWidgetInspectorSelectionOnTapEnabledNotifierObject ??=
+          ValueNotifier<bool>(true);
   ValueNotifier<bool>? _debugWidgetInspectorSelectionOnTapEnabledNotifierObject;
 
   /// If true, [WidgetInspector] will not be automatically injected into the
@@ -644,7 +653,11 @@ mixin WidgetsBinding
     // SingleChildRenderObjectElement variations
     FlutterError.addDefaultStackFilter(
       const RepetitiveStackFrameFilter(
-        frames: <PartialStackFrame>[elementInflateWidget, elementUpdateChild, singleChildMount],
+        frames: <PartialStackFrame>[
+          elementInflateWidget,
+          elementUpdateChild,
+          singleChildMount,
+        ],
         replacement: replacementString,
       ),
     );
@@ -680,7 +693,8 @@ mixin WidgetsBinding
       if (!kIsWeb) {
         registerBoolServiceExtension(
           name: WidgetsServiceExtensions.showPerformanceOverlay.name,
-          getter: () => Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+          getter: () =>
+              Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
           setter: (bool value) {
             if (WidgetsApp.showPerformanceOverlayOverride == value) {
               return Future<void>.value();
@@ -745,7 +759,9 @@ mixin WidgetsBinding
         },
       );
 
-      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
+      WidgetInspectorService.instance.initServiceExtensions(
+        registerServiceExtension,
+      );
 
       return true;
     }());
@@ -820,7 +836,8 @@ mixin WidgetsBinding
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
     bool didCancel = false;
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
         didCancel = true;
         // Don't early return. For the case where someone is just using the
@@ -834,7 +851,8 @@ mixin WidgetsBinding
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeMetrics();
     }
   }
@@ -842,7 +860,8 @@ mixin WidgetsBinding
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeTextScaleFactor();
     }
   }
@@ -850,7 +869,8 @@ mixin WidgetsBinding
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangePlatformBrightness();
     }
   }
@@ -858,7 +878,8 @@ mixin WidgetsBinding
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -884,7 +905,8 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeLocales(locales);
     }
   }
@@ -898,7 +920,8 @@ mixin WidgetsBinding
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -941,7 +964,8 @@ mixin WidgetsBinding
   @protected
   @visibleForTesting
   Future<bool> handlePopRoute() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
         return true;
       }
@@ -951,12 +975,16 @@ mixin WidgetsBinding
   }
 
   // The observers that are currently handling an active predictive back gesture.
-  final List<WidgetsBindingObserver> _backGestureObservers = <WidgetsBindingObserver>[];
+  final List<WidgetsBindingObserver> _backGestureObservers =
+      <WidgetsBindingObserver>[];
 
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
     _backGestureObservers.clear();
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(
+      arguments,
+    );
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
         _backGestureObservers.add(observer);
       }
@@ -969,7 +997,9 @@ mixin WidgetsBinding
       return;
     }
 
-    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(
+      arguments,
+    );
     for (final WidgetsBindingObserver observer in _backGestureObservers) {
       observer.handleUpdateBackGestureProgress(backEvent);
     }
@@ -1010,8 +1040,11 @@ mixin WidgetsBinding
   @mustCallSuper
   @visibleForTesting
   Future<bool> handlePushRoute(String route) async {
-    final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    final RouteInformation routeInformation = RouteInformation(
+      uri: Uri.parse(route),
+    );
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
         return true;
       }
@@ -1019,12 +1052,15 @@ mixin WidgetsBinding
     return false;
   }
 
-  Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+  Future<bool> _handlePushRouteInformation(
+    Map<dynamic, dynamic> routeArguments,
+  ) async {
     final RouteInformation routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
         return true;
       }
@@ -1045,11 +1081,14 @@ mixin WidgetsBinding
   }
 
   Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) async {
-    final Map<String?, Object?>? arguments = (methodCall.arguments as Map<Object?, Object?>?)
-        ?.cast<String?, Object?>();
+    final Map<String?, Object?>? arguments =
+        (methodCall.arguments as Map<Object?, Object?>?)
+            ?.cast<String?, Object?>();
     return switch (methodCall.method) {
       'startBackGesture' => _handleStartBackGesture(arguments!),
-      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
+      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(
+        arguments!,
+      ),
       'commitBackGesture' => _handleCommitBackGesture(),
       'cancelBackGesture' => _handleCancelBackGesture(),
       _ => throw MissingPluginException(),
@@ -1059,7 +1098,8 @@ mixin WidgetsBinding
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
     }
   }
@@ -1067,7 +1107,8 @@ mixin WidgetsBinding
   @override
   void handleViewFocusChanged(ViewFocusEvent event) {
     super.handleViewFocusChanged(event);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeViewFocus(event);
     }
   }
@@ -1075,7 +1116,8 @@ mixin WidgetsBinding
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+    for (final WidgetsBindingObserver observer
+        in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didHaveMemoryPressure();
     }
   }
@@ -1361,7 +1403,9 @@ mixin WidgetsBinding
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
-    attachToBuildOwner(RootWidget(debugShortDescription: '[root]', child: rootWidget));
+    attachToBuildOwner(
+      RootWidget(debugShortDescription: '[root]', child: rootWidget),
+    );
   }
 
   /// Called by [attachRootWidget] to attach the provided [RootWidget] to the
@@ -1779,7 +1823,11 @@ class RootElement extends Element with RootElementMixin {
 
   void _rebuild() {
     try {
-      _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
+      _child = updateChild(
+        _child,
+        (widget as RootWidget).child,
+        /* slot */ null,
+      );
     } catch (exception, stack) {
       final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
