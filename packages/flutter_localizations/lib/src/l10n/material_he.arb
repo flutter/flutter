@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "חיפוש באינטרנט",
   "shareButtonLabel": "שיתוף",
   "clearButtonTooltip": "מחיקת הטקסט",
-  "selectedDateLabel": "התאריך שנבחר"
+  "selectedDateLabel": "התאריך שנבחר",
+  "translateButtonLabel": "Translate"
 }

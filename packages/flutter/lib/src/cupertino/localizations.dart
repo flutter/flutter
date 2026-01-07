@@ -268,6 +268,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get clearButtonLabel;
 
+  /// The term used for translating a selection.
+  // The global version uses the translated string from the arb file.
+  String get translateButtonLabel;
+
   /// Label that appears in the Cupertino toolbar when the spell checker
   /// couldn't find any replacements for the current word.
   // The global version uses the translated string from the arb file.

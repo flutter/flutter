@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Пошук у сетцы",
   "shareButtonLabel": "Абагуліць",
   "clearButtonTooltip": "Выдаліць тэкст",
-  "selectedDateLabel": "Выбрана"
+  "selectedDateLabel": "Выбрана",
+  "translateButtonLabel": "Translate"
 }

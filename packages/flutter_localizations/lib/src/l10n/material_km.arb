@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ស្វែងរក​លើបណ្ដាញ",
   "shareButtonLabel": "ចែករំលែក",
   "clearButtonTooltip": "សម្អាតអក្សរ",
-  "selectedDateLabel": "បានជ្រើសរើស"
+  "selectedDateLabel": "បានជ្រើសរើស",
+  "translateButtonLabel": "Translate"
 }

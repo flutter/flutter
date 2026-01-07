@@ -150,5 +150,6 @@
   "searchWebButtonLabel": "Căutați pe web",
   "shareButtonLabel": "Trimiteți",
   "clearButtonTooltip": "Ștergeți textul",
-  "selectedDateLabel": "Selectată"
+  "selectedDateLabel": "Selectată",
+  "translateButtonLabel": "Translate"
 }

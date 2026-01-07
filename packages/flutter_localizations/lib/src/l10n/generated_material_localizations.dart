@@ -510,6 +510,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Kies minute';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -1004,6 +1007,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ደቂቃዎችን ይምረጡ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'ቀን';
@@ -1502,6 +1508,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'اختيار الدقائق';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'التاريخ';
 
   @override
@@ -1996,6 +2005,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'মিনিট বাছনি কৰক';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'তাৰিখ';
@@ -2494,6 +2506,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Dəqiqə seçin';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Tarix';
 
   @override
@@ -2988,6 +3003,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Выберыце хвіліны';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Дата';
@@ -3486,6 +3504,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Избиране на минути';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Дата';
 
   @override
@@ -3980,6 +4001,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'মিনিট বেছে নিন';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'তারিখ';
@@ -4478,6 +4502,9 @@ class MaterialLocalizationBo extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'སྐར་མ་འདེམས་པ།';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'ཟླ་ཚེས།';
 
   @override
@@ -4972,6 +4999,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Odaberite minute';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Datum';
@@ -5470,6 +5500,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Selecciona els minuts';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Data';
 
   @override
@@ -5964,6 +5997,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Vyberte minuty';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Datum';
@@ -6462,6 +6498,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Dewis munudau';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Dyddiad';
 
   @override
@@ -6958,6 +6997,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Vælg minutter';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Dato';
 
   @override
@@ -7452,6 +7494,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Minuten auswählen';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Datum';
@@ -8014,6 +8059,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Επιλογή λεπτών';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Ημερομηνία';
 
   @override
@@ -8508,6 +8556,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Date';
@@ -9714,6 +9765,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleccionar minutos';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Fecha';
@@ -14015,6 +14069,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Minutite valimine';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Kuupäev';
 
   @override
@@ -14509,6 +14566,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Hautatu minutuak';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Data';
@@ -15007,6 +15067,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'انتخاب دقیقه';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'تاریخ';
 
   @override
@@ -15501,6 +15564,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Valitse minuutit';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Päivämäärä';
@@ -15999,6 +16065,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Pumili ng mga minuto';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Petsa';
 
   @override
@@ -16493,6 +16562,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Sélectionner des minutes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Date';
@@ -17148,6 +17220,9 @@ class MaterialLocalizationGa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Roghnaigh nóiméid';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Dáta';
 
   @override
@@ -17642,6 +17717,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleccionar minutos';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Data';
@@ -18140,6 +18218,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Minuten auswählen';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -18634,6 +18715,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'મિનિટ પસંદ કરો';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'તારીખ';
@@ -19132,6 +19216,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'בחירת דקות';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'תאריך';
 
   @override
@@ -19626,6 +19713,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनट के हिसाब से समय चुनें';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'तारीख';
@@ -20124,6 +20214,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Odaberite minute';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -20618,6 +20711,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Perc kiválasztása';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Dátum';
@@ -21116,6 +21212,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Ընտրեք րոպեները';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Ամսաթիվ';
 
   @override
@@ -21610,6 +21709,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pilih menit';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Tanggal';
@@ -22108,6 +22210,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Velja mínútur';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Dagsetning';
 
   @override
@@ -22602,6 +22707,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Seleziona i minuti';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Data';
@@ -23100,6 +23208,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => '分を選択';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => '日付';
 
   @override
@@ -23594,6 +23705,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'აირჩიეთ წუთები';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'თარიღი';
@@ -24092,6 +24206,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Минуттарды таңдаңыз';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Күн';
 
   @override
@@ -24586,6 +24703,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ជ្រើសរើស​នាទី';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'កាលបរិច្ឆេទ';
@@ -25084,6 +25204,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => '\u{ca6}\u{cbf}\u{ca8}\u{cbe}\u{c82}\u{c95}';
 
   @override
@@ -25578,6 +25701,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => '분 선택';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => '날짜';
@@ -26076,6 +26202,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Мүнөттөрдү тандаңыз';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Күн';
 
   @override
@@ -26570,6 +26699,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ເລືອກນາທີ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'ວັນທີ';
@@ -27068,6 +27200,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Pasirinkite minutes';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Data';
 
   @override
@@ -27562,6 +27697,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Atlasiet minūtes';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Datums';
@@ -28060,6 +28198,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Изберете минути';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Датум';
 
   @override
@@ -28554,6 +28695,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'മിനിറ്റ് തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'തീയതി';
@@ -29052,6 +29196,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Минут сонгоно уу';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Огноо';
 
   @override
@@ -29546,6 +29693,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनिटे निवडा';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'तारीख';
@@ -30044,6 +30194,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Pilih minit';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Tarikh';
 
   @override
@@ -30538,6 +30691,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'မိနစ်ကို ရွေးပါ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'ရက်စွဲ';
@@ -31036,6 +31192,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Angi minutter';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Dato';
 
   @override
@@ -31530,6 +31689,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'मिनेट चयन गर्नुहोस्';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'मिति';
@@ -32028,6 +32190,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Minuten selecteren';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -32522,6 +32687,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Angi minutter';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Dato';
@@ -33020,6 +33188,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'ମିନିଟ ଚୟନ କରନ୍ତୁ';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'ତାରିଖ';
 
   @override
@@ -33514,6 +33685,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'ਮਿੰਟ ਚੁਣੋ';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'ਤਾਰੀਖ';
@@ -34012,6 +34186,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Wybierz minuty';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Data';
 
   @override
@@ -34508,6 +34685,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'منې غوره کړئ';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Date';
 
   @override
@@ -35002,6 +35182,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Selecione os minutos';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Data';
@@ -35681,6 +35864,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Selectați minutele';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Data';
 
   @override
@@ -36175,6 +36361,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Выберите минуты';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Дата';
@@ -36673,6 +36862,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'මිනිත්තු ගණන තෝරන්න';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'දිනය';
 
   @override
@@ -37167,6 +37359,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Vybrať minúty';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Dátum';
@@ -37665,6 +37860,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Izberite minute';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -38161,6 +38359,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Zgjidh minutat';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Data';
 
   @override
@@ -38655,6 +38856,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Изаберите минуте';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Датум';
@@ -39506,6 +39710,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Välj minuter';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Datum';
 
   @override
@@ -40000,6 +40207,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Chagua dakika';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Tarehe';
@@ -40498,6 +40708,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'நிமிடங்களைத் தேர்ந்தெடுக்கவும்';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'தேதி';
 
   @override
@@ -40992,6 +41205,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'నిమిషాలను ఎంచుకోండి';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'తేదీ';
@@ -41490,6 +41706,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'เลือกนาที';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'วันที่';
 
   @override
@@ -41984,6 +42203,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Pumili ng mga minuto';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Petsa';
@@ -42482,6 +42704,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Dakikayı seçin';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Tarih';
 
   @override
@@ -42976,6 +43201,9 @@ class MaterialLocalizationUg extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'مىنۇت تاللاش';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'چېسلا';
@@ -43474,6 +43702,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Виберіть хвилини';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Дата';
 
   @override
@@ -43968,6 +44199,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'منٹ منتخب کریں';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'تاریخ';
@@ -44466,6 +44700,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Daqiqani tanlang';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Sana';
 
   @override
@@ -44962,6 +45199,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Chọn phút';
 
   @override
+  String get translateButtonLabel => 'Translate';
+
+  @override
   String get unspecifiedDate => 'Ngày';
 
   @override
@@ -45456,6 +45696,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => '选择分钟';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => '日期';
@@ -46490,6 +46733,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Khetha amaminithi';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 
   @override
   String get unspecifiedDate => 'Idethi';

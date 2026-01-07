@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ウェブを検索",
   "shareButtonLabel": "共有",
   "clearButtonTooltip": "テキストを消去",
-  "selectedDateLabel": "選択済み"
+  "selectedDateLabel": "選択済み",
+  "translateButtonLabel": "Translate"
 }

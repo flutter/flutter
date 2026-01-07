@@ -228,6 +228,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           ContextMenuButtonType.lookUp => localizations.lookUpButtonLabel,
           ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
           ContextMenuButtonType.share => localizations.shareButtonLabel,
+          ContextMenuButtonType.translate => localizations.translateButtonLabel,
           ContextMenuButtonType.liveTextInput => localizations.scanTextButtonLabel,
           ContextMenuButtonType.custom => '',
         };

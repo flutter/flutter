@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "वेबमा खोज्नुहोस्",
   "shareButtonLabel": "सेयर गर्नुहोस्",
   "clearButtonTooltip": "टेक्स्ट हटाउनुहोस्",
-  "selectedDateLabel": "चयन गरिएको"
+  "selectedDateLabel": "चयन गरिएको",
+  "translateButtonLabel": "Translate"
 }

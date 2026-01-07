@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Keresés az interneten",
   "shareButtonLabel": "Megosztás",
   "clearButtonTooltip": "Szöveg törlése",
-  "selectedDateLabel": "Kijelölve"
+  "selectedDateLabel": "Kijelölve",
+  "translateButtonLabel": "Translate"
 }

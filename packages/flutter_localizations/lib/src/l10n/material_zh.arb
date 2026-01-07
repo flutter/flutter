@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "搜索",
   "shareButtonLabel": "分享",
   "clearButtonTooltip": "清除文字",
-  "selectedDateLabel": "已选择"
+  "selectedDateLabel": "已选择",
+  "translateButtonLabel": "Translate"
 }

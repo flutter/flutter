@@ -154,5 +154,6 @@
   "keyboardKeyScrollLock": "Scrollghlas",
   "keyboardKeySelect": "Roghnaigh",
   "keyboardKeyShift": "Shift",
-  "keyboardKeySpace": "Space"
+  "keyboardKeySpace": "Space",
+  "translateButtonLabel": "Translate"
 }

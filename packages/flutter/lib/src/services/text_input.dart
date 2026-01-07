@@ -1275,7 +1275,7 @@ mixin TextSelectionDelegate {
   bool get liveTextInputEnabled => false;
 
   /// Whether translate is enabled
-  bool get translateEnabled => false;
+  bool get translateEnabled => true;
 
   /// Cut current selection to [Clipboard].
   ///

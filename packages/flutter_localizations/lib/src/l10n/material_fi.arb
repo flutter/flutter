@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Hae verkosta",
   "shareButtonLabel": "Jaa",
   "clearButtonTooltip": "Tyhjennä teksti",
-  "selectedDateLabel": "Valittu"
+  "selectedDateLabel": "Valittu",
+  "translateButtonLabel": "Translate"
 }

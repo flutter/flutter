@@ -2731,18 +2731,7 @@ class EditableTextState extends State<EditableText>
 
   @override
   bool get translateEnabled {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-        return !widget.obscureText &&
-            !textEditingValue.selection.isCollapsed &&
-            textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
-    }
+    return true;
   }
 
   void _onChangedClipboardStatus() {

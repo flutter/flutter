@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება",
   "clearButtonTooltip": "ტექსტის გასუფთავება",
-  "selectedDateLabel": "არჩეულია"
+  "selectedDateLabel": "არჩეულია",
+  "translateButtonLabel": "Translate"
 }
