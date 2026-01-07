@@ -1935,6 +1935,9 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
     animation.dispose();
     secondaryAnimation.dispose();
     newAnimation.dispose();
