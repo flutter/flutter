@@ -1254,10 +1254,12 @@ void main() {
       });
 
       testWidgets('showOnScreen sends showOnScreen action', (WidgetTester tester) async {
+        final controller = ScrollController(initialScrollOffset: 50);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: ListView(
-              controller: ScrollController(initialScrollOffset: 50),
+              controller: controller,
               children: <Widget>[
                 const MergeSemantics(child: SizedBox(height: 40, child: Text('Test'))),
                 SizedBox(width: 40, height: tester.binding.window.physicalSize.height * 1.5),
@@ -1280,6 +1282,7 @@ void main() {
           const text = 'This is some text.';
           int currentIndex = text.length;
           final controller = TextEditingController(text: text);
+          addTearDown(controller.dispose);
           await tester.pumpWidget(
             MaterialApp(
               home: Material(child: TextField(controller: controller)),
@@ -1330,6 +1333,7 @@ void main() {
           const text = 'This is some text.';
           int currentIndex = text.length;
           final controller = TextEditingController(text: text);
+          addTearDown(controller.dispose);
           await tester.pumpWidget(
             MaterialApp(
               home: Material(child: TextField(controller: controller)),
@@ -1377,6 +1381,7 @@ void main() {
       testWidgets('setText causes semantics to set the text', (WidgetTester tester) async {
         const expectedText = 'This is some text.';
         final controller = TextEditingController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Material(child: TextField(controller: controller)),
@@ -1399,6 +1404,7 @@ void main() {
         const int expectedStart = text.length - 8;
         const int expectedEnd = text.length - 4;
         final controller = TextEditingController(text: text);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Material(child: TextField(controller: controller)),
