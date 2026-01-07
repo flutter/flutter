@@ -1298,7 +1298,6 @@ void main() {
       addTearDown(clipboardStatus.dispose);
 
       return SelectionOverlay(
-        cursorWidth: 2.0,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: onSelectionHandleTapped,
         startHandleType: TextSelectionHandleType.collapsed,

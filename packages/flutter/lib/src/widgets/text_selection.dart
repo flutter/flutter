@@ -115,9 +115,10 @@ abstract class TextSelectionControls {
   /// the point that is aligned with a specific point in the text. A handle
   /// often visually "points to" that location.
   ///
+  /// {@template flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
   /// The [cursorWidth] argument is the thickness of the cursor, which may be
-  /// used to offset the anchor point.
-  ///
+  /// used to offset the anchor point. Defaults to 2.0.
+  /// {@endtemplate}
   Offset getHandleAnchor(
     TextSelectionHandleType type,
     double textLineHeight, {
@@ -414,8 +415,7 @@ class TextSelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final TextSelectionControls? selectionControls;
 
-  /// The width of the cursor.
-  ///
+  /// {@macro flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
   final double cursorWidth;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
@@ -1140,7 +1140,7 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    required this.cursorWidth,
+    this.cursorWidth,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
@@ -1312,11 +1312,11 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
-  /// Cursor width.
+  /// {@macro flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
   ///
   /// This value is used for calculating the position of the text selection
   /// handles.
-  final double cursorWidth;
+  final double? cursorWidth;
 
   void _handleStartHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingStartHandle);
@@ -2052,7 +2052,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
-    required this.cursorWidth,
+    this.cursorWidth,
   });
 
   final LayerLink handleLayerLink;
@@ -2065,7 +2065,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
-  final double cursorWidth;
+  final double? cursorWidth;
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
@@ -2138,7 +2138,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
       widget.preferredLineHeight,
-      cursorWidth: widget.cursorWidth,
+      cursorWidth: widget.cursorWidth ?? 2.0,
     );
 
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
