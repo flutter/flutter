@@ -13,7 +13,7 @@ On iOS and macOS, it is the only mode used for displaying platform views.
 
 HC creates multiple layers of native views that are composited by the standard platform
 UI toolkit rather than by Flutter. This requires separating the Flutter rendering into
-seperate views, one containing the things that are behind the native view, and another
+separate views, one containing the things that are behind the native view, and another
 things above the native view, so that everything looks correct when composited by the
 system.
 
