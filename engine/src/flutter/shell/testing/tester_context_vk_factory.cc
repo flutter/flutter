@@ -8,8 +8,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include <iostream>
-#include <string>
 #include <vector>
 
 #include "flutter/fml/mapping.h"

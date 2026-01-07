@@ -8,10 +8,7 @@
 #include <memory>
 
 #include "flutter/flow/surface.h"
-
-namespace impeller {
-class Context;
-}  // namespace impeller
+#include "flutter/impeller/renderer/context.h"
 
 namespace flutter {
 

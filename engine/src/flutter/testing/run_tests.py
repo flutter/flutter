@@ -387,15 +387,6 @@ class EngineExecutableTask():  # pylint: disable=too-many-instance-attributes
 
   def __call__(self,
                *args: typing.Any) -> typing.Tuple[typing.Optional[Exception], typing.List[str]]:
-    # Create a pipe to capture the logs/stdout/stderr from the executed task.
-    # We used to depend on the main process to capture the logs, but this
-    # caused interleaved output which is hard to read.
-    #
-    # We prefer to use a pipe over a StringIO buffer because the latter didn't seem
-    # to play nice with the multiprocessing library or the way we are using it.
-    #
-    # We also rely on the fact that logging is thread-safe.
-    # Using a string IO buffer failed to capture the logs.
     log_capture_string = io.StringIO()
     stream_handler = logging.StreamHandler(log_capture_string)
     stream_handler.setLevel(logging.INFO)
