@@ -11,6 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widget_test_fixtures.dart';
+
+Color _getRandomColor(int index) {
+  return genericWidgetTestColors[index % genericWidgetTestColors.length];
+}
 
 void main() {
   group(WidgetOrderTraversalPolicy, () {
@@ -1937,7 +1942,7 @@ void main() {
             // checks for the closest node.
             width: index == 3 ? 150 : 100,
             height: index == 1 ? 150 : 100,
-            color: Colors.primaries[index],
+            color: _getRandomColor(index),
             child: Text('[$row, $col]'),
           ),
         );
@@ -2069,7 +2074,7 @@ void main() {
             child: Container(
               width: row == 1 ? 150 : 100,
               height: 100,
-              color: Colors.primaries[row],
+              color: _getRandomColor(row),
               child: Text('[$row]'),
             ),
           ),
@@ -2160,7 +2165,7 @@ void main() {
             child: Container(
               width: 100,
               height: col == 1 ? 150 : 100,
-              color: Colors.primaries[col],
+              color: _getRandomColor(col),
               child: Text('[$col]'),
             ),
           ),
@@ -2825,7 +2830,7 @@ void main() {
                               child: Container(
                                 width: cellHeight,
                                 height: cellHeight,
-                                color: Colors.primaries[rowIndex % Colors.primaries.length],
+                                color: _getRandomColor(rowIndex),
                               ),
                             );
                           },
