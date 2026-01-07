@@ -1237,7 +1237,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TextField(autofocus: true, controller: controller)),
+          home: Scaffold(body: TestTextField(autofocus: true, controller: controller)),
         ),
       );
 
@@ -1254,7 +1254,7 @@ void main() {
       expect(gestureDetector, findsOneWidget);
       // The GestureDetector's size should not exceed that of the TextField.
       final Rect hitRect = tester.getRect(gestureDetector);
-      final Rect textFieldRect = tester.getRect(find.byType(TextField));
+      final Rect textFieldRect = tester.getRect(find.byType(TestTextField));
 
       expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
       expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
