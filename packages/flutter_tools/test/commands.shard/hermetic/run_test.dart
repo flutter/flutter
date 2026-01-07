@@ -1074,6 +1074,271 @@ void main() {
         },
       );
     });
+
+    group('CLI precedence over web_dev_config.yaml', () {
+      late FakeWebRunnerFactory fakeWebRunnerFactory;
+
+      setUp(() {
+        fakeWebRunnerFactory = FakeWebRunnerFactory();
+
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+{
+  "packages": [],
+  "configVersion": 2
+}
+''');
+        final device = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        );
+        testDeviceManager.devices = <Device>[device];
+      });
+
+      testUsingContext(
+        'CLI --web-port overrides web_dev_config.yaml port',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: confighost
+  port: 9000
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 8080);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'CLI --web-hostname overrides web_dev_config.yaml host',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: confighost
+  port: 9000
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'clihost');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'CLI --web-header overrides web_dev_config.yaml headers',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: any
+  port: 9000
+  headers:
+    - name: X-Config-Header
+      value: config-value
+    - name: X-Shared-Header
+      value: from-config
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--web-header=X-Shared-Header=from-cli',
+            '--web-header=X-Cli-Header=cli-value',
+          ]);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          final Map<String, String> headers =
+              fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers;
+          // CLI headers override file config headers with same name
+          expect(headers['X-Shared-Header'], 'from-cli');
+          // CLI-only headers are included
+          expect(headers['X-Cli-Header'], 'cli-value');
+          // File config headers are preserved if not overridden
+          expect(headers['X-Config-Header'], 'config-value');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'uses web_dev_config.yaml values when CLI args not provided',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: confighost
+  port: 9000
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'confighost');
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 9000);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'CLI TLS cert args override web_dev_config.yaml https config',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: any
+  port: 9000
+  https:
+    cert-path: /config/cert.pem
+    cert-key-path: /config/key.pem
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--web-tls-cert-path=/cli/cert.pem',
+            '--web-tls-cert-key-path=/cli/key.pem',
+          ]);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/cli/key.pem',
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'CLI TLS cert path with file config key path creates valid HTTPS config',
+        () async {
+          fileSystem.file('web_dev_config.yaml').writeAsStringSync('''
+server:
+  host: any
+  port: 9000
+  https:
+    cert-path: /config/cert.pem
+    cert-key-path: /config/key.pem
+''');
+          final command = RunCommand();
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          // CLI cert path overrides file config
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
+          // File config key path is used as fallback
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/config/key.pem',
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+
+      testUsingContext(
+        'CLI TLS args work without web_dev_config.yaml file',
+        () async {
+          // No web_dev_config.yaml file exists
+          final command = RunCommand();
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+            '--web-tls-cert-path=/cli/cert.pem',
+            '--web-tls-cert-key-path=/cli/key.pem',
+          ]);
+
+          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            '/cli/cert.pem',
+          );
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            '/cli/key.pem',
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
+          WebRunnerFactory: () => fakeWebRunnerFactory,
+        },
+      );
+    });
   });
 
   group('terminal', () {
@@ -1717,6 +1982,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required Terminal terminal,
     bool machine = false,
     Future<String> Function(String)? urlTunneller,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
     lastOptions = debuggingOptions;
     return FakeResidentRunner();
