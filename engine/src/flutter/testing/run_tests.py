@@ -1114,6 +1114,7 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
     queue_listener.stop()
 
   if len(failures) > 0:
+    print_divider('<')
     _logger.error('The following commands failed:')
     for task, failure_exn in failures:
       _logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
