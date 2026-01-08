@@ -20,7 +20,8 @@ const JSONMethodCodec jsonCodec = JSONMethodCodec();
 
 // An object to listen to values coming from media queries in the browser, like
 // prefers-color-scheme or prefers-reduced-motion
-final MediaQueryManager _mediaQueries = MediaQueryManager();
+@visibleForTesting
+final MediaQueryManager mediaQueries = MediaQueryManager();
 
 /// Platform event dispatcher.
 ///
@@ -31,7 +32,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// these.
   EnginePlatformDispatcher() {
     _registerMediaQueryListeners();
-    HighContrastSupport.instance.addListener(_updateHighContrast);
     _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
@@ -82,10 +82,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void dispose() {
-    _mediaQueries.detachAll();
+    mediaQueries.detachAll();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
-    HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
     accessibilityPlaceholder.remove();
@@ -1223,9 +1222,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [_platformBrightness] and invokes [onPlatformBrightnessChanged]
   /// callback if [_platformBrightness] changed.
-  void _updatePlatformBrightness(ui.Brightness value) {
-    if (configuration.platformBrightness != value) {
-      configuration = configuration.copyWith(platformBrightness: value);
+  void _updatePlatformBrightness(bool prefersDark) {
+    final ui.Brightness brightness = prefersDark ? ui.Brightness.dark : ui.Brightness.light;
+    if (configuration.platformBrightness != brightness) {
+      configuration = configuration.copyWith(platformBrightness: brightness);
       invokeOnPlatformConfigurationChanged();
       invokeOnPlatformBrightnessChanged();
     }
@@ -1237,30 +1237,32 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [_highContrast] and invokes [onHighContrastModeChanged]
   /// callback if [_highContrast] changed.
-  void _updateHighContrast(bool value) {
-    if (configuration.accessibilityFeatures.highContrast != value) {
+  void _updateHighContrast(bool enabled) {
+    HighContrastSupport.instance.isHighContrastEnabled = enabled;
+    if (configuration.accessibilityFeatures.highContrast != enabled) {
       final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
-        accessibilityFeatures: original.copyWith(highContrast: value),
+        accessibilityFeatures: original.copyWith(highContrast: enabled),
       );
       invokeOnPlatformConfigurationChanged();
+      invokeOnAccessibilityFeaturesChanged();
     }
   }
 
   /// Updates [AccessibilityFeatures] `reduceMotion` and `disableAnimations` to
-  /// [value], and notifies the framework of the change.
+  /// [reduced], and notifies the framework of the change.
   ///
   /// The web doesn't seem to distinguish between "reduced motion" and "disable
   /// animations", so we set both at the same time in this update.
-  void _updateReducedMotion(bool value) {
-    if (configuration.accessibilityFeatures.reduceMotion != value) {
+  void _updateReducedMotion(bool reduced) {
+    if (configuration.accessibilityFeatures.reduceMotion != reduced) {
       final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
         accessibilityFeatures: original.copyWith(
           // There's no distinction on the web between "reduceMotion" and
           // "disableAnimations", so we set both at the same time.
-          reduceMotion: value,
-          disableAnimations: value,
+          reduceMotion: reduced,
+          disableAnimations: reduced,
         ),
       );
       invokeOnPlatformConfigurationChanged();
@@ -1270,14 +1272,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   // Configures the [_mediaQueries] object.
   void _registerMediaQueryListeners() {
-    // Controls light-dark mode
-    _mediaQueries.addListener(
-      '(prefers-color-scheme: dark)',
-      onMatch: (prefersDark) {
-        _updatePlatformBrightness(prefersDark ? ui.Brightness.dark : ui.Brightness.light);
-      },
-    );
-    _mediaQueries.addListener('(prefers-reduced-motion: reduce)', onMatch: _updateReducedMotion);
+    mediaQueries.addListener(MediaQueryManager.DARK_MODE, onMatch: _updatePlatformBrightness);
+    mediaQueries.addListener(MediaQueryManager.REDUCED_MOTION, onMatch: _updateReducedMotion);
+    mediaQueries.addListener(MediaQueryManager.FORCED_COLORS, onMatch: _updateHighContrast);
   }
 
   /// A callback that is invoked whenever [platformBrightness] changes value.

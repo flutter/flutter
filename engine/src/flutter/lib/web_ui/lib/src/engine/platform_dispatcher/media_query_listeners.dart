@@ -12,22 +12,39 @@ typedef MediaQueryMatchHandler = void Function(bool matches);
 /// This is used by the [EnginePlatformDispatcher] to detect some properties
 /// from the browser (light/dark mode or reduced motion)
 class MediaQueryManager {
+
+  /// Detects dark mode.
+  static const DARK_MODE = '(prefers-color-scheme: dark)';
+
+  /// Detects forced colors (high contrast).
+  static const FORCED_COLORS = '(forced-colors: active)';
+
+  /// Detects reduced motion.
+  static const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+
   final Map<String, _MediaQueryListeners> _listeners = {};
 
   /// Used in tests to inject mock objects that can dispatch arbitrary
   /// [DomMediaQueryListEvent]s.
   ///
   /// When this is not set, [domWindow.matchMedia] is used by default.
+  ///
+  /// This is used to ensure the connection of the [MediaQueryManager] with
+  /// incoming events from the browser.
   @visibleForTesting
   MediaQueryBuilder? debugOverrideMediaQueryBuilder;
 
-  // Returns the current value of an object that may be a [DomMediaQueryList]
-  // (but maybe not, if it was mocked)
-  bool _getMatchesValue(DomEventTarget maybeMediaQueryList) {
-    if (!maybeMediaQueryList.isA<DomMediaQueryList>()) {
-      return false;
-    }
-    return (maybeMediaQueryList as DomMediaQueryList).matches;
+  /// Used in tests to trigger [event] on all the registered listeners of
+  /// [mediaQueryString].
+  ///
+  /// This is used to test the connection between the [EnginePlatformDispatcher]
+  /// and the [MediaQueryManager], without the browser having to dispatch real
+  /// events.
+  @visibleForTesting
+  void debugTriggerListener(String mediaQueryString, { required DomMediaQueryListEvent event }) {
+    final _MediaQueryListeners? listeners = _listeners[mediaQueryString];
+    assert(listeners != null, 'Cannot find listeners for $mediaQueryString');
+    listeners!.trigger(event);
   }
 
   // Creates a [DomMediaQueryList] object from a [mediaQueryString].
@@ -46,9 +63,6 @@ class MediaQueryManager {
   /// This function calls [onMatch] synchronously with the initial value of the
   /// match, and then, through an event listener, every time the value changes.
   void addListener(String mediaQueryString, {required MediaQueryMatchHandler onMatch}) {
-    // Create a proper media query object
-    final DomEventTarget mediaQuery = _createMediaQuery(mediaQueryString);
-
     // Wrap `onMatch` in a [DomEventListener]
     final DomEventListener mediaQueryListener = (DomEvent event) {
       final mqEvent = event as DomMediaQueryListEvent;
@@ -56,12 +70,16 @@ class MediaQueryManager {
     }.toJS;
 
     // Attach the listener
-    _listeners
-        .putIfAbsent(mediaQueryString, () => _MediaQueryListeners(mediaQuery))
-        .addListener(mediaQueryListener);
+    final _MediaQueryListeners listeners = _listeners
+        .putIfAbsent(mediaQueryString, () {
+          // Create a proper media query object
+          final DomEventTarget mediaQuery = _createMediaQuery(mediaQueryString);
+          return _MediaQueryListeners(mediaQuery);
+        })
+        ..addListener(mediaQueryListener);
 
-    // Call onMatch with the initial value
-    onMatch(_getMatchesValue(mediaQuery));
+    // Call onMatch with the immediate value of the media query
+    onMatch(listeners.matches);
   }
 
   /// Detaches all registered listeners.
@@ -79,10 +97,20 @@ class MediaQueryManager {
 
 /// Groups the listeners for a media query
 class _MediaQueryListeners {
-  _MediaQueryListeners(DomEventTarget mediaQuery) : _mediaQuery = mediaQuery;
+  _MediaQueryListeners(this._mediaQuery);
 
   final DomEventTarget _mediaQuery;
   final List<DomEventListener> _listeners = [];
+
+  // Returns whether or not the listened [DomMediaQueryList] matches now.
+  bool get matches {
+    // On tests we inject something that is a raw DomEventTarget so we can
+    // dispatch events from it directly, so we check for that case now.
+    if (!_mediaQuery.isA<DomMediaQueryList>()) {
+      return false;
+    }
+    return (_mediaQuery as DomMediaQueryList).matches;
+  }
 
   void addListener(DomEventListener listener) {
     _mediaQuery.addEventListener('change', listener);
@@ -96,6 +124,15 @@ class _MediaQueryListeners {
 
   void _removeListener(DomEventListener listener) {
     _mediaQuery.removeEventListener('change', listener);
+  }
+
+  /// Triggers [event] on all registered listeners.
+  @visibleForTesting
+  void trigger(DomMediaQueryListEvent event) {
+    for (final JSFunction listener in _listeners) {
+      // This is directly calling the registered JSFunction with [event].
+      listener.callAsFunction(null, event);
+    }
   }
 }
 

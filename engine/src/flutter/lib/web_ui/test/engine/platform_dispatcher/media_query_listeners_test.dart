@@ -25,10 +25,7 @@ Future<void> testMain() async {
 
     setUp(() {
       manager = MediaQueryManager();
-      manager.debugOverrideMediaQueryBuilder = (String query) {
-        print('Mocked mediaQuery: $query');
-        return mockMap[query]!;
-      };
+      manager.debugOverrideMediaQueryBuilder = (String query) => mockMap[query]!;
     });
 
     test('addListener immediately calls onMatch', () {
