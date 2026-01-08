@@ -31,7 +31,7 @@ import xvfb
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 sys_path.insert(0, os.path.join(THIS_DIR, '..', 'third_party', 'pyyaml', 'lib'))
-import yaml  # pylint: disable=import-error, wrong-import-position
+import yaml  # type: ignore # pylint: disable=import-error, wrong-import-position
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
@@ -55,15 +55,15 @@ def print(*args, **kwargs):  # pylint: disable=redefined-builtin
   logger.info(*args, **kwargs)
 
 
-def print_divider(char='='):
+def print_divider(char: str = '=') -> None:
   logger.info('\n')
   for _ in range(4):
     logger.info(''.join([char for _ in range(80)]))
   logger.info('\n')
 
 
-def is_asan(build_dir):
-  with open(os.path.join(build_dir, 'args.gn')) as args:
+def is_asan(build_dir: str) -> bool:
+  with open(os.path.join(build_dir, 'args.gn'), encoding='utf-8') as args:
     if 'is_asan = true' in args.read():
       return True
 
@@ -72,11 +72,11 @@ def is_asan(build_dir):
 
 def run_cmd( # pylint: disable=too-many-arguments
     cmd: typing.List[str],
-    cwd: str = None,
-    forbidden_output: typing.List[str] = None,
+    cwd: typing.Optional[str] = None,
+    forbidden_output: typing.Optional[typing.List[str]] = None,
     expect_failure: bool = False,
-    env: typing.Dict[str, str] = None,
-    allowed_failure_output: typing.List[str] = None,
+    env: typing.Optional[typing.Dict[str, str]] = None,
+    allowed_failure_output: typing.Optional[typing.List[str]] = None,
     **kwargs
 ) -> None:
   if forbidden_output is None:
@@ -102,9 +102,10 @@ def run_cmd( # pylint: disable=too-many-arguments
   )
   output = ''
 
-  for line in iter(process.stdout.readline, ''):
-    output += line
-    logger.info(line.rstrip())
+  if process.stdout:
+    for line in iter(process.stdout.readline, ''):
+      output += line
+      logger.info(line.rstrip())
 
   process.wait()
   end_time = time.time()
@@ -126,7 +127,7 @@ def run_cmd( # pylint: disable=too-many-arguments
 
     if not allowed_failure:
       raise RuntimeError(
-          'Command "%s" (in %s) exited with code %s.' % (command_string, cwd, process.returncode)
+          f'Command "{command_string}" (in {cwd}) exited with code {process.returncode}.'
       )
 
   for forbidden_string in forbidden_output:
@@ -144,11 +145,11 @@ def run_cmd( # pylint: disable=too-many-arguments
   )
 
 
-def is_mac():
+def is_mac() -> bool:
   return sys_platform == 'darwin'
 
 
-def is_aarm64():
+def is_aarm64() -> bool:
   assert is_mac()
   output = subprocess.check_output(['sysctl', 'machdep.cpu'])
   text = output.decode('utf-8')
@@ -158,19 +159,19 @@ def is_aarm64():
   return aarm64
 
 
-def is_linux():
+def is_linux() -> bool:
   return sys_platform.startswith('linux')
 
 
-def is_windows():
+def is_windows() -> bool:
   return sys_platform.startswith(('cygwin', 'win'))
 
 
-def executable_suffix():
+def executable_suffix() -> str:
   return '.exe' if is_windows() else ''
 
 
-def find_executable_path(path):
+def find_executable_path(path: str) -> str:
   if os.path.exists(path):
     return path
 
@@ -183,10 +184,10 @@ def find_executable_path(path):
     if os.path.exists(bat_path):
       return bat_path
 
-  raise Exception('Executable %s does not exist!' % path)
+  raise Exception(f'Executable {path} does not exist!')
 
 
-def vulkan_validation_env(build_dir):
+def vulkan_validation_env(build_dir: str) -> typing.Dict[str, str]:
   extra_env = {
       # pylint: disable=line-too-long
       # Note: built from //third_party/swiftshader
@@ -199,7 +200,7 @@ def vulkan_validation_env(build_dir):
   return extra_env
 
 
-def metal_validation_env():
+def metal_validation_env() -> typing.Dict[str, str]:
   extra_env = {
       # pylint: disable=line-too-long
       # See https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early?language=objc
@@ -218,8 +219,12 @@ def metal_validation_env():
 
 
 def build_engine_executable_command(
-    build_dir, executable_name, flags=None, coverage=False, gtest=False
-):
+    build_dir: str,
+    executable_name: str,
+    flags: typing.Optional[typing.List[str]] = None,
+    coverage: bool = False,
+    gtest: bool = False
+) -> typing.List[str]:
   if flags is None:
     flags = []
 
@@ -239,7 +244,7 @@ def build_engine_executable_command(
         '-t', executable, '-o',
         os.path.join(build_dir, 'coverage', executable_name), '-f', 'html'
     ]
-    updated_flags = ['--args=%s' % ' '.join(flags)]
+    updated_flags = [f'--args={" ".join(flags)}']
     test_command = [coverage_script] + coverage_flags + updated_flags
   else:
     test_command = [executable] + flags
@@ -253,18 +258,18 @@ def build_engine_executable_command(
 
 
 def run_engine_executable( # pylint: disable=too-many-arguments
-    build_dir,
-    executable_name,
-    executable_filter,
-    flags=None,
-    cwd=BUILDROOT_DIR,
-    forbidden_output=None,
-    allowed_failure_output=None,
-    expect_failure=False,
-    coverage=False,
-    extra_env=None,
-    gtest=False,
-):
+    build_dir: str,
+    executable_name: str,
+    executable_filter: typing.Optional[typing.List[str]],
+    flags: typing.Optional[typing.List[str]] = None,
+    cwd: str = BUILDROOT_DIR,
+    forbidden_output: typing.Optional[typing.List[str]] = None,
+    allowed_failure_output: typing.Optional[typing.List[str]] = None,
+    expect_failure: bool = False,
+    coverage: bool = False,
+    extra_env: typing.Optional[typing.Dict[str, str]] = None,
+    gtest: bool = False,
+) -> None:
   if executable_filter is not None and executable_name not in executable_filter:
     logger.info('Skipping %s due to filter.', executable_name)
     return
@@ -332,9 +337,7 @@ def run_engine_executable( # pylint: disable=too-many-arguments
     luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
     core_path = os.path.join(cwd, 'core')
     if luci_test_outputs_path and os.path.exists(core_path) and os.path.exists(unstripped_exe):
-      dump_path = os.path.join(
-          luci_test_outputs_path, '%s_%s.txt' % (executable_name, sys_platform)
-      )
+      dump_path = os.path.join(luci_test_outputs_path, f'{executable_name}_{sys_platform}.txt')
       logger.error('Writing core dump analysis to %s', dump_path)
       subprocess.call([
           os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'analyze_core_dump.sh'),
@@ -351,17 +354,17 @@ class EngineExecutableTask():  # pylint: disable=too-many-instance-attributes
 
   def __init__( # pylint: disable=too-many-arguments
       self,
-      build_dir,
-      executable_name,
-      executable_filter,
-      flags=None,
-      cwd=BUILDROOT_DIR,
-      forbidden_output=None,
-      allowed_failure_output=None,
-      expect_failure=False,
-      coverage=False,
-      extra_env=None,
-  ):
+      build_dir: str,
+      executable_name: str,
+      executable_filter: typing.Optional[typing.List[str]],
+      flags: typing.Optional[typing.List[str]] = None,
+      cwd: str = BUILDROOT_DIR,
+      forbidden_output: typing.Optional[typing.List[str]] = None,
+      allowed_failure_output: typing.Optional[typing.List[str]] = None,
+      expect_failure: bool = False,
+      coverage: bool = False,
+      extra_env: typing.Optional[typing.Dict[str, str]] = None,
+  ) -> None:
     self.build_dir = build_dir
     self.executable_name = executable_name
     self.executable_filter = executable_filter
@@ -373,7 +376,7 @@ class EngineExecutableTask():  # pylint: disable=too-many-instance-attributes
     self.coverage = coverage
     self.extra_env = extra_env
 
-  def __call__(self, *args):
+  def __call__(self, *args: typing.Any) -> None:
     run_engine_executable(
         self.build_dir,
         self.executable_name,
@@ -387,7 +390,7 @@ class EngineExecutableTask():  # pylint: disable=too-many-instance-attributes
         extra_env=self.extra_env,
     )
 
-  def __str__(self):
+  def __str__(self) -> str:
     command = build_engine_executable_command(
         self.build_dir, self.executable_name, flags=self.flags, coverage=self.coverage
     )
@@ -404,14 +407,21 @@ repeat_flags = [
 ]
 
 
-def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
+def run_cc_tests(
+    build_dir: str, executable_filter: typing.Optional[typing.List[str]], coverage: bool,
+    capture_core_dump: bool
+) -> None:
   logger.info('Running Engine Unit-tests.')
 
   if capture_core_dump and is_linux():
     import resource  # pylint: disable=import-outside-toplevel
     resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
 
-  def make_test(name, flags=None, extra_env=None):
+  def make_test(
+      name: str,
+      flags: typing.Optional[typing.List[str]] = None,
+      extra_env: typing.Optional[typing.Dict[str, str]] = None
+  ) -> typing.Tuple[str, typing.List[str], typing.Dict[str, str]]:
     if flags is None:
       flags = repeat_flags
     if extra_env is None:
@@ -472,10 +482,10 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
 
   if is_linux():
     flow_flags = [
-        '--golden-dir=%s' % GOLDEN_DIR,
-        '--font-file=%s' % ROBOTO_FONT_PATH,
+        f'--golden-dir={GOLDEN_DIR}',
+        f'--font-file={ROBOTO_FONT_PATH}',
     ]
-    icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+    icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
     unittests += [
         make_test('flow_unittests', flags=repeat_flags + ['--'] + flow_flags),
         make_test('flutter_glfw_unittests'),
@@ -589,10 +599,12 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
     )
 
 
-def run_engine_benchmarks(build_dir, executable_filter):
+def run_engine_benchmarks(
+    build_dir: str, executable_filter: typing.Optional[typing.List[str]]
+) -> None:
   logger.info('Running Engine Benchmarks.')
 
-  icu_flags = ['--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat')]
+  icu_flags = [f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}']
 
   run_engine_executable(build_dir, 'shell_benchmarks', executable_filter, icu_flags)
 
@@ -612,19 +624,19 @@ class FlutterTesterOptions():
 
   def __init__( # pylint: disable=too-many-arguments
       self,
-      multithreaded=False,
-      enable_impeller=False,
-      enable_vm_service=False,
-      enable_microtask_profiling=False,
-      expect_failure=False
-  ):
+      multithreaded: bool = False,
+      enable_impeller: bool = False,
+      enable_vm_service: bool = False,
+      enable_microtask_profiling: bool = False,
+      expect_failure: bool = False
+  ) -> None:
     self.multithreaded = multithreaded
     self.enable_impeller = enable_impeller
     self.enable_vm_service = enable_vm_service
     self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
 
-  def apply_args(self, command_args):
+  def apply_args(self, command_args: typing.List[str]) -> None:
     if not self.enable_vm_service:
       command_args.append('--disable-vm-service')
 
@@ -639,38 +651,40 @@ class FlutterTesterOptions():
     if self.enable_microtask_profiling:
       command_args.append('--profile-microtasks')
 
-  def threading_description(self):
+  def threading_description(self) -> str:
     if self.multithreaded:
       return 'multithreaded'
     return 'single-threaded'
 
-  def impeller_enabled(self):
+  def impeller_enabled(self) -> str:
     if self.enable_impeller:
       return 'impeller swiftshader'
     return 'skia software'
 
 
-def gather_dart_test(build_dir, dart_file, options):
+def gather_dart_test(
+    build_dir: str, dart_file: str, options: FlutterTesterOptions
+) -> EngineExecutableTask:
   kernel_file_name = os.path.basename(dart_file) + '.dill'
   kernel_file_output = os.path.join(build_dir, 'gen', kernel_file_name)
-  error_message = "%s doesn't exist. Please run the build that populates %s" % (
-      kernel_file_output, build_dir
+  error_message = (
+      f"{kernel_file_output} doesn't exist. "
+      f'Please run the build that populates {build_dir}'
   )
   assert os.path.isfile(kernel_file_output), error_message
 
-  command_args = []
+  command_args: typing.List[str] = []
 
   options.apply_args(command_args)
 
-  dart_file_contents = open(dart_file, 'r')
-  custom_options = re.findall('// FlutterTesterOptions=(.*)', dart_file_contents.read())
-  dart_file_contents.close()
+  with open(dart_file, 'r', encoding='utf-8') as dart_file_contents:
+    custom_options = re.findall('// FlutterTesterOptions=(.*)', dart_file_contents.read())
   command_args.extend(custom_options)
 
   command_args += [
       '--use-test-fonts',
-      '--icu-data-file-path=%s' % os.path.join(build_dir, 'icudtl.dat'),
-      '--flutter-assets-dir=%s' % os.path.join(build_dir, 'gen', 'flutter', 'lib', 'ui', 'assets'),
+      f'--icu-data-file-path={os.path.join(build_dir, "icudtl.dat")}',
+      f'--flutter-assets-dir={os.path.join(build_dir, "gen", "flutter", "lib", "ui", "assets")}',
       '--disable-asset-fonts',
       kernel_file_output,
   ]
@@ -691,43 +705,47 @@ def gather_dart_test(build_dir, dart_file, options):
   )
 
 
-def ensure_ios_tests_are_built(ios_out_dir):
+def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(OUT_DIR, ios_out_dir)
   ios_test_lib = os.path.join(tmp_out_dir, 'libios_test_flutter.dylib')
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
-  message.append('ninja -C %s ios_test_flutter' % ios_out_dir)
-  final_message = "%s or %s doesn't exist. Please run the following commands: \n%s" % (
-      ios_out_dir, ios_test_lib, '\n'.join(message)
+  message.append(f'ninja -C {ios_out_dir} ios_test_flutter')
+  joined_message = '\n'.join(message)
+  final_message = (
+      f"{ios_out_dir} or {ios_test_lib} doesn't exist. "
+      f'Please run the following commands: \n{joined_message}'
   )
   assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
 
-def assert_expected_xcode_version():
+def assert_expected_xcode_version() -> None:
   """Checks that the user has a version of Xcode installed"""
   version_output = subprocess.check_output(['xcodebuild', '-version'])
   # TODO ricardoamador: remove this check when python 2 is deprecated.
-  version_output = version_output if isinstance(version_output,
-                                                str) else version_output.decode(ENCODING)
-  version_output = version_output.strip()
-  match = re.match(r'Xcode (\d+)', version_output)
+  version_output_str = version_output if isinstance(version_output,
+                                                    str) else version_output.decode(ENCODING)
+  version_output_str = version_output_str.strip()
+  match = re.match(r'Xcode (\d+)', version_output_str)
   message = 'Xcode must be installed to run the iOS embedding unit tests'
   assert match, message
 
 
-def java_home():
+def java_home() -> str:
   script_path = os.path.dirname(os.path.realpath(__file__))
   if is_mac():
     return os.path.join(script_path, '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home')
   return os.path.join(script_path, '..', 'third_party', 'java', 'openjdk')
 
 
-def java_bin():
+def java_bin() -> str:
   return os.path.join(java_home(), 'bin', 'java.exe' if is_windows() else 'java')
 
 
-def run_java_tests(executable_filter, android_variant='android_debug_unopt'):
+def run_java_tests(
+    executable_filter: typing.Optional[str], android_variant: str = 'android_debug_unopt'
+) -> None:
   """Runs the Java JUnit unit tests for the Android embedding"""
   test_runner_dir = os.path.join(
       BUILDROOT_DIR, 'flutter', 'shell', 'platform', 'android', 'test_runner'
@@ -744,21 +762,21 @@ def run_java_tests(executable_filter, android_variant='android_debug_unopt'):
   test_class = executable_filter if executable_filter else '*'
   command = [
       gradle_bin,
-      '-Pflutter_jar=%s' % flutter_jar,
-      '-Pbuild_dir=%s' % build_dir,
+      f'-Pflutter_jar={flutter_jar}',
+      f'-Pbuild_dir={build_dir}',
       'testDebugUnitTest',
-      '--tests=%s' % test_class,
+      f'--tests={test_class}',
       '--rerun-tasks',
       '--no-daemon',
-      '--project-cache-dir=%s' % gradle_cache_dir,
-      '--gradle-user-home=%s' % gradle_cache_dir,
+      f'--project-cache-dir={gradle_cache_dir}',
+      f'--gradle-user-home={gradle_cache_dir}',
   ]
 
   env = dict(os.environ, ANDROID_HOME=android_home, JAVA_HOME=java_home())
   run_cmd(command, cwd=test_runner_dir, env=env)
 
 
-def run_android_unittest(test_runner_name, android_variant, adb_path):
+def run_android_unittest(test_runner_name: str, android_variant: str, adb_path: str) -> None:
   tests_path = os.path.join(OUT_DIR, android_variant, test_runner_name)
   remote_path = '/data/local/tmp'
   remote_tests_path = os.path.join(remote_path, test_runner_name)
@@ -769,14 +787,16 @@ def run_android_unittest(test_runner_name, android_variant, adb_path):
   except:
     luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
     if luci_test_outputs_path:
-      print('>>>>> Test %s failed. Capturing logcat.' % test_runner_name)
-      logcat_path = os.path.join(luci_test_outputs_path, '%s_logcat' % test_runner_name)
-      logcat_file = open(logcat_path, 'w')
-      subprocess.run([adb_path, 'logcat', '-d'], stdout=logcat_file, check=False)
+      print(f'>>>>> Test {test_runner_name} failed. Capturing logcat.')
+      logcat_path = os.path.join(luci_test_outputs_path, f'{test_runner_name}_logcat')
+      with open(logcat_path, 'w', encoding='utf-8') as logcat_file:
+        subprocess.run([adb_path, 'logcat', '-d'], stdout=logcat_file, check=False)
     raise
 
 
-def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
+def run_android_tests(
+    android_variant: str = 'android_debug_unopt', adb_path: typing.Optional[str] = None
+) -> None:
   if adb_path is None:
     adb_path = 'adb'
 
@@ -785,7 +805,9 @@ def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
   run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
 
-def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
+def run_objc_tests(
+    ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
+) -> None:
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   assert_expected_xcode_version()
   ios_out_dir = os.path.join(OUT_DIR, ios_variant)
@@ -801,7 +823,7 @@ def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
       'xcrun '
       'simctl '
       'create '
-      '%s com.apple.CoreSimulator.SimDeviceType.iPhone-11' % new_simulator_name
+      f'{new_simulator_name} com.apple.CoreSimulator.SimDeviceType.iPhone-11'
   ]
   run_cmd(create_simulator, shell=True)
 
@@ -825,7 +847,7 @@ def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
           'FLUTTER_ENGINE=' + ios_variant
       ]
       if test_filter is not None:
-        test_command[0] = test_command[0] + ' -only-testing:%s' % test_filter
+        test_command[0] = test_command[0] + f' -only-testing:{test_filter}'
       try:
         run_cmd(test_command, cwd=ios_unit_test_dir, shell=True)
 
@@ -845,7 +867,7 @@ def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
     delete_simulator(new_simulator_name)
 
 
-def delete_simulator(simulator_name):
+def delete_simulator(simulator_name: str) -> None:
   # Will delete all simulators with this name.
   command = [
       'xcrun',
@@ -857,7 +879,9 @@ def delete_simulator(simulator_name):
   run_cmd(command, expect_failure=True)
 
 
-def gather_dart_tests(build_dir, test_filter):
+def gather_dart_tests(
+    build_dir: str, test_filter: typing.Optional[typing.List[str]]
+) -> typing.Generator[EngineExecutableTask, None, None]:
   dart_tests_dir = os.path.join(
       BUILDROOT_DIR,
       'flutter',
@@ -874,8 +898,8 @@ def gather_dart_tests(build_dir, test_filter):
       cwd=dart_tests_dir,
   )
 
-  dart_vm_service_tests = glob.glob('%s/vm_service/*_test.dart' % dart_tests_dir)
-  dart_tests = glob.glob('%s/*_test.dart' % dart_tests_dir)
+  dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
+  dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
@@ -910,7 +934,9 @@ def gather_dart_tests(build_dir, test_filter):
           )
 
 
-def gather_dart_smoke_test(build_dir, test_filter):
+def gather_dart_smoke_test(
+    build_dir: str, test_filter: typing.Optional[typing.List[str]]
+) -> typing.Generator[EngineExecutableTask, None, None]:
   smoke_test = os.path.join(
       BUILDROOT_DIR,
       'flutter',
@@ -929,7 +955,9 @@ def gather_dart_smoke_test(build_dir, test_filter):
     )
 
 
-def gather_dart_package_tests(build_dir, package_path):
+def gather_dart_package_tests(
+    build_dir: str, package_path: str
+) -> typing.Generator[EngineExecutableTask, None, None]:
   if uses_package_test_runner(package_path):
     opts = ['test', '--reporter=expanded']
     yield EngineExecutableTask(
@@ -940,9 +968,9 @@ def gather_dart_package_tests(build_dir, package_path):
         cwd=package_path,
     )
   else:
-    dart_tests = glob.glob('%s/test/*_test.dart' % package_path)
+    dart_tests = glob.glob(f'{package_path}/test/*_test.dart')
     if not dart_tests:
-      raise Exception('No tests found for Dart package at %s' % package_path)
+      raise Exception(f'No tests found for Dart package at {package_path}')
     for dart_test_file in dart_tests:
       opts = [dart_test_file]
       yield EngineExecutableTask(
@@ -953,11 +981,11 @@ def gather_dart_package_tests(build_dir, package_path):
 # Returns whether the given package path should be tested with `dart test`.
 #
 # Inferred by a dependency on the `package:test` package in the pubspec.yaml.
-def uses_package_test_runner(package):
+def uses_package_test_runner(package: str) -> bool:
   pubspec = os.path.join(package, 'pubspec.yaml')
   if not os.path.exists(pubspec):
     return False
-  with open(pubspec, 'r') as file:
+  with open(pubspec, 'r', encoding='utf-8') as file:
     # Check if either "dependencies" or "dev_dependencies" contains "test".
     data = yaml.safe_load(file)
     if data is None:
@@ -979,7 +1007,7 @@ def uses_package_test_runner(package):
 #
 # The second element of each tuple is a list of additional command line
 # arguments to pass to each of the packages tests.
-def build_dart_host_test_list():
+def build_dart_host_test_list() -> typing.List[str]:
   dart_host_tests = [
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
@@ -999,9 +1027,9 @@ def build_dart_host_test_list():
   return dart_host_tests
 
 
-def run_benchmark_tests(build_dir):
+def run_benchmark_tests(build_dir: str) -> None:
   test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'benchmark')
-  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+  dart_tests = glob.glob(f'{test_dir}/test/*_test.dart')
   for dart_test_file in dart_tests:
     opts = [dart_test_file]
     run_engine_executable(
@@ -1009,7 +1037,7 @@ def run_benchmark_tests(build_dir):
     )
 
 
-def worker_init(queue, level):
+def worker_init(queue: multiprocessing.Queue, level: int) -> None:
   queue_handler = logging.handlers.QueueHandler(queue)
   log = logging.getLogger(__name__)
   log.setLevel(logging.INFO)
@@ -1017,7 +1045,7 @@ def worker_init(queue, level):
   log.addHandler(queue_handler)
 
 
-def run_engine_tasks_in_parallel(tasks):
+def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bool:
   # Work around a bug in Python.
   #
   # The multiprocessing package relies on the win32 WaitForMultipleObjects()
@@ -1031,7 +1059,7 @@ def run_engine_tasks_in_parallel(tasks):
   if sys_platform.startswith(('cygwin', 'win')) and max_processes > 60:
     max_processes = 60
 
-  queue = multiprocessing.Queue()
+  queue: multiprocessing.Queue = multiprocessing.Queue()
   queue_listener = logging.handlers.QueueListener(
       queue,
       console_logger_handler,
@@ -1055,8 +1083,8 @@ def run_engine_tasks_in_parallel(tasks):
 
   if len(failures) > 0:
     logger.error('The following commands failed:')
-    for task, exn in failures:
-      logger.error('%s\n  %s\n\n', str(task), str(exn))
+    for task, failure_exn in failures:
+      logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
     return False
 
   return True
@@ -1069,18 +1097,22 @@ class DirectoryChange():
   old_cwd: str = ''
   new_cwd: str = ''
 
-  def __init__(self, new_cwd: str):
+  def __init__(self, new_cwd: str) -> None:
     self.new_cwd = new_cwd
 
-  def __enter__(self):
+  def __enter__(self) -> None:
     self.old_cwd = os.getcwd()
     os.chdir(self.new_cwd)
 
-  def __exit__(self, exception_type, exception_value, exception_traceback):
+  def __exit__(
+      self, exception_type: typing.Optional[typing.Type[BaseException]],
+      exception_value: typing.Optional[BaseException],
+      exception_traceback: typing.Optional[typing.Any]
+  ) -> None:
     os.chdir(self.old_cwd)
 
 
-def contains_png_recursive(directory):
+def contains_png_recursive(directory: str) -> bool:
   """
   Recursively checks if a directory contains at least one .png file.
 
@@ -1104,8 +1136,8 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
   tests_path: str = os.path.join(build_dir, 'impeller_golden_tests')
   if not os.path.exists(tests_path):
     raise Exception(
-        'Cannot find the "impeller_golden_tests" executable in "%s". You may need to build it.' %
-        (build_dir)
+        f'Cannot find the "impeller_golden_tests" executable in "{build_dir}". '
+        'You may need to build it.'
     )
   harvester_path: Path = Path(SCRIPT_DIR).parent.joinpath('tools'
                                                          ).joinpath('golden_tests_harvester')
@@ -1146,12 +1178,12 @@ for more information.
       )
       return
 
-    with DirectoryChange(harvester_path):
+    with DirectoryChange(str(harvester_path)):
       bin_path = Path('.').joinpath('bin').joinpath('golden_tests_harvester.dart')
       run_cmd([dart_bin, str(bin_path), temp_dir])
 
 
-def main():
+def main() -> int:
   parser = argparse.ArgumentParser(
       description="""
 In order to learn the details of running tests in the engine, please consult the
@@ -1181,7 +1213,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       '--type',
       type=str,
       default='all',
-      help='A list of test types, default is "all" (equivalent to "%s")' % (','.join(all_types))
+      help=f'A list of test types, default is "all" (equivalent to "{",".join(all_types)}")'
   )
   parser.add_argument(
       '--engine-filter', type=str, default='', help='A list of engine test executables to run.'
@@ -1303,21 +1335,21 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     print('Warning: using "android" in variant. Did you mean to use --android-variant?')
 
   build_dir = os.path.join(OUT_DIR, args.variant)
-  if args.type != 'java' and args.type != 'android':
-    assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
+  if args.type not in ('java', 'android'):
+    assert os.path.exists(build_dir), f'Build variant directory {build_dir} does not exist!'
 
   if args.sanitizer_suppressions:
     assert is_linux() or is_mac(
     ), 'The sanitizer suppressions flag is only supported on Linux and Mac.'
     file_dir = os.path.dirname(os.path.abspath(__file__))
     command = [
-        'env', '-i', 'bash', '-c',
-        'source {}/sanitizer_suppressions.sh >/dev/null && env'.format(file_dir)
+        'env', '-i', 'bash', '-c', f'source {file_dir}/sanitizer_suppressions.sh >/dev/null && env'
     ]
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
-    for line in process.stdout:
-      key, _, value = line.decode('utf8').strip().partition('=')
-      os.environ[key] = value
+    if process.stdout:
+      for line in process.stdout:
+        key, _, value = line.decode('utf8').strip().partition('=')
+        os.environ[key] = value
     process.communicate()  # Avoid pipe deadlock while waiting for termination.
 
   success = True
