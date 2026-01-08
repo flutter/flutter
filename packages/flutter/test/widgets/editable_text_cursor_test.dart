@@ -234,9 +234,7 @@ void main() {
   testWidgets(
     'Cursor does not animate on non-iOS platforms',
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: Material(child: TestTextField(maxLines: 3))),
-      );
+      await tester.pumpWidget(const MaterialApp(home: Material(child: TestTextField(maxLines: 3))));
 
       await tester.tap(find.byType(TestTextField));
       await tester.pump();
@@ -469,7 +467,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
     await tester.pumpWidget(
       MaterialApp(
-        home: Material(child: TextField(focusNode: focusNode, autofocus: true)),
+        home: Material(child: TestTextField(focusNode: focusNode, autofocus: true)),
       ),
     );
     assert(focusNode.hasFocus);

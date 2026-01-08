@@ -19113,6 +19113,36 @@ void main() {
 
     expect(controller.text, 'H');
   });
+
+  testWidgets('Cursor does not show when not focused', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/106512 .
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(child: TextField(focusNode: focusNode, autofocus: true)),
+      ),
+    );
+    assert(focusNode.hasFocus);
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    for (var i = 0; i < 10; i += 10) {
+      // Make sure it does not paint for a period of time.
+      expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+      expect(tester.hasRunningAnimations, isFalse);
+      await tester.pump(const Duration(milliseconds: 29));
+    }
+
+    // Refocus and it should paint the caret.
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
+  });
 }
 
 /// A Simple widget for testing the obscure text.
