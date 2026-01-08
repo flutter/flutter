@@ -17,7 +17,6 @@
 - (void)showShareViewController:(NSString*)content;
 - (void)searchWeb:(NSString*)searchTerm;
 - (void)showLookUpViewController:(NSString*)term;
-
 - (void)showTranslateViewController:(NSString*)term;
 @end
 

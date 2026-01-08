@@ -5,12 +5,12 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -42,11 +42,10 @@ FLUTTER_ASSERT_ARC
     [engine runWithEntrypoint:nil];
 
     XCTestExpectation* presentExpectation =
-    [self expectationWithDescription:@"Translate view hosting controller presented"];
+        [self expectationWithDescription:@"Translate view hosting controller presented"];
 
-    FlutterViewController* engineViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                        nibName:nil
-                                                                                         bundle:nil];
+    FlutterViewController* engineViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
     FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
 
     FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
@@ -56,7 +55,7 @@ FLUTTER_ASSERT_ARC
                                                                       arguments:@"Test"];
     FlutterResult result = ^(id result) {
       OCMVerify([mockEngineViewController
-                 addChildViewController:[OCMArg isKindOfClass:[TranslateController class]]]);
+          addChildViewController:[OCMArg isKindOfClass:[TranslateController class]]]);
       [presentExpectation fulfill];
     };
     [mockPlugin handleMethodCall:methodCall result:result];
