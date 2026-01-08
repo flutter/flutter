@@ -293,7 +293,7 @@ void main() {
                       ) {
                         focusNode = fieldFocusNode;
                         textEditingController = fieldTextEditingController;
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -407,7 +407,7 @@ void main() {
                             FocusNode focusNode,
                             VoidCallback onSubmitted,
                           ) {
-                            return TextField(
+                            return TestTextField(
                               key: fieldKey,
                               focusNode: focusNode,
                               controller: textEditingController,
@@ -535,7 +535,7 @@ void main() {
                         FocusNode focusNode,
                         VoidCallback onSubmitted,
                       ) {
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -559,7 +559,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -599,7 +599,7 @@ void main() {
                         FocusNode focusNode,
                         VoidCallback onSubmitted,
                       ) {
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -623,7 +623,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -673,7 +673,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: fieldTextEditingController,
@@ -766,7 +766,7 @@ void main() {
                 ) {
                   textEditingController = fieldTextEditingController;
                   focusNode = fieldFocusNode;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: fieldTextEditingController,
@@ -853,7 +853,7 @@ void main() {
                   textEditingController = fieldTextEditingController;
                   focusNode = fieldFocusNode;
                   lastOnFieldSubmitted = onFieldSubmitted;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: fieldTextEditingController,
@@ -913,7 +913,7 @@ void main() {
                       FocusNode focusNode,
                       VoidCallback onFieldSubmitted,
                     ) {
-                      return TextField(controller: controller, focusNode: focusNode);
+                      return TestTextField(controller: controller, focusNode: focusNode);
                     },
                 optionsViewBuilder:
                     (
@@ -928,10 +928,10 @@ void main() {
           ),
         ),
       );
-      await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TestTextField));
       await tester.pump();
       expect(
-        tester.getBottomLeft(find.byType(TextField)),
+        tester.getBottomLeft(find.byType(TestTextField)),
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))),
       );
     });
@@ -952,7 +952,7 @@ void main() {
                       FocusNode focusNode,
                       VoidCallback onFieldSubmitted,
                     ) {
-                      return TextField(controller: controller, focusNode: focusNode);
+                      return TestTextField(controller: controller, focusNode: focusNode);
                     },
                 optionsViewBuilder:
                     (
@@ -967,10 +967,10 @@ void main() {
           ),
         ),
       );
-      await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TestTextField));
       await tester.pump();
       expect(
-        tester.getBottomLeft(find.byType(TextField)),
+        tester.getBottomLeft(find.byType(TestTextField)),
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))),
       );
     });
@@ -990,7 +990,7 @@ void main() {
                       FocusNode focusNode,
                       VoidCallback onFieldSubmitted,
                     ) {
-                      return TextField(controller: controller, focusNode: focusNode);
+                      return TestTextField(controller: controller, focusNode: focusNode);
                     },
                 optionsViewBuilder:
                     (
@@ -1005,10 +1005,10 @@ void main() {
           ),
         ),
       );
-      await tester.showKeyboard(find.byType(TextField));
+      await tester.showKeyboard(find.byType(TestTextField));
       await tester.pump();
       expect(
-        tester.getTopLeft(find.byType(TextField)),
+        tester.getTopLeft(find.byType(TestTextField)),
         offsetMoreOrLessEquals(tester.getBottomLeft(find.text('a'))),
       );
     });
@@ -1038,7 +1038,7 @@ void main() {
                           FocusNode focusNode,
                           VoidCallback onFieldSubmitted,
                         ) {
-                          return TextField(controller: controller, focusNode: focusNode);
+                          return TestTextField(controller: controller, focusNode: focusNode);
                         },
                     optionsViewBuilder:
                         (
@@ -1062,7 +1062,7 @@ void main() {
       );
 
       // Show the options. It should open downwards since there is more space.
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
 
       expect(
@@ -1096,7 +1096,7 @@ void main() {
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  TextField(controller: controller, focusNode: focusNode),
+                  TestTextField(controller: controller, focusNode: focusNode),
                   RawAutocomplete<String>(
                     key: autocompleteKey,
                     textEditingController: controller,
@@ -1118,7 +1118,7 @@ void main() {
             ),
           ),
         );
-        await tester.showKeyboard(find.byType(TextField));
+        await tester.showKeyboard(find.byType(TestTextField));
         await tester.pump();
         expect(
           tester.getBottomLeft(find.byKey(autocompleteKey)),
@@ -1154,13 +1154,13 @@ void main() {
                           return const Text('a');
                         },
                   ),
-                  TextField(controller: controller, focusNode: focusNode),
+                  TestTextField(controller: controller, focusNode: focusNode),
                 ],
               ),
             ),
           ),
         );
-        await tester.showKeyboard(find.byType(TextField));
+        await tester.showKeyboard(find.byType(TestTextField));
         await tester.pump();
         expect(
           tester.getTopLeft(find.byKey(autocompleteKey)),
@@ -1345,7 +1345,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: fieldTextEditingController,
@@ -1492,7 +1492,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -1570,7 +1570,7 @@ void main() {
               FocusNode fieldFocusNode,
               VoidCallback onFieldSubmitted,
             ) {
-              return TextField(focusNode: focusNode, controller: textEditingController);
+              return TestTextField(focusNode: focusNode, controller: textEditingController);
             },
       );
     }, throwsAssertionError);
@@ -1606,7 +1606,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -2241,7 +2241,7 @@ void main() {
                   FocusNode fieldFocusNode,
                   VoidCallback onFieldSubmitted,
                 ) {
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: fieldFocusNode,
                     controller: fieldTextEditingController,
@@ -2313,7 +2313,7 @@ void main() {
                           FocusNode focusNode,
                           VoidCallback onSubmitted,
                         ) {
-                          return TextField(
+                          return TestTextField(
                             key: fieldKey,
                             focusNode: focusNode,
                             controller: textEditingController,
@@ -2334,7 +2334,7 @@ void main() {
     final RenderBox fieldBox = tester.renderObject(find.byKey(fieldKey));
     expect(fieldBox.size.width, 100.0);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     expect(find.byKey(fieldKey), findsOneWidget);
@@ -2385,7 +2385,7 @@ void main() {
                 setState = localStateSetter;
                 return SizedBox(
                   width: width,
-                  child: TextField(
+                  child: TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -2410,7 +2410,7 @@ void main() {
     final RenderBox fieldBox = tester.renderObject(find.byKey(fieldKey));
     expect(fieldBox.size.width, 100.0);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     expect(find.byKey(fieldKey), findsOneWidget);
@@ -2484,7 +2484,7 @@ void main() {
                         FocusNode focusNode,
                         VoidCallback onSubmitted,
                       ) {
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -2514,7 +2514,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -2585,7 +2585,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -2658,7 +2658,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
@@ -2761,7 +2761,7 @@ void main() {
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsNothing);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pumpAndSettle();
       expect(find.byKey(fieldKey), findsOneWidget);
       expect(find.byKey(optionsKey), findsOneWidget);
@@ -2881,7 +2881,7 @@ void main() {
                         FocusNode focusNode,
                         VoidCallback onSubmitted,
                       ) {
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -2989,7 +2989,7 @@ void main() {
                         FocusNode focusNode,
                         VoidCallback onSubmitted,
                       ) {
-                        return TextField(
+                        return TestTextField(
                           key: fieldKey,
                           focusNode: focusNode,
                           controller: textEditingController,
@@ -3078,7 +3078,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -3158,7 +3158,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -3244,7 +3244,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -3327,7 +3327,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -3393,7 +3393,7 @@ void main() {
                 ) {
                   focusNode = fieldFocusNode;
                   textEditingController = fieldTextEditingController;
-                  return TextField(
+                  return TestTextField(
                     key: fieldKey,
                     focusNode: focusNode,
                     controller: textEditingController,
@@ -3524,7 +3524,7 @@ void main() {
                       TextEditingController textEditingController,
                       FocusNode focusNode,
                       VoidCallback voidCallBack,
-                    ) => TextField(controller: textEditingController),
+                    ) => TestTextField(controller: textEditingController),
                 optionsViewBuilder:
                     (
                       BuildContext context,
@@ -3567,7 +3567,7 @@ void main() {
                     VoidCallback onFieldSubmitted,
                   ) {
                     focusNode = fieldFocusNode;
-                    return TextField(
+                    return TestTextField(
                       key: fieldKey,
                       focusNode: fieldFocusNode,
                       controller: fieldTextEditingController,
