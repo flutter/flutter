@@ -110,7 +110,8 @@ typedef struct {
   // Policy for the thread that runs UI isolate.
   FlutterDesktopUIThreadPolicy ui_thread_policy;
 
-  // Accessibility mode
+  // The accessibility mode.
+  // This can be used to enable the experimental IAccessibleEx implementation.
   FlutterDesktopAccessibilityMode accessibility_mode;
 } FlutterDesktopEngineProperties;
 
