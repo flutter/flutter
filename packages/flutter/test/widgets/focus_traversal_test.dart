@@ -3035,7 +3035,7 @@ void main() {
         final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
         addTearDown(focusNodeLowerRight.dispose);
 
-        Widget generatetestWidgets(bool ignoreTextFields) {
+        Widget generateTestWidgets(bool ignoreTextFields) {
           final shortcuts = <ShortcutActivator, Intent>{
             const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
               TraversalDirection.left,
@@ -3126,7 +3126,7 @@ void main() {
           );
         }
 
-        await tester.pumpWidget(generatetestWidgets(false));
+        await tester.pumpWidget(generateTestWidgets(false));
 
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -3138,7 +3138,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
 
-        await tester.pumpWidget(generatetestWidgets(true));
+        await tester.pumpWidget(generateTestWidgets(true));
 
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
