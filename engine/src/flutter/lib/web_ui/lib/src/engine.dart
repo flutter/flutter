@@ -87,7 +87,7 @@ export 'engine/occlusion_map.dart';
 export 'engine/onscreen_logging.dart';
 export 'engine/platform_dispatcher.dart';
 export 'engine/platform_dispatcher/app_lifecycle_state.dart';
-export 'engine/platform_dispatcher/media_query_listeners.dart';
+export 'engine/platform_dispatcher/media_query_manager.dart';
 export 'engine/platform_dispatcher/view_focus_binding.dart';
 export 'engine/platform_views/content_manager.dart';
 export 'engine/platform_views/embedder.dart';
