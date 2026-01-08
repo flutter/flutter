@@ -31,6 +31,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 #include "flutter/shell/testing/tester_context.h"
+#include "flutter/shell/testing/tester_context_gles_factory.h"
 #include "flutter/shell/testing/tester_context_mtl_factory.h"
 #include "flutter/shell/testing/tester_context_vk_factory.h"
 
@@ -53,6 +54,13 @@ std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
   if (settings.enable_impeller &&
       settings.requested_rendering_backend == "metal") {
     tester_context = TesterContextMTLFactory::Create();
+  }
+#endif
+#if TESTER_ENABLE_OPENGLES
+  if (settings.enable_impeller && !tester_context &&
+      settings.requested_rendering_backend == "opengles") {
+    FML_LOG(IMPORTANT) << "Impeller context: OpenGLES";
+    tester_context = TesterContextGLESFactory::Create();
   }
 #endif
 #if TESTER_ENABLE_VULKAN
