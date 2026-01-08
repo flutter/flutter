@@ -1074,6 +1074,29 @@ typedef struct {
   FlutterEngineDisplayId display_id;
   /// The view that this event is describing.
   int64_t view_id;
+  /// If `true`, the window has size constraints.
+  /// If `false`, the constraint values are ignored.
+  bool has_constraints;
+  /// Minimum physical width of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be less than or equal to
+  /// |max_width_constraint| and |width|.
+  size_t min_width_constraint;
+  /// Minimum physical height of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be less than or equal to
+  /// |max_height_constraint| and |height|.
+  size_t min_height_constraint;
+  /// Maximum physical width of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be greater than or equal to
+  /// |min_width_constraint| and |width|.
+  size_t max_width_constraint;
+  /// Maximum physical height of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be greater than or equal to
+  /// |min_height_constraint| and |height|.
+  size_t max_height_constraint;
 } FlutterWindowMetricsEvent;
 
 typedef struct {
