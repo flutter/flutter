@@ -131,7 +131,7 @@ class DartProject {
   }
 
   // Returns the accessibility implementation used by Flutter.
-  // Defaults to AccessibilityMode::IAccessibleEx.
+  // Defaults to AccessibilityMode::Defaults.
   AccessibilityMode accessibility_mode() const { return accessibility_mode_; }
 
  private:
@@ -163,7 +163,7 @@ class DartProject {
   // Thread policy for UI isolate.
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
   // The accessibility implementation used by Flutter.
-  AccessibilityMode accessibility_mode_ = AccessibilityMode::IAccessibleEx;
+  AccessibilityMode accessibility_mode_ = AccessibilityMode::Default;
 };
 
 }  // namespace flutter
