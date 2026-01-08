@@ -425,15 +425,16 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       );
     }
     final int numElements = info.floatCount ~/ elementSize;
-    final elements = List<T>.empty(growable: true);
 
-    for (var i = 0; i < numElements; ++i) {
-      final floatComponentsForElement = List<SkwasmUniformFloatSlot>.generate(
-        elementSize,
-        (j) => SkwasmUniformFloatSlot._(this, j, name, i * elementSize + j + info.location),
-      );
-      elements.add(elementFactory(floatComponentsForElement));
-    }
+    final allFloatSlots = List<SkwasmUniformFloatSlot>.generate(
+      info.floatCount,
+      (j) => SkwasmUniformFloatSlot._(this, j ~/ elementSize, name, info.location + j),
+    );
+
+    final elements = List<T>.generate(
+      numElements,
+      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
+    );
 
     return _SkwasmUniformArray<T>._(elements);
   }

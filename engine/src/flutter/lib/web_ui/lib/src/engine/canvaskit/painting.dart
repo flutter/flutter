@@ -460,15 +460,16 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
       );
     }
     final int numElements = info.floatCount ~/ elementSize;
-    final elements = List<T>.empty(growable: true);
 
-    for (var i = 0; i < numElements; ++i) {
-      final floatComponentsForElement = List<CkUniformFloatSlot>.generate(
-        elementSize,
-        (j) => CkUniformFloatSlot._(this, j, name, i * elementSize + j + info.location),
-      );
-      elements.add(elementFactory(floatComponentsForElement));
-    }
+    final allFloatSlots = List<CkUniformFloatSlot>.generate(
+      info.floatCount,
+      (j) => CkUniformFloatSlot._(this, j ~/ elementSize, name, info.location + j),
+    );
+
+    final elements = List<T>.generate(
+      numElements,
+      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
+    );
 
     return _CkUniformFloatArray<T>._(elements);
   }

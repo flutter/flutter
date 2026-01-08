@@ -1010,7 +1010,7 @@ abstract class FragmentProgram {
   FragmentShader fragmentShader();
 }
 
-abstract class UniformType {}
+sealed class UniformType {}
 
 abstract class UniformFloatSlot extends UniformType {
   UniformFloatSlot(this.name, this.index);

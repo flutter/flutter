@@ -83,30 +83,44 @@ void main() async {
     });
 
     test('FragmentProgram getUniformFloat unknown', () async {
-      try {
-        shader.getUniformFloat('unknown');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('No uniform named "unknown".'));
-      }
+      expect(
+        () {
+          shader.getUniformFloat('unknown');
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('No uniform named "unknown"'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformFloat offset overflow', () async {
-      try {
-        shader.getUniformFloat('iVec2Uniform', 2);
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
-      }
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', 2),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `2` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformFloat offset underflow', () async {
-      try {
-        shader.getUniformFloat('iVec2Uniform', -1);
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
-      }
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', -1),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `-1` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformVec2', () async {
@@ -115,17 +129,26 @@ void main() async {
     });
 
     test('FragmentProgram getUniformVec2 wrong size', () async {
-      try {
-        shader.getUniformVec2('iVec3Uniform');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 2.'));
-      }
-      try {
-        shader.getUniformVec2('iFloatUniform');
-      } catch (e) {
-        expect(e.toString(), contains('`iFloatUniform` has size 1, not size 2.'));
-      }
+      expect(
+        () => shader.getUniformVec2('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 2.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec2('iFloatUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iFloatUniform` has size 1, not size 2.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformVec3', () async {
@@ -134,17 +157,26 @@ void main() async {
     });
 
     test('FragmentProgram getUniformVec3 wrong size', () async {
-      try {
-        shader.getUniformVec3('iVec2Uniform');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`iVec2Uniform` has size 2, not size 3.'));
-      }
-      try {
-        shader.getUniformVec3('iVec4Uniform');
-      } catch (e) {
-        expect(e.toString(), contains('`iVec4Uniform` has size 4, not size 3.'));
-      }
+      expect(
+        () => shader.getUniformVec3('iVec2Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec2Uniform` has size 2, not size 3.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec3('iVec4Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec4Uniform` has size 4, not size 3.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformVec4', () async {
@@ -153,83 +185,95 @@ void main() async {
     });
 
     test('FragmentProgram getUniformVec4 wrong size', () async {
-      try {
-        shader.getUniformVec4('iVec3Uniform');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 4.'));
-      }
+      expect(
+        () => shader.getUniformVec4('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 4.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformArray float', () async {
       final UniformArray<UniformFloatSlot> slots = shader.getUniformFloatArray(
         'iFloatArrayUniform',
       );
+      expect(slots.length, 10);
       slots[0].set(1.0);
       slots[1].set(1.0);
     });
 
     test('FragmentProgram getUniformArray not found', () async {
-      try {
-        shader.getUniformFloatArray('unknown');
-        fail('Unreachable');
-      } catch (e) {
-        expect(e.toString(), contains('No uniform named "unknown".'));
-      }
+      expect(
+        () => shader.getUniformFloatArray('unknown'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('No uniform named "unknown".'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformArrayVec2', () async {
       final UniformArray<UniformVec2Slot> slots = shader.getUniformVec2Array('iVec2ArrayUniform');
-
+      expect(slots.length, 3);
       slots[0].set(1.0, 1.0);
     });
 
     test('FragmentProgram getUniformArrayVec2 wrong type', () async {
-      try {
-        shader.getUniformVec2Array('iVec3ArrayUniform');
-        fail('unreachable');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
-        );
-      }
+      expect(
+        () => shader.getUniformVec2Array('iVec3ArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformArrayVec3', () async {
       final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
-
+      expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0);
     });
 
     test('FragmentProgram getUniformArrayVec3 wrong type', () async {
-      try {
-        shader.getUniformVec3Array('iFloatArrayUniform');
-        fail('unreachable');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
-        );
-      }
+      expect(
+        () => shader.getUniformVec3Array('iFloatArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
+          ),
+        ),
+      );
     });
 
     test('FragmentProgram getUniformArrayVec4', () async {
       final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
-
+      expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0, 1.0);
     });
 
     test('FragmentProgram getUniformArrayVec4 wrong type', () async {
-      try {
-        shader.getUniformVec4Array('iFloatArrayUniform');
-        fail('unreachable');
-      } catch (e) {
-        expect(
-          e.toString(),
-          contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 4.'),
-        );
-      }
+      expect(
+        () => shader.getUniformVec4Array('iFloatArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 4.'),
+          ),
+        ),
+      );
     });
   });
 

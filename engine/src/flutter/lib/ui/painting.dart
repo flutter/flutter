@@ -5505,7 +5505,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
 // A binding into a uniform defined in a shader. Used now to restrict the types
 // of UniformArrays that can be created.
-abstract base class UniformType {}
+sealed class UniformType {}
 
 /// A binding to a uniform of type float. Calling [set] on this object updates
 /// a float uniform's value.
@@ -5798,14 +5798,14 @@ base class FragmentShader extends Shader {
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
 
-    if (index < 0) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
-
     final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
 
-    if (index + 1 > info.size) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
+    if (index < 0 || index + 1 > info.size) {
+      throw IndexError.withLength(
+        index,
+        info.size,
+        message: 'Index `$index` out of bounds for `$name`.',
+      );
     }
 
     final result = UniformFloatSlot._(this, name, index, info.index + index);
@@ -5887,21 +5887,20 @@ base class FragmentShader extends Shader {
       );
     }
     final int numElements = info.size ~/ elementSize;
-    final allAddedSlots = List<UniformFloatSlot>.empty(growable: true);
 
-    final elements = List<T>.empty(growable: true);
-    for (var i = 0; i < numElements; ++i) {
-      final floatComponentsForElement = List<UniformFloatSlot>.generate(
-        elementSize,
-        (j) => UniformFloatSlot._(this, name, j, i * elementSize + j + info.index),
-      );
-      elements.add(elementFactory(floatComponentsForElement));
-      allAddedSlots.addAll(floatComponentsForElement);
-    }
+    final allFloatSlots = List<UniformFloatSlot>.generate(
+      info.size,
+      (j) => UniformFloatSlot._(this, name, j ~/ elementSize, info.index + j),
+    );
+
+    final elements = List<T>.generate(
+      numElements,
+      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
+    );
 
     // Clean up expired weak references and add the new ones.
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
-    _slots.addAll(allAddedSlots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+    _slots.addAll(allFloatSlots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
 
     return UniformArray<T>._(elements);
   }
