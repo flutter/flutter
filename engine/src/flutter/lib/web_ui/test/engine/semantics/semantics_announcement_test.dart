@@ -22,7 +22,6 @@ void testMain() {
     final DomElement announcementsHost = createDomElement('flt-announcement-host');
     accessibilityAnnouncements = AccessibilityAnnouncements(hostElement: announcementsHost);
     setLiveMessageDurationForTest(const Duration(milliseconds: 10));
-    setAnnouncementDelayForTest(const Duration(milliseconds: 10));
     expect(
       announcementsHost.querySelector('flt-announcement-polite'),
       accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite),
@@ -63,10 +62,12 @@ void testMain() {
 
     void expectNoMessages() => expectMessages();
 
+    // Small delay to allow Timer(Duration.zero) callbacks to execute
+    Future<void> waitForNextEventLoop() => Future<void>.delayed(Duration.zero);
+
     test('Default value of aria-live is polite when assertiveness is not specified', () async {
       accessibilityAnnouncements.handleMessage(codec, encodeMessageOnly(message: 'polite message'));
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'polite message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -75,8 +76,7 @@ void testMain() {
 
     test('aria-live is assertive when assertiveness is set to 1', () async {
       sendAnnouncementMessage(message: 'assertive message', assertiveness: 1);
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(assertive: 'assertive message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -85,8 +85,7 @@ void testMain() {
 
     test('aria-live is polite when assertiveness is null', () async {
       sendAnnouncementMessage(message: 'polite message');
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'polite message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -95,8 +94,7 @@ void testMain() {
 
     test('aria-live is polite when assertiveness is set to 0', () async {
       sendAnnouncementMessage(message: 'polite message', assertiveness: 0);
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'polite message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -104,29 +102,18 @@ void testMain() {
     });
 
     test('Rapid-fire messages are each announced', () async {
-      // With the announcement delay, rapid-fire messages queue up.
-      // Each message appears after its own delay timer fires.
-      // Since both announcementDelay and liveMessageDuration are set to 10ms in tests,
-      // we need to be careful about timing.
-
       // Send first message
       sendAnnouncementMessage(message: 'Hello');
-      expectNoMessages();
-
-      // Wait for first message to appear
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'Hello');
 
-      // Wait for first message to clear, then send second message
+      // Wait for first message to clear
       await Future<void>.delayed(liveMessageDuration);
       expectNoMessages();
 
-      // Send second message after first is cleared
+      // Send second message
       sendAnnouncementMessage(message: 'There');
-      expectNoMessages();
-
-      // Wait for second message to appear
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'There\u00A0');
 
       // Wait for second message to clear
@@ -136,19 +123,19 @@ void testMain() {
 
     test('Repeated announcements are modified to ensure screen readers announce them', () async {
       sendAnnouncementMessage(message: 'Hello');
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'Hello');
       await Future<void>.delayed(liveMessageDuration);
       expectNoMessages();
 
       sendAnnouncementMessage(message: 'Hello');
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'Hello\u00A0');
       await Future<void>.delayed(liveMessageDuration);
       expectNoMessages();
 
       sendAnnouncementMessage(message: 'Hello');
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'Hello');
       await Future<void>.delayed(liveMessageDuration);
       expectNoMessages();
@@ -156,8 +143,7 @@ void testMain() {
 
     test('announce() polite', () async {
       accessibilityAnnouncements.announce('polite message', Assertiveness.polite);
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(polite: 'polite message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -166,8 +152,7 @@ void testMain() {
 
     test('announce() assertive', () async {
       accessibilityAnnouncements.announce('assertive message', Assertiveness.assertive);
-      expectNoMessages();
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expectMessages(assertive: 'assertive message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -187,9 +172,10 @@ void testMain() {
 
       accessibilityAnnouncements.announce('modal message', Assertiveness.polite);
 
+      // Element should be moved to modal immediately
       expect(politeElement.parentElement, modalDialog);
 
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expect(politeElement.text, 'modal message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -210,7 +196,7 @@ void testMain() {
 
       expect(politeElement.parentElement, originalParent);
 
-      await Future<void>.delayed(announcementDelay);
+      await waitForNextEventLoop();
       expect(politeElement.text, 'normal message');
 
       await Future<void>.delayed(liveMessageDuration);
@@ -237,7 +223,7 @@ void testMain() {
 
       expect(politeElement.parentElement, modalDialog2);
 
-      await Future<void>.delayed(announcementDelay + liveMessageDuration);
+      await Future<void>.delayed(liveMessageDuration);
 
       modalDialog1.remove();
       modalDialog2.remove();

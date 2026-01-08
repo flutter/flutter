@@ -22,20 +22,9 @@ enum Assertiveness { polite, assertive }
 /// This was determined by trial and error with some extra buffer added.
 Duration liveMessageDuration = const Duration(milliseconds: 300);
 
-/// Delay before setting the announcement text. This allows VoiceOver to finish
-/// reading the button's accessible name before the announcement is made.
-///
-/// See: https://github.com/flutter/flutter/issues/179076
-Duration announcementDelay = const Duration(milliseconds: 500);
-
 /// Sets [liveMessageDuration] to reduce the delay in tests.
 void setLiveMessageDurationForTest(Duration duration) {
   liveMessageDuration = duration;
-}
-
-/// Sets [announcementDelay] to reduce the delay in tests.
-void setAnnouncementDelayForTest(Duration duration) {
-  announcementDelay = duration;
 }
 
 /// Makes accessibility announcements using `aria-live` DOM elements.
@@ -104,9 +93,6 @@ class AccessibilityAnnouncements {
     // then move it back. This works because VoiceOver already knows about the existing
     // aria-live element from when the page loaded.
     //
-    // We also add a small delay before setting the announcement text to allow
-    // VoiceOver to finish reading the button's accessible name first.
-    //
     // See: https://github.com/flutter/flutter/issues/179076
     final DomElement? modalDialog = _findTopmostModalDialog();
     final DomHTMLElement ariaLiveElement = ariaLiveElementFor(assertiveness);
@@ -120,11 +106,22 @@ class AccessibilityAnnouncements {
     final messageText = _appendSpace ? '$message\u00A0' : message;
     _appendSpace = !_appendSpace;
 
-    Timer(announcementDelay, () {
+    // We use Timer with Duration.zero to defer setting the announcement text
+    // to the next event loop iteration. This is critical for VoiceOver to work
+    // correctly: when a button is clicked, VoiceOver immediately starts processing
+    // the button's accessible name. If we set the aria-live text synchronously
+    // (in the same event loop tick), VoiceOver may not have yet committed the
+    // button label to its speech queue, causing the announcement to replace or
+    // interfere with the button label. By deferring to the next tick, VoiceOver
+    // has time to queue the button label first, and then our announcement is
+    // properly queued after it.
+    //
+    // See: https://github.com/flutter/flutter/issues/179076
+    Timer(Duration.zero, () {
       ariaLiveElement.text = messageText;
     });
 
-    Timer(announcementDelay + liveMessageDuration, () {
+    Timer(liveMessageDuration, () {
       ariaLiveElement.text = '';
       if (modalDialog != null && originalParent != null) {
         originalParent.append(ariaLiveElement);
