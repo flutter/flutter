@@ -86,9 +86,9 @@ dependencies:
 
 dev_dependencies:
   flutter_tools:
-    path: ../../../
+    path: ../../../packages/flutter_tools/
 
-# PUBSPEC CHECKSUM: rseq17
+# PUBSPEC CHECKSUM: 55t4hi
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
