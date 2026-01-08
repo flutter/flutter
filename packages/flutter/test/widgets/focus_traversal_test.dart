@@ -3157,7 +3157,7 @@ void main() {
     );
 
     testWidgets(
-      'Focus traversal does not break when no focusable is available on a MaterialApp',
+      'Focus traversal does not break when no focusable is available on a WidgetsApp',
       (WidgetTester tester) async {
         final events = <Object>[];
 
