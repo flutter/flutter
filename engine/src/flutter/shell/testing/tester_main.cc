@@ -52,13 +52,11 @@ std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
 #if TESTER_ENABLE_METAL
   if (settings.enable_impeller &&
       settings.requested_rendering_backend == "metal") {
-    FML_LOG(IMPORTANT) << "Impeller context: Metal";
     tester_context = TesterContextMTLFactory::Create();
   }
 #endif
 #if TESTER_ENABLE_VULKAN
   if (settings.enable_impeller && !tester_context) {
-    FML_LOG(IMPORTANT) << "Impeller context: Vulkan";
     tester_context =
         TesterContextVKFactory::Create(settings.enable_vulkan_validation);
   }
