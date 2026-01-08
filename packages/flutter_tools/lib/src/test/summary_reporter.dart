@@ -17,10 +17,7 @@ import '../globals.dart' as globals;
 /// Usage:
 ///   flutter test --reporter=summary
 class SummaryReporter {
-  SummaryReporter({
-    required this.supportsColor,
-    required this.stdout,
-  });
+  SummaryReporter({required this.supportsColor, required this.stdout});
 
   final bool supportsColor;
   final io.Stdout stdout;

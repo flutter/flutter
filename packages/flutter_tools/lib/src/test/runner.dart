@@ -79,7 +79,8 @@ interface class FlutterTestRunner {
     final testArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
       if (debuggingOptions.startPaused) '--pause-after-load',
-      if (machine || useSummaryReporter) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
+      if (machine || useSummaryReporter) ...<String>['-r', 'json'] else if (reporter !=
+          null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
       if (ignoreTimeouts) '--ignore-timeouts',
@@ -157,10 +158,7 @@ interface class FlutterTestRunner {
           supportsColor: globals.terminal.supportsColor,
           stdout: globals.stdio.stdout,
         );
-        await testWrapper.mainWithOutputCapture(
-          testArgs,
-          onOutputLine: summaryReporter.handleLine,
-        );
+        await testWrapper.mainWithOutputCapture(testArgs, onOutputLine: summaryReporter.handleLine);
       } else {
         await testWrapper.main(testArgs);
       }
@@ -208,10 +206,7 @@ interface class FlutterTestRunner {
           supportsColor: globals.terminal.supportsColor,
           stdout: globals.stdio.stdout,
         );
-        await testWrapper.mainWithOutputCapture(
-          testArgs,
-          onOutputLine: summaryReporter.handleLine,
-        );
+        await testWrapper.mainWithOutputCapture(testArgs, onOutputLine: summaryReporter.handleLine);
       } else {
         await testWrapper.main(testArgs);
       }
@@ -693,7 +688,10 @@ class SpawnPlugin extends PlatformPlugin {
     // Compute the command-line arguments for package:test.
     final packageTestArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
-      if (machine) ...<String>['-r', 'json'] else if (effectiveReporter != null) ...<String>['-r', effectiveReporter],
+      if (machine) ...<String>['-r', 'json'] else if (effectiveReporter != null) ...<String>[
+        '-r',
+        effectiveReporter,
+      ],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
       if (ignoreTimeouts) '--ignore-timeouts',

@@ -28,10 +28,7 @@ abstract class TestWrapper {
   ///
   /// All stdout output from the test runner will be passed to [onOutputLine]
   /// line-by-line, allowing for stream processing of test results.
-  Future<void> mainWithOutputCapture(
-    List<String> args, {
-    required OutputLineCallback onOutputLine,
-  });
+  Future<void> mainWithOutputCapture(List<String> args, {required OutputLineCallback onOutputLine});
 
   void registerPlatformPlugin(
     Iterable<Runtime> runtimes,
@@ -137,8 +134,7 @@ class _InterceptingStdout implements io.Stdout {
   }
 
   @override
-  void addError(Object error, [StackTrace? stackTrace]) =>
-      _original.addError(error, stackTrace);
+  void addError(Object error, [StackTrace? stackTrace]) => _original.addError(error, stackTrace);
 
   @override
   Future<void> addStream(Stream<List<int>> stream) async {
