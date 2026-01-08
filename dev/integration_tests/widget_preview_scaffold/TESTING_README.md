@@ -4,4 +4,4 @@ This directory contains a hydrated instance of the `widget_preview_scaffold` pro
 
 # Updating the Hydrated Template
 
-If any of the `widget_preview_scaffold` template files are updated, `widget_preview_scaffold/test/template_change_detection_smoke_test.dart` will fail to indicate that the hydrated scaffold needs to be regenerated. To do this, run `dart test/widget_preview_scaffold.shard/update_widget_preview_scaffold.dart` to regenerate the project.
+If any of the `widget_preview_scaffold` template files are updated, `widget_preview_scaffold/test/template_change_detection_smoke_test.dart` will fail to indicate that the hydrated scaffold needs to be regenerated. To do this, run `dart update_widget_preview_scaffold.dart` to regenerate the project.

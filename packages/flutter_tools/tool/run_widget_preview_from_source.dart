@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 /// This script operates on the CWD and:
 ///  - Deletes .dart_tool/widget_preview_scaffold/
 ///  - Deletes the contents of $FLUTTER_ROOT/packages/flutter_tools/templates/widget_preview_scaffold/lib/
-///  - Copies the contents of $FLUTTER_ROOT/packages/flutter_tools/test/widget_preview_scaffold.shard/widget_preview_scaffold/lib/
+///  - Copies the contents of $FLUTTER_ROOT/dev/integration_tests/widget_preview_scaffold/lib/
 ///    to $FLUTTER_ROOT/packages/flutter_tools/templates/widget_preview_scaffold/lib/ with the
 ///    correct template extension
 ///  - Runs `flutter widget-preview start` with all arguments passed to this script.
@@ -29,7 +29,7 @@ Future<void> main(List<String> args) async {
 
   final widgetPreviewScaffoldLibDir = Directory(
     Platform.script
-        .resolve('../test/widget_preview_scaffold.shard/widget_preview_scaffold/lib')
+        .resolve('../../../dev/integration_tests/widget_preview_scaffold/lib')
         .toFilePath(),
   );
 

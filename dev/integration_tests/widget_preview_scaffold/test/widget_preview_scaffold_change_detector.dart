@@ -4,6 +4,8 @@
 
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 abstract class WidgetPreviewScaffoldChangeDetector {
   static final Set<String> _ignoreDiffSet = <String>{
     // The pubspec can't be compared directly to the template since the SDK version is populated
@@ -30,8 +32,10 @@ abstract class WidgetPreviewScaffoldChangeDetector {
       if (_ignoreDiffSet.contains(scaffoldPath)) {
         continue;
       }
-      final String resolvedScaffoldPath =
-          '${widgetPreviewScaffoldProject.absolute.path}$scaffoldPath';
+      final String resolvedScaffoldPath = path.join(
+        widgetPreviewScaffoldProject.absolute.path,
+        scaffoldPath,
+      );
       if (entity is Directory) {
         if (!Directory(resolvedScaffoldPath).existsSync()) {
           stdout.writeln(
