@@ -107,7 +107,9 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(command: <String>['xattr', '-cr', '/']);
+  const xattrCommand = FakeCommand(
+    command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
+  );
 
   FakeCommand setUpRsyncCommand({void Function(List<String> command)? onRun}) {
     return FakeCommand(
