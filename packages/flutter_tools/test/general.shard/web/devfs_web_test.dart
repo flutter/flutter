@@ -1509,7 +1509,7 @@ void main() {
           reason: 'Path "$path" should return 200 and index.html',
         );
       }
-    }),
+    }, overrides: <Type, Generator>{Platform: () => linux}),
   );
 
   test(
