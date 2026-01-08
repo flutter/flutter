@@ -189,6 +189,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
     this.padding,
+    this.showValueIndicator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -216,7 +217,7 @@ class Slider extends StatefulWidget {
   ///
   /// If a [CupertinoSlider] is created, the following parameters are ignored:
   /// [secondaryTrackValue], [label], [inactiveColor], [secondaryActiveColor],
-  /// [semanticFormatterCallback].
+  /// [semanticFormatterCallback], [showValueIndicator].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Slider.adaptive({
@@ -240,6 +241,7 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.showValueIndicator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -567,6 +569,13 @@ class Slider extends StatefulWidget {
   /// horizontal padding, defaults to the width of the thumb shape or
   /// overlay shape, whichever is larger.
   final EdgeInsetsGeometry? padding;
+
+  /// Determines the conditions under which the value indicator is shown.
+  ///
+  /// If [Slider.showValueIndicator] is null then the
+  /// ambient [SliderThemeData.showValueIndicator] is used. If that is also
+  /// null, defaults to [ShowValueIndicator.onlyForDiscrete].
+  final ShowValueIndicator? showValueIndicator;
 
   /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
@@ -914,7 +923,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       thumbShape: sliderTheme.thumbShape ?? defaults.thumbShape,
       overlayShape: sliderTheme.overlayShape ?? defaults.overlayShape,
       valueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
+      showValueIndicator:
+          widget.showValueIndicator ?? sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: valueIndicatorTextStyle,
       padding: widget.padding ?? sliderTheme.padding,
       thumbSize: sliderTheme.thumbSize ?? defaults.thumbSize,
