@@ -16,6 +16,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/paths.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -24,6 +25,54 @@
 namespace flutter {
 
 namespace {
+
+static void FindSwiftShaderICDAtKnownPaths() {
+  static constexpr const char* kSwiftShaderICDJSON = "vk_swiftshader_icd.json";
+  static constexpr const char* kVulkanICDFileNamesEnvVariableKey =
+      "VK_ICD_FILENAMES";
+  const auto executable_directory_path =
+      fml::paths::GetExecutableDirectoryPath();
+  FML_CHECK(executable_directory_path.first);
+  const auto executable_directory =
+      fml::OpenDirectory(executable_directory_path.second.c_str(), false,
+                         fml::FilePermission::kRead);
+  FML_CHECK(executable_directory.is_valid());
+  if (fml::FileExists(executable_directory, kSwiftShaderICDJSON)) {
+    const auto icd_path = fml::paths::JoinPaths(
+        {executable_directory_path.second, kSwiftShaderICDJSON});
+#if FML_OS_WIN
+    const auto success =
+        ::SetEnvironmentVariableA(kVulkanICDFileNamesEnvVariableKey,  //
+                                  icd_path.c_str()                    //
+                                  ) != 0;
+#else   // FML_OS_WIN
+    const auto success = ::setenv(kVulkanICDFileNamesEnvVariableKey,  //
+                                  icd_path.c_str(),                   //
+                                  1  // overwrite
+                                  ) == 0;
+#endif  // FML_OS_WIN
+    FML_CHECK(success)
+        << "Could not set the environment variable to use SwiftShader.";
+  } else {
+    FML_CHECK(false)
+        << "Was asked to use SwiftShader but could not find the installable "
+           "client driver (ICD) for the locally built SwiftShader.";
+  }
+}
+
+void SetupSwiftshaderOnce(bool use_swiftshader) {
+  static bool swiftshader_preference = false;
+  static std::once_flag sOnceInitializer;
+  std::call_once(sOnceInitializer, [use_swiftshader]() {
+    if (use_swiftshader) {
+      FindSwiftShaderICDAtKnownPaths();
+      swiftshader_preference = use_swiftshader;
+    }
+  });
+  FML_CHECK(swiftshader_preference == use_swiftshader)
+      << "The option to use SwiftShader in a process can only be set once and "
+         "may not be changed later.";
+}
 
 bool HasExtension(const char* extensions, const char* name) {
   const char* r = strstr(extensions, name);
@@ -40,6 +89,8 @@ EGLDisplay CreateSwangleDisplay() {
     // fallback? But we specifically want Swangle (SwiftShader/ANGLE).
     return EGL_NO_DISPLAY;
   }
+
+  FML_LOG(INFO) << "EGL extensions: " << extensions;
 
   // We expect EGL_EXT_platform_base for Swangle.
   if (!HasExtension(extensions, "EGL_EXT_platform_base")) {
@@ -282,6 +333,7 @@ class TesterContextGLES : public TesterContext {
 };
 
 std::unique_ptr<TesterContext> TesterContextGLESFactory::Create() {
+  SetupSwiftshaderOnce(true);
   auto context = std::make_unique<TesterContextGLES>();
   if (!context->Initialize()) {
     return nullptr;
