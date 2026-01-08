@@ -363,7 +363,7 @@ import java.util.Set;
       if (flag != null) {
         Log.w(
             TAG,
-            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set "
+            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
                 + flag.commandLineArgument
                 + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
         break;

@@ -175,7 +175,8 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
    * <p>The first {@code FlutterEngine} instance constructed per process will also load the Flutter
    * native library and start a Dart VM.
    *
-   * <p>In order to pass Dart VM initialization arguments (see shell/common/switches.cc for all
+   * <p>In order to pass Dart VM initialization arguments (see {@link
+   * io.flutter.embedding.engine.FlutterShellArgs} for all
    * available flags) when creating the VM, manually set the initialization arguments by calling
    * {@link io.flutter.embedding.engine.loader.FlutterLoader#startInitialization(Context)} and
    * {@link io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context,
