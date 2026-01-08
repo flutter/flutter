@@ -1336,12 +1336,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         // through in the horizontal case below.
         // Minor
         _sortByYIndex();
-        break;
       case Axis.horizontal:
         // Column major traversal
         // Minor
         _sortByXIndex();
-        break;
     }
     for (final ChildVicinity vicinity in _currentChildVicinities) {
       previousChild = _completeChildParentData(

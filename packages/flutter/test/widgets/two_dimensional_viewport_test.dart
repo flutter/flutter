@@ -2967,8 +2967,6 @@ void main() {
       expect(tester.state(find.byKey(const ValueKey<int>(2))), stateBeforeReordering);
     }, variant: TargetPlatformVariant.all());
 
-
-
     testWidgets('Child sorting and layout logic remain consistent', (WidgetTester tester) async {
       // Verify that sorting rules are unchanged after removing nested loops:
       // - Main axis vertical → Row-major order (y-index first, then x-index)
