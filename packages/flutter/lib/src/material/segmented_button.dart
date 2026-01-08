@@ -998,6 +998,14 @@ class _RenderSegmentedButton<T> extends RenderBox
       maxWidth = math.max(maxWidth, boxWidth);
       child = childAfter(child);
     }
+
+    // When the parent enforces a bounded width, ensure each child
+    // occupies the full available width, preventing segments from
+    // shrinking to their intrinsic content size.
+    if (constraints.hasBoundedWidth) {
+      maxWidth = math.max(maxWidth, constraints.maxWidth);
+    }
+
     return Size(maxWidth, childHeight);
   }
 
