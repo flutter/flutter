@@ -6,12 +6,15 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'widget_test_route_fixtures.dart' show TestPageRouteBuilder;
+import 'widget_test_route_fixtures.dart' show TestPageRoute;
 
 Widget buildWidgetsApp(Widget child) {
   return WidgetsApp(
     color: const Color(0xFFFFFFFF),
-    onGenerateRoute: (RouteSettings settings) => TestPageRouteBuilder(child: child),
+    home: child,
+    pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+      return TestPageRoute<T>(settings: settings, builder: builder);
+    },
   );
 }
 
