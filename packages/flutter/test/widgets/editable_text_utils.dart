@@ -141,6 +141,13 @@ class OverflowWidgetTextEditingController extends TextEditingController {
   }
 }
 
+/// A minimal wrapper around [EditableText] for use in widget tests.
+///
+/// This wrapper provides robust text selection gestures through
+/// [TextSelectionGestureDetector].
+///
+/// This wrapper does not provide selection handles or context menus
+/// out of the box.
 class TestTextField extends StatefulWidget {
   const TestTextField({
     super.key,
