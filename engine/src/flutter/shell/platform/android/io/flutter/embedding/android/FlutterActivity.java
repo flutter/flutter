@@ -49,7 +49,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgsFromIntent;
+import io.flutter.embedding.engine.FlutterShellArgsIntentUtils;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -1034,6 +1034,17 @@ public class FlutterActivity extends Activity
   public Lifecycle getLifecycle() {
     return lifecycle;
   }
+  
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
+   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
+   * Flutter.
+   */
+  @NonNull
+  @Override
+  public String[] getFlutterShellArgs() {
+    return FlutterShellArgsIntentUtils.getFlutterShellCommandLineArgs(getIntent());
+  }
 
   /**
    * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to use
@@ -1289,17 +1300,6 @@ public class FlutterActivity extends Activity
   @Nullable
   protected FlutterEngine getFlutterEngine() {
     return delegate.getFlutterEngine();
-  }
-
-  /**
-   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
-   * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing
-   * Flutter.
-   */
-  @NonNull
-  @Override
-  public String[] getFlutterShellArgs() {
-    return FlutterShellArgsFromIntent.getFlutterShellCommandLineArgs(getIntent());
   }
 
   /**

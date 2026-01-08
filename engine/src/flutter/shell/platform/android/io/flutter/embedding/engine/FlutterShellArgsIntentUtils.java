@@ -26,10 +26,10 @@ import java.util.*;
  * how to set each flag via the command line and manifest metadata.
  */
 // TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
-// is no longer supported. See https://github.com/flutter/flutter/issues/172553.
-public final class FlutterShellArgsFromIntent {
+// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
+public final class FlutterShellArgsIntentUtils {
 
-  private FlutterShellArgsFromIntent() {}
+  private FlutterShellArgsIntentUtils() {}
 
   public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
