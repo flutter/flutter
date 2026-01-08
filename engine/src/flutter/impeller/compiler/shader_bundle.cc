@@ -194,6 +194,8 @@ std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
   ///
 
   fb::shaderbundle::ShaderBundleT shader_bundle;
+  shader_bundle.format_version = static_cast<uint32_t>(
+      fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
 
   for (const auto& [shader_name, shader_config] : bundle_config.value()) {
     std::unique_ptr<fb::shaderbundle::ShaderT> shader =

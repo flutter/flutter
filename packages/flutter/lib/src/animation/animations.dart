@@ -543,7 +543,7 @@ class TrainHoppingAnimation extends Animation<double>
   void _statusChangeHandler(AnimationStatus status) {
     assert(_currentTrain != null);
     if (status != _lastStatus) {
-      notifyListeners();
+      notifyStatusListeners(status);
       _lastStatus = status;
     }
     assert(_lastStatus != null);
@@ -555,7 +555,7 @@ class TrainHoppingAnimation extends Animation<double>
   double? _lastValue;
   void _valueChangeHandler() {
     assert(_currentTrain != null);
-    bool hop = false;
+    var hop = false;
     if (_nextTrain != null) {
       assert(_mode != null);
       hop = switch (_mode!) {

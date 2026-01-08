@@ -119,17 +119,17 @@ void main() {
     });
 
     testWidgets('can reset all values', (WidgetTester tester) async {
-      final DisplaySnapshot initial = DisplaySnapshot(tester.view.display);
+      final initial = DisplaySnapshot(tester.view.display);
 
       tester.view.display.devicePixelRatio = 7;
       tester.view.display.refreshRate = 40;
       tester.view.display.size = const Size(476, 823);
 
-      final DisplaySnapshot faked = DisplaySnapshot(tester.view.display);
+      final faked = DisplaySnapshot(tester.view.display);
 
       tester.view.display.reset();
 
-      final DisplaySnapshot reset = DisplaySnapshot(tester.view.display);
+      final reset = DisplaySnapshot(tester.view.display);
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
@@ -171,7 +171,7 @@ class _DisplaySnapshotMatcher extends Matcher {
     bool verbose,
   ) {
     assert(item is DisplaySnapshot, 'Can only match against snapshots of Display.');
-    final DisplaySnapshot actual = item as DisplaySnapshot;
+    final actual = item as DisplaySnapshot;
 
     if (actual.devicePixelRatio != expected.devicePixelRatio) {
       mismatchDescription.add(
@@ -200,7 +200,7 @@ class _DisplaySnapshotMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     assert(item is DisplaySnapshot, 'Can only match against snapshots of Display.');
-    final DisplaySnapshot actual = item as DisplaySnapshot;
+    final actual = item as DisplaySnapshot;
 
     return actual.devicePixelRatio == expected.devicePixelRatio &&
         actual.refreshRate == expected.refreshRate &&

@@ -68,6 +68,7 @@ class TickerMode extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
+  /// // ignore: deprecated_member_use
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   @Deprecated(
@@ -450,7 +451,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     assert(_tickerModeNotifier != null);
     _tickers ??= <_WidgetTicker>{};
     final TickerModeData values = _tickerModeNotifier!.value;
-    final _WidgetTicker result =
+    final result =
         _WidgetTicker(
             onTick,
             this,

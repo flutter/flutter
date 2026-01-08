@@ -37,7 +37,7 @@ class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegat
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final Offset overhang = Offset(
+    final overhang = Offset(
       anchor.dx + childSize.width - size.width,
       anchor.dy + childSize.height - size.height,
     );

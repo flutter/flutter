@@ -79,7 +79,7 @@ class UndoManager {
 
   Future<dynamic> _handleUndoManagerInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final args = methodCall.arguments as List<dynamic>;
     if (method == 'UndoManagerClient.handleUndo') {
       assert(_currentClient != null, 'There must be a current UndoManagerClient.');
       _currentClient!.handlePlatformUndo(_toUndoDirection(args[0] as String));

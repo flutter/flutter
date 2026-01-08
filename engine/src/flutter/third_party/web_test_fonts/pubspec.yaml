@@ -3,7 +3,7 @@ name: web_test_fonts
 publish_to: none
 
 environment:
-  sdk: ^3.7.0-0
+  sdk: ^3.9.0-0
 
 dev_dependencies:
   args: any

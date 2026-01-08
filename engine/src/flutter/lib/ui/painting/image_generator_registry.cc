@@ -6,7 +6,14 @@
 #include <utility>
 
 #include "flutter/lib/ui/painting/image_generator_registry.h"
+#include "third_party/skia/include/codec/SkBmpDecoder.h"
 #include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/codec/SkGifDecoder.h"
+#include "third_party/skia/include/codec/SkIcoDecoder.h"
+#include "third_party/skia/include/codec/SkJpegDecoder.h"
+#include "third_party/skia/include/codec/SkPngDecoder.h"
+#include "third_party/skia/include/codec/SkWbmpDecoder.h"
+#include "third_party/skia/include/codec/SkWebpDecoder.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 #ifdef FML_OS_MACOSX
 #include "third_party/skia/include/ports/SkImageGeneratorCG.h"
@@ -15,6 +22,25 @@
 #endif
 
 #include "image_generator_apng.h"
+
+#include <mutex>
+
+namespace {
+void RegisterSkiaCodecs() {
+  // These are in the order they will be attempted to be decoded from.
+  // If we have data to back it up, we can order these by "frequency used in
+  // the wild" for a very small performance bump, but for now we mirror the
+  // order Skia had them in.
+  SkCodecs::Register(SkPngDecoder::Decoder());
+  SkCodecs::Register(SkJpegDecoder::Decoder());
+  SkCodecs::Register(SkWebpDecoder::Decoder());
+  SkCodecs::Register(SkGifDecoder::Decoder());
+  SkCodecs::Register(SkBmpDecoder::Decoder());
+  SkCodecs::Register(SkWbmpDecoder::Decoder());
+  SkCodecs::Register(SkIcoDecoder::Decoder());
+}
+
+}  // namespace
 
 namespace flutter {
 
@@ -25,6 +51,8 @@ ImageGeneratorRegistry::ImageGeneratorRegistry() : weak_factory_(this) {
       },
       0);
 
+  static std::once_flag register_skia_codecs;
+  std::call_once(register_skia_codecs, RegisterSkiaCodecs);
   AddFactory(
       [](sk_sp<SkData> buffer) {
         return BuiltinSkiaCodecImageGenerator::MakeFromData(std::move(buffer));

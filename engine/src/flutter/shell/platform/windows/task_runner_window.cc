@@ -7,30 +7,90 @@
 #include <timeapi.h>
 #include <algorithm>
 #include <chrono>
+#include <functional>
+#include <mutex>
+#include <thread>
 
 #include "flutter/fml/logging.h"
 
 namespace flutter {
 
+TimerThread::TimerThread(std::function<void()> callback)
+    : callback_(std::move(callback)),
+      next_fire_time_(
+          std::chrono::time_point<std::chrono::high_resolution_clock>::max()) {}
+
+void TimerThread::Start() {
+  FML_DCHECK(!thread_);
+  thread_ =
+      std::make_optional<std::thread>(&TimerThread::TimerThreadMain, this);
+}
+
+void TimerThread::Stop() {
+  if (!thread_) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    callback_ = nullptr;
+  }
+  cv_.notify_all();
+  thread_->join();
+}
+
+TimerThread::~TimerThread() {
+  // Ensure that Stop() has been called if Start() has been called.
+  FML_DCHECK(callback_ == nullptr || !thread_);
+}
+
+// Schedules the callback to be called at specified time point. If there is
+// already a callback scheduled earlier than the specified time point, does
+// nothing.
+void TimerThread::ScheduleAt(
+    std::chrono::time_point<std::chrono::high_resolution_clock> time_point) {
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (time_point < next_fire_time_) {
+    next_fire_time_ = time_point;
+  }
+  ++schedule_counter_;
+  cv_.notify_all();
+}
+
+void TimerThread::TimerThreadMain() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  while (callback_ != nullptr) {
+    cv_.wait_until(lock, next_fire_time_, [this]() {
+      return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
+             callback_ == nullptr;
+    });
+    auto scheduled_count = schedule_counter_;
+    if (callback_) {
+      lock.unlock();
+      callback_();
+      lock.lock();
+    }
+    // If nothing was scheduled in the meanwhile park the timer.
+    if (scheduled_count == schedule_counter_ &&
+        next_fire_time_ <= std::chrono::high_resolution_clock::now()) {
+      next_fire_time_ =
+          std::chrono::time_point<std::chrono::high_resolution_clock>::max();
+    }
+  }
+}
+
 // Timer used for PollOnce timeout.
 static const uintptr_t kPollTimeoutTimerId = 1;
 
-TaskRunnerWindow::TaskRunnerWindow() {
+TaskRunnerWindow::TaskRunnerWindow() : timer_thread_([this]() { OnTimer(); }) {
   WNDCLASS window_class = RegisterWindowClass();
   window_handle_ =
       CreateWindowEx(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0,
                      HWND_MESSAGE, nullptr, window_class.hInstance, nullptr);
 
-  timer_ = CreateThreadpoolTimer(TimerProc, this, nullptr);
-  if (!timer_) {
-    FML_LOG(ERROR) << "Failed to create threadpool timer, error: "
-                   << GetLastError();
-    FML_CHECK(timer_);
-  }
-
   if (window_handle_) {
     SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                      reinterpret_cast<LONG_PTR>(this));
+    timer_thread_.Start();
   } else {
     auto error = GetLastError();
     LPWSTR message = nullptr;
@@ -44,32 +104,20 @@ TaskRunnerWindow::TaskRunnerWindow() {
   }
 
   thread_id_ = GetCurrentThreadId();
-
-  // Increase timer precision for this process (the call only affects
-  // current process since Windows 10, version 2004).
-  timeBeginPeriod(1);
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {
-  SetThreadpoolTimer(timer_, nullptr, 0, 0);
-  // Ensures that no callbacks will run after CloseThreadpoolTimer.
-  // https://learn.microsoft.com/en-us/windows/win32/api/threadpoolapiset/nf-threadpoolapiset-closethreadpooltimer#remarks
-  WaitForThreadpoolTimerCallbacks(timer_, TRUE);
-  CloseThreadpoolTimer(timer_);
+  timer_thread_.Stop();
 
   if (window_handle_) {
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
   }
   UnregisterClass(window_class_name_.c_str(), nullptr);
-
-  timeEndPeriod(1);
 }
 
 void TaskRunnerWindow::OnTimer() {
-  if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    FML_LOG(ERROR) << "Failed to post message to main thread.";
-  }
+  WakeUp();
 }
 
 void TaskRunnerWindow::TimerProc(PTP_CALLBACK_INSTANCE instance,
@@ -90,20 +138,14 @@ std::shared_ptr<TaskRunnerWindow> TaskRunnerWindow::GetSharedInstance() {
 }
 
 void TaskRunnerWindow::WakeUp() {
-  // When waking up from main thread while there are messages in the message
-  // queue use timer to post the WM_NULL message from background thread. This
-  // gives message loop chance to process input events before WM_NULL is
-  // processed - which is necessary because messages scheduled through
-  // PostMessage take precedence over input event messages. Otherwise await
-  // Future.delayed(Duration.zero) deadlocks the main thread. (See
-  // https://github.com/flutter/flutter/issues/173843)
-  if (thread_id_ == GetCurrentThreadId() && GetQueueStatus(QS_ALLEVENTS) != 0) {
-    SetTimer(std::chrono::nanoseconds::zero());
-    return;
-  }
-
-  if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    FML_LOG(ERROR) << "Failed to post message to main thread.";
+  bool expected = false;
+  // Only post wake up message if needed otherwise the message queue will
+  // get flooded possibly resulting in application stopping to respond.
+  // https://github.com/flutter/flutter/issues/173843
+  if (wake_up_posted_.compare_exchange_strong(expected, true)) {
+    if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
+      FML_LOG(ERROR) << "Failed to post message to main thread.";
+    }
   }
 }
 
@@ -144,16 +186,10 @@ void TaskRunnerWindow::ProcessTasks() {
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
   if (when == std::chrono::nanoseconds::max()) {
-    SetThreadpoolTimer(timer_, nullptr, 0, 0);
+    timer_thread_.ScheduleAt(
+        std::chrono::time_point<std::chrono::high_resolution_clock>::max());
   } else {
-    auto microseconds =
-        std::chrono::duration_cast<std::chrono::microseconds>(when).count();
-    ULARGE_INTEGER ticks;
-    ticks.QuadPart = -static_cast<LONGLONG>(microseconds * 10);
-    FILETIME ft;
-    ft.dwLowDateTime = ticks.LowPart;
-    ft.dwHighDateTime = ticks.HighPart;
-    SetThreadpoolTimer(timer_, &ft, 0, 0);
+    timer_thread_.ScheduleAt(std::chrono::high_resolution_clock::now() + when);
   }
 }
 
@@ -181,6 +217,9 @@ TaskRunnerWindow::HandleMessage(UINT const message,
                                 LPARAM const lparam) noexcept {
   switch (message) {
     case WM_NULL:
+      // After this point, WakeUp() needs to post new message to ensure
+      // that the wake-up request is not lost.
+      wake_up_posted_ = false;
       ProcessTasks();
       return 0;
   }

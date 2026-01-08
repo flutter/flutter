@@ -252,14 +252,14 @@ void main() {
       publishRoot.createSync(recursive: true);
       packageRoot.createSync(recursive: true);
       docsRoot.createSync(recursive: true);
-      final List<String> files = <String>[
+      final files = <String>[
         'README.md',
         'analysis_options.yaml',
         'dartdoc_options.yaml',
         searchTemplate.path,
         publishRoot.childFile('opensearch.xml').path,
       ];
-      for (final String file in files) {
+      for (final file in files) {
         docsRoot.childFile(file).createSync(recursive: true);
       }
       searchTemplate.writeAsStringSync('{SITE_URL}');
@@ -594,8 +594,7 @@ void main() {
   </code>
 </pre>
 ''');
-            const String queryParams =
-                'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
+            const queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
             widgetsDir.childFile('Listener-class.html').writeAsStringSync('''
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?$queryParams">
 </iframe>

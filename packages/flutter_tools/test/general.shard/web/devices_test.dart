@@ -430,7 +430,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   late Chromium Function() _launcher;
 
   @override
-  var currentCompleter = Completer<Chromium>();
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
 
   @override
   bool canFindExecutable() {

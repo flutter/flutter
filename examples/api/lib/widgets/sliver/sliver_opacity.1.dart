@@ -39,14 +39,20 @@ class _SliverOpacityExampleState extends State<SliverOpacityExample> {
       body: CustomScrollView(
         slivers: <Widget>[
           const SliverToBoxAdapter(
-            child: ListTile(title: Text('Press on the button to toggle the list visibility.')),
+            child: ListTile(
+              title: Text('Press on the button to toggle the list visibility.'),
+            ),
           ),
-          const SliverToBoxAdapter(child: ListTile(title: Text('Before the list...'))),
+          const SliverToBoxAdapter(
+            child: ListTile(title: Text('Before the list...')),
+          ),
           SliverOpacity(
             opacity: _visible ? 1.0 : 0.0,
             sliver: SliverList.list(children: _listItems),
           ),
-          const SliverToBoxAdapter(child: ListTile(title: Text('After the list...'))),
+          const SliverToBoxAdapter(
+            child: ListTile(title: Text('After the list...')),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(

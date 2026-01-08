@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.0.dart' as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 String get catLabel => example.Animal.cat.label;
@@ -26,8 +27,16 @@ void main() {
     expect(find.text(felisCatusLabel), findsOneWidget);
     expect(find.text(dogLabel), findsOneWidget);
     expect(
-      tester.getRect(find.ancestor(of: find.text(catLabel), matching: find.byType(TapRegion))),
-      rectMoreOrLessEquals(const Rect.fromLTRB(447.2, 328.0, 626.3, 532.0), epsilon: 0.1),
+      tester.getRect(
+        find.ancestor(
+          of: find.text(catLabel),
+          matching: find.byType(TapRegion),
+        ),
+      ),
+      rectMoreOrLessEquals(
+        const Rect.fromLTRB(447.2, 328.0, 626.3, 532.0),
+        epsilon: 0.1,
+      ),
     );
 
     // Close the menu.
@@ -72,7 +81,9 @@ void main() {
     expect(find.text(felisCatusLabel), findsNothing);
   });
 
-  testWidgets('Check appears next to selected item', (WidgetTester tester) async {
+  testWidgets('Check appears next to selected item', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RawMenuAnchorApp());
 
     await tester.tap(find.text('Select One'));
@@ -89,8 +100,16 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.getRect(find.ancestor(of: find.text(catLabel), matching: find.byType(TapRegion))),
-      rectMoreOrLessEquals(const Rect.fromLTRB(447.2, 328.0, 626.3, 532.0), epsilon: 0.1),
+      tester.getRect(
+        find.ancestor(
+          of: find.text(catLabel),
+          matching: find.byType(TapRegion),
+        ),
+      ),
+      rectMoreOrLessEquals(
+        const Rect.fromLTRB(447.2, 328.0, 626.3, 532.0),
+        epsilon: 0.1,
+      ),
     );
 
     expect(

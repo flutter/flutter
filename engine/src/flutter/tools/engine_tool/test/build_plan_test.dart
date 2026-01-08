@@ -26,20 +26,26 @@ void main() {
     TestEnvironment? environment,
     void Function(TestBuilderConfig)? builds,
   }) {
-    final (builders, parser, env) = _createTestFixture(environment: environment, builds: builds);
+    final (List<Build> builders, ArgParser parser, Environment env) = _createTestFixture(
+      environment: environment,
+      builds: builds,
+    );
 
     return BuildPlan.fromArgResults(parser.parse(args), env, builds: builders);
   }
 
   test('rbe defaults to true if detected', () {
-    final plan = configureAndParse([], environment: TestEnvironment.withTestEngine(withRbe: true));
+    final BuildPlan plan = configureAndParse(
+      [],
+      environment: TestEnvironment.withTestEngine(withRbe: true),
+    );
 
     expect(plan.useRbe, isTrue);
     expect(plan.toGnArgs(), isNot(contains('--no-rbe')));
   });
 
   test('rbe defaults to false if not detected', () {
-    final plan = configureAndParse(
+    final BuildPlan plan = configureAndParse(
       [],
       environment: TestEnvironment.withTestEngine(
         // This is the default, but make it explicit for the test.
@@ -53,21 +59,21 @@ void main() {
   });
 
   test('lto is true if explicitly enabled', () {
-    final plan = configureAndParse(['--lto']);
+    final BuildPlan plan = configureAndParse(['--lto']);
 
     expect(plan.useLto, isTrue);
     expect(plan.toGnArgs(), contains('--lto'));
   });
 
   test('lto is false if explicitly disabled', () {
-    final plan = configureAndParse(['--no-lto']);
+    final BuildPlan plan = configureAndParse(['--no-lto']);
 
     expect(plan.useLto, isFalse);
     expect(plan.toGnArgs(), contains('--no-lto'));
   });
 
   test('lto is true if the config omits --no-lto', () {
-    final plan = configureAndParse([]);
+    final BuildPlan plan = configureAndParse([]);
 
     expect(
       plan.useLto,
@@ -78,7 +84,7 @@ void main() {
   });
 
   test('lto is false if the config uses --no-lto', () {
-    final plan = configureAndParse(
+    final BuildPlan plan = configureAndParse(
       [],
       builds: (testConfig) {
         testConfig.addBuild(
@@ -94,19 +100,19 @@ void main() {
   });
 
   test('concurrency defaults to null if not specified', () {
-    final plan = configureAndParse([]);
+    final BuildPlan plan = configureAndParse([]);
 
     expect(plan.concurrency, isNull);
   });
 
   test('concurrency parses the number provided', () {
-    final plan = configureAndParse(['--concurrency=1024']);
+    final BuildPlan plan = configureAndParse(['--concurrency=1024']);
 
     expect(plan.concurrency, 1024);
   });
 
   test('strategy defaults to auto', () {
-    final plan = configureAndParse([]);
+    final BuildPlan plan = configureAndParse([]);
 
     expect(plan.strategy, BuildStrategy.auto);
     expect(
@@ -117,7 +123,7 @@ void main() {
   });
 
   test('strategy can be set to --local', () {
-    final plan = configureAndParse(['--build-strategy=local']);
+    final BuildPlan plan = configureAndParse(['--build-strategy=local']);
 
     expect(plan.strategy, BuildStrategy.local);
     expect(
@@ -128,7 +134,7 @@ void main() {
   });
 
   test('strategy can be set to --remote', () {
-    final plan = configureAndParse([
+    final BuildPlan plan = configureAndParse([
       '--build-strategy=remote',
     ], environment: TestEnvironment.withTestEngine(withRbe: true));
 
@@ -141,17 +147,17 @@ void main() {
   });
 
   test('can provide a single extra "--gn-args"', () {
-    final result = configureAndParse(['--gn-args', '--foo']);
+    final BuildPlan result = configureAndParse(['--gn-args', '--foo']);
     expect(result.extraGnArgs, ['--foo']);
   });
 
   test('can provide multiple extra "--gn-arg"s', () {
-    final result = configureAndParse(['--gn-args', '--foo', '--gn-args', '--bar']);
+    final BuildPlan result = configureAndParse(['--gn-args', '--foo', '--gn-args', '--bar']);
     expect(result.extraGnArgs, ['--foo', '--bar']);
   });
 
   test('build defaults to host_debug', () {
-    final plan = configureAndParse([]);
+    final BuildPlan plan = configureAndParse([]);
 
     expect(plan.build.name, 'linux/host_debug');
   });
@@ -164,7 +170,7 @@ void main() {
     testConfig.addBuild(name: 'linux/host_debug_unopt_arm64', dimension: TestDroneDimension.linux);
 
     final parser = ArgParser();
-    final builds = BuildPlan.configureArgParser(
+    final List<Build> builds = BuildPlan.configureArgParser(
       parser,
       testEnv.environment,
       configs: {
@@ -282,7 +288,7 @@ void main() {
     });
 
     group('build fails if an extra "--gn-args" contains a reserved flag', () {
-      for (final reserved in BuildPlan.reservedGnArgs) {
+      for (final String reserved in BuildPlan.reservedGnArgs) {
         test(reserved, () {
           expect(
             () => configureAndParse(['--gn-args', '--$reserved']),
@@ -352,12 +358,12 @@ void main() {
       TestEnvironment? environment,
       void Function(TestBuilderConfig)? builds,
     }) {
-      final (_, parser, _) = _createTestFixture(environment: environment, builds: builds);
+      final (_, ArgParser parser, _) = _createTestFixture(environment: environment, builds: builds);
       return parser;
     }
 
     test('show builds in help message as long as not a [ci/...] build', () {
-      final parser = createArgParser(
+      final ArgParser parser = createArgParser(
         builds: (testConfig) {
           testConfig.addBuild(name: 'ci/host_debug', dimension: TestDroneDimension.linux);
           testConfig.addBuild(name: 'linux/host_debug', dimension: TestDroneDimension.linux);
@@ -369,7 +375,7 @@ void main() {
     });
 
     test('shows [ci/...] builds if verbose is true', () {
-      final parser = createArgParser(
+      final ArgParser parser = createArgParser(
         environment: TestEnvironment.withTestEngine(verbose: true),
         builds: (testConfig) {
           testConfig.addBuild(name: 'ci/host_debug', dimension: TestDroneDimension.linux);
@@ -382,19 +388,21 @@ void main() {
     });
 
     test('hides LTO instructions normally', () {
-      final parser = createArgParser();
+      final ArgParser parser = createArgParser();
 
       expect(parser.usage, isNot(contains('Whether LTO should be enabled for a build')));
     });
 
     test('shows LTO instructions if verbose', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('Whether LTO should be enabled for a build'));
     });
 
     test('shows RBE instructions if not configured', () {
-      final parser = createArgParser(
+      final ArgParser parser = createArgParser(
         environment: TestEnvironment.withTestEngine(
           // This is the default, but make it explicit for the test.
           // ignore: avoid_redundant_argument_values
@@ -412,7 +420,9 @@ void main() {
     });
 
     test('shows RBE instructions if verbose', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(
         parser.usage,
@@ -424,14 +434,16 @@ void main() {
     });
 
     test('hides RBE instructions if enabled', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(withRbe: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(withRbe: true),
+      );
 
       expect(parser.usage, contains('Enable pre-configured remote build execution'));
       expect(parser.usage, isNot(contains('https://flutter.dev/to/engine-rbe')));
     });
 
     test('hides --build-strategy if RBE not enabled', () {
-      final parser = createArgParser(
+      final ArgParser parser = createArgParser(
         environment: TestEnvironment.withTestEngine(
           // This is the default, but make it explicit for the test.
           // ignore: avoid_redundant_argument_values
@@ -443,25 +455,31 @@ void main() {
     });
 
     test('shows --build-strategy if RBE enabled', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(withRbe: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(withRbe: true),
+      );
 
       expect(parser.usage, contains('How to prefer remote or local builds'));
     });
 
     test('shows --build-strategy if verbose', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('How to prefer remote or local builds'));
     });
 
     test('hides --gn-args if not verbose', () {
-      final parser = createArgParser();
+      final ArgParser parser = createArgParser();
 
       expect(parser.usage, isNot(contains('Additional arguments to provide to "gn"')));
     });
 
     test('shows --gn-args if verbose', () {
-      final parser = createArgParser(environment: TestEnvironment.withTestEngine(verbose: true));
+      final ArgParser parser = createArgParser(
+        environment: TestEnvironment.withTestEngine(verbose: true),
+      );
 
       expect(parser.usage, contains('Additional arguments to provide to "gn"'));
     });
@@ -491,7 +509,7 @@ void main() {
       );
 
       final parser = ArgParser();
-      final _ = BuildPlan.configureArgParser(
+      final List<Build> _ = BuildPlan.configureArgParser(
         parser,
         testEnv.environment,
         configs: {
@@ -505,13 +523,13 @@ void main() {
     }
 
     test('shows only non-CI builds that can run locally', () {
-      final parser = createMultiPlatformArgParser(verbose: false);
+      final ArgParser parser = createMultiPlatformArgParser(verbose: false);
 
       expect(parser.usage, contains('[host_debug]'));
     });
 
     test('shows builds that can run locally, with details', () {
-      final parser = createMultiPlatformArgParser(verbose: true);
+      final ArgParser parser = createMultiPlatformArgParser(verbose: true);
 
       expect(
         parser.usage,
@@ -530,7 +548,7 @@ void main() {
   TestEnvironment? environment,
   void Function(TestBuilderConfig)? builds,
 }) {
-  final testEnv = environment ?? TestEnvironment.withTestEngine();
+  final TestEnvironment testEnv = environment ?? TestEnvironment.withTestEngine();
   addTearDown(testEnv.cleanup);
 
   final testConfig = TestBuilderConfig();
@@ -541,7 +559,7 @@ void main() {
   }
 
   final parser = ArgParser();
-  final builders = BuildPlan.configureArgParser(
+  final List<Build> builders = BuildPlan.configureArgParser(
     parser,
     testEnv.environment,
     configs: {

@@ -66,7 +66,7 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   // rounding errors and add an offset. Said another way; ideally we would skip
   // this branch for the unit test `ComposePaintRuntimeOuter`, but do it for
   // `ComposeBackdropRuntimeOuterBlurInner`.
-  if (!input_snapshot->transform.IsIdentity()) {
+  if (input_snapshot->ShouldRasterizeForRuntimeEffects()) {
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
         coverage.GetLeftTop(),     //

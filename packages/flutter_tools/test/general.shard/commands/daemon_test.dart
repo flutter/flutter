@@ -70,7 +70,7 @@ class FakeServerSocket extends Fake implements ServerSocket {
   @override
   int get port => 1;
 
-  var closeCalled = false;
+  bool closeCalled = false;
   final controller = StreamController<Socket>();
 
   @override

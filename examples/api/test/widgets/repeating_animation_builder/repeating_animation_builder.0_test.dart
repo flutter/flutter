@@ -8,8 +8,12 @@ import 'package:flutter_api_samples/widgets/repeating_animation_builder/repeatin
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RepeatingAnimationBuilder animates continuously', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
+  testWidgets('RepeatingAnimationBuilder animates continuously', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.RepeatingAnimationBuilderExampleApp(),
+    );
 
     // Verify animation is happening by checking Transform changes
     final Transform initial = tester.widget(find.byType(Transform).first);
@@ -19,8 +23,12 @@ void main() {
     expect(initial.transform, isNot(equals(after.transform)));
   });
 
-  testWidgets('Play/pause button controls animation', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
+  testWidgets('Play/pause button controls animation', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.RepeatingAnimationBuilderExampleApp(),
+    );
 
     // Initially playing (pause icon visible)
     expect(find.byIcon(Icons.pause), findsOneWidget);
@@ -42,8 +50,12 @@ void main() {
     expect(find.byIcon(Icons.pause), findsOneWidget);
   });
 
-  testWidgets('Reverse toggle changes animation direction', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.RepeatingAnimationBuilderExampleApp());
+  testWidgets('Reverse toggle changes animation direction', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const example.RepeatingAnimationBuilderExampleApp(),
+    );
 
     // Check initial state
     Switch switchWidget = tester.widget(find.byType(Switch));

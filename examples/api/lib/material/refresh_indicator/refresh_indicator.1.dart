@@ -59,7 +59,10 @@ class RefreshIndicatorExample extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text('Pull down here', style: Theme.of(context).textTheme.headlineMedium),
+                    Text(
+                      'Pull down here',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
                     const Text("RefreshIndicator won't trigger"),
                   ],
                 ),

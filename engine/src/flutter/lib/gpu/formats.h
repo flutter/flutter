@@ -104,6 +104,9 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
   switch (value) {
     case impeller::PixelFormat::kUnknown:
       return FlutterGPUPixelFormat::kUnknown;
+    case impeller::PixelFormat::kR32Float:
+      FML_DCHECK(false) << "k32Float not implemented.";
+      return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kA8UNormInt:
       return FlutterGPUPixelFormat::kA8UNormInt;
     case impeller::PixelFormat::kR8UNormInt:

@@ -36,7 +36,13 @@ class DividerExample extends StatelessWidget {
               child: Center(child: Text('Above')),
             ),
           ),
-          const Divider(height: 20, thickness: 5, indent: 20, endIndent: 0, color: Colors.black),
+          const Divider(
+            height: 20,
+            thickness: 5,
+            indent: 20,
+            endIndent: 0,
+            color: Colors.black,
+          ),
           // Subheader example from Material spec.
           // https://material.io/components/dividers#types
           Container(

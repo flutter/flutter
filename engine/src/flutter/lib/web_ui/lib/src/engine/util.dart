@@ -62,7 +62,7 @@ enum TransformKind {
 /// Detects the kind of transform the [matrix] performs.
 TransformKind transformKindOf(List<double> matrix) {
   assert(matrix.length == 16);
-  final List<double> m = matrix;
+  final m = matrix;
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
@@ -123,7 +123,7 @@ String float64ListToCssTransform2d(List<double> matrix) {
 /// Converts [matrix] to a 3D CSS transform value.
 String float64ListToCssTransform3d(List<double> matrix) {
   assert(matrix.length == 16);
-  final List<double> m = matrix;
+  final m = matrix;
   if (m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
@@ -288,7 +288,7 @@ String colorValueToCssString(int value) {
     };
   } else {
     final double alpha = ((value >> 24) & 0xFF) / 255.0;
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
     sb.write('rgba(');
     sb.write(((value >> 16) & 0xFF).toString());
     sb.write(',');
@@ -371,8 +371,8 @@ String? canonicalizeFontFamily(String? fontFamily) {
 /// Converts a list of [Offset] to a typed array of floats.
 Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
   final int length = offsetList.length;
-  final Float32List floatList = Float32List(length * 2);
-  for (int i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
+  final floatList = Float32List(length * 2);
+  for (var i = 0, destIndex = 0; i < length; i++, destIndex += 2) {
     floatList[destIndex] = offsetList[i].dx;
     floatList[destIndex + 1] = offsetList[i].dy;
   }
@@ -397,7 +397,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   if (b == null || a.length != b.length) {
     return false;
   }
-  for (int index = 0; index < a.length; index += 1) {
+  for (var index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }
@@ -436,7 +436,7 @@ bool unorderedListEqual<T>(List<T>? a, List<T>? b) {
   }
 
   // Complex cases.
-  final Map<T, int> wordCounts = <T, int>{};
+  final wordCounts = <T, int>{};
   for (final T word in a) {
     final int count = wordCounts[word] ?? 0;
     wordCounts[word] = count + 1;
@@ -580,7 +580,7 @@ void setElementStyle(DomElement element, String name, String? value) {
 }
 
 void setThemeColor(ui.Color? color) {
-  DomHTMLMetaElement? theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
+  var theme = domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
 
   if (color != null) {
     if (theme == null) {
@@ -613,7 +613,7 @@ void ensureMetaTag(String name, String content) {
 /// This is mostly useful for iterables containing non-null elements.
 extension FirstWhereOrNull<T> on Iterable<T> {
   T? firstWhereOrNull(bool Function(T element) test) {
-    for (final T element in this) {
+    for (final element in this) {
       if (test(element)) {
         return element;
       }
@@ -717,7 +717,7 @@ class LruCache<K extends Object, V extends Object> {
   }
 
   void _removeLeastRecentlyUsedValue() {
-    final bool didRemove = _itemMap.remove(_itemQueue.last.key) != null;
+    final didRemove = _itemMap.remove(_itemQueue.last.key) != null;
     assert(didRemove);
     _itemQueue.removeLast();
   }
@@ -770,9 +770,9 @@ String _generateDebugFilename(String filePrefix) {
 
 void downloadDebugInfo(String filePrefix, Map<String, dynamic> json) {
   final String jsonString = const JsonEncoder.withIndent(' ').convert(json);
-  final blob = createDomBlob([jsonString], {'type': 'application/json'});
-  final url = domWindow.URL.createObjectURL(blob);
-  final element = domDocument.createElement('a');
+  final DomBlob blob = createDomBlob([jsonString], {'type': 'application/json'});
+  final String url = domWindow.URL.createObjectURL(blob);
+  final DomElement element = domDocument.createElement('a');
   element.setAttribute('href', url);
   element.setAttribute('download', _generateDebugFilename(filePrefix));
   element.click();

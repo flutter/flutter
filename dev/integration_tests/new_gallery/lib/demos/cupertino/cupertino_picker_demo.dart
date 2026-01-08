@@ -31,7 +31,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedWeekday = 0;
 
   static List<String> getDaysOfWeek([String? locale]) {
-    final DateTime now = DateTime.now();
+    final now = DateTime.now();
     final DateTime firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
     return List<int>.generate(7, (int index) => index)
         .map(
@@ -45,7 +45,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   void _showDemoPicker({required BuildContext context, required Widget child}) {
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
-    final CupertinoTheme dialogBody = CupertinoTheme(data: themeData, child: child);
+    final dialogBody = CupertinoTheme(data: themeData, child: child);
 
     showCupertinoModalPopup<void>(context: context, builder: (BuildContext context) => dialogBody);
   }

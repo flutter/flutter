@@ -1295,8 +1295,8 @@ class FakeSimpleArtifact extends CachedArtifact {
 }
 
 class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
-  var upToDate = false;
-  var didUpdate = false;
+  bool upToDate = false;
+  bool didUpdate = false;
   Exception? updateException;
 
   @override
@@ -1322,10 +1322,10 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
 
 class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
   @override
-  var environment = <String, String>{};
+  Map<String, String> environment = <String, String>{};
 
   @override
-  var stampName = 'ios-usb';
+  String stampName = 'ios-usb';
 }
 
 class FakeSecondaryCache extends Fake implements Cache {
@@ -1419,7 +1419,7 @@ class FakeCache extends Cache {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
-  var reinitialized = false;
+  bool reinitialized = false;
 
   @override
   void reinitialize({FileSystem? fileSystem}) {

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart' as example;
+import 'package:flutter_api_samples/material/dropdown_menu/dropdown_menu.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -51,7 +52,9 @@ void main() {
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
   });
 
-  testWidgets('DropdownMenu has focus when tapping on the text field', (WidgetTester tester) async {
+  testWidgets('DropdownMenu has focus when tapping on the text field', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.DropdownMenuExample());
 
     // Make sure the dropdown menus are there.
@@ -100,9 +103,9 @@ void main() {
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
 
     // Resize the screen to small screen and make sure no overflowed error appears.
-    tester.binding.window.physicalSizeTestValue = const Size(200, 160);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    tester.view.physicalSize = const Size(200, 160);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
     await tester.pump();
 
     expect(tester.takeException(), isNull);

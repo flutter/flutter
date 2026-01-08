@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/lib/ui/painting/immutable_buffer.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
@@ -35,9 +36,21 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
 
   // This must be kept in sync with the enum in painting.dart
   enum PixelFormat {
+    // Error pixel format for Skia compatibility.
+    kUnknown,
     kRGBA8888,
     kBGRA8888,
     kRGBAFloat32,
+    kR32Float,
+    kGray8,
+  };
+
+  struct ImageInfo {
+    const uint32_t width;
+    const uint32_t height;
+    const PixelFormat format;
+    const SkAlphaType alpha_type;
+    const sk_sp<SkColorSpace> color_space;
   };
 
   /// @brief  Asynchronously initializes an ImageDescriptor for an encoded
@@ -57,7 +70,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
                       int width,
                       int height,
                       int row_bytes,
-                      PixelFormat pixel_format);
+                      int pixel_format);
 
   /// @brief  Associates a flutter::Codec object with the dart.ui Codec handle.
   void instantiateCodec(Dart_Handle codec,
@@ -66,19 +79,19 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
                         int32_t destination_format);
 
   /// @brief  The width of this image, EXIF oriented if applicable.
-  int width() const { return image_info_.width(); }
+  int width() const { return image_info_.width; }
 
   /// @brief  The height of this image. EXIF oriented if applicable.
-  int height() const { return image_info_.height(); }
+  int height() const { return image_info_.height; }
 
   /// @brief  The bytes per pixel of the image.
-  int bytesPerPixel() const { return image_info_.bytesPerPixel(); }
+  int bytesPerPixel() const;
 
   /// @brief  The byte length of the first row of the image.
   ///         Defaults to width() * 4.
   int row_bytes() const {
     return row_bytes_.value_or(
-        static_cast<size_t>(image_info_.width() * image_info_.bytesPerPixel()));
+        static_cast<size_t>(image_info_.width * bytesPerPixel()));
   }
 
   /// @brief  Whether the given `target_width` or `target_height` differ from
@@ -97,7 +110,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
   bool is_compressed() const { return !!generator_; }
 
   /// @brief  The orientation corrected image info for this image.
-  const SkImageInfo& image_info() const { return image_info_; }
+  const ImageInfo& image_info() const { return image_info_; }
 
   /// @brief  Gets the scaled dimensions of this image, if backed by an
   ///         `ImageGenerator` that can perform efficient subpixel scaling.
@@ -106,7 +119,7 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     if (generator_) {
       return generator_->GetScaledDimensions(scale);
     }
-    return image_info_.dimensions();
+    return SkISize::Make(image_info_.width, image_info_.height);
   }
 
   /// @brief  Gets pixels for this image transformed based on the EXIF
@@ -119,19 +132,20 @@ class ImageDescriptor : public RefCountedDartWrappable<ImageDescriptor> {
     ClearDartWrapper();
   }
 
+  static ImageInfo CreateImageInfo(const SkImageInfo& sk_image_info);
+  static SkImageInfo ToSkImageInfo(const ImageInfo& image_info);
+
  private:
   ImageDescriptor(sk_sp<SkData> buffer,
-                  const SkImageInfo& image_info,
+                  const ImageInfo& image_info,
                   std::optional<size_t> row_bytes);
   ImageDescriptor(sk_sp<SkData> buffer,
                   std::shared_ptr<ImageGenerator> generator);
 
   sk_sp<SkData> buffer_;
+  const ImageInfo image_info_;
   std::shared_ptr<ImageGenerator> generator_;
-  const SkImageInfo image_info_;
   std::optional<size_t> row_bytes_;
-
-  const SkImageInfo CreateImageInfo() const;
 
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(ImageDescriptor);

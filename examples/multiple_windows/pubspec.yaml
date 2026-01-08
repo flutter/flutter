@@ -1,7 +1,7 @@
 name: multiple_windows
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 dependencies:
   flutter:
@@ -11,8 +11,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: lkvhan
+# PUBSPEC CHECKSUM: dpf2lg

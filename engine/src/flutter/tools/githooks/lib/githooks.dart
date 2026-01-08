@@ -14,7 +14,7 @@ import 'src/pre_rebase_command.dart';
 
 /// Runs the githooks
 Future<int> run(List<String> args) async {
-  final CommandRunner<bool> runner =
+  final runner =
       CommandRunner<bool>('githooks', 'Githooks implementation for the flutter/engine repo.')
         ..addCommand(PostCheckoutCommand())
         ..addCommand(PostMergeCommand())
@@ -62,7 +62,7 @@ String? _checkArgs(ArgResults argResults) {
     return 'The --flutter option is required';
   }
 
-  final io.Directory dir = io.Directory(argResults['flutter'] as String);
+  final dir = io.Directory(argResults['flutter'] as String);
   if (!dir.isAbsolute) {
     return 'The --flutter option must be an absolute path';
   }

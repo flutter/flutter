@@ -436,8 +436,8 @@ abstract final class MatrixUtils {
     final double ry = storage[1] * x + storage[5] * y + storage[13];
 
     if (storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0) {
-      double left = rx;
-      double right = rx;
+      var left = rx;
+      var right = rx;
       if (wx < 0) {
         left += wx;
       } else {
@@ -449,8 +449,8 @@ abstract final class MatrixUtils {
         right += hx;
       }
 
-      double top = ry;
-      double bottom = ry;
+      var top = ry;
+      var bottom = ry;
       if (wy < 0) {
         top += wy;
       } else {
@@ -487,14 +487,14 @@ abstract final class MatrixUtils {
   }
 
   static double _min4(double a, double b, double c, double d) {
-    final double e = (a < b) ? a : b;
-    final double f = (c < d) ? c : d;
+    final e = (a < b) ? a : b;
+    final f = (c < d) ? c : d;
     return (e < f) ? e : f;
   }
 
   static double _max4(double a, double b, double c, double d) {
-    final double e = (a > b) ? a : b;
-    final double f = (c > d) ? c : d;
+    final e = (a > b) ? a : b;
+    final f = (c > d) ? c : d;
     return (e > f) ? e : f;
   }
 
@@ -573,7 +573,7 @@ abstract final class MatrixUtils {
     //  [0.0, 1.0, 0.0, 0.0],
     //  [0.0, 0.0, 1.0, -radius],
     //  [0.0, 0.0, 0.0, 1.0]]
-    Matrix4 result = Matrix4.identity()
+    var result = Matrix4.identity()
       ..setEntry(3, 2, -perspective)
       ..setEntry(2, 3, -radius)
       ..setEntry(3, 3, perspective * radius + 1.0);
@@ -595,9 +595,15 @@ abstract final class MatrixUtils {
 
   /// Returns a matrix that transforms every point to [offset].
   static Matrix4 forceToPoint(Offset offset) {
-    return Matrix4.identity()
-      ..setRow(0, Vector4(0, 0, 0, offset.dx))
-      ..setRow(1, Vector4(0, 0, 0, offset.dy));
+    final result = Matrix4.zero();
+    final Float64List storage = result.storage;
+    // Matrix4 is column-major.
+    // The first two columns (indices 0, 1, 4, 5) are zero, so x and y are ignored.
+    storage[10] = 1; // Row 2, Column 2: z' = z
+    storage[12] = offset.dx; // Row 0, Column 3: x' = offset.dx
+    storage[13] = offset.dy; // Row 1, Column 3: y' = offset.dy
+    storage[15] = 1; // Row 3, Column 3: w' = w
+    return result;
   }
 }
 
@@ -633,7 +639,7 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
-      final List<String> values = <String>[
+      final values = <String>[
         '${debugFormatDouble(value!.entry(0, 0))},${debugFormatDouble(value!.entry(0, 1))},${debugFormatDouble(value!.entry(0, 2))},${debugFormatDouble(value!.entry(0, 3))}',
         '${debugFormatDouble(value!.entry(1, 0))},${debugFormatDouble(value!.entry(1, 1))},${debugFormatDouble(value!.entry(1, 2))},${debugFormatDouble(value!.entry(1, 3))}',
         '${debugFormatDouble(value!.entry(2, 0))},${debugFormatDouble(value!.entry(2, 1))},${debugFormatDouble(value!.entry(2, 2))},${debugFormatDouble(value!.entry(2, 3))}',

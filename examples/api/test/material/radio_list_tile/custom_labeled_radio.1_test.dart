@@ -8,10 +8,14 @@ import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tapping LabeledRadio toggles the radio', (WidgetTester tester) async {
+  testWidgets('Tapping LabeledRadio toggles the radio', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.LabeledRadioApp());
 
-    RadioGroup<bool> group = tester.widget<RadioGroup<bool>>(find.byType(RadioGroup<bool>));
+    RadioGroup<bool> group = tester.widget<RadioGroup<bool>>(
+      find.byType(RadioGroup<bool>),
+    );
     // Second radio is checked.
     expect(group.groupValue, isFalse);
 

@@ -723,9 +723,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -826,6 +829,25 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   }
 }
 
+/// Update the MinimumOSVersion key in the given Info.plist file.
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    printXcodeWarning(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+    );
+  }
+}
+
 /// Create an App.framework for debug iOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
@@ -887,7 +909,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,

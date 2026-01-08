@@ -64,7 +64,7 @@ class SemanticScrollable extends SemanticRole {
       semanticsObject.updateChildrenPositionAndSize();
 
       final int semanticsId = semanticsObject.id;
-      final Float64List offsets = Float64List(2);
+      final offsets = Float64List(2);
 
       // Either SemanticsObject.isVerticalScrollContainer or
       // SemanticsObject.isHorizontalScrollContainer should be

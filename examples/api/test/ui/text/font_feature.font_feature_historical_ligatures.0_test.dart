@@ -18,7 +18,10 @@ void main() {
     );
     expect(
       (tester.widget(find.byType(Text).first) as Text).style!.fontFeatures,
-      equals(const <FontFeature>[FontFeature.historicalForms(), FontFeature.historicalLigatures()]),
+      equals(const <FontFeature>[
+        FontFeature.historicalForms(),
+        FontFeature.historicalLigatures(),
+      ]),
     );
   });
 }

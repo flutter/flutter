@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show HttpServer;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -170,7 +172,7 @@ void main() {
         target: 'http://localhost:8080/users/',
         replacement: r'$1',
       );
-      final Uri targetUri = rule.getTargetUri();
+      final Uri targetUri = rule.targetUri;
       expect(targetUri.toString(), 'http://localhost:8080/users/');
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
@@ -283,7 +285,7 @@ void main() {
 
     test('getTargetUri returns correct Uri', () {
       final rule = PrefixProxyRule(prefix: '/api/users', target: 'http://localhost:8080');
-      final Uri targetUri = rule.getTargetUri();
+      final Uri targetUri = rule.targetUri;
       expect(targetUri.toString(), 'http://localhost:8080');
       expect(targetUri.scheme, 'http');
       expect(targetUri.host, 'localhost');
@@ -371,13 +373,13 @@ void main() {
     test('should add query parameters if original request does have one', () {
       final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
       final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api?foo=bar&a=b'));
-      final Uri target = getFinalTargetUri(originalRequest, rule);
+      final Uri target = rule.finalTargetUri(originalRequest.requestedUri);
       expect('$target', 'http://mock-backend.com/api?foo=bar&a=b');
     });
     test('should not add empty query if original request does not have one', () {
       final rule = RegexProxyRule(pattern: RegExp(r'^/api'), target: 'http://mock-backend.com');
       final originalRequest = Request('GET', Uri.parse('http://localhost:8000/api'));
-      final Uri target = getFinalTargetUri(originalRequest, rule);
+      final Uri target = rule.finalTargetUri(originalRequest.requestedUri);
       expect('$target', 'http://mock-backend.com/api');
     });
   });
@@ -403,5 +405,44 @@ void main() {
       expect(response.statusCode, 200);
       expect(await response.readAsString(), 'Inner Handler Response');
     });
+
+    test(
+      'should forward 404 response from backend instead of falling back to inner handler',
+      () async {
+        HttpServer? mockServer;
+        try {
+          mockServer = await shelf_io.serve(
+            (Request request) => Response.notFound(
+              '{"error": "Not found"}',
+              headers: {'content-type': 'application/json'},
+            ),
+            'localhost',
+            0,
+          );
+          final int port = mockServer.port;
+
+          final rules = <ProxyRule>[
+            PrefixProxyRule(prefix: '/api/', target: 'http://localhost:$port/'),
+          ];
+
+          final Middleware middleware = proxyMiddleware(rules, logger);
+
+          var innerHandlerCalled = false;
+          FutureOr<Response> innerHandler(Request request) {
+            innerHandlerCalled = true;
+            return Response.ok('<!DOCTYPE html><html>index.html</html>');
+          }
+
+          final request = Request('GET', Uri.parse('http://localhost:8080/api/missing'));
+          final Response response = await middleware(innerHandler)(request);
+
+          expect(innerHandlerCalled, isFalse);
+          expect(response.statusCode, 404);
+          expect(await response.readAsString(), '{"error": "Not found"}');
+        } finally {
+          await mockServer?.close();
+        }
+      },
+    );
   });
 }

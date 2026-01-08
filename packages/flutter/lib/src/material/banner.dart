@@ -146,8 +146,8 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// Defines the banner's [Material.elevation].
   ///
-  /// If this property is null, then [MaterialBannerThemeData.elevation] of
-  /// [ThemeData.bannerTheme] is used, if that is also null, the default value is 0.
+  /// If this property is null, then the ambient [MaterialBannerThemeData.elevation]
+  /// is used, if that is also null, the default value is 0.
   /// If the elevation is 0, the [Scaffold]'s body will be pushed down by the
   /// MaterialBanner when used with [ScaffoldMessenger].
   final double? elevation;
@@ -181,16 +181,14 @@ class MaterialBanner extends StatefulWidget {
 
   /// The color of the shadow below the [MaterialBanner].
   ///
-  /// If this property is null, then [MaterialBannerThemeData.shadowColor] of
-  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
-  /// is null.
+  /// If this property is null, then the ambient [MaterialBannerThemeData.shadowColor]
+  /// is used. If that is also null, the default value is null.
   final Color? shadowColor;
 
   /// The color of the divider.
   ///
-  /// If this property is null, then [MaterialBannerThemeData.dividerColor] of
-  /// [ThemeData.bannerTheme] is used. If that is also null, the default value
-  /// is [ColorScheme.surfaceVariant].
+  /// If this property is null, then the ambient [MaterialBannerThemeData.dividerColor]
+  /// is used. If that is also null, the default value is [ColorScheme.surfaceVariant].
   final Color? dividerColor;
 
   /// The amount of space by which to inset the [content].

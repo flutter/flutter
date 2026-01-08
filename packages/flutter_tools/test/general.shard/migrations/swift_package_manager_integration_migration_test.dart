@@ -3830,7 +3830,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   FakeXcodeProjectInterpreter({this.throwErrorOnGetInfo = false});
 
   @override
-  var isInstalled = false;
+  bool isInstalled = false;
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
@@ -3899,7 +3899,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   late Directory? xcodeWorkspace = hostAppRoot.childDirectory('$hostAppProjectName.xcworkspace');
 
   @override
-  var hostAppProjectName = 'Runner';
+  String hostAppProjectName = 'Runner';
 
   @override
   bool usesSwiftPackageManager;

@@ -45,7 +45,7 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
   ///
   /// Called automatically when the binding is created.
   RenderView initRenderView(FlutterView view) {
-    final RenderView renderView = RenderView(view: view);
+    final renderView = RenderView(view: view);
     rootPipelineOwner.rootNode = renderView;
     addRenderView(renderView);
     renderView.prepareInitialFrame();

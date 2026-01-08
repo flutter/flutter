@@ -135,7 +135,10 @@ class _ColorItem extends StatelessWidget {
         color: color,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[Text('$prefix$index'), Flexible(child: Text(_colorString))],
+          children: <Widget>[
+            Text('$prefix$index'),
+            Flexible(child: Text(_colorString)),
+          ],
         ),
       ),
     );

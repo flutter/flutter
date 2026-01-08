@@ -140,7 +140,7 @@ final class _CiYamlTarget {
       name: map['name'] as String,
       span: map.span,
       runIf: () {
-        final YamlList? runIf = map['runIf'] as YamlList?;
+        final runIf = map['runIf'] as YamlList?;
         if (runIf == null) {
           return null;
         }
@@ -172,14 +172,14 @@ final class _CiYaml {
       sourceUrl: Uri.parse(path),
     );
 
-    final YamlMap root = yamlDoc.contents as YamlMap;
-    final YamlList yamlTargets = root['targets'] as YamlList;
+    final root = yamlDoc.contents as YamlMap;
+    final yamlTargets = root['targets'] as YamlList;
     final List<_CiYamlTarget> targets = yamlTargets.nodes.map((YamlNode node) {
       return _CiYamlTarget.fromYamlMap(node as YamlMap);
     }).toList();
 
-    final YamlMap yamlPlatforms = root['platform_properties'] as YamlMap;
-    final Set<String> platforms = Set<String>.from(yamlPlatforms.keys.cast<String>());
+    final yamlPlatforms = root['platform_properties'] as YamlMap;
+    final platforms = Set<String>.from(yamlPlatforms.keys.cast<String>());
     return _CiYaml(targets: targets, platforms: platforms);
   }
 }

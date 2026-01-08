@@ -13,7 +13,7 @@ void main() {
   });
 
   testWidgets('AnimationStyle.copyWith() overrides all properties', (WidgetTester tester) async {
-    const AnimationStyle original = AnimationStyle(
+    const original = AnimationStyle(
       curve: Curves.ease,
       duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
@@ -33,18 +33,18 @@ void main() {
 
   test('AnimationStyle.lerp identical a,b', () {
     expect(AnimationStyle.lerp(null, null, 0), null);
-    const AnimationStyle data = AnimationStyle();
+    const data = AnimationStyle();
     expect(identical(AnimationStyle.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
-    const AnimationStyle a = AnimationStyle(
+    const a = AnimationStyle(
       curve: Curves.ease,
       duration: Duration(seconds: 1),
       reverseCurve: Curves.ease,
       reverseDuration: Duration(seconds: 1),
     );
-    const AnimationStyle b = AnimationStyle(
+    const b = AnimationStyle(
       curve: Curves.linear,
       duration: Duration(seconds: 2),
       reverseCurve: Curves.linear,
@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('default AnimationStyle debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     const AnimationStyle().debugFillProperties(builder);
 
@@ -70,7 +70,7 @@ void main() {
   });
 
   testWidgets('AnimationStyle implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     const AnimationStyle(
       curve: Curves.easeInOut,

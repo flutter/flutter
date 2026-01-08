@@ -12,7 +12,10 @@ void main() {
     await tester.pumpWidget(const example.AnimatedDigitApp());
 
     Finder findVisibleDigit(int digit) {
-      return find.descendant(of: find.byType(SlideTransition).last, matching: find.text('$digit'));
+      return find.descendant(
+        of: find.byType(SlideTransition).last,
+        matching: find.text('$digit'),
+      );
     }
 
     expect(findVisibleDigit(0), findsOneWidget);
@@ -26,7 +29,9 @@ void main() {
     expect(findVisibleDigit(2), findsOneWidget);
 
     await tester.tap(find.byType(FloatingActionButton));
-    await tester.pump(const Duration(milliseconds: 100)); // Animation duration is 300ms
+    await tester.pump(
+      const Duration(milliseconds: 100),
+    ); // Animation duration is 300ms
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     expect(findVisibleDigit(4), findsOneWidget);

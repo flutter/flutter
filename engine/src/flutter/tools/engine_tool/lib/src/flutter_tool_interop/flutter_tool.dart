@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:process_runner/process_runner.dart';
+
 import '../environment.dart';
 import '../logger.dart';
 import 'device.dart';
@@ -24,7 +26,7 @@ interface class FlutterTool {
 
   /// Returns a list of devices available via the `flutter devices` command.
   Future<List<Device>> devices() async {
-    final result = await _environment.processRunner.runProcess([
+    final ProcessRunnerResult result = await _environment.processRunner.runProcess([
       _toolPath,
       'devices',
       '--machine',

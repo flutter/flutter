@@ -38,7 +38,7 @@ Future<void> testHarnessTestsRunner() async {
   // to run (e.g. compiling), so we don't want to run them in series, especially
   // on 20-core machines. However, we have a race condition, so for now...
   // Race condition issue: https://github.com/flutter/flutter/issues/90026
-  final List<ShardRunner> tests = <ShardRunner>[
+  final tests = <ShardRunner>[
     () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'pass_test.dart'),
@@ -69,7 +69,7 @@ Future<void> testHarnessTestsRunner() async {
       expectFailure: true,
       printOutput: false,
       outputChecker: (CommandResult result) {
-        const String expectedError =
+        const expectedError =
             '══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════\n'
             'The following StateError was thrown running a test (but after the test had completed):\n'
             'Bad state: Exception thrown after test completed.';
@@ -123,7 +123,7 @@ Future<void> testHarnessTestsRunner() async {
   } else {
     testsToRun = tests;
   }
-  for (final ShardRunner test in testsToRun) {
+  for (final test in testsToRun) {
     await test();
   }
 

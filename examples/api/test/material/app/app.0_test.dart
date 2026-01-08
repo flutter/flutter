@@ -14,7 +14,10 @@ void main() {
 
     Material getScaffoldMaterial() {
       return tester.widget<Material>(
-        find.descendant(of: find.byType(Scaffold), matching: find.byType(Material).first),
+        find.descendant(
+          of: find.byType(Scaffold),
+          matching: find.byType(Material).first,
+        ),
       );
     }
 
@@ -35,7 +38,11 @@ void main() {
     // The Scaffold background color is updated.
     expect(
       getScaffoldMaterial().color,
-      Color.lerp(lightTheme.colorScheme.surface, darkTheme.colorScheme.surface, 0.5),
+      Color.lerp(
+        lightTheme.colorScheme.surface,
+        darkTheme.colorScheme.surface,
+        0.5,
+      ),
     );
 
     await tester.pumpAndSettle();

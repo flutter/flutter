@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('DisplayFeatureSubScreen', () {
     testWidgets('without Directionality or anchor', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -29,12 +29,12 @@ void main() {
       );
 
       // With no Directionality or anchorpoint, the widget throws
-      final String message = tester.takeException().toString();
+      final message = tester.takeException().toString();
       expect(message, contains('Directionality'));
     });
 
     testWidgets('with anchorPoint', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -63,7 +63,7 @@ void main() {
     });
 
     testWidgets('with infinity anchorpoint', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -92,7 +92,7 @@ void main() {
     });
 
     testWidgets('with horizontal hinge and anchorPoint', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -120,7 +120,7 @@ void main() {
     });
 
     testWidgets('with multiple display features and anchorPoint', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(
@@ -153,7 +153,7 @@ void main() {
     });
 
     testWidgets('with non-splitting display features and anchorPoint', (WidgetTester tester) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           // Top notch
@@ -196,7 +196,7 @@ void main() {
     testWidgets('with size 0 display feature in half-opened posture and anchorPoint', (
       WidgetTester tester,
     ) async {
-      const Key childKey = Key('childKey');
+      const childKey = Key('childKey');
       final MediaQueryData mediaQuery = MediaQueryData.fromView(tester.view).copyWith(
         displayFeatures: <DisplayFeature>[
           const DisplayFeature(

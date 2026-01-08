@@ -16,8 +16,8 @@ class TestStatusTransitionWidget extends StatusTransitionWidget {
 
 void main() {
   testWidgets('Status transition control test', (WidgetTester tester) async {
-    bool didBuild = false;
-    final AnimationController controller = AnimationController(
+    var didBuild = false;
+    final controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
@@ -57,7 +57,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(didBuild, isFalse);
 
-    final AnimationController anotherController = AnimationController(
+    final anotherController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );

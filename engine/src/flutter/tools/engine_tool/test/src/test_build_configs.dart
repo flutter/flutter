@@ -54,7 +54,7 @@ final class TestBuilderConfig {
     if (task == null) {
       return [];
     }
-    final (script, args) = task;
+    final (String script, List<String> args) = task;
     return [
       {
         'name': 'test_task',
@@ -70,7 +70,7 @@ final class TestBuilderConfig {
     if (task == null) {
       return {};
     }
-    final (script, args) = task;
+    final (String script, List<String> args) = task;
     return {
       'tasks': [
         {

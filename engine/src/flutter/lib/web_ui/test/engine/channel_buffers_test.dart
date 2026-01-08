@@ -34,10 +34,10 @@ void _resize(ui.ChannelBuffers buffers, String name, int newSize) {
 
 void testMain() {
   test('push drain', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData data = _makeByteData('bar');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    bool called = false;
+    final buffers = ui.ChannelBuffers();
+    var called = false;
     void callback(ByteData? responseData) {
       called = true;
     }
@@ -56,13 +56,13 @@ void testMain() {
   });
 
   test('drain is sync', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData data = _makeByteData('message');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     void callback(ByteData? responseData) {}
     buffers.push(channel, data, callback);
-    final List<String> log = <String>[];
-    final Completer<void> completer = Completer<void>();
+    final log = <String>[];
+    final completer = Completer<void>();
     scheduleMicrotask(() {
       log.add('before drain, microtask');
     });
@@ -91,13 +91,13 @@ void testMain() {
   });
 
   test('push drain zero', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData data = _makeByteData('bar');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     void callback(ByteData? responseData) {}
     _resize(buffers, channel, 0);
     buffers.push(channel, data, callback);
-    bool didCall = false;
+    var didCall = false;
     await buffers.drain(channel, (
       ByteData? drainedData,
       ui.PlatformMessageResponseCallback drainedCallback,
@@ -109,9 +109,9 @@ void testMain() {
   });
 
   test('drain when empty', () async {
-    const String channel = 'foo';
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    bool didCall = false;
+    const channel = 'foo';
+    final buffers = ui.ChannelBuffers();
+    var didCall = false;
     await buffers.drain(channel, (
       ByteData? drainedData,
       ui.PlatformMessageResponseCallback drainedCallback,
@@ -123,19 +123,19 @@ void testMain() {
   });
 
   test('overflow', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
     final ByteData three = _makeByteData('three');
     final ByteData four = _makeByteData('four');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     void callback(ByteData? responseData) {}
     _resize(buffers, channel, 3);
     buffers.push(channel, one, callback);
     buffers.push(channel, two, callback);
     buffers.push(channel, three, callback);
     buffers.push(channel, four, callback);
-    int counter = 0;
+    var counter = 0;
     await buffers.drain(channel, (
       ByteData? drainedData,
       ui.PlatformMessageResponseCallback drainedCallback,
@@ -155,16 +155,16 @@ void testMain() {
   });
 
   test('resize drop', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     _resize(buffers, channel, 100);
     void callback(ByteData? responseData) {}
     buffers.push(channel, one, callback);
     buffers.push(channel, two, callback);
     _resize(buffers, channel, 1);
-    int counter = 0;
+    var counter = 0;
     await buffers.drain(channel, (
       ByteData? drainedData,
       ui.PlatformMessageResponseCallback drainedCallback,
@@ -180,11 +180,11 @@ void testMain() {
   });
 
   test('resize dropping calls callback', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    bool didCallCallback = false;
+    final buffers = ui.ChannelBuffers();
+    var didCallCallback = false;
     void oneCallback(ByteData? responseData) {
       expect(responseData, isNull);
       didCallCallback = true;
@@ -203,11 +203,11 @@ void testMain() {
   });
 
   test('overflow calls callback', () async {
-    const String channel = 'foo';
+    const channel = 'foo';
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
-    bool didCallCallback = false;
+    final buffers = ui.ChannelBuffers();
+    var didCallCallback = false;
     void oneCallback(ByteData? responseData) {
       expect(responseData, isNull);
       didCallCallback = true;
@@ -224,18 +224,18 @@ void testMain() {
   });
 
   test('handle garbage', () async {
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     expect(() => buffers.handleMessage(_makeByteData('asdfasdf')), throwsException);
   });
 
   test('handle resize garbage', () async {
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final buffers = ui.ChannelBuffers();
     expect(() => buffers.handleMessage(_makeByteData('resize\rfoo\rbar')), throwsException);
   });
 
   test('ChannelBuffers.setListener', () async {
-    final List<String> log = <String>[];
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final log = <String>[];
+    final buffers = ui.ChannelBuffers();
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
     final ByteData three = _makeByteData('three');
@@ -296,8 +296,8 @@ void testMain() {
   });
 
   test('ChannelBuffers.clearListener', () async {
-    final List<String> log = <String>[];
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final log = <String>[];
+    final buffers = ui.ChannelBuffers();
     final ByteData one = _makeByteData('one');
     final ByteData two = _makeByteData('two');
     final ByteData three = _makeByteData('three');
@@ -343,7 +343,7 @@ void testMain() {
   }, skip: isWasm); // https://github.com/dart-lang/sdk/issues/50778
 
   test('ChannelBuffers.handleMessage for resize', () async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     final ui.ChannelBuffers buffers = _TestChannelBuffers(log);
     // Created as follows:
     //   print(StandardMethodCodec().encodeMethodCall(MethodCall('resize', ['abcdef', 12345])).buffer.asUint8List());
@@ -398,7 +398,7 @@ void testMain() {
   });
 
   test('ChannelBuffers.handleMessage for overflow', () async {
-    final List<String> log = <String>[];
+    final log = <String>[];
     final ui.ChannelBuffers buffers = _TestChannelBuffers(log);
     // Created as follows:
     //   print(StandardMethodCodec().encodeMethodCall(MethodCall('overflow', ['abcdef', false])).buffer.asUint8List());
@@ -453,8 +453,8 @@ void testMain() {
   });
 
   test('ChannelBuffers uses the right zones', () async {
-    final List<String> log = <String>[];
-    final ui.ChannelBuffers buffers = ui.ChannelBuffers();
+    final log = <String>[];
+    final buffers = ui.ChannelBuffers();
     final Zone zone1 = Zone.current.fork();
     final Zone zone2 = Zone.current.fork();
     zone1.run(() {
