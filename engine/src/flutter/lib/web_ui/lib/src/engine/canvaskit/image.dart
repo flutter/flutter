@@ -500,7 +500,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
     assert(_debugCheckIsNotDisposed());
     switch (imageSource) {
       case ImageElementImageSource():
@@ -531,11 +531,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
     }
     ByteData? data = _readPixelsFromSkImage(format);
     data ??= _readPixelsFromImageViaSurface(format);
-    if (data == null) {
-      return Future<ByteData>.error('Failed to encode the image into bytes.');
-    } else {
-      return Future<ByteData>.value(data);
-    }
+    return data;
   }
 
   @override
@@ -555,13 +551,16 @@ class CkImage implements ui.Image, StackTraceDebugger {
     return data;
   }
 
-  ByteData? _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
+  ByteData _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    surface.setSize(BitmapSize(width, height));
+    final SkSurface skiaSurface = surface.skSurface!;
+
+    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawImage(this, ui.Offset.zero, CkPaint());
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
+    final SkImage skImage = skiaSurface.makeImageSnapshot();
+
     final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
@@ -570,6 +569,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
       height: height.toDouble(),
     );
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    skImage.delete();
+
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }

@@ -327,4 +327,8 @@ class SkwasmRenderer extends Renderer {
   void debugResetRasterizer() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
+
+  @override
+  Surface get pictureToImageSurface =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 }
