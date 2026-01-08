@@ -22,6 +22,7 @@
 #include "impeller/entity/mtl/framebuffer_blend_shaders.h"
 #include "impeller/entity/mtl/modern_shaders.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
 namespace flutter {
@@ -97,7 +98,8 @@ class TesterContextMTL : public TesterContext {
     }
 
     delegate_ = std::make_unique<TesterGPUSurfaceMetalDelegate>(device);
-    aiks_context_ = std::make_shared<impeller::AiksContext>(context_, nullptr);
+    aiks_context_ = std::make_shared<impeller::AiksContext>(
+        context_, /*typographer_context=*/impeller::TypographerContextSkia::Make());
 
     return true;
   }
