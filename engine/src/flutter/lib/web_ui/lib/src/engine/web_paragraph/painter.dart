@@ -19,10 +19,8 @@ import 'paragraph.dart';
 // TODO(mdebbar): Discuss it: we use this canvas for painting the entire block (entire line)
 // so we need to make sure it's big enough to hold the biggest line.
 // Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
-const int _paintWidth = 1000;
-const int _paintHeight = 1000;
 double? currentDevicePixelRatio;
-final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
+final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(paintWidth, paintHeight);
 final paintContext =
     paintCanvas.getContext('2d', {'willReadFrequently': useCPUTextLayout})!
         as DomCanvasRenderingContext2D;
@@ -62,9 +60,16 @@ abstract class Painter {
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
-  void resizePaintCanvas(double devicePixelRatio) {
-    if (currentDevicePixelRatio == devicePixelRatio) {
-      // Nothing changed
+  void resizePaintCanvas(double devicePixelRatio, double width, double height) {
+    if (useSmallCanvas) {
+      if (currentDevicePixelRatio == devicePixelRatio &&
+          paintCanvas.width == (width * devicePixelRatio).ceilToDouble() &&
+          paintCanvas.height == (height * devicePixelRatio).ceilToDouble()) {
+        // If we use small canvas, we need to resize it whenever the requested size changes
+        return;
+      }
+    } else if (currentDevicePixelRatio == devicePixelRatio) {
+      // If we use fixed size canvas, we only need to check the device pixel ratio
       return;
     }
 
@@ -74,19 +79,24 @@ abstract class Painter {
     if (currentDevicePixelRatio != null) {
       paintContext.restore(); // Restore to unscaled state
     }
-    paintCanvas.width = (_paintWidth * devicePixelRatio).ceilToDouble();
-    paintCanvas.height = (_paintHeight * devicePixelRatio).ceilToDouble();
+    paintCanvas.width = (width * devicePixelRatio).ceilToDouble();
+    paintCanvas.height = (height * devicePixelRatio).ceilToDouble();
     paintContext.scale(devicePixelRatio, devicePixelRatio);
     paintContext.save();
 
     currentDevicePixelRatio = devicePixelRatio;
-
-    WebParagraphDebug.log(
-      'resizePaintCanvas: ${paintCanvas.width}x${paintCanvas.height} @ $devicePixelRatio',
-    );
   }
 
-  void paintTextClustersAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+  CkImage? paintTextClustersAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+  void paintTextClustersAsSingleImageFromCache(
+    ui.Canvas canvas,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+    CkImage image,
+  );
+
+  void resetCache();
+  bool hasCache();
 }
 
 class CanvasKitPainter extends Painter {
@@ -294,31 +304,23 @@ class CanvasKitPainter extends Painter {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
-    /*
-    final DomImageBitmap bitmap = timeAction('paint.transferToImageBitmap', () {
-      return paintCanvas.transferToImageBitmap();
-    });
+  }
 
-    final SkImage? skImage = timeAction('paint.MakeLazyImageFromImageBitmap', () {
-      return canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-    });
-    if (skImage == null) {
-      throw Exception('Failed to convert text image bitmap to an SkImage.');
+  DomImageBitmap _createSmallBitmapSync(ui.Rect bounds) {
+    // We should have resized the small canvas before calling this method
+    if (useSmallCanvas &&
+        (bounds.width != paintCanvas.width || bounds.height != paintCanvas.height)) {
+      print(
+        '_resizePaintCanvas needed: '
+        'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${bounds.width}x${bounds.height}',
+      );
+      assert(false);
     }
 
-    final CkImage ckImage = timeAction('paint.ImageBitmapImageSource', () {
-      return CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
-    });
-
-    timeAction('paint.drawImageRect', () {
-      canvas.drawImageRect(
-        ckImage,
-        sourceRect,
-        targetRect,
-        ui.Paint()..filterQuality = ui.FilterQuality.none,
-      );
-    });
-    */
+    // Transfer the buffer from the small canvas
+    // This is synchronous and returns the handle immediately
+    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+    return bitmap;
   }
 
   @override
@@ -339,8 +341,12 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void paintTextClustersAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
-    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+  CkImage? paintTextClustersAsSingleImage(
+    ui.Canvas canvas,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+  ) {
+    final DomImageBitmap bitmap = _createSmallBitmapSync(sourceRect);
 
     final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
     if (skImage == null) {
@@ -354,6 +360,33 @@ class CanvasKitPainter extends Painter {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+
+    return ckImage;
+  }
+
+  @override
+  void paintTextClustersAsSingleImageFromCache(
+    ui.Canvas canvas,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+    CkImage image,
+  ) {
+    canvas.drawImageRect(
+      image,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  @override
+  void resetCache() {
+    Painter.imageCache.clear();
+  }
+
+  @override
+  bool hasCache() {
+    return Painter.imageCache.isNotEmpty;
   }
 
   double calculateThickness(WebTextStyle textStyle) {

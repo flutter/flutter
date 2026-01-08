@@ -1,26 +1,241 @@
 withCacheId: VERY BASIC GLYPH ID (one font, id=cluster text) Saving bitmap 
 useCPUTextLayout: Keeping both layout and paint canvas contexts on CPU side by setting willReadFrequently flag
 
+
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+
 SKPARAGRAPH
 ===========
-00:02 +0: Build/Layout/Paint small text                                                                                                                                            
-build: 34ms
-layout: 19ms
-paint: 559ms
+00:01 +0: Build/Layout/Paint small text   
+build: 17ms
+layout: 12ms
+paint: 120ms/540ms
 
 00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
-build: 12ms
-layout: 6ms
-paint: 227ms
+build: 1ms
+layout: 1ms
+paint: 218ms
 
 00:03 +2: Build/Layout/Paint large text                                                                                                                                            
-build: 8ms
+build: 2ms
+layout: 3ms
+paint: 66ms
+
+BEST WEBPARAGRAPH
+=================
+withCacheId = true
+useSmallCanvas=true
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 15ms
+paint: 663ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 268ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
 layout: 11ms
-paint: 63ms
+paint: 116ms
+
+
+BEST WEBPARAGRAPH
+=================
+withCacheId = true
+useSmallCanvas=false
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 16ms
+paint: 629ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 242ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 11ms
+paint: 115ms
+
+
+
+============================================
+BASE LINE (large text test failed)
+withCacheId = false
+useSmallCanvas=false
+drawSingleImage=false
+============================================
+00:07 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 0ms
+layout: 18ms
+paint: 6129ms
+
+00:18 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 3ms
+paint: 10657ms
+
+======================
+withCacheId = true
+useSmallCanvas=false
+drawSingleImage=false
+=====================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 17ms
+paint: 725ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.formatLines: 0ms
+layout: 3ms
+paint: 517ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 14ms
+paint: 982ms
+
+=======================
+withCacheId = true
+useSmallCanvas=true
+drawSingleImage=false
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 15ms
+paint: 591ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 291ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 10ms
+paint: 611ms
+
+=======================
+withCacheId = false
+useSmallCanvas=false
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 16ms
+paint: 1294ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 618ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 12ms
+paint: 628ms
+
+=======================
+withCacheId = true
+useSmallCanvas=false
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 16ms
+paint: 629ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 242ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 11ms
+paint: 115ms
+
+=======================
+withCacheId = false
+useSmallCanvas=true
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 18ms
+paint: 1263ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 5ms
+paint: 604ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 11ms
+paint: 610ms
+
+=======================
+withCacheId = true
+useSmallCanvas=true
+drawSingleImage=true
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout: 15ms
+paint: 663ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout: 2ms
+paint: 268ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout: 11ms
+paint: 116ms
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 BASE LINE (large text test runs only 1 time)
-=========
+============================================
 00:07 +0: Build/Layout/Paint small text                                                                                                                                            
 build: 4ms
 layout.AllCodeUnitFlags: 16ms
@@ -32,8 +247,6 @@ layout: 45ms
 paint/fillTextCluster: 1558ms
 paint/paintTextCluster: 46ms
 paint.paintTextCluster: 1614ms
-preroll_frame: 23ms
-apply_frame: 2ms
 paint: 6405ms
 
 00:19 +1: Build/Layout/Paint medium text                                                                                                                                           
@@ -47,8 +260,6 @@ layout: 32ms
 paint/fillTextCluster: 2614ms
 paint/paintTextCluster: 327ms
 paint.paintTextCluster: 2959ms
-preroll_frame: 8ms
-apply_frame: 1ms
 paint: 11033ms
 
 00:26 +2: Build/Layout/Paint large text                                                                                                                                            
@@ -62,133 +273,279 @@ layout: 18ms
 paint/fillTextCluster: 3408ms
 paint/paintTextCluster: 597ms
 paint.paintTextCluster: 4040ms
-preroll_frame: 0ms
-apply_frame: 0ms
 paint: 6140ms
 
+=======================
 useCPUTextLayout = true
 withCacheId = true
-==================
-00:02 +0: Build/Layout/Paint small text (*100)                                                                                                                                            
-build: 4ms
-layout.AllCodeUnitFlags: 20ms
-layout.extractTextClusters: 13ms
-layout.extractBidiRuns: 3ms
-layout.wrapText: 8ms
-layout.formatLines: 0ms
-layout: 47ms
-paint/fillTextCluster: 33ms
-paint/paintTextCluster: 13ms
-paint.paintTextCluster: 51ms
-preroll_frame: 13ms
-apply_frame: 2ms
-paint: 786ms
-
-00:03 +1: Build/Layout/Paint medium text (*50)                                                                                                                                           
-build: 0ms
-layout.AllCodeUnitFlags: 5ms
-layout.extractTextClusters: 4ms
-layout.extractBidiRuns: 1ms
-layout.wrapText: 8ms
-layout.formatLines: 0ms
-layout: 19ms
-paint/fillTextCluster: 66ms
-paint/paintTextCluster: 14ms
-paint.paintTextCluster: 85ms
-preroll_frame: 4ms
-apply_frame: 1ms
-paint: 531ms
-
-00:04 +2: Build/Layout/Paint large text (*10)                                                                                                                                            
-build: 0ms
-layout.AllCodeUnitFlags: 12ms
-layout.extractTextClusters: 13ms
-layout.extractBidiRuns: 1ms
-layout.wrapText: 66ms
-layout.formatLines: 2ms
-layout: 96ms
-paint/fillTextCluster: 74ms
-paint/paintTextCluster: 100ms
-paint.paintTextCluster: 221ms
-preroll_frame: 2ms
-apply_frame: 0ms
-paint: 498ms
-
-
-Draw a paragraph as a single image (width=100 as for all the tests above)
-=========================================================================
-00:02 +0: Build/Layout/Paint small text (*100)                                                                                                                                           
-build: 4ms
-layout.AllCodeUnitFlags: 18ms
-layout.extractTextClusters: 11ms
-layout.extractBidiRuns: 3ms
-layout.wrapText: 7ms
-layout.formatLines: 1ms
-layout: 43ms
-paint.fillParagraph: 177ms
-paint.paintParagraph: 12ms
-paint: 1221ms
-
-00:03 +1: Build/Layout/Paint medium text (*50)                                                                                                                                          
-build: 1ms
-layout.AllCodeUnitFlags: 5ms
-layout.extractTextClusters: 4ms
-layout.extractBidiRuns: 1ms
-layout.wrapText: 8ms
-layout.formatLines: 0ms
-layout: 21ms
-paint.fillParagraph: 96ms
-paint.paintParagraph: 5ms
-paint: 581ms
-
-00:04 +2: Build/Layout/Paint large text (*10)                                                                                                                                           
-build: 0ms
-layout.AllCodeUnitFlags: 12ms
-layout.extractTextClusters: 11ms
-layout.extractBidiRuns: 1ms
-layout.wrapText: 63ms
-layout.formatLines: 1ms
-layout: 90ms
-paint.fillParagraph: 269ms
-paint.paintParagraph: 3ms
-paint: 395ms
-
-
-Draw a paragraph as a single image (width=1000 aso the large text fits into the canvas)
-=======================================================================================
+useSmallCanvas=false
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
 00:02 +0: Build/Layout/Paint small text                                                                                                                                            
-build: 3ms
-layout.AllCodeUnitFlags: 17ms
-layout.extractTextClusters: 11ms
-layout.extractBidiRuns: 3ms
-layout.wrapText: 8ms
-layout.formatLines: 0ms
-layout: 42ms
-paint.fillParagraph: 182ms
-paint.paintParagraph: 10ms (1123-182)/100 = 9.41
-paint: 1223ms
-
-00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
 build: 1ms
-layout.AllCodeUnitFlags: 5ms
-layout.extractTextClusters: 5ms
-layout.extractBidiRuns: 0ms
-layout.wrapText: 5ms
+layout.AllCodeUnitFlags: 9ms
+layout.extractTextClusters: 3ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
 layout.formatLines: 0ms
 layout: 17ms
-paint.fillParagraph: 93ms
-paint.paintParagraph: 5ms (572-93)/50 = 9.58
-paint: 572ms
+paint/fillTextCluster: 30ms
+paint/paintTextCluster: 11ms
+paint.paintTextCluster: 45ms
+paint: 725ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 1ms
+layout.formatLines: 0ms
+layout: 3ms
+paint/fillTextCluster: 60ms
+paint/paintTextCluster: 13ms
+paint.paintTextCluster: 77ms
+paint: 517ms
 
 00:04 +2: Build/Layout/Paint large text                                                                                                                                            
 build: 0ms
-layout.AllCodeUnitFlags: 12ms
-layout.extractTextClusters: 10ms
-layout.extractBidiRuns: 1ms
-layout.wrapText: 44ms
+layout.AllCodeUnitFlags: 3ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 7ms
 layout.formatLines: 0ms
-layout: 68ms
-paint.fillParagraph: 463ms
-paint.paintParagraph: 16ms  (612 - 463)/10 = 14.9
-paint: 612ms
+layout: 14ms
+paint/fillTextCluster: 54ms
+paint/paintTextCluster: 86ms
+paint.paintTextCluster: 178ms
+paint: 982ms
+
+=======================
+useCPUTextLayout = true
+withCacheId = true
+useSmallCanvas=true
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout.AllCodeUnitFlags: 8ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
+layout.formatLines: 0ms
+layout: 15ms
+paint/fillTextCluster: 2ms
+paint/paintTextCluster: 10ms
+paint.paintTextCluster: 16ms
+paint: 591ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 2ms
+paint/fillTextCluster: 2ms
+paint/paintTextCluster: 10ms
+paint.paintTextCluster: 14ms
+paint: 291ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 2ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 5ms
+layout.formatLines: 0ms
+layout: 10ms
+paint/fillTextCluster: 10ms
+paint/paintTextCluster: 84ms
+paint.paintTextCluster: 122ms
+paint: 611ms
+
+=======================
+useCPUTextLayout = true
+withCacheId = false
+useSmallCanvas=false
+drawSingleImage=true
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout.AllCodeUnitFlags: 9ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
+layout.formatLines: 0ms
+layout: 16ms
+paint.fillParagraph: 182ms
+paint.paintParagraph: 12ms
+paint: 1294ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 1ms
+layout.formatLines: 0ms
+layout: 2ms
+paint.fillParagraph: 99ms
+paint.paintParagraph: 6ms
+paint: 618ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 3ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 6ms
+layout.formatLines: 0ms
+layout: 12ms
+paint.fillParagraph: 468ms
+paint.paintParagraph: 16ms
+paint: 628ms
+
+=======================
+useCPUTextLayout = true
+withCacheId = true
+useSmallCanvas=false
+drawSingleImage=true
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout.AllCodeUnitFlags: 9ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
+layout.formatLines: 0ms
+layout: 16ms
+paint.fillParagraph: 16ms
+paint.paintParagraph: 5ms
+paint: 629ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 2ms
+paint.fillParagraph: 10ms
+paint.paintParagraph: 1ms
+paint: 242ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 2ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 5ms
+layout.formatLines: 0ms
+layout: 11ms
+paint.fillParagraph: 48ms
+paint.paintParagraph: 2ms
+paint: 115ms
+
+=======================
+useCPUTextLayout = true
+withCacheId = false
+useSmallCanvas=true
+drawSingleImage=true
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout.AllCodeUnitFlags: 9ms
+layout.extractTextClusters: 3ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
+layout.formatLines: 0ms
+layout: 18ms
+paint.fillParagraph: 179ms
+paint.paintParagraph: 15ms
+paint: 1263ms
+
+00:03 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 1ms
+layout.extractTextClusters: 3ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 1ms
+layout.formatLines: 0ms
+layout: 5ms
+paint.fillParagraph: 94ms
+paint.paintParagraph: 5ms
+paint: 604ms
+
+00:04 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 3ms
+layout.extractTextClusters: 1ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 5ms
+layout.formatLines: 0ms
+layout: 11ms
+paint.fillParagraph: 454ms
+paint.paintParagraph: 15ms
+paint: 610ms
+
+=======================
+useCPUTextLayout = true
+withCacheId = true
+useSmallCanvas=true
+drawSingleImage=true
+small: layout=10, paint=1000
+medium: layout=5, paint=500
+large: layout=1, paint=100
+==========================
+00:02 +0: Build/Layout/Paint small text                                                                                                                                            
+build: 1ms
+layout.AllCodeUnitFlags: 8ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 1ms
+layout.wrapText: 2ms
+layout.formatLines: 0ms
+layout: 15ms
+paint.fillParagraph: 19ms
+paint.paintParagraph: 9ms
+paint: 663ms
+
+00:02 +1: Build/Layout/Paint medium text                                                                                                                                           
+build: 0ms
+layout.AllCodeUnitFlags: 0ms
+layout.extractTextClusters: 0ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 0ms
+layout.formatLines: 0ms
+layout: 2ms
+paint.fillParagraph: 10ms
+paint.paintParagraph: 2ms
+paint: 268ms
+
+00:03 +2: Build/Layout/Paint large text                                                                                                                                            
+build: 0ms
+layout.AllCodeUnitFlags: 3ms
+layout.extractTextClusters: 2ms
+layout.extractBidiRuns: 0ms
+layout.wrapText: 5ms
+layout.formatLines: 0ms
+layout: 11ms
+paint.fillParagraph: 48ms
+paint.paintParagraph: 2ms
+paint: 116ms
 

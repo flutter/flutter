@@ -138,30 +138,35 @@ class TextPaint {
             }
             paintContext.restore();
           case StyleElements.text:
-            final bool cached = timeAction('paint/fillTextCluster', () {
-              return painter.fillTextCluster(
-                clusterText,
-                // We shape ellipsis with default direction coming from the attaching block
-                // and all the other blocks with the default paragraph direction.
-                // The reason for shaping ellipsis this way is that we literally attach it to the block
-                // that overflows and we want to keep all the styling attributes (including text direction) consistent.
-                block is EllipsisBlock
-                    ? block.isLtr
-                    : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+            if (useSmallCanvas) {
+              painter.resizePaintCanvas(
+                ui.window.devicePixelRatio,
+                sourceRect.width,
+                sourceRect.height,
               );
-            });
-            timeAction('paint/paintTextCluster', () {
-              if (cached) {
-                painter.paintTextClusterFromCache(
-                  canvas,
-                  sourceRect,
-                  targetRect,
-                  clusterText.cacheId,
-                );
-              } else {
-                painter.paintTextCluster(canvas, sourceRect, targetRect, clusterText.cacheId);
-              }
-            });
+            }
+            final bool cached = painter.fillTextCluster(
+              clusterText,
+              // We shape ellipsis with default direction coming from the attaching block
+              // and all the other blocks with the default paragraph direction.
+              // The reason for shaping ellipsis this way is that we literally attach it to the block
+              // that overflows and we want to keep all the styling attributes (including text direction) consistent.
+              block is EllipsisBlock
+                  ? block.isLtr
+                  : layout.paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr,
+            );
+
+            if (cached) {
+              painter.paintTextClusterFromCache(
+                canvas,
+                sourceRect,
+                targetRect,
+                clusterText.cacheId,
+              );
+            } else {
+              painter.paintTextCluster(canvas, sourceRect, targetRect, clusterText.cacheId);
+            }
+
           default:
             assert(false);
         }
@@ -357,9 +362,7 @@ class TextPaint {
     _paintByClusters(StyleElements.shadows, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
-    timeAction('paint.paintTextCluster', () {
-      _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
-    });
+    _paintByClusters(StyleElements.text, canvas, layout, line, x, y);
 
     WebParagraphDebug.log('paintLineOnCanvasKit.Decorations: ${line.textRange}');
     _paintByBlocks(StyleElements.decorations, canvas, layout, line, x, y);
@@ -376,26 +379,51 @@ class TextPaint {
     _paintByClustersOnCanvas2D(StyleElements.text, canvas, layout, line, x, y);
   }
 
-  void fillAsSingleImage(ui.Canvas canvas, TextLayout layout) {
+  void fillAsSingleImage(
+    ui.Canvas canvas,
+    TextLayout layout,
+    ui.Rect sourceRect,
+    ui.Offset offset,
+  ) {
+    if (withCacheId && layout.imageCache != null) {
+      return;
+    }
+
+    if (useSmallCanvas) {
+      painter.resizePaintCanvas(ui.window.devicePixelRatio, sourceRect.width, sourceRect.height);
+    }
+
     // Paint the entire paragraph as a single image on Canvas2D
-    timeAction('paint.fillParagraph', () {
-      ui.Offset offset = ui.Offset.zero;
-      for (final TextLine line in layout.lines) {
-        WebParagraphDebug.log('fillAsSingleImage: ${line.textRange} $offset');
-        paintContext.save();
-        paintContext.translate(offset.dx, offset.dy);
-        _fillClustersOnCanvas2D(layout, line);
-        paintContext.restore();
-        offset = offset.translate(-line.advance.width - line.trailingSpacesWidth, 0);
-        offset = offset.translate(0, line.advance.height);
-      }
-    });
+    ui.Offset offset = ui.Offset.zero;
+    for (final TextLine line in layout.lines) {
+      paintContext.save();
+      paintContext.translate(line.formattingShift + offset.dx, offset.dy);
+      _fillClustersOnCanvas2D(layout, line);
+      paintContext.restore();
+      offset = offset.translate(-line.advance.width - line.trailingSpacesWidth, 0);
+      offset = offset.translate(0, line.advance.height);
+    }
   }
 
-  void paintAsSingleImage(ui.Canvas canvas, TextLayout layout, ui.Offset offset) {
-    timeAction('paint.paintParagraph', () {
-      _paintClustersAsSingleImage(canvas, layout, offset);
-    });
+  void paintAsSingleImage(
+    ui.Canvas canvas,
+    TextLayout layout,
+    ui.Rect sourceRect,
+    ui.Rect targetRect,
+    ui.Offset offset,
+  ) {
+    if (withCacheId && layout.imageCache != null) {
+      painter.paintTextClustersAsSingleImageFromCache(
+        canvas,
+        sourceRect,
+        targetRect,
+        layout.imageCache!,
+      );
+    } else if (withCacheId) {
+      layout.imageCache = painter.paintTextClustersAsSingleImage(canvas, sourceRect, targetRect);
+    } else {
+      painter.paintTextClustersAsSingleImage(canvas, sourceRect, targetRect);
+    }
   }
 
   void _fillClustersOnCanvas2D(TextLayout layout, TextLine line) {
@@ -428,31 +456,35 @@ class TextPaint {
     }
   }
 
-  void _paintClustersAsSingleImage(ui.Canvas canvas, TextLayout layout, ui.Offset offset) {
-    final (ui.Rect sourceRect, ui.Rect targetRect) = calculateParagraph(
-      layout,
-      ui.Offset(offset.dx, offset.dy),
-      ui.window.devicePixelRatio,
-    );
-    //print('paintClustersAsSingleImage sourceRect: $sourceRect targetRect: $targetRect');
-    painter.paintTextClustersAsSingleImage(canvas, sourceRect, targetRect);
-  }
-
   (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
     TextLayout layout,
     ui.Offset offset,
     double devicePixelRatio,
   ) {
+    // Calculate the longest line taking in account the formatting shifts
+    double maxWidth = 0;
+    for (final TextLine line in layout.lines) {
+      final double lineWidth = line.advance.width + line.formattingShift + line.trailingSpacesWidth;
+      if (lineWidth > maxWidth) {
+        maxWidth = lineWidth;
+      }
+    }
+
     // Define the paragraph rect (using advances, not selected rects)
     // Source rect must take in account the scaling
     final sourceRect = ui.Rect.fromLTWH(
       0,
       0,
-      layout.paragraph.longestLine * devicePixelRatio,
-      layout.paragraph.height * devicePixelRatio,
+      (maxWidth * devicePixelRatio).ceilToDouble(),
+      (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final zeroRect = ui.Rect.fromLTWH(0, 0, layout.paragraph.longestLine, layout.paragraph.height);
+    final zeroRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      maxWidth.ceilToDouble(),
+      layout.paragraph.height.ceilToDouble(),
+    );
     final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
     WebParagraphDebug.log(

@@ -34,8 +34,7 @@ Future<void> testMain() async {
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 100));
-    paragraph.fillAsSingleImage(canvas);
-    paragraph.paintAsSingleImage(canvas, const Offset(100, 100));
+    paragraph.paint(canvas, const Offset(100, 100));
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_single_image.png', region: region);

@@ -268,6 +268,7 @@ class Dart2WasmCompiler extends TestCompiler {
 
       '-DFLUTTER_WEB_USE_SKIA=${renderer == Renderer.canvaskit}',
       '-DFLUTTER_WEB_USE_SKWASM=${renderer == Renderer.skwasm}',
+      '-DFLUTTER_WEB_ENABLE_PROFILING=true',
 
       if (renderer == Renderer.skwasm) ...<String>[
         '--import-shared-memory',

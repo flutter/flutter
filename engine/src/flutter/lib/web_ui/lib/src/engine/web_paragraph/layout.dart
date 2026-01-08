@@ -22,6 +22,7 @@ class TextLayout {
   late final AllCodeUnitFlags codeUnitFlags;
   final bidiRuns = <BidiRun>[];
   final lines = <TextLine>[];
+  CkImage? imageCache;
 
   final allClusters = <WebCluster>[];
   late final _mapping = _TextClusterMapping(paragraph.text.length + 1, allClusters);
@@ -689,9 +690,13 @@ class TextLayout {
 
       // We found the line that contains the offset; let's go through all the visual blocks to find the position
       for (final LineBlock block in line.visualBlocks) {
-        final ui.Rect blockRect = block.advance
-            .translate(line.advance.left + line.formattingShift, line.advance.top)
-            .inflate(epsilon);
+        // Calculate block rectangle with line height
+        final ui.Rect blockRect = ui.Rect.fromLTWH(
+          block.advance.left,
+          line.advance.top,
+          block.advance.width,
+          line.advance.height,
+        ).translate(line.advance.left + line.formattingShift, 0).inflate(epsilon);
         if (blockRect.right < offset.dx) {
           return ui.TextPosition(
             offset: line.textClusterRange.end - 1,
@@ -709,18 +714,19 @@ class TextLayout {
         final step = block.isLtr ? 1 : -1;
         for (var i = start; i != end; i += step) {
           final WebCluster cluster = allClusters[i];
-          final ui.Rect rect = cluster.advance
-              .translate(
-                // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
-                //                to come up with a better API and probably not use `cluster.advance` directly.
-                //                See other TODO above [WebCluster.bounds].
-                line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
-                line.advance.top + line.fontBoundingBoxAscent,
-              )
-              .inflate(epsilon);
-          WebParagraphDebug.log('test cluster: $rect vs $offset');
-          if (rect.contains(offset)) {
-            if (offset.dx - rect.left <= rect.right - offset.dx) {
+          // Calculate cluster rectangle with line height
+          final ui.Rect clusterRect = ui.Rect.fromLTWH(
+            cluster.advance.left,
+            line.advance.top,
+            cluster.advance.width,
+            line.advance.height,
+            // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
+            //                to come up with a better API and probably not use `cluster.advance` directly.
+            //                See other TODO above [WebCluster.bounds].
+          ).translate(line.advance.left + line.formattingShift + block.spanShiftFromLineStart, 0).inflate(epsilon);
+          WebParagraphDebug.log('test cluster: $clusterRect vs $offset');
+          if (clusterRect.contains(offset)) {
+            if (offset.dx - clusterRect.left <= clusterRect.right - offset.dx) {
               return ui.TextPosition(offset: cluster.start);
             } else if (cluster.end == paragraph.text.length) {
               return ui.TextPosition(offset: cluster.end - 1);
@@ -730,6 +736,37 @@ class TextLayout {
           }
         }
         // We found the block but not the cluster? How could that happen
+        {
+          final int start = block.isLtr ? block.clusterRange.start : block.clusterRange.end - 1;
+          final int end = block.isLtr ? block.clusterRange.end : block.clusterRange.start - 1;
+          final step = block.isLtr ? 1 : -1;
+          WebParagraphDebug.apiTrace(
+            'Could not find $offset cluster in block $block[$start:$end] $blockRect',
+          );
+
+          for (var i = start; i != end; i += step) {
+            final WebCluster cluster = allClusters[i];
+            // Calculate cluster rectangle with line height
+            final ui.Rect clusterRect =
+                ui.Rect.fromLTWH(
+                      cluster.advance.left,
+                      line.advance.top,
+                      cluster.advance.width,
+                      line.advance.height,
+                      // TODO(mdebbar): Using `block.spanShiftFromLineStart` here is unfortunate. We should try
+                      //                to come up with a better API and probably not use `cluster.advance` directly.
+                      //                See other TODO above [WebCluster.bounds].
+                    )
+                    .translate(
+                      line.advance.left + line.formattingShift + block.spanShiftFromLineStart,
+                      0,
+                    )
+                    .inflate(epsilon);
+            WebParagraphDebug.apiTrace(
+              'test cluster[$i]: ${cluster.advance} + ${line.advance.top} + ${line.fontBoundingBoxAscent} = $clusterRect vs $offset',
+            );
+          }
+        }
         assert(false);
       }
 

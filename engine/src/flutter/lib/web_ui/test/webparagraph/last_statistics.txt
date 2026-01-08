@@ -1,0 +1,59 @@
+small: layout=10, paint=1000
+medium: layout=10, paint=500
+large: layout=10, paint=100
+bool useCPUTextLayout = true;
+bool withCacheId = true;
+bool useSmallCanvas = true;
+bool singleImagePaint = true;
+
+SKPARAGRAPH
+===========
+00:05 +0: Build/Layout/Paint small text                                                                                                                                            
+build.first: 13ms
+layout.first: 11ms
+build: 1ms
+layout: 0ms
+paint.first: 161ms
+paint: 4105ms
+
+00:10 +1: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 0ms
+paint.first: 43ms
+paint: 4210ms
+
+00:16 +2: Build/Layout/Paint large text                                                                                                                                            
+build.first: 2ms
+layout.first: 2ms
+build: 2ms
+layout: 1ms
+paint.first: 67ms
+paint: 5775ms
+
+WEBPARAGRAPH
+============
+00:05 +0: Build/Layout/Paint small text                                                                                                                                            
+build.first: 0ms
+layout.first: 13ms
+build: 0ms
+layout: 2ms
+paint.first: 162ms
+paint: 4104ms
+
+00:10 +1: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+paint.first: 51ms
+paint: 4413ms
+
+00:17 +2: Build/Layout/Paint large text                                                                                                                                            
+build.first: 0ms
+layout.first: 10ms
+build: 0ms
+layout: 54ms
+paint.first: 564ms
+paint: 5595ms

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -14,7 +15,13 @@ const String kPlaceholderChar = '\uFFFC';
 
 // Performance flags for testing.
 bool useCPUTextLayout = true;
-bool withCacheId = false;
+bool withCacheId = true;
+bool useSmallCanvas = true;
+bool singleImagePaint = true;
+bool printCounts = false;
+
+const int paintWidth = 1000;
+const int paintHeight = 1000;
 
 /// A single canvas2d context to use for text layout.
 @visibleForTesting
@@ -840,7 +847,9 @@ class WebStrutStyle implements ui.StrutStyle {
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this.paragraphStyle, this.spans, this.text);
+  WebParagraph(this.paragraphStyle, this.spans, this.text) : paragraphId = paragraphCount + 1 {
+    paragraphCount += 1;
+  }
 
   final WebParagraphStyle paragraphStyle;
   final List<ParagraphSpan> spans;
@@ -877,11 +886,14 @@ class WebParagraph implements ui.Paragraph {
 
   List<TextLine> get lines => _layout.lines;
 
+  static int paragraphCount = 0;
+  int paragraphId;
+  int layoutCount = 0;
+  int paintCount = 0;
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() {
-    final List<ui.TextBox> results = timeAction('query.getBoxesForPlaceholders', () {
-      return _layout.getBoxesForPlaceholders();
-    });
+    final List<ui.TextBox> results = _layout.getBoxesForPlaceholders();
     WebParagraphDebug.apiTrace('getBoxesForPlaceholders, ${results.length} boxes: $results');
     return results;
   }
@@ -893,9 +905,12 @@ class WebParagraph implements ui.Paragraph {
     ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
     ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
-    final List<ui.TextBox> result = timeAction('query.getBoxesForRange', () {
-      return _layout.getBoxesForRange(start, end, boxHeightStyle, boxWidthStyle);
-    });
+    final List<ui.TextBox> result = _layout.getBoxesForRange(
+      start,
+      end,
+      boxHeightStyle,
+      boxWidthStyle,
+    );
 
     WebParagraphDebug.apiTrace(
       'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
@@ -905,9 +920,9 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    final ui.TextPosition result = timeAction('query.getPositionForOffset', () {
-      return text.isEmpty ? const ui.TextPosition(offset: 0) : _layout.getPositionForOffset(offset);
-    });
+    final ui.TextPosition result = text.isEmpty
+        ? const ui.TextPosition(offset: 0)
+        : _layout.getPositionForOffset(offset);
     WebParagraphDebug.apiTrace('getPositionForOffset("$text", $offset): $result');
     return result;
   }
@@ -916,9 +931,7 @@ class WebParagraph implements ui.Paragraph {
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final ui.TextPosition position = getPositionForOffset(offset);
     assert(position.offset < text.length || text.isEmpty);
-    final ui.GlyphInfo? result = timeAction('query.getClosestGlyphInfoForOffset', () {
-      return getGlyphInfoAt(position.offset);
-    });
+    final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
     if (result == null) {
       WebParagraphDebug.apiTrace(
         'getClosestGlyphInfoForOffset("$text", ${offset.dx}, ${offset.dy}): '
@@ -942,9 +955,7 @@ class WebParagraph implements ui.Paragraph {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
       return null;
     }
-    final ui.GlyphInfo? result = timeAction('query.getGlyphInfoAt', () {
-      return _layout.getGlyphInfoAt(codeUnitOffset);
-    });
+    final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
     WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): $result');
     return result;
   }
@@ -961,16 +972,18 @@ class WebParagraph implements ui.Paragraph {
     if (codepointPosition >= text.length) {
       return ui.TextRange(start: text.length, end: text.length);
     }
-    final ui.TextRange result = timeAction('query.getWordBoundary', () {
-      return _layout.getWordBoundary(codepointPosition);
-    });
+    final ui.TextRange result = _layout.getWordBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getWordBoundary("$text", $position): $result');
     return result;
   }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
+    layoutCount += 1;
     _layout.performLayout(constraints.width);
+    if (printCounts) {
+      print('layout[$paragraphId]: $layoutCount "$text" ${constraints.width}');
+    }
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
       'width=${width.toStringAsFixed(4)} height=${height.toStringAsFixed(4)} '
@@ -985,26 +998,47 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final TextLine line in _layout.lines) {
-      _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+    paintCount += 1;
+
+    if (printCounts) {
+      print(
+        'paint[$paragraphId]: $layoutCount $paintCount "$text" ${_layout.imageCache != null ? 'with cache ' : 'no cache'}',
+      );
+    }
+
+    if (!useSmallCanvas) {
+      _paint.painter.resizePaintCanvas(
+        ui.window.devicePixelRatio,
+        paintWidth as double,
+        paintHeight as double,
+      );
+    }
+    if (singleImagePaint) {
+      final (ui.Rect sourceRect, ui.Rect targetRect) = _paint.calculateParagraph(
+        _layout,
+        offset,
+        ui.window.devicePixelRatio,
+      );
+      _paint.fillAsSingleImage(canvas, _layout, sourceRect, offset);
+      _paint.paintAsSingleImage(canvas, _layout, sourceRect, targetRect, offset);
+    } else {
+      for (final TextLine line in _layout.lines) {
+        _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
+      }
     }
   }
 
   void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
+    if (!useSmallCanvas) {
+      _paint.painter.resizePaintCanvas(
+        ui.window.devicePixelRatio,
+        paintWidth as double,
+        paintHeight as double,
+      );
+    }
     for (final TextLine line in _layout.lines) {
       _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }
-  }
-
-  void fillAsSingleImage(ui.Canvas canvas) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    _paint.fillAsSingleImage(canvas, _layout);
-  }
-
-  void paintAsSingleImage(ui.Canvas canvas, ui.Offset offset) {
-    _paint.paintAsSingleImage(canvas, _layout, offset);
   }
 
   @override
@@ -1013,9 +1047,7 @@ class WebParagraph implements ui.Paragraph {
       ui.TextAffinity.upstream => position.offset - 1,
       ui.TextAffinity.downstream => position.offset,
     };
-    final ui.TextRange result = timeAction('query.getLineBoundary', () {
-      return _layout.getLineBoundary(codepointPosition);
-    });
+    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
     WebParagraphDebug.apiTrace('getLineBoundary("$text", $position): $result');
     return result;
   }
@@ -1023,11 +1055,9 @@ class WebParagraph implements ui.Paragraph {
   @override
   List<ui.LineMetrics> computeLineMetrics() {
     final metrics = <ui.LineMetrics>[];
-    timeAction('query.computeLineMetrics', () {
-      for (final TextLine line in _layout.lines) {
-        metrics.add(line.getMetrics());
-      }
-    });
+    for (final TextLine line in _layout.lines) {
+      metrics.add(line.getMetrics());
+    }
     WebParagraphDebug.apiTrace('computeLineMetrics("$text": $metrics');
     return metrics;
   }
@@ -1037,10 +1067,7 @@ class WebParagraph implements ui.Paragraph {
     if (lineNumber < 0 || lineNumber >= _layout.lines.length) {
       return null;
     }
-    final ui.LineMetrics results = timeAction('query.getLineMetricsAt', () {
-      return _layout.lines[lineNumber].getMetrics();
-    });
-    return results;
+    return _layout.lines[lineNumber].getMetrics();
   }
 
   @override
@@ -1059,21 +1086,19 @@ class WebParagraph implements ui.Paragraph {
       return null;
     }
 
-    final int? result = timeAction('query.getLineNumberAt', () {
-      for (final TextLine line in _layout.lines) {
-        if (line.allLineTextRange.isBefore(codeUnitOffset)) {
-          continue;
-        }
-        if (line.allLineTextRange.isAfter(codeUnitOffset)) {
-          // We haven't reached the offset yet, keep going.
-          return null;
-        }
-
-        WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
-        return line.lineNumber;
+    int? result;
+    for (final TextLine line in _layout.lines) {
+      if (line.allLineTextRange.isBefore(codeUnitOffset)) {
+        // We haven't reached the offset yet, keep going.
+        continue;
       }
-      return null;
-    });
+      if (line.allLineTextRange.isAfter(codeUnitOffset)) {
+        break;
+      }
+
+      WebParagraphDebug.apiTrace('getLineNumberAt("$text", $codeUnitOffset): ${line.lineNumber}');
+      result = line.lineNumber;
+    }
 
     if (result == null) {
       assert(
