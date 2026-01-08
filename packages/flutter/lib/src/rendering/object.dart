@@ -1498,12 +1498,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       // print('flush nodesToProcessGeometry $nodesToProcessGeometry');
       for (final node in nodesToProcessGeometry) {
-        if (node._semantics.geometryDirty ||
-            node._semantics._children.every((child) => !child.geometryDirty)) {
+        for (final _RenderObjectSemantics child in node._semantics._children) {
+          child.geometry = null;
+        }
+      }
+      for (final node in nodesToProcessGeometry) {
+        _RenderObjectSemantics target = node._semantics;
+        while (target.geometryDirty || !target.shouldFormSemanticsNode) {
+          target = target.parent!;
+        }
+        if (target._children.every((child) => !child.geometryDirty)) {
+          // print('skip $node, _children ${target._children}');
           continue;
         }
-        // print('process geometry for $node');
-        node._semantics.ensureGeometry();
+        // print('process geometry for $target');
+        target.ensureGeometry();
       }
       // if (nodesToProcessGeometry.isNotEmpty) {
       //   debugDumpRenderObjectSemanticsTree();
@@ -5579,17 +5588,17 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   void markGeometryDirty() {
     // Geometry of semantics nodes below this render object tree will be inaccurate.
-    for (final _RenderObjectSemantics child in _children) {
-      child.geometry = null;
-    }
+    // for (final _RenderObjectSemantics child in _children) {
+    //   child.geometry = null;
+    // }
 
     // Finds parent that forms a semantics node and recalculate geometry from there.
-    var target = this;
-    while (!target.parentDataDirty && !target.shouldFormSemanticsNode) {
-      target = target.parent!;
-    }
+    // var target = this;
+    // while (!target.parentDataDirty && !target.shouldFormSemanticsNode) {
+    //   target = target.parent!;
+    // }
 
-    renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(target.renderObject);
+    renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(renderObject);
   }
 
   /// Updates the [parentData] for the [_RenderObjectSemantics]s in the
@@ -5883,13 +5892,16 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       geometry = _SemanticsGeometry.root(renderObject.semanticBounds);
     }
     assert(geometry != null);
-    _updateChildGeometry();
+    _updateChildGeometry(onlyDirtyChildren: true);
   }
 
-  void _updateChildGeometry() {
+  void _updateChildGeometry({bool onlyDirtyChildren = false}) {
     assert(geometry != null);
     final _SemanticsGeometry parentGeometry = geometry!;
     for (final _RenderObjectSemantics child in _children) {
+      if (onlyDirtyChildren && !child.geometryDirty) {
+        continue;
+      }
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: parentGeometry.paintClipRect,
         parentSemanticsClipRect: parentGeometry.semanticsClipRect,
@@ -6128,9 +6140,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the semantics geometry of the cached semantics node.
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
-    if (geometry == null) {
-      debugDumpRenderObjectSemanticsTree();
-    }
+    // if (geometry == null) {
+    //   print('geometry is null for $this');
+    //   debugDumpRenderObjectSemanticsTree();
+    // }
     final _SemanticsGeometry nodeGeometry = geometry!;
     final bool isSemanticsHidden =
         configProvider.original.isHidden ||
