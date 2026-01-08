@@ -226,8 +226,16 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// See also:
 ///
 ///   * [Tooltip], a Material-themed [RawTooltip].
-// TODO(victorsanni): https://github.com/flutter/flutter/issues/180318
-// Add an example of how to call ensureTooltipVisible.
+/// 
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how [RowTooltip] can be shown manually with [TooltipTriggerMode.manual]
+/// by calling the [TooltipState.ensureTooltipVisible] function.
+///
+/// ** See code in examples/api/lib/material/raw_tooltip/raw_tooltip.0.dart **
+/// {@end-tool}
+///
 class RawTooltip extends StatefulWidget {
   /// Creates a raw tooltip.
   ///
