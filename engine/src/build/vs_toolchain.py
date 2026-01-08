@@ -169,11 +169,8 @@ def GetVisualStudioVersion():
   supported_versions_str = ', '.join('{} ({})'.format(v,k)
       for k,v in list(MSVS_VERSIONS.items()))
   available_versions = []
-  for version in supported_versions:
-    # Also look for the numeric version folder (e.g. "18")
-    search_versions = [version]
-    if version in MSVS_VERSIONS:
-        search_versions.append(MSVS_VERSIONS[version])
+  # Also look for the numeric version folder (e.g. "18")
+  search_versions = list(supported_versions) + list(MSVS_VERSIONS.values())
 
   for version in search_versions:
     for path in (
