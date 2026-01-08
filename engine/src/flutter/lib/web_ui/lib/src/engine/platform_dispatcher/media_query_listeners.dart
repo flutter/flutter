@@ -12,7 +12,6 @@ typedef MediaQueryMatchHandler = void Function(bool matches);
 /// This is used by the [EnginePlatformDispatcher] to detect some properties
 /// from the browser (light/dark mode or reduced motion)
 class MediaQueryManager {
-
   /// Detects dark mode.
   static const DARK_MODE = '(prefers-color-scheme: dark)';
 
@@ -41,7 +40,7 @@ class MediaQueryManager {
   /// and the [MediaQueryManager], without the browser having to dispatch real
   /// events.
   @visibleForTesting
-  void debugTriggerListener(String mediaQueryString, { required DomMediaQueryListEvent event }) {
+  void debugTriggerListener(String mediaQueryString, {required DomMediaQueryListEvent event}) {
     final _MediaQueryListeners? listeners = _listeners[mediaQueryString];
     assert(listeners != null, 'Cannot find listeners for $mediaQueryString');
     listeners!.trigger(event);
@@ -70,13 +69,11 @@ class MediaQueryManager {
     }.toJS;
 
     // Attach the listener
-    final _MediaQueryListeners listeners = _listeners
-        .putIfAbsent(mediaQueryString, () {
-          // Create a proper media query object
-          final DomEventTarget mediaQuery = _createMediaQuery(mediaQueryString);
-          return _MediaQueryListeners(mediaQuery);
-        })
-        ..addListener(mediaQueryListener);
+    final _MediaQueryListeners listeners = _listeners.putIfAbsent(mediaQueryString, () {
+      // Create a proper media query object
+      final DomEventTarget mediaQuery = _createMediaQuery(mediaQueryString);
+      return _MediaQueryListeners(mediaQuery);
+    })..addListener(mediaQueryListener);
 
     // Call onMatch with the immediate value of the media query
     onMatch(listeners.matches);

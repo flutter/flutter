@@ -11,7 +11,6 @@ import 'dom.dart';
 /// is handled by the [MediaQueryManager] object of the
 /// [EnginePlatformDispatcher]. See [_registerMediaQueryListeners].
 class HighContrastSupport {
-
   /// The singleton instance.
   static HighContrastSupport instance = HighContrastSupport();
 

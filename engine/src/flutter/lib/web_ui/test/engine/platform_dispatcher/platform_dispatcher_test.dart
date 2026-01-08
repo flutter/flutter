@@ -581,13 +581,15 @@ void testMain() {
       test('high contrast in accessibilityFeatures has the correct value', () {
         const String mediaQuery = MediaQueryManager.FORCED_COLORS;
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
         );
 
         expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
         );
 
@@ -597,13 +599,15 @@ void testMain() {
       test('configuration.platformBrightness (dark mode) has the correct value', () {
         const String mediaQuery = MediaQueryManager.DARK_MODE;
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
         );
 
         expect(dispatcher.configuration.platformBrightness, ui.Brightness.light);
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
         );
 
@@ -613,19 +617,37 @@ void testMain() {
       test('reduced motion (disable animations) has the correct value', () {
         const String mediaQuery = MediaQueryManager.REDUCED_MOTION;
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
         );
 
-        expect(dispatcher.accessibilityFeatures.reduceMotion, isFalse, reason: 'reduceMotion is wrong');
-        expect(dispatcher.accessibilityFeatures.disableAnimations, isFalse, reason: 'disableAnimations is wrong');
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isFalse,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isFalse,
+          reason: 'disableAnimations is wrong',
+        );
 
-        mediaQueries.debugTriggerListener(mediaQuery,
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
           event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
         );
 
-        expect(dispatcher.accessibilityFeatures.reduceMotion, isTrue, reason: 'reduceMotion is wrong');
-        expect(dispatcher.accessibilityFeatures.disableAnimations, isTrue, reason: 'disableAnimations is wrong');
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isTrue,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isTrue,
+          reason: 'disableAnimations is wrong',
+        );
       });
     });
 
