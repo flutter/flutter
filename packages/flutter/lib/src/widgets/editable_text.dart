@@ -3409,16 +3409,27 @@ class EditableTextState extends State<EditableText>
           ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
           : widget.style;
       if (_hasInputConnection) {
-        _textInputConnection!.setStyleWithMetrics(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-          letterSpacing: _style.letterSpacing,
-          wordSpacing: _style.wordSpacing,
-          lineHeight: renderEditable.preferredLineHeight,
-        );
+        // Schedule the style update after layout to ensure preferredLineHeight
+        // is computed with the new style.
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_hasInputConnection) {
+            return;
+          }
+          final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+          final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+          _textInputConnection!.setStyleWithMetrics(
+            fontFamily: _style.fontFamily,
+            fontSize: _style.fontSize,
+            fontWeight: _style.fontWeight,
+            textDirection: _textDirection,
+            textAlign: widget.textAlign,
+            letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+            wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+            // preferredLineHeight already includes lineHeightScaleFactor from
+            // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+            lineHeight: renderEditable.preferredLineHeight,
+          );
+        }, debugLabel: 'EditableText.setStyleWithMetrics');
       }
     }
 
@@ -3961,6 +3972,8 @@ class EditableTextState extends State<EditableText>
           : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
+      final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+      final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
       _textInputConnection!
         ..setStyleWithMetrics(
           fontFamily: _style.fontFamily,
@@ -3968,8 +3981,10 @@ class EditableTextState extends State<EditableText>
           fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
-          letterSpacing: _style.letterSpacing,
-          wordSpacing: _style.wordSpacing,
+          letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+          wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+          // preferredLineHeight already includes lineHeightScaleFactor from
+          // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
           lineHeight: renderEditable.preferredLineHeight,
         )
         ..setEditingState(localValue)
@@ -4033,6 +4048,8 @@ class EditableTextState extends State<EditableText>
         TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
+    final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
     newConnection
       ..show()
       ..setStyleWithMetrics(
@@ -4041,8 +4058,10 @@ class EditableTextState extends State<EditableText>
         fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
-        letterSpacing: _style.letterSpacing,
-        wordSpacing: _style.wordSpacing,
+        letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+        wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+        // preferredLineHeight already includes lineHeightScaleFactor from
+        // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
         lineHeight: renderEditable.preferredLineHeight,
       )
       ..setEditingState(_value);
