@@ -244,7 +244,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         abbr: 'r',
         help:
             'Set how to print test results. If unset, value will default to either compact or expanded.',
-        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
+        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent', 'summary'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
           'expanded':
@@ -255,6 +255,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
+          'summary':
+              'Like compact, but prints a list of all failed tests at the end for easy identification.',
         },
       )
       ..addOption(

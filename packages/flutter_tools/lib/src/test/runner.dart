@@ -21,6 +21,7 @@ import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
 import 'font_config_manager.dart';
+import 'summary_reporter.dart';
 import 'test_config.dart';
 import 'test_time_recorder.dart';
 import 'test_wrapper.dart';
@@ -70,11 +71,15 @@ interface class FlutterTestRunner {
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
 
+    // Check if we're using the summary reporter (needs JSON internally).
+    final useSummaryReporter = reporter == 'summary';
+
     // Compute the command-line arguments for package:test.
+    // When using summary reporter, we use JSON internally and transform the output.
     final testArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
       if (debuggingOptions.startPaused) '--pause-after-load',
-      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
+      if (machine || useSummaryReporter) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
       if (ignoreTimeouts) '--ignore-timeouts',
@@ -146,7 +151,19 @@ interface class FlutterTestRunner {
           crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
         );
       });
-      await testWrapper.main(testArgs);
+
+      if (useSummaryReporter) {
+        final summaryReporter = SummaryReporter(
+          supportsColor: globals.terminal.supportsColor,
+          stdout: globals.stdio.stdout,
+        );
+        await testWrapper.mainWithOutputCapture(
+          testArgs,
+          onOutputLine: summaryReporter.handleLine,
+        );
+      } else {
+        await testWrapper.main(testArgs);
+      }
       return exitCode;
     }
 
@@ -185,7 +202,19 @@ interface class FlutterTestRunner {
 
     try {
       globals.printTrace('running test package with arguments: $testArgs');
-      await testWrapper.main(testArgs);
+
+      if (useSummaryReporter) {
+        final summaryReporter = SummaryReporter(
+          supportsColor: globals.terminal.supportsColor,
+          stdout: globals.stdio.stdout,
+        );
+        await testWrapper.mainWithOutputCapture(
+          testArgs,
+          onOutputLine: summaryReporter.handleLine,
+        );
+      } else {
+        await testWrapper.main(testArgs);
+      }
 
       // test.main() sets dart:io's exitCode global.
       globals.printTrace('test package returned with exit code $exitCode');
@@ -656,10 +685,15 @@ class SpawnPlugin extends PlatformPlugin {
       'root_test_isolate_spawner.dill',
     );
 
+    // Check if we're using the summary reporter.
+    // Note: Summary reporter in lightweight engine mode is not yet supported,
+    // fall back to compact reporter.
+    final String? effectiveReporter = reporter == 'summary' ? 'compact' : reporter;
+
     // Compute the command-line arguments for package:test.
     final packageTestArgs = <String>[
       if (!globals.terminal.supportsColor) '--no-color',
-      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
+      if (machine) ...<String>['-r', 'json'] else if (effectiveReporter != null) ...<String>['-r', effectiveReporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
       if (ignoreTimeouts) '--ignore-timeouts',

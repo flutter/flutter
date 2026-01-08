@@ -1765,6 +1765,14 @@ class FakePackageTest implements TestWrapper {
   }
 
   @override
+  Future<void> mainWithOutputCapture(
+    List<String> args, {
+    required OutputLineCallback onOutputLine,
+  }) async {
+    lastArgs = args;
+  }
+
+  @override
   void registerPlatformPlugin(
     Iterable<Runtime> runtimes,
     FutureOr<PlatformPlugin> Function() platforms,
