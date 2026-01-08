@@ -262,6 +262,13 @@ void main() {
       flutterSdk.childFile('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
+      widgetPreviewScaffold = flutterSdk
+          .childDirectory('dev')
+          .childDirectory('integration_test')
+          .childDirectory('widget_preview_scaffold');
+      widgetPreviewScaffold.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kWidgetTestPubspecYaml);
       hookUserDefinesIntegrationTest = flutterSdk
           .childDirectory('dev')
           .childDirectory('integration_tests')
@@ -308,6 +315,14 @@ void main() {
         expect(
           pub.pubspecs[flutterTools.absolute.path]!.first.dependencies,
           (Pubspec.parse(kFlutterToolsPubspecYaml)
+                ..dependencies['unified_analytics'] = HostedDependency(
+                  version: VersionConstraint.parse('8.0.10'),
+                ))
+              .dependencies,
+        );
+        expect(
+          pub.pubspecs[widgetPreviewScaffold.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kWidgetTestPubspecYaml)
                 ..dependencies['unified_analytics'] = HostedDependency(
                   version: VersionConstraint.parse('8.0.10'),
                 ))
