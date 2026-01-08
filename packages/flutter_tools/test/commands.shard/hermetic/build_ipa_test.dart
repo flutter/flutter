@@ -138,9 +138,7 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
-  );
+  const xattrCommand = FakeCommand(command: <String>['xattr', '-cr', '/']);
 
   FakeCommand setUpXCResultCommand({
     String stdout = '',
