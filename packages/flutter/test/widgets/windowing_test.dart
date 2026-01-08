@@ -20,6 +20,7 @@ import 'package:flutter/src/widgets/_window.dart'
         WindowScope,
         WindowingOwner,
         createDefaultWindowingOwner;
+import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -127,6 +128,9 @@ class _StubTooltipWindowController extends TooltipWindowController {
 
   @override
   void setConstraints(BoxConstraints constraints) {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
 
   @override
   void destroy() {}

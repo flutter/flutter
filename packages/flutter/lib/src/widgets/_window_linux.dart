@@ -598,6 +598,7 @@ class WindowingOwnerLinux extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
