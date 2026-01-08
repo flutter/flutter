@@ -1279,7 +1279,7 @@ void main() {
     );
   });
 
-  group('containsSemantics', () {
+  group('isSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -1310,7 +1310,7 @@ void main() {
 
       expect(
         tester.getSemantics(find.byKey(key)),
-        containsSemantics(
+        isSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -1335,7 +1335,7 @@ void main() {
       expect(
         tester.getSemantics(find.byKey(key)),
         isNot(
-          containsSemantics(
+          isSemantics(
             label: 'foo',
             hint: 'bar',
             value: 'baz',
@@ -1430,7 +1430,7 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1535,7 +1535,7 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1683,7 +1683,7 @@ void main() {
 
       expect(
         emptyNode,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1696,7 +1696,7 @@ void main() {
 
       expect(
         fullNode,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1726,10 +1726,10 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           label: 'Foo',
           textDirection: TextDirection.ltr,
-          children: <Matcher>[containsSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
+          children: <Matcher>[isSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
         ),
       );
 
@@ -1750,7 +1750,7 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           label: 'Foo',
           validationResult: SemanticsValidationResult.valid,
           textDirection: TextDirection.ltr,
@@ -1772,9 +1772,9 @@ void main() {
         ),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
-      // It is important that validationResult is passed as null to containsSemantics,
+      // It is important that validationResult is passed as null to isSemantics,
       // because this is testing that null means "ignore the validation result value".
-      expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+      expect(node, isSemantics(label: 'Foo', textDirection: TextDirection.ltr));
 
       handle.dispose();
     });
@@ -1818,7 +1818,7 @@ void main() {
       );
       final node = _FakeSemanticsNode(data);
 
-      expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
+      expect(node, isSemantics(customActions: <CustomSemanticsAction>[action]));
     });
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
@@ -1852,7 +1852,7 @@ void main() {
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
         tester.getSemantics(find.byKey(key)),
-        containsSemantics(
+        isSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
