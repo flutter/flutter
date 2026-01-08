@@ -4,32 +4,31 @@
 
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
 
 import 'widget_preview_scaffold_change_detector.dart';
 
 void main() {
   test('Widget Preview Scaffold template change detection', () {
+    expect(
+      path.basename(Directory.current.path),
+      'widget_preview_scaffold',
+      reason:
+          'This test must be run from dev/integration_tests/widget_preview_scaffold/',
+    );
     if (WidgetPreviewScaffoldChangeDetector.checkForTemplateUpdates(
-      widgetPreviewScaffoldProject: Directory(
-        Platform.script.resolve('..').path,
-      ),
+      widgetPreviewScaffoldProject: Directory.current,
       widgetPreviewScaffoldTemplateDir: Directory(
-        Platform.script
-            .resolve(
-              path.join(
-                '..',
-                '..',
-                '..',
-                '..',
-                'packages',
-                'flutter_tools',
-                'templates',
-                'widget_preview_scaffold',
-              ),
-            )
-            .path,
+        path.join(
+          '..',
+          '..',
+          '..',
+          'packages',
+          'flutter_tools',
+          'templates',
+          'widget_preview_scaffold',
+        ),
       ),
     )) {
       stdout.writeln(
