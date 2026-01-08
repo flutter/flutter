@@ -1034,7 +1034,7 @@ public class FlutterActivity extends Activity
   public Lifecycle getLifecycle() {
     return lifecycle;
   }
-  
+
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when initializing

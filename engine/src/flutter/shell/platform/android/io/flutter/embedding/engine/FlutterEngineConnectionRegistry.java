@@ -329,7 +329,8 @@ import java.util.Set;
   private void attachToActivityInternal(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
 
-    // TODO(camsim99): Remove ability to set this flag via Intents. See https://github.com/flutter/flutter/issues/180686.
+    // TODO(camsim99): Remove ability to set this flag via Intents. See
+    // https://github.com/flutter/flutter/issues/180686.
     boolean useSoftwareRendering =
         activity.getIntent() != null
             ? activity
@@ -338,7 +339,8 @@ import java.util.Set;
                     FlutterShellArgsIntentUtils.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
             : false;
 
-    // The ability to set --enable-software-rendering via Intent will soon be removed. Warn developers
+    // The ability to set --enable-software-rendering via Intent will soon be removed. Warn
+    // developers
     // about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
     // https://github.com/flutter/flutter/issues/179274.
