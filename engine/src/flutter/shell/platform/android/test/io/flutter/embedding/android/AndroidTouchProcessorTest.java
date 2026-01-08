@@ -6,6 +6,7 @@ package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -426,8 +427,8 @@ public class AndroidTouchProcessorTest {
     final double verticalScaleFactor =
         ViewConfiguration.get(context).getScaledVerticalScrollFactor();
     // Zero verticalScaleFactor will cause this test to miss bugs.
-    assertEquals("zero horizontal scale factor", true, horizontalScaleFactor != 0);
-    assertEquals("zero vertical scale factor", true, verticalScaleFactor != 0);
+    assertTrue("zero horizontal scale factor", horizontalScaleFactor != 0);
+    assertTrue("zero vertical scale factor", verticalScaleFactor != 0);
 
     final MotionEvent event =
         mocker.mockEvent(
@@ -484,7 +485,7 @@ public class AndroidTouchProcessorTest {
             0.0f,
             0.0f);
     boolean handled = touchProcessor.onGenericMotionEvent(event, context);
-    assertEquals(true, handled);
+    assertTrue(handled);
 
     InOrder inOrder = inOrder(mockRenderer);
     inOrder
