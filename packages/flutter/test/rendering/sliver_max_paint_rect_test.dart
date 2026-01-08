@@ -23,7 +23,32 @@ void main() {
         scrollOffset: 0.0,
         precedingScrollExtent: 0.0,
         overlap: 0.0,
-        remainingPaintExtent: 100.0,
+        remainingPaintExtent: 300.0,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        viewportMainAxisExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        cacheOrigin: 0.0,
+      ),
+    );
+
+    expect(sliver.getMaxPaintRect(), const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+  });
+
+  test('RenderSliver.getMaxPaintRect AxisDirection.down and GrowthDirection.reverse', () {
+    final sliver = _TestRenderSliver(
+      const SliverGeometry(scrollExtent: 100.0, paintExtent: 100.0, maxPaintExtent: 100.0),
+    );
+
+    sliver.layout(
+      const SliverConstraints(
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.reverse,
+        userScrollDirection: ScrollDirection.idle,
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        overlap: 0.0,
+        remainingPaintExtent: 300.0,
         crossAxisExtent: 100.0,
         crossAxisDirection: AxisDirection.right,
         viewportMainAxisExtent: 100.0,
@@ -75,7 +100,7 @@ void main() {
         scrollOffset: 0.0,
         precedingScrollExtent: 0.0,
         overlap: 0.0,
-        remainingPaintExtent: 100.0,
+        remainingPaintExtent: 300.0,
         crossAxisExtent: 100.0,
         crossAxisDirection: AxisDirection.right,
         viewportMainAxisExtent: 100.0,
@@ -136,7 +161,7 @@ void main() {
         scrollOffset: 0.0,
         precedingScrollExtent: 0.0,
         overlap: 0.0,
-        remainingPaintExtent: 100.0,
+        remainingPaintExtent: 300.0,
         crossAxisExtent: 100.0,
         crossAxisDirection: AxisDirection.down,
         viewportMainAxisExtent: 100.0,
@@ -189,7 +214,7 @@ void main() {
         scrollOffset: 0.0,
         precedingScrollExtent: 0.0,
         overlap: 0.0,
-        remainingPaintExtent: 100.0,
+        remainingPaintExtent: 300.0,
         crossAxisExtent: 100.0,
         crossAxisDirection: AxisDirection.down,
         viewportMainAxisExtent: 100.0,
@@ -285,7 +310,7 @@ void main() {
         scrollOffset: 50.0,
         precedingScrollExtent: 0.0,
         overlap: 0.0,
-        remainingPaintExtent: 100.0,
+        remainingPaintExtent: 300.0,
         crossAxisExtent: 100.0,
         crossAxisDirection: AxisDirection.right,
         viewportMainAxisExtent: 100.0,
@@ -298,6 +323,62 @@ void main() {
     // = 50 + 150 + (-50) = 150.
     // Rect.fromLTWH(0.0, -50.0, 100.0, 150.0)
     expect(sliver.getMaxPaintRect(), const Rect.fromLTWH(0.0, -50.0, 100.0, 150.0));
+  });
+
+  test('RenderSliver.getMaxPaintRect with crossAxisExtent set (e.g. SliverCrossAxisGroup)', () {
+    final sliver = _TestRenderSliver(
+      const SliverGeometry(
+        scrollExtent: 100.0,
+        paintExtent: 100.0,
+        maxPaintExtent: 100.0,
+        crossAxisExtent: 50.0,
+      ),
+    );
+
+    sliver.layout(
+      const SliverConstraints(
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        userScrollDirection: ScrollDirection.idle,
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        overlap: 0.0,
+        remainingPaintExtent: 300.0,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        viewportMainAxisExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        cacheOrigin: 0.0,
+      ),
+    );
+
+    expect(sliver.getMaxPaintRect(), const Rect.fromLTWH(0.0, 0.0, 50.0, 100.0));
+  });
+
+  test('RenderSliver.getMaxPaintRect maxPaintExtent > remainingPaintExtent', () {
+    final sliver = _TestRenderSliver(
+      const SliverGeometry(scrollExtent: 200.0, paintExtent: 100.0, maxPaintExtent: 150.0),
+    );
+
+    sliver.layout(
+      const SliverConstraints(
+        axisDirection: AxisDirection.down,
+        growthDirection: GrowthDirection.forward,
+        userScrollDirection: ScrollDirection.idle,
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        overlap: 0.0,
+        remainingPaintExtent: 100.0,
+        crossAxisExtent: 100.0,
+        crossAxisDirection: AxisDirection.right,
+        viewportMainAxisExtent: 100.0,
+        remainingCacheExtent: 100.0,
+        cacheOrigin: 0.0,
+      ),
+    );
+
+    // getMaxPaintRect should use maxPaintExtent (150.0) regardless of remainingPaintExtent (100.0).
+    expect(sliver.getMaxPaintRect(), const Rect.fromLTWH(0.0, 0.0, 100.0, 150.0));
   });
 }
 

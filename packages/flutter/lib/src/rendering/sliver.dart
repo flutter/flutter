@@ -1736,10 +1736,15 @@ abstract class RenderSliver extends RenderObject {
   }
 
   /// Returns the [Rect] that covers the total paint extent of the sliver.
+  ///
+  /// [Rect] is expressed in the [RenderSliver]'s local coordinate system, which
+  /// is axis-aligned with the [PaintingContext]'s canvas. The coordinate
+  /// system's origin (0,0) corresponds to the `offset` argument passed to the
+  /// [paint] method.
   @protected
   Rect getMaxPaintRect() {
     final SliverGeometry? sliverGeometry = geometry;
-    if (sliverGeometry == null) {
+    if (sliverGeometry == null || sliverGeometry == SliverGeometry.zero) {
       return Rect.zero;
     }
 
@@ -1749,26 +1754,18 @@ abstract class RenderSliver extends RenderObject {
           constraints.scrollOffset + sliverGeometry.cacheExtent + constraints.cacheOrigin;
     }
     final double paintExtent = sliverGeometry.paintExtent;
-    // If sliver is pinned, the scroll offset is sticked to the edge.
-    final double clampedScrollOffset = clampDouble(
+    // To ensure the computed [Rect] remains visible when pinned, the leading offset is capped
+    // at the sliver's `scrollExtent - maxScrollObstructionExtent`.
+    final double leadingOffset = clampDouble(
       constraints.scrollOffset,
       0.0,
       sliverGeometry.scrollExtent - sliverGeometry.maxScrollObstructionExtent,
     );
+    final double crossAxisExtent = sliverGeometry.crossAxisExtent ?? constraints.crossAxisExtent;
 
     final Rect rect = switch (constraints.axis) {
-      Axis.horizontal => Rect.fromLTWH(
-        -clampedScrollOffset,
-        0.0,
-        maxPaintExtent,
-        constraints.crossAxisExtent,
-      ),
-      Axis.vertical => Rect.fromLTWH(
-        0.0,
-        -clampedScrollOffset,
-        constraints.crossAxisExtent,
-        maxPaintExtent,
-      ),
+      Axis.horizontal => Rect.fromLTWH(-leadingOffset, 0.0, maxPaintExtent, crossAxisExtent),
+      Axis.vertical => Rect.fromLTWH(0.0, -leadingOffset, crossAxisExtent, maxPaintExtent),
     };
 
     return switch (applyGrowthDirectionToAxisDirection(
