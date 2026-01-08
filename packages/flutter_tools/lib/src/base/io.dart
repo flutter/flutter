@@ -100,6 +100,7 @@ export 'dart:io'
         Stdin,
         StdinException,
         Stdout,
+        StdoutException,
         WebSocket,
         WebSocketException,
         WebSocketTransformer,
