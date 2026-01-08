@@ -767,6 +767,7 @@ class Typography with Diagnosticable {
 
   static const List<String> _helsinkiFontFallbacks = <String>[
     'Ubuntu',
+    'Adwaita Sans',
     'Cantarell',
     'DejaVu Sans',
     'Liberation Sans',

@@ -153,6 +153,18 @@ class AndroidRunOutputTest extends RunOutputTask {
 
     return TaskResult.success(null);
   }
+
+  @override
+  bool isExpectedStderr(String line) {
+    // Gradle sometimes "terminates" unexpectedly when starting the daemon. This isn't actually an
+    // error and the build completes successfully.
+    //
+    // See https://github.com/flutter/flutter/issues/177371
+    return {
+      'e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:',
+      '1. Kotlin compile daemon is ready',
+    }.contains(line.trim());
+  }
 }
 
 class WindowsRunOutputTest extends DesktopRunOutputTest {

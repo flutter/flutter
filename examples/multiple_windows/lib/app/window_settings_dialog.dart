@@ -44,8 +44,12 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     _regularWidthController.text = widget.settings.regularSize.width.toString();
     _regularHeightController.text = widget.settings.regularSize.height
         .toString();
+    _regularWidthController.addListener(_updateRegularSize);
+    _regularHeightController.addListener(_updateRegularSize);
     _dialogWidthController.text = widget.settings.dialogSize.width.toString();
     _dialogHeightController.text = widget.settings.dialogSize.height.toString();
+    _dialogWidthController.addListener(_updateDialogSize);
+    _dialogHeightController.addListener(_updateDialogSize);
   }
 
   @override
@@ -103,24 +107,43 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: TextButton(
             onPressed: () {
-              widget.settings.regularSize = Size(
-                double.tryParse(_regularWidthController.text) ??
-                    widget.settings.regularSize.width,
-                double.tryParse(_regularHeightController.text) ??
-                    widget.settings.regularSize.height,
-              );
-              widget.settings.dialogSize = Size(
-                double.tryParse(_dialogWidthController.text) ??
-                    widget.settings.dialogSize.width,
-                double.tryParse(_dialogHeightController.text) ??
-                    widget.settings.dialogSize.height,
-              );
               widget.onClose();
             },
-            child: const Text('Apply'),
+            child: const Text('Close'),
           ),
         ),
       ],
     );
+  }
+
+  void _updateRegularSize() {
+    widget.settings.regularSize = Size(
+      double.tryParse(_regularWidthController.text) ??
+          widget.settings.regularSize.width,
+      double.tryParse(_regularHeightController.text) ??
+          widget.settings.regularSize.height,
+    );
+  }
+
+  void _updateDialogSize() {
+    widget.settings.dialogSize = Size(
+      double.tryParse(_dialogWidthController.text) ??
+          widget.settings.dialogSize.width,
+      double.tryParse(_dialogHeightController.text) ??
+          widget.settings.dialogSize.height,
+    );
+  }
+
+  @override
+  void dispose() {
+    _regularWidthController.removeListener(_updateRegularSize);
+    _regularHeightController.removeListener(_updateRegularSize);
+    _dialogWidthController.removeListener(_updateDialogSize);
+    _dialogHeightController.removeListener(_updateDialogSize);
+    _regularWidthController.dispose();
+    _regularHeightController.dispose();
+    _dialogWidthController.dispose();
+    _dialogHeightController.dispose();
+    super.dispose();
   }
 }

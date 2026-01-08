@@ -212,6 +212,7 @@ executable("flutter_windows_unittests") {
   # Common Windows test sources.
   sources = [
     "accessibility_bridge_windows_unittests.cc",
+    "accessibility_plugin_unittests.cc",
     "compositor_opengl_unittests.cc",
     "compositor_software_unittests.cc",
     "cursor_handler_unittests.cc",

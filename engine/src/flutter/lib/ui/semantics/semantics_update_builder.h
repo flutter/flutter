@@ -73,7 +73,9 @@ class SemanticsUpdateBuilder
       int validationResult,
       int hitTestBehavior,
       int inputType,
-      std::string locale);
+      std::string locale,
+      std::string minValue,
+      std::string maxValue);
 
   void updateCustomAction(int id,
                           std::string label,

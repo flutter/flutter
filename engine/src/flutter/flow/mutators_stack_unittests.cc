@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/flow/embedded_views.h"
 #include "gtest/gtest.h"
@@ -96,6 +97,43 @@ TEST(MutatorsStack, PushOpacity) {
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::kOpacity);
   ASSERT_TRUE(iter->get()->GetAlpha() == 240);
+}
+
+TEST(MutatorsStack, PushPlatformViewClipRect) {
+  MutatorsStack stack;
+  auto rect = DlRect();
+  stack.PushPlatformViewClipRect(rect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRect);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRect().rect == rect);
+}
+
+TEST(MutatorsStack, PushPlatformViewClipRRect) {
+  MutatorsStack stack;
+  auto rrect = DlRoundRect();
+  stack.PushPlatformViewClipRRect(rrect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipRRect);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRRect().rrect == rrect);
+}
+
+TEST(MutatorsStack, PushPlatformViewClipRSuperellipse) {
+  MutatorsStack stack;
+  auto rse = DlRoundSuperellipse();
+  stack.PushPlatformViewClipRSuperellipse(rse);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() ==
+              MutatorType::kBackdropClipRSuperellipse);
+  ASSERT_TRUE(iter->get()->GetBackdropClipRSuperellipse().rse == rse);
+}
+
+TEST(MutatorsStack, PushPlatformViewClipPath) {
+  MutatorsStack stack;
+  auto path = DlPath();
+  stack.PushPlatformViewClipPath(path);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::kBackdropClipPath);
+  ASSERT_TRUE(iter->get()->GetBackdropClipPath().path == path);
 }
 
 TEST(MutatorsStack, PushBackdropFilter) {
