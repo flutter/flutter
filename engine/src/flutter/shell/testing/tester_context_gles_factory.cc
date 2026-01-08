@@ -47,6 +47,18 @@ EGLDisplay CreateSwangleDisplay() {
     return EGL_NO_DISPLAY;
   }
 
+  if (!HasExtension(extensions, "EGL_ANGLE_platform_angle_vulkan")) {
+    FML_LOG(ERROR) << "EGL_ANGLE_platform_angle_vulkan not supported.";
+    return EGL_NO_DISPLAY;
+  }
+
+  if (!HasExtension(extensions,
+                    "EGL_ANGLE_platform_angle_device_type_swiftshader")) {
+    FML_LOG(ERROR)
+        << "EGL_ANGLE_platform_angle_device_type_swiftshader not supported.";
+    return EGL_NO_DISPLAY;
+  }
+
   PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display_EXT =
       reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
           eglGetProcAddress("eglGetPlatformDisplayEXT"));
@@ -62,6 +74,8 @@ EGLDisplay CreateSwangleDisplay() {
       EGL_PLATFORM_ANGLE_TYPE_VULKAN_ANGLE,
       EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
       EGL_PLATFORM_ANGLE_DEVICE_TYPE_SWIFTSHADER_ANGLE,
+      EGL_PLATFORM_ANGLE_NATIVE_PLATFORM_TYPE_ANGLE,
+      EGL_PLATFORM_VULKAN_DISPLAY_MODE_HEADLESS_ANGLE,
       EGL_NONE,
   };
 
