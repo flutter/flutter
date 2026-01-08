@@ -6,6 +6,15 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'widget_test_route_fixtures.dart' show TestPageRouteBuilder;
+
+Widget buildWidgetsApp(Widget child) {
+  return WidgetsApp(
+    color: const Color(0xFFFFFFFF),
+    onGenerateRoute: (RouteSettings settings) => TestPageRouteBuilder(child: child),
+  );
+}
+
 /// A small set of colors for widget tests, inspired by the original Material 2 primary colors.
 @visibleForTesting
 const List<Color> genericWidgetTestColors = [

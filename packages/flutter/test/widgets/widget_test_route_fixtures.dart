@@ -6,13 +6,6 @@
 
 import 'package:flutter/widgets.dart';
 
-Widget buildWidgetsApp(Widget child) {
-  return WidgetsApp(
-    color: const Color(0xFFFFFFFF),
-    onGenerateRoute: (RouteSettings settings) => TestPageRouteBuilder(child: child),
-  );
-}
-
 @visibleForTesting
 class TestPageRoute<T> extends PageRoute<T> {
   TestPageRoute({

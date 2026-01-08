@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'widget_test_fixtures.dart';
-import 'widget_test_route_fixtures.dart';
 
 void main() {
   const blueColor = Color(0xFF2196F3);
