@@ -2633,9 +2633,6 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
     static float logarithm_of_ratio = 1.5;  // ratio = size / corner_radius
 
     float ratio = std::exp(logarithm_of_ratio);
-    constexpr size_t kMaxRatioLabelLength = 20;
-    char ratio_string[kMaxRatioLabelLength];
-    snprintf(ratio_string, kMaxRatioLabelLength, "%.2g", ratio);
 
     float rect_size = corner_radius * ratio;
     Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
@@ -2648,7 +2645,7 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     {
       ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
-      ImGui::LabelText("Ratio", "%s", ratio_string);
+      ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
       ImGui::Text("  where Ratio = RectSize / CornerRadius");
     }
     ImGui::End();
@@ -2690,11 +2687,12 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
       success = success && entity.Render(context, pass);
     }
 
+    // Draw a ruler to show the length in portion of rect size.
     auto screen_top_right =
         Matrix::MakeScale(GetContentScale()).Invert() * top_right;
     constexpr float font_size = 13.0f;
     for (int i = -1; i < 100; i++) {
-      float screen_offset = static_cast<float>(i) * 20.0f;
+      float screen_offset_y = static_cast<float>(i) * 20.0f;
       std::string label;
       if (i == -1) {
         label = "Ruler: (in portion of rect size)";
@@ -2702,13 +2700,18 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
         label = "- 0.0";
       } else {
         float portion_of_rect =
-            screen_offset * GetContentScale().y / scale / rect_size;
+            screen_offset_y * GetContentScale().y / scale / rect_size;
         label = std::format("- {:.2g}", portion_of_rect);
       }
       ImGui::GetBackgroundDrawList()->AddText(
-          NULL, font_size,
+          nullptr, font_size,
+          // Draw the ruler at around the flat part of the curve, which is
+          // somewhere to the left of the top right corner.
+          //
+          // Offset vertically by font_size/2 so that the hyphen aligns with the
+          // top of shape.
           {screen_top_right.x - 500,
-           screen_top_right.y + screen_offset - font_size / 2},
+           screen_top_right.y + screen_offset_y - font_size / 2},
           IM_COL32_WHITE, label.c_str());
     }
     return success;
