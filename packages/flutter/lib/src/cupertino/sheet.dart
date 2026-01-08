@@ -409,6 +409,10 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   void initState() {
     super.initState();
 
+    _stretchDragController = AnimationController(
+      duration: const Duration(microseconds: 1),
+      vsync: this,
+    );
     _setupAnimation();
   }
 
@@ -425,6 +429,7 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   @override
   void dispose() {
     _disposeCurve();
+    _stretchDragController.dispose();
     super.dispose();
   }
 
@@ -439,10 +444,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
       reverseCurve: Curves.easeInToLinear,
       parent: widget.secondaryRouteAnimation,
     );
-    _stretchDragController = AnimationController(
-      duration: const Duration(microseconds: 1),
-      vsync: this,
-    );
     // Maintain the same stretch distance (0.008 of screen height) regardless of custom topGap.
     const double stretchDistance = _kTopGapRatio - _kStretchedTopGapRatio;
     final double stretchedTopGap = widget.topGap - stretchDistance;
@@ -454,7 +455,6 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition>
   }
 
   void _disposeCurve() {
-    _stretchDragController.dispose();
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryPositionCurve = null;
