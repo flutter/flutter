@@ -25,8 +25,8 @@ public class FlutterShellArgsIntentUtilsTest {
     intent.putExtra("trace-skia-allowlist", "skia.a,skia.b");
 
     // Execute the behavior under test.
-    FlutterShellArgsIntentUtils args = FlutterShellArgsIntentUtils.fromIntent(intent);
-    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args.toArray()));
+    String[] args = FlutterShellArgsIntentUtils.getFlutterShellCommandLineArgs(intent);
+    HashSet<String> argValues = new HashSet<String>(Arrays.asList(args));
 
     // Verify results.
     assertEquals(2, argValues.size());
