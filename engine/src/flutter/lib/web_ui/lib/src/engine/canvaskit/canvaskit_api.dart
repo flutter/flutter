@@ -175,6 +175,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
 
   SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) =>
       _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+
+  external SkImage? MakeImageFromCanvasImageSource(JSAny src);
 }
 
 extension type CanvasKitModule(JSObject _) implements JSObject {

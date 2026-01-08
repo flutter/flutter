@@ -23,6 +23,9 @@ class CanvasKitRenderer extends Renderer {
   @override
   String get rendererTag => 'canvaskit';
 
+  /// Whether the renderer is using software rendering.
+  bool get isSoftware => _pictureToImageSurface.isSoftware;
+
   late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
       ? WebFontCollection()
       : SkiaFontCollection();
