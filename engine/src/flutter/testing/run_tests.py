@@ -937,7 +937,7 @@ def gather_dart_tests(
       else:
         _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
-          for impeller in ['', 'vulkan', 'metal']:
+          for impeller in ['', 'vulkan', 'metal', 'opengles']:
             yield gather_dart_test(
                 build_dir, dart_test_file,
                 FlutterTesterOptions(
@@ -955,7 +955,7 @@ def gather_dart_tests(
     else:
       _logger.info("Gathering dart test '%s'", dart_test_file)
       for multithreaded in [False, True]:
-        for impeller in ['', 'vulkan', 'metal']:
+        for impeller in ['', 'vulkan', 'metal', 'opengles']:
           yield gather_dart_test(
               build_dir, dart_test_file,
               FlutterTesterOptions(multithreaded=multithreaded, impeller_backend=impeller)
