@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
+import '../base/io.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 
@@ -20,7 +19,7 @@ class SummaryReporter {
   SummaryReporter({required this.supportsColor, required this.stdout});
 
   final bool supportsColor;
-  final io.Stdout stdout;
+  final Stdout stdout;
 
   final Map<int, _TestInfo> _tests = <int, _TestInfo>{};
   final Map<int, String> _suites = <int, String>{};
@@ -263,7 +262,7 @@ class SummaryReporter {
   int get _terminalWidth {
     try {
       return stdout.terminalColumns;
-    } on io.StdoutException {
+    } on StdoutException {
       return 80;
     }
   }

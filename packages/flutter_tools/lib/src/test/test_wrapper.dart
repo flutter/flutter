@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io' as io;
+import 'dart:convert'; // flutter_ignore: dart_convert_import
+import 'dart:io' as io; // flutter_ignore: dart_io_import
 
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:test_core/src/platform.dart' // ignore: implementation_imports

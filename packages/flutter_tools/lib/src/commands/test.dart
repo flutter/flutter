@@ -244,7 +244,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         abbr: 'r',
         help:
             'Set how to print test results. If unset, value will default to either compact or expanded.',
-        allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent', 'summary'],
+        allowed: <String>[
+          'compact',
+          'expanded',
+          'failures-only',
+          'github',
+          'json',
+          'silent',
+          'summary',
+        ],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
           'expanded':
