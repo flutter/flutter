@@ -58,8 +58,8 @@ Offset _intersection(Offset p1, double k1, Offset p2, double k2) {
     return (p1 + p2) / 2;
   }
 
-  final x = (k1 * p1.dx - k2 * p2.dx + p2.dy - p1.dy) / (k1 - k2);
-  final y = k1 * (x - p1.dx) + p1.dy;
+  final double x = (k1 * p1.dx - k2 * p2.dx + p2.dy - p1.dy) / (k1 - k2);
+  final double y = k1 * (x - p1.dx) + p1.dy;
 
   return Offset(x, y);
 }
@@ -168,9 +168,9 @@ class _RSuperellipseOctant {
 
   (_ConicParam, _ConicParam) _superellipseArcPoints() {
     final posA = Offset(0, seA);
-    final posJ = circleStart;
+    final Offset posJ = circleStart;
 
-    final (:weight1, :weight2, :yHOverA) = _superellipseBezierFactors(
+    final (:double weight1, :double weight2, :double yHOverA) = _superellipseBezierFactors(
       seN,
       posJ.dx / seA,
       posJ.dy / seA,
@@ -178,7 +178,7 @@ class _RSuperellipseOctant {
 
     final posH = Offset(math.pow(1 - math.pow(yHOverA, seN), 1 / seN) * seA, yHOverA * seA);
 
-    final kA = 0.0;
+    const kA = 0.0;
     final kJ = -math.pow(posJ.dx / posJ.dy, seN - 1) as double;
     final kH = -math.pow(posH.dx / posH.dy, seN - 1) as double;
 
@@ -250,7 +250,7 @@ class _RSuperellipseOctant {
         (1 - frac) * kPrecomputedVariables[left].$2 + frac * kPrecomputedVariables[left + 1].$2;
 
     final double yHProportion = math.sqrt(n);
-    const double yAOverA = 1.0;
+    const yAOverA = 1.0;
 
     return (
       weight1: factor1 * math.sqrt(n),
