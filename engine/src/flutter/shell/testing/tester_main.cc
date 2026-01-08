@@ -50,14 +50,10 @@ std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
   std::unique_ptr<TesterContext> tester_context;
 #if TESTER_ENABLE_VULKAN
   if (settings.enable_impeller) {
-    FML_LOG(IMPORTANT) << "Impeller context: Vulkan";
     tester_context =
         TesterContextVKFactory::Create(settings.enable_vulkan_validation);
   }
 #endif
-  if (!tester_context) {
-    FML_LOG(IMPORTANT) << "Impeller context: Skia";
-  }
   return tester_context;
 }
 }  // namespace
