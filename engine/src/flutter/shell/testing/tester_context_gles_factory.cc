@@ -90,23 +90,17 @@ EGLDisplay CreateSwangleDisplay() {
     return EGL_NO_DISPLAY;
   }
 
-  FML_LOG(INFO) << "EGL extensions: " << extensions;
-
   // We expect EGL_EXT_platform_base for Swangle.
   if (!HasExtension(extensions, "EGL_EXT_platform_base")) {
-    FML_LOG(ERROR) << "EGL_EXT_platform_base not supported.";
     return EGL_NO_DISPLAY;
   }
 
   if (!HasExtension(extensions, "EGL_ANGLE_platform_angle_vulkan")) {
-    FML_LOG(ERROR) << "EGL_ANGLE_platform_angle_vulkan not supported.";
     return EGL_NO_DISPLAY;
   }
 
   if (!HasExtension(extensions,
                     "EGL_ANGLE_platform_angle_device_type_swiftshader")) {
-    FML_LOG(ERROR)
-        << "EGL_ANGLE_platform_angle_device_type_swiftshader not supported.";
     return EGL_NO_DISPLAY;
   }
 
@@ -150,7 +144,7 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
   TesterGLESDelegate() {
     display_ = CreateSwangleDisplay();
     if (display_ == EGL_NO_DISPLAY) {
-      FML_LOG(ERROR) << "Could not create EGL display.";
+      // This will fail but it isn't necessary for the dart tests anyways.
       return;
     }
 
@@ -276,7 +270,7 @@ class TesterContextGLES : public TesterContext {
   bool Initialize() {
     delegate_ = std::make_unique<TesterGLESDelegate>();
     if (!delegate_->IsValid()) {
-      FML_LOG(ERROR) << "Could not create GLES delegate.";
+      // This will fail right now, but it isn't required for dart tests today.
       return false;
     }
 

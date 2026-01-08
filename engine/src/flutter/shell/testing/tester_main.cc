@@ -59,7 +59,6 @@ std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
 #if TESTER_ENABLE_OPENGLES
   if (settings.enable_impeller && !tester_context &&
       settings.requested_rendering_backend == "opengles") {
-    FML_LOG(IMPORTANT) << "Impeller context: OpenGLES";
     tester_context = TesterContextGLESFactory::Create();
   }
 #endif
