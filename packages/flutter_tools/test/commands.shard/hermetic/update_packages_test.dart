@@ -264,7 +264,7 @@ void main() {
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
       widgetPreviewScaffold = flutterSdk
           .childDirectory('dev')
-          .childDirectory('integration_test')
+          .childDirectory('integration_tests')
           .childDirectory('widget_preview_scaffold');
       widgetPreviewScaffold.childFile('pubspec.yaml')
         ..createSync(recursive: true)
