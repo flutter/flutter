@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import 'widget_preview_scaffold_change_detector.dart';
 
@@ -13,12 +13,13 @@ void main() {
   test('Widget Preview Scaffold template change detection', () {
     if (WidgetPreviewScaffoldChangeDetector.checkForTemplateUpdates(
       widgetPreviewScaffoldProject: Directory(
-        Platform.script.resolve('.').path,
+        Platform.script.resolve('..').path,
       ),
       widgetPreviewScaffoldTemplateDir: Directory(
         Platform.script
             .resolve(
               path.join(
+                '..',
                 '..',
                 '..',
                 '..',
