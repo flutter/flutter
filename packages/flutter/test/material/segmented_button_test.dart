@@ -1631,12 +1631,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 1. RenderBox do SegmentedButton
     final RenderBox segmentedBox = tester.renderObject(find.byType(SegmentedButton<String>));
 
     expect(segmentedBox.size.width, screenWidth);
 
-    // 2. RenderBoxes dos segmentos internos
     final Finder segmentMaterials = find.descendant(
       of: find.byType(SegmentedButton<String>),
       matching: find.byType(Material),
@@ -1645,11 +1643,7 @@ void main() {
     for (final Element element in segmentMaterials.evaluate()) {
       final segmentBox = element.renderObject! as RenderBox;
 
-      expect(
-        segmentBox.size.width,
-        screenWidth,
-        reason: 'Cada segmento deve ocupar a largura total do container pai',
-      );
+      expect(segmentBox.size.width, screenWidth);
     }
   });
 }
