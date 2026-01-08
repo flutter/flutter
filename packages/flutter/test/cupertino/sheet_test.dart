@@ -2008,4 +2008,41 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+  testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
+    WidgetTester tester,
+  ) async {
+    final animation = AnimationController(vsync: const TestVSync());
+    final secondaryAnimation = AnimationController(vsync: const TestVSync());
+
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: secondaryAnimation,
+        topGap: 0.08,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    final newAnimation = AnimationController(vsync: const TestVSync());
+
+    // Should not throw an exception.
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: newAnimation,
+        secondaryRouteAnimation: secondaryAnimation,
+        topGap: 0.08,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    animation.dispose();
+    secondaryAnimation.dispose();
+    newAnimation.dispose();
+  });
 }
