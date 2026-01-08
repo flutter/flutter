@@ -49,7 +49,14 @@ public class TranslateController: UIViewController {
   }
 
   @objc public func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
-    let hostingController = UIHostingController(rootView: ContentView(termToTranslate: termToTranslate, ipadBounds: ipadBounds))
+    var contentView = ContentView(termToTranslate: termToTranslate, ipadBounds: ipadBounds)
+    contentView.onDismiss = { [weak self] in
+            self?.willMove(toParent: nil)
+            self?.view.removeFromSuperview()
+            self?.removeFromParent()
+        }
+
+    let hostingController = UIHostingController(rootView: contentView)
     hostingController.view.backgroundColor = .clear
     return hostingController
   }
@@ -60,6 +67,9 @@ struct ContentView: View {
   @State private var isTranslationPopoverShown = true
   let termToTranslate : String
   let ipadBounds: CGRect?
+
+  var onDismiss: (() -> Void)?
+  
   var body: some View {
     Color.clear
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -67,5 +77,10 @@ struct ContentView: View {
           isPresented: $isTranslationPopoverShown,
           text: termToTranslate,
           attachmentAnchor: ipadBounds != nil ? .rect(.rect(ipadBounds!)) : .rect(.bounds))
+        .onChange(of: isTranslationPopoverShown) { _, isShown in
+                    if !isShown {
+                        onDismiss?()
+                    }
+                }
   }
 }

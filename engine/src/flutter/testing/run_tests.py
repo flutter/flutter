@@ -1174,7 +1174,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       '--variant',
       dest='variant',
       action='store',
-      default='host_debug_unopt',
+      default='host_debug_unopt_arm64',
       help='The engine build variant to run the tests for.'
   )
   parser.add_argument(
