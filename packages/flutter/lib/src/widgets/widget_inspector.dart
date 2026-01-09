@@ -37,7 +37,7 @@ import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
-import 'safe_area.dart';
+import 'media_query.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
@@ -3070,7 +3070,10 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack containing a _RenderInspectorOverlay as a child.
-    return SafeArea(
+    return Padding(
+      padding: EdgeInsetsGeometry.only(
+        bottom: MediaQuery.of(context).viewPadding.bottom,
+      ),
       child: Stack(
         children: <Widget>[
           GestureDetector(
@@ -3100,7 +3103,6 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     );
   }
 }
-
 /// Enables the Flutter DevTools Widget Inspector for a [Widget] subtree.
 ///
 /// The widget inspector is enabled by default, so this widget is only useful if
