@@ -49,6 +49,8 @@ class LinuxDevice extends DesktopDevice {
   late final Future<TargetPlatform> targetPlatform = () async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
+    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+      return TargetPlatform.linux_riscv64;
     }
     return TargetPlatform.linux_arm64;
   }();

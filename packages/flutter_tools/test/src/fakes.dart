@@ -532,6 +532,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWindowingEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
+    this.isRiscv64SupportEnabled = false,
   });
 
   @override
@@ -583,6 +584,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isUISceneMigrationEnabled;
 
   @override
+  final bool isRiscv64SupportEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     return switch (feature) {
       flutterWebFeature => isWebEnabled,
@@ -600,6 +604,7 @@ class TestFeatureFlags implements FeatureFlags {
       windowingFeature => isWindowingEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
+      riscv64 => isRiscv64SupportEnabled,
       _ => false,
     };
   }
@@ -622,6 +627,7 @@ class TestFeatureFlags implements FeatureFlags {
     windowingFeature,
     lldbDebugging,
     uiSceneMigration,
+    riscv64,
   ];
 
   @override
