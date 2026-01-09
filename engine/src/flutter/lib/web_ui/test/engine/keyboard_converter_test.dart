@@ -942,7 +942,7 @@ void testMain() {
         expect(
           keyDataList,
           hasLength(2),
-          'No synthetic key up should be generated after debounce delay if no modifier is involved.',
+          reason: 'No synthetic key up should be generated after debounce delay if no modifier is involved.',
         );
 
         keyDataList.clear();
