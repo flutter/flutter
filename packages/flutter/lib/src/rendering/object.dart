@@ -1466,6 +1466,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
+      // print('flush nodesToProcess $nodesToProcess');
+      // debugDumpRenderObjectSemanticsTree();
       for (final node in nodesToProcess) {
         if (node._semantics.parentDataDirty) {
           // This node is either blocked by a sibling
@@ -1497,6 +1499,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         FlutterTimeline.startSync('Semantics.ensureGeometry');
       }
       // print('flush nodesToProcessGeometry $nodesToProcessGeometry');
+      // debugDumpRenderObjectSemanticsTree();
       for (final node in nodesToProcessGeometry) {
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
@@ -1504,12 +1507,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       for (final node in nodesToProcessGeometry) {
         _RenderObjectSemantics target = node._semantics;
-        while (target.geometryDirty || !target.shouldFormSemanticsNode) {
+        while (!target.isRoot && (target.geometryDirty || !target.shouldFormSemanticsNode)) {
           target = target.parent!;
-        }
-        if (target._children.every((child) => !child.geometryDirty)) {
-          // print('skip $node, _children ${target._children}');
-          continue;
         }
         // print('process geometry for $target');
         target.ensureGeometry();
@@ -1543,6 +1542,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         _nodesNeedingSemantics.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
       );
+    } on Error catch (e) {
+      rethrow;
     } finally {
       assert(() {
         _debugDoingSemantics = false;
@@ -3801,6 +3802,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (!attached || owner!._semanticsOwner == null) {
       return;
     }
+    print('markNeedsSemanticsUpdate $this');
     _semantics.markNeedsUpdate();
   }
 
@@ -6275,7 +6277,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       // (See semantics_10_test.dart for an example why this is required).
       renderObject.owner!._nodesNeedingSemantics.remove(renderObject);
     }
-    if (!node._semantics.parentDataDirty) {
+    if (!node._semantics.parentDataDirty || node._semantics.isRoot) {
       if (renderObject.owner != null) {
         assert(node._semantics.configProvider.effective.isSemanticBoundary || node.parent == null);
         if (renderObject.owner!._nodesNeedingSemantics.add(node)) {
@@ -6338,10 +6340,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('owner', describeIdentity(renderObject)));
-    properties.add(
-      FlagProperty('noParentData', value: parentData == null, ifTrue: 'NO PARENT DATA'),
-    );
-    properties.add(FlagProperty('geometry', value: geometry == null, ifTrue: 'NO GEOMETRY'));
+    properties.add(FlagProperty('noParentData', value: parentDataDirty, ifTrue: 'NO PARENT DATA'));
+    properties.add(FlagProperty('geometry', value: geometryDirty, ifTrue: 'NO GEOMETRY'));
     properties.add(
       FlagProperty(
         'semanticsBlock',
@@ -6349,7 +6349,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         ifTrue: 'BLOCK PREVIOUS',
       ),
     );
-    if (contributesToSemanticsTree) {
+    if (!parentDataDirty && contributesToSemanticsTree) {
       final String semanticsNodeStatus;
       if (built) {
         semanticsNodeStatus = 'formed ${cachedSemanticsNode?.id}';
