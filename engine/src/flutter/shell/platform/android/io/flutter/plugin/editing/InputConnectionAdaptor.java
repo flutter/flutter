@@ -361,7 +361,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
       setSelection(selStart, newSelectionEnd);
     }
     return true;
-  };
+  }
 
   private boolean handleVerticalMovement(boolean isUp, boolean isShiftPressed) {
     final int selStart = Selection.getSelectionStart(mEditable);

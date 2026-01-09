@@ -98,6 +98,11 @@ class DataColumn {
 
   /// Called when the user asks to sort the table using this column.
   ///
+  /// If non-null, space is reserved in the column header for the sort
+  /// indicator (the arrow icon), even when this column is not currently
+  /// the active sort column and no arrow is painted. This can affect
+  /// the layout and width of the column.
+  ///
   /// If null, the column will not be considered sortable.
   ///
   /// See [DataTable.sortColumnIndex] and [DataTable.sortAscending].
@@ -932,8 +937,6 @@ class DataTable extends StatelessWidget {
       label = Tooltip(message: tooltip, child: label);
     }
 
-    // TODO(dkwingsmt): Only wrap Inkwell if onSort != null. Blocked by
-    // https://github.com/flutter/flutter/issues/51152
     label = InkWell(
       onTap: onSort,
       overlayColor: overlayColor,

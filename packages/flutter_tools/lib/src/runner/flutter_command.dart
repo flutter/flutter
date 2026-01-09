@@ -129,6 +129,7 @@ abstract final class FlutterOptions {
   static const kDartObfuscationOption = 'obfuscate';
   static const kDartDefinesOption = 'dart-define';
   static const kDartDefineFromFileOption = 'dart-define-from-file';
+  static const kWebDefinesOption = 'web-define';
   static const kPerformanceMeasurementFile = 'performance-measurement-file';
   static const kDeviceUser = 'device-user';
   static const kDeviceTimeout = 'device-timeout';
@@ -389,6 +390,16 @@ abstract class FlutterCommand extends Command<void> {
           'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
           'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
       valueHelp: '--foo=bar',
+      hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'cross-origin-isolation',
+      help:
+          'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
+          'headers to the web server. These headers are required for using APIs like '
+          'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
+          'and this flag can be used to override the default. To disable this for the '
+          'skwasm renderer, use "--no-cross-origin-isolation".',
       hide: !verboseHelp,
     );
   }
@@ -750,6 +761,21 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
     );
     _usesDartDefineFromFileOption();
+  }
+
+  void usesWebDefineOption() {
+    argParser.addMultiOption(
+      FlutterOptions.kWebDefinesOption,
+      help:
+          'Additional key-value pairs that will be available as template variables '
+          'in web/index.html and web/flutter_bootstrap.js files during development and build.\n'
+          'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
+          'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
+          'the build will fail with an error.',
+      valueHelp: 'API_URL=https://api.example.com',
+      splitCommas: false,
+    );
   }
 
   void _usesDartDefineFromFileOption() {
@@ -1615,6 +1641,28 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return dartDefines;
+  }
+
+  Map<String, String> extractWebDefines() {
+    final webDefines = <String, String>{};
+
+    if (argParser.options.containsKey(FlutterOptions.kWebDefinesOption)) {
+      final List<String> defines = stringsArg(FlutterOptions.kWebDefinesOption);
+      for (final define in defines) {
+        final int separatorIndex = define.indexOf('=');
+        if (separatorIndex == -1 || separatorIndex == 0) {
+          throwToolExit(
+            'Invalid web-define format: $define\n'
+            'Expected format: KEY=VALUE (e.g., API_URL=https://api.example.com)',
+          );
+        }
+        final String key = define.substring(0, separatorIndex);
+        final String value = define.substring(separatorIndex + 1);
+        webDefines[key] = value;
+      }
+    }
+
+    return webDefines;
   }
 
   Map<String, Object?> extractDartDefineConfigJsonMap() {

@@ -187,7 +187,6 @@ class SystemContextMenu extends StatefulWidget {
         // not via defaults. Intentionally ignore in default mapping.
       }
     }
-    print(items);
 
     return items;
   }

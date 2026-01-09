@@ -3148,6 +3148,102 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
             kInvalidArguments);
 }
 
+TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  // Test with has_constraints = true and valid constraints
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.has_constraints = true;
+  event.min_width_constraint = 400;
+  event.max_width_constraint = 1200;
+  event.min_height_constraint = 300;
+  event.max_height_constraint = 900;
+
+  // Should succeed with valid constraints
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  // Test with has_constraints = false
+  // Constraints should be ignored and set to current width/height
+  FlutterWindowMetricsEvent event_no_constraints = {};
+  event_no_constraints.struct_size = sizeof(event_no_constraints);
+  event_no_constraints.width = 1024;
+  event_no_constraints.height = 768;
+  event_no_constraints.pixel_ratio = 1.0;
+  event_no_constraints.has_constraints = false;
+  // These constraint values should be ignored
+  event_no_constraints.min_width_constraint = 0;
+  event_no_constraints.max_width_constraint = 0;
+  event_no_constraints.min_height_constraint = 0;
+  event_no_constraints.max_height_constraint = 0;
+
+  // Should succeed even with invalid constraint values because has_constraints
+  // is false
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &event_no_constraints),
+      kSuccess);
+
+  // Test with has_constraints = true but width violates min constraint
+  FlutterWindowMetricsEvent event_invalid_min = {};
+  event_invalid_min.struct_size = sizeof(event_invalid_min);
+  event_invalid_min.width = 300;  // Less than min_width_constraint
+  event_invalid_min.height = 600;
+  event_invalid_min.pixel_ratio = 1.0;
+  event_invalid_min.has_constraints = true;
+  event_invalid_min.min_width_constraint = 400;
+  event_invalid_min.max_width_constraint = 1200;
+  event_invalid_min.min_height_constraint = 300;
+  event_invalid_min.max_height_constraint = 900;
+
+  // Should fail because width < min_width_constraint
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &event_invalid_min),
+      kInvalidArguments);
+
+  // Test with has_constraints = true but width violates max constraint
+  FlutterWindowMetricsEvent event_invalid_max = {};
+  event_invalid_max.struct_size = sizeof(event_invalid_max);
+  event_invalid_max.width = 1300;  // Greater than max_width_constraint
+  event_invalid_max.height = 600;
+  event_invalid_max.pixel_ratio = 1.0;
+  event_invalid_max.has_constraints = true;
+  event_invalid_max.min_width_constraint = 400;
+  event_invalid_max.max_width_constraint = 1200;
+  event_invalid_max.min_height_constraint = 300;
+  event_invalid_max.max_height_constraint = 900;
+
+  // Should fail because width > max_width_constraint
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &event_invalid_max),
+      kInvalidArguments);
+
+  // Test with has_constraints = true but height violates constraints
+  FlutterWindowMetricsEvent event_invalid_height = {};
+  event_invalid_height.struct_size = sizeof(event_invalid_height);
+  event_invalid_height.width = 800;
+  event_invalid_height.height = 200;  // Less than min_height_constraint
+  event_invalid_height.pixel_ratio = 1.0;
+  event_invalid_height.has_constraints = true;
+  event_invalid_height.min_width_constraint = 400;
+  event_invalid_height.max_width_constraint = 1200;
+  event_invalid_height.min_height_constraint = 300;
+  event_invalid_height.max_height_constraint = 900;
+
+  // Should fail because height < min_height_constraint
+  ASSERT_EQ(
+      FlutterEngineSendWindowMetricsEvent(engine.get(), &event_invalid_height),
+      kInvalidArguments);
+}
+
 static void expectSoftwareRenderingOutputMatches(
     EmbedderTest& test,
     std::string entrypoint,

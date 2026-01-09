@@ -16,8 +16,13 @@ import 'theme.dart';
 // late BuildContext context;
 
 /// A [ButtonStyle] theme that overrides the default appearance of
-/// [SubmenuButton]s and [MenuItemButton]s when it's used with a
-/// [MenuButtonTheme] or with the overall [Theme]'s [ThemeData.menuTheme].
+/// [SubmenuButton]s and [MenuItemButton]s.
+///
+/// Descendant widgets obtain the current [MenuButtonThemeData] object
+/// using [MenuButtonTheme.of].
+///
+/// A [MenuButtonThemeData] is often specified as part of the
+/// overall [Theme] with [ThemeData.menuButtonTheme].
 ///
 /// The [style]'s properties override [MenuItemButton]'s and [SubmenuButton]'s
 /// default style, i.e. the [ButtonStyle] returned by

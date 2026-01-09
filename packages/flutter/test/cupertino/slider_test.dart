@@ -831,4 +831,15 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('CupertinoSlider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoSlider(value: 0.0, onChanged: (_) {})),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSlider)), Size.zero);
+  });
 }

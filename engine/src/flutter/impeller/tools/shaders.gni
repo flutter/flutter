@@ -103,20 +103,24 @@ template("impeller_shaders") {
     if (defined(invoker.analyze) && !invoker.analyze) {
       analyze = false
     }
-    gles_shaders = "gles_$target_name"
 
-    impeller_shaders_gles(gles_shaders) {
-      name = invoker.name
-      require_framebuffer_fetch = require_framebuffer_fetch
-      if (defined(invoker.gles_language_version)) {
-        gles_language_version = invoker.gles_language_version
+    # wasm builds only use GLES3, no need to build GLES2 shaders
+    if (!is_wasm) {
+      gles_shaders = "gles_$target_name"
+
+      impeller_shaders_gles(gles_shaders) {
+        name = invoker.name
+        require_framebuffer_fetch = require_framebuffer_fetch
+        if (defined(invoker.gles_language_version)) {
+          gles_language_version = invoker.gles_language_version
+        }
+        if (defined(invoker.gles_exclusions)) {
+          shaders = invoker.shaders - invoker.gles_exclusions
+        } else {
+          shaders = invoker.shaders
+        }
+        analyze = analyze
       }
-      if (defined(invoker.gles_exclusions)) {
-        shaders = invoker.shaders - invoker.gles_exclusions
-      } else {
-        shaders = invoker.shaders
-      }
-      analyze = analyze
     }
 
     gles3_shaders = "gles3_$target_name"
@@ -167,10 +171,12 @@ template("impeller_shaders") {
     }
 
     if (enable_opengles) {
-      public_deps += [
-        ":$gles3_shaders",
-        ":$gles_shaders",
-      ]
+      public_deps += [ ":$gles3_shaders" ]
+
+      # wasm builds only use GLES3, no need to build GLES2 shaders
+      if (!is_wasm) {
+        public_deps += [ ":$gles_shaders" ]
+      }
     }
 
     if (impeller_enable_vulkan) {

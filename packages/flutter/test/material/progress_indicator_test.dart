@@ -378,7 +378,12 @@ void main() {
 
       expect(
         tester.getSemantics(find.byType(CircularProgressIndicator)),
-        matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+        matchesSemantics(
+          value: '0',
+          textDirection: TextDirection.ltr,
+          minValue: '0',
+          maxValue: '100',
+        ),
       );
       handle.dispose();
     },
@@ -936,7 +941,8 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const label = 'Label';
-    const value = '25%';
+    const value = '25';
+
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -978,7 +984,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byKey(key)),
-      matchesSemantics(textDirection: TextDirection.ltr, label: label, value: '25%'),
+      matchesSemantics(textDirection: TextDirection.ltr, label: label, value: '25'),
     );
 
     handle.dispose();
@@ -1033,7 +1039,8 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const label = 'Label';
-    const value = '25%';
+    const value = '25';
+
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1061,7 +1068,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const label = 'Label';
-    const value = '25%';
+    const value = '25';
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -1983,6 +1990,84 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(LinearProgressIndicator)), Size.zero);
+  });
+
+  testWidgets('LinearProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: LinearProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: LinearProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('CircularProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: CircularProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CircularProgressIndicator)),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: CircularProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CircularProgressIndicator)),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshProgressIndicator clamps value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    // Test value > 1.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: 1.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(RefreshProgressIndicator)),
+      matchesSemantics(value: '100', textDirection: TextDirection.ltr),
+    );
+
+    // Test value < 0.0
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: RefreshProgressIndicator(value: -0.5))),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(RefreshProgressIndicator)),
+      matchesSemantics(value: '0', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
   });
 }
 
