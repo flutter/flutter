@@ -26,6 +26,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
 import 'lookup_boundary.dart';
+import 'media_query.dart';
 import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
@@ -2022,6 +2023,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
+    final MediaQueryData overlayData = MediaQuery.of(Overlay.of(context).context);
+    final MediaQueryData data = MediaQuery.of(context);
     if (zOrderIndex == null) {
       return _OverlayPortal(
         overlayLocation: null,
@@ -2033,7 +2036,14 @@ class _OverlayPortalState extends State<OverlayPortal> {
       overlayLocation: _getLocation(zOrderIndex, widget.overlayLocation),
       overlayChild: _DeferredLayout(
         childIdentifier: this,
-        child: Builder(builder: widget.overlayChildBuilder),
+        child: MediaQuery(
+          data: data.copyWith(
+            padding: overlayData.padding,
+            viewPadding: overlayData.viewPadding,
+            viewInsets: overlayData.viewInsets,
+          ),
+          child: Builder(builder: widget.overlayChildBuilder),
+        ),
       ),
       child: Semantics(traversalParentIdentifier: this, child: widget.child),
     );
