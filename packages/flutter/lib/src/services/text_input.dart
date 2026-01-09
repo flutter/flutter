@@ -1267,15 +1267,15 @@ mixin TextSelectionDelegate {
   /// Whether share is enabled.
   bool get shareEnabled => true;
 
+  /// Whether translate is enabled
+  bool get translateEnabled => true;
+
   /// Whether Live Text input is enabled.
   ///
   /// See also:
   ///  * [LiveText], where the availability of Live Text input can be obtained.
   ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
   bool get liveTextInputEnabled => false;
-
-  /// Whether translate is enabled
-  bool get translateEnabled => true;
 
   /// Cut current selection to [Clipboard].
   ///
