@@ -333,6 +333,14 @@ class FormState extends State<Form> {
     _fieldDidChange();
   }
 
+  /// Clears the validation errors for all [FormField]s in this [Form]
+  /// without resetting their values.
+  void clearError() {
+    for (final FormFieldState<dynamic> field in _fields) {
+      field.clearError();
+    }
+  }
+
   /// Validates every [FormField] that is a descendant of this [Form], and
   /// returns true if there are no errors.
   ///
@@ -653,6 +661,18 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _errorText.value = null;
     });
     widget.onReset?.call();
+    Form.maybeOf(context)?._fieldDidChange();
+  }
+
+  /// Clears the error display for this field without resetting the field's value.
+  ///
+  /// This sets the [errorText] to null and marks [hasInteractedByUser] as false,
+  /// effectively hiding any validation messages until the next validation or interaction.
+  void clearError() {
+    setState(() {
+      _errorText.value = null;
+      _hasInteractedByUser.value = false;
+    });
     Form.maybeOf(context)?._fieldDidChange();
   }
 
