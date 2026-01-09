@@ -3064,7 +3064,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     // a RenderStack containing a _RenderInspectorOverlay as a child.
     return Padding(
       padding: EdgeInsetsGeometry.only(
-        bottom: MediaQuery.of(context).viewPadding.bottom,
+        bottom: MediaQuery.viewPaddingOf(context).bottom,
       ),
       child: Stack(
         children: <Widget>[
