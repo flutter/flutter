@@ -718,8 +718,6 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
-    final double sheetHeight =
-        MediaQuery.sizeOf(context).height - (MediaQuery.sizeOf(context).height * topGap);
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -727,11 +725,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(
-            sheetHeight: sheetHeight,
-            route: this,
-            child: _sheetWithDragHandle(context),
-          ),
+          child: _CupertinoSheetScope(child: _sheetWithDragHandle(context)),
         ),
       ),
     );
@@ -771,16 +765,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
 // Internally used to see if another sheet is in the tree already.
 class _CupertinoSheetScope extends InheritedWidget {
-  const _CupertinoSheetScope({
-    required super.child,
-    required this.route,
-    required this.sheetHeight,
-  });
-
-  // The height of the sheet when fully open, and not stretched upwards.
-  final double sheetHeight;
-
-  final CupertinoSheetRoute<dynamic> route;
+  const _CupertinoSheetScope({required super.child});
 
   static _CupertinoSheetScope? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<_CupertinoSheetScope>();
@@ -908,7 +893,6 @@ class _CupertinoDragGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
-    this.sheetHeight,
   });
 
   final Widget child;
@@ -916,8 +900,6 @@ class _CupertinoDragGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoDragGestureController<T>> onStartPopGesture;
-
-  final double? sheetHeight;
 
   @override
   _CupertinoDragGestureDetectorState<T> createState() => _CupertinoDragGestureDetectorState<T>();
@@ -932,7 +914,7 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
   static VelocityTracker _cupertinoVelocityBuilder(PointerEvent event) =>
       IOSScrollViewFlingVelocityTracker(event.kind);
 
-  double get sheetHeight => widget.sheetHeight ?? context.size!.height;
+  double get sheetHeight => context.size!.height;
 
   @override
   void initState() {
