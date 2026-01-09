@@ -804,6 +804,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         logger,
       );
       expect(logger.traceText, contains('Failed to remove com.apple.FinderInfo'));
+      expect(logger.traceText, contains('Failed to remove com.apple.provenance'));
       expect(processManager, hasNoRemainingExpectations);
     });
   });
