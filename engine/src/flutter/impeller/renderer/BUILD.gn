@@ -52,6 +52,8 @@ impeller_component("renderer") {
     "pipeline.h",
     "pipeline_builder.cc",
     "pipeline_builder.h",
+    "pipeline_compile_queue.cc",
+    "pipeline_compile_queue.h",
     "pipeline_descriptor.cc",
     "pipeline_descriptor.h",
     "pipeline_library.cc",
