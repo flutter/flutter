@@ -60,9 +60,9 @@ class CupertinoFocusHalo extends StatefulWidget {
   }) : _borderRadius = borderRadius,
        _shapeBuilder = RoundedRectangleBorder.new;
 
-  /// Creates a rounded superellipse -shaped [CupertinoFocusHalo] around the child
+  /// Creates a rounded superellipse-shaped [CupertinoFocusHalo] around the child
   ///
-  /// For example, to highlight a rounded superellipse -shaped section of the widget tree when any button inside that
+  /// For example, to highlight a rounded superellipse-shaped section of the widget tree when any button inside that
   /// section has focus, one could write:
   ///
   /// ```dart
