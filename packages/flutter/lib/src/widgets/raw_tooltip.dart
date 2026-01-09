@@ -226,7 +226,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// See also:
 ///
 ///   * [Tooltip], a Material-themed [RawTooltip].
-/// 
+///
 /// {@tool dartpad}
 /// This example shows how [RowTooltip] can be shown manually with [TooltipTriggerMode.manual]
 /// by calling the [TooltipState.ensureTooltipVisible] function.
