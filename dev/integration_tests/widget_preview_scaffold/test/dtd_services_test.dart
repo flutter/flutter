@@ -17,10 +17,10 @@ import 'package:flutter_tools/src/widget_preview/persistent_preferences.dart';
 import 'package:test/fake.dart';
 import 'package:widget_preview_scaffold/src/dtd/dtd_services.dart';
 
-import '../../../src/common.dart';
-import '../../../src/context.dart';
-import '../../../src/fakes.dart';
-import '../../../commands.shard/permeable/utils/project_testing_utils.dart';
+import '../../../../packages/flutter_tools/test/src/common.dart';
+import '../../../../packages/flutter_tools/test/src/context.dart';
+import '../../../../packages/flutter_tools/test/src/fakes.dart';
+import '../../../../packages/flutter_tools/test/commands.shard/permeable/utils/project_testing_utils.dart';
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject();
@@ -62,6 +62,7 @@ void main() {
       ),
       onHotRestartPreviewerRequest: onHotRestartPreviewerRequest ?? () {},
       project: FakeFlutterProject(),
+      addUuidToServiceName: false,
     );
     await server.launchAndConnect();
     return server;

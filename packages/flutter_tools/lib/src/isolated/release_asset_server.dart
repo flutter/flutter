@@ -28,14 +28,12 @@ class ReleaseAssetServer {
        _platform = platform,
        _flutterRoot = flutterRoot,
        _webBuildDirectory = webBuildDirectory,
-       _needsCoopCoep = needsCoopCoep,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
+       _needsCoopCoep = needsCoopCoep;
 
   final Uri entrypoint;
   final String? _flutterRoot;
   final String? _webBuildDirectory;
   final FileSystem _fileSystem;
-  final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
   final bool _needsCoopCoep;
 
@@ -49,9 +47,7 @@ class ReleaseAssetServer {
   List<Uri> _searchPaths() => <Uri>[
     _fileSystem.directory(_webBuildDirectory).uri,
     _fileSystem.directory(_flutterRoot).uri,
-    _fileSystem.directory(_flutterRoot).parent.uri,
     _fileSystem.currentDirectory.uri,
-    _fileSystem.directory(_fileSystemUtils.homeDirPath).uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {
