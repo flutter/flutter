@@ -2,10 +2,12 @@ name: hook_user_defines
 description: 'Project for testing user-defines.'
 version: 0.0.1
 
+# This package is not part of the workspace on purpose to test the user-defines
+# in this pubspec.
+# resolution: workspace
+
 environment:
   sdk: ^3.9.0-0
-
-resolution: workspace
 
 hooks:
   user_defines:
@@ -13,11 +15,11 @@ hooks:
       magic_value: 1000
 
 dependencies:
-  hooks: any
-  logging: any
-  native_toolchain_c: any
+  hooks: 1.0.0
+  logging: 1.3.0
+  native_toolchain_c: 0.17.4
 
 dev_dependencies:
-  test: any
+  test: 1.28.0
 
-# PUBSPEC CHECKSUM: meinbq
+# PUBSPEC CHECKSUM: qlfuuh
