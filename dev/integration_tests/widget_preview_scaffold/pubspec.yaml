@@ -15,7 +15,7 @@ dependencies:
   dtd: 4.0.0
   flutter_lints: 6.0.0
   google_fonts: 6.3.3
-  json_rpc_2: 3.0.3
+  json_rpc_2: 4.0.0
   path: 1.9.1
   stack_trace: 1.12.1
   url_launcher: 6.3.2
@@ -63,9 +63,9 @@ dependencies:
 
 dev_dependencies:
   flutter_tools:
-    path: ../../../
+    path: ../../../packages/flutter_tools/
   test: 1.28.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: 437hbt
+# PUBSPEC CHECKSUM: p85g55
