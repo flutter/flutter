@@ -37,7 +37,7 @@ import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
-import 'media_query.dart';
+import 'safe_area.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
@@ -3062,10 +3062,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack containing a _RenderInspectorOverlay as a child.
-    return Padding(
-      padding: EdgeInsetsGeometry.only(
-        bottom: MediaQuery.viewPaddingOf(context).bottom,
-      ),
+    return SafeArea(
       child: Stack(
         children: <Widget>[
           GestureDetector(
