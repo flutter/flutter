@@ -19143,6 +19143,174 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/175511.
+  testWidgets('Radio group does not intercept key events when no radio is focused', (
+    WidgetTester tester,
+  ) async {
+    final log = <String>[];
+    late final shortcuts = <ShortcutActivator, Intent>{
+      const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(() => log.add('←')),
+      const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(() => log.add('→')),
+      const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(() => log.add('↓')),
+      const SingleActivator(LogicalKeyboardKey.arrowUp): VoidCallbackIntent(() => log.add('↑')),
+      const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(() => log.add('_')),
+    };
+
+    final firstRadioFocusNode = FocusNode();
+    addTearDown(firstRadioFocusNode.dispose);
+    final textFieldFocusNode = FocusNode();
+    addTearDown(textFieldFocusNode.dispose);
+    StateSetter setState;
+    int? groupValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Shortcuts(
+            shortcuts: shortcuts,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                setState = stateSetter;
+                return RadioGroup<int>(
+                  groupValue: groupValue,
+                  onChanged: (int? newValue) {
+                    setState(() {
+                      groupValue = newValue;
+                    });
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      Radio<int>(focusNode: firstRadioFocusNode, value: 0),
+                      const RadioListTile<int>(value: 1),
+                      const Radio<int>(value: 2),
+                      TextField(focusNode: textFieldFocusNode),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus on the first radio and toggle it.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Toggle the second radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+    // Log is empty because radio group handles shortcuts.
+    expect(log, isEmpty);
+
+    // Toggle the first radio with shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, isEmpty);
+
+    // Move focus to the text field.
+    // Now radio group will ignore shortcuts as there are no focused radios.
+    textFieldFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    // Verify that shortcuts are not intercepted by the radio group.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, <String>['←', '→', '↓', '↑', '_']);
+
+    log.clear();
+    expect(log, isEmpty);
+
+    // Focus on the first radio.
+    firstRadioFocusNode.requestFocus();
+    await tester.pump();
+    expect(groupValue, 0);
+    expect(firstRadioFocusNode.hasFocus, isTrue);
+
+    // Verify that radio group handles shortcuts again.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(groupValue, 1);
+    expect(log, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(groupValue, 0);
+    expect(log, isEmpty);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/170521.
+  testWidgets(
+    'when supportsShowingSystemContextMenu is false, SystemContextMenu throws',
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'one two three');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            final MediaQueryData mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
+              child: MaterialApp(
+                home: Scaffold(
+                  body: Center(
+                    child: TextField(
+                      controller: controller,
+                      contextMenuBuilder:
+                          (BuildContext context, EditableTextState editableTextState) {
+                            return SystemContextMenu.editableText(
+                              editableTextState: editableTextState,
+                            );
+                          },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(find.byType(SystemContextMenu), findsNothing);
+
+      await tester.tap(find.byType(TextField));
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      expect(tester.takeException(), isAssertionError);
+    },
+    skip: kIsWeb, // [intended] SystemContextMenu is not supported on web.
+  );
 }
 
 /// A Simple widget for testing the obscure text.
