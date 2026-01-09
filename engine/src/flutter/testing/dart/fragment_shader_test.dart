@@ -570,16 +570,11 @@ void main() async {
     final FragmentShader shader = program.fragmentShader();
     final filter = ImageFilter.shader(shader);
 
-    // This is confusing but returning false was the stated behavior Jonah
-    // implemented, see
-    // https://github.com/flutter/flutter/issues/163302#issuecomment-2660339423
-    // By always returning false caching mechanisms won't ever store the same
-    // filter.
-    expect(filter, isNot(filter));
+    expect(filter, filter);
     expect(identical(filter, filter), true);
 
     final filter_2 = ImageFilter.shader(shader);
-    expect(filter, isNot(filter_2));
+    expect(filter, filter_2);
     expect(identical(filter, filter_2), false);
 
     shader.setFloat(0, 1);
