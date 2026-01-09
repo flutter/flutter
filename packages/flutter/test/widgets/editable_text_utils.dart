@@ -143,11 +143,23 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 
 /// A minimal wrapper around [EditableText] for use in widget tests.
 ///
-/// This wrapper provides robust text selection gestures through
+/// This widget provides robust text selection gestures through
 /// [TextSelectionGestureDetector].
 ///
-/// This wrapper does not provide selection handles or context menus
-/// out of the box.
+/// This widget does not provide selection handles or text selection
+/// context menus out of the box.
+///
+/// This input field manages its own internal [TextEditingController]
+/// and [FocusNode] unless provided one. This field also provides defaults
+/// for required [EditableText] members [EditableText.cursorColor],
+/// [EditableText.backgroundCursorColor], and [EditableText.style].
+///
+/// This widget provides platform defaults based on observed native behavior:
+///
+///  * [EditableText.cursorOpacityAnimates] is set to true on iOS.
+///  * [EditableText.cursorRadius] is set to `Radius.circular(2.0)` on iOS and macOS.
+///  * [EditableText.backgroundCursorColor] is set to `Color(0xFF999999)` on iOS and macOS.
+///  * [TextSelectionGestureDetectorBuilderDelegate.forcePressEnabled] is set to true on iOS.
 class TestTextField extends StatefulWidget {
   const TestTextField({
     super.key,
@@ -223,6 +235,7 @@ class _TestTextFieldState extends State<TestTextField>
 
   @override
   Widget build(BuildContext context) {
+    // Platform defaults.
     final bool cursorOpacityAnimates = switch (defaultTargetPlatform) {
       TargetPlatform.iOS => true,
       _ => false,
@@ -239,27 +252,29 @@ class _TestTextFieldState extends State<TestTextField>
       TargetPlatform.iOS => true,
       _ => false,
     };
+    // End of platform defaults.
     return _selectionGestureDetectorBuilder.buildGestureDetector(
       behavior: HitTestBehavior.translucent,
       child: EditableText(
         key: editableTextKey,
         autofillHints: widget.autofillHints,
         autofocus: widget.autofocus,
-        backgroundCursorColor: backgroundCursorColor ?? _red, // Colors.red
+        backgroundCursorColor:
+            backgroundCursorColor ?? _red, // Colors.red, required by editable text.
         contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: widget.cursorColor ?? _red, // Colors.red
+        cursorColor: widget.cursorColor ?? _red, // Colors.red, required by editable text.
         cursorOpacityAnimates: cursorOpacityAnimates,
         cursorRadius: cursorRadius,
-        focusNode: _effectiveFocusNode,
+        focusNode: _effectiveFocusNode, // required by editable text.
         groupId: widget.groupId,
         maxLines: widget.maxLines,
         onChanged: widget.onChanged,
         readOnly: widget.readOnly,
-        rendererIgnoresPointer: true, // for gestures.
+        rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
         selectionControls: testTextSelectionHandleControls,
         showCursor: widget.showCursor,
-        style: widget.style ?? const TextStyle(),
-        controller: _effectiveController,
+        style: widget.style ?? const TextStyle(), // required by editable text.
+        controller: _effectiveController, // required by editable text.
       ),
     );
   }
