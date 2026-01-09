@@ -2548,9 +2548,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (owner case final PipelineOwner owner when (owner._semanticsOwner != null)) {
-      _semantics.markGeometryDirty();
-    }
     if (owner case final PipelineOwner owner when (_isRelayoutBoundary ?? false)) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
@@ -3218,6 +3215,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(owner == null || !owner!.debugDoingPaint);
     if (_needsPaint) {
       return;
+    }
+    if (owner case final PipelineOwner owner when (owner._semanticsOwner != null)) {
+      _semantics.markGeometryDirty();
     }
     _needsPaint = true;
     // If this was not previously a repaint boundary it will not have
