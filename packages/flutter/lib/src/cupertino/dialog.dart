@@ -1207,7 +1207,8 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: CupertinoFocusHalo.withRoundedSuperellipse(
+      // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
+      child: CupertinoFocusHalo.withRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
         child: _ActionSheetButtonBackground(
           isCancel: true,
@@ -1901,7 +1902,8 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: CupertinoFocusHalo.withRoundedSuperellipse(
+      // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
+      child: CupertinoFocusHalo.withRRect(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,
@@ -2099,7 +2101,8 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       );
     }
 
-    return CupertinoFocusHalo.withRoundedSuperellipse(
+    // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
+    return CupertinoFocusHalo.withRRect(
       borderRadius: BorderRadius.only(
         bottomLeft: CupertinoPopupSurface._clipper.bottomLeft,
         bottomRight: CupertinoPopupSurface._clipper.bottomRight,
