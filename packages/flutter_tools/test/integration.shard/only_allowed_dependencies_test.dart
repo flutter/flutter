@@ -63,12 +63,12 @@ Future<void> main() async {
 
     // These are the sdk packages that Flutter apps can depend on.
     final roots = <String>['flutter', 'flutter_test', 'flutter_test', 'flutter_localizations'];
-    final allowedPackages = <String>[
+    final allowedPackages = <String>{
       // Allow depending on other Flutter framework sdk packages.
       ...roots,
       // Allow depending on allowed external packages.
       ...allowedExternalPackages,
-    ];
+    };
     final packages = packageGraph['packages']! as List<Object?>;
     // Do a transitive parse of the package graph rooted in `roots` to find any
     // disallowed dependencies.
