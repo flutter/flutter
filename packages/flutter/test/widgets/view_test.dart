@@ -4,15 +4,17 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
 void main() {
+  const green = Color(0xff00ff00);
+
   testWidgets('Widgets running with runApp can find View', (WidgetTester tester) async {
     FlutterView? viewOf;
     FlutterView? viewMaybeOf;
@@ -197,7 +199,7 @@ void main() {
       ViewAnchor(
         view: View(
           view: FakeView(tester.view),
-          child: const ColoredBox(color: Colors.green),
+          child: const ColoredBox(color: green),
         ),
         child: const SizedBox(),
       ),
@@ -311,7 +313,7 @@ void main() {
             return ViewAnchor(
               view: View(
                 view: FakeView(tester.view),
-                child: const ColoredBox(color: Colors.green),
+                child: const ColoredBox(color: green),
               ),
               child: const SizedBox(),
             );
@@ -411,7 +413,7 @@ void main() {
             return View(key: viewKey, view: FakeView(tester.view), child: const SizedBox());
           },
         ),
-        child: const ColoredBox(color: Colors.green),
+        child: const ColoredBox(color: green),
       ),
     );
 
@@ -428,7 +430,7 @@ void main() {
     expect(children, contains(rawViewOwner));
 
     // Remove that View from the tree.
-    await tester.pumpWidget(const ViewAnchor(child: ColoredBox(color: Colors.green)));
+    await tester.pumpWidget(const ViewAnchor(child: ColoredBox(color: green)));
 
     expect(rawView.owner, isNull);
     expect(RendererBinding.instance.renderViews, isNot(contains(rawView)));

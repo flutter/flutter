@@ -160,6 +160,12 @@ void runSemanticsTests() {
   group('forms', () {
     _testForms();
   });
+  group('progressBar', () {
+    _testProgressBar();
+  });
+  group('loadingSpinner', () {
+    _testLoadingSpinner();
+  });
 }
 
 void _testSemanticRole() {
@@ -398,6 +404,29 @@ void _testEngineAccessibilityBuilder() {
     features = builder.build();
     expect(features.reduceMotion, isTrue);
   });
+
+  test('autoPlayAnimatedImages', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayAnimatedImages.
+    expect(features.autoPlayAnimatedImages, isTrue);
+    builder.autoPlayAnimatedImages = false;
+    features = builder.build();
+    expect(features.autoPlayAnimatedImages, isFalse);
+  });
+
+  test('autoPlayVideos', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayVideos.
+    expect(features.autoPlayVideos, isTrue);
+    builder.autoPlayVideos = false;
+    features = builder.build();
+    expect(features.autoPlayVideos, isFalse);
+  });
+
+  test('deterministicCursor', () {
+    expect(features.deterministicCursor, isFalse);
+    builder.deterministicCursor = true;
+    features = builder.build();
+    expect(features.deterministicCursor, isTrue);
+  });
 }
 
 void _testAlerts() {
@@ -484,9 +513,10 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
-    // Therefore, we need to ensure that the original copy starts with false (1 << 7).
-    const original = EngineAccessibilityFeatures(0 | 1 << 7);
+    // Announce, autoPlayAnimatedImages and autoPlayVideos are inverted
+    // checks, see EngineAccessibilityFeatures. Therefore, we need to ensure
+    // that the original copy starts with false values for them.
+    const original = EngineAccessibilityFeatures(0 | 1 << 7 | 1 << 8 | 1 << 9);
 
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
@@ -497,6 +527,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(boldText: true);
     expect(copy.accessibleNavigation, false);
@@ -506,6 +539,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(disableAnimations: true);
     expect(copy.accessibleNavigation, false);
@@ -516,6 +552,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(highContrast: true);
     expect(copy.accessibleNavigation, false);
@@ -526,6 +565,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(invertColors: true);
     expect(copy.accessibleNavigation, false);
@@ -536,6 +578,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
     expect(copy.accessibleNavigation, false);
@@ -545,6 +590,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(supportsAnnounce: true);
     expect(copy.accessibleNavigation, false);
@@ -555,6 +603,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, true);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(reduceMotion: true);
     expect(copy.accessibleNavigation, false);
@@ -565,6 +616,48 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, true);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(autoPlayAnimatedImages: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, true);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(autoPlayVideos: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, true);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(deterministicCursor: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, true);
   });
 
   test('makes the semantic DOM tree invisible', () {
@@ -6151,6 +6244,55 @@ void _testForms() {
   semantics().semanticsEnabled = false;
 }
 
+void _testProgressBar() {
+  test('nodes with progress bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLoadingSpinner() {
+  test('nodes with loading spinner role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.loadingSpinner,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -6195,6 +6337,8 @@ void updateNode(
   ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
+  String minValue = '0',
+  String maxValue = '0',
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
@@ -6242,6 +6386,8 @@ void updateNode(
     hitTestBehavior: hitTestBehavior,
     inputType: inputType,
     locale: locale,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
 

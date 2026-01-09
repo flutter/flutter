@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void verify(WidgetTester tester, List<Offset> answerKey) {
@@ -15,6 +15,8 @@ void verify(WidgetTester tester, List<Offset> answerKey) {
 }
 
 void main() {
+  const green = Color(0xff00ff00);
+
   testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Wrap(
@@ -976,7 +978,7 @@ void main() {
         child: Center(
           child: IntrinsicHeight(
             child: ColoredBox(
-              color: Colors.green,
+              color: green,
               child: Wrap(
                 children: <Widget>[
                   Text('Start', style: TextStyle(height: 1.0, fontSize: 16)),
@@ -1004,7 +1006,7 @@ void main() {
         child: Center(
           child: IntrinsicWidth(
             child: ColoredBox(
-              color: Colors.green,
+              color: green,
               child: Wrap(
                 direction: Axis.vertical,
                 children: <Widget>[

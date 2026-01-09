@@ -60,11 +60,11 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
       final canvas = ui.Canvas(recorder);
       canvas.drawImage(this, ui.Offset.zero, ui.Paint());
       final picture = recorder.endRecording() as SkwasmPicture;
-      final DomImageBitmap bitmap = (await (renderer as SkwasmRenderer).surface.renderPictures(
-        <SkwasmPicture>[picture],
-        picture.cullRect.width.ceil(),
-        picture.cullRect.height.ceil(),
-      )).imageBitmaps.single;
+      final surface = renderer.pictureToImageSurface as SkwasmSurface;
+      await surface.setSize(BitmapSize(width, height));
+      final DomImageBitmap bitmap = (await surface.rasterizeToImageBitmaps(<SkwasmPicture>[
+        picture,
+      ])).single;
       final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
         bitmap.width,
         bitmap.height,
@@ -80,7 +80,7 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
       context.transferFromImageBitmap(null);
       return ByteData.view(arrayBuffer.toDart);
     } else {
-      return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
+      return renderer.pictureToImageSurface.rasterizeImage(this, format);
     }
   }
 
