@@ -5800,13 +5800,7 @@ base class FragmentShader extends Shader {
 
     final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
 
-    if (index < 0 || index + 1 > info.size) {
-      throw IndexError.withLength(
-        index,
-        info.size,
-        message: 'Index `$index` out of bounds for `$name`.',
-      );
-    }
+    IndexError.check(index, info.size, message: 'Index `$index` out of bounds for `$name`.');
 
     final result = UniformFloatSlot._(this, name, index, info.index + index);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
@@ -5888,19 +5882,16 @@ base class FragmentShader extends Shader {
     }
     final int numElements = info.size ~/ elementSize;
 
-    final allFloatSlots = List<UniformFloatSlot>.generate(
-      info.size,
-      (j) => UniformFloatSlot._(this, name, j ~/ elementSize, info.index + j),
-    );
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<UniformFloatSlot>.generate(
+        info.size,
+        (j) => UniformFloatSlot._(this, name, j, info.index + i * elementSize + j),
+      );
+      _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+      return elementFactory(slots);
+    });
 
-    final elements = List<T>.generate(
-      numElements,
-      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
-    );
-
-    // Clean up expired weak references and add the new ones.
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
-    _slots.addAll(allFloatSlots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
 
     return UniformArray<T>._(elements);
   }

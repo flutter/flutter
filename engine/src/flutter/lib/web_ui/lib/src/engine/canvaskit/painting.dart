@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
@@ -422,9 +421,7 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
     index ??= 0;
     final UniformData info = _program._getUniformFloatInfo(name);
 
-    if (index + 1 > info.floatCount) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
 
     return CkUniformFloatSlot._(this, index, name, info.location + index);
   }
@@ -461,15 +458,13 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
     }
     final int numElements = info.floatCount ~/ elementSize;
 
-    final allFloatSlots = List<CkUniformFloatSlot>.generate(
-      info.floatCount,
-      (j) => CkUniformFloatSlot._(this, j ~/ elementSize, name, info.location + j),
-    );
-
-    final elements = List<T>.generate(
-      numElements,
-      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
-    );
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<CkUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => CkUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
 
     return _CkUniformFloatArray<T>._(elements);
   }

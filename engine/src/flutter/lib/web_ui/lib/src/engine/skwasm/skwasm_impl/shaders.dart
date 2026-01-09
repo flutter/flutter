@@ -374,9 +374,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     index ??= 0;
     final UniformData info = _program._getUniformFloatInfo(name);
 
-    if (index + 1 > info.floatCount) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
 
     return SkwasmUniformFloatSlot._(this, index, name, info.location + index);
   }
@@ -406,6 +404,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
     final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
     return List<SkwasmUniformFloatSlot>.generate(
       size,
       (i) => SkwasmUniformFloatSlot._(this, i, name, info.location + i),
@@ -426,15 +429,13 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
     }
     final int numElements = info.floatCount ~/ elementSize;
 
-    final allFloatSlots = List<SkwasmUniformFloatSlot>.generate(
-      info.floatCount,
-      (j) => SkwasmUniformFloatSlot._(this, j ~/ elementSize, name, info.location + j),
-    );
-
-    final elements = List<T>.generate(
-      numElements,
-      (i) => elementFactory(allFloatSlots.sublist(i * elementSize, i * elementSize + elementSize)),
-    );
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<SkwasmUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => SkwasmUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
 
     return _SkwasmUniformArray<T>._(elements);
   }
