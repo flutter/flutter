@@ -27,7 +27,6 @@ import 'dart:ui'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/material.dart';
 import 'package:meta/meta_meta.dart';
 
 import 'basic.dart';
@@ -38,6 +37,7 @@ import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
+import 'safe_area.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
