@@ -268,18 +268,23 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Padding(padding: const EdgeInsets.all(8.0), child: Text(title)),
-                for (final T choice in choices)
-                  RadioSelection<T>(
-                    value: choice,
-                    groupValue: value,
-                    onChanged: onChanged,
-                    child: Text(choiceLabels[choice]!),
+            child: RadioGroup<T>(
+              groupValue: value,
+              onChanged: onChanged,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(title),
                   ),
-              ],
+                  for (final T choice in choices)
+                    RadioSelection<T>(
+                      value: choice,
+                      child: Text(choiceLabels[choice]!),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -318,25 +323,12 @@ class EnumCard<T extends Enum> extends StatelessWidget {
 
 // A button that has a radio button on one side and a label child. Tapping on
 // the label or the radio button selects the item.
-class RadioSelection<T extends Object?> extends StatefulWidget {
-  const RadioSelection({
-    super.key,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-    required this.child,
-  });
+class RadioSelection<T extends Object?> extends StatelessWidget {
+  const RadioSelection({super.key, required this.value, required this.child});
 
   final T value;
-  final T? groupValue;
-  final ValueChanged<T?> onChanged;
   final Widget child;
 
-  @override
-  State<RadioSelection<T>> createState() => _RadioSelectionState<T>();
-}
-
-class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -344,21 +336,11 @@ class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
       children: <Widget>[
         Padding(
           padding: const EdgeInsetsDirectional.only(end: 8),
-          child: Radio<T>(
-            // TODO(loic-sharma): Migrate to RadioGroup.
-            // https://github.com/flutter/flutter/issues/179088
-            // ignore: deprecated_member_use
-            groupValue: widget.groupValue,
-            value: widget.value,
-            // TODO(loic-sharma): Migrate to RadioGroup.
-            // https://github.com/flutter/flutter/issues/179088
-            // ignore: deprecated_member_use
-            onChanged: widget.onChanged,
-          ),
+          child: Radio<T>(value: value),
         ),
         GestureDetector(
-          onTap: () => widget.onChanged(widget.value),
-          child: widget.child,
+          onTap: () => RadioGroup.maybeOf<T>(context)?.onChanged(value),
+          child: child,
         ),
       ],
     );

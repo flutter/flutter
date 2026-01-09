@@ -87,7 +87,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       flutterRunProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
         String line,
       ) {
-        if (line.startsWith('This app is linked to the debug service')) {
+        if (!ddcAppReady.isCompleted && line.startsWith('Debug service listening on')) {
           ddcAppReady.complete();
         }
         print('[CHROME STDOUT]: $line');

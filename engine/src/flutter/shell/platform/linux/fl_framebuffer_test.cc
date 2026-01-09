@@ -43,7 +43,7 @@ TEST(FlFramebufferTest, ResourcesRemoved) {
 TEST(FlFramebufferTest, Sibling) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 
-  EXPECT_CALL(epoxy, eglCreateImage);
+  EXPECT_CALL(epoxy, eglCreateImageKHR);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, 100, 100, TRUE);
   g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);

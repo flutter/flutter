@@ -94,6 +94,7 @@ Future<void> testMain() async {
     final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
+      textDirection: TextDirection.rtl,
       color: const Color(0xFF000000),
     );
     final builder = WebParagraphBuilder(arialStyle);
@@ -119,7 +120,11 @@ Future<void> testMain() async {
     );
     final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText('لABC لم def لل لم ghi');
+    builder.addText('ABC لم def');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paint(canvas, Offset.zero);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
 
@@ -952,5 +957,115 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('pixels.png', region: region);
+  });
+
+  test('Ellipsis LTR', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      ellipsis: '...',
+      maxLines: 1,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText('This is a long text that should be ellipsized at the end');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ellipsisLTR.png', region: region);
+  });
+
+  test('Ellipsis RTL', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      ellipsis: '...',
+      maxLines: 1,
+      textDirection: TextDirection.rtl,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ellipsisRTL.png', region: region);
+  });
+
+  test('MaxLines, no ellipsis', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      maxLines: 2,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText(
+        'This is a long text cut on the second line and starting from "and" it should show up.',
+      );
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('maxLines2.png', region: region);
   });
 }

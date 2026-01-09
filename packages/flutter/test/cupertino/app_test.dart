@@ -579,6 +579,8 @@ void main() {
     debugBrightnessOverride = null;
   });
 
+  // TODO(justinmc): Cupertino tests should not import Material.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets('CupertinoApp creates a Material theme with colors based off of Cupertino theme', (
     WidgetTester tester,
   ) async {
@@ -704,6 +706,15 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('CupertinoApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox.shrink(child: CupertinoApp(home: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoApp)), Size.zero);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {

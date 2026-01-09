@@ -376,4 +376,25 @@ void main() {
       TargetPlatform.macOS,
     }),
   );
+
+  testWidgets('CupertinoExpansionTile does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ExpansibleController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoExpansionTile(
+            controller: controller,
+            title: const Text('X'),
+            child: const Text('Y'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoExpansionTile)), Size.zero);
+    controller.expand();
+    await tester.pumpAndSettle();
+  });
 }

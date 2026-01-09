@@ -12,10 +12,13 @@ import 'dart:ui';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+import 'goldens.dart';
 import 'impeller_enabled.dart';
 import 'shader_test_file_utils.dart';
 
 void main() async {
+  final ImageComparer comparer = await ImageComparer.create();
+
   test('impellerc produces reasonable JSON encoded IPLR files', () async {
     final Directory directory = shaderDirectory('iplr-json');
     final Object? rawData = convert.json.decode(
@@ -25,7 +28,7 @@ void main() async {
     expect(rawData is Map<String, Object?>, true);
 
     final data = rawData! as Map<String, Object?>;
-    expect(data.keys.toList(), <String>['sksl']);
+    expect(data.keys.toList(), <String>['format_version', 'sksl']);
     expect(data['sksl'] is Map<String, Object?>, true);
 
     final skslData = data['sksl']! as Map<String, Object?>;
@@ -56,54 +59,107 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
-  test('FragmentProgram uniform info', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    final List<UniformFloatSlot> slots = [
-      shader.getUniformFloat('iFloatUniform'),
-      shader.getUniformFloat('iVec2Uniform', 0),
-      shader.getUniformFloat('iVec2Uniform', 1),
-      shader.getUniformFloat('iMat2Uniform', 0),
-      shader.getUniformFloat('iMat2Uniform', 1),
-      shader.getUniformFloat('iMat2Uniform', 2),
-      shader.getUniformFloat('iMat2Uniform', 3),
-    ];
-    for (var i = 0; i < slots.length; ++i) {
-      expect(slots[i].shaderIndex, equals(i));
-    }
-  });
+  group('FragmentProgram getUniform*', () {
+    late FragmentShader shader;
 
-  test('FragmentProgram getUniformFloat unknown', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('unknown');
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('No uniform named "unknown".'));
-    }
-  });
+    setUpAll(() async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+      shader = program.fragmentShader();
+    });
 
-  test('FragmentProgram getUniformFloat offset overflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('iVec2Uniform', 2);
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
-    }
-  });
+    test('FragmentProgram uniform info', () async {
+      final List<UniformFloatSlot> slots = [
+        shader.getUniformFloat('iFloatUniform'),
+        shader.getUniformFloat('iVec2Uniform', 0),
+        shader.getUniformFloat('iVec2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 0),
+        shader.getUniformFloat('iMat2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 2),
+        shader.getUniformFloat('iMat2Uniform', 3),
+      ];
+      for (var i = 0; i < slots.length; ++i) {
+        expect(slots[i].shaderIndex, equals(i));
+      }
+    });
 
-  test('FragmentProgram getUniformFloat offset underflow', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
-    try {
-      shader.getUniformFloat('iVec2Uniform', -1);
-      fail('Unreachable');
-    } catch (e) {
-      expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
-    }
+    test('FragmentProgram getUniformFloat unknown', () async {
+      try {
+        shader.getUniformFloat('unknown');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('No uniform named "unknown".'));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat offset overflow', () async {
+      try {
+        shader.getUniformFloat('iVec2Uniform', 2);
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('Index `2` out of bounds for `iVec2Uniform`.'));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat offset underflow', () async {
+      try {
+        shader.getUniformFloat('iVec2Uniform', -1);
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('Index `-1` out of bounds for `iVec2Uniform`.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec2', () async {
+      final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
+      slot.set(6.0, 7.0);
+    });
+
+    test('FragmentProgram getUniformVec2 wrong size', () async {
+      try {
+        shader.getUniformVec2('iVec3Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 2.'));
+      }
+      try {
+        shader.getUniformVec2('iFloatUniform');
+      } catch (e) {
+        expect(e.toString(), contains('`iFloatUniform` has size 1, not size 2.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec3', () async {
+      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+      slot.set(0.8, 0.1, 0.3);
+    });
+
+    test('FragmentProgram getUniformVec3 wrong size', () async {
+      try {
+        shader.getUniformVec3('iVec2Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec2Uniform` has size 2, not size 3.'));
+      }
+      try {
+        shader.getUniformVec3('iVec4Uniform');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec4Uniform` has size 4, not size 3.'));
+      }
+    });
+
+    test('FragmentProgram getUniformVec4', () async {
+      final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
+      slot.set(11.0, 22.0, 19.0, 96.0);
+    });
+
+    test('FragmentProgram getUniformVec4 wrong size', () async {
+      try {
+        shader.getUniformVec4('iVec3Uniform');
+        fail('Unreachable');
+      } catch (e) {
+        expect(e.toString(), contains('`iVec3Uniform` has size 3, not size 4.'));
+      }
+    });
   });
 
   test('FragmentProgram getImageSampler', () async {
@@ -310,6 +366,28 @@ void main() async {
     shader.dispose();
     blueGreenImage.dispose();
   });
+
+  for (final (filterQuality, goldenFilename) in [
+    (FilterQuality.none, 'fragment_shader_texture_with_quality_none.png'),
+    (FilterQuality.low, 'fragment_shader_texture_with_quality_low.png'),
+    (FilterQuality.medium, 'fragment_shader_texture_with_quality_medium.png'),
+    (FilterQuality.high, 'fragment_shader_texture_with_quality_high.png'),
+  ]) {
+    test('FragmentShader renders sampler with filter quality ${filterQuality.name}', () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('texture.frag.iplr');
+      final Image image = _createOvalGradientImage(imageDimension: 16);
+      final FragmentShader shader = program.fragmentShader()
+        ..setImageSampler(0, image, filterQuality: filterQuality);
+      shader.getUniformFloat('u_size', 0).set(300);
+      shader.getUniformFloat('u_size', 1).set(300);
+
+      final Image shaderImage = await _imageFromShader(shader: shader, imageDimension: 300);
+
+      await comparer.addGoldenImage(shaderImage, goldenFilename);
+      shader.dispose();
+      image.dispose();
+    });
+  }
 
   test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
@@ -597,13 +675,17 @@ Future<ByteData?> _imageByteDataFromShader({
   required Shader shader,
   int imageDimension = 100,
 }) async {
+  final Image image = await _imageFromShader(shader: shader, imageDimension: imageDimension);
+  return image.toByteData();
+}
+
+Future<Image> _imageFromShader({required Shader shader, required int imageDimension}) {
   final recorder = PictureRecorder();
   final canvas = Canvas(recorder);
   final paint = Paint()..shader = shader;
   canvas.drawPaint(paint);
   final Picture picture = recorder.endRecording();
-  final Image image = await picture.toImage(imageDimension, imageDimension);
-  return image.toByteData();
+  return picture.toImage(imageDimension, imageDimension);
 }
 
 // Loads the path and spirv content of the files at
@@ -681,6 +763,32 @@ Image _createBlueGreenImageSync() {
   final Picture picture = recorder.endRecording();
   try {
     return picture.toImageSync(10, 10);
+  } finally {
+    picture.dispose();
+  }
+}
+
+// Image of an oval painted with a linear gradient.
+Image _createOvalGradientImage({required int imageDimension}) {
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  canvas.drawPaint(Paint()..color = const Color(0xFF000000));
+  canvas.drawOval(
+    Rect.fromCenter(
+      center: Offset(imageDimension * 0.5, imageDimension * 0.5),
+      width: imageDimension * 0.6,
+      height: imageDimension * 0.9,
+    ),
+    Paint()
+      ..shader = Gradient.linear(
+        Offset.zero,
+        Offset(imageDimension.toDouble(), imageDimension.toDouble()),
+        [const Color(0xFFFF0000), const Color(0xFF00FF00)],
+      ),
+  );
+  final Picture picture = recorder.endRecording();
+  try {
+    return picture.toImageSync(imageDimension, imageDimension);
   } finally {
     picture.dispose();
   }

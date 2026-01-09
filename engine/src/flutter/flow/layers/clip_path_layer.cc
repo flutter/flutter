@@ -31,4 +31,9 @@ void ClipPathLayer::ApplyClip(LayerStateStack::MutatorContext& mutator) const {
   }
 }
 
+void ClipPathLayer::PushClipToEmbeddedNativeViewMutatorStack(
+    ExternalViewEmbedder* view_embedder) const {
+  view_embedder->PushClipPathToVisitedPlatformViews(clip_shape());
+}
+
 }  // namespace flutter

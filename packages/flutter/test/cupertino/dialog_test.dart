@@ -1846,9 +1846,8 @@ void main() {
       await tester.tap(find.text('Go'));
       await tester.pump();
 
-      // The inherited ScrollBehavior should not apply Scrollbars since they are
+      // The inherited ScrollBehavior should not apply scrollbars since they are
       // already built in to the widget.
-      expect(find.byType(Scrollbar), findsNothing);
       expect(find.byType(RawScrollbar), findsNothing);
       // Built in CupertinoScrollbars should only number 2: one for the actions,
       // one for the content.
@@ -2155,6 +2154,60 @@ void main() {
     await gesture.moveTo(actionSheetAction);
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
+  });
+
+  testWidgets('CupertinoDialogAction does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoDialogAction(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoDialogAction)), Size.zero);
+  });
+
+  testWidgets('CupertinoActionSheetAction does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    final focusNode = FocusNode();
+    addTearDown(tester.view.reset);
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoActionSheetAction(
+            focusNode: focusNode,
+            onPressed: () {},
+            child: const Text('X'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoActionSheetAction)), Size.zero);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('CupertinoPopupSurface does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPopupSurface(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPopupSurface)), Size.zero);
+  });
+
+  testWidgets('CupertinoAlertDialog does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoAlertDialog())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoAlertDialog)), Size.zero);
   });
 }
 

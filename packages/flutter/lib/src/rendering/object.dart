@@ -4789,7 +4789,9 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
     config.isBlockingUserActions = blockUserActions;
-    config.localeForSubtree = localeForSubtree;
+    if (localeForSubtree != null) {
+      config.localeForSubtree = localeForSubtree;
+    }
     assert(
       ((_properties.scopesRoute ?? false) && explicitChildNodes) ||
           !(_properties.scopesRoute ?? false),
@@ -4936,8 +4938,18 @@ mixin SemanticsAnnotationsMixin on RenderObject {
       config.validationResult = _properties.validationResult;
     }
 
+    if (_properties.hitTestBehavior != null) {
+      config.hitTestBehavior = _properties.hitTestBehavior!;
+    }
+
     if (_properties.inputType != null) {
       config.inputType = _properties.inputType!;
+    }
+    if (_properties.minValue != null) {
+      config.minValue = _properties.minValue;
+    }
+    if (_properties.maxValue != null) {
+      config.maxValue = _properties.maxValue;
     }
 
     // Registering _perform* as action handlers instead of the user provided

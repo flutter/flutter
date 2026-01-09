@@ -6196,10 +6196,14 @@ TestSemantics _expectedSemantics({bool scrollable = false}) {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  TestSemantics(children: destinations),
-                  TestSemantics(label: 'body', textDirection: TextDirection.ltr),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(children: destinations),
+                      TestSemantics(label: 'body', textDirection: TextDirection.ltr),
+                    ],
+                  ),
                 ],
               ),
             ],

@@ -703,11 +703,7 @@ void main() {
     expect(find.text('suffix'), findsOneWidget);
     expect(
       tester.semantics.find(find.byKey(suffix)),
-      containsSemantics(
-        label: 'suffix',
-        identifier: 'myId',
-        rect: const Rect.fromLTWH(0, 0, 50, 50),
-      ),
+      isSemantics(label: 'suffix', identifier: 'myId', rect: const Rect.fromLTWH(0, 0, 50, 50)),
     );
   });
 
@@ -2003,32 +1999,36 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
-              id: 1,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.paste,
+                    SemanticsAction.setText,
+                    SemanticsAction.moveCursorBackwardByWord,
+                  ],
+                  value: 'abcdefghi',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection.collapsed(offset: 9),
+                ),
               ],
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.setSelection,
-                SemanticsAction.paste,
-                SemanticsAction.setText,
-                SemanticsAction.moveCursorBackwardByWord,
-              ],
-              value: 'abcdefghi',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection.collapsed(offset: 9),
             ),
           ],
         ),
         ignoreRect: true,
+        ignoreId: true,
         ignoreTransform: true,
       ),
     );
@@ -5654,24 +5654,28 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics.rootChild(id: 2, textDirection: TextDirection.ltr, label: 'Prefix'),
-            TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              value: 'some text',
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(id: 2, textDirection: TextDirection.ltr, label: 'Prefix'),
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  value: 'some text',
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                ),
+                TestSemantics(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
               ],
             ),
-            TestSemantics.rootChild(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -5697,24 +5701,28 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              value: 'some text',
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  value: 'some text',
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                ),
+                TestSemantics(textDirection: TextDirection.ltr, label: 'Prefix'),
+                TestSemantics(textDirection: TextDirection.ltr, label: 'Suffix'),
               ],
             ),
-            TestSemantics.rootChild(id: 2, textDirection: TextDirection.ltr, label: 'Prefix'),
-            TestSemantics.rootChild(id: 3, textDirection: TextDirection.ltr, label: 'Suffix'),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8439,20 +8447,24 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 0,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8467,21 +8479,25 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              value: 'Guten Tag',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  value: 'Guten Tag',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8496,31 +8512,35 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              value: 'Guten Tag',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              textSelection: const TextSelection.collapsed(offset: 9),
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  value: 'Guten Tag',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  textSelection: const TextSelection.collapsed(offset: 9),
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8535,33 +8555,37 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection.collapsed(offset: 4),
-              value: 'Guten Tag',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 9,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorForwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.moveCursorForwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection.collapsed(offset: 4),
+                  value: 'Guten Tag',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 9,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8577,31 +8601,35 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection.collapsed(offset: 0),
-              value: 'Schönen Feierabend',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 18,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorForwardByCharacter,
-                SemanticsAction.moveCursorForwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection.collapsed(offset: 0),
+                  value: 'Schönen Feierabend',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 18,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8698,30 +8726,34 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              textDirection: TextDirection.ltr,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.setText,
-                // Absent the following because enableInteractiveSelection: false
-                // SemanticsAction.moveCursorBackwardByCharacter,
-                // SemanticsAction.moveCursorBackwardByWord,
-                // SemanticsAction.setSelection,
-                // SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics.rootChild(
+                  textDirection: TextDirection.ltr,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 0,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setText,
+                    // Absent the following because enableInteractiveSelection: false
+                    // SemanticsAction.moveCursorBackwardByCharacter,
+                    // SemanticsAction.moveCursorBackwardByWord,
+                    // SemanticsAction.setSelection,
+                    // SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8747,21 +8779,25 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              value: 'Hello',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+              children: <TestSemantics>[
+                TestSemantics(
+                  value: 'Hello',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8777,31 +8813,35 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              value: 'Hello',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textSelection: const TextSelection.collapsed(offset: 5),
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  value: 'Hello',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textSelection: const TextSelection.collapsed(offset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8816,35 +8856,39 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 1,
-              value: 'Hello',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorForwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.moveCursorForwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-                SemanticsAction.cut,
-                SemanticsAction.copy,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              children: <TestSemantics>[
+                TestSemantics(
+                  value: 'Hello',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorForwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.moveCursorForwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                    SemanticsAction.cut,
+                    SemanticsAction.copy,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -8869,7 +8913,7 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    const inputFieldId = 1;
+    const inputFieldId = 2;
 
     expect(
       controller.selection,
@@ -8881,27 +8925,32 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: inputFieldId,
-              value: 'Hello',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textSelection: const TextSelection.collapsed(offset: 5),
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  value: 'Hello',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textSelection: const TextSelection.collapsed(offset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
@@ -8940,29 +8989,34 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: inputFieldId,
-              value: 'Hello',
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-                SemanticsAction.cut,
-                SemanticsAction.copy,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  value: 'Hello',
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
+                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                    SemanticsAction.cut,
+                    SemanticsAction.copy,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                ),
               ],
             ),
           ],
@@ -8993,26 +9047,31 @@ void main() {
       ),
     );
 
-    const inputFieldId = 1;
+    const inputFieldId = 2;
 
     expect(
       semantics,
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: inputFieldId,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  value: textInTextField,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textDirection: TextDirection.ltr,
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              value: textInTextField,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textDirection: TextDirection.ltr,
             ),
           ],
         ),
@@ -9029,32 +9088,37 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: inputFieldId,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  value: textInTextField,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(
+                    baseOffset: textInTextField.length,
+                    extentOffset: textInTextField.length,
+                  ),
+                ),
               ],
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              value: textInTextField,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection(
-                baseOffset: textInTextField.length,
-                extentOffset: textInTextField.length,
-              ),
             ),
           ],
         ),
@@ -9083,26 +9147,31 @@ void main() {
       ),
     );
 
-    const inputFieldId = 1;
+    const inputFieldId = 2;
 
     expect(
       semantics,
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: inputFieldId,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  value: textInTextField,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textDirection: TextDirection.ltr,
+                ),
               ],
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              value: textInTextField,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textDirection: TextDirection.ltr,
             ),
           ],
         ),
@@ -9119,32 +9188,37 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(
-              id: inputFieldId,
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
+            TestSemantics.rootChild(
+              id: 1,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: inputFieldId,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.moveCursorBackwardByCharacter,
+                    SemanticsAction.moveCursorBackwardByWord,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    // No paste option.
+                  ],
+                  value: textInTextField,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 5,
+                  textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(
+                    baseOffset: textInTextField.length,
+                    extentOffset: textInTextField.length,
+                  ),
+                ),
               ],
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.moveCursorBackwardByCharacter,
-                SemanticsAction.moveCursorBackwardByWord,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                // No paste option.
-              ],
-              value: textInTextField,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 5,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection(
-                baseOffset: textInTextField.length,
-                extentOffset: textInTextField.length,
-              ),
             ),
           ],
         ),
@@ -9280,30 +9354,33 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'label',
-              id: 1,
-              textDirection: TextDirection.ltr,
-              inputType: ui.SemanticsInputType.text,
-              maxValueLength: 10,
-              currentValueLength: 0,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
               children: <TestSemantics>[
-                TestSemantics(id: 2, label: 'helper', textDirection: TextDirection.ltr),
                 TestSemantics(
-                  id: 3,
-                  label: '10 characters remaining',
+                  label: 'label',
                   textDirection: TextDirection.ltr,
+                  inputType: ui.SemanticsInputType.text,
+                  maxValueLength: 10,
+                  currentValueLength: 0,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'helper', textDirection: TextDirection.ltr),
+                    TestSemantics(
+                      label: '10 characters remaining',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -9318,39 +9395,42 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'label',
-              id: 1,
-              textDirection: TextDirection.ltr,
-              textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              maxValueLength: 10,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-                SemanticsAction.focus,
-                SemanticsAction.setSelection,
-                SemanticsAction.setText,
-                SemanticsAction.paste,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocused,
-              ],
               children: <TestSemantics>[
-                TestSemantics(id: 2, label: 'helper', textDirection: TextDirection.ltr),
-                TestSemantics(
-                  id: 3,
-                  label: '10 characters remaining',
-                  flags: <SemanticsFlag>[SemanticsFlag.isLiveRegion],
+                TestSemantics.rootChild(
+                  label: 'label',
                   textDirection: TextDirection.ltr,
+                  textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 0,
+                  maxValueLength: 10,
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                    SemanticsAction.focus,
+                    SemanticsAction.setSelection,
+                    SemanticsAction.setText,
+                    SemanticsAction.paste,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                    SemanticsFlag.isFocused,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(id: 2, label: 'helper', textDirection: TextDirection.ltr),
+                    TestSemantics(
+                      label: '10 characters remaining',
+                      flags: <SemanticsFlag>[SemanticsFlag.isLiveRegion],
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
+        ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
       ),
@@ -9390,20 +9470,24 @@ void main() {
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              label: 'label',
-              textDirection: TextDirection.ltr,
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
               children: <TestSemantics>[
-                TestSemantics(label: 'helper', textDirection: TextDirection.ltr),
-                TestSemantics(label: '0 out of 10', textDirection: TextDirection.ltr),
+                TestSemantics(
+                  label: 'label',
+                  textDirection: TextDirection.ltr,
+                  inputType: ui.SemanticsInputType.text,
+                  currentValueLength: 0,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isTextField,
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.hasEnabledState,
+                    SemanticsFlag.isEnabled,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(label: 'helper', textDirection: TextDirection.ltr),
+                    TestSemantics(label: '0 out of 10', textDirection: TextDirection.ltr),
+                  ],
+                ),
               ],
             ),
           ],
@@ -9448,22 +9532,26 @@ void main() {
           TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics.rootChild(
-                label: 'label',
-                textDirection: TextDirection.ltr,
-                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                flags: <SemanticsFlag>[
-                  SemanticsFlag.isTextField,
-                  SemanticsFlag.isFocusable,
-                  SemanticsFlag.hasEnabledState,
-                  SemanticsFlag.isEnabled,
-                ],
-                inputType: ui.SemanticsInputType.text,
-                currentValueLength: 0,
                 children: <TestSemantics>[
-                  TestSemantics(
-                    label: 'oh no!',
+                  TestSemantics.rootChild(
+                    label: 'label',
                     textDirection: TextDirection.ltr,
-                    flags: <SemanticsFlag>[if (!supportsAnnounce) SemanticsFlag.isLiveRegion],
+                    actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isTextField,
+                      SemanticsFlag.isFocusable,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    inputType: ui.SemanticsInputType.text,
+                    currentValueLength: 0,
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        label: 'oh no!',
+                        textDirection: TextDirection.ltr,
+                        flags: <SemanticsFlag>[if (!supportsAnnounce) SemanticsFlag.isLiveRegion],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -18893,6 +18981,94 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     tester.pump();
   });
+
+  testWidgets(
+    'Does not crash when editing value changes between consecutive scrolls',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179164.
+      final controller = TextEditingController(text: 'text ' * 10000);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(child: TextField(controller: controller, maxLines: null)),
+        ),
+      );
+
+      final Finder textField = find.byType(TextField);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+      // Long press to select the first word and show the toolbar.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      // Scroll down so selection is not visible, and toolbar is scheduled to be shown
+      // when the selection is once again visible.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(textField));
+      await gesture.moveBy(const Offset(0.0, -200.0));
+      await tester.pump();
+      await gesture.up();
+
+      // Scroll again before the post-frame callback from the first scroll is run to invalidate
+      // the data from the first scroll.
+      controller.value = const TextEditingValue(text: 'a different value');
+
+      await gesture.down(tester.getCenter(textField));
+      await gesture.moveBy(const Offset(0.0, -100.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // This test should reach the end without crashing.
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
+  );
+
+  testWidgets(
+    'toolbar should not reappear when editing value changes during a scroll',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179164.
+      final controller = TextEditingController(text: 'text ' * 10000);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(child: TextField(controller: controller, maxLines: null)),
+        ),
+      );
+
+      final Finder textField = find.byType(TextField);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+      // Long press to select the first word and show the toolbar.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      // Scroll down so selection is not visible, and toolbar is scheduled to be shown
+      // when the selection is once again visible.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(textField));
+      await gesture.moveBy(const Offset(0.0, -200.0));
+      await tester.pump();
+      await gesture.up();
+      // Change the editing value before the post-frame callback from the scroll is run,
+      // this should invalidate the data from the scroll and cause the toolbar to not
+      // reappear.
+      controller.value = const TextEditingValue(text: 'a different value');
+      // Pump and settle to allow postFrameCallbacks to complete.
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, false);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
+  );
 }
 
 /// A Simple widget for testing the obscure text.

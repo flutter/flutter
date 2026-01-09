@@ -126,7 +126,9 @@
       "cfenv": "cpp",
       "execution": "cpp",
       "print": "cpp",
-      "unicode.h": "c"
+      "unicode.h": "c",
+      "source_location": "cpp",
+      "syncstream": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",

@@ -306,7 +306,7 @@ Future<void> testMain() async {
         expect(pngData, isNotNull);
         expect(pngData!.lengthInBytes, isNonZero);
       });
-    });
+    }, skip: isWimp); // See https://github.com/flutter/flutter/issues/175371
   }
 
   emitImageTests('picture_toImage', () {

@@ -183,6 +183,12 @@ class RunSuiteStep implements PipelineStep {
       print('Did not create SkiaGoldClient. Reason: Safari browser.');
       return null;
     }
+    if (suite.runConfig.enableWimp) {
+      // Wimp has various major rendering limitations right now, such
+      // as MSAA being disabled. As a result, we are not going to validate
+      // golden tests until wimp is in a more stable place.
+      return null;
+    }
     final Renderer renderer = suite.testBundle.compileConfigs.first.renderer;
     final CanvasKitVariant? variant = suite.runConfig.variant;
     final io.Directory workDirectory = getSkiaGoldDirectoryForSuite(suite);
