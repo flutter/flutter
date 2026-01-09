@@ -217,12 +217,23 @@ class _TestTextFieldState extends State<TestTextField>
   }
 
   static const Color _red = Color(0xFFF44336); // Colors.red.
+  static const Color _cupertinoInactiveGrey = Color(
+    0xFF999999,
+  ); // CupertinoColors.inactiveGrey.color
 
   @override
   Widget build(BuildContext context) {
     final bool cursorOpacityAnimates = switch (defaultTargetPlatform) {
       TargetPlatform.iOS => true,
       _ => false,
+    };
+    final Radius? cursorRadius = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => const Radius.circular(2.0),
+      _ => null,
+    };
+    final Color? backgroundCursorColor = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS => _cupertinoInactiveGrey,
+      _ => null,
     };
     forcePressEnabled = switch (defaultTargetPlatform) {
       TargetPlatform.iOS => true,
@@ -234,10 +245,11 @@ class _TestTextFieldState extends State<TestTextField>
         key: editableTextKey,
         autofillHints: widget.autofillHints,
         autofocus: widget.autofocus,
-        backgroundCursorColor: _red, // Colors.red
+        backgroundCursorColor: backgroundCursorColor ?? _red, // Colors.red
         contextMenuBuilder: widget.contextMenuBuilder,
         cursorColor: widget.cursorColor ?? _red, // Colors.red
         cursorOpacityAnimates: cursorOpacityAnimates,
+        cursorRadius: cursorRadius,
         focusNode: _effectiveFocusNode,
         groupId: widget.groupId,
         maxLines: widget.maxLines,

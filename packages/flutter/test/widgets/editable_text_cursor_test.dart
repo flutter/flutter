@@ -291,10 +291,12 @@ void main() {
     (WidgetTester tester) async {
       EditableText.debugDeterministicCursor = true;
       final defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-      const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
+      final Widget widget = MaterialApp(
+        home: Material(child: TestTextField(maxLines: 3, cursorColor: defaultCursorColor)),
+      );
       await tester.pumpWidget(widget);
 
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
 
       final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -330,10 +332,12 @@ void main() {
   ) async {
     final defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
     EditableText.debugDeterministicCursor = true;
-    const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
+    final Widget widget = MaterialApp(
+      home: Material(child: TestTextField(maxLines: 3, cursorColor: defaultCursorColor)),
+    );
     await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -496,7 +500,7 @@ void main() {
   testWidgets(
     'Cursor radius is 2.0',
     (WidgetTester tester) async {
-      const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
+      const Widget widget = MaterialApp(home: Material(child: TestTextField(maxLines: 3)));
       await tester.pumpWidget(widget);
 
       final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
