@@ -574,7 +574,6 @@ void main() {
     expect(packageResolver.resolved, <List<String>>[
       <String>['fuchsia-debug-symbols-x64', '123456'],
       <String>['fuchsia-debug-symbols-arm64', '123456'],
-      <String>['fuchsia-debug-symbols-riscv64', '123456'],
     ]);
   });
 
