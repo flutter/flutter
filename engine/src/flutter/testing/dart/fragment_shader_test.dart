@@ -489,43 +489,40 @@ void main() async {
     shader.dispose();
   });
 
-  test(
-    'ImageFilter.shader errors if shader does not have correct uniform layout',
-    () async {
-      if (impellerEnabled || !impellerEnabled) {
-        // TODO(gaaclarke): This test was disabled for a long time and atrophied
-        // we need to fix it or delete it.
-        print('This test atrophied and is disabled.');
-        return;
-      }
-      const shaders = <String>[
-        'no_uniforms.frag.iplr',
-        'missing_size.frag.iplr',
-        'missing_texture.frag.iplr',
-      ];
-      const errors = <(bool, bool)>[(true, true), (true, false), (false, false)];
-      for (var i = 0; i < 3; i++) {
-        final String fileName = shaders[i];
-        final FragmentProgram program = await FragmentProgram.fromAsset(fileName);
-        final FragmentShader shader = program.fragmentShader();
+  test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
+    if (impellerEnabled || !impellerEnabled) {
+      // TODO(gaaclarke): This test was disabled for a long time and atrophied
+      // we need to fix it or delete it.
+      print('This test atrophied and is disabled.');
+      return;
+    }
+    const shaders = <String>[
+      'no_uniforms.frag.iplr',
+      'missing_size.frag.iplr',
+      'missing_texture.frag.iplr',
+    ];
+    const errors = <(bool, bool)>[(true, true), (true, false), (false, false)];
+    for (var i = 0; i < 3; i++) {
+      final String fileName = shaders[i];
+      final FragmentProgram program = await FragmentProgram.fromAsset(fileName);
+      final FragmentShader shader = program.fragmentShader();
 
-        Object? error;
-        try {
-          ImageFilter.shader(shader);
-        } catch (err) {
-          error = err;
-        }
-        expect(error is StateError, true);
-        final (bool floatError, bool samplerError) = errors[i];
-        if (floatError) {
-          expect(error.toString(), contains('shader has fewer than two float'));
-        }
-        if (samplerError) {
-          expect(error.toString(), contains('shader is missing a sampler uniform'));
-        }
+      Object? error;
+      try {
+        ImageFilter.shader(shader);
+      } catch (err) {
+        error = err;
       }
-    },
-  );
+      expect(error is StateError, true);
+      final (bool floatError, bool samplerError) = errors[i];
+      if (floatError) {
+        expect(error.toString(), contains('shader has fewer than two float'));
+      }
+      if (samplerError) {
+        expect(error.toString(), contains('shader is missing a sampler uniform'));
+      }
+    }
+  });
 
   _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
@@ -540,11 +537,7 @@ void main() async {
     await _expectShaderRendersGreen(shader);
   });
 
-  _runSkiaTest('ImageFilter.shader can be applied to canvas operations', () async {
-    if (!impellerEnabled) {
-      print('Skipped for Skia');
-      return;
-    }
+  _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final recorder = PictureRecorder();
