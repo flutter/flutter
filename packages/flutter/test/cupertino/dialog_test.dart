@@ -2269,9 +2269,11 @@ void main() {
     (WidgetTester tester) async {
       final focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
       final focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+      final focusNodeThree = FocusNode(debugLabel: 'CupertinoDialogAction Three');
 
       addTearDown(focusNodeOne.dispose);
       addTearDown(focusNodeTwo.dispose);
+      addTearDown(focusNodeThree.dispose);
 
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -2287,6 +2289,11 @@ void main() {
                 child: const Text('One'),
               ),
               CupertinoDialogAction(focusNode: focusNodeTwo, child: const Text('Two')),
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeThree,
+                child: const Text('Three'),
+              ),
             ],
           ),
         ),
@@ -2297,18 +2304,22 @@ void main() {
 
       expect(focusNodeOne.hasPrimaryFocus, isFalse);
       expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeThree.hasPrimaryFocus, isFalse);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
       expect(focusNodeOne.hasPrimaryFocus, isTrue);
       expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeThree.hasPrimaryFocus, isFalse);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
 
-      expect(focusNodeOne.hasFocus, isTrue);
-      expect(focusNodeTwo.hasFocus, isFalse);
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+      expect(focusNodeThree.hasPrimaryFocus, isTrue);
+
     },
   );
 
