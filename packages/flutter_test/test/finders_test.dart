@@ -16,11 +16,13 @@ const List<Widget> fooBarTexts = <Text>[
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(
         _boilerplate(ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))))),
       );
@@ -166,11 +168,13 @@ void main() {
     });
 
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
+      final controller = TextEditingController()..text = 'this is test';
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: _boilerplate(
-              TextField(controller: TextEditingController()..text = 'this is test'),
+              TextField(controller: controller),
             ),
           ),
         ),
@@ -694,11 +698,16 @@ void main() {
     });
 
     testWidgets('finds only static text for now', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final controller = TextEditingController(text: 'text');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _boilerplate(
           EditableText(
-            controller: TextEditingController(text: 'text'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: const Color(0x00000000),
             backgroundCursorColor: const Color(0x00000000),
@@ -740,6 +749,7 @@ void main() {
   });
 
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
       _boilerplate(
         Row(
@@ -1412,6 +1422,7 @@ void main() {
     group('scrollable', () {
       testWidgets('can find node that can scroll up', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1429,6 +1440,7 @@ void main() {
 
       testWidgets('can find node that can scroll down', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 400);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1446,6 +1458,7 @@ void main() {
 
       testWidgets('can find node that can scroll left', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1464,6 +1477,7 @@ void main() {
 
       testWidgets('can find node that can scroll right', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 200);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(

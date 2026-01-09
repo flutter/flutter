@@ -14,6 +14,11 @@ void main() {
     image = await createTestImage(width: 8, height: 8);
   });
 
+  _MutantPainter painterOfCustomPaintByKey(Key key) {
+    return (find.byKey(key).evaluate().first.widget as CustomPaint)
+        .painter! as _MutantPainter;
+  }
+
   testWidgets('paints.circle is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
     await tester.pumpWidget(
@@ -32,6 +37,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -57,6 +63,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -84,6 +91,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -117,6 +125,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -143,6 +152,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -169,6 +179,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -196,6 +207,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -222,6 +234,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -258,6 +271,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -285,6 +299,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -315,6 +330,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -349,6 +365,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -378,6 +395,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -412,6 +430,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -449,6 +468,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -488,6 +508,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -527,6 +548,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -566,6 +588,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
