@@ -717,17 +717,23 @@ Future<void> removeExtendedAttributes(
   ProcessUtils processUtils,
   Logger logger,
 ) async {
-  // Use -cr to clear ALL extended attributes recursively.
-  // This handles com.apple.FinderInfo, com.apple.provenance, and any other
-  // extended attributes that may cause code signing failures.
-  final bool success = await processUtils.exitsHappy(<String>[
-    'xattr',
-    '-cr',
-    projectDirectory.path,
-  ]);
-  // Ignore all errors, for example if directory is missing.
-  if (!success) {
-    logger.printTrace('Failed to remove extended attributes from ${projectDirectory.path}');
+  // Remove specific extended attributes that cause code signing failures.
+  // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
+  // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
+  final List<String> attributesToRemove = <String>['com.apple.FinderInfo', 'com.apple.provenance'];
+
+  for (final String attribute in attributesToRemove) {
+    final bool success = await processUtils.exitsHappy(<String>[
+      'xattr',
+      '-r',
+      '-d',
+      attribute,
+      projectDirectory.path,
+    ]);
+    // Ignore all errors, for example if directory is missing or attribute doesn't exist.
+    if (!success) {
+      logger.printTrace('Failed to remove $attribute from ${projectDirectory.path}');
+    }
   }
 }
 
