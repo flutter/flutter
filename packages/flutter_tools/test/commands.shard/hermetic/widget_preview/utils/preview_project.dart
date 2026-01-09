@@ -173,7 +173,9 @@ dependencies:
 
     return (
       path: file.path,
-      uri: PackageConfig(<Package>[Package(packageName, projectRoot.uri)]).toPackageUri(file.uri)!,
+      uri: PackageConfig(<Package>[
+        Package(packageName, projectRoot.uri, packageUriRoot: Uri.parse('lib/')),
+      ]).toPackageUri(file.uri)!,
     );
   }
 
