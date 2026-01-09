@@ -62,7 +62,7 @@ Future<void> main() async {
     final packageGraph = jsonDecode(packageGraphFile.readAsStringSync()) as Map<String, Object?>;
 
     // These are the sdk packages that Flutter apps can depend on.
-    final roots = <String>['flutter', 'flutter_test', 'flutter_test', 'flutter_localizations'];
+    final roots = <String>['flutter', 'flutter_test', 'flutter_localizations'];
     final allowedPackages = <String>{
       // Allow depending on other Flutter framework sdk packages.
       ...roots,
