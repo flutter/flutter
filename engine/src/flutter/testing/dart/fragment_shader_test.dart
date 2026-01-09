@@ -565,27 +565,23 @@ void main() async {
   });
 
   // For an explaination of the problem see https://github.com/flutter/flutter/issues/163302 .
-  test('ImageFilter.shader equality checks consider uniform values', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
-    // ignore: dead_code
+  _runImpellerTest('ImageFilter.shader equality checks consider uniform values', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final filter = ImageFilter.shader(shader);
 
-    // The same shader is equal to itself.
-    expect(filter, filter);
+    // This is confusing but returning false was the stated behavior Jonah
+    // implemented, see
+    // https://github.com/flutter/flutter/issues/163302#issuecomment-2660339423
+    // By always returning false caching mechanisms won't ever store the same
+    // filter.
+    expect(filter, isNot(filter));
     expect(identical(filter, filter), true);
 
     final filter_2 = ImageFilter.shader(shader);
-
-    // The different shader is equal as long as uniforms are identical.
-    expect(filter, filter_2);
+    expect(filter, isNot(filter_2));
     expect(identical(filter, filter_2), false);
 
-    // Not equal if uniforms change.
     shader.setFloat(0, 1);
     final filter_3 = ImageFilter.shader(shader);
 
