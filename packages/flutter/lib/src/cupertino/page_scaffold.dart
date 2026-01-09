@@ -109,7 +109,6 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
   }
 
   @override
-  @override
   void handleStatusBarTap() {
     super.handleStatusBarTap();
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
