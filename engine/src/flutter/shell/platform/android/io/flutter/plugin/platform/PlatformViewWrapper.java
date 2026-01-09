@@ -4,7 +4,6 @@
 
 package io.flutter.plugin.platform;
 
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
