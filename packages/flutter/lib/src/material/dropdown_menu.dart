@@ -726,7 +726,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   TextEditingController? _localTextEditingController;
   TextEditingController get _effectiveTextEditingController =>
       widget.controller ?? (_localTextEditingController ??= TextEditingController());
-  final FocusNode _internalFocudeNode = FocusNode();
+  final FocusNode _internalFocusNode = FocusNode();
   WidgetStatesController? _highlightedItemStatesController;
 
   FocusNode? _localTrailingIconButtonFocusNode;
@@ -757,7 +757,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   void dispose() {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
-    _internalFocudeNode.dispose();
+    _internalFocusNode.dispose();
     _localTrailingIconButtonFocusNode?.dispose();
     _localTrailingIconButtonFocusNode = null;
     _highlightedItemStatesController?.dispose();
@@ -1103,7 +1103,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       }
       controller.open();
       if (focusForKeyboard) {
-        _internalFocudeNode.requestFocus();
+        _internalFocusNode.requestFocus();
       }
     }
     setState(() {});
@@ -1405,7 +1405,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
             },
             child: Focus(
-              focusNode: _internalFocudeNode,
+              focusNode: _internalFocusNode,
               skipTraversal: true,
               child: const SizedBox.shrink(),
             ),
