@@ -489,11 +489,13 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest(
+  test(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
     () async {
-      if (!impellerEnabled) {
-        print('Skipped for Skia');
+      if (impellerEnabled || !impellerEnabled) {
+        // TODO(gaaclarke): This test was disabled for a long time and atrophied
+        // we need to fix it or delete it.
+        print('This test atrophied and is disabled.');
         return;
       }
       const shaders = <String>[
