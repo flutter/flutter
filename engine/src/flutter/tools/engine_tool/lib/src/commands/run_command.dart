@@ -256,7 +256,7 @@ final class RunTarget {
         if (device.emulator) {
           return switch (mode) {
             'debug' => () {
-              // TODO(flutter/flutter#155960): Consider auto-detecting host
+              // TODO(mahmuttaskiran): Consider auto-detecting host
               // architecture or allowing users to specify x64 vs arm64.
               // For x64 simulators, use 'ios_debug_sim' instead.
               return switch (device.targetPlatform) {
