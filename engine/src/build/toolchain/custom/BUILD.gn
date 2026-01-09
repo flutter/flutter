@@ -7,10 +7,9 @@ import("//build/toolchain/ccache.gni")
 
 toolchain("custom") {
   toolchain_bin = "${custom_toolchain}/bin"
+  compiler_prefix = ""
   if (use_ccache) {
     compiler_prefix = "ccache "
-  } else {
-    compiler_prefix = ""
   }
 
   # We can't do string interpolation ($ in strings) on things with dots in
