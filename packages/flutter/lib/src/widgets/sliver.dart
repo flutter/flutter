@@ -1850,22 +1850,73 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
 ///    within the computed [SliverGeometry.scrollExtent] of the [SliverMainAxisGroup].
 ///  * [SliverCrossAxisGroup], which is the [RenderObjectWidget] for laying out
 ///    multiple slivers along the cross axis.
-class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
+// class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
+//   /// Creates a sliver that places sliver children in a linear array along
+//   /// the main axis.
+//   const SliverMainAxisGroup({super.key, required List<Widget> slivers}) : super(children: slivers);
+
+//   @override
+//   MultiChildRenderObjectElement createElement() => _SliverMainAxisGroupElement(this);
+
+//   @override
+//   RenderSliverMainAxisGroup createRenderObject(BuildContext context) {
+//     return RenderSliverMainAxisGroup();
+//   }
+// }
+
+// class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
+//   _SliverMainAxisGroupElement(SliverMainAxisGroup super.widget);
+
+//   @override
+//   void debugVisitOnstageChildren(ElementVisitor visitor) {
+//     children
+//         .where((Element e) {
+//           final renderSliver = e.renderObject! as RenderSliver;
+//           return renderSliver.geometry!.visible;
+//         })
+//         .forEach(visitor);
+//   }
+// }
+
+class SliverMainAxisGroup extends StatelessWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the main axis.
-  const SliverMainAxisGroup({super.key, required List<Widget> slivers}) : super(children: slivers);
+  const SliverMainAxisGroup({super.key, required this.slivers});
+
+  final List<Widget> slivers;
 
   @override
-  MultiChildRenderObjectElement createElement() => _SliverMainAxisGroupElement(this);
-
-  @override
-  RenderSliverMainAxisGroup createRenderObject(BuildContext context) {
-    return RenderSliverMainAxisGroup();
+  Widget build(BuildContext context) {
+    return SliverUnpinned(sliver: NestedSlivers(slivers: slivers));
   }
 }
 
-class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
-  _SliverMainAxisGroupElement(SliverMainAxisGroup super.widget);
+/// POC of a base class for sliver that places sliver children in a linear array along
+/// the main axis.
+class NestedSlivers extends MultiChildRenderObjectWidget {
+  /// Creates a sliver that places sliver children in a linear array along
+  /// the main axis.
+  const NestedSlivers({super.key, required List<Widget> slivers, this.paintOrder})
+    : super(children: slivers);
+
+  final SliverPaintOrder? paintOrder;
+
+  @override
+  MultiChildRenderObjectElement createElement() => _NestedSliversElement(this);
+
+  @override
+  RenderNestedSlivers createRenderObject(BuildContext context) {
+    return RenderNestedSlivers(paintOrder: paintOrder);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderNestedSlivers renderObject) {
+    renderObject.paintOrder = paintOrder;
+  }
+}
+
+class _NestedSliversElement extends MultiChildRenderObjectElement {
+  _NestedSliversElement(NestedSlivers super.widget);
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
@@ -1921,4 +1972,44 @@ class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
 class _RenderSliverEnsureSemantics extends RenderProxySliver {
   @override
   bool get ensureSemantics => true;
+}
+
+/// A sliver that makes its sliver child unpinned.
+class SliverUnpinned extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that makes its sliver child unpinned.
+  const SliverUnpinned({super.key, required Widget sliver}) : super(child: sliver);
+
+  @override
+  RenderSliverUnpinned createRenderObject(BuildContext context) {
+    return RenderSliverUnpinned();
+  }
+}
+
+/// A sliver that makes its sliver child unpinned.
+class RenderSliverUnpinned extends RenderProxySliver {
+  @override
+  void performLayout() {
+    assert(child != null);
+    child!.layout(constraints, parentUsesSize: true);
+
+    final SliverGeometry childGeometry = child!.geometry!;
+
+    if (childGeometry.scrollOffsetCorrection != null ||
+        childGeometry.maxScrollObstructionExtent == 0) {
+      geometry = childGeometry;
+      return;
+    }
+
+    final double pinnedScrollExtent = math.max(
+      0,
+      constraints.overlap +
+          constraints.scrollOffset -
+          (childGeometry.scrollExtent - childGeometry.maxScrollObstructionExtent),
+    );
+
+    geometry = childGeometry.copyWith(
+      paintOrigin: childGeometry.paintOrigin - pinnedScrollExtent,
+      maxScrollObstructionExtent: 0,
+    );
+  }
 }
