@@ -154,6 +154,7 @@ class TestTextField extends StatefulWidget {
     this.autofillHints = const <String>[],
     this.autofocus = false,
     this.contextMenuBuilder,
+    this.cursorColor,
     this.focusNode,
     this.groupId = EditableText,
     this.maxLines = 1,
@@ -167,6 +168,7 @@ class TestTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final bool autofocus;
   final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final Color? cursorColor;
   final FocusNode? focusNode;
   final Object groupId;
   final int? maxLines;
@@ -234,7 +236,7 @@ class _TestTextFieldState extends State<TestTextField>
         autofocus: widget.autofocus,
         backgroundCursorColor: _red, // Colors.red
         contextMenuBuilder: widget.contextMenuBuilder,
-        cursorColor: _red, // Colors.red
+        cursorColor: widget.cursorColor ?? _red, // Colors.red
         cursorOpacityAnimates: cursorOpacityAnimates,
         focusNode: _effectiveFocusNode,
         groupId: widget.groupId,

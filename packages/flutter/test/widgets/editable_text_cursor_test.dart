@@ -252,10 +252,12 @@ void main() {
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);
-    const Widget widget = MaterialApp(home: Material(child: TextField(maxLines: 3)));
+    final Widget widget = MaterialApp(
+      home: Material(child: TestTextField(maxLines: 3, cursorColor: defaultCursorColor)),
+    );
     await tester.pumpWidget(widget);
 
-    await tester.tap(find.byType(TextField));
+    await tester.tap(find.byType(TestTextField));
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
