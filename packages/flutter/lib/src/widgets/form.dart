@@ -664,9 +664,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     Form.maybeOf(context)?._fieldDidChange();
   }
 
-  /// Clears the error display for this field without resetting the field's value.
+  /// Clears any visible validation error for this field without resetting the field's value.
   ///
-  /// This sets the [errorText] to null and marks [hasInteractedByUser] as false,
+  /// Resets [errorText] to `null` and marks [hasInteractedByUser] as false,
   /// effectively hiding any validation messages until the next validation or interaction.
   void clearError() {
     setState(() {
