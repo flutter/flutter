@@ -87,14 +87,56 @@ class AccessibilityAnnouncements {
   ///
   /// [assertiveness] controls how interruptive the announcement is.
   void announce(String message, Assertiveness assertiveness) {
+    // When a modal dialog is present (aria-modal="true"), screen readers ignore
+    // content outside the dialog. To ensure announcements are heard, we temporarily
+    // move the EXISTING aria-live element INTO the modal dialog, make the announcement,
+    // then move it back. This works because VoiceOver already knows about the existing
+    // aria-live element from when the page loaded.
+    //
+    // See: https://github.com/flutter/flutter/issues/179076
+    final DomElement? modalDialog = _findTopmostModalDialog();
     final DomHTMLElement ariaLiveElement = ariaLiveElementFor(assertiveness);
+    final DomElement? originalParent = ariaLiveElement.parentElement;
 
-    final DomHTMLDivElement messageElement = createDomHTMLDivElement();
+    if (modalDialog != null && originalParent != null) {
+      modalDialog.append(ariaLiveElement);
+    }
+
     // See the doc-comment for [_appendSpace] for the rationale.
-    messageElement.text = _appendSpace ? '$message\u00A0' : message;
+    final messageText = _appendSpace ? '$message\u00A0' : message;
     _appendSpace = !_appendSpace;
-    ariaLiveElement.append(messageElement);
-    Timer(liveMessageDuration, () => messageElement.remove());
+
+    // We use Timer with Duration.zero to defer setting the announcement text
+    // to the next event loop iteration. This is critical for VoiceOver to work
+    // correctly: when a button is clicked, VoiceOver immediately starts processing
+    // the button's accessible name. If we set the aria-live text synchronously
+    // (in the same event loop tick), VoiceOver may not have yet committed the
+    // button label to its speech queue, causing the announcement to replace or
+    // interfere with the button label. By deferring to the next tick, VoiceOver
+    // has time to queue the button label first, and then our announcement is
+    // properly queued after it.
+    //
+    // See: https://github.com/flutter/flutter/issues/179076
+    Timer(Duration.zero, () {
+      ariaLiveElement.text = messageText;
+    });
+
+    Timer(liveMessageDuration, () {
+      ariaLiveElement.text = '';
+      if (modalDialog != null && originalParent != null) {
+        originalParent.append(ariaLiveElement);
+      }
+    });
+  }
+
+  static DomElement? _findTopmostModalDialog() {
+    final List<DomElement> modalElements = domDocument
+        .querySelectorAll('[aria-modal="true"]')
+        .toList();
+    if (modalElements.isEmpty) {
+      return null;
+    }
+    return modalElements.last;
   }
 
   static DomHTMLElement _createElement(Assertiveness assertiveness) {
