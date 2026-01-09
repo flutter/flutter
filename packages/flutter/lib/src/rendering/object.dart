@@ -1450,24 +1450,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // subtree depends on ancestors' transforms and clips. If it updates child
       // first, it may use dirty geometry in parent's semantics node to
       // calculate the geometries in the subtree.
+      // print(
+      //   'flush nodesToProcess before ${_nodesNeedingSemantics.map((e) => '$e, needsLayout: ${e._needsLayout}').toList()}',
+      // );
       final List<RenderObject> nodesToProcess =
           _nodesNeedingSemantics
               .where((RenderObject object) => !object._needsLayout && object.owner == this)
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemantics.clear();
-
-      final List<RenderObject> nodesToProcessGeometry =
-          _nodesNeedingSemanticsGeometryUpdate
-              .where((RenderObject object) => !object._needsLayout && object.owner == this)
-              .toList()
-            ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-      _nodesNeedingSemanticsGeometryUpdate.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
       }
+      final RenderObject? rootNode = this.rootNode;
       // print('flush nodesToProcess $nodesToProcess');
-      // debugDumpRenderObjectSemanticsTree();
+      // print(rootNode?._semantics.toStringDeep());
       for (final node in nodesToProcess) {
         if (node._semantics.parentDataDirty) {
           // This node is either blocked by a sibling
@@ -1486,7 +1483,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         FlutterTimeline.finishSync();
       }
 
-      final RenderObject? rootNode = this.rootNode;
       assert(() {
         assert(nodesToProcess.isEmpty || rootNode != null);
         if (rootNode != null) {
@@ -1498,8 +1494,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.ensureGeometry');
       }
+      final List<RenderObject> nodesToProcessGeometry =
+          _nodesNeedingSemanticsGeometryUpdate
+              .where((RenderObject object) => !object._needsLayout && object.owner == this)
+              .toList()
+            ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      _nodesNeedingSemanticsGeometryUpdate.clear();
       // print('flush nodesToProcessGeometry $nodesToProcessGeometry');
-      // debugDumpRenderObjectSemanticsTree();
+      // print(rootNode?._semantics.toStringDeep());
       for (final node in nodesToProcessGeometry) {
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
@@ -1542,8 +1544,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         _nodesNeedingSemantics.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
       );
-    } on Error catch (e) {
-      rethrow;
     } finally {
       assert(() {
         _debugDoingSemantics = false;
@@ -5686,6 +5686,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         in result.$1.whereType<_RenderObjectSemantics>()) {
       assert(childSemantics.contributesToSemanticsTree);
       if (childSemantics.shouldFormSemanticsNode) {
+        if (childSemantics.geometryDirty) {
+          childSemantics.markGeometryDirty();
+        }
         _children.add(childSemantics);
       } else {
         _children.addAll(childSemantics._children);
@@ -6377,17 +6380,21 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
 /// Dumps the render object semantics tree.
 void debugDumpRenderObjectSemanticsTree() {
-  debugPrint(_debugCollectRenderObjectSemanticsTrees());
+  if (RendererBinding.instance.renderViews.isEmpty) {
+    debugPrint('No render tree root was added to the binding.');
+    return;
+  }
+
+  debugPrint(
+    <String>[
+      for (final RenderObject renderView in RendererBinding.instance.renderViews)
+        _debugCollectRenderObjectSemanticsTrees(renderView),
+    ].join('\n\n'),
+  );
 }
 
-String _debugCollectRenderObjectSemanticsTrees() {
-  if (RendererBinding.instance.renderViews.isEmpty) {
-    return 'No render tree root was added to the binding.';
-  }
-  return <String>[
-    for (final RenderObject renderView in RendererBinding.instance.renderViews)
-      renderView._semantics.toStringDeep(),
-  ].join('\n\n');
+String _debugCollectRenderObjectSemanticsTrees(RenderObject root) {
+  return root._semantics.toStringDeep();
 }
 
 /// Helper class that keeps track of the geometry of a [SemanticsNode].
