@@ -72,7 +72,7 @@ Future<void> main() async {
     final packages = packageGraph['packages']! as List<Object?>;
     // Do a transitive parse of the package graph rooted in `roots` to find any
     // disallowed dependencies.
-    final toVisit = <String?>[...roots.cast<String>()];
+    final toVisit = <String?>[...roots];
     final visited = <String>{};
     final stack = <String>[];
     while (toVisit.isNotEmpty) {
