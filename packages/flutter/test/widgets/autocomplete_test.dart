@@ -2711,7 +2711,11 @@ void main() {
 
       // Shrink the screen further so that the options become smaller than
       // kMinInteractiveDimension and move to overlap the field.
-      const shortWindowSize = Size(1920.0, 90.0);
+      const shortWindowSize = Size(
+        1920.0,
+        48.0,
+      ); //TODO(Renzo-Olivares): Should a test like this be in material,cupertino, and widgets? The shortWindowSize varies depending
+      // on the input field because of additional padding by decorators.
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
