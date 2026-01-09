@@ -3422,6 +3422,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       }
     });
 
+    testWidgets('WidgetInspector buttons respect SafeArea insets', (WidgetTester tester) async {
+  const double bottomInset = 48.0;
+  const double leftInset = 24.0;
+
+  const Key exitKey = ValueKey('exit-select-mode');
+
+  await tester.pumpWidget(
+    MediaQuery(
+      data: const MediaQueryData(
+        padding: EdgeInsets.only(bottom: bottomInset, left: leftInset),
+      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: WidgetInspector(
+          // Put any child; size matters so use SizedBox.expand.
+          child: const SizedBox.expand(),
+
+          // This makes the button findable.
+          exitWidgetSelectionButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+            return SizedBox(
+              key: exitKey,
+              width: 40,
+              height: 40,
+              child: GestureDetector(onTap: onPressed),
+            );
+          },
+        ),
+      ),
+    ),
+  );
+
+  await tester.pump();
+
+  final Finder exitFinder = find.byKey(exitKey);
+  expect(exitFinder, findsOneWidget);
+
+  final Rect rect = tester.getRect(exitFinder);
+  final Size logicalSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+
+  // Not behind the bottom system UI.
+  expect(rect.bottom, lessThanOrEqualTo(logicalSize.height - bottomInset));
+
+  // Not behind left system UI (gesture/3-button area).
+  expect(rect.left, greaterThanOrEqualTo(leftInset));
+});
+
+
     testWidgets('cyclic diagnostics regression test', (WidgetTester tester) async {
       const group = 'test-group';
       final a = CyclicDiagnostic('a');
