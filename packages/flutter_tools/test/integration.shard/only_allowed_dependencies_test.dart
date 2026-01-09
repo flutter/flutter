@@ -70,6 +70,11 @@ Future<void> main() async {
       ...allowedExternalPackages,
     };
     final packages = packageGraph['packages']! as List<Object?>;
+    final packagesByName = <String, Map<String, Object?>>{
+      for (final package in packages)
+        (package! as Map<String, Object?>)['name']! as String: package as Map<String, Object?>,
+    };
+
     // Do a transitive parse of the package graph rooted in `roots` to find any
     // disallowed dependencies.
     final toVisit = <String?>[...roots];
@@ -94,9 +99,7 @@ Either remove the dependency or add it to the allowed dependencies list:
   packages/flutter_tools/test/integration.shard/only_allowed_dependencies_test.dart
 ''');
       }
-      final currentPackage =
-          packages.firstWhere((p) => (p! as Map<String, Object?>)['name'] == currentName)!
-              as Map<String, Object?>;
+      final Map<String, Object?> currentPackage = packagesByName[currentName]!;
       final dependencies = currentPackage['dependencies']! as List<Object?>;
       toVisit.add(null); // Marker for when we are done with this package.
       toVisit.addAll(dependencies.cast<String>());
