@@ -184,7 +184,7 @@ dependencies:
     await savePackageConfig(
       PackageConfig(
         <Package>[
-          Package(packageName, projectRoot.uri),
+          Package(packageName, projectRoot.uri, packageUriRoot: Uri.parse('lib/')),
           Package(
             'flutter',
             Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
@@ -290,6 +290,13 @@ mixin ProjectWithPreviews on WidgetPreviewProject {
     final PreviewPath previewPath = toPreviewPath(path);
     librariesWithPreviews.remove(previewPath);
     librariesWithoutPreviews.add(previewPath);
+  }
+
+  /// Writes a file containing previews under `test/$path`.
+  void addPreviewContainingTestFile({required String path}) {
+    projectRoot.childDirectory('test').childFile(path)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(previewContainingFileContents);
   }
 
   /// Adds a new library with a part at [path].
