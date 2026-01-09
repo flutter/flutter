@@ -3802,7 +3802,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (!attached || owner!._semanticsOwner == null) {
       return;
     }
-    print('markNeedsSemanticsUpdate $this');
     _semantics.markNeedsUpdate();
   }
 
