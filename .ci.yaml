@@ -3523,9 +3523,12 @@ targets:
 
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
+      os: Mac-15
+      cpu: arm64
+      device_os: iOS-18
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animated_advanced_blend_perf_ios__timeline_summary
