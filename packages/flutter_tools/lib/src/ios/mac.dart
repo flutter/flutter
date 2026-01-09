@@ -720,7 +720,7 @@ Future<void> removeExtendedAttributes(
   // Remove specific extended attributes that cause code signing failures.
   // We remove com.apple.FinderInfo and com.apple.provenance, but preserve
   // com.apple.xcode.CreatedByBuildSystem which Xcode uses to manage build directories.
-  final attributesToRemove = <String>['com.apple.FinderInfo', 'com.apple.provenance'];
+ const attributesToRemove = <String>{'com.apple.FinderInfo', 'com.apple.provenance'};
 
   for (final attribute in attributesToRemove) {
     final bool success = await processUtils.exitsHappy(<String>[
