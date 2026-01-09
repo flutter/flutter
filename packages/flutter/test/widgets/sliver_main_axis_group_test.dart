@@ -85,7 +85,7 @@ void main() {
     expect(first.constraints.scrollOffset, equals(19 * 300.0));
     expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(1 * 300.0));
 
-    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
+    final RenderSliverUnpinned renderGroup = tester.renderObject<RenderSliverUnpinned>(
       find.byType(SliverMainAxisGroup),
     );
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
@@ -166,7 +166,7 @@ void main() {
     expect(first.constraints.scrollOffset, equals(19 * 300.0));
     expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
-    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
+    final RenderSliverUnpinned renderGroup = tester.renderObject<RenderSliverUnpinned>(
       find.byType(SliverMainAxisGroup),
     );
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
@@ -250,7 +250,7 @@ void main() {
     expect(first.constraints.scrollOffset, equals(20 * 300.0));
     expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
-    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
+    final RenderSliverUnpinned renderGroup = tester.renderObject<RenderSliverUnpinned>(
       find.byType(SliverMainAxisGroup),
     );
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
@@ -335,7 +335,7 @@ void main() {
     expect(first.constraints.scrollOffset, equals(20 * 300.0));
     expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
-    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
+    final RenderSliverUnpinned renderGroup = tester.renderObject<RenderSliverUnpinned>(
       find.byType(SliverMainAxisGroup),
     );
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
@@ -460,8 +460,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final visitedChildren = <RenderSliver>[];
-    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(
-      find.byType(SliverMainAxisGroup),
+    final RenderNestedSlivers renderGroup = tester.renderObject<RenderNestedSlivers>(
+      find.byType(NestedSlivers),
     );
     void visitor(RenderObject child) {
       visitedChildren.add(child as RenderSliver);
@@ -469,9 +469,9 @@ void main() {
 
     renderGroup.visitChildrenForSemantics(visitor);
     expect(visitedChildren.length, equals(3));
-    expect(visitedChildren[0].geometry!.scrollExtent, equals(300));
+    expect(visitedChildren[0].geometry!.scrollExtent, equals(400));
     expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
-    expect(visitedChildren[2].geometry!.scrollExtent, equals(400));
+    expect(visitedChildren[2].geometry!.scrollExtent, equals(300));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (
@@ -491,16 +491,18 @@ void main() {
       ),
     );
     final renderGroup =
-        tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+        tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
     // Scroll extent is the total of the box sliver and the sliver persistent header.
     expect(renderGroup.geometry!.scrollExtent, equals(600.0 + 60.0));
+    expect(renderGroup.geometry!.paintOrigin, equals(0.0));
     controller.jumpTo(620);
     await tester.pumpAndSettle();
     final renderHeader =
         tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     // Paint extent after header's layout is 60.0, so we must offset by -20.0 to fit within the 40.0 remaining extent.
+    expect(renderGroup.geometry!.paintOrigin, equals(-20.0));
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
-    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup', (
@@ -521,7 +523,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final renderGroup =
-        tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+        tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
     expect(renderGroup.geometry!.scrollExtent, equals(660));
     controller.jumpTo(660.0);
     await tester.pumpAndSettle();
@@ -552,15 +554,16 @@ void main() {
         ),
       );
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
       controller.jumpTo(630);
       await tester.pumpAndSettle();
       // Paint extent of the header is 40.0, so we must provide an offset of -10.0 to make it fit in the 30.0 remaining paint extent of the group.
+      expect(renderGroup.geometry!.paintOrigin, equals(-10.0));
       expect(renderHeader.geometry!.paintExtent, equals(40.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
       controller.jumpTo(610);
       await tester.pumpAndSettle();
       expect(renderHeader.geometry!.paintExtent, equals(40.0));
@@ -586,7 +589,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
@@ -630,7 +633,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
@@ -642,8 +645,9 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 30.0));
       await tester.pump();
       // Paint extent after header's layout is 40.0, so we need to adjust by -10.0.
+      expect(renderGroup.geometry!.paintOrigin, equals(-10.0));
       expect(renderHeader.geometry!.paintExtent, equals(40.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
       // Pinned floating headers should expand to maximum extent as we continue scrolling.
       await gesture.moveBy(const Offset(0.0, 20.0));
       await tester.pump();
@@ -670,7 +674,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
 
       controller.jumpTo(660);
@@ -705,7 +709,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
@@ -718,14 +722,16 @@ void main() {
       await tester.pump();
 
       // The snap animation does not go through until the gesture is released.
+      expect(renderGroup.geometry!.paintOrigin, equals(0.0));
       expect(renderHeader.geometry!.paintExtent, equals(10));
       expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
       // Once it is released, the header's paint extent becomes the maximum and the group sets an offset of -50.0.
       await gesture.up();
       await tester.pumpAndSettle();
+      expect(renderGroup.geometry!.paintOrigin, equals(0.0));
       expect(renderHeader.geometry!.paintExtent, equals(60));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
     },
   );
 
@@ -753,7 +759,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final renderGroup =
-          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverUnpinned;
       final renderHeader =
           tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
       expect(renderGroup.geometry!.scrollExtent, equals(660));
@@ -765,14 +771,16 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 10));
       await tester.pump();
 
+      expect(renderGroup.geometry!.paintOrigin, equals(-20.0));
       expect(renderHeader.geometry!.paintExtent, equals(30.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
 
       // Once we lift the gesture up, the animation should finish.
       await gesture.up();
       await tester.pumpAndSettle();
+      expect(renderGroup.geometry!.paintOrigin, equals(-20.0));
       expect(renderHeader.geometry!.paintExtent, equals(60.0));
-      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
     },
   );
 
@@ -853,7 +861,7 @@ void main() {
     expect(buildsPerGroup[1], 1); // Second only lays out one child
     expect(buildsPerGroup[2], 1); // Third only lays out one child
     final renderGroup =
-        tester.renderObject(find.byType(SliverMainAxisGroup).first) as RenderSliverMainAxisGroup;
+        tester.renderObject(find.byType(SliverMainAxisGroup).first) as RenderSliverUnpinned;
     expect(renderGroup.geometry!.cacheExtent, 850.0);
   });
 
@@ -1187,7 +1195,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/173274
   testWidgets(
-    'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do not overscroll.',
+    'In multiple SliverMainAxisGroups, children after a PinnedHeaderSliver do overscroll.',
     (WidgetTester tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
@@ -1229,7 +1237,7 @@ void main() {
       expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 10.0));
       controller.jumpTo(90);
       await tester.pumpAndSettle();
-      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 20.0));
+      expect(tester.getBottomRight(find.byKey(key)), offset - const Offset(0.0, 30.0));
     },
   );
 
