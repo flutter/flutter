@@ -6,9 +6,9 @@
 
 precision highp float;
 
-out vec4 oColor;
+layout(location = 0) out vec4 oColor;
 
-uniform sampler2D iChild;
+layout(location = 0) uniform sampler2D iChild;
 
 void main() {
   // iChild1 is an image that is half blue, half green,
