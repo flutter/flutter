@@ -490,12 +490,11 @@ void main() async {
   });
 
   test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
-    if (impellerEnabled || !impellerEnabled) {
-      // TODO(gaaclarke): This test was disabled for a long time and atrophied
-      // we need to fix it or delete it.
-      print('This test atrophied and is disabled.');
-      return;
-    }
+    // TODO(gaaclarke): This test was disabled for a long time and has been
+    // atrophied. Fix it or remove it.
+    print('Atrophied test is disabled.');
+    return;
+    // ignore: dead_code
     const shaders = <String>[
       'no_uniforms.frag.iplr',
       'missing_size.frag.iplr',
@@ -525,12 +524,12 @@ void main() async {
   });
 
   _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
-    if (impellerEnabled || !impellerEnabled) {
-      // TODO(gaaclarke): This test was disabled for a long time and has been
-      // atrophied. Fix it or remove it.
-      print('Atrophied test is disabled.');
-      return;
-    }
+    // TODO(gaaclarke): This test was disabled for a long time and has been
+    // atrophied. Fix it or remove it.
+    print('Atrophied test is disabled.');
+    return;
+
+    // ignore: dead_code
     final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
 
@@ -544,12 +543,11 @@ void main() async {
   });
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
-    if (impellerEnabled || !impellerEnabled) {
-      // TODO(gaaclarke): This test was disabled for a long time and has been
-      // atrophied. Fix it or remove it.
-      print('Atrophied test is disabled.');
-      return;
-    }
+    // TODO(gaaclarke): This test was disabled for a long time and has been
+    // atrophied. Fix it or remove it.
+    print('Atrophied test is disabled.');
+    return;
+    // ignore: dead_code
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final recorder = PictureRecorder();
@@ -568,11 +566,11 @@ void main() async {
 
   // For an explaination of the problem see https://github.com/flutter/flutter/issues/163302 .
   test('ImageFilter.shader equality checks consider uniform values', () async {
-    if (impellerEnabled || !impellerEnabled) {
-      // TODO(gaaclarke): Delete or fix this test.
-      print("This test was skipped and now doesn't work.");
-      return;
-    }
+    // TODO(gaaclarke): This test was disabled for a long time and has been
+    // atrophied. Fix it or remove it.
+    print('Atrophied test is disabled.');
+    return;
+    // ignore: dead_code
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final filter = ImageFilter.shader(shader);
