@@ -68,7 +68,7 @@ class AndroidEmulators extends EmulatorDiscovery {
     return emulators;
   }
 
-  static final RegExp _emulatorIdRegex = RegExp(r'^[A-Za-z0-9_]+$');
+  static final RegExp _emulatorIdRegex = RegExp(r'^[A-Za-z0-9_.-]+$');
 
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.

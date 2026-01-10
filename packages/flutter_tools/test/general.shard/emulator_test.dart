@@ -88,7 +88,8 @@ void main() {
               stdout:
                   'INFO    | Storing crashdata in: /tmp/some.db, detection is enabled for process: 95538\n'
                   'WARNING | Crash annotation is very large (16415), only 16384 bytes will be recorded, 31 bytes are lost.\n'
-                  'Emulator_API_33',
+                  'Emulator_API_33\n'
+                  'pixel-4.api-30',
             ),
           ]),
           androidSdk: sdk,
@@ -96,8 +97,9 @@ void main() {
         );
 
         final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
-        expect(emulators, hasLength(1));
+        expect(emulators, hasLength(2));
         expect(emulators.first.id, 'Emulator_API_33');
+        expect(emulators.last.id, 'pixel-4.api-30');
       },
       // Exclude the iOS emulator discovery.
       overrides: <Type, Generator>{Platform: () => FakePlatform()},
