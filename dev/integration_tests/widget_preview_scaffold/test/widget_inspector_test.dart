@@ -184,4 +184,56 @@ void main() {
     expect(controller.widgetInspectorVisible.value, false);
     expect(splitFinder, findsNothing);
   });
+
+  testWidgets(
+    'WidgetInspector does not inset preview content when viewPadding is present',
+    (tester) async {
+      const EdgeInsets viewPadding = EdgeInsets.only(bottom: 24.0);
+      final GlobalKey unsafeAreaKey = GlobalKey();
+
+      final controller = FakeWidgetPreviewScaffoldController();
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(viewPadding: viewPadding),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: WidgetPreviewerWidgetScaffolding(
+              child: WidgetPreviewWidget(
+                controller: controller,
+                preview: WidgetPreview.test(
+                  previewData: Preview(),
+                  builder: () {
+                    return Stack(
+                      children: <Widget>[
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          height: viewPadding.bottom,
+                          child: Container(key: unsafeAreaKey),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Rect unsafeRect = tester.getRect(find.byKey(unsafeAreaKey));
+      final Size rootSize = tester.getSize(
+        find.byType(WidgetPreviewerWidgetScaffolding),
+      );
+
+      expect(
+        unsafeRect.bottom,
+        equals(rootSize.height),
+        reason:
+            'Preview content should not be inset by safe area padding applied to inspector controls',
+      );
+    },
+  );
 }

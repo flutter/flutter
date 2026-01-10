@@ -37,6 +37,7 @@ import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'service_extensions.dart';
 import 'view.dart';
+import 'media_query.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.exitWidgetSelectionButtonBuilder].
@@ -3860,7 +3861,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       textDirection: Directionality.of(context),
       start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
       end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
-      bottom: _kExitWidgetSelectionButtonMargin,
+      bottom: _kExitWidgetSelectionButtonMargin + MediaQuery.viewPaddingOf(context).bottom,
       child: buttonGroup,
     );
   }
