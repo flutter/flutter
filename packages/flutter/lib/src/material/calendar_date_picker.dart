@@ -236,9 +236,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
-      setState(() {
-        _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix');
-      });
+_announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix');
     }
   }
 
