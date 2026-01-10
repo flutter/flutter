@@ -398,7 +398,7 @@ _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix'
         Semantics(
           container: true,
           liveRegion: Theme.of(context).platform == TargetPlatform.android,
-          accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+          accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
           label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
           child: SizedBox(
             height: _subHeaderHeight + scaledMaxDayPickerHeight,
