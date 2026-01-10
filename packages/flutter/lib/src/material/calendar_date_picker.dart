@@ -667,9 +667,7 @@ class _MonthPickerState extends State<_MonthPicker> {
   // Auxiliary method for handling the difference between platforms
   void _announce(String message) {
     if (Theme.of(context).platform == TargetPlatform.android) {
-      setState(() {
         _announcementText = message;
-      });
     } else {
       // Maintains the mandatory announcement for other platforms
       SemanticsService.sendAnnouncement(View.of(context), message, Directionality.of(context));
