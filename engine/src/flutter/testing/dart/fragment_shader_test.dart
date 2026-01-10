@@ -615,23 +615,23 @@ void main() async {
 // Helper Functions ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void _runSkiaTest(String name, void Function() callback) {
-  test(name, () {
+void _runSkiaTest(String name, Future<void> Function() callback) {
+  test(name, () async {
     if (impellerEnabled) {
       print('skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
       return;
     }
-    callback();
+    await callback();
   });
 }
 
-void _runImpellerTest(String name, void Function() callback) {
-  test(name, () {
+void _runImpellerTest(String name, Future<void> Function() callback) {
+  test(name, () async {
     if (!impellerEnabled) {
       print('skipped for Skia');
       return;
     }
-    callback();
+    await callback();
   });
 }
 
