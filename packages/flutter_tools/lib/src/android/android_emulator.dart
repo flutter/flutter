@@ -68,6 +68,8 @@ class AndroidEmulators extends EmulatorDiscovery {
     return emulators;
   }
 
+  static final RegExp _emulatorIdRegex = RegExp(r'^[A-Za-z0-9_]+$');
+
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.
   void _extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
@@ -76,7 +78,7 @@ class AndroidEmulators extends EmulatorDiscovery {
         .map((String l) => l.trim())
         // Emulator IDs cannot contain spaces,
         // strip blank lines and error messages that can appear in the output.
-        .where((String l) => l.isNotEmpty && !l.contains(' '));
+        .where((String l) => l.isNotEmpty && _emulatorIdRegex.hasMatch(l));
     for (final id in ids) {
       emulators.add(_loadEmulatorInfo(id));
     }
