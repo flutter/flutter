@@ -1176,7 +1176,7 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // only after placing it to the correct position. Hence autofill menu
       // does not appear on top-left of the page.
       // Refocus on the elements after applying the geometry.
-      focusedFormElement!.focusWithoutScroll();
+      focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
   }
