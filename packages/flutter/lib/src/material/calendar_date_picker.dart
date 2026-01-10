@@ -690,8 +690,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        _announcementText = widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations);
-        _announce(_announcementText);
+_announce(widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations));
       }
     });
   }
