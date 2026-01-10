@@ -489,4 +489,26 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('Expansible does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ExpansibleController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Expansible(
+            headerBuilder: (_, _) => const Text('X'),
+            bodyBuilder: (_, _) => const Text('Y'),
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Expansible)), Size.zero);
+    controller.expand();
+    await tester.pump();
+  });
 }
