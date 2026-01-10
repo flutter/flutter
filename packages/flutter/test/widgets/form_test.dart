@@ -1816,6 +1816,18 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Form does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Form(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Form)), Size.zero);
+  });
 }
 
 class _PlatformAnnounceScenario {
