@@ -683,7 +683,6 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
     }
     await _downloadDebugSymbols('x64', artifactUpdater);
     await _downloadDebugSymbols('arm64', artifactUpdater);
-    await _downloadDebugSymbols('riscv64', artifactUpdater);
   }
 }
 
