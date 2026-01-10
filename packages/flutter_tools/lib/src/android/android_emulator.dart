@@ -71,13 +71,18 @@ class AndroidEmulators extends EmulatorDiscovery {
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.
   void _extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-    for (final String id in text.trim().split('\n').where((String l) => l != '')) {
+    final Iterable<String> ids = text
+        .split('\n')
+        .map((String l) => l.trim())
+        // Emulator IDs cannot contain spaces,
+        // strip blank lines and error messages that can appear in the output.
+        .where((String l) => l.isNotEmpty && !l.contains(' '));
+    for (final id in ids) {
       emulators.add(_loadEmulatorInfo(id));
     }
   }
 
   AndroidEmulator _loadEmulatorInfo(String id) {
-    id = id.trim();
     final String? avdPath = _androidSdk?.getAvdPath();
     final androidEmulatorWithoutProperties = AndroidEmulator(
       id,
