@@ -76,8 +76,7 @@ class AndroidEmulators extends EmulatorDiscovery {
     final Iterable<String> ids = text
         .split('\n')
         .map((String l) => l.trim())
-        // Emulator IDs cannot contain spaces,
-        // strip blank lines and error messages that can appear in the output.
+        // Strip blank lines and error messages that can appear in the output.
         .where((String l) => l.isNotEmpty && _emulatorIdRegex.hasMatch(l));
     for (final id in ids) {
       emulators.add(_loadEmulatorInfo(id));
