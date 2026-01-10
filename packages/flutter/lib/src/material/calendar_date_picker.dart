@@ -878,7 +878,7 @@ _announce(widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations)
       container: true,
       explicitChildNodes: true,
       liveRegion: Theme.of(context).platform == TargetPlatform.android,
-      accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+      accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
       label: Theme.of(context).platform == TargetPlatform.android ? _announcementText : null,
       child: Column(
         children: <Widget>[
