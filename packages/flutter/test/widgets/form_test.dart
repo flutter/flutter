@@ -1874,6 +1874,70 @@ void main() {
 
     expect(fields?.every((field) => field.isValid), isFalse);
   });
+
+  testWidgets('allows collecting and updating values from all field types', (
+    WidgetTester tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(key: const ValueKey('name'), initialValue: 'Name'),
+                TextFormField(key: const ValueKey('email'), initialValue: 'Email'),
+                FormField<int>(
+                  key: const ValueKey('age'),
+                  initialValue: 18,
+                  builder: (field) => const SizedBox.shrink(),
+                ),
+                DropdownButtonFormField<String>(
+                  key: const ValueKey('gender'),
+                  initialValue: 'other',
+                  items: const [
+                    DropdownMenuItem(value: 'male', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'female', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'other', child: SizedBox.shrink()),
+                  ],
+                  onChanged: (_) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Map<String, dynamic> collectData() {
+      return {
+        for (final field in formKey.currentState!.fields)
+          if (field.widget.key case ValueKey<String>(:final value)) value: field.value,
+      };
+    }
+
+    expect(collectData(), {'name': 'Name', 'email': 'Email', 'age': 18, 'gender': 'other'});
+
+    FormFieldState<T> field<T>(String key) => formKey.currentState!.fields
+        .whereType<FormFieldState<T>>()
+        .singleWhere((f) => f.widget.key == ValueKey(key));
+
+    field<String>('name').didChange('New Name');
+    field<String>('email').didChange('new@email.com');
+    field<int>('age').didChange(30);
+    field<String>('gender').didChange('female');
+
+    await tester.pump();
+
+    expect(collectData(), {
+      'name': 'New Name',
+      'email': 'new@email.com',
+      'age': 30,
+      'gender': 'female',
+    });
+  });
 }
 
 class _PlatformAnnounceScenario {
