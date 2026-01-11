@@ -20,15 +20,15 @@ List<ui.PointerData> _allPointerData(List<ui.PointerDataPacket> packets) {
   return packets.expand((ui.PointerDataPacket packet) => packet.data).toList();
 }
 
-class _MockParentPostMessage {
+class _MockParentScroll {
   int callCount = 0;
-  Object? lastMessage;
-  String? lastTargetOrigin;
+  int? lastDeltaX;
+  int? lastDeltaY;
 
-  void call(Object message, String targetOrigin) {
+  void call(int deltaX, int deltaY) {
     callCount++;
-    lastMessage = message;
-    lastTargetOrigin = targetOrigin;
+    lastDeltaX = deltaX;
+    lastDeltaY = deltaY;
   }
 }
 
@@ -74,7 +74,7 @@ void testMain() {
     ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     dpi = EngineFlutterDisplay.instance.devicePixelRatio;
     debugSetIframeEmbeddingForTests(false);
-    debugParentPostMessageHandler = null;
+    debugParentScrollHandler = null;
   });
 
   tearDown(() {
@@ -763,13 +763,13 @@ void testMain() {
   });
 
   test('wheel event in iframe does not scroll parent when handled', () {
-    final mockParent = _MockParentPostMessage();
+    final mockParent = _MockParentScroll();
     addTearDown(() {
-      debugParentPostMessageHandler = null;
+      debugParentScrollHandler = null;
       debugResetIframeDetectionCache();
       ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     });
-    debugParentPostMessageHandler = mockParent.call;
+    debugParentScrollHandler = mockParent.call;
     debugSetIframeEmbeddingForTests(true);
 
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
@@ -791,17 +791,17 @@ void testMain() {
 
     expect(event.defaultPrevented, isTrue);
     expect(mockParent.callCount, 0);
-    expect(mockParent.lastMessage, isNull);
+    expect(mockParent.lastDeltaX, isNull);
   });
 
   test('wheel event in iframe scrolls parent when platform default allowed', () {
-    final mockParent = _MockParentPostMessage();
+    final mockParent = _MockParentScroll();
     addTearDown(() {
-      debugParentPostMessageHandler = null;
+      debugParentScrollHandler = null;
       debugResetIframeDetectionCache();
       ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     });
-    debugParentPostMessageHandler = mockParent.call;
+    debugParentScrollHandler = mockParent.call;
     debugSetIframeEmbeddingForTests(true);
 
     ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
@@ -823,11 +823,8 @@ void testMain() {
 
     expect(event.defaultPrevented, isTrue);
     expect(mockParent.callCount, 1);
-    final message = mockParent.lastMessage! as Map<String, Object?>;
-    expect(message['type'], 'flutter-scroll');
-    expect(message['deltaX'], 7);
-    expect(message['deltaY'], 21);
-    expect(mockParent.lastTargetOrigin, '*');
+    expect(mockParent.lastDeltaX, 7);
+    expect(mockParent.lastDeltaY, 21);
   });
 
   test('does synthesize add or hover or move for scroll', () {
