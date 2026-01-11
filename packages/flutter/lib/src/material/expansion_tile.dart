@@ -272,7 +272,7 @@ class ExpansionTile extends StatefulWidget {
   ///
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
-  final Alignment? expandedAlignment;
+  final AlignmentGeometry ? expandedAlignment;
 
   /// Specifies the alignment of each child within [children] when the tile is expanded.
   ///
