@@ -1816,6 +1816,64 @@ void main() {
       ),
     );
   });
+
+  testWidgets('exposes all registered FormFieldStates with their values', (
+    WidgetTester tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(initialValue: 'A'),
+                TextFormField(initialValue: 'B'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final FormState? formState = formKey.currentState;
+
+    expect(formState?.fields.length, equals(2));
+    expect(formState?.fields.map((field) => field.value), containsAll(<String>['A', 'B']));
+  });
+
+  testWidgets('reports all fields as invalid after validation errors', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(initialValue: 'foo', validator: errorText),
+                TextFormField(initialValue: 'bar', validator: errorText),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    formKey.currentState?.validate();
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
+
+    final List<FormFieldState<dynamic>>? fields = formKey.currentState?.fields.toList();
+
+    expect(fields?.every((field) => field.isValid), isFalse);
+  });
 }
 
 class _PlatformAnnounceScenario {
