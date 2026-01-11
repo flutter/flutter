@@ -195,6 +195,10 @@ class RadioListTile<T> extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.radioScaleFactor = 1.0,
     this.titleAlignment,
     this.enabled,
@@ -249,6 +253,10 @@ class RadioListTile<T> extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.radioScaleFactor = 1.0,
     this.enabled,
     this.useCupertinoCheckmarkStyle = false,
@@ -294,7 +302,9 @@ class RadioListTile<T> extends StatefulWidget {
   /// RadioListTile<SingingCharacter>(
   ///   title: const Text('Lafayette'),
   ///   value: SingingCharacter.lafayette,
+  ///   // ignore: deprecated_member_use
   ///   groupValue: _character,
+  ///   // ignore: deprecated_member_use
   ///   onChanged: (SingingCharacter? newValue) {
   ///     setState(() {
   ///       _character = newValue;
@@ -470,6 +480,18 @@ class RadioListTile<T> extends StatefulWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// {@macro flutter.material.ListTile.horizontalTitleGap}
+  final double? horizontalTitleGap;
+
+  /// {@macro flutter.material.ListTile.minVerticalPadding}
+  final double? minVerticalPadding;
+
+  /// {@macro flutter.material.ListTile.minLeadingWidth}
+  final double? minLeadingWidth;
+
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
+
   final _RadioType _radioType;
 
   /// Defines how [ListTile.leading] and [ListTile.trailing] are
@@ -568,6 +590,7 @@ class RadioListTile<T> extends StatefulWidget {
 
 class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T> {
   FocusNode? _internalFocusNode;
+
   @override
   FocusNode get focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
 
@@ -694,7 +717,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     };
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
-    final Set<WidgetState> states = <WidgetState>{if (widget.selected) WidgetState.selected};
+    final states = <WidgetState>{if (widget.selected) WidgetState.selected};
     final Color effectiveActiveColor =
         widget.activeColor ??
         radioThemeData.fillColor?.resolve(states) ??
@@ -720,6 +743,10 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
         focusNode: focusNode,
         onFocusChange: widget.onFocusChange,
         enableFeedback: widget.enableFeedback,
+        horizontalTitleGap: widget.horizontalTitleGap,
+        minVerticalPadding: widget.minVerticalPadding,
+        minLeadingWidth: widget.minLeadingWidth,
+        minTileHeight: widget.minTileHeight,
         titleAlignment: widget.titleAlignment,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),

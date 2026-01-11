@@ -304,7 +304,7 @@ class Icon extends StatelessWidget {
       iconColor = null;
     }
 
-    final TextStyle fontStyle = TextStyle(
+    final fontStyle = TextStyle(
       fontVariations: <FontVariation>[
         if (iconFill != null) FontVariation('FILL', iconFill),
         if (iconWeight != null) FontVariation('wght', iconWeight),

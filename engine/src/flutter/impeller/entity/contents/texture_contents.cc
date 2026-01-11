@@ -87,7 +87,9 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
                                  Matrix::MakeScale(scale),
                     .sampler_descriptor = options.sampler_descriptor.value_or(
                         sampler_descriptor_),
-                    .opacity = opacity};
+                    .opacity = opacity,
+                    .needs_rasterization_for_runtime_effects =
+                        snapshots_need_rasterization_for_runtime_effects_};
   }
   return Contents::RenderToSnapshot(
       renderer, entity,
@@ -112,7 +114,7 @@ bool TextureContents::Render(const ContentContext& renderer,
     return true;  // Nothing to render.
   }
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   using FSExternal = TiledTextureFillExternalFragmentShader;
   bool is_external_texture =
       texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
@@ -155,7 +157,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   pipeline_options.depth_write_enabled =
       stencil_enabled_ && pipeline_options.blend_mode == BlendMode::kSrc;
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   if (is_external_texture) {
     pass.SetPipeline(
         renderer.GetTiledTextureExternalPipeline(pipeline_options));
@@ -189,7 +191,7 @@ bool TextureContents::Render(const ContentContext& renderer,
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             sampler_descriptor_));
-#ifdef IMPELLER_ENABLE_OPENGLES
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   } else if (is_external_texture) {
     FSExternal::FragInfo frag_info;
     frag_info.x_tile_mode =
@@ -251,6 +253,10 @@ const SamplerDescriptor& TextureContents::GetSamplerDescriptor() const {
 
 void TextureContents::SetDeferApplyingOpacity(bool defer_applying_opacity) {
   defer_applying_opacity_ = defer_applying_opacity;
+}
+
+void TextureContents::SetNeedsRasterizationForRuntimeEffects(bool value) {
+  snapshots_need_rasterization_for_runtime_effects_ = value;
 }
 
 }  // namespace impeller

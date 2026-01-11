@@ -17,8 +17,8 @@ void testMain() {
   setUpImplicitView();
 
   group('PlatformViewManager', () {
-    const String viewType = 'forTest';
-    const int viewId = 6;
+    const viewType = 'forTest';
+    const viewId = 6;
 
     late PlatformViewManager contentManager;
 
@@ -86,8 +86,8 @@ void testMain() {
     });
 
     group('renderContent', () {
-      const String unregisteredViewType = 'unregisteredForTest';
-      const String anotherViewType = 'anotherViewType';
+      const unregisteredViewType = 'unregisteredForTest';
+      const anotherViewType = 'anotherViewType';
 
       setUp(() {
         contentManager.registerFactory(viewType, (int id) {
@@ -158,12 +158,12 @@ void testMain() {
 
     group('getViewById', () {
       test('finds created views', () async {
-        final Map<int, DomElement> views1 = <int, DomElement>{
+        final views1 = <int, DomElement>{
           1: createDomHTMLDivElement(),
           2: createDomHTMLDivElement(),
           5: createDomHTMLDivElement(),
         };
-        final Map<int, DomElement> views2 = <int, DomElement>{
+        final views2 = <int, DomElement>{
           3: createDomHTMLDivElement(),
           4: createDomHTMLDivElement(),
         };

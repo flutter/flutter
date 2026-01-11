@@ -78,7 +78,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   void _addNewItem() {
     setState(() {
-      items.insert(0, Container(color: colors[items.length % 5], height: 150.0));
+      items.insert(
+        0,
+        Container(color: colors[items.length % 5], height: 150.0),
+      );
     });
   }
 
@@ -114,7 +117,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               onChanged: _onElevatedChanged,
             ),
             Expanded(
-              child: ListView(controller: _controller, children: items.toList()),
+              child: ListView(
+                controller: _controller,
+                children: items.toList(),
+              ),
             ),
           ],
         ),
@@ -127,7 +133,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
               )
             : null,
         floatingActionButtonLocation: _fabLocation,
-        bottomNavigationBar: _DemoBottomAppBar(isElevated: _isElevated, isVisible: _isVisible),
+        bottomNavigationBar: _DemoBottomAppBar(
+          isElevated: _isElevated,
+          isVisible: _isVisible,
+        ),
       ),
     );
   }
@@ -162,8 +171,16 @@ class _DemoBottomAppBar extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
               },
             ),
-            IconButton(tooltip: 'Search', icon: const Icon(Icons.search), onPressed: () {}),
-            IconButton(tooltip: 'Favorite', icon: const Icon(Icons.favorite), onPressed: () {}),
+            IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.search),
+              onPressed: () {},
+            ),
+            IconButton(
+              tooltip: 'Favorite',
+              icon: const Icon(Icons.favorite),
+              onPressed: () {},
+            ),
           ],
         ),
       ),

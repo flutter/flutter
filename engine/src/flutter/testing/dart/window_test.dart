@@ -25,7 +25,7 @@ void main() {
   });
 
   test('FrameTiming.toString has the correct format', () {
-    final FrameTiming timing = FrameTiming(
+    final timing = FrameTiming(
       vsyncStart: 500,
       buildStart: 1000,
       buildFinish: 8000,
@@ -49,7 +49,7 @@ void main() {
   });
 
   test('FrameTiming.toString with cache statistics has the correct format', () {
-    final FrameTiming timing = FrameTiming(
+    final timing = FrameTiming(
       vsyncStart: 500,
       buildStart: 1000,
       buildFinish: 8000,
@@ -77,7 +77,7 @@ void main() {
   });
 
   test('computePlatformResolvedLocale basic', () {
-    final List<Locale> supportedLocales = <Locale>[
+    final supportedLocales = <Locale>[
       const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'),
       const Locale.fromSubtags(languageCode: 'fr', countryCode: 'FR'),
       const Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),

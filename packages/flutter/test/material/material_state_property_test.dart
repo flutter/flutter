@@ -32,7 +32,7 @@ void main() {
   });
 
   test('MaterialStatePropertyAll', () {
-    const MaterialStatePropertyAll<int> value = MaterialStatePropertyAll<int>(123);
+    const value = MaterialStatePropertyAll<int>(123);
     expect(value.resolve(<MaterialState>{}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.hovered}), 123);
     expect(value.resolve(<MaterialState>{MaterialState.focused}), 123);

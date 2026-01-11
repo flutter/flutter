@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/transitions/matrix_transition.0.dart' as example;
+import 'package:flutter_api_samples/widgets/transitions/matrix_transition.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows Flutter logo inside a MatrixTransition', (WidgetTester tester) async {
+  testWidgets('Shows Flutter logo inside a MatrixTransition', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.MatrixTransitionExampleApp());
 
     final Finder transformFinder = find.ancestor(

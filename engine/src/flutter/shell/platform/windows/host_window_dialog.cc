@@ -38,16 +38,17 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
                                    std::optional<HWND> const& owner_window)
-    : HostWindow(
-          window_manager,
-          engine,
-          WindowArchetype::kDialog,
-          GetWindowStyleForDialog(owner_window),
-          GetExtendedWindowStyleForDialog(owner_window),
-          constraints,
+    : HostWindow(window_manager, engine) {
+  InitializeFlutterView(HostWindowInitializationParams{
+      .archetype = WindowArchetype::kDialog,
+      .window_style = GetWindowStyleForDialog(owner_window),
+      .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
+      .box_constraints = constraints,
+      .initial_window_rect =
           GetInitialRect(engine, preferred_size, constraints, owner_window),
-          title,
-          owner_window) {
+      .title = title,
+      .owner_window = owner_window,
+  });
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {

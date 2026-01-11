@@ -29,9 +29,9 @@ class ScaffoldMessengerExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('A SnackBar has been shown.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A SnackBar has been shown.')),
+        );
       },
       child: const Text('Show SnackBar'),
     );

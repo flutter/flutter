@@ -22,8 +22,9 @@ if [ "$(uname)" == "Darwin" ]; then
 else
   NDK_PLATFORM="linux-x86_64"
 fi
-ADDR2LINE="flutter/third_party/android_tools/ndk/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-addr2line"
-NM="flutter/third_party/android_tools/ndk/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-nm"
+NDK_VERSION="28.2.13676358"
+ADDR2LINE="flutter/third_party/android_tools/sdk/ndk/$NDK_VERSION/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-addr2line"
+NM="flutter/third_party/android_tools/sdk/ndk/$NDK_VERSION/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llvm-nm"
 
 # Run the binary size script from the buildroot directory so the treemap path
 # navigation will start from there.

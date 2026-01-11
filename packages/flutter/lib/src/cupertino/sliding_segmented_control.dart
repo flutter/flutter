@@ -621,7 +621,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
     // If the long press or horizontal drag recognizer gets accepted, we know for
     // sure the gesture is meant for the segmented control. Hand everything to
     // the drag gesture recognizer.
-    final GestureArenaTeam team = GestureArenaTeam();
+    final team = GestureArenaTeam();
     longPress.team = team;
     drag.team = team;
     team.captain = drag;
@@ -684,8 +684,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   // Converts local coordinate to segments.
   T segmentForXPosition(double dx) {
     final BuildContext currentContext = segmentedControlRenderWidgetKey.currentContext!;
-    final _RenderSegmentedControl<T> renderBox =
-        currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
+    final renderBox = currentContext.findRenderObject()! as _RenderSegmentedControl<T>;
 
     final int numOfChildren = widget.children.length;
     assert(renderBox.hasSize);
@@ -703,11 +702,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   }
 
   bool _hasDraggedTooFar(DragUpdateDetails details) {
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final renderBox = context.findRenderObject()! as RenderBox;
     assert(renderBox.hasSize);
     final Size size = renderBox.size;
     final Offset offCenter = details.localPosition - Offset(size.width / 2, size.height / 2);
-    final double l2 =
+    final l2 =
         math.pow(math.max(0.0, offCenter.dx.abs() - size.width / 2), 2) +
                 math.pow(math.max(0.0, offCenter.dy.abs() - size.height / 2), 2)
             as double;
@@ -850,13 +849,13 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
   @override
   Widget build(BuildContext context) {
     assert(widget.children.length >= 2);
-    List<Widget> children = <Widget>[];
-    bool isPreviousSegmentHighlighted = false;
+    var children = <Widget>[];
+    var isPreviousSegmentHighlighted = false;
 
-    int index = 0;
+    var index = 0;
     int? highlightedIndex;
     for (final MapEntry<T, Widget> entry in widget.children.entries) {
-      final bool isHighlighted = highlighted == entry.key;
+      final isHighlighted = highlighted == entry.key;
       if (isHighlighted) {
         highlightedIndex = index;
       }
@@ -1144,11 +1143,10 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   double get totalSeparatorWidth => separatorWidth * (childCount ~/ 2);
 
   int getClosestSegmentIndex(double dx) {
-    int index = 0;
+    var index = 0;
     RenderBox? child = firstChild;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedControlContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       final double clampX = clampDouble(
         dx,
         childParentData.offset.dx,
@@ -1268,7 +1266,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       return List<double>.filled(segmentCount, maxChildWidth);
     }
 
-    final List<double> segmentWidths = <double>[];
+    final segmentWidths = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
       final double childWidth =
@@ -1289,7 +1287,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
 
     final double scale = clampDouble(totalWidth, allowedMinWidth, allowedMaxWidth) / totalWidth;
     if (scale != 1) {
-      for (int i = 0; i < segmentWidths.length; i++) {
+      for (var i = 0; i < segmentWidths.length; i++) {
         segmentWidths[i] = segmentWidths[i] * scale;
       }
     }
@@ -1308,13 +1306,11 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final List<double> segmentWidths = _getChildWidths(constraints);
     final double childHeight = _getMaxChildHeight(constraints, constraints.maxWidth);
 
-    int index = 0;
+    var index = 0;
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     RenderBox? child = firstChild;
     while (child != null) {
-      final BoxConstraints childConstraints = BoxConstraints.tight(
-        Size(segmentWidths[index], childHeight),
-      );
+      final childConstraints = BoxConstraints.tight(Size(segmentWidths[index], childHeight));
       baselineOffset = baselineOffset.minOf(
         BaselineOffset(child.getDryBaseline(childConstraints, baseline)),
       );
@@ -1337,21 +1333,15 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     final List<double> segmentWidths = _getChildWidths(constraints);
 
     final double childHeight = _getMaxChildHeight(constraints, double.infinity);
-    final BoxConstraints separatorConstraints = BoxConstraints(
-      minHeight: childHeight,
-      maxHeight: childHeight,
-    );
+    final separatorConstraints = BoxConstraints(minHeight: childHeight, maxHeight: childHeight);
     RenderBox? child = firstChild;
-    int index = 0;
+    var index = 0;
     double start = 0;
     while (child != null) {
-      final BoxConstraints childConstraints = BoxConstraints.tight(
-        Size(segmentWidths[index ~/ 2], childHeight),
-      );
+      final childConstraints = BoxConstraints.tight(Size(segmentWidths[index ~/ 2], childHeight));
       child.layout(index.isEven ? childConstraints : separatorConstraints, parentUsesSize: true);
-      final _SegmentedControlContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedControlContainerBoxParentData;
-      final Offset childOffset = Offset(start, 0);
+      final childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
+      final childOffset = Offset(start, 0);
       childParentData.offset = childOffset;
       start += child.size.width;
       assert(
@@ -1403,7 +1393,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     // Children contains both segment and separator and the order is segment ->
     // separator -> segment. So to paint separators, index should start from 1 and
     // the step should be 2.
-    for (int index = 1; index < childCount; index += 2) {
+    for (var index = 1; index < childCount; index += 2) {
       _paintSeparator(context, offset, children[index]);
     }
 
@@ -1412,8 +1402,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     if (highlightedChildIndex != null) {
       final RenderBox selectedChild = children[highlightedChildIndex * 2];
 
-      final _SegmentedControlContainerBoxParentData childParentData =
-          selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
+      final childParentData = selectedChild.parentData! as _SegmentedControlContainerBoxParentData;
       final Rect newThumbRect = _kThumbInsets.inflateRect(
         childParentData.offset & selectedChild.size,
       );
@@ -1461,7 +1450,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
         _SegmentLocation.inbetween => 0,
       };
 
-      final Rect thumbRect = Rect.fromCenter(
+      final thumbRect = Rect.fromCenter(
         center: unscaledThumbRect.center - Offset(delta / 2, 0),
         width: unscaledThumbRect.width * thumbScale,
         height: unscaledThumbRect.height * thumbScale,
@@ -1472,7 +1461,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       currentThumbRect = null;
     }
 
-    for (int index = 0; index < children.length; index += 2) {
+    for (var index = 0; index < children.length; index += 2) {
       // Children contains both segment and separator and the order is segment ->
       // separator -> segment. So to paint separators, index should start from 0 and
       // the step should be 2.
@@ -1483,30 +1472,25 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   // Paint the separator to the right of the given child.
   final Paint separatorPaint = Paint();
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
-    final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData! as _SegmentedControlContainerBoxParentData;
+    final childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, offset + childParentData.offset);
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child) {
-    final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData! as _SegmentedControlContainerBoxParentData;
+    final childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
   void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
     // Colors extracted from https://developer.apple.com/design/resources/.
-    const List<BoxShadow> thumbShadow = <BoxShadow>[
+    const thumbShadow = <BoxShadow>[
       BoxShadow(color: Color(0x1F000000), offset: Offset(0, 3), blurRadius: 8),
       BoxShadow(color: Color(0x0A000000), offset: Offset(0, 3), blurRadius: 1),
     ];
 
-    final RSuperellipse thumbShape = RSuperellipse.fromRectAndRadius(
-      thumbRect.shift(offset),
-      _kThumbRadius,
-    );
+    final thumbShape = RSuperellipse.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
 
-    for (final BoxShadow shadow in thumbShadow) {
+    for (final shadow in thumbShadow) {
       context.canvas.drawRSuperellipse(thumbShape.shift(shadow.offset), shadow.toPaint());
     }
 
@@ -1522,8 +1506,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedControlContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
       if ((childParentData.offset & child.size).contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,

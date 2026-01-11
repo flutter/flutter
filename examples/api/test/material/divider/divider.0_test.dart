@@ -15,7 +15,10 @@ void main() {
     // Divider is positioned horizontally.
     final Offset container = tester.getBottomLeft(
       find
-          .descendant(of: find.byType(example.DividerExample), matching: find.byType(ColoredBox))
+          .descendant(
+            of: find.byType(example.DividerExample),
+            matching: find.byType(ColoredBox),
+          )
           .first,
     );
     expect(container.dy, tester.getTopLeft(find.byType(Divider)).dy);

@@ -1451,7 +1451,7 @@ class NotifyingLogger extends DelegatingLogger {
   final messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
 
-  var notifyVerbose = false;
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1595,7 +1595,7 @@ class EmulatorDomain extends Domain {
     registerHandler('create', create);
   }
 
-  var emulators = EmulatorManager(
+  EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
     java: globals.java,

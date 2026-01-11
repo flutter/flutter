@@ -17,7 +17,7 @@ import 'theme.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [BottomNavigationBarThemeData] object
-/// using `BottomNavigationBarTheme.of(context)`. Instances of
+/// using [BottomNavigationBarTheme.of]. Instances of
 /// [BottomNavigationBarThemeData] can be customized with
 /// [BottomNavigationBarThemeData.copyWith].
 ///

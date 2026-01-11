@@ -6,16 +6,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const Rect rect = Rect.fromLTWH(100, 100, 200, 500);
-  const Offset outsideTopLeft = Offset(50, 50);
-  const Offset outsideLeft = Offset(50, 200);
-  const Offset outsideBottomLeft = Offset(50, 700);
-  const Offset outsideTop = Offset(200, 50);
-  const Offset outsideTopRight = Offset(350, 50);
-  const Offset outsideRight = Offset(350, 200);
-  const Offset outsideBottomRight = Offset(350, 700);
-  const Offset outsideBottom = Offset(200, 700);
-  const Offset center = Offset(150, 300);
+  const rect = Rect.fromLTWH(100, 100, 200, 500);
+  const outsideTopLeft = Offset(50, 50);
+  const outsideLeft = Offset(50, 200);
+  const outsideBottomLeft = Offset(50, 700);
+  const outsideTop = Offset(200, 50);
+  const outsideTopRight = Offset(350, 50);
+  const outsideRight = Offset(350, 200);
+  const outsideBottomRight = Offset(350, 700);
+  const outsideBottom = Offset(200, 700);
+  const center = Offset(150, 300);
 
   group('selection utils', () {
     test('selectionBasedOnRect works', () {

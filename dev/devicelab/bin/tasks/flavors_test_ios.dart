@@ -21,9 +21,9 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
     // test install and uninstall of flavors app
-    final String projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
+    final projectDir = '${flutterDirectory.path}/dev/integration_tests/flavors';
     final TaskResult installTestsResult = await inDirectory(projectDir, () async {
-      final List<TaskResult> testResults = <TaskResult>[
+      final testResults = <TaskResult>[
         await _testInstallDebugPaidFlavor(projectDir),
         await _testInstallBogusFlavor(),
       ];
@@ -57,7 +57,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
     ),
   ).readAsBytesSync();
 
-  final Map<Object?, Object?> assetManifest =
+  final assetManifest =
       const StandardMessageCodec().decodeMessage(ByteData.sublistView(assetManifestFileData))
           as Map<Object?, Object?>;
 
@@ -83,7 +83,7 @@ Future<TaskResult> _testInstallDebugPaidFlavor(String projectDir) async {
 }
 
 Future<TaskResult> _testInstallBogusFlavor() async {
-  final StringBuffer stderr = StringBuffer();
+  final stderr = StringBuffer();
   await evalFlutter(
     'install',
     canFail: true,
@@ -91,7 +91,7 @@ Future<TaskResult> _testInstallBogusFlavor() async {
     options: <String>['--flavor', 'bogus'],
   );
 
-  final String stderrString = stderr.toString();
+  final stderrString = stderr.toString();
   if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
     print(stderrString);
     return TaskResult.failure('Should not succeed with bogus flavor');
@@ -110,7 +110,7 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     );
   });
 
-  final File generatedXcconfig = File(path.join(projectDir, 'ios/Flutter/Generated.xcconfig'));
+  final generatedXcconfig = File(path.join(projectDir, 'ios/Flutter/Generated.xcconfig'));
   if (!generatedXcconfig.existsSync()) {
     throw TaskResult.failure('Unable to find Generated.xcconfig');
   }
@@ -118,14 +118,14 @@ Future<TaskResult> _testFlavorWhenBuiltFromXcode(String projectDir) async {
     throw TaskResult.failure('Generated.xcconfig does not contain FLAVOR=free');
   }
 
-  const String configuration = 'Debug Paid';
-  const String productName = 'Paid App';
-  const String buildDir = 'build/ios';
+  const configuration = 'Debug Paid';
+  const productName = 'Paid App';
+  const buildDir = 'build/ios';
 
   // Delete app bundle before build to ensure checks below do not use previously
   // built bundle.
-  final String appPath = '$projectDir/$buildDir/$configuration-iphoneos/$productName.app';
-  final Directory appBundle = Directory(appPath);
+  final appPath = '$projectDir/$buildDir/$configuration-iphoneos/$productName.app';
+  final appBundle = Directory(appPath);
   if (appBundle.existsSync()) {
     appBundle.deleteSync(recursive: true);
   }

@@ -2,7 +2,7 @@ name: platform_views_layout_hybrid_composition
 description: A benchmark for platform views, using hybrid composition on android.
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

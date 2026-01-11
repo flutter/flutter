@@ -310,13 +310,17 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the selected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.label].
   ///
-  /// If null then the [ThemeData.primaryColor] is used.
+  /// If null then the ambient [BottomNavigationBarThemeData.selectedItemColor]
+  /// is used. If that is also null, [ColorScheme.primary] is used when
+  /// [ThemeData.brightness] is [Brightness.light], and [ColorScheme.secondary]
+  /// is used when [ThemeData.brightness] is [Brightness.dark].
   final Color? selectedItemColor;
 
   /// The color of the unselected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.label]s.
   ///
-  /// If null then the [ThemeData.unselectedWidgetColor]'s color is used.
+  /// If null then the ambient [BottomNavigationBarThemeData.unselectedItemColor]
+  /// is used. If that is also null, [ThemeData.unselectedWidgetColor] is used.
   final Color? unselectedItemColor;
 
   /// The size, opacity, and color of the icon in the currently selected
@@ -676,7 +680,7 @@ class _TileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color? iconColor = colorTween.evaluate(animation);
-    final IconThemeData defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
+    final defaultIconTheme = IconThemeData(color: iconColor, size: iconSize);
     final IconThemeData iconThemeData = IconThemeData.lerp(
       defaultIconTheme.merge(unselectedIconTheme),
       defaultIconTheme.merge(selectedIconTheme),
@@ -1042,11 +1046,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         );
     }
 
-    final List<Widget> tiles = <Widget>[];
-    for (int i = 0; i < widget.items.length; i++) {
-      final Set<WidgetState> states = <WidgetState>{
-        if (i == widget.currentIndex) WidgetState.selected,
-      };
+    final tiles = <Widget>[];
+    for (var i = 0; i < widget.items.length; i++) {
+      final states = <WidgetState>{if (i == widget.currentIndex) WidgetState.selected};
 
       final MouseCursor effectiveMouseCursor =
           WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
@@ -1249,7 +1251,7 @@ class _RadialPainter extends CustomPainter {
     if (circles.length != oldPainter.circles.length) {
       return true;
     }
-    for (int i = 0; i < circles.length; i += 1) {
+    for (var i = 0; i < circles.length; i += 1) {
       if (circles[i] != oldPainter.circles[i]) {
         return true;
       }
@@ -1260,15 +1262,15 @@ class _RadialPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final _Circle circle in circles) {
-      final Paint paint = Paint()..color = circle.color;
-      final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
+      final paint = Paint()..color = circle.color;
+      final rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
       final double leftFraction = switch (textDirection) {
         TextDirection.rtl => 1.0 - circle.horizontalLeadingOffset,
         TextDirection.ltr => circle.horizontalLeadingOffset,
       };
-      final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
-      final Tween<double> radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
+      final center = Offset(leftFraction * size.width, size.height / 2.0);
+      final radiusTween = Tween<double>(begin: 0.0, end: _maxRadius(center, size));
       canvas.drawCircle(center, radiusTween.transform(circle.animation.value), paint);
     }
   }

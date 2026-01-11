@@ -53,7 +53,7 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> contents = <Widget>[
+    final contents = <Widget>[
       const SizedBox(height: 15),
       _buildUserInfo(),
       const SizedBox(height: 10),

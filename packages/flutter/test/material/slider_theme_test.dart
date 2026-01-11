@@ -14,12 +14,12 @@ void main() {
   });
 
   test('SliderThemeData lerp special cases', () {
-    const SliderThemeData data = SliderThemeData();
+    const data = SliderThemeData();
     expect(identical(SliderThemeData.lerp(data, data, 0.5), data), true);
   });
 
   testWidgets('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('SliderThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SliderThemeData(
       trackHeight: 7.0,
       activeTrackColor: Color(0xFF000001),
@@ -114,17 +114,17 @@ void main() {
 
   testWidgets('Slider defaults', (WidgetTester tester) async {
     debugDisableShadows = false;
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
-    const double trackHeight = 4.0;
-    final Color activeTrackColor = Color(colorScheme.primary.value);
+    const trackHeight = 4.0;
+    final activeTrackColor = Color(colorScheme.primary.value);
     final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
     final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
     final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.38);
     final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
     final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
     final Color shadowColor = colorScheme.shadow;
-    final Color thumbColor = Color(colorScheme.primary.value);
+    final thumbColor = Color(colorScheme.primary.value);
     final Color disabledThumbColor = Color.alphaBlend(
       colorScheme.onSurface.withOpacity(0.38),
       colorScheme.surface,
@@ -135,7 +135,7 @@ void main() {
     final Color disabledInactiveTickMarkColor = colorScheme.onSurface.withOpacity(0.38);
 
     try {
-      double value = 0.45;
+      var value = 0.45;
       Widget buildApp({int? divisions, bool enabled = true}) {
         final ValueChanged<double>? onChanged = !enabled
             ? null
@@ -168,8 +168,8 @@ void main() {
       final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
       // Test default track height.
-      const Radius radius = Radius.circular(trackHeight / 2);
-      const Radius activatedRadius = Radius.circular((trackHeight + 2) / 2);
+      const radius = Radius.circular(trackHeight / 2);
+      const activatedRadius = Radius.circular((trackHeight + 2) / 2);
       expect(
         material,
         paints
@@ -273,10 +273,10 @@ void main() {
   ) async {
     debugDisableShadows = false;
     try {
-      const Color customColor1 = Color(0xcafefeed);
-      const Color customColor2 = Color(0xdeadbeef);
-      const Color customColor3 = Color(0xdecaface);
-      final ThemeData theme = ThemeData(
+      const customColor1 = Color(0xcafefeed);
+      const customColor2 = Color(0xdeadbeef);
+      const customColor3 = Color(0xdecaface);
+      final theme = ThemeData(
         useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
@@ -298,7 +298,7 @@ void main() {
         ),
       );
       final SliderThemeData sliderTheme = theme.sliderTheme;
-      double value = 0.45;
+      var value = 0.45;
       Widget buildApp({
         Color? activeColor,
         Color? inactiveColor,
@@ -602,12 +602,12 @@ void main() {
 
   testWidgets('Slider parameters overrides theme properties', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const Color activeTrackColor = Color(0xffff0001);
-    const Color inactiveTrackColor = Color(0xffff0002);
-    const Color secondaryActiveTrackColor = Color(0xffff0003);
-    const Color thumbColor = Color(0xffff0004);
+    const activeTrackColor = Color(0xffff0001);
+    const inactiveTrackColor = Color(0xffff0002);
+    const secondaryActiveTrackColor = Color(0xffff0003);
+    const thumbColor = Color(0xffff0004);
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -618,7 +618,7 @@ void main() {
       ),
     );
     try {
-      const double value = 0.45;
+      const value = 0.45;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
           theme: theme,
@@ -661,7 +661,7 @@ void main() {
   });
 
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.red);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.red);
     final SliderThemeData sliderTheme = theme.sliderTheme;
     final SliderThemeData customTheme = sliderTheme.copyWith(
       activeTrackColor: Colors.purple,
@@ -686,7 +686,7 @@ void main() {
   testWidgets('Slider overrides ThemeData theme if SliderTheme present', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.red);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.red);
     final SliderThemeData sliderTheme = theme.sliderTheme;
     final SliderThemeData customTheme = sliderTheme.copyWith(
       activeTrackColor: Colors.purple,
@@ -711,12 +711,12 @@ void main() {
   testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (
     WidgetTester tester,
   ) async {
-    const Color customColor1 = Color(0xcafefeed);
-    const Color customColor2 = Color(0xdeadbeef);
-    const Color customColor3 = Color(0xdecaface);
-    const Color customColor4 = Color(0xfeedcafe);
+    const customColor1 = Color(0xcafefeed);
+    const customColor2 = Color(0xdeadbeef);
+    const customColor3 = Color(0xdecaface);
+    const customColor4 = Color(0xfeedcafe);
 
-    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+    final sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
@@ -746,12 +746,12 @@ void main() {
   testWidgets('SliderThemeData generates correct shapes for fromPrimaryColors', (
     WidgetTester tester,
   ) async {
-    const Color customColor1 = Color(0xcafefeed);
-    const Color customColor2 = Color(0xdeadbeef);
-    const Color customColor3 = Color(0xdecaface);
-    const Color customColor4 = Color(0xfeedcafe);
+    const customColor1 = Color(0xcafefeed);
+    const customColor2 = Color(0xdeadbeef);
+    const customColor3 = Color(0xdecaface);
+    const customColor4 = Color(0xfeedcafe);
 
-    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+    final sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
@@ -789,7 +789,7 @@ void main() {
       ),
     ).copyWith(trackHeight: 6.0);
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
-    const Color middleGrey = Color(0xff7f7f7f);
+    const middleGrey = Color(0xff7f7f7f);
 
     expect(lerp.trackHeight, equals(4.0));
     expect(lerp.activeTrackColor, isSameColorAs(middleGrey.withAlpha(0xff)));
@@ -811,14 +811,14 @@ void main() {
   });
 
   testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, secondaryTrackValue: 0.5));
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
-    const Radius radius = Radius.circular(2);
-    const Radius activatedRadius = Radius.circular(3);
+    const radius = Radius.circular(2);
+    const activatedRadius = Radius.circular(3);
 
     // The enabled slider thumb has track segments that extend to and from
     // the center of the thumb.
@@ -882,7 +882,7 @@ void main() {
   });
 
   testWidgets('Default slider overlay draws correctly', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
@@ -918,7 +918,7 @@ void main() {
   });
 
   testWidgets('Slider can use theme overlay with material states', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
       overlayColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
         if (states.contains(WidgetState.focused)) {
@@ -928,10 +928,10 @@ void main() {
         return Colors.transparent;
       }),
     );
-    final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
+    final focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    double value = 0.5;
+    var value = 0.5;
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -980,7 +980,7 @@ void main() {
   });
 
   testWidgets('Default slider ticker and thumb shape draw correctly', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
+    final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45));
@@ -1025,7 +1025,7 @@ void main() {
   ) async {
     debugDisableShadows = false;
     try {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
@@ -1210,7 +1210,7 @@ void main() {
   ) async {
     debugDisableShadows = false;
     try {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         useMaterial3: false,
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
@@ -1392,8 +1392,8 @@ void main() {
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
-    const Radius radius = Radius.circular(8);
-    const Radius activatedRadius = Radius.circular(9);
+    const radius = Radius.circular(8);
+    const activatedRadius = Radius.circular(9);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
 
@@ -1879,10 +1879,7 @@ void main() {
   ) async {
     debugDisableShadows = false;
     try {
-      final ThemeData theme = ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-      );
+      final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
       final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
         thumbColor: Colors.red.shade500,
         showValueIndicator: ShowValueIndicator.always,
@@ -1940,10 +1937,7 @@ void main() {
     'Default paddle range slider value indicator shape draws correctly with debugDisableShadows',
     (WidgetTester tester) async {
       debugDisableShadows = true;
-      final ThemeData theme = ThemeData(
-        platform: TargetPlatform.android,
-        primarySwatch: Colors.blue,
-      );
+      final theme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
       final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
         thumbColor: Colors.red.shade500,
         showValueIndicator: ShowValueIndicator.always,
@@ -2125,7 +2119,7 @@ void main() {
   });
 
   testWidgets('SliderTheme.allowedInteraction is themeable', (WidgetTester tester) async {
-    double value = 0.0;
+    var value = 0.0;
 
     Widget buildApp({
       bool isAllowedInteractionInThemeNull = false,
@@ -2233,7 +2227,7 @@ void main() {
   testWidgets('Default value indicator color', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
-      final ThemeData theme = ThemeData(platform: TargetPlatform.android);
+      final theme = ThemeData(platform: TargetPlatform.android);
       Widget buildApp(
         String value, {
         double sliderValue = 0.5,
@@ -2292,7 +2286,7 @@ void main() {
   testWidgets(
     'RectangularSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always,
           valueIndicatorShape: RectangularSliderValueIndicatorShape(),
@@ -2301,7 +2295,7 @@ void main() {
         ),
       );
 
-      const double value = 0.5;
+      const value = 0.5;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2334,7 +2328,7 @@ void main() {
   testWidgets('PaddleSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
         valueIndicatorShape: PaddleSliderValueIndicatorShape(),
@@ -2343,7 +2337,7 @@ void main() {
       ),
     );
 
-    const double value = 0.5;
+    const value = 0.5;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2375,7 +2369,7 @@ void main() {
   testWidgets('DropSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
         valueIndicatorShape: DropSliderValueIndicatorShape(),
@@ -2384,7 +2378,7 @@ void main() {
       ),
     );
 
-    const double value = 0.5;
+    const value = 0.5;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2416,7 +2410,7 @@ void main() {
   testWidgets(
     'RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always,
           rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
@@ -2425,7 +2419,7 @@ void main() {
         ),
       );
 
-      RangeValues values = const RangeValues(0, 0.5);
+      var values = const RangeValues(0, 0.5);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2469,7 +2463,7 @@ void main() {
   testWidgets(
     'RectangularRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always,
           rangeValueIndicatorShape: RectangularRangeSliderValueIndicatorShape(),
@@ -2479,7 +2473,7 @@ void main() {
         ),
       );
 
-      RangeValues values = const RangeValues(0.0, 0.0);
+      var values = const RangeValues(0.0, 0.0);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2523,7 +2517,7 @@ void main() {
   testWidgets(
     'PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always,
           rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
@@ -2532,7 +2526,7 @@ void main() {
         ),
       );
 
-      RangeValues values = const RangeValues(0, 0.5);
+      var values = const RangeValues(0, 0.5);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2576,7 +2570,7 @@ void main() {
   testWidgets(
     'PaddleRangeSliderValueIndicatorShape supports SliderTheme.valueIndicatorStrokeColor on overlapping indicator',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           showValueIndicator: ShowValueIndicator.always,
           rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
@@ -2586,7 +2580,7 @@ void main() {
         ),
       );
 
-      RangeValues values = const RangeValues(0, 0);
+      var values = const RangeValues(0, 0);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2631,9 +2625,7 @@ void main() {
     testWidgets(
       'Only draw active track if thumb center is higher than trackRect.left and track radius',
       (WidgetTester tester) async {
-        const SliderThemeData sliderTheme = SliderThemeData(
-          trackShape: RoundedRectSliderTrackShape(),
-        );
+        const sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
         await tester.pumpWidget(_buildApp(sliderTheme));
 
         MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
@@ -2661,9 +2653,7 @@ void main() {
     testWidgets(
       'Only draw inactive track if thumb center is lower than trackRect.right and track radius',
       (WidgetTester tester) async {
-        const SliderThemeData sliderTheme = SliderThemeData(
-          trackShape: RoundedRectSliderTrackShape(),
-        );
+        const sliderTheme = SliderThemeData(trackShape: RoundedRectSliderTrackShape());
         await tester.pumpWidget(_buildApp(sliderTheme, value: 1.0));
 
         MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
@@ -2940,8 +2930,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Test default track shape.
-    const Radius trackOuterCornerRadius = Radius.circular(8.0);
-    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    const trackOuterCornerRadius = Radius.circular(8.0);
+    const trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3031,8 +3021,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
 
     // Test default track shape.
-    const Radius trackOuterCornerRadius = Radius.circular(8.0);
-    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    const trackOuterCornerRadius = Radius.circular(8.0);
+    const trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3227,11 +3217,11 @@ void main() {
   testWidgets('Opt into 2024 Slider appearance with SliderThemeData.year2023', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(sliderTheme: const SliderThemeData(year2023: false));
+    final theme = ThemeData(sliderTheme: const SliderThemeData(year2023: false));
     final ColorScheme colorScheme = theme.colorScheme;
     final Color activeTrackColor = colorScheme.primary;
     final Color inactiveTrackColor = colorScheme.secondaryContainer;
-    const double value = 0.45;
+    const value = 0.45;
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -3246,8 +3236,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Test default track shape.
-    const Radius trackOuterCornerRadius = Radius.circular(8.0);
-    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    const trackOuterCornerRadius = Radius.circular(8.0);
+    const trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3283,11 +3273,11 @@ void main() {
   });
 
   testWidgets('Slider.year2023 overrides SliderThemeData.year2023', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(sliderTheme: const SliderThemeData(year2023: false));
+    final theme = ThemeData(sliderTheme: const SliderThemeData(year2023: false));
     final ColorScheme colorScheme = theme.colorScheme;
     final Color activeTrackColor = colorScheme.primary;
     final Color inactiveTrackColor = colorScheme.surfaceContainerHighest;
-    const double value = 0.45;
+    const value = 0.45;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -3304,8 +3294,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Test default track shape.
-    const Radius activeTrackCornerRadius = Radius.circular(3.0);
-    const Radius inactiveTrackCornerRadius = Radius.circular(2.0);
+    const activeTrackCornerRadius = Radius.circular(3.0);
+    const inactiveTrackCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3326,8 +3316,8 @@ void main() {
   testWidgets(
     'Slider with transparent track colors and custom track height can reach extreme ends',
     (WidgetTester tester) async {
-      const double sliderPadding = 24.0;
-      final ThemeData theme = ThemeData(
+      const sliderPadding = 24.0;
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           trackHeight: 100,
           activeTrackColor: Colors.transparent,
@@ -3370,8 +3360,8 @@ void main() {
   testWidgets(
     'RangeSlider with transparent track colors and custom track height can reach extreme ends',
     (WidgetTester tester) async {
-      const double sliderPadding = 24.0;
-      final ThemeData theme = ThemeData(
+      const sliderPadding = 24.0;
+      final theme = ThemeData(
         sliderTheme: const SliderThemeData(
           trackHeight: 100,
           activeTrackColor: Colors.transparent,
@@ -3412,17 +3402,17 @@ void main() {
 
     testWidgets('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
-      final ThemeData theme = ThemeData(useMaterial3: false);
-      const double trackHeight = 4.0;
+      final theme = ThemeData(useMaterial3: false);
+      const trackHeight = 4.0;
       final ColorScheme colorScheme = theme.colorScheme;
-      final Color activeTrackColor = Color(colorScheme.primary.value);
+      final activeTrackColor = Color(colorScheme.primary.value);
       final Color inactiveTrackColor = colorScheme.primary.withOpacity(0.24);
       final Color secondaryActiveTrackColor = colorScheme.primary.withOpacity(0.54);
       final Color disabledActiveTrackColor = colorScheme.onSurface.withOpacity(0.32);
       final Color disabledInactiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
       final Color disabledSecondaryActiveTrackColor = colorScheme.onSurface.withOpacity(0.12);
       final Color shadowColor = colorScheme.shadow;
-      final Color thumbColor = Color(colorScheme.primary.value);
+      final thumbColor = Color(colorScheme.primary.value);
       final Color disabledThumbColor = Color.alphaBlend(
         colorScheme.onSurface.withOpacity(.38),
         colorScheme.surface,
@@ -3437,7 +3427,7 @@ void main() {
       );
 
       try {
-        double value = 0.45;
+        var value = 0.45;
         Widget buildApp({int? divisions, bool enabled = true}) {
           final ValueChanged<double>? onChanged = !enabled
               ? null
@@ -3466,8 +3456,8 @@ void main() {
         final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
         // Test default track height.
-        const Radius radius = Radius.circular(trackHeight / 2);
-        const Radius activatedRadius = Radius.circular((trackHeight + 2) / 2);
+        const radius = Radius.circular(trackHeight / 2);
+        const activatedRadius = Radius.circular((trackHeight + 2) / 2);
         expect(
           material,
           paints
@@ -3586,7 +3576,7 @@ void main() {
     testWidgets('Default value indicator color', (WidgetTester tester) async {
       debugDisableShadows = false;
       try {
-        final ThemeData theme = ThemeData(useMaterial3: false, platform: TargetPlatform.android);
+        final theme = ThemeData(useMaterial3: false, platform: TargetPlatform.android);
         Widget buildApp(
           String value, {
           double sliderValue = 0.5,

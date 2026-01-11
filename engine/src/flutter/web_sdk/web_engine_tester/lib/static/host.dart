@@ -120,9 +120,9 @@ void main() {
       final MultiChannel<dynamic> serverChannel = _connectToServer();
       serverChannel.stream.listen((dynamic message) {
         if (message['command'] == 'loadSuite') {
-          final int channelId = message['channel'] as int;
-          final String url = message['url'] as String;
-          final int messageId = message['id'] as int;
+          final channelId = message['channel'] as int;
+          final url = message['url'] as String;
+          final messageId = message['id'] as int;
           final VirtualChannel<dynamic> suiteChannel = serverChannel.virtualChannel(channelId);
           final StreamChannel<dynamic> iframeChannel = _connectToIframe(url, messageId);
           suiteChannel.pipe(iframeChannel);
@@ -178,11 +178,11 @@ MultiChannel<dynamic> _connectToServer() {
   // [BrowserManager] with which this communicates.
   final DomWebSocket webSocket = createDomWebSocket(_currentUrl.queryParameters['managerUrl']!);
 
-  final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
+  final controller = StreamChannelController<dynamic>(sync: true);
   webSocket.addEventListener(
     'message',
     createDomEventListener((DomEvent message) {
-      final String data = (message as DomMessageEvent).data as String;
+      final data = (message as DomMessageEvent).data as String;
       controller.local.sink.add(jsonDecode(data));
     }),
   );
@@ -200,10 +200,10 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
 
-  final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
+  final controller = StreamChannelController<dynamic>(sync: true);
 
-  final List<DomSubscription> domSubscriptions = <DomSubscription>[];
-  final List<StreamSubscription<dynamic>> streamSubscriptions = <StreamSubscription<dynamic>>[];
+  final domSubscriptions = <DomSubscription>[];
+  final streamSubscriptions = <StreamSubscription<dynamic>>[];
   _domSubscriptions[id] = domSubscriptions;
   _streamSubscriptions[id] = streamSubscriptions;
   domSubscriptions.add(
@@ -211,7 +211,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       domWindow,
       'message',
       createDomEventListener((DomEvent event) {
-        final DomMessageEvent message = event as DomMessageEvent;
+        final message = event as DomMessageEvent;
         // A message on the Window can theoretically come from any website. It's
         // very unlikely that a malicious site would care about hacking someone's
         // unit tests, let alone be able to find the test server while it's

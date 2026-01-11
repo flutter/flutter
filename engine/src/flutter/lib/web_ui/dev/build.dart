@@ -24,6 +24,7 @@ const Map<String, String> targetAliases = <String, String>{
   'skwasm_st': 'flutter/third_party/canvaskit:skwasm_st_group',
   'skwasm_heavy': 'flutter/third_party/canvaskit:skwasm_heavy_group',
   'skwasm_heavy_st': 'flutter/third_party/canvaskit:skwasm_heavy_st_group',
+  'wimp': 'flutter/third_party/canvaskit:wimp_group',
   'archive': 'flutter/web_sdk:flutter_web_sdk_archive',
 };
 
@@ -97,8 +98,8 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     if (embedDwarf && runtimeMode != RuntimeMode.debug) {
       throw ToolExit('Embedding DWARF data requires debug runtime mode.');
     }
-    final FilePath libPath = FilePath.fromWebUi('lib');
-    final List<PipelineStep> steps = <PipelineStep>[
+    final libPath = FilePath.fromWebUi('lib');
+    final steps = <PipelineStep>[
       GnPipelineStep(host: host, runtimeMode: runtimeMode, embedDwarf: embedDwarf),
       NinjaPipelineStep(
         host: host,
@@ -106,7 +107,7 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
         targets: targets.map((String target) => targetAliases[target] ?? target),
       ),
     ];
-    final Pipeline buildPipeline = Pipeline(steps: steps);
+    final buildPipeline = Pipeline(steps: steps);
     await buildPipeline.run();
 
     if (isWatchMode) {

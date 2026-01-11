@@ -610,7 +610,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
-    for (final _RawMenuAnchorBaseMixin child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
+    for (final child in List<_RawMenuAnchorBaseMixin>.of(_anchorChildren)) {
       if (inDispose) {
         child.close(inDispose: inDispose);
       } else {
@@ -788,7 +788,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
     // Transform the anchor rectangle using the full transform matrix.
     final Rect anchorRect = MatrixUtils.transformRect(transform, Offset.zero & anchorSize);
 
-    final RawMenuOverlayInfo info = RawMenuOverlayInfo(
+    final info = RawMenuOverlayInfo(
       anchorRect: anchorRect,
       overlaySize: layoutInfo.overlaySize,
       position: _menuPosition,

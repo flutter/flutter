@@ -272,7 +272,7 @@ abstract class FlutterDriver {
     OffsetType type, {
     Duration? timeout,
   }) async {
-    final GetOffset command = GetOffset(finder, type, timeout: timeout);
+    final command = GetOffset(finder, type, timeout: timeout);
     final GetOffsetResult result = GetOffsetResult.fromJson(await sendCommand(command));
     return DriverOffset(result.dx, result.dy);
   }
@@ -465,7 +465,7 @@ abstract class FlutterDriver {
     // looking for finally scrolls onscreen. We add an initial pause to give it
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
-    bool isVisible = false;
+    var isVisible = false;
     waitFor(item, timeout: timeout).then<void>((_) {
       isVisible = true;
     });

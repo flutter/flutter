@@ -13,18 +13,56 @@ namespace flutter {
 
 class DlBlurImageFilter final : public DlImageFilter {
  public:
-  DlBlurImageFilter(DlScalar sigma_x, DlScalar sigma_y, DlTileMode tile_mode)
-      : sigma_x_(sigma_x), sigma_y_(sigma_y), tile_mode_(tile_mode) {}
+  /**
+   * @brief Creates an ImageFilter that applies a Gaussian blur to its input.
+   *
+   * @param sigma_x The standard deviation of the Gaussian kernel in the X
+   * direction.
+   * @param sigma_y The standard deviation of the Gaussian kernel in the Y
+   * direction.
+   * @param bounds An optional rectangle that enables "bounded blur" mode.
+   * @param tile_mode Defines how to sample from areas outside the bounds of the
+   * input texture.
+   *
+   * If `bounds` is std::nullopt, a standard Gaussian blur is applied and to the
+   * entire surface.
+   *
+   * If `bounds` is not std::nullopt, the filter performs a "bounded blur": the
+   * image filter substitutes transparent black for any sample it reads from
+   * outside the defined bounding rectangle. The final weighted sum is then
+   * divided by the total weight of the non-transparent samples (the effective
+   * alpha), resulting in opaque output.
+   *
+   * The bounded mode prevents color bleeding from content adjacent to the
+   * bounds into the blurred area, and is typically used when the blur must be
+   * strictly contained within a clipped region, such as for iOS-style frosted
+   * glass effects.
+   *
+   * The `bounds` rectangle is specified in the canvas's current coordinate
+   * space and is affected by the current transform; consequently, the bounds
+   * may not be axis-aligned in the final canvas coordinates.
+   */
+  DlBlurImageFilter(DlScalar sigma_x,
+                    DlScalar sigma_y,
+                    DlTileMode tile_mode,
+                    std::optional<DlRect> bounds = std::nullopt)
+      : sigma_x_(sigma_x),
+        sigma_y_(sigma_y),
+        tile_mode_(tile_mode),
+        bounds_(bounds) {}
   explicit DlBlurImageFilter(const DlBlurImageFilter* filter)
       : DlBlurImageFilter(filter->sigma_x_,
                           filter->sigma_y_,
-                          filter->tile_mode_) {}
+                          filter->tile_mode_,
+                          filter->bounds_) {}
   DlBlurImageFilter(const DlBlurImageFilter& filter)
       : DlBlurImageFilter(&filter) {}
 
-  static std::shared_ptr<DlImageFilter> Make(DlScalar sigma_x,
-                                             DlScalar sigma_y,
-                                             DlTileMode tile_mode);
+  static std::shared_ptr<DlImageFilter> Make(
+      DlScalar sigma_x,
+      DlScalar sigma_y,
+      DlTileMode tile_mode,
+      std::optional<DlRect> bounds = std::nullopt);
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlBlurImageFilter>(this);
@@ -51,6 +89,7 @@ class DlBlurImageFilter final : public DlImageFilter {
   DlScalar sigma_x() const { return sigma_x_; }
   DlScalar sigma_y() const { return sigma_y_; }
   DlTileMode tile_mode() const { return tile_mode_; }
+  std::optional<DlRect> bounds() const { return bounds_; }
 
  protected:
   bool equals_(const DlImageFilter& other) const override;
@@ -59,6 +98,7 @@ class DlBlurImageFilter final : public DlImageFilter {
   DlScalar sigma_x_;
   DlScalar sigma_y_;
   DlTileMode tile_mode_;
+  std::optional<DlRect> bounds_;
 };
 
 }  // namespace flutter

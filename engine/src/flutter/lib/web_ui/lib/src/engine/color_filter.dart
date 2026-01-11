@@ -111,9 +111,9 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the given saturation to the RGB
   /// channels.
   factory EngineColorFilter.saturation(double saturation) {
-    const double rLuminance = 0.2126;
-    const double gLuminance = 0.7152;
-    const double bLuminance = 0.0722;
+    const rLuminance = 0.2126;
+    const gLuminance = 0.7152;
+    const bLuminance = 0.0722;
     final double invSat = 1 - saturation;
 
     return EngineColorFilter.matrix(<double>[
@@ -134,6 +134,9 @@ class EngineColorFilter implements LayerImageFilter, ui.ColorFilter {
   /// Color filters don't affect the image bounds
   @override
   ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
+
+  @override
+  String get debugShortDescription => toString();
 
   @override
   String toString() {

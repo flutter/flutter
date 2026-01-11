@@ -14,12 +14,12 @@ void main() {
 
   test('BadgeThemeData lerp special cases', () {
     expect(BadgeThemeData.lerp(null, null, 0), const BadgeThemeData());
-    const BadgeThemeData data = BadgeThemeData();
+    const data = BadgeThemeData();
     expect(identical(BadgeThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('BadgeThemeData defaults', () {
-    const BadgeThemeData themeData = BadgeThemeData();
+    const themeData = BadgeThemeData();
     expect(themeData.backgroundColor, null);
     expect(themeData.textColor, null);
     expect(themeData.smallSize, null);
@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('Default BadgeThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWidgets('BadgeThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData(
       backgroundColor: Color(0xfffffff0),
       textColor: Color(0xfffffff1),
@@ -73,9 +73,9 @@ void main() {
   });
 
   testWidgets('Badge uses ThemeData badge theme', (WidgetTester tester) async {
-    const Color green = Color(0xff00ff00);
-    const Color black = Color(0xff000000);
-    const BadgeThemeData badgeTheme = BadgeThemeData(
+    const green = Color(0xff00ff00);
+    const black = Color(0xff000000);
+    const badgeTheme = BadgeThemeData(
       backgroundColor: green,
       textColor: black,
       smallSize: 5,
@@ -119,9 +119,9 @@ void main() {
   // this case the theme is introduced with the BadgeTheme widget instead of
   // ThemeData.badgeTheme.
   testWidgets('Badge uses BadgeTheme', (WidgetTester tester) async {
-    const Color green = Color(0xff00ff00);
-    const Color black = Color(0xff000000);
-    const BadgeThemeData badgeTheme = BadgeThemeData(
+    const green = Color(0xff00ff00);
+    const black = Color(0xff000000);
+    const badgeTheme = BadgeThemeData(
       backgroundColor: green,
       textColor: black,
       smallSize: 5,

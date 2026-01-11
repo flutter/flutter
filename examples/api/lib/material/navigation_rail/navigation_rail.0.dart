@@ -76,7 +76,10 @@ class _NavRailExampleState extends State<NavRailExample> {
                 ),
                 NavigationRailDestination(
                   icon: Badge(label: Text('4'), child: Icon(Icons.star_border)),
-                  selectedIcon: Badge(label: Text('4'), child: Icon(Icons.star)),
+                  selectedIcon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star),
+                  ),
                   label: Text('Third'),
                 ),
               ],
@@ -107,11 +110,12 @@ class _NavRailExampleState extends State<NavRailExample> {
                       ),
                     ],
                     selected: <NavigationRailLabelType>{labelType},
-                    onSelectionChanged: (Set<NavigationRailLabelType> newSelection) {
-                      setState(() {
-                        labelType = newSelection.first;
-                      });
-                    },
+                    onSelectionChanged:
+                        (Set<NavigationRailLabelType> newSelection) {
+                          setState(() {
+                            labelType = newSelection.first;
+                          });
+                        },
                   ),
                   const SizedBox(height: 20),
                   Text('Group alignment: $groupAlignment'),
@@ -140,7 +144,9 @@ class _NavRailExampleState extends State<NavRailExample> {
                     },
                   ),
                   SwitchListTile(
-                    title: Text(showTrailing ? 'Hide Trailing' : 'Show Trailing'),
+                    title: Text(
+                      showTrailing ? 'Hide Trailing' : 'Show Trailing',
+                    ),
                     value: showTrailing,
                     onChanged: (bool value) {
                       setState(() {

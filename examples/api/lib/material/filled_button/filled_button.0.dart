@@ -39,9 +39,15 @@ class FilledButtonApp extends StatelessWidget {
                   const SizedBox(height: 30),
                   const Text('Filled tonal'),
                   const SizedBox(height: 15),
-                  FilledButton.tonal(onPressed: () {}, child: const Text('Enabled')),
+                  FilledButton.tonal(
+                    onPressed: () {},
+                    child: const Text('Enabled'),
+                  ),
                   const SizedBox(height: 30),
-                  const FilledButton.tonal(onPressed: null, child: Text('Disabled')),
+                  const FilledButton.tonal(
+                    onPressed: null,
+                    child: Text('Disabled'),
+                  ),
                 ],
               ),
             ],

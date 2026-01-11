@@ -46,7 +46,7 @@ void main() {
     test('Notifies onBytesReceived for every chunk of bytes', () async {
       final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
       response.contentLength = syntheticTotal;
-      final List<int?> records = <int?>[];
+      final records = <int?>[];
       await consolidateHttpClientResponseBytes(
         response,
         onBytesReceived: (int cumulative, int? total) {
@@ -114,7 +114,7 @@ void main() {
 
       test('Notifies onBytesReceived with gzipped numbers', () async {
         response.contentLength = gzipped.length;
-        final List<int?> records = <int?>[];
+        final records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int? total) {
@@ -136,7 +136,7 @@ void main() {
           final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
           response.compressionState = HttpClientResponseCompressionState.decompressed;
           response.contentLength = syntheticTotal;
-          final List<int?> records = <int?>[];
+          final records = <int?>[];
           await consolidateHttpClientResponseBytes(
             response,
             onBytesReceived: (int cumulative, int? total) {

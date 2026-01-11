@@ -252,13 +252,15 @@ class _OptionsState extends State<Options> {
                       ),
                     ),
                     Tooltip(
-                      message: 'Round the number of points to the nearest integer.',
+                      message:
+                          'Round the number of points to the nearest integer.',
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: OutlinedButton(
                           child: const Text('Nearest'),
                           onPressed: () {
-                            widget.model.points = widget.model.points.roundToDouble();
+                            widget.model.points = widget.model.points
+                                .roundToDouble();
                           },
                         ),
                       ),
@@ -418,7 +420,12 @@ class ControlSlider extends StatelessWidget {
           Expanded(flex: 2, child: Text(label, textAlign: TextAlign.end)),
           Expanded(
             flex: 5,
-            child: Slider(onChanged: onChanged, min: min, max: max, value: value),
+            child: Slider(
+              onChanged: onChanged,
+              min: min,
+              max: max,
+              value: value,
+            ),
           ),
           Expanded(child: Text(value.toStringAsFixed(precision))),
         ],

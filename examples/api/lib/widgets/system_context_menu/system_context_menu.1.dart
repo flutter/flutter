@@ -27,7 +27,8 @@ class SystemContextMenuExample extends StatefulWidget {
   const SystemContextMenuExample({super.key});
 
   @override
-  State<SystemContextMenuExample> createState() => _SystemContextMenuExampleState();
+  State<SystemContextMenuExample> createState() =>
+      _SystemContextMenuExampleState();
 }
 
 class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
@@ -42,7 +43,9 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -57,54 +60,63 @@ class _SystemContextMenuExampleState extends State<SystemContextMenuExample> {
           labelText: 'Text Field with Custom Context Menu',
           helperText: 'Long press to see custom menu items (iOS 16.0+)',
         ),
-        contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-          if (!MediaQuery.of(context).supportsShowingSystemContextMenu) {
-            return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
-          }
+        contextMenuBuilder:
+            (BuildContext context, EditableTextState editableTextState) {
+              if (!MediaQuery.of(context).supportsShowingSystemContextMenu) {
+                return AdaptiveTextSelectionToolbar.editableText(
+                  editableTextState: editableTextState,
+                );
+              }
 
-          return SystemContextMenu.editableText(
-            editableTextState: editableTextState,
-            items: <IOSSystemContextMenuItem>[
-              IOSSystemContextMenuItemCustom(
-                title: 'Clear Text',
-                onPressed: () {
-                  _controller.clear();
-                  _showMessage('Text cleared');
-                },
-              ),
-              IOSSystemContextMenuItemCustom(
-                title: 'Add Heart',
-                onPressed: () {
-                  final TextSelection selection = _controller.selection;
-                  final String text = _controller.text;
-                  _controller.value = TextEditingValue(
-                    text: text.replaceRange(selection.start, selection.end, '❤️'),
-                    selection: TextSelection.collapsed(offset: selection.start + 2),
-                  );
-                  _showMessage('Heart added');
-                },
-              ),
-              IOSSystemContextMenuItemCustom(
-                title: 'Uppercase',
-                onPressed: () {
-                  final TextSelection selection = _controller.selection;
-                  if (selection.isValid && !selection.isCollapsed) {
-                    final String selectedText = _controller.text.substring(
-                      selection.start,
-                      selection.end,
-                    );
-                    _controller.text = _controller.text.replaceRange(
-                      selection.start,
-                      selection.end,
-                      selectedText.toUpperCase(),
-                    );
-                    _showMessage('Text converted to uppercase');
-                  }
-                },
-              ),
-            ],
-          );
-        },
+              return SystemContextMenu.editableText(
+                editableTextState: editableTextState,
+                items: <IOSSystemContextMenuItem>[
+                  IOSSystemContextMenuItemCustom(
+                    title: 'Clear Text',
+                    onPressed: () {
+                      _controller.clear();
+                      _showMessage('Text cleared');
+                    },
+                  ),
+                  IOSSystemContextMenuItemCustom(
+                    title: 'Add Heart',
+                    onPressed: () {
+                      final TextSelection selection = _controller.selection;
+                      final String text = _controller.text;
+                      _controller.value = TextEditingValue(
+                        text: text.replaceRange(
+                          selection.start,
+                          selection.end,
+                          '❤️',
+                        ),
+                        selection: TextSelection.collapsed(
+                          offset: selection.start + 2,
+                        ),
+                      );
+                      _showMessage('Heart added');
+                    },
+                  ),
+                  IOSSystemContextMenuItemCustom(
+                    title: 'Uppercase',
+                    onPressed: () {
+                      final TextSelection selection = _controller.selection;
+                      if (selection.isValid && !selection.isCollapsed) {
+                        final String selectedText = _controller.text.substring(
+                          selection.start,
+                          selection.end,
+                        );
+                        _controller.text = _controller.text.replaceRange(
+                          selection.start,
+                          selection.end,
+                          selectedText.toUpperCase(),
+                        );
+                        _showMessage('Text converted to uppercase');
+                      }
+                    },
+                  ),
+                ],
+              );
+            },
       ),
     );
   }

@@ -33,7 +33,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the map of iOS key codes to physical keys.
   String get _scanCodeMap {
-    final OutputLines<int> lines = OutputLines<int>('iOS scancode map');
+    final lines = OutputLines<int>('iOS scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       if (entry.iOSScanCode != null) {
         lines.add(
@@ -46,14 +46,14 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   Iterable<PhysicalKeyEntry> get _functionKeyData {
-    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    final functionKeyRe = RegExp(r'^f[0-9]+$');
     return keyData.entries.where((PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     });
   }
 
   String get _functionKeys {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     for (final PhysicalKeyEntry entry in _functionKeyData) {
       result.writeln('    ${toHex(entry.iOSScanCode)},  // ${entry.constantName}');
     }
@@ -61,7 +61,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _keyCodeToLogicalMap {
-    final OutputLines<int> lines = OutputLines<int>('iOS keycode map');
+    final lines = OutputLines<int>('iOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (int iOSValue, String iOSName) {
         lines.add(
@@ -75,9 +75,9 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates the mask values for the part of a key code that defines its plane.
   String get _maskConstants {
-    final StringBuffer buffer = StringBuffer();
-    const List<MaskConstant> maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kIosPlane];
-    for (final MaskConstant constant in maskConstants) {
+    final buffer = StringBuffer();
+    const maskConstants = <MaskConstant>[kValueMask, kUnicodePlane, kIosPlane];
+    for (final constant in maskConstants) {
       buffer.writeln('/**');
       buffer.write(wrapString(constant.description, prefix: ' * '));
       buffer.writeln(' */');
@@ -91,9 +91,9 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates a map from the key code to a modifier flag.
   String get _keyToModifierFlagMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
+    final modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line =
+      final line =
           '{${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}, kModifierFlag${lowerCamelToUpperCamel(name)}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
@@ -102,9 +102,9 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates a map from the modifier flag to the key code.
   String get _modifierFlagToKeyMap {
-    final StringBuffer modifierKeyMap = StringBuffer();
+    final modifierKeyMap = StringBuffer();
     for (final String name in kModifiersOfInterest) {
-      final String line =
+      final line =
           '{kModifierFlag${lowerCamelToUpperCamel(name)}, ${toHex(logicalData.entryByName(name).iOSKeyCodeValues[0])}},';
       modifierKeyMap.writeln('    ${line.padRight(42)}// $name');
     }
@@ -112,7 +112,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   }
 
   String get _specialKeyMapping {
-    final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
+    final lines = OutputLines<int>('iOS special key mapping');
     kIosSpecialKeyMapping.forEach((String key, String logicalName) {
       final int value = logicalData.entryByName(logicalName).value;
       lines.add(value, '  @"$key" : @(${toHex(value)}),');
@@ -122,7 +122,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   /// This generates some keys that needs special attention.
   String get _specialKeyConstants {
-    final StringBuffer specialKeyConstants = StringBuffer();
+    final specialKeyConstants = StringBuffer();
     for (final String keyName in kSpecialPhysicalKeys) {
       specialKeyConstants.writeln(
         'const uint64_t k${keyName}PhysicalKey = ${toHex(keyData.entryByName(keyName).usbHidCode)};',

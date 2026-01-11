@@ -9,7 +9,7 @@ void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
     const Key builderKey = PageStorageKey<String>('builderKey');
     late StateSetter setState;
-    int storedValue = 0;
+    var storedValue = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
     late StateSetter setState;
-    int storedValue = 0;
+    var storedValue = 0;
 
     Widget buildWidthKey(Key key) {
       return MaterialApp(
@@ -52,7 +52,7 @@ void main() {
       );
     }
 
-    Key key = const Key('Key one');
+    var key = const Key('Key one');
     await tester.pumpWidget(buildWidthKey(key));
     Element builderElement = tester.element(find.byKey(key));
     expect(PageStorage.of(builderElement), isNotNull);

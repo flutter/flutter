@@ -22,8 +22,8 @@ void main() {
 
   group('RestorationManager', () {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) {
@@ -31,7 +31,7 @@ void main() {
         return result.future;
       });
 
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
@@ -73,14 +73,14 @@ void main() {
 
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
-      final List<MethodCall> callsToEngine = <MethodCall>[];
+      final callsToEngine = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) async {
         callsToEngine.add(call);
         return null;
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
 
       await _pushDataFromEngine(_createEncodedRestorationData1());
@@ -97,15 +97,15 @@ void main() {
       WidgetTester tester,
     ) async {
       SystemChannels.restoration.setMethodCallHandler(null);
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) {
         callsToEngine.add(call);
         return result.future;
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
 
       RestorationBucket? rootBucket;
@@ -136,7 +136,7 @@ void main() {
       ) async {
         return _createEncodedRestorationData1();
       });
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
       manager.rootBucket.then((RestorationBucket? bucket) {
@@ -148,7 +148,7 @@ void main() {
       final RestorationBucket child = rootBucket!.claimChild('child1', debugOwner: null);
       expect(child.read<int>('another value'), 22);
 
-      bool rootReplaced = false;
+      var rootReplaced = false;
       RestorationBucket? newRoot;
       manager.addListener(() {
         rootReplaced = true;
@@ -177,22 +177,22 @@ void main() {
     testWidgets('returns null as root bucket when restoration is disabled', (
       WidgetTester tester,
     ) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) {
         callsToEngine.add(call);
         return result.future;
       });
-      int listenerCount = 0;
-      final RestorationManager manager = RestorationManager()
+      var listenerCount = 0;
+      final manager = RestorationManager()
         ..addListener(() {
           listenerCount++;
         });
       addTearDown(manager.dispose);
       RestorationBucket? rootBucket;
-      bool rootBucketResolved = false;
+      var rootBucketResolved = false;
       manager.rootBucket.then((RestorationBucket? bucket) {
         rootBucketResolved = true;
         rootBucket = bucket;
@@ -224,8 +224,8 @@ void main() {
     });
 
     testWidgets('flushData', (WidgetTester tester) async {
-      final List<MethodCall> callsToEngine = <MethodCall>[];
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      final callsToEngine = <MethodCall>[];
+      final result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) {
@@ -233,7 +233,7 @@ void main() {
         return result.future;
       });
 
-      final RestorationManager manager = RestorationManager();
+      final manager = RestorationManager();
       addTearDown(manager.dispose);
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
@@ -263,14 +263,14 @@ void main() {
     });
 
     testWidgets('isReplacing', (WidgetTester tester) async {
-      final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
+      final result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (
         MethodCall call,
       ) {
         return result.future;
       });
 
-      final TestRestorationManager manager = TestRestorationManager();
+      final manager = TestRestorationManager();
       addTearDown(manager.dispose);
       expect(manager.isReplacing, isFalse);
 
@@ -349,7 +349,7 @@ Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
 }
 
 Map<dynamic, dynamic> _createEncodedRestorationData1() {
-  final Map<String, dynamic> data = <String, dynamic>{
+  final data = <String, dynamic>{
     valuesMapKey: <String, dynamic>{'value1': 10, 'value2': 'Hello'},
     childrenMapKey: <String, dynamic>{
       'child1': <String, dynamic>{
@@ -361,7 +361,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData1() {
 }
 
 Map<dynamic, dynamic> _createEncodedRestorationData2() {
-  final Map<String, dynamic> data = <String, dynamic>{
+  final data = <String, dynamic>{
     valuesMapKey: <String, dynamic>{'foo': 33},
     childrenMapKey: <String, dynamic>{
       'childFoo': <String, dynamic>{

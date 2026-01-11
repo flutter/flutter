@@ -111,21 +111,21 @@ class TestEnvironment {
     DateTime Function() now = DateTime.now,
   }) {
     final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
-    final TestEngine engine = TestEngine.createTemp(rootDir: rootDir);
+    final engine = TestEngine.createTemp(rootDir: rootDir);
     if (withRbe) {
       io.Directory(
         path.join(engine.srcDir.path, 'flutter', 'build', 'rbe'),
       ).createSync(recursive: true);
     }
     // When GN runs, always try to create out/host_debug.
-    final CannedProcess cannedGn = CannedProcess((List<String> command) {
+    final cannedGn = CannedProcess((List<String> command) {
       if (command[0].endsWith('/gn') && !command.contains('desc')) {
         io.Directory(path.join(engine.outDir.path, 'host_debug')).createSync(recursive: true);
         return true;
       }
       return false;
     });
-    final TestEnvironment testEnvironment = TestEnvironment(
+    final testEnvironment = TestEnvironment(
       engine,
       abi: abi,
       cannedProcesses: cannedProcesses + <CannedProcess>[cannedGn],
@@ -187,7 +187,7 @@ String _pathSeparatorForAbi(ffi.Abi abi) {
 }
 
 FakeProcess _getCannedResult(List<String> command, List<CannedProcess> cannedProcesses) {
-  for (final CannedProcess cp in cannedProcesses) {
+  for (final cp in cannedProcesses) {
     final bool matched = cp.commandMatcher(command);
     if (matched) {
       return cp.fakeProcess;
@@ -200,7 +200,7 @@ io.ProcessResult _getCannedProcessResult(
   List<String> command,
   List<CannedProcess> cannedProcesses,
 ) {
-  for (final CannedProcess cp in cannedProcesses) {
+  for (final cp in cannedProcesses) {
     final bool matched = cp.commandMatcher(command);
     if (matched) {
       return cp.processResult;

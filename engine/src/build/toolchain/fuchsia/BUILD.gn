@@ -7,15 +7,15 @@ import("//build/toolchain/clang.gni")
 import("//build/toolchain/rbe.gni")
 import("//build/toolchain/toolchain.gni")
 
-if (target_cpu == "x64") {
-  target_triple = "x86_64-unknown-fuchsia"
-} else if (target_cpu == "arm64") {
-  target_triple = "aarch64-unknown-fuchsia"
-} else {
-  assert(false, "Unsupported target_cpu: $target_cpu")
-}
-
 if (use_rbe) {
+  if (target_cpu == "x64") {
+    target_triple = "x86_64-unknown-fuchsia"
+  } else if (target_cpu == "arm64") {
+    target_triple = "aarch64-unknown-fuchsia"
+  } else {
+    assert(false, "Unsupported target_cpu: $target_cpu")
+  }
+
   remote_wrapper =
       rebase_path("//flutter/build/rbe/remote_wrapper_linux.sh", root_build_dir)
   local_wrapper =

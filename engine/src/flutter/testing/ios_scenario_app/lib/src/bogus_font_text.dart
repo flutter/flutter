@@ -18,11 +18,11 @@ class BogusFontText extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final builder = SceneBuilder();
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
-    final ParagraphBuilder paragraphBuilder =
+    final paragraphBuilder =
         ParagraphBuilder(ParagraphStyle(fontFamily: "some font that doesn't exist"))
           ..pushStyle(TextStyle(fontSize: 80))
           ..addText('One more thing...')

@@ -346,7 +346,7 @@ class MeasureVisitor extends LayerVisitor<void> {
   void visitOpacity(OpacityEngineLayer opacity) {
     assert(opacity.needsPainting);
 
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
 
     measuringCanvas.save();
@@ -381,7 +381,7 @@ class MeasureVisitor extends LayerVisitor<void> {
     measuringCanvas.save();
     measuringCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
     measuringCanvas.clipRect(offsetPaintBounds, doAntiAlias: false);
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
     measuringCanvas.saveLayer(offsetPaintBounds, paint);
     if (imageFilter.filter is! ui.ColorFilter) {
@@ -408,12 +408,18 @@ class MeasureVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     assert(picture.needsPainting);
+    if (picture.picture.isDisposed) {
+      // The picture layer was disposed before the picture could be painted.
+      // Just ignore it then.
+      picture.isCulled = true;
+      return;
+    }
 
     measuringCanvas.save();
     measuringCanvas.translate(picture.offset.dx, picture.offset.dy);
 
     // Get the picture bounds using the measuring canvas.
-    final Float32List localTransform = Float32List.fromList(measuringCanvas.getTransform());
+    final localTransform = Float32List.fromList(measuringCanvas.getTransform());
     ui.Rect transformedBounds = Matrix4.fromFloat32List(
       localTransform,
     ).transformRect(picture.picture.cullRect);
@@ -434,7 +440,7 @@ class MeasureVisitor extends LayerVisitor<void> {
   void visitColorFilter(ColorFilterEngineLayer colorFilter) {
     assert(colorFilter.needsPainting);
 
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.colorFilter = colorFilter.filter;
 
     // We need to clip because if the ColorFilter affects transparent black,
@@ -502,7 +508,7 @@ class PaintVisitor extends LayerVisitor<void> {
 
   @override
   void visitBackdropFilter(BackdropFilterEngineLayer backdropFilter) {
-    final ui.Paint paint = ui.Paint()..blendMode = backdropFilter.blendMode;
+    final paint = ui.Paint()..blendMode = backdropFilter.blendMode;
 
     nWayCanvas.saveLayerWithFilter(backdropFilter.paintBounds, backdropFilter.filter, paint);
     paintChildren(backdropFilter);
@@ -584,7 +590,7 @@ class PaintVisitor extends LayerVisitor<void> {
   void visitOpacity(OpacityEngineLayer opacity) {
     assert(opacity.needsPainting);
 
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.color = ui.Color.fromARGB(opacity.alpha, 0, 0, 0);
 
     nWayCanvas.save();
@@ -619,7 +625,7 @@ class PaintVisitor extends LayerVisitor<void> {
     nWayCanvas.save();
     nWayCanvas.translate(imageFilter.offset.dx, imageFilter.offset.dy);
     nWayCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
     nWayCanvas.saveLayer(offsetPaintBounds, paint);
     paintChildren(imageFilter);
@@ -635,14 +641,14 @@ class PaintVisitor extends LayerVisitor<void> {
     nWayCanvas.saveLayer(shaderMask.paintBounds, null);
     paintChildren(shaderMask);
 
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.shader = shaderMask.shader;
     paint.blendMode = shaderMask.blendMode;
     paint.filterQuality = shaderMask.filterQuality;
 
     late List<ui.Canvas> canvasesToApplyShaderMask;
     if (viewEmbedder != null) {
-      final Set<ui.Canvas> canvases = <ui.Canvas>{};
+      final canvases = <ui.Canvas>{};
       final List<PictureLayer>? pictureChildren = picturesUnderShaderMask[shaderMask];
       if (pictureChildren != null) {
         for (final PictureLayer picture in pictureChildren) {
@@ -654,7 +660,7 @@ class PaintVisitor extends LayerVisitor<void> {
       canvasesToApplyShaderMask = <ui.Canvas>[toImageCanvas!];
     }
 
-    for (final ui.Canvas canvas in canvasesToApplyShaderMask) {
+    for (final canvas in canvasesToApplyShaderMask) {
       canvas.save();
       canvas.translate(shaderMask.maskRect.left, shaderMask.maskRect.top);
 
@@ -671,6 +677,13 @@ class PaintVisitor extends LayerVisitor<void> {
   @override
   void visitPicture(PictureLayer picture) {
     assert(picture.needsPainting);
+
+    if (picture.picture.isDisposed) {
+      // The picture layer was disposed before the picture could be painted.
+      // Just ignore it then.
+      picture.isCulled = true;
+      return;
+    }
 
     // For each shader mask this picture is a child of, record that it needs
     // to have the shader mask applied to it.
@@ -697,7 +710,7 @@ class PaintVisitor extends LayerVisitor<void> {
   void visitColorFilter(ColorFilterEngineLayer colorFilter) {
     assert(colorFilter.needsPainting);
 
-    final ui.Paint paint = ui.Paint();
+    final paint = ui.Paint();
     paint.colorFilter = colorFilter.filter;
 
     // We need to clip because if the ColorFilter affects transparent black,
@@ -724,7 +737,7 @@ class PaintVisitor extends LayerVisitor<void> {
 
 class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
   List<Map<String, dynamic>> debugChildren(ContainerLayer container) {
-    final List<Map<String, dynamic>> children = <Map<String, dynamic>>[];
+    final children = <Map<String, dynamic>>[];
 
     for (final Layer layer in container.children) {
       children.add(layer.accept(this));
@@ -843,7 +856,7 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> visitOffset(OffsetEngineLayer offset) {
-    final translation = offset.transform.getTranslation();
+    final Vector3 translation = offset.transform.getTranslation();
     return <String, dynamic>{
       'type': 'offset',
       'offset': {'x': translation.x, 'y': translation.y},
@@ -904,7 +917,7 @@ class DebugInfoVisitor extends LayerVisitor<Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> visitPlatformView(PlatformViewLayer platformView) {
-    final ui.Rect bounds = ui.Rect.fromLTWH(
+    final bounds = ui.Rect.fromLTWH(
       platformView.offset.dx,
       platformView.offset.dy,
       platformView.width,

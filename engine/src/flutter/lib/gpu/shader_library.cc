@@ -185,6 +185,15 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     return nullptr;
   }
 
+  const auto version = bundle->format_version();
+  const auto expected = static_cast<uint32_t>(
+      impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
+  if (version != expected) {
+    VALIDATION_LOG << "Unsupported shader bundle format version: " << version
+                   << ", expected: " << expected;
+    return nullptr;
+  }
+
   ShaderLibrary::ShaderMap shader_map;
 
   for (const auto* bundled_shader : *bundle->shaders()) {

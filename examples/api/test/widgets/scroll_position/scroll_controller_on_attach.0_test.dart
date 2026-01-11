@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/scroll_position/scroll_controller_on
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can toggle between scroll notification types', (WidgetTester tester) async {
+  testWidgets('Can toggle between scroll notification types', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ScrollControllerDemo());
 
     expect(find.byType(CustomScrollView), findsOneWidget);
@@ -16,7 +18,7 @@ void main() {
     Material appBarMaterial = tester.widget<Material>(
       find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
     );
-    expect(appBarMaterial.color, Colors.redAccent[700]!.withOpacity(.85));
+    expect(appBarMaterial.color, Colors.redAccent[700]!.withValues(alpha: .85));
     final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(CustomScrollView)),
     );
@@ -26,7 +28,7 @@ void main() {
     appBarMaterial = tester.widget<Material>(
       find.descendant(of: find.byType(AppBar), matching: find.byType(Material)),
     );
-    expect(appBarMaterial.color, Colors.green[800]!.withOpacity(.85));
+    expect(appBarMaterial.color, Colors.green[800]!.withValues(alpha: .85));
     await gesture.up();
     await tester.pumpAndSettle();
 

@@ -139,7 +139,7 @@ class RollingAdler32 {
   /// Block size of the rolling hash calculation.
   final int blockSize;
 
-  var processedBytes = 0;
+  int processedBytes = 0;
 
   final Uint8List _buffer;
   var _cur = 0;

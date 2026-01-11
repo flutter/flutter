@@ -8,6 +8,7 @@
 
 #include "impeller/compiler/logger.h"
 #include "impeller/compiler/types.h"
+#include "impeller/compiler/utilities.h"
 
 namespace impeller {
 namespace compiler {
@@ -44,11 +45,11 @@ std::shared_ptr<fml::Mapping> SPIRVCompiler::CompileToSPV(
   auto result = std::make_shared<shaderc::SpvCompilationResult>(
       spv_compiler.CompileGlslToSpv(
           reinterpret_cast<const char*>(sources_->GetMapping()),  // source_text
-          sources_->GetSize(),                // source_text_size
-          shader_kind,                        // shader_kind
-          options_.file_name.c_str(),         // input_file_name
-          options_.entry_point_name.c_str(),  // entry_point_name
-          spirv_options                       // options
+          sources_->GetSize(),                       // source_text_size
+          shader_kind,                               // shader_kind
+          Utf8FromPath(options_.file_name).c_str(),  // input_file_name
+          options_.entry_point_name.c_str(),         // entry_point_name
+          spirv_options                              // options
           ));
   if (result->GetCompilationStatus() !=
       shaderc_compilation_status::shaderc_compilation_status_success) {

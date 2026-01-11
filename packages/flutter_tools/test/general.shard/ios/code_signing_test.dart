@@ -2066,10 +2066,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool get isCliAnimationEnabled => supportsColor;
 
   @override
-  var usesTerminalUi = true;
+  bool usesTerminalUi = true;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   late Completer<void> promptCompleter;
 

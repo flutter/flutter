@@ -19,6 +19,8 @@ Future<void> main() async {
       PluginTest('ios', <String>['--platforms=ios,macos'], sharedDarwinSource: true).call,
       // Test that FFI plugins are supported.
       PluginTest('ios', <String>['--platforms=ios'], template: 'plugin_ffi').call,
+      // Test that plugins support the darwin platform.
+      PluginTest('ios', <String>['--platforms=darwin']).call,
     ]),
   );
 }

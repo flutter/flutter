@@ -162,23 +162,6 @@ void main() {
     final allowedPath = <String>[
       fileSystem.path.join(flutterTools, 'lib', 'src', 'isolated', 'web_compilation_delegate.dart'),
       fileSystem.path.join(flutterTools, 'test', 'general.shard', 'platform_plugins_test.dart'),
-      fileSystem.path.join(
-        flutterTools,
-        'test',
-        'widget_preview_scaffold.shard',
-        'widget_preview_scaffold',
-        'test',
-        'filter_by_selected_file_test.dart',
-      ),
-      fileSystem.path.join(
-        flutterTools,
-        'test',
-        'widget_preview_scaffold.shard',
-        'widget_preview_scaffold',
-        'lib',
-        'src',
-        'widget_preview_scaffold_controller.dart',
-      ),
     ];
     for (final dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = fileSystem

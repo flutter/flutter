@@ -11,16 +11,16 @@ const int _kNumIterations = 1000;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
 
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   {
-    final List<double> clampDoubleValues = <double>[];
-    for (int j = 0; j < _kNumIterations; ++j) {
+    final clampDoubleValues = <double>[];
+    for (var j = 0; j < _kNumIterations; ++j) {
       double tally = 0;
       watch.reset();
       watch.start();
-      for (int i = 0; i < _kBatchSize; i += 1) {
+      for (var i = 0; i < _kBatchSize; i += 1) {
         tally += clampDouble(-1.0, 0.0, 1.0);
         tally += clampDouble(2.0, 0.0, 1.0);
         tally += clampDouble(0.0, 0.0, 1.0);
@@ -42,13 +42,13 @@ Future<void> execute() async {
   }
 
   {
-    final List<double> doubleClampValues = <double>[];
+    final doubleClampValues = <double>[];
 
-    for (int j = 0; j < _kNumIterations; ++j) {
+    for (var j = 0; j < _kNumIterations; ++j) {
       double tally = 0;
       watch.reset();
       watch.start();
-      for (int i = 0; i < _kBatchSize; i += 1) {
+      for (var i = 0; i < _kBatchSize; i += 1) {
         tally += -1.0.clamp(0.0, 1.0);
         tally += 2.0.clamp(0.0, 1.0);
         tally += 0.0.clamp(0.0, 1.0);

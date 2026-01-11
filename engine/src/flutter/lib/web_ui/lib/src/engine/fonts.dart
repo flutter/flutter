@@ -31,8 +31,7 @@ class FontManifest {
 }
 
 Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
-  final HttpFetchResponse response =
-      await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
+  final response = await assetManager.loadAsset('FontManifest.json') as HttpFetchResponse;
   if (!response.hasPayload) {
     printWarning('Font manifest does not exist at `${response.url}` - ignoring.');
     return FontManifest(<FontFamily>[]);
@@ -56,14 +55,14 @@ Future<FontManifest> fetchFontManifest(ui_web.AssetManager assetManager) async {
   final List<FontFamily> families = (fontManifestJson! as List<dynamic>).map((
     dynamic fontFamilyJson,
   ) {
-    final Map<String, dynamic> fontFamily = fontFamilyJson as Map<String, dynamic>;
+    final fontFamily = fontFamilyJson as Map<String, dynamic>;
     final String familyName = fontFamily.readString('family');
     final List<dynamic> fontAssets = fontFamily.readList('fonts');
     return FontFamily(
       familyName,
       fontAssets.map((dynamic fontAssetJson) {
         String? asset;
-        final Map<String, String> descriptors = <String, String>{};
+        final descriptors = <String, String>{};
         for (final MapEntry<String, dynamic> descriptor
             in (fontAssetJson as Map<String, dynamic>).entries) {
           if (descriptor.key == 'asset') {

@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/nested_scroll_view/nested_scroll_vie
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Hides app bar after scrolling down', (WidgetTester tester) async {
+  testWidgets('Hides app bar after scrolling down', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.NestedScrollViewExampleApp());
     expect(find.text('Floating Nested SliverAppBar'), findsOneWidget);
     expect(find.byType(NestedScrollView), findsOneWidget);

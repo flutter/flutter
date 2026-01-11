@@ -38,7 +38,7 @@ void main() {
   }
 
   test('StarBorder defaults', () {
-    const StarBorder star = StarBorder();
+    const star = StarBorder();
     expect(star.side, BorderSide.none);
     expect(star.points, 5);
     expect(star.innerRadiusRatio, 0.4);
@@ -47,7 +47,7 @@ void main() {
     expect(star.valleyRounding, 0);
     expect(star.squash, 0);
 
-    const StarBorder polygon = StarBorder.polygon();
+    const polygon = StarBorder.polygon();
     expect(polygon.points, 5);
     expect(polygon.pointRounding, 0);
     expect(polygon.rotation, 0);
@@ -55,7 +55,7 @@ void main() {
   });
 
   test('StarBorder copyWith, ==, hashCode', () {
-    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    const side = BorderSide(width: 10.0, color: Color(0xff123456));
     final StarBorder copy = const StarBorder().copyWith(
       side: side,
       points: 3,
@@ -65,7 +65,7 @@ void main() {
       rotation: 180,
       squash: 0.4,
     );
-    const StarBorder expected = StarBorder(
+    const expected = StarBorder(
       side: side,
       points: 3,
       innerRadiusRatio: 0.1,
@@ -246,7 +246,7 @@ void main() {
   });
 
   testWidgets('StarBorder lerped with StarBorder', (WidgetTester tester) async {
-    const StarBorder from = StarBorder();
+    const from = StarBorder();
     const ShapeBorder otherBorder = StarBorder(
       points: 6,
       pointRounding: 0.5,
@@ -263,7 +263,7 @@ void main() {
   });
 
   testWidgets('StarBorder lerped with CircleBorder', (WidgetTester tester) async {
-    const StarBorder from = StarBorder();
+    const from = StarBorder();
     const ShapeBorder otherBorder = CircleBorder();
     const ShapeBorder eccentricCircle = CircleBorder(eccentricity: 0.6);
     await testBorder(tester, 'to_circle_border_20', from, lerpTo: otherBorder, lerpAmount: 0.2);
@@ -323,8 +323,8 @@ void main() {
   });
 
   testWidgets('StarBorder lerped with RoundedRectangleBorder', (WidgetTester tester) async {
-    const StarBorder from = StarBorder();
-    const RoundedRectangleBorder rectangleBorder = RoundedRectangleBorder();
+    const from = StarBorder();
+    const rectangleBorder = RoundedRectangleBorder();
     await testBorder(tester, 'to_rect_border_20', from, lerpTo: rectangleBorder, lerpAmount: 0.2);
     await testBorder(tester, 'to_rect_border_70', from, lerpTo: rectangleBorder, lerpAmount: 0.7);
     await testBorder(tester, 'to_rect_border_100', from, lerpTo: rectangleBorder, lerpAmount: 1.0);
@@ -350,7 +350,7 @@ void main() {
       lerpAmount: 1.0,
     );
 
-    const RoundedRectangleBorder roundedRectBorder = RoundedRectangleBorder(
+    const roundedRectBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         bottomLeft: Radius.circular(10.0),
         bottomRight: Radius.circular(10.0),
@@ -401,8 +401,8 @@ void main() {
   });
 
   testWidgets('StarBorder lerped with StadiumBorder', (WidgetTester tester) async {
-    const StarBorder from = StarBorder();
-    const StadiumBorder stadiumBorder = StadiumBorder();
+    const from = StarBorder();
+    const stadiumBorder = StadiumBorder();
 
     await testBorder(tester, 'to_stadium_border_20', from, lerpTo: stadiumBorder, lerpAmount: 0.2);
     await testBorder(tester, 'to_stadium_border_70', from, lerpTo: stadiumBorder, lerpAmount: 0.7);

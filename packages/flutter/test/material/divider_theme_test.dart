@@ -13,7 +13,7 @@ void main() {
   });
 
   test('DividerThemeData null fields by default', () {
-    const DividerThemeData dividerTheme = DividerThemeData();
+    const dividerTheme = DividerThemeData();
     expect(dividerTheme.color, null);
     expect(dividerTheme.space, null);
     expect(dividerTheme.thickness, null);
@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('Default DividerThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const DividerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -35,7 +35,7 @@ void main() {
   });
 
   testWidgets('DividerThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const DividerThemeData(
       color: Color(0xFFFFFFFF),
       space: 5.0,
@@ -62,7 +62,7 @@ void main() {
 
   group('Material3 - Horizontal Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
@@ -74,7 +74,7 @@ void main() {
       expect(box.size.height, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.border!.bottom.width, 1.0);
 
       expect(decoration.border!.bottom.color, theme.colorScheme.outlineVariant);
@@ -98,7 +98,7 @@ void main() {
       expect(box.size.height, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.border!.bottom.width, dividerTheme.thickness);
       expect(decoration.border!.bottom.color, dividerTheme.color);
 
@@ -107,7 +107,7 @@ void main() {
       expect(lineRect.left, dividerRect.left + dividerTheme.indent!);
       expect(lineRect.right, dividerRect.right - dividerTheme.endIndent!);
 
-      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      final borderRadius = decoration.borderRadius! as BorderRadius;
       expect(borderRadius.topLeft, const Radius.circular(1));
       expect(borderRadius.topRight, const Radius.circular(2));
       expect(borderRadius.bottomLeft, const Radius.circular(3));
@@ -125,17 +125,17 @@ void main() {
       );
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.border!.bottom.width, dividerTheme.thickness);
       expect(decoration.border!.bottom.color, dividerTheme.color);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
       const Color color = Colors.purple;
-      const double height = 10.0;
-      const double thickness = 5.0;
-      const double indent = 8.0;
-      const double endIndent = 9.0;
+      const height = 10.0;
+      const thickness = 5.0;
+      const indent = 8.0;
+      const endIndent = 9.0;
 
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(
@@ -158,7 +158,7 @@ void main() {
       expect(box.size.height, height);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.border!.bottom.width, thickness);
       expect(decoration.border!.bottom.color, color);
 
@@ -167,7 +167,7 @@ void main() {
       expect(lineRect.left, dividerRect.left + indent);
       expect(lineRect.right, dividerRect.right - endIndent);
 
-      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      final borderRadius = decoration.borderRadius! as BorderRadius;
       expect(borderRadius.topLeft, const Radius.circular(5));
       expect(borderRadius.topRight, const Radius.circular(5));
       expect(borderRadius.bottomLeft, const Radius.circular(5));
@@ -177,7 +177,7 @@ void main() {
 
   group('Material3 - Vertical Divider', () {
     testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final theme = ThemeData();
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
@@ -189,8 +189,8 @@ void main() {
       expect(box.size.width, 16.0);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
-      final Border border = decoration.border! as Border;
+      final decoration = container.decoration! as BoxDecoration;
+      final border = decoration.border! as Border;
       expect(border.left.width, 1.0);
 
       expect(border.left.color, theme.colorScheme.outlineVariant);
@@ -214,8 +214,8 @@ void main() {
       expect(box.size.width, dividerTheme.space);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
-      final Border border = decoration.border! as Border;
+      final decoration = container.decoration! as BoxDecoration;
+      final border = decoration.border! as Border;
       expect(border.left.width, dividerTheme.thickness);
       expect(border.left.color, dividerTheme.color);
 
@@ -224,7 +224,7 @@ void main() {
       expect(lineRect.top, dividerRect.top + dividerTheme.indent!);
       expect(lineRect.bottom, dividerRect.bottom - dividerTheme.endIndent!);
 
-      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      final borderRadius = decoration.borderRadius! as BorderRadius;
       expect(borderRadius.topLeft, const Radius.circular(1));
       expect(borderRadius.topRight, const Radius.circular(2));
       expect(borderRadius.bottomLeft, const Radius.circular(3));
@@ -242,18 +242,18 @@ void main() {
       );
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
-      final Border border = decoration.border! as Border;
+      final decoration = container.decoration! as BoxDecoration;
+      final border = decoration.border! as Border;
       expect(border.left.width, dividerTheme.thickness);
       expect(border.left.color, dividerTheme.color);
     });
 
     testWidgets('Widget properties take priority over theme', (WidgetTester tester) async {
       const Color color = Colors.purple;
-      const double width = 10.0;
-      const double thickness = 5.0;
-      const double indent = 8.0;
-      const double endIndent = 9.0;
+      const width = 10.0;
+      const thickness = 5.0;
+      const indent = 8.0;
+      const endIndent = 9.0;
 
       final DividerThemeData dividerTheme = _dividerTheme();
       await tester.pumpWidget(
@@ -276,8 +276,8 @@ void main() {
       expect(box.size.width, width);
 
       final Container container = tester.widget(find.byType(Container));
-      final BoxDecoration decoration = container.decoration! as BoxDecoration;
-      final Border border = decoration.border! as Border;
+      final decoration = container.decoration! as BoxDecoration;
+      final border = decoration.border! as Border;
       expect(border.left.width, thickness);
       expect(border.left.color, color);
 
@@ -286,7 +286,7 @@ void main() {
       expect(lineRect.top, dividerRect.top + indent);
       expect(lineRect.bottom, dividerRect.bottom - endIndent);
 
-      final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+      final borderRadius = decoration.borderRadius! as BorderRadius;
       expect(borderRadius.topLeft, const Radius.circular(5));
       expect(borderRadius.topRight, const Radius.circular(5));
       expect(borderRadius.bottomLeft, const Radius.circular(5));
@@ -312,10 +312,10 @@ void main() {
         expect(box.size.height, 16.0);
 
         final Container container = tester.widget(find.byType(Container));
-        final BoxDecoration decoration = container.decoration! as BoxDecoration;
+        final decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, 0.0);
 
-        final ThemeData theme = ThemeData(useMaterial3: false);
+        final theme = ThemeData(useMaterial3: false);
         expect(decoration.border!.bottom.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(Divider));
@@ -335,11 +335,11 @@ void main() {
         );
 
         final Container container = tester.widget(find.byType(Container));
-        final BoxDecoration decoration = container.decoration! as BoxDecoration;
+        final decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, theme.thickness);
         expect(decoration.border!.bottom.color, theme.color);
 
-        final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+        final borderRadius = decoration.borderRadius! as BorderRadius;
         expect(borderRadius.topLeft, const Radius.circular(1));
         expect(borderRadius.topRight, const Radius.circular(2));
         expect(borderRadius.bottomLeft, const Radius.circular(3));
@@ -360,11 +360,11 @@ void main() {
         expect(box.size.width, 16.0);
 
         final Container container = tester.widget(find.byType(Container));
-        final BoxDecoration decoration = container.decoration! as BoxDecoration;
-        final Border border = decoration.border! as Border;
+        final decoration = container.decoration! as BoxDecoration;
+        final border = decoration.border! as Border;
         expect(border.left.width, 0.0);
 
-        final ThemeData theme = ThemeData(useMaterial3: false);
+        final theme = ThemeData(useMaterial3: false);
         expect(border.left.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));

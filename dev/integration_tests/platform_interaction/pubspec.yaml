@@ -2,7 +2,7 @@ name: platform_interaction
 description: Integration test for platform interactions.
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

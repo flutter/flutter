@@ -143,7 +143,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   static Rect _closestToAnchorPoint(Iterable<Rect> subScreens, Offset anchorPoint) {
     Rect closestScreen = subScreens.first;
     double closestDistance = _distanceFromPointToRect(anchorPoint, closestScreen);
-    for (final Rect screen in subScreens) {
+    for (final screen in subScreens) {
       final double subScreenDistance = _distanceFromPointToRect(anchorPoint, screen);
       if (subScreenDistance < closestDistance) {
         closestScreen = screen;
@@ -198,9 +198,9 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   /// [avoidBounds] that are at least as tall or as wide.
   static Iterable<Rect> subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
-    for (final Rect bounds in avoidBounds) {
-      final List<Rect> newSubScreens = <Rect>[];
-      for (final Rect screen in subScreens) {
+    for (final bounds in avoidBounds) {
+      final newSubScreens = <Rect>[];
+      for (final screen in subScreens) {
         if (screen.top >= bounds.top && screen.bottom <= bounds.bottom) {
           // Display feature splits the screen vertically
           if (screen.left < bounds.left) {

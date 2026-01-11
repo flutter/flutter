@@ -12,6 +12,7 @@
 #include <string>
 #include <type_traits>
 
+#include "fml/logging.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
 #include "impeller/geometry/type_traits.h"
@@ -201,9 +202,85 @@ struct TPoint {
     return sqrt(GetDistanceSquared(p));
   }
 
-  constexpr Type GetLengthSquared() const { return GetDistanceSquared({}); }
+  constexpr Type GetLengthSquared() const {
+    return static_cast<double>(x) * x + static_cast<double>(y) * y;
+  }
 
-  constexpr Type GetLength() const { return GetDistance({}); }
+  constexpr Type GetLength() const { return std::sqrt(GetLengthSquared()); }
+
+  /// Returns the distance (squared) from this point to the closest point on
+  /// the line segment p0 -> p1.
+  ///
+  /// If the projection of this point onto the line defined by the two points
+  /// is between them, the distance (squared) to that point is returned.
+  /// Otherwise, we return the distance (squared) to the endpoint that is
+  /// closer to the projected point.
+  Type GetDistanceToSegmentSquared(TPoint p0, TPoint p1) const {
+    // Compute relative vectors to one endpoint of the segment (p0)
+    TPoint u = p1 - p0;
+    TPoint v = *this - p0;
+
+    // Compute the projection of (this point) onto p0->p1.
+    Scalar dot = u.Dot(v);
+    if (dot <= 0) {
+      // The projection lands outside the segment on the p0 side.
+      // The result is the (square of the) distance to p0 (length of v).
+      return v.GetLengthSquared();
+    }
+
+    // The dot product is the product of the length of the two vectors
+    // ||u|| and ||v|| and the cosine of the angle between them. The length
+    // of the v vector times the cosine is the same as the length of
+    // the projection of the v vector onto the u vector (consider a right
+    // triangle [(0,0), v, v_projected], the length of v multipled by the
+    // cosine is the length of v_projected).
+    //
+    // Thus the dot product is also the product of the u vector and the
+    // projected shadow of the v vector onto the u vector.
+    //
+    // So, if the dot product is larger than the square of the length of
+    // the u vector, then the v vector was projected onto the line beyond
+    // the end of the u vector and so we can use the distance formula to
+    // that endpoint as our result.
+    Scalar uLengthSquared = u.GetLengthSquared();
+    if (dot >= uLengthSquared) {
+      // The projection lands outside the segment on the p1 side.
+      // The result is the (square of the) distance to p1.
+      return GetDistanceSquared(p1);
+    }
+
+    // We must now compute the distance from this point to its projection
+    // on to the segment.
+    //
+    // We compute the cross product of the two vectors u and v which
+    // gives us the area of the parallelogram [(0,0), u, u+v, v]. That
+    // parallelogram area is also the product of the length of one of its
+    // sides and the height perpendicular to that side. We have the length
+    // of one side which is the length of the segment itself (squared) as
+    // uLengthSquared, so if we divide the parallelogram area (squared)
+    // by uLengthSquared then we will get its height (squared) relative to u.
+    //
+    // That height is also the distance from this point to the line segment.
+    Scalar cross = u.Cross(v);
+    // The cross product may currently be signed, but we will square it later.
+
+    // To get our height (squared), we want to compute:
+    //   result^2 == h^2 == (cross * cross / uLengthSquared)
+    //
+    // We reorder the equation slightly to avoid infinities:
+    return (cross / uLengthSquared) * cross;
+  }
+
+  /// Returns the distance from this point to the closest point on the line
+  /// segment p0 -> p1.
+  ///
+  /// If the projection of this point onto the line defined by the two points
+  /// is between them, the distance to that point is returned. Otherwise,
+  /// we return the distance to the endpoint that is closer to the projected
+  /// point.
+  constexpr Type GetDistanceToSegment(TPoint p0, TPoint p1) const {
+    return std::sqrt(GetDistanceToSegmentSquared(p0, p1));
+  }
 
   constexpr TPoint Normalize() const {
     const auto length = GetLength();
@@ -217,6 +294,17 @@ struct TPoint {
 
   constexpr Type Cross(const TPoint& p) const { return (x * p.y) - (y * p.x); }
 
+  /// Return the cross product representing the sign (turning direction) and
+  /// magnitude (sin of the angle) of the angle from p1 to p2 as viewed from
+  /// p0.
+  ///
+  /// Equivalent to ((p1 - p0).Cross(p2 - p0)).
+  static constexpr Type Cross(const TPoint& p0,
+                              const TPoint& p1,
+                              const TPoint& p2) {
+    return (p1 - p0).Cross(p2 - p0);
+  }
+
   constexpr Type Dot(const TPoint& p) const { return (x * p.x) + (y * p.y); }
 
   constexpr TPoint Reflect(const TPoint& axis) const {
@@ -228,6 +316,16 @@ struct TPoint {
     const auto sin_a = std::sinf(angle.radians);
     return {x * cos_a - y * sin_a, x * sin_a + y * cos_a};
   }
+
+  /// Return the perpendicular vector turning to the right (Clockwise)
+  /// in the logical coordinate system where X increases to the right and Y
+  /// increases downward.
+  constexpr TPoint PerpendicularRight() const { return {-y, x}; }
+
+  /// Return the perpendicular vector turning to the left (Counterclockwise)
+  /// in the logical coordinate system where X increases to the right and Y
+  /// increases downward.
+  constexpr TPoint PerpendicularLeft() const { return {y, -x}; }
 
   constexpr Radians AngleTo(const TPoint& p) const {
     return Radians{std::atan2(this->Cross(p), this->Dot(p))};

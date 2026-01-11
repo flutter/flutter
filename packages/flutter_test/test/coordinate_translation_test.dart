@@ -13,7 +13,7 @@ void main() {
   ) async {
     tester.view.physicalSize = const Size(2400, 1800);
     tester.view.devicePixelRatio = 3.0;
-    final RenderView renderView = RenderView(
+    final renderView = RenderView(
       view: tester.view,
       configuration: TestViewConfiguration.fromView(view: tester.view, size: const Size(400, 200)),
     );

@@ -19,11 +19,11 @@ Future<void> testMain() async {
   setUpImplicitView();
 
   group('$ClipboardMessageHandler', () {
-    const String testText = 'test text';
-    const JSONMethodCodec codec = JSONMethodCodec();
+    const testText = 'test text';
+    const codec = JSONMethodCodec();
 
     late ClipboardMessageHandler clipboardMessageHandler;
-    _MockClipboardStrategy mockClipboardStrategy = _MockClipboardStrategy();
+    var mockClipboardStrategy = _MockClipboardStrategy();
 
     setUp(() {
       clipboardMessageHandler = ClipboardMessageHandler();
@@ -37,7 +37,7 @@ Future<void> testMain() async {
 
     group('setDataMethodCall', () {
       test('completes successfully when no exception arises', () async {
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
 
@@ -49,7 +49,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onSetData = (String? text) async {
           throw StateError('Clipboard is not available in the context.');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
 
@@ -72,7 +72,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onSetData = (String? text) async {
           throw Exception('');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.setDataMethodCall(completer.complete, testText);
 
@@ -94,7 +94,7 @@ Future<void> testMain() async {
 
     group('getDataMethodCall', () {
       test('completes with null value when filter is not supported', () async {
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(completer.complete, 'unknown/unknown');
 
@@ -103,7 +103,7 @@ Future<void> testMain() async {
       });
 
       test('completes without text when clipboard is empty', () async {
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(
           completer.complete,
@@ -111,13 +111,13 @@ Future<void> testMain() async {
         );
 
         final ByteData result = await completer.future;
-        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        final data = codec.decodeEnvelope(result) as Map<String, Object?>;
         expect(data['text'], isEmpty);
       });
 
       test('completes with text when clipboard is not empty', () async {
         mockClipboardStrategy.onGetData = () async => testText;
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(
           completer.complete,
@@ -125,7 +125,7 @@ Future<void> testMain() async {
         );
 
         final ByteData result = await completer.future;
-        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        final data = codec.decodeEnvelope(result) as Map<String, Object?>;
         expect(data['text'], testText);
       });
 
@@ -133,7 +133,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onGetData = () async {
           throw StateError('Clipboard is not available in the context.');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(
           completer.complete,
@@ -159,7 +159,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onGetData = () async {
           throw Exception('');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.getDataMethodCall(
           completer.complete,
@@ -184,23 +184,23 @@ Future<void> testMain() async {
 
     group('hasStringsMethodCall', () {
       test('completes with false value when clipboard is empty', () async {
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
         final ByteData result = await completer.future;
-        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        final data = codec.decodeEnvelope(result) as Map<String, Object?>;
         expect(data['value'], isFalse);
       });
 
       test('completes with true value when clipboard is not empty', () async {
         mockClipboardStrategy.onGetData = () async => testText;
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
         final ByteData result = await completer.future;
-        final Map<String, Object?> data = codec.decodeEnvelope(result) as Map<String, Object?>;
+        final data = codec.decodeEnvelope(result) as Map<String, Object?>;
         expect(data['value'], isTrue);
       });
 
@@ -208,7 +208,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onGetData = () async {
           throw StateError('Clipboard is not available in the context.');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 
@@ -231,7 +231,7 @@ Future<void> testMain() async {
         mockClipboardStrategy.onGetData = () async {
           throw Exception('');
         };
-        final Completer<ByteData> completer = Completer<ByteData>();
+        final completer = Completer<ByteData>();
 
         clipboardMessageHandler.hasStringsMethodCall(completer.complete);
 

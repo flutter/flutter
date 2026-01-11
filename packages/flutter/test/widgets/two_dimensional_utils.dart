@@ -236,8 +236,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
 
     final double viewportWidth = viewportDimension.width;
     final double viewportHeight = viewportDimension.height;
-    final TwoDimensionalChildBuilderDelegate builderDelegate =
-        delegate as TwoDimensionalChildBuilderDelegate;
+    final builderDelegate = delegate as TwoDimensionalChildBuilderDelegate;
 
     final int maxRowIndex;
     final int maxColumnIndex;
@@ -259,10 +258,10 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
-    for (int column = leadingColumn; column <= trailingColumn; column++) {
+    for (var column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset = (leadingRow * 200) - verticalOffset.pixels;
-      for (int row = leadingRow; row <= trailingRow; row++) {
-        final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
+      for (var row = leadingRow; row <= trailingRow; row++) {
+        final vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox? child = buildOrObtainChildFor(vicinity);
         if (!forgetToLayoutChild) {
           child?.layout(constraints.tighten(width: 200.0, height: 200.0));
@@ -433,8 +432,7 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
-    final TwoDimensionalChildListDelegate listDelegate =
-        delegate as TwoDimensionalChildListDelegate;
+    final listDelegate = delegate as TwoDimensionalChildListDelegate;
     final int rowCount;
     final int columnCount;
     rowCount = listDelegate.children.length;
@@ -452,10 +450,10 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
-    for (int column = leadingColumn; column <= trailingColumn; column++) {
+    for (var column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset = (leadingRow * 200) - verticalOffset.pixels;
-      for (int row = leadingRow; row <= trailingRow; row++) {
-        final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
+      for (var row = leadingRow; row <= trailingRow; row++) {
+        final vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
         child.layout(constraints.tighten(width: 200.0, height: 200.0));
 
@@ -530,7 +528,7 @@ class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is TestExtendedParentData);
-    final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
+    final parentData = renderObject.parentData! as TestExtendedParentData;
     parentData.testValue = testValue;
   }
 

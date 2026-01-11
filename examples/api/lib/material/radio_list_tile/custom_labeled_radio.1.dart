@@ -23,7 +23,12 @@ class LabeledRadioApp extends StatelessWidget {
 }
 
 class LabeledRadio extends StatelessWidget {
-  const LabeledRadio({super.key, required this.label, required this.padding, required this.value});
+  const LabeledRadio({
+    super.key,
+    required this.label,
+    required this.padding,
+    required this.value,
+  });
 
   final String label;
   final EdgeInsets padding;

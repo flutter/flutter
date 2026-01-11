@@ -46,7 +46,10 @@ class ImageClipExample extends StatelessWidget {
               padding: EdgeInsets.all(10.0),
               child: Text(
                 'PUFFIN',
-                style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

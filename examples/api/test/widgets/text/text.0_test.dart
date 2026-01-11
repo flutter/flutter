@@ -18,7 +18,9 @@ void main() {
 
     // Because this example uses Material 3 and a light brightness, the text color
     // should be the color scheme `onSurface` color.
-    final Color textColor = ColorScheme.fromSeed(seedColor: Colors.purple).onSurface;
+    final Color textColor = ColorScheme.fromSeed(
+      seedColor: Colors.purple,
+    ).onSurface;
     expect(text.text.style!.color, textColor);
   });
 }

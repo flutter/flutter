@@ -15,16 +15,28 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(const example.SelectionContainerExampleApp());
 
-      expect(find.widgetWithText(AppBar, 'SelectionContainer Sample'), findsOne);
+      expect(
+        find.widgetWithText(AppBar, 'SelectionContainer Sample'),
+        findsOne,
+      );
 
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Row 1'), matching: find.byType(RichText)),
+        find.descendant(
+          of: find.text('Row 1'),
+          matching: find.byType(RichText),
+        ),
       );
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Row 2'), matching: find.byType(RichText)),
+        find.descendant(
+          of: find.text('Row 2'),
+          matching: find.byType(RichText),
+        ),
       );
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Row 3'), matching: find.byType(RichText)),
+        find.descendant(
+          of: find.text('Row 3'),
+          matching: find.byType(RichText),
+        ),
       );
       final Rect paragraph1Rect = tester.getRect(find.text('Row 1'));
       final TestGesture gesture = await tester.startGesture(
@@ -36,9 +48,18 @@ void main() {
 
       await gesture.moveTo(paragraph1Rect.center);
       await tester.pump();
-      expect(paragraph1.selections.first, const TextSelection(baseOffset: 0, extentOffset: 5));
-      expect(paragraph2.selections.first, const TextSelection(baseOffset: 0, extentOffset: 5));
-      expect(paragraph3.selections.first, const TextSelection(baseOffset: 0, extentOffset: 5));
+      expect(
+        paragraph1.selections.first,
+        const TextSelection(baseOffset: 0, extentOffset: 5),
+      );
+      expect(
+        paragraph2.selections.first,
+        const TextSelection(baseOffset: 0, extentOffset: 5),
+      );
+      expect(
+        paragraph3.selections.first,
+        const TextSelection(baseOffset: 0, extentOffset: 5),
+      );
 
       await gesture.up();
     },

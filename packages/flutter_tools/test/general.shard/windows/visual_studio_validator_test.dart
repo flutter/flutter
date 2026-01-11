@@ -229,25 +229,25 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   List<String> necessaryComponentDescriptions() => <String>['A', 'B'];
 
   @override
-  var isInstalled = true;
+  bool isInstalled = true;
 
   @override
-  var isAtLeastMinimumVersion = true;
+  bool isAtLeastMinimumVersion = true;
 
   @override
-  var isPrerelease = true;
+  bool isPrerelease = true;
 
   @override
-  var isComplete = true;
+  bool isComplete = true;
 
   @override
-  var isLaunchable = true;
+  bool isLaunchable = true;
 
   @override
-  var isRebootRequired = true;
+  bool isRebootRequired = true;
 
   @override
-  var hasNecessaryComponents = true;
+  bool hasNecessaryComponents = true;
 
   @override
   String? fullVersion;

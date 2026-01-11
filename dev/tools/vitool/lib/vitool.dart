@@ -20,8 +20,8 @@ class Animation {
   factory Animation.fromFrameData(List<FrameData> frames) {
     _validateFramesData(frames);
     final Point<double> size = frames[0].size;
-    final List<PathAnimation> paths = <PathAnimation>[];
-    for (int i = 0; i < frames[0].paths.length; i += 1) {
+    final paths = <PathAnimation>[];
+    for (var i = 0; i < frames[0].paths.length; i += 1) {
       paths.add(PathAnimation.fromFrameData(frames, i));
     }
     return Animation(size, paths);
@@ -36,7 +36,7 @@ class Animation {
   static void _validateFramesData(List<FrameData> frames) {
     final Point<double> size = frames[0].size;
     final int numPaths = frames[0].paths.length;
-    for (int i = 0; i < frames.length; i += 1) {
+    for (var i = 0; i < frames.length; i += 1) {
       final FrameData frame = frames[i];
       if (size != frame.size) {
         throw Exception(
@@ -56,7 +56,7 @@ class Animation {
   }
 
   String toDart(String className, String varName) {
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
     sb.write('const $className $varName = const $className(\n');
     sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
     sb.write('${kIndent}const <_PathFrames>[\n');
@@ -78,19 +78,16 @@ class PathAnimation {
       return const PathAnimation(<PathCommandAnimation>[], opacities: <double>[]);
     }
 
-    final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
+    final commands = <PathCommandAnimation>[];
     for (
-      int commandIdx = 0;
+      var commandIdx = 0;
       commandIdx < frames[0].paths[pathIdx].commands.length;
       commandIdx += 1
     ) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
-      final List<List<Point<double>>> points = List<List<Point<double>>>.filled(
-        numPointsInCommand,
-        <Point<double>>[],
-      );
+      final points = List<List<Point<double>>>.filled(numPointsInCommand, <Point<double>>[]);
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
-      for (int i = 0; i < frames.length; i += 1) {
+      for (var i = 0; i < frames.length; i += 1) {
         final FrameData frame = frames[i];
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType) {
@@ -100,7 +97,7 @@ class PathAnimation {
             "command $commandIdx at frame $i was of type '$currentCommandType'",
           );
         }
-        for (int j = 0; j < numPointsInCommand; j += 1) {
+        for (var j = 0; j < numPointsInCommand; j += 1) {
           points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
         }
       }
@@ -126,7 +123,7 @@ class PathAnimation {
   }
 
   String toDart() {
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
     sb.write('${kIndent * 2}const _PathFrames(\n');
     sb.write('${kIndent * 3}opacities: const <double>[\n');
     for (final double opacity in opacities) {
@@ -168,11 +165,11 @@ class PathCommandAnimation {
       'Z' => '_PathClose',
       _ => throw Exception('unsupported path command: $type'),
     };
-    final StringBuffer sb = StringBuffer();
+    final sb = StringBuffer();
     sb.write('${kIndent * 4}const $dartCommandClass(\n');
     for (final List<Point<double>> pointFrames in points) {
       sb.write('${kIndent * 5}const <Offset>[\n');
-      for (final Point<double> point in pointFrames) {
+      for (final point in pointFrames) {
         sb.write('${kIndent * 6}const Offset(${point.x}, ${point.y}),\n');
       }
       sb.write('${kIndent * 5}],\n');
@@ -193,7 +190,7 @@ class PathCommandAnimation {
 /// support SVG files exported by a specific tool the motion design team is
 /// using.
 FrameData interpretSvg(String svgFilePath) {
-  final File file = File(svgFilePath);
+  final file = File(svgFilePath);
   final String fileData = file.readAsStringSync();
   final XmlElement svgElement = _extractSvgElement(XmlDocument.parse(fileData));
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
@@ -204,12 +201,12 @@ FrameData interpretSvg(String svgFilePath) {
 }
 
 List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
-  final List<SvgPath> paths = <SvgPath>[];
-  for (final XmlNode node in children) {
+  final paths = <SvgPath>[];
+  for (final node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
       continue;
     }
-    final XmlElement element = node as XmlElement;
+    final element = node as XmlElement;
 
     if (element.name.local == 'path') {
       paths.add(SvgPath.fromElement(element)._applyTransform(transform));
@@ -228,10 +225,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
         );
       }
 
-      final _Transform subtreeTransform = _Transform(
-        transformMatrix: transformMatrix,
-        opacity: opacity,
-      );
+      final subtreeTransform = _Transform(transformMatrix: transformMatrix, opacity: opacity);
       paths.addAll(_interpretSvgGroup(element.children, subtreeTransform));
     }
   }
@@ -254,8 +248,8 @@ final RegExp _pointMatcher = RegExp(r'^ *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)');
 ///
 /// Commas are optional.
 List<Point<double>> parsePoints(String points) {
-  String unParsed = points;
-  final List<Point<double>> result = <Point<double>>[];
+  var unParsed = points;
+  final result = <Point<double>>[];
   while (unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
     final Match m = _pointMatcher.firstMatch(unParsed)!;
     result.add(Point<double>(double.parse(m.group(1)!), double.parse(m.group(2)!)));
@@ -308,8 +302,8 @@ class SvgPath {
     assert(pathElement.name.local == 'path');
     final String id = _extractAttr(pathElement, 'id');
     final String dAttr = _extractAttr(pathElement, 'd');
-    final List<SvgPathCommand> commands = <SvgPathCommand>[];
-    final SvgPathCommandBuilder commandsBuilder = SvgPathCommandBuilder();
+    final commands = <SvgPathCommand>[];
+    final commandsBuilder = SvgPathCommandBuilder();
     if (!_pathCommandValidator.hasMatch(dAttr)) {
       throw Exception('illegal or unsupported path d expression: $dAttr');
     }
@@ -407,7 +401,7 @@ class SvgPathCommandBuilder {
   Point<double> subPathStartPoint = const Point<double>(0.0, 0.0);
 
   SvgPathCommand build(String type, List<Point<double>> points) {
-    List<Point<double>> absPoints = points;
+    var absPoints = points;
     if (_isRelativeCommand(type)) {
       absPoints = points.map<Point<double>>((Point<double> p) => p + lastPoint).toList();
     }
@@ -431,8 +425,8 @@ class SvgPathCommandBuilder {
 }
 
 List<double> _pointsToVector3Array(List<Point<double>> points) {
-  final List<double> result = List<double>.filled(points.length * 3, 0.0);
-  for (int i = 0; i < points.length; i += 1) {
+  final result = List<double>.filled(points.length * 3, 0.0);
+  for (var i = 0; i < points.length; i += 1) {
     result[i * 3] = points[i].x;
     result[i * 3 + 1] = points[i].y;
     result[i * 3 + 2] = 1.0;
@@ -442,7 +436,7 @@ List<double> _pointsToVector3Array(List<Point<double>> points) {
 
 List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
   final int numPoints = (vector.length / 3).floor();
-  final List<Point<double>> points = <Point<double>>[
+  final points = <Point<double>>[
     for (int i = 0; i < numPoints; i += 1) Point<double>(vector[i * 3], vector[i * 3 + 1]),
   ];
   return points;
@@ -477,8 +471,8 @@ Matrix3 _parseSvgTransform(String transform) {
     throw Exception('illegal or unsupported transform: $transform');
   }
   final Iterable<Match> matches = _transformCommand.allMatches(transform).toList().reversed;
-  Matrix3 result = Matrix3.identity();
-  for (final Match m in matches) {
+  var result = Matrix3.identity();
+  for (final m in matches) {
     final String command = m.group(1)!;
     final String params = m.group(2)!;
     if (command == 'translate') {

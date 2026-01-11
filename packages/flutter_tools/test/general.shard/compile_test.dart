@@ -2,13 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart' hide FakeProcess;
 
 void main() {
   testWithoutContext('StdoutHandler can produce output message', () async {
@@ -145,6 +153,197 @@ void main() {
           '--delete-tostring-package-uri=package:flutter',
         ],
       );
+    },
+  );
+
+  testWithoutContext(
+    'includeUnsupportedPlatformLibraryStubs is only valid for Target.dartdevc',
+    () {
+      final unsupportedTargetModels = <TargetModel>{
+        TargetModel.flutter,
+        TargetModel.flutterRunner,
+        TargetModel.vm,
+      };
+
+      // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for targets other
+      // than DDC is not currently supported as it's limited for use with the widget previewer.
+      for (final target in unsupportedTargetModels) {
+        try {
+          ResidentCompiler(
+            'sdkroot',
+            buildMode: BuildMode.debug,
+            logger: BufferLogger.test(),
+            processManager: FakeProcessManager.any(),
+            artifacts: Artifacts.test(),
+            platform: FakePlatform(),
+            fileSystem: MemoryFileSystem.test(),
+            shutdownHooks: FakeShutdownHooks(),
+            targetModel: target,
+            includeUnsupportedPlatformLibraryStubs: true,
+          );
+          fail('Unsupported target did not throw.');
+        } on StateError catch (e) {
+          expect(
+            e.message,
+            'includeUnsupportedPlatformLibraryStubs should only be used by the widget-preview '
+            'command.',
+          );
+        }
+      }
+
+      // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
+      // supported.
+      ResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        shutdownHooks: FakeShutdownHooks(),
+        targetModel: TargetModel.dartdevc,
+        includeUnsupportedPlatformLibraryStubs: true,
+      );
+    },
+  );
+
+  testWithoutContext(
+    'Strips --include-unsupported-platform-library-stubs from extraFrontEndOptions',
+    () async {
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list([
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+            '--sdk-root',
+            'sdkroot/',
+            '--incremental',
+            '--target=dartdevc',
+            '--experimental-emit-debug-metadata',
+            '--output-dill',
+            'foo.dill',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--track-widget-creation',
+            '--verbosity=error',
+            '--extra-flag',
+          ],
+          onRun: (_) => completer.complete(),
+        ),
+      ]);
+      final compiler = DefaultResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        shutdownHooks: FakeShutdownHooks(),
+        targetModel: TargetModel.dartdevc,
+        // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
+        // included in the argument list.
+        // ignore: avoid_redundant_argument_values
+        includeUnsupportedPlatformLibraryStubs: false,
+        extraFrontEndOptions: [
+          '--include-unsupported-platform-library-stubs',
+          // Include a random extra flag to ensure not all extra options are stripped.
+          '--extra-flag',
+        ],
+      );
+
+      await runZonedGuarded(
+        () {
+          // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
+          compiler.recompile(
+            Uri.file('foo.dart'),
+            [],
+            outputPath: 'foo.dill',
+            packageConfig: PackageConfig.empty,
+          );
+        },
+        (e, st) {
+          if (e is! ToolExit) {
+            completer.completeError(e, st);
+          }
+        },
+      );
+
+      // Fail if the command isn't run. This can happen when the commands actual arguments don't
+      // match.
+      await completer.future.timeout(const Duration(seconds: 5));
+    },
+  );
+
+  testWithoutContext(
+    '--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set',
+    () async {
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list([
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+            '--sdk-root',
+            'sdkroot/',
+            '--incremental',
+            '--target=dartdevc',
+            '--experimental-emit-debug-metadata',
+            '--output-dill',
+            'foo.dill',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--track-widget-creation',
+            '--include-unsupported-platform-library-stubs',
+            '--verbosity=error',
+            '--extra-flag',
+          ],
+          onRun: (_) => completer.complete(),
+        ),
+      ]);
+      final compiler = DefaultResidentCompiler(
+        'sdkroot',
+        buildMode: BuildMode.debug,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        shutdownHooks: FakeShutdownHooks(),
+        targetModel: TargetModel.dartdevc,
+        // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
+        // argument list.
+        includeUnsupportedPlatformLibraryStubs: true,
+        extraFrontEndOptions: [
+          // Include a random extra flag to ensure not all extra options are stripped.
+          '--extra-flag',
+        ],
+      );
+
+      await runZonedGuarded(
+        () {
+          // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
+          compiler.recompile(
+            Uri.file('foo.dart'),
+            [],
+            outputPath: 'foo.dill',
+            packageConfig: PackageConfig.empty,
+          );
+        },
+        (e, st) {
+          if (e is! ToolExit) {
+            completer.completeError(e, st);
+          }
+        },
+      );
+
+      // Fail if the command isn't run. This can happen when the commands actual arguments don't
+      // match.
+      await completer.future.timeout(const Duration(seconds: 5));
     },
   );
 }

@@ -46,7 +46,7 @@ Future<void> main(List<String> rawArgs) async {
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
 
-  final File packageConfigFile = File(path.join('.dart_tool', 'package_config.json'));
+  final packageConfigFile = File(path.join('.dart_tool', 'package_config.json'));
   final bool packageConfigExists = packageConfigFile.existsSync();
 
   if (!packageConfigExists) {
@@ -56,13 +56,13 @@ Future<void> main(List<String> rawArgs) async {
     );
   }
 
-  final List<Object?> packages =
+  final packages =
       (json.decode(packageConfigFile.readAsStringSync()) as Map<String, Object?>)['packages']!
           as List<Object?>;
 
   String? pathToIntl;
-  for (final Object? package in packages) {
-    final Map<String, Object?> packageAsMap = package! as Map<String, Object?>;
+  for (final package in packages) {
+    final packageAsMap = package! as Map<String, Object?>;
     if (packageAsMap['name'] == 'intl') {
       pathToIntl = Uri.parse(packageAsMap['rootUri']! as String).toFilePath();
       break;
@@ -76,15 +76,15 @@ Future<void> main(List<String> rawArgs) async {
     );
   }
 
-  final Directory dateSymbolsDirectory = Directory(
+  final dateSymbolsDirectory = Directory(
     path.join(pathToIntl!, 'lib', 'src', 'data', 'dates', 'symbols'),
   );
   final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
-  final Directory datePatternsDirectory = Directory(
+  final datePatternsDirectory = Directory(
     path.join(pathToIntl, 'lib', 'src', 'data', 'dates', 'patterns'),
   );
   final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   final Set<String> supportedLocales = _supportedLocales();
 
   buffer.writeln('''
@@ -106,8 +106,7 @@ import 'package:intl/date_symbols.dart' as intl;
   symbolFiles.forEach((String locale, File data) {
     currentLocale = locale;
     if (supportedLocales.contains(locale)) {
-      final Map<String, Object?> objData =
-          json.decode(data.readAsStringSync()) as Map<String, Object?>;
+      final objData = json.decode(data.readAsStringSync()) as Map<String, Object?>;
       buffer.writeln("'$locale': intl.DateSymbols(");
       objData.forEach((String key, Object? value) {
         if (value == null) {
@@ -131,8 +130,7 @@ import 'package:intl/date_symbols.dart' as intl;
   );
   patternFiles.forEach((String locale, File data) {
     if (supportedLocales.contains(locale)) {
-      final Map<String, dynamic> patterns =
-          json.decode(data.readAsStringSync()) as Map<String, dynamic>;
+      final patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);
@@ -144,7 +142,7 @@ import 'package:intl/date_symbols.dart' as intl;
   buffer.writeln('};');
 
   if (writeToFile) {
-    final File dateLocalizationsFile = File(
+    final dateLocalizationsFile = File(
       path.join(
         'packages',
         'flutter_localizations',
@@ -155,7 +153,7 @@ import 'package:intl/date_symbols.dart' as intl;
       ),
     );
     dateLocalizationsFile.writeAsStringSync(buffer.toString());
-    final String extension = Platform.isWindows ? '.exe' : '';
+    final extension = Platform.isWindows ? '.exe' : '';
     final ProcessResult result = Process.runSync(
       path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart$extension'),
       <String>['format', dateLocalizationsFile.path],
@@ -186,14 +184,14 @@ String _jsonToObject(dynamic json) {
       return generateEncodedString(currentLocale, json);
     case Iterable<Object?>():
       final Type type = json.first.runtimeType;
-      final StringBuffer buffer = StringBuffer('const <$type>[');
-      for (final dynamic value in json) {
+      final buffer = StringBuffer('const <$type>[');
+      for (final Object? value in json) {
         buffer.writeln('${_jsonToMap(value)},');
       }
       buffer.write(']');
       return buffer.toString();
     case Map<String, dynamic>():
-      final StringBuffer buffer = StringBuffer('<String, Object>{');
+      final buffer = StringBuffer('<String, Object>{');
       json.forEach((String key, dynamic value) {
         buffer.writeln(_jsonToMapEntry(key, value));
       });
@@ -211,14 +209,14 @@ String _jsonToMap(dynamic json) {
     case String():
       return generateEncodedString(currentLocale, json);
     case Iterable<dynamic>():
-      final StringBuffer buffer = StringBuffer('<String>[');
-      for (final dynamic value in json) {
+      final buffer = StringBuffer('<String>[');
+      for (final Object? value in json) {
         buffer.writeln('${_jsonToMap(value)},');
       }
       buffer.write(']');
       return buffer.toString();
     case Map<String, dynamic>():
-      final StringBuffer buffer = StringBuffer('<String, Object>{');
+      final buffer = StringBuffer('<String, Object>{');
       json.forEach((String key, dynamic value) {
         buffer.writeln(_jsonToMapEntry(key, value));
       });
@@ -235,9 +233,9 @@ Set<String> _supportedLocales() {
   // date patterns and symbols may cause problems.
   //
   // For more context, see https://github.com/flutter/flutter/issues/67644.
-  final Set<String> supportedLocales = <String>{'en_US'};
-  final RegExp filenameRE = RegExp(r'(?:material|cupertino)_(\w+)\.arb$');
-  final Directory supportedLocalesDirectory = Directory(
+  final supportedLocales = <String>{'en_US'};
+  final filenameRE = RegExp(r'(?:material|cupertino)_(\w+)\.arb$');
+  final supportedLocalesDirectory = Directory(
     path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'),
   );
   for (final FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
@@ -251,11 +249,11 @@ Set<String> _supportedLocales() {
 }
 
 Map<String, File> _listIntlData(Directory directory) {
-  final Map<String, File> localeFiles = <String, File>{};
+  final localeFiles = <String, File>{};
   final Iterable<File> files = directory.listSync().whereType<File>().where(
     (File file) => file.path.endsWith('.json'),
   );
-  for (final File file in files) {
+  for (final file in files) {
     final String locale = path.basenameWithoutExtension(file.path);
     localeFiles[locale] = file;
   }

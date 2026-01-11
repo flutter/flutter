@@ -225,6 +225,32 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
   return buildSettings?[_developmentTeamBuildSettingName];
 }
 
+/// Returns the standard Provisioning Profiles directory, or null if home directory is unavailable.
+///
+/// Provisioning profiles are stored in `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`
+/// by Xcode. This function constructs the path to this directory.
+///
+/// Returns null if the home directory cannot be determined (e.g., in some CI/CD environments).
+Directory? getProvisioningProfileDirectory({
+  required FileSystemUtils fileSystemUtils,
+  required FileSystem fileSystem,
+}) {
+  final String? homeDir = fileSystemUtils.homeDirPath;
+  if (homeDir == null) {
+    return null;
+  }
+  return fileSystem.directory(
+    fileSystem.path.join(
+      homeDir,
+      'Library',
+      'Developer',
+      'Xcode',
+      'UserData',
+      'Provisioning Profiles',
+    ),
+  );
+}
+
 class XcodeCodeSigningSettings {
   XcodeCodeSigningSettings({
     required Config config,
@@ -330,7 +356,7 @@ class XcodeCodeSigningSettings {
       if (automaticCodeSignStyleOnly) {
         return null;
       }
-      final _ProvisioningProfile? validatedProfile = await _validateSavedProfile(
+      final ProvisioningProfile? validatedProfile = await _validateSavedProfile(
         savedProfile,
         validCodeSigningIdentities,
       );
@@ -385,7 +411,7 @@ class XcodeCodeSigningSettings {
     _config.setValue(kConfigCodeSignCertificate, identity);
   }
 
-  void _saveProvisioningProfile(_ProvisioningProfile profile) {
+  void _saveProvisioningProfile(ProvisioningProfile profile) {
     _logger.printStatus('Provisioning Profile "${profile.name}" saved.');
     _config.setValue(kConfigCodeSignProvisioningProfile, profile.filePath);
   }
@@ -439,7 +465,7 @@ class XcodeCodeSigningSettings {
   /// valid identity/certificate for the profile.
   ///
   /// Returns null if profile cannot be found, parsed, or validated.
-  Future<_ProvisioningProfile?> _validateSavedProfile(
+  Future<ProvisioningProfile?> _validateSavedProfile(
     String savedProfilePath,
     List<String> validCodeSigningIdentities,
   ) async {
@@ -448,7 +474,7 @@ class XcodeCodeSigningSettings {
       _logger.printError('Unable to find saved provisioning profile $savedProfilePath');
       return null;
     }
-    final _ProvisioningProfile? parsedProfile = await _parseProvisioningProfile(savedProfile);
+    final ProvisioningProfile? parsedProfile = await parseProvisioningProfile(savedProfile);
     if (parsedProfile == null) {
       return null;
     }
@@ -465,8 +491,11 @@ class XcodeCodeSigningSettings {
   }
 
   /// Decode and convert a .mobileprovision file to a .plist file and then
-  /// parse the .plist into [_ProvisioningProfile].
-  Future<_ProvisioningProfile?> _parseProvisioningProfile(File provisioningProfileFile) async {
+  /// parse the .plist into [ProvisioningProfile].
+  ///
+  /// This is a public method that can be used by other parts of flutter_tools
+  /// to parse provisioning profiles without pulling in certificate validation logic.
+  Future<ProvisioningProfile?> parseProvisioningProfile(File provisioningProfileFile) async {
     final Directory profilesDirectory = _fileSystem.systemTempDirectory.childDirectory(
       'provisioning_profiles',
     );
@@ -494,7 +523,7 @@ class XcodeCodeSigningSettings {
     }
     try {
       final Map<String, Object> contents = _plistParser.parseFile(decodedProfile.path);
-      return _ProvisioningProfile.fromPlist(
+      return ProvisioningProfile.fromPlist(
         provisioningProfileFile.path,
         contents,
         fileSystem: _fileSystem,
@@ -667,7 +696,7 @@ class XcodeCodeSigningSettings {
         return;
       }
     } else if (style == _CodeSigningStyle.manual) {
-      final List<_ProvisioningProfile> validProvisioningProfiles = await _getProvisioningProfiles();
+      final List<ProvisioningProfile> validProvisioningProfiles = await _getProvisioningProfiles();
       if (validProvisioningProfiles.isEmpty) {
         _logger.printError(
           'No provisioning profiles were found. To learn how to create or download '
@@ -678,7 +707,7 @@ class XcodeCodeSigningSettings {
         _logger.printWarning(_codeSignSelectionCanceled);
         return;
       }
-      final _ProvisioningProfile? profile = await _selectProvisioningProfile(
+      final ProvisioningProfile? profile = await _selectProvisioningProfile(
         validProvisioningProfiles,
       );
       if (profile == null) {
@@ -776,34 +805,24 @@ class XcodeCodeSigningSettings {
   /// Get list of provisioning profiles from `~/Library/Developer/Xcode/UserData/Provisioning\ Profiles`.
   ///
   /// Only return non-Xcode-managed profiles with matching valid identities.
-  Future<List<_ProvisioningProfile>> _getProvisioningProfiles() async {
-    final String? homeDir = _fileSystemUtils.homeDirPath;
-    if (homeDir == null) {
-      return <_ProvisioningProfile>[];
-    }
-    final Directory profileDirectory = _fileSystem.directory(
-      _fileSystem.path.join(
-        homeDir,
-        'Library',
-        'Developer',
-        'Xcode',
-        'UserData',
-        'Provisioning Profiles',
-      ),
+  Future<List<ProvisioningProfile>> _getProvisioningProfiles() async {
+    final Directory? profileDirectory = getProvisioningProfileDirectory(
+      fileSystemUtils: _fileSystemUtils,
+      fileSystem: _fileSystem,
     );
 
-    if (!profileDirectory.existsSync()) {
-      return <_ProvisioningProfile>[];
+    if (profileDirectory == null || !profileDirectory.existsSync()) {
+      return <ProvisioningProfile>[];
     }
 
     final List<String> validCodeSigningIdentities = await _getSigningIdentities();
 
-    final profiles = <_ProvisioningProfile>[];
+    final profiles = <ProvisioningProfile>[];
     for (final FileSystemEntity entity in profileDirectory.listSync()) {
       if (entity is! File || _fileSystem.path.extension(entity.path) != '.mobileprovision') {
         continue;
       }
-      final _ProvisioningProfile? profile = await _parseProvisioningProfile(entity);
+      final ProvisioningProfile? profile = await parseProvisioningProfile(entity);
 
       // Xcode managed profiles can't be used for manual code-signing.
       final bool? isXcodeManaged = profile?.isXcodeManaged;
@@ -823,8 +842,8 @@ class XcodeCodeSigningSettings {
   }
 
   /// Prompt the user to select from list of [validatedProfiles].
-  Future<_ProvisioningProfile?> _selectProvisioningProfile(
-    List<_ProvisioningProfile> validatedProfiles,
+  Future<ProvisioningProfile?> _selectProvisioningProfile(
+    List<ProvisioningProfile> validatedProfiles,
   ) async {
     if (validatedProfiles.isEmpty) {
       return null;
@@ -875,17 +894,18 @@ enum _CodeSigningStyle {
   final String label;
 }
 
-class _ProvisioningProfile {
-  _ProvisioningProfile({
+class ProvisioningProfile {
+  ProvisioningProfile({
     required this.filePath,
     required this.name,
+    required this.uuid,
     required this.teamIdentifier,
     required this.expirationDate,
     required this.developerCertificates,
     this.isXcodeManaged,
   });
 
-  factory _ProvisioningProfile.fromPlist(
+  factory ProvisioningProfile.fromPlist(
     String filePath,
     Map<String, Object> data, {
     required FileSystem fileSystem,
@@ -936,9 +956,10 @@ class _ProvisioningProfile {
     }
     final DateTime expirationDate = DateTime.parse(expirationDateString);
 
-    return _ProvisioningProfile(
+    return ProvisioningProfile(
       filePath: filePath,
       name: name,
+      uuid: uuid,
       developerCertificates: certificateFiles,
       isXcodeManaged: data['IsXcodeManaged'] is bool? ? data['IsXcodeManaged'] as bool? : null,
       expirationDate: expirationDate,
@@ -948,6 +969,7 @@ class _ProvisioningProfile {
 
   final String filePath;
   final String name;
+  final String uuid;
   final String teamIdentifier;
   final DateTime expirationDate;
   final List<File> developerCertificates;

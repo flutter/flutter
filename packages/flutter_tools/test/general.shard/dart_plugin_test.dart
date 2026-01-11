@@ -1458,7 +1458,7 @@ void createFakeDartPlugins(
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  var dependencies = <String>{};
+  Set<String> dependencies = <String>{};
 
   @override
   String get appName => 'myapp';
@@ -1466,7 +1466,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   late FlutterManifest manifest;

@@ -23,8 +23,8 @@ void main() {
       matching: find.byType(DecoratedBox),
     );
 
-    final DecoratedBox box = tester.widget(groupDecoratedBoxFinder) as DecoratedBox;
-    final BoxDecoration decoration = box.decoration as BoxDecoration;
+    final box = tester.widget(groupDecoratedBoxFinder) as DecoratedBox;
+    final decoration = box.decoration as BoxDecoration;
 
     return decoration.border;
   }
@@ -32,9 +32,9 @@ void main() {
   testWidgets(
     'CupertinoTraversalGroup appearance changes correctly with default focus color when focus is changed',
     (WidgetTester tester) async {
-      final FocusNode group1Child1FocusNode = FocusNode(debugLabel: 'group1Child1');
-      final FocusNode group1Child2FocusNode = FocusNode(debugLabel: 'group1Child2');
-      final FocusNode group2Child1FocusNode = FocusNode(debugLabel: 'group2Child1');
+      final group1Child1FocusNode = FocusNode(debugLabel: 'group1Child1');
+      final group1Child2FocusNode = FocusNode(debugLabel: 'group1Child2');
+      final group2Child1FocusNode = FocusNode(debugLabel: 'group2Child1');
 
       final GlobalKey group1Key = GlobalKey();
       final GlobalKey group2Key = GlobalKey();
@@ -106,9 +106,9 @@ void main() {
   testWidgets(
     'CupertinoTraversalGroup appearance changes correctly with default focus color when focus is traversed',
     (WidgetTester tester) async {
-      final FocusNode group1Child1FocusNode = FocusNode(debugLabel: 'group1Child1');
-      final FocusNode group1Child2FocusNode = FocusNode(debugLabel: 'group1Child2');
-      final FocusNode group2Child1FocusNode = FocusNode(debugLabel: 'group2Child1');
+      final group1Child1FocusNode = FocusNode(debugLabel: 'group1Child1');
+      final group1Child2FocusNode = FocusNode(debugLabel: 'group1Child2');
+      final group2Child1FocusNode = FocusNode(debugLabel: 'group2Child1');
 
       final GlobalKey group1Key = GlobalKey();
       final GlobalKey group2Key = GlobalKey();
@@ -172,4 +172,23 @@ void main() {
       expect(findBorder(group2Key, tester), getExpectedHaloBorder());
     },
   );
+
+  testWidgets('CupertinoFocusHalo does not crash at zero area', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: CupertinoFocusHalo.withRect(
+              child: Focus(focusNode: focusNode, child: const Text('X')),
+            ),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(CupertinoFocusHalo)), Size.zero);
+  });
 }

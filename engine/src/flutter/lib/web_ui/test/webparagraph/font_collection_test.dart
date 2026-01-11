@@ -19,7 +19,7 @@ void testMain() {
   group('$WebFontCollection', () {
     setUpUnitTests();
 
-    const String testFontUrl = '/assets/fonts/ahem.ttf';
+    const testFontUrl = '/assets/fonts/ahem.ttf';
 
     late FakeAssetScope testScope;
     setUp(() {
@@ -37,9 +37,9 @@ void testMain() {
 
     group('regular special characters', () {
       test('Register Asset with no special characters', () async {
-        const String testFontFamily = 'Ahem';
-        final List<String> fontFamilyList = <String>[];
-        final WebFontCollection collection = WebFontCollection();
+        const testFontFamily = 'Ahem';
+        final fontFamilyList = <String>[];
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -54,10 +54,10 @@ void testMain() {
       });
 
       test('Register Asset with white space in the family name', () async {
-        const String testFontFamily = 'Ahem ahem ahem';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = 'Ahem ahem ahem';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -72,10 +72,10 @@ void testMain() {
       });
 
       test('Register Asset with capital case letters', () async {
-        const String testFontFamily = 'AhEm';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = 'AhEm';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -90,9 +90,9 @@ void testMain() {
       });
 
       test('Register Asset with descriptor', () async {
-        const String testFontFamily = 'Ahem';
-        final List<String> fontFamilyList = <String>[];
-        final WebFontCollection collection = WebFontCollection();
+        const testFontFamily = 'Ahem';
+        final fontFamilyList = <String>[];
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[
@@ -114,10 +114,10 @@ void testMain() {
 
     group('fonts with special characters', () {
       test('Register Asset twice with special character slash', () async {
-        const String testFontFamily = '/Ahem';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = '/Ahem';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -138,10 +138,10 @@ void testMain() {
       });
 
       test('Register Asset twice with exclamation mark', () async {
-        const String testFontFamily = 'Ahem!!ahem';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = 'Ahem!!ahem';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -162,10 +162,10 @@ void testMain() {
       });
 
       test('Register Asset twice with comma', () async {
-        const String testFontFamily = 'Ahem ,ahem';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = 'Ahem ,ahem';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),
@@ -186,10 +186,10 @@ void testMain() {
       });
 
       test('Register Asset twice with a digit at the start of a token', () async {
-        const String testFontFamily = 'Ahem 1998';
-        final List<String> fontFamilyList = <String>[];
+        const testFontFamily = 'Ahem 1998';
+        final fontFamilyList = <String>[];
 
-        final WebFontCollection collection = WebFontCollection();
+        final collection = WebFontCollection();
         await collection.loadAssetFonts(
           FontManifest(<FontFamily>[
             FontFamily(testFontFamily, <FontAsset>[FontAsset(testFontUrl, <String, String>{})]),

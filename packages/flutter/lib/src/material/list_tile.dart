@@ -714,22 +714,28 @@ class ListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// {@template flutter.material.ListTile.horizontalTitleGap}
   /// The horizontal gap between the titles and the leading/trailing widgets.
   ///
   /// If null, then the value of [ListTileTheme.horizontalTitleGap] is used. If
   /// that is also null, then a default value of 16 is used.
+  /// {@endtemplate}
   final double? horizontalTitleGap;
 
+  /// {@template flutter.material.ListTile.minVerticalPadding}
   /// The minimum padding on the top and bottom of the title and subtitle widgets.
   ///
   /// If null, then the value of [ListTileTheme.minVerticalPadding] is used. If
   /// that is also null, then a default value of 4 is used.
+  /// {@endtemplate}
   final double? minVerticalPadding;
 
+  /// {@template flutter.material.ListTile.minLeadingWidth}
   /// The minimum width allocated for the [ListTile.leading] widget.
   ///
   /// If null, then the value of [ListTileTheme.minLeadingWidth] is used. If
   /// that is also null, then a default value of 40 is used.
+  /// {@endtemplate}
   final double? minLeadingWidth;
 
   /// {@template flutter.material.ListTile.minTileHeight}
@@ -823,7 +829,7 @@ class ListTile extends StatelessWidget {
     final ListTileThemeData defaults = theme.useMaterial3
         ? _LisTileDefaultsM3(context)
         : _LisTileDefaultsM2(context, listTileStyle);
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (!enabled) WidgetState.disabled,
       if (selected) WidgetState.selected,
     };
@@ -879,8 +885,8 @@ class ListTile extends StatelessWidget {
           defaults.textColor,
           theme.disabledColor,
         );
-    final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
-    final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
+    final iconThemeData = IconThemeData(color: effectiveIconColor);
+    final iconButtonThemeData = IconButtonThemeData(
       style:
           IconButtonTheme.of(context).style?.copyWith(
             foregroundColor: WidgetStatePropertyAll<Color?>(effectiveIconButtonColor),
@@ -894,7 +900,7 @@ class ListTile extends StatelessWidget {
           leadingAndTrailingTextStyle ??
           tileTheme.leadingAndTrailingTextStyle ??
           defaults.leadingAndTrailingTextStyle!;
-      final Color? leadingAndTrailingTextColor = effectiveColor;
+      final leadingAndTrailingTextColor = effectiveColor;
       leadingAndTrailingStyle = leadingAndTrailingStyle.copyWith(
         color: leadingAndTrailingTextColor,
       );
@@ -910,7 +916,7 @@ class ListTile extends StatelessWidget {
     }
 
     TextStyle titleStyle = titleTextStyle ?? tileTheme.titleTextStyle ?? defaults.titleTextStyle!;
-    final Color? titleColor = effectiveColor;
+    final titleColor = effectiveColor;
     titleStyle = titleStyle.copyWith(
       color: titleColor,
       fontSize: _isDenseLayout(theme, tileTheme) ? 13.0 : null,
@@ -926,7 +932,7 @@ class ListTile extends StatelessWidget {
     if (subtitle != null) {
       subtitleStyle =
           subtitleTextStyle ?? tileTheme.subtitleTextStyle ?? defaults.subtitleTextStyle!;
-      final Color? subtitleColor = effectiveColor;
+      final subtitleColor = effectiveColor;
       subtitleStyle = subtitleStyle.copyWith(
         color: subtitleColor,
         fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
@@ -954,7 +960,7 @@ class ListTile extends StatelessWidget {
         defaults.contentPadding!.resolve(textDirection);
 
     // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
-    final Set<WidgetState> mouseStates = <WidgetState>{
+    final mouseStates = <WidgetState>{
       if (!enabled || (onTap == null && onLongPress == null)) WidgetState.disabled,
     };
     final MouseCursor effectiveMouseCursor =
@@ -1449,10 +1455,16 @@ class _RenderListTile extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return math.max(
-      _targetTileHeight,
-      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
-    );
+    final double titleMinHeight = title.getMinIntrinsicHeight(width);
+    final double? subtitleMinHeight = subtitle?.getMinIntrinsicHeight(width);
+
+    const topAndBottomPaddingMultiplier = 2;
+    final double contentHeight =
+        titleMinHeight +
+        (subtitleMinHeight ?? 0.0) +
+        topAndBottomPaddingMultiplier * _minVerticalPadding;
+
+    return math.max(_targetTileHeight, contentHeight);
   }
 
   @override
@@ -1462,7 +1474,7 @@ class _RenderListTile extends RenderBox
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    final BoxParentData parentData = title.parentData! as BoxParentData;
+    final parentData = title.parentData! as BoxParentData;
     final BaselineOffset offset =
         BaselineOffset(title.getDistanceToActualBaseline(baseline)) + parentData.offset.dy;
     return offset.offset;
@@ -1478,7 +1490,7 @@ class _RenderListTile extends RenderBox
   );
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData! as BoxParentData;
+    final parentData = box.parentData! as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1667,7 +1679,7 @@ class _RenderListTile extends RenderBox
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox? child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData! as BoxParentData;
+        final parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1684,7 +1696,7 @@ class _RenderListTile extends RenderBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     for (final RenderBox child in children) {
-      final BoxParentData parentData = child.parentData! as BoxParentData;
+      final parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

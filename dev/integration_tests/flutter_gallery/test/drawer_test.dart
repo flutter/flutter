@@ -14,7 +14,7 @@ void main() {
   }
 
   testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
-    bool hasFeedback = false;
+    var hasFeedback = false;
 
     await tester.pumpWidget(
       GalleryApp(
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify theme settings
-    MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
+    var app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme!.brightness, equals(Brightness.light));
     expect(app.darkTheme!.brightness, equals(Brightness.dark));
 

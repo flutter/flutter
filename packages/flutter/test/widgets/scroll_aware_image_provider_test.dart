@@ -40,7 +40,7 @@ void main() {
   }
 
   Future<DisposableBuildContext> createContext(WidgetTester tester) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
@@ -54,19 +54,17 @@ void main() {
       final DisposableBuildContext context = await createContext(tester);
 
       final ui.Image image = testImage.clone();
-      final TestImageProvider testImageProvider = TestImageProvider(image);
+      final testImageProvider = TestImageProvider(image);
 
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider1 = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider2 = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       testImageProvider.complete();
       image.dispose();
@@ -83,20 +81,18 @@ void main() {
         final ui.Image image1 = testImage.clone();
         final ui.Image image2 = testImage.clone();
 
-        final TestImageProvider testImageProvider1 = TestImageProvider(image1);
-        final TestImageProvider testImageProvider2 = TestImageProvider(image2);
+        final testImageProvider1 = TestImageProvider(image1);
+        final testImageProvider2 = TestImageProvider(image2);
 
-        final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
-            ScrollAwareImageProvider<TestImageProvider>(
-              context: context,
-              imageProvider: testImageProvider1,
-            );
+        final imageProvider1 = ScrollAwareImageProvider<TestImageProvider>(
+          context: context,
+          imageProvider: testImageProvider1,
+        );
 
-        final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
-            ScrollAwareImageProvider<TestImageProvider>(
-              context: context,
-              imageProvider: testImageProvider2,
-            );
+        final imageProvider2 = ScrollAwareImageProvider<TestImageProvider>(
+          context: context,
+          imageProvider: testImageProvider2,
+        );
 
         testImageProvider1.complete();
         testImageProvider2.complete();
@@ -114,13 +110,12 @@ void main() {
       final DisposableBuildContext context = await createContext(tester);
 
       final ui.Image image = testImage.clone();
-      final TestImageProvider testImageProvider = TestImageProvider(image);
+      final testImageProvider = TestImageProvider(image);
 
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       testImageProvider.complete();
       image.dispose();
@@ -137,20 +132,18 @@ void main() {
       final ui.Image image1 = testImage.clone();
       final ui.Image image2 = testImage.clone();
 
-      final TestImageProvider testImageProvider1 = TestImageProvider(image1);
-      final TestImageProvider testImageProvider2 = TestImageProvider(image2);
+      final testImageProvider1 = TestImageProvider(image1);
+      final testImageProvider2 = TestImageProvider(image2);
 
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider1 =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context1,
-            imageProvider: testImageProvider1,
-          );
+      final imageProvider1 = ScrollAwareImageProvider<TestImageProvider>(
+        context: context1,
+        imageProvider: testImageProvider1,
+      );
 
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider2 =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context2,
-            imageProvider: testImageProvider2,
-          );
+      final imageProvider2 = ScrollAwareImageProvider<TestImageProvider>(
+        context: context2,
+        imageProvider: testImageProvider2,
+      );
 
       testImageProvider1.complete();
       testImageProvider2.complete();
@@ -164,17 +157,16 @@ void main() {
   testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final testImageProvider = TestImageProvider(testImage.clone());
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -195,7 +187,7 @@ void main() {
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -205,12 +197,11 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final testImageProvider = TestImageProvider(testImage.clone());
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -232,8 +223,8 @@ void main() {
   testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (
     WidgetTester tester,
   ) async {
-    final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
-    final ScrollController scrollController = ScrollController();
+    final keys = <GlobalKey<TestWidgetState>>[];
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -252,12 +243,11 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final testImageProvider = TestImageProvider(testImage.clone());
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -296,8 +286,8 @@ void main() {
   testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (
     WidgetTester tester,
   ) async {
-    final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
-    final ScrollController scrollController = ScrollController();
+    final keys = <GlobalKey<TestWidgetState>>[];
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -316,12 +306,11 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
-    final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-        ScrollAwareImageProvider<TestImageProvider>(
-          context: context,
-          imageProvider: testImageProvider,
-        );
+    final testImageProvider = TestImageProvider(testImage.clone());
+    final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
 
     expect(testImageProvider.configuration, null);
     expect(imageCache.containsKey(testImageProvider), false);
@@ -370,8 +359,8 @@ void main() {
   testWidgets(
     'ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed',
     (WidgetTester tester) async {
-      final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
-      final ScrollController scrollController = ScrollController();
+      final keys = <GlobalKey<TestWidgetState>>[];
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         Directionality(
@@ -390,12 +379,11 @@ void main() {
 
       final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
       addTearDown(context.dispose);
-      final TestImageProvider testImageProvider = TestImageProvider(cloneImage());
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final testImageProvider = TestImageProvider(cloneImage());
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);
@@ -447,8 +435,8 @@ void main() {
   testWidgets(
     'ScrollAwareImageProvider resolves from ImageCache and does not set completer twice',
     (WidgetTester tester) async {
-      final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
-      final ScrollController scrollController = ScrollController();
+      final key = GlobalKey<TestWidgetState>();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         Directionality(
@@ -463,12 +451,11 @@ void main() {
 
       final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
       addTearDown(context.dispose);
-      final TestImageProvider testImageProvider = TestImageProvider(cloneImage());
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final testImageProvider = TestImageProvider(cloneImage());
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);
@@ -513,8 +500,8 @@ void main() {
       final int oldSize = imageCache.maximumSize;
       imageCache.maximumSize = 1;
 
-      final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
-      final ScrollController scrollController = ScrollController();
+      final key = GlobalKey<TestWidgetState>();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         Directionality(
@@ -529,12 +516,11 @@ void main() {
 
       final DisposableBuildContext context = DisposableBuildContext(key.currentState!);
       addTearDown(context.dispose);
-      final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
-      final ScrollAwareImageProvider<TestImageProvider> imageProvider =
-          ScrollAwareImageProvider<TestImageProvider>(
-            context: context,
-            imageProvider: testImageProvider,
-          );
+      final testImageProvider = TestImageProvider(testImage.clone());
+      final imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+        context: context,
+        imageProvider: testImageProvider,
+      );
 
       expect(testImageProvider.configuration, null);
       expect(imageCache.containsKey(testImageProvider), false);
@@ -549,7 +535,7 @@ void main() {
       expect(imageCache.currentSize, 0);
 
       // Occupy the only slot in the cache with another image.
-      final TestImageProvider testImageProvider2 = TestImageProvider(testImage.clone());
+      final testImageProvider2 = TestImageProvider(testImage.clone());
       testImageProvider2.complete();
       await precacheImage(testImageProvider2, context.context!);
       expect(imageCache.containsKey(testImageProvider), false);

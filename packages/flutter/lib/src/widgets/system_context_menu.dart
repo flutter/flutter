@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'context_menu_button_item.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -156,15 +157,36 @@ class SystemContextMenu extends StatefulWidget {
   ///  * [EditableTextState.contextMenuButtonItems], which provides the default
   ///    [ContextMenuButtonItem]s for the Flutter-rendered context menu.
   static List<IOSSystemContextMenuItem> getDefaultItems(EditableTextState editableTextState) {
-    return <IOSSystemContextMenuItem>[
-      if (editableTextState.copyEnabled) const IOSSystemContextMenuItemCopy(),
-      if (editableTextState.cutEnabled) const IOSSystemContextMenuItemCut(),
-      if (editableTextState.pasteEnabled) const IOSSystemContextMenuItemPaste(),
-      if (editableTextState.selectAllEnabled) const IOSSystemContextMenuItemSelectAll(),
-      if (editableTextState.lookUpEnabled) const IOSSystemContextMenuItemLookUp(),
-      if (editableTextState.searchWebEnabled) const IOSSystemContextMenuItemSearchWeb(),
-      if (editableTextState.liveTextInputEnabled) const IOSSystemContextMenuItemLiveText(),
-    ];
+    final items = <IOSSystemContextMenuItem>[];
+
+    // Use the generic Flutter-rendered context menu model as the single source of truth.
+    for (final ContextMenuButtonItem button in editableTextState.contextMenuButtonItems) {
+      switch (button.type) {
+        case ContextMenuButtonType.copy:
+          items.add(const IOSSystemContextMenuItemCopy());
+        case ContextMenuButtonType.cut:
+          items.add(const IOSSystemContextMenuItemCut());
+        case ContextMenuButtonType.paste:
+          items.add(const IOSSystemContextMenuItemPaste());
+        case ContextMenuButtonType.selectAll:
+          items.add(const IOSSystemContextMenuItemSelectAll());
+        case ContextMenuButtonType.lookUp:
+          items.add(const IOSSystemContextMenuItemLookUp());
+        case ContextMenuButtonType.searchWeb:
+          items.add(const IOSSystemContextMenuItemSearchWeb());
+        case ContextMenuButtonType.share:
+          items.add(const IOSSystemContextMenuItemShare());
+        case ContextMenuButtonType.liveTextInput:
+          items.add(const IOSSystemContextMenuItemLiveText());
+        case ContextMenuButtonType.delete:
+        // No native iOS system menu button for Delete — intentionally ignored.
+        case ContextMenuButtonType.custom:
+        // Custom items are provided explicitly via SystemContextMenu.items,
+        // not via defaults. Intentionally ignore in default mapping.
+      }
+    }
+
+    return items;
   }
 
   @override

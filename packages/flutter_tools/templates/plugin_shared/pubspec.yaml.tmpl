@@ -20,7 +20,7 @@ dependencies:
 dev_dependencies:
 {{#withFfi}}
   ffi: ^2.1.3
-  ffigen: ^13.0.0
+  ffigen: ^20.1.1
 {{/withFfi}}
   flutter_test:
     sdk: flutter
@@ -107,6 +107,14 @@ flutter:
       macos:
         pluginClass: {{pluginClass}}
 {{/macos}}
+{{#darwin}}
+      ios:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+      macos:
+        pluginClass: {{pluginClass}}
+        sharedDarwinSource: true
+{{/darwin}}
 {{#windows}}
       windows:
         pluginClass: {{pluginClass}}CApi

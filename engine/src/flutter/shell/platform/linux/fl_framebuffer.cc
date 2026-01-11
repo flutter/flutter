@@ -44,7 +44,7 @@ static EGLImage create_egl_image(GLuint texture_id) {
     return nullptr;
   }
 
-  return eglCreateImage(
+  return eglCreateImageKHR(
       egl_display, egl_context, EGL_GL_TEXTURE_2D,
       reinterpret_cast<EGLClientBuffer>(static_cast<intptr_t>(texture_id)),
       nullptr);

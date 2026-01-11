@@ -33,7 +33,7 @@ void main() {
       );
 
       expect(
-        find.descendant(of: find.byType(Tooltip), matching: find.byType(MouseRegion)),
+        find.descendant(of: find.byType(RawTooltip), matching: find.byType(MouseRegion)),
         findsNothing,
       );
     },
@@ -149,7 +149,7 @@ void main() {
   testWidgets('Tooltip does not trigger manually when in TooltipVisibility with visible = false', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    final tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipVisibility(
@@ -171,7 +171,7 @@ void main() {
   testWidgets('Tooltip triggers manually when in TooltipVisibility with visible = true', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    final tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipVisibility(

@@ -12,7 +12,7 @@ import 'common.dart';
 
 void main() {
   test('constructs expected model', () async {
-    const String registryContent = '''
+    const registryContent = '''
 contact=abc@gmail.com
 fetch=git clone https://github.com/flutter/cocoon.git tests
 fetch=git -C tests checkout abc123
@@ -30,7 +30,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
     final File registryFile = MemoryFileSystem().file('flutter_cocoon.test')
       ..writeAsStringSync(registryContent);
 
-    final CustomerTest test = CustomerTest(registryFile);
+    final test = CustomerTest(registryFile);
     expect(test.contacts, containsAll(<String>['abc@gmail.com']));
     expect(
       test.fetch,
@@ -62,7 +62,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
   });
 
   test('throws exception when unknown field is passed', () async {
-    const String registryContent = '''
+    const registryContent = '''
 contact=abc@gmail.com
 update=.
 fetch=git clone https://github.com/flutter/cocoon.git tests
@@ -78,7 +78,7 @@ unknownfield=super not cool
   });
 
   test('throws exception when no tests given', () async {
-    const String registryContent = '''
+    const registryContent = '''
 contact=abc@gmail.com
 update=.
 fetch=git clone https://github.com/flutter/cocoon.git tests
@@ -90,7 +90,7 @@ fetch=git clone https://github.com/flutter/cocoon.git tests
   });
 
   test('throws exception when only one fetch instruction given', () async {
-    const String registryContent = '''
+    const registryContent = '''
 contact=abc@gmail.com
 update=.
 fetch=git clone https://github.com/flutter/cocoon.git tests
@@ -104,7 +104,7 @@ test.windows=.\test_utilities\bin\flutter_test_runner.bat repo_dashboard
   });
 
   test('throws exception when no contacts given', () async {
-    const String registryContent = '''
+    const registryContent = '''
 update=.
 fetch=git clone https://github.com/flutter/cocoon.git tests
 test.posix=./test_utilities/bin/flutter_test_runner.sh app_flutter

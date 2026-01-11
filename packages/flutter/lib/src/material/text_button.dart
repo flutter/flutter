@@ -104,7 +104,7 @@ class TextButton extends ButtonStyleButton {
   /// If [icon] is null, this constructor will create a [TextButton]
   /// that doesn't display an icon.
   ///
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  /// {@macro flutter.material.ButtonStyle.iconAlignment}
   ///
   TextButton.icon({
     super.key,

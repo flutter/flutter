@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('should accept a major and minor version', () {
-    final ReleaseVersion version = ReleaseVersion(major: 3, minor: 21);
+    final version = ReleaseVersion(major: 3, minor: 21);
     expect(version.major, equals(3));
     expect(version.minor, equals(21));
   });

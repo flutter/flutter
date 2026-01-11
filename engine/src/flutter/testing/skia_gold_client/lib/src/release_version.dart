@@ -54,7 +54,7 @@ final class ReleaseVersion {
   /// format (either empty/comments only, or missing a `major.minor` line in
   /// the format described in [ReleaseVersion.new]).
   static ReleaseVersion? parse(String fileContents) {
-    bool parsedNone = false;
+    var parsedNone = false;
     ReleaseVersion? parsed;
     for (final String line in LineSplitter.split(fileContents)) {
       final String trimmed = line.trim();

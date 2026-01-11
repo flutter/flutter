@@ -43,7 +43,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
+    final rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
@@ -79,7 +79,7 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    final RRect rrect = RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8));
+    final rrect = RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
@@ -130,7 +130,7 @@ void main() {
     // T = alignment.top
     // R = L + '0'.width + padding.width
     // B = T + largeSize, R = largeSize/2
-    final RRect rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
+    final rrect = RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8));
     expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
 
     await tester.pumpWidget(buildFrame(1000));
@@ -138,7 +138,7 @@ void main() {
   });
 
   testWidgets('Small Badge defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -173,7 +173,7 @@ void main() {
   });
 
   testWidgets('Small Badge RTL defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -210,9 +210,9 @@ void main() {
   });
 
   testWidgets('Large Badge textStyle and colors', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
-    const Color green = Color(0xff00ff00);
-    const Color black = Color(0xff000000);
+    final theme = ThemeData();
+    const green = Color(0xff00ff00);
+    const black = Color(0xff000000);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -256,7 +256,7 @@ void main() {
   });
 
   testWidgets('Large Badge alignment', (WidgetTester tester) async {
-    const Radius badgeRadius = Radius.circular(8);
+    const badgeRadius = Radius.circular(8);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
@@ -301,7 +301,7 @@ void main() {
     await tester.pumpWidget(buildFrame(Alignment.bottomRight));
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200, 200, 200 + 16, badgeRadius)));
 
-    const Offset offset = Offset(5, 10);
+    const offset = Offset(5, 10);
 
     await tester.pumpWidget(buildFrame(Alignment.topLeft, offset));
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 16, 16, badgeRadius).shift(offset)));
@@ -353,7 +353,7 @@ void main() {
   });
 
   testWidgets('Small Badge alignment', (WidgetTester tester) async {
-    const Radius badgeRadius = Radius.circular(3);
+    const badgeRadius = Radius.circular(3);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
@@ -394,7 +394,7 @@ void main() {
     await tester.pumpWidget(buildFrame(Alignment.bottomRight));
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 6, 200, 200, 200 + 6, badgeRadius)));
 
-    const Offset offset = Offset(5, 10); // Not used for smallSize Badges.
+    const offset = Offset(5, 10); // Not used for smallSize Badges.
 
     await tester.pumpWidget(buildFrame(Alignment.topLeft, offset));
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 6, 6, badgeRadius)));
@@ -422,7 +422,7 @@ void main() {
   });
 
   testWidgets('Badge Larger than large size', (WidgetTester tester) async {
-    const Radius badgeRadius = Radius.circular(15);
+    const badgeRadius = Radius.circular(15);
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(

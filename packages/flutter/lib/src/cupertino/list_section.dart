@@ -440,7 +440,7 @@ class CupertinoListSection extends StatelessWidget {
       // Insert a short divider between all rows.
       // If it is a `CupertinoListSectionType.base` type, add a long divider
       // to the top and bottom of the rows.
-      final List<Widget> childrenWithDividers = <Widget>[];
+      final childrenWithDividers = <Widget>[];
 
       if (type == CupertinoListSectionType.base) {
         childrenWithDividers.add(longDivider);

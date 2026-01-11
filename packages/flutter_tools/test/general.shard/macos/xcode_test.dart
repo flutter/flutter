@@ -1960,10 +1960,10 @@ void main() {
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  var version = Version(0, 0, 0);
+  Version version = Version(0, 0, 0);
 
   @override
-  var isInstalled = false;
+  bool isInstalled = false;
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
@@ -1975,7 +1975,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   FakeIOSCoreDeviceControl({this.getCoreDevicesCompleter});
 
   final Completer<void>? getCoreDevicesCompleter;
-  var devices = <FakeIOSCoreDevice>[];
+  List<FakeIOSCoreDevice> devices = <FakeIOSCoreDevice>[];
 
   @override
   Future<List<IOSCoreDevice>> getCoreDevices({

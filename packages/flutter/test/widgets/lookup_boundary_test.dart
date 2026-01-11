@@ -999,9 +999,9 @@ void main() {
 
   group('LookupBoundary.visitAncestorElements', () {
     testWidgets('respects boundary', (WidgetTester tester) async {
-      final List<Element> throughBoundary = <Element>[];
-      final List<Element> stoppedAtBoundary = <Element>[];
-      final List<Element> stoppedAtBoundaryTerminatedEarly = <Element>[];
+      final throughBoundary = <Element>[];
+      final stoppedAtBoundary = <Element>[];
+      final stoppedAtBoundaryTerminatedEarly = <Element>[];
 
       final Key level0 = UniqueKey();
       final Key level1 = UniqueKey();
@@ -1086,8 +1086,8 @@ void main() {
         ),
       );
 
-      final List<Element> throughBoundary = <Element>[];
-      final List<Element> stoppedAtBoundary = <Element>[];
+      final throughBoundary = <Element>[];
+      final stoppedAtBoundary = <Element>[];
 
       final BuildContext context = tester.element(find.byKey(root));
 

@@ -50,7 +50,7 @@ final class BuilderConfig extends BuildConfigBase {
   /// [path] should be the file system path to the file that the JSON data comes
   /// from. [map] must be the JSON data returned by e.g. `JsonDecoder.convert`.
   factory BuilderConfig.fromJson({required String path, required Map<String, Object?> map}) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
 
     // Parse the "builds" field.
     final List<Build>? builds = objListOfJson<Build>(map, 'builds', errors, Build.fromJson);
@@ -122,21 +122,21 @@ final class BuilderConfig extends BuildConfigBase {
 
   @override
   List<String> check(String path) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     errors.addAll(super.check(path));
-    for (int i = 0; i < builds.length; i++) {
+    for (var i = 0; i < builds.length; i++) {
       final Build build = builds[i];
       errors.addAll(build.check('$path/builds[$i]'));
     }
-    for (int i = 0; i < tests.length; i++) {
+    for (var i = 0; i < tests.length; i++) {
       final GlobalTest test = tests[i];
       errors.addAll(test.check('$path/tests[$i]'));
     }
-    for (int i = 0; i < generators.length; i++) {
+    for (var i = 0; i < generators.length; i++) {
       final TestTask task = generators[i];
       errors.addAll(task.check('$path/generators/tasks[$i]'));
     }
-    for (int i = 0; i < archives.length; i++) {
+    for (var i = 0; i < archives.length; i++) {
       final GlobalArchive archive = archives[i];
       errors.addAll(archive.check('$path/archives[$i]'));
     }
@@ -170,7 +170,7 @@ final class BuilderConfig extends BuildConfigBase {
 /// }
 final class Build extends BuildConfigBase {
   factory Build.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? description = stringOfJson(map, 'description', errors);
     final List<String>? gn = stringListOfJson(map, 'gn', errors);
@@ -306,18 +306,18 @@ final class Build extends BuildConfigBase {
 
   @override
   List<String> check(String path) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     errors.addAll(super.check(path));
     errors.addAll(ninja.check('$path/ninja'));
-    for (int i = 0; i < tests.length; i++) {
+    for (var i = 0; i < tests.length; i++) {
       final BuildTest test = tests[i];
       errors.addAll(test.check('$path/tests[$i]'));
     }
-    for (int i = 0; i < generators.length; i++) {
+    for (var i = 0; i < generators.length; i++) {
       final BuildTask task = generators[i];
       errors.addAll(task.check('$path/generators/tasks[$i]'));
     }
-    for (int i = 0; i < archives.length; i++) {
+    for (var i = 0; i < archives.length; i++) {
       final BuildArchive archive = archives[i];
       errors.addAll(archive.check('$path/archives[$i]'));
     }
@@ -332,7 +332,7 @@ final class Build extends BuildConfigBase {
 /// },
 final class BuildNinja extends BuildConfigBase {
   factory BuildNinja.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? config = stringOfJson(map, 'config', errors);
     final List<String>? targets = stringListOfJson(map, 'targets', errors);
     if (config == null || targets == null) {
@@ -367,7 +367,7 @@ final class BuildNinja extends BuildConfigBase {
 /// }
 final class BuildTest extends BuildConfigBase {
   factory BuildTest.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? language = stringOfJson(map, 'language', errors);
     final String? script = stringOfJson(map, 'script', errors);
@@ -430,7 +430,7 @@ final class BuildTest extends BuildConfigBase {
 /// run in sequence by appending the same parameter list to each one.
 final class BuildTask extends BuildConfigBase {
   factory BuildTask.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? language = stringOfJson(map, 'language', errors);
     final List<String>? scripts = stringListOfJson(map, 'scripts', errors);
@@ -475,7 +475,7 @@ final class BuildTask extends BuildConfigBase {
 /// }
 final class BuildArchive extends BuildConfigBase {
   factory BuildArchive.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? type = stringOfJson(map, 'type', errors);
     final String? basePath = stringOfJson(map, 'base_path', errors);
@@ -522,7 +522,7 @@ final class BuildArchive extends BuildConfigBase {
 /// }
 final class GlobalTest extends BuildConfigBase {
   factory GlobalTest.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? recipe = stringOfJson(map, 'recipe', errors);
     final List<String>? droneDimensions = stringListOfJson(map, 'drone_dimensions', errors);
@@ -587,13 +587,13 @@ final class GlobalTest extends BuildConfigBase {
 
   @override
   List<String> check(String path) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     errors.addAll(super.check(path));
-    for (int i = 0; i < testDependencies.length; i++) {
+    for (var i = 0; i < testDependencies.length; i++) {
       final TestDependency testDependency = testDependencies[i];
       errors.addAll(testDependency.check('$path/test_dependencies[$i]'));
     }
-    for (int i = 0; i < tasks.length; i++) {
+    for (var i = 0; i < tasks.length; i++) {
       final TestTask task = tasks[i];
       errors.addAll(task.check('$path/tasks[$i]'));
     }
@@ -608,7 +608,7 @@ final class GlobalTest extends BuildConfigBase {
 /// }
 final class TestDependency extends BuildConfigBase {
   factory TestDependency.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? dependency = stringOfJson(map, 'dependency', errors);
     final String? version = stringOfJson(map, 'version', errors);
     if (dependency == null || version == null) {
@@ -638,7 +638,7 @@ final class TestDependency extends BuildConfigBase {
 /// }
 final class TestTask extends BuildConfigBase {
   factory TestTask.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
     final String? language = stringOfJson(map, 'language', errors);
     final String? script = stringOfJson(map, 'script', errors);
@@ -690,7 +690,7 @@ final class TestTask extends BuildConfigBase {
 /// },
 final class GlobalArchive extends BuildConfigBase {
   factory GlobalArchive.fromJson(Map<String, Object?> map) {
-    final List<String> errors = <String>[];
+    final errors = <String>[];
     final String? source = stringOfJson(map, 'source', errors);
     final String? destination = stringOfJson(map, 'destination', errors);
     final String? realm = stringOfJson(map, 'realm', errors);
@@ -717,7 +717,7 @@ final class GlobalArchive extends BuildConfigBase {
 
 bool _canRunOn(List<String> droneDimensions, Platform platform) {
   String? os;
-  for (final String dimension in droneDimensions) {
+  for (final dimension in droneDimensions) {
     os ??= switch (dimension.split('=')) {
       ['os', 'Linux'] => Platform.linux,
       ['os', final String win] when win.startsWith('Windows') => Platform.windows,
@@ -760,7 +760,7 @@ List<T>? objListOfJson<T>(
     appendTypeError(map, field, 'list', errors);
     return null;
   }
-  for (final Object? obj in map[field]! as List<Object?>) {
+  for (final obj in map[field]! as List<Object?>) {
     if (obj is! Map<String, Object?>) {
       appendTypeError(map, field, 'map', errors);
       return null;
@@ -777,7 +777,7 @@ List<String>? stringListOfJson(Map<String, Object?> map, String field, List<Stri
     appendTypeError(map, field, 'list', errors);
     return null;
   }
-  for (final Object? obj in map[field]! as List<Object?>) {
+  for (final obj in map[field]! as List<Object?>) {
     if (obj is! String) {
       appendTypeError(map, field, element: obj, 'string', errors);
       return null;

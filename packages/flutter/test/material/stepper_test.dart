@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('Stepper tap callback test', (WidgetTester tester) async {
-    int index = 0;
+    var index = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -148,8 +148,8 @@ void main() {
   });
 
   testWidgets('Material2 - Stepper button test', (WidgetTester tester) async {
-    bool continuePressed = false;
-    bool cancelPressed = false;
+    var continuePressed = false;
+    var cancelPressed = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -180,8 +180,8 @@ void main() {
   });
 
   testWidgets('Material3 - Stepper button test', (WidgetTester tester) async {
-    bool continuePressed = false;
-    bool cancelPressed = false;
+    var continuePressed = false;
+    var cancelPressed = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -211,7 +211,7 @@ void main() {
   });
 
   testWidgets('Stepper disabled step test', (WidgetTester tester) async {
-    int index = 0;
+    var index = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -300,12 +300,12 @@ void main() {
   });
 
   testWidgets('Stepper custom controls test', (WidgetTester tester) async {
-    bool continuePressed = false;
+    var continuePressed = false;
     void setContinue() {
       continuePressed = true;
     }
 
-    bool canceledPressed = false;
+    var canceledPressed = false;
     void setCanceled() {
       canceledPressed = true;
     }
@@ -367,7 +367,7 @@ void main() {
   });
 
   testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
-    int currentStep = 0;
+    var currentStep = 0;
     void setContinue() {
       currentStep += 1;
     }
@@ -507,7 +507,7 @@ void main() {
 
     expect(errorDetails.stack, isNotNull);
     // Check the ErrorDetails without the stack trace
-    final String fullErrorMessage = errorDetails.toString();
+    final fullErrorMessage = errorDetails.toString();
     final List<String> lines = fullErrorMessage.split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
@@ -639,7 +639,7 @@ void main() {
   });
 
   testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
-    const String longText = 'A long long long long long long long long long long long long text';
+    const longText = 'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -659,7 +659,7 @@ void main() {
   });
 
   testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
-    const String longText = 'A long long long long long long long long long long long long text';
+    const longText = 'A long long long long long long long long long long long long text';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -714,13 +714,13 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2)),
     );
 
-    final ThemeData themeLight = ThemeData(useMaterial3: false);
+    final themeLight = ThemeData(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeLight));
 
-    const String continueStr = 'CONTINUE';
-    const String cancelStr = 'CANCEL';
-    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
-    const Rect cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
+    const continueStr = 'CONTINUE';
+    const cancelStr = 'CANCEL';
+    const continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.0, 260.0);
+    const cancelButtonRect = Rect.fromLTRB(176.0, 212.0, 292.0, 260.0);
     expect(buttonMaterial(continueStr).color!.value, 0xff2196f3);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial(continueStr).shape, buttonShape);
@@ -731,7 +731,7 @@ void main() {
     expect(buttonMaterial(cancelStr).shape, buttonShape);
     expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
 
-    final ThemeData themeDark = ThemeData.dark(useMaterial3: false);
+    final themeDark = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
@@ -776,13 +776,13 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2)),
     );
 
-    final ThemeData themeLight = ThemeData();
+    final themeLight = ThemeData();
     await tester.pumpWidget(buildFrame(themeLight));
 
-    const String continueStr = 'Continue';
-    const String cancelStr = 'Cancel';
-    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.8, 260.0);
-    const Rect cancelButtonRect = Rect.fromLTRB(176.8, 212.0, 293.4, 260.0);
+    const continueStr = 'Continue';
+    const cancelStr = 'Cancel';
+    const continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.8, 260.0);
+    const cancelButtonRect = Rect.fromLTRB(176.8, 212.0, 293.4, 260.0);
     expect(buttonMaterial(continueStr).color!.value, themeLight.colorScheme.primary.value);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial(continueStr).shape, buttonShape);
@@ -799,7 +799,7 @@ void main() {
       rectMoreOrLessEquals(cancelButtonRect, epsilon: 0.001),
     );
 
-    final ThemeData themeDark = ThemeData.dark();
+    final themeDark = ThemeData.dark();
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
@@ -847,18 +847,18 @@ void main() {
       );
     }
 
-    final ThemeData themeLight = ThemeData(useMaterial3: false);
+    final themeLight = ThemeData(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeLight));
 
-    const String continueStr = 'CONTINUE';
-    const String cancelStr = 'CANCEL';
+    const continueStr = 'CONTINUE';
+    const cancelStr = 'CANCEL';
     expect(buttonMaterial(continueStr).color!.value, 0);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, 0x61000000);
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
     expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0x61000000);
 
-    final ThemeData themeDark = ThemeData.dark(useMaterial3: false);
+    final themeDark = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
 
@@ -893,12 +893,12 @@ void main() {
       );
     }
 
-    final ThemeData themeLight = ThemeData();
+    final themeLight = ThemeData();
     final ColorScheme colorsLight = themeLight.colorScheme;
     await tester.pumpWidget(buildFrame(themeLight));
 
-    const String continueStr = 'Continue';
-    const String cancelStr = 'Cancel';
+    const continueStr = 'Continue';
+    const cancelStr = 'Cancel';
     expect(buttonMaterial(continueStr).color!.value, 0);
     expect(
       buttonMaterial(continueStr).textStyle!.color!.value,
@@ -911,7 +911,7 @@ void main() {
       colorsLight.onSurface.withOpacity(0.38).value,
     );
 
-    final ThemeData themeDark = ThemeData.dark();
+    final themeDark = ThemeData.dark();
     final ColorScheme colorsDark = themeDark.colorScheme;
     await tester.pumpWidget(buildFrame(themeDark));
     await tester.pumpAndSettle(); // Complete the theme animation.
@@ -955,7 +955,7 @@ void main() {
   });
 
   testWidgets('ScrollController is passed to the stepper listview', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(() => controller.dispose());
     for (final StepperType type in StepperType.values) {
       await tester.pumpWidget(
@@ -1021,7 +1021,7 @@ void main() {
   });
 
   testWidgets('Stepper custom elevation', (WidgetTester tester) async {
-    const double elevation = 4.0;
+    const elevation = 4.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1076,7 +1076,7 @@ void main() {
   testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
     const Color untappedColor = Colors.blue;
     const Color tappedColor = Colors.red;
-    int index = 0;
+    var index = 0;
 
     Widget buildFrame() {
       return MaterialApp(
@@ -1174,7 +1174,7 @@ void main() {
   });
 
   testWidgets('Stepper with Alternative Label', (WidgetTester tester) async {
-    int index = 0;
+    var index = 0;
     late TextStyle bodyLargeStyle;
     late TextStyle bodyMediumStyle;
     late TextStyle bodySmallStyle;
@@ -1254,7 +1254,7 @@ void main() {
   testWidgets('Stepper Connector Style', (WidgetTester tester) async {
     const Color selectedColor = Colors.black;
     const Color disabledColor = Colors.white;
-    int index = 0;
+    var index = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1397,7 +1397,7 @@ void main() {
   });
 
   testWidgets('StepStyle test', (WidgetTester tester) async {
-    final StepStyle stepStyle = StepStyle(
+    final stepStyle = StepStyle(
       color: Colors.white,
       errorColor: Colors.orange,
       connectorColor: Colors.red,
@@ -1486,7 +1486,7 @@ void main() {
       ),
     );
 
-    final SizedBox lastConnector =
+    final lastConnector =
         tester
                 .widget<Center>(
                   find.descendant(
@@ -1575,8 +1575,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/160156.
   testWidgets('Vertical stepper border displays correctly', (WidgetTester tester) async {
-    int index = 0;
-    const Color connectorColor = Color(0xff00ffff);
+    var index = 0;
+    const connectorColor = Color(0xff00ffff);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1630,12 +1630,12 @@ void main() {
     final Finder findStep2 = find.text('step2');
     await tester.tap(findStep2);
 
-    const int checkCount = 5;
-    final Duration duration = Duration(
+    const checkCount = 5;
+    final duration = Duration(
       microseconds: kThemeAnimationDuration.inMicroseconds ~/ (checkCount + 1),
     );
 
-    for (int i = 0; i < checkCount; i++) {
+    for (var i = 0; i < checkCount; i++) {
       await tester.pump(duration);
       verifyConnector();
     }
@@ -1644,8 +1644,8 @@ void main() {
   testWidgets('Vertical stepper active step has fully colored connector line', (
     WidgetTester tester,
   ) async {
-    const Color activeColor = Color(0xFF2196F3);
-    const Color inactiveColor = Color(0xFF9E9E9E);
+    const activeColor = Color(0xFF2196F3);
+    const inactiveColor = Color(0xFF9E9E9E);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1682,6 +1682,29 @@ void main() {
     expect(colors.where((Color c) => c == activeColor).length, equals(2));
     expect(colors.first, equals(activeColor));
     expect(colors.last, equals(activeColor));
+  });
+
+  testWidgets('Stepper does not crash at zero area', (WidgetTester tester) async {
+    for (final StepperType type in StepperType.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox.shrink(
+                child: Stepper(
+                  type: type,
+                  steps: const <Step>[
+                    Step(title: Text('X'), content: Text('X')),
+                    Step(title: Text('Y'), content: Text('Y')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(Stepper)), Size.zero);
+    }
   });
 }
 

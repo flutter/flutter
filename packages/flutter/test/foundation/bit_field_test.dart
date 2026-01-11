@@ -10,7 +10,7 @@ enum _TestEnum { a, b, c, d, e, f, g, h }
 
 void main() {
   test('BitField control test', () {
-    final BitField<_TestEnum> field = BitField<_TestEnum>(8);
+    final field = BitField<_TestEnum>(8);
 
     expect(field[_TestEnum.d], isFalse);
 
@@ -41,11 +41,11 @@ void main() {
   }, skip: isBrowser); // [intended] BitField is not supported when compiled to Javascript.
 
   test('BitField.filed control test', () {
-    final BitField<_TestEnum> field1 = BitField<_TestEnum>.filled(8, true);
+    final field1 = BitField<_TestEnum>.filled(8, true);
 
     expect(field1[_TestEnum.d], isTrue);
 
-    final BitField<_TestEnum> field2 = BitField<_TestEnum>.filled(8, false);
+    final field2 = BitField<_TestEnum>.filled(8, false);
 
     expect(field2[_TestEnum.d], isFalse);
   }, skip: isBrowser); // [intended] BitField is not supported when compiled to Javascript.

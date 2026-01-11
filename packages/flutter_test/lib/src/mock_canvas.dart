@@ -600,7 +600,7 @@ class _PathMatcher extends Matcher {
       return false;
     }
     final Path path = object;
-    final List<String> errors = <String>[
+    final errors = <String>[
       for (final Offset offset in includes)
         if (!path.contains(offset)) 'Offset $offset should be inside the path, but is not.',
       for (final Offset offset in excludes)
@@ -670,11 +670,11 @@ bool _evaluatePainter(Object? object, Canvas canvas, PaintingContext context) {
 abstract class _TestRecordingCanvasMatcher extends Matcher {
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
-    final TestRecordingCanvas canvas = TestRecordingCanvas();
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-    final StringBuffer description = StringBuffer();
-    String prefixMessage = 'unexpectedly failed.';
-    bool result = false;
+    final canvas = TestRecordingCanvas();
+    final context = TestRecordingPaintingContext(canvas);
+    final description = StringBuffer();
+    var prefixMessage = 'unexpectedly failed.';
+    var result = false;
     try {
       if (!_evaluatePainter(object, canvas, context)) {
         matchState[this] =
@@ -732,8 +732,8 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
 
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
-    int count = 0;
-    for (final RecordedInvocation call in calls) {
+    var count = 0;
+    for (final call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
         count++;
       }
@@ -778,11 +778,11 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
 class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
-    final TestRecordingCanvas canvas = TestRecordingCanvas();
-    final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-    final StringBuffer description = StringBuffer();
-    String prefixMessage = 'unexpectedly failed.';
-    bool result = false;
+    final canvas = TestRecordingCanvas();
+    final context = TestRecordingPaintingContext(canvas);
+    final description = StringBuffer();
+    var prefixMessage = 'unexpectedly failed.';
+    var result = false;
     try {
       if (!_evaluatePainter(object, canvas, context)) {
         matchState[this] =
@@ -1194,7 +1194,7 @@ abstract class _PaintPredicate {
 
   @protected
   void checkMethod(Iterator<RecordedInvocation> call, Symbol symbol) {
-    int others = 0;
+    var others = 0;
     final RecordedInvocation firstCall = call.current;
     while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
       others += 1;
@@ -1261,7 +1261,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @protected
   @mustCallSuper
   void verifyArguments(List<dynamic> arguments) {
-    final Paint paintArgument = arguments[paintArgumentIndex] as Paint;
+    final paintArgument = arguments[paintArgumentIndex] as Paint;
     if (color != null && !_colorsMatch(paintArgument.color, color)) {
       throw FlutterError(
         'It called $methodName with a paint whose color, '
@@ -1305,7 +1305,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     String result = name;
     if (description.isNotEmpty) {
@@ -1348,7 +1348,7 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final T actual = arguments[0] as T;
+    final actual = arguments[0] as T;
     if (expected != null && actual != expected) {
       throw FlutterError(
         'It called $methodName with $T, $actual, which was not exactly the '
@@ -1389,14 +1389,14 @@ class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final T1 actual1 = arguments[0] as T1;
+    final actual1 = arguments[0] as T1;
     if (expected1 != null && actual1 != expected1) {
       throw FlutterError(
         'It called $methodName with its first argument (a $T1), $actual1, '
         'which was not exactly the expected $T1 ($expected1).',
       );
     }
-    final T2 actual2 = arguments[1] as T2;
+    final actual2 = arguments[1] as T2;
     if (expected2 != null && actual2 != expected2) {
       throw FlutterError(
         'It called $methodName with its second argument (a $T2), $actual2, '
@@ -1449,8 +1449,8 @@ class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    const double eps = .0001;
-    final RRect actual = arguments[0] as RRect;
+    const eps = .0001;
+    final actual = arguments[0] as RRect;
     if (rrect != null &&
         ((actual.left - rrect!.left).abs() > eps ||
             (actual.right - rrect!.right).abs() > eps ||
@@ -1504,7 +1504,7 @@ class _RSuperellipsePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final RSuperellipse rsuperellipseArgument = arguments[0] as RSuperellipse;
+    final rsuperellipseArgument = arguments[0] as RSuperellipse;
     if (rsuperellipse != null && rsuperellipseArgument != rsuperellipse) {
       throw FlutterError(
         'It called $methodName with a rounded superellipse, '
@@ -1541,9 +1541,9 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Offset pointArgument = arguments[0] as Offset;
+    final pointArgument = arguments[0] as Offset;
     if (x != null && y != null) {
-      final Offset point = Offset(x!, y!);
+      final point = Offset(x!, y!);
       if (point != pointArgument) {
         throw FlutterError(
           'It called $methodName with a center coordinate, $pointArgument, '
@@ -1566,7 +1566,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
         );
       }
     }
-    final double radiusArgument = arguments[1] as double;
+    final radiusArgument = arguments[1] as double;
     if (radius != null && radiusArgument != radius) {
       throw FlutterError(
         'It called $methodName with radius, '
@@ -1611,7 +1611,7 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Path pathArgument = arguments[0] as Path;
+    final pathArgument = arguments[0] as Path;
     if (includes != null) {
       for (final Offset offset in includes!) {
         if (!pathArgument.contains(offset)) {
@@ -1667,8 +1667,8 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
     if (arguments.length != 3) {
       throw FlutterError('It called $methodName with ${arguments.length} arguments; expected 3.');
     }
-    final Offset p1Argument = arguments[0] as Offset;
-    final Offset p2Argument = arguments[1] as Offset;
+    final p1Argument = arguments[0] as Offset;
+    final p2Argument = arguments[1] as Offset;
     if (p1 != null && p1Argument != p1) {
       throw FlutterError(
         'It called $methodName with p1 endpoint, $p1Argument, which was not '
@@ -1719,28 +1719,28 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Rect rectArgument = arguments[0] as Rect;
+    final rectArgument = arguments[0] as Rect;
     if (rect != null && rectArgument != rect) {
       throw FlutterError(
         'It called $methodName with a paint whose rect, $rectArgument, was not '
         'exactly the expected rect ($rect).',
       );
     }
-    final double startAngleArgument = arguments[1] as double;
+    final startAngleArgument = arguments[1] as double;
     if (startAngle != null && startAngleArgument != startAngle) {
       throw FlutterError(
         'It called $methodName with a start angle, $startAngleArgument, which '
         'was not exactly the expected start angle ($startAngle).',
       );
     }
-    final double sweepAngleArgument = arguments[2] as double;
+    final sweepAngleArgument = arguments[2] as double;
     if (sweepAngle != null && sweepAngleArgument != sweepAngle) {
       throw FlutterError(
         'It called $methodName with a sweep angle, $sweepAngleArgument, which '
         'was not exactly the expected sweep angle ($sweepAngle).',
       );
     }
-    final bool useCenterArgument = arguments[3] as bool;
+    final useCenterArgument = arguments[3] as bool;
     if (useCenter != null && useCenterArgument != useCenter) {
       throw FlutterError(
         'It called $methodName with a useCenter value, $useCenterArgument, '
@@ -1790,7 +1790,7 @@ class _ShadowPredicate extends _PaintPredicate {
     if (arguments.length != 4) {
       throw FlutterError('It called $methodName with ${arguments.length} arguments; expected 4.');
     }
-    final Path pathArgument = arguments[0] as Path;
+    final pathArgument = arguments[0] as Path;
     if (includes != null) {
       for (final Offset offset in includes!) {
         if (!pathArgument.contains(offset)) {
@@ -1811,21 +1811,21 @@ class _ShadowPredicate extends _PaintPredicate {
         }
       }
     }
-    final Color actualColor = arguments[1] as Color;
+    final actualColor = arguments[1] as Color;
     if (color != null && !_colorsMatch(actualColor, color)) {
       throw FlutterError(
         'It called $methodName with a color, $actualColor, which was not '
         'exactly the expected color ($color).',
       );
     }
-    final double actualElevation = arguments[2] as double;
+    final actualElevation = arguments[2] as double;
     if (elevation != null && actualElevation != elevation) {
       throw FlutterError(
         'It called $methodName with an elevation, $actualElevation, which was '
         'not exactly the expected value ($elevation).',
       );
     }
-    final bool actualTransparentOccluder = arguments[3] as bool;
+    final actualTransparentOccluder = arguments[3] as bool;
     if (transparentOccluder != null && actualTransparentOccluder != transparentOccluder) {
       throw FlutterError(
         'It called $methodName with a transparentOccluder value, '
@@ -1864,7 +1864,7 @@ class _ShadowPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
+    final description = <String>[];
     debugFillDescription(description);
     String result = methodName;
     if (description.isNotEmpty) {
@@ -1892,16 +1892,16 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final ui.Image imageArgument = arguments[0] as ui.Image;
+    final imageArgument = arguments[0] as ui.Image;
     if (image != null && !image!.isCloneOf(imageArgument)) {
       throw FlutterError(
         'It called $methodName with an image, $imageArgument, which was not '
         'exactly the expected image ($image).',
       );
     }
-    final Offset pointArgument = arguments[0] as Offset;
+    final pointArgument = arguments[0] as Offset;
     if (x != null && y != null) {
-      final Offset point = Offset(x!, y!);
+      final point = Offset(x!, y!);
       if (point != pointArgument) {
         throw FlutterError(
           'It called $methodName with an offset coordinate, $pointArgument, '
@@ -1963,21 +1963,21 @@ class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final ui.Image imageArgument = arguments[0] as ui.Image;
+    final imageArgument = arguments[0] as ui.Image;
     if (image != null && !image!.isCloneOf(imageArgument)) {
       throw FlutterError(
         'It called $methodName with an image, $imageArgument, which was not '
         'exactly the expected image ($image).',
       );
     }
-    final Rect sourceArgument = arguments[1] as Rect;
+    final sourceArgument = arguments[1] as Rect;
     if (source != null && sourceArgument != source) {
       throw FlutterError(
         'It called $methodName with a source rectangle, $sourceArgument, which '
         'was not exactly the expected rectangle ($source).',
       );
     }
-    final Rect destinationArgument = arguments[2] as Rect;
+    final destinationArgument = arguments[2] as Rect;
     if (destination != null && destinationArgument != destination) {
       throw FlutterError(
         'It called $methodName with a destination rectangle, '
@@ -2010,7 +2010,7 @@ class _SomethingPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<RecordedInvocation> call) {
     RecordedInvocation currentCall;
-    bool testedAllCalls = false;
+    var testedAllCalls = false;
     do {
       if (testedAllCalls) {
         throw FlutterError(
@@ -2106,7 +2106,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
         'expected ${arguments.length}.',
       );
     }
-    for (int index = 0; index < arguments.length; index += 1) {
+    for (var index = 0; index < arguments.length; index += 1) {
       final dynamic actualArgument = call.current.invocation.positionalArguments[index];
       final dynamic desiredArgument = arguments[index];
 
@@ -2125,7 +2125,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    final List<String> adjectives = <String>[
+    final adjectives = <String>[
       for (int index = 0; index < arguments.length; index += 1)
         arguments[index] != null ? _valueName(arguments[index]) : '...',
     ];
@@ -2137,7 +2137,7 @@ class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<RecordedInvocation> call) {
     checkMethod(call, #save);
-    int depth = 1;
+    var depth = 1;
     while (depth > 0) {
       if (!call.moveNext()) {
         throw FlutterError(
@@ -2171,6 +2171,6 @@ String _valueName(Object? value) {
 String _symbolName(Symbol symbol) {
   // WARNING: Assumes a fixed format for Symbol.toString which is *not*
   // guaranteed anywhere.
-  final String s = '$symbol';
+  final s = '$symbol';
   return s.substring(8, s.length - 2);
 }

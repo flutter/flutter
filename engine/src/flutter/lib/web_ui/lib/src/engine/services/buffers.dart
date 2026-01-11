@@ -45,7 +45,7 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
   set length(int newLength) {
     if (newLength < _length) {
       final E defaultValue = _defaultValue;
-      for (int i = newLength; i < _length; i++) {
+      for (var i = newLength; i < _length; i++) {
         _buffer[i] = defaultValue;
       }
     } else if (newLength > _buffer.length) {
@@ -137,8 +137,8 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
     // Add elements at end, growing as appropriate, then put them back at
     // position [index] using flip-by-double-reverse.
     int writeIndex = _length;
-    int skipCount = start;
-    for (final E value in values) {
+    var skipCount = start;
+    for (final value in values) {
       if (skipCount > 0) {
         skipCount--;
         continue;
@@ -196,8 +196,8 @@ abstract class _TypedDataBuffer<E> extends ListBase<E> {
     }
 
     // Otherwise, just add values one at a time.
-    int i = 0;
-    for (final E value in values) {
+    var i = 0;
+    for (final value in values) {
       if (i >= start) {
         add(value);
       }

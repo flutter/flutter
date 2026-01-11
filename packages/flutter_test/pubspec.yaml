@@ -1,7 +1,7 @@
 name: flutter_test
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 
@@ -18,7 +18,7 @@ dependencies:
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
   test_api: 0.7.8
-  matcher: 0.12.17
+  matcher: 0.12.18
 
   # Used by golden file comparator
   path: 1.9.1
@@ -47,4 +47,4 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
-# PUBSPEC CHECKSUM: i5q1aa
+# PUBSPEC CHECKSUM: pbetap

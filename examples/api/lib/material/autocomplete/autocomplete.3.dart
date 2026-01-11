@@ -21,7 +21,9 @@ class AutocompleteExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Autocomplete - async and debouncing')),
+        appBar: AppBar(
+          title: const Text('Autocomplete - async and debouncing'),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -82,7 +84,9 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   Widget build(BuildContext context) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
-        final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
+        final Iterable<String>? options = await _debouncedSearch(
+          textEditingValue.text,
+        );
         if (options == null) {
           return _lastOptions;
         }
@@ -98,7 +102,11 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 
 // Mimics a remote API.
 class _FakeAPI {
-  static const List<String> _kOptions = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _kOptions = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query) async {

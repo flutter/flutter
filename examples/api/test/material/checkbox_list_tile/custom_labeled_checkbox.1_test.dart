@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/material/checkbox_list_tile/custom_labeled_c
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tapping LabeledCheckbox toggles the checkbox', (WidgetTester tester) async {
+  testWidgets('Tapping LabeledCheckbox toggles the checkbox', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.LabeledCheckboxApp());
 
     // Checkbox is initially unchecked.

@@ -33,7 +33,7 @@ void printOnScreen(Object object) {
     _initialize();
   }
 
-  final String message = '$object';
+  final message = '$object';
   if (_logBuffer.isNotEmpty && _logBuffer.last.message == message) {
     _logBuffer.last.duplicateCount += 1;
   } else {
@@ -104,14 +104,12 @@ void debugPrintStack({String? label, int? maxFrames}) {
 /// format but the frame numbers will not be consecutive (frames are elided)
 /// and the final line may be prose rather than a stack frame.
 Iterable<String> defaultStackFilter(Iterable<String> frames) {
-  const List<String> filteredPackages = <String>['dart:async-patch', 'dart:async', 'dart:_runtime'];
-  final RegExp stackParser = RegExp(
-    r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$',
-  );
-  final RegExp packageParser = RegExp(r'^([^:]+):(.+)$');
-  final List<String> result = <String>[];
-  final List<String> skipped = <String>[];
-  for (final String line in frames) {
+  const filteredPackages = <String>['dart:async-patch', 'dart:async', 'dart:_runtime'];
+  final stackParser = RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
+  final packageParser = RegExp(r'^([^:]+):(.+)$');
+  final result = <String>[];
+  final skipped = <String>[];
+  for (final line in frames) {
     final Match? match = stackParser.firstMatch(line);
     if (match != null) {
       assert(match.groupCount == 2);

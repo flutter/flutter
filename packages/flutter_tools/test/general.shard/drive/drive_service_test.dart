@@ -466,10 +466,10 @@ class FakeDevice extends Fake implements Device {
   FakeDevice(this.result, {this.supportsFlutterExit = true});
 
   LaunchResult result;
-  var didStopApp = false;
-  var didUninstallApp = false;
-  var didDispose = false;
-  var failOnce = false;
+  bool didStopApp = false;
+  bool didUninstallApp = false;
+  bool didDispose = false;
+  bool failOnce = false;
   @override
   final PlatformType platformType = PlatformType.web;
 
@@ -530,8 +530,8 @@ class FakeDevice extends Fake implements Device {
 class FakeDartDevelopmentService extends Fake
     with DartDevelopmentServiceLocalOperationsMixin
     implements DartDevelopmentService {
-  var started = false;
-  var disposed = false;
+  bool started = false;
+  bool disposed = false;
 
   @override
   final Uri uri = Uri.parse('http://127.0.0.1:1234/');

@@ -382,7 +382,7 @@ class WebServerDevice extends WebDevice {
   WebServerDevice({required super.logger}) : _logger = logger, super('web-server');
 
   static const kWebServerDeviceId = 'web-server';
-  static var showWebServerDevice = false;
+  static bool showWebServerDevice = false;
 
   final Logger _logger;
 

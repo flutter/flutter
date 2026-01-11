@@ -44,13 +44,13 @@ void main() {
   });
 
   test('Image painting events - deduplicates across frames', () async {
-    final Completer<Event> completer = Completer<Event>();
+    final completer = Completer<Event>();
     vmService.onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
@@ -81,13 +81,13 @@ void main() {
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
 
   test('Image painting events - deduplicates across frames', () async {
-    final Completer<Event> completer = Completer<Event>();
+    final completer = Completer<Event>();
     vmService.onExtensionEvent
         .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
-    final TestCanvas canvas = TestCanvas();
+    final canvas = TestCanvas();
     paintImage(
       canvas: canvas,
       rect: const Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),

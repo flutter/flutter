@@ -15,7 +15,7 @@ TimelineEvent newGPUTraceEvent(double ms) => TimelineEvent(<String, dynamic>{
 
 void main() {
   test('Can process GPU frame times.', () {
-    final GpuSumarizer summarizer = GpuSumarizer(<TimelineEvent>[
+    final summarizer = GpuSumarizer(<TimelineEvent>[
       newGPUTraceEvent(4.233),
       newGPUTraceEvent(7.22),
       newGPUTraceEvent(9.1),

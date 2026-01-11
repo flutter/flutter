@@ -32,7 +32,7 @@ String getArtifactPath() {
 String? _findMatchId(List<String> idList, String idPattern) {
   String? candidate;
   idPattern = idPattern.toLowerCase();
-  for (final String id in idList) {
+  for (final id in idList) {
     if (id.toLowerCase() == idPattern) {
       return id;
     }
@@ -267,7 +267,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     }
 
     if (cpu != null) {
-      for (final AndroidDevice device in allDevices) {
+      for (final device in allDevices) {
         if (await _matchesCPURequirement(device)) {
           _workingDevice = device;
           break;
@@ -309,8 +309,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<List<String>> discoverDevices() async {
     final List<String> output = (await eval(adbPath, <String>['devices', '-l'])).trim().split('\n');
-    final List<String> results = <String>[];
-    for (final String line in output) {
+    final results = <String>[];
+    for (final line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon ')) {
         continue;
@@ -339,10 +339,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
-        final AndroidDevice device = AndroidDevice(deviceId: deviceId);
+        final device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
@@ -571,8 +571,8 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
       's',
     ])).trim().split('\n');
 
-    final List<String> devices = <String>[];
-    for (final String line in output) {
+    final devices = <String>[];
+    for (final line in output) {
       final List<String> parts = line.split(' ');
       assert(parts.length == 2);
       devices.add(parts.last); // The device id.
@@ -582,7 +582,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       try {
         final int resolveResult = await exec(_ffx, <String>['target', 'list', '-f', 'a', deviceId]);
@@ -685,9 +685,7 @@ class AndroidDevice extends Device {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.
     // A Samsung phone returns `getWakefullnessLocked()=Awake`.
-    final RegExp wakefulnessRegexp = RegExp(
-      r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)',
-    );
+    final wakefulnessRegexp = RegExp(r'(?:mWakefulness|getWakefulnessLocked\(\))=\s*([a-zA-Z]+)');
     return wakefulnessRegexp.allMatches(powerInfo).single.group(1)!;
   }
 
@@ -822,11 +820,11 @@ class AndroidDevice extends Device {
 
   @override
   Stream<String> get logcat {
-    final Completer<void> stdoutDone = Completer<void>();
-    final Completer<void> stderrDone = Completer<void>();
-    final Completer<void> processDone = Completer<void>();
-    final Completer<void> abort = Completer<void>();
-    bool aborted = false;
+    final stdoutDone = Completer<void>();
+    final stderrDone = Completer<void>();
+    final processDone = Completer<void>();
+    final abort = Completer<void>();
+    var aborted = false;
     late final StreamController<String> stream;
     stream = StreamController<String>(
       onListen: () async {
@@ -920,7 +918,7 @@ class AndroidDevice extends Device {
     print('Waiting for device.');
     final String waitOut = await adb(<String>['wait-for-device']);
     print(waitOut);
-    const RetryOptions retryOptions = RetryOptions(
+    const retryOptions = RetryOptions(
       delayFactor: Duration(seconds: 1),
       maxAttempts: 10,
       maxDelay: Duration(minutes: 1),
@@ -995,7 +993,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final List<dynamic> results =
+    final results =
         json.decode(
               await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
                 'devices',
@@ -1026,10 +1024,10 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     //   }
     // ]
 
-    final List<String> deviceIds = <String>[];
+    final deviceIds = <String>[];
 
     for (final dynamic result in results) {
-      final Map<String, dynamic> device = result as Map<String, dynamic>;
+      final device = result as Map<String, dynamic>;
       if (device['targetPlatform'] == 'ios' &&
           device['id'] != null &&
           device['emulator'] != true &&
@@ -1046,7 +1044,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = HealthCheckResult.success();
@@ -1079,7 +1077,7 @@ class IosDevice extends Device {
   }
 
   String get dyldLibraryPath {
-    final List<String> dylibsPaths = <String>[
+    final dylibsPaths = <String>[
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libimobiledevice'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'openssl'),
       path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'libusbmuxd'),
@@ -1595,7 +1593,7 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final results = <String, HealthCheckResult>{};
     for (final String deviceId in await discoverDevices()) {
       results['fake-device-$deviceId'] = HealthCheckResult.success();
     }

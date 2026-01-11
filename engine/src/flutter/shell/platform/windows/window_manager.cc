@@ -17,6 +17,7 @@
 #include "shell/platform/windows/client_wrapper/include/flutter/flutter_view.h"
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/host_window.h"
+#include "shell/platform/windows/host_window_tooltip.h"
 
 namespace flutter {
 
@@ -55,6 +56,21 @@ FlutterViewId WindowManager::CreateDialogWindow(
   return view_id;
 }
 
+FlutterViewId WindowManager::CreateTooltipWindow(
+    const TooltipWindowCreationRequest* request) {
+  auto window = HostWindow::CreateTooltipWindow(
+      this, engine_, request->preferred_constraints,
+      request->is_sized_to_content, request->get_position_callback,
+      request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
 void WindowManager::OnEngineShutdown() {
   // Don't send any more messages to isolate.
   on_message_ = nullptr;
@@ -67,7 +83,7 @@ void WindowManager::OnEngineShutdown() {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
-    DestroyWindow(hwnd);
+    InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
 }
 
@@ -77,9 +93,13 @@ std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
                                                     LPARAM lparam) {
   if (message == WM_NCDESTROY) {
     active_windows_.erase(hwnd);
+    return std::nullopt;
   }
 
-  FlutterWindowsView* view = engine_->GetViewFromTopLevelWindow(hwnd);
+  HostWindow* host_window = HostWindow::GetThisFromHandle(hwnd);
+  FlutterWindowsView* view =
+      host_window ? host_window->view_controller_->view() : nullptr;
+
   if (!view) {
     FML_LOG(WARNING) << "Received message for unknown view";
     return std::nullopt;
@@ -134,6 +154,15 @@ FlutterViewId InternalFlutterWindows_WindowManager_CreateDialogWindow(
   return engine->window_manager()->CreateDialogWindow(request);
 }
 
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+    int64_t engine_id,
+    const flutter::TooltipWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreateTooltipWindow(request);
+}
+
 HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
     int64_t engine_id,
     FlutterViewId view_id) {
@@ -158,6 +187,26 @@ void InternalFlutterWindows_WindowManager_SetWindowSize(
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
   if (window) {
     window->SetContentSize(*size);
+  }
+}
+
+void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  HWND flutter_view_handle = nullptr;
+  if (window) {
+    // First reparent the FlutterView to null parent. Otherwise destroying
+    // the window HWND will immediately destroy the FlutterView HWND as well,
+    // which will cause crash when raster thread tries to reallocate surface.
+    // The FlutterView may only be destroyed safely when
+    // FlutterWindowsEngine::RemoveView finishes.
+    flutter_view_handle = window->GetFlutterViewWindowHandle();
+    ShowWindow(flutter_view_handle, SW_HIDE);
+    SetParent(flutter_view_handle, nullptr);
+  }
+  DestroyWindow(hwnd);
+  if (flutter_view_handle) {
+    // Now the flutter view HWND can be destroyed safely.
+    DestroyWindow(flutter_view_handle);
   }
 }
 
@@ -190,4 +239,12 @@ bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
   }
 
   return false;
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindowTooltip* tooltip_window =
+      reinterpret_cast<flutter::HostWindowTooltip*>(window);
+  tooltip_window->UpdatePosition();
 }

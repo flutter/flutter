@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/toggle_buttons/toggle_buttons.1.dart' as example;
+import 'package:flutter_api_samples/material/toggle_buttons/toggle_buttons.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ToggleButtons allows multiple or no selection', (WidgetTester tester) async {
+  testWidgets('ToggleButtons allows multiple or no selection', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData();
     Finder findButton(String text) {
       return find.descendant(
@@ -24,11 +27,11 @@ void main() {
     // Initially, only M is selected.
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      isSameColorAs(theme.colorScheme.primary.withValues(alpha: 0.1216)),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
 
     // Tap on XL.
@@ -41,11 +44,11 @@ void main() {
 
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      isSameColorAs(theme.colorScheme.primary.withValues(alpha: 0.1216)),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.primary.withOpacity(0.12),
+      isSameColorAs(theme.colorScheme.primary.withValues(alpha: 0.1216)),
     );
 
     // Tap M to deselect it.
@@ -62,15 +65,17 @@ void main() {
 
     expect(
       toggleMButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
     expect(
       toggleXLButton.style!.backgroundColor!.resolve(enabled),
-      theme.colorScheme.surface.withOpacity(0.0),
+      theme.colorScheme.surface.withValues(alpha: 0.0),
     );
   });
 
-  testWidgets('SegmentedButton allows multiple or no selection', (WidgetTester tester) async {
+  testWidgets('SegmentedButton allows multiple or no selection', (
+    WidgetTester tester,
+  ) async {
     final ThemeData theme = ThemeData();
     Finder findButton(String text) {
       return find.descendant(

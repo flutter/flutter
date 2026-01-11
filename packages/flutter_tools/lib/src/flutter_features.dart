@@ -66,6 +66,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isUISceneMigrationEnabled => isEnabled(uiSceneMigration);
+
+  @override
+  bool get isRiscv64SupportEnabled => isEnabled(riscv64);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {

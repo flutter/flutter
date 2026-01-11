@@ -46,7 +46,9 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
       child: GridView.builder(
         controller: _controller,
         itemCount: 120,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+        ),
         itemBuilder: (BuildContext context, int index) {
           return Center(child: Text('item $index'));
         },

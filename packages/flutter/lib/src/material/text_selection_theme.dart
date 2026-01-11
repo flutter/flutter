@@ -17,14 +17,15 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the visual properties needed for text selection in [TextField] and
+/// Defines the text selection visual properties for descendant [TextField] and
 /// [SelectableText] widgets.
 ///
-/// Used by [TextSelectionTheme] to control the visual properties of text
-/// selection in a widget subtree.
+/// Descendant widgets obtain the current [TextSelectionThemeData] object using
+/// [TextSelectionTheme.of]. Instances of [TextSelectionThemeData] can be customized
+/// with [TextSelectionThemeData.copyWith].
 ///
-/// Use [TextSelectionTheme.of] to access the closest ancestor
-/// [TextSelectionTheme] of the current [BuildContext].
+/// Typically a [TextSelectionThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.textSelectionTheme].
 ///
 /// See also:
 ///

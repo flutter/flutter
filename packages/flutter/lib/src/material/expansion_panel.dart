@@ -41,8 +41,8 @@ class _SaltedKey<S, V> extends LocalKey {
 
   @override
   String toString() {
-    final String saltString = S == String ? "<'$salt'>" : '<$salt>';
-    final String valueString = V == String ? "<'$value'>" : '<$value>';
+    final saltString = S == String ? "<'$salt'>" : '<$salt>';
+    final valueString = V == String ? "<'$value'>" : '<$value>';
     return '[$saltString $valueString]';
   }
 }
@@ -324,7 +324,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   bool _allIdentifiersUnique() {
-    final Map<Object, bool> identifierMap = <Object, bool>{};
+    final identifierMap = <Object, bool>{};
     for (final ExpansionPanelRadio child in widget.children.cast<ExpansionPanelRadio>()) {
       identifierMap[child.value] = true;
     }
@@ -333,7 +333,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _isChildExpanded(int index) {
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio radioWidget = widget.children[index] as ExpansionPanelRadio;
+      final radioWidget = widget.children[index] as ExpansionPanelRadio;
       return _currentOpenPanel?.value == radioWidget.value;
     }
     return widget.children[index].isExpanded;
@@ -341,12 +341,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   void _handlePressed(bool isExpanded, int index) {
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
+      final pressedChild = widget.children[index] as ExpansionPanelRadio;
 
       // If another ExpansionPanelRadio was already open, apply its
       // expansionCallback (if any) to false, because it's closing.
-      for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
-        final ExpansionPanelRadio child = widget.children[childIndex] as ExpansionPanelRadio;
+      for (var childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
+        final child = widget.children[childIndex] as ExpansionPanelRadio;
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value) {
@@ -363,7 +363,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value) {
-    for (final ExpansionPanelRadio panel in panels) {
+    for (final panel in panels) {
       if (panel.value == value) {
         return panel;
       }
@@ -379,9 +379,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       ' possible elevation values.',
     );
 
-    final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
+    final items = <MergeableMaterialItem>[];
 
-    for (int index = 0; index < widget.children.length; index += 1) {
+    for (var index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
         items.add(
           MaterialGap(

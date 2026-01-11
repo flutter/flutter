@@ -42,7 +42,7 @@ List<TreeSliverNode<String>> treeNodes = _setUpNodes();
 
 void main() {
   testWidgets('asserts proper axis directions', (WidgetTester tester) async {
-    final List<Object?> exceptions = <Object?>[];
+    final exceptions = <Object?>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
@@ -116,7 +116,7 @@ void main() {
   testWidgets('Basic layout', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
     // Default layout, custom indentation values, row extents.
-    TreeSliver<String> treeSliver = TreeSliver<String>(tree: treeNodes);
+    var treeSliver = TreeSliver<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
@@ -244,7 +244,7 @@ void main() {
 
   testWidgets('Animating node segment', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    TreeSliver<String> treeSliver = TreeSliver<String>(tree: treeNodes);
+    var treeSliver = TreeSliver<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
@@ -453,7 +453,7 @@ void main() {
 
   testWidgets('Multiple animating node segments', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    final TreeSliver<String> treeSliver = TreeSliver<String>(tree: treeNodes);
+    final treeSliver = TreeSliver<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(home: CustomScrollView(slivers: <Widget>[treeSliver])));
     await tester.pump();
     expect(
@@ -595,13 +595,10 @@ void main() {
 
   testWidgets('only paints visible rows', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    final ScrollController scrollController = ScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     treeNodes = _setUpNodes();
-    final TreeSliver<String> treeSliver = TreeSliver<String>(
-      treeRowExtentBuilder: (_, _) => 200,
-      tree: treeNodes,
-    );
+    final treeSliver = TreeSliver<String>(treeRowExtentBuilder: (_, _) => 200, tree: treeNodes);
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(controller: scrollController, slivers: <Widget>[treeSliver]),

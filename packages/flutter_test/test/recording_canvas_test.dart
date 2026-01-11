@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('paints.drawRRect is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
-    const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -93,7 +93,7 @@ void main() {
 
   testWidgets('paints.drawDRRect is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
-    const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -103,8 +103,8 @@ void main() {
               key: customPaintKey,
               painter: _MutantPainter(
                 painter: (Canvas canvas, Paint paint) {
-                  final RRect rRect = RRect.fromRectXY(rect, 4.0, 4.0);
-                  final RRect innerRRect = RRect.fromRectXY(
+                  final rRect = RRect.fromRectXY(rect, 4.0, 4.0);
+                  final innerRRect = RRect.fromRectXY(
                     const Rect.fromLTRB(10.0, 10.0, 80.0, 80.0),
                     4.0,
                     4.0,
@@ -187,7 +187,7 @@ void main() {
               key: customPaintKey,
               painter: _MutantPainter(
                 painter: (Canvas canvas, Paint paint) {
-                  const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+                  const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
                   canvas.drawArc(rect, 10.0, 10.0, true, paint);
                 },
               ),
@@ -276,7 +276,7 @@ void main() {
               key: customPaintKey,
               painter: _MutantPainter(
                 painter: (Canvas canvas, Paint paint) {
-                  const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+                  const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
                   canvas.drawOval(rect, paint);
                 },
               ),
@@ -331,7 +331,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
-    const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -360,7 +360,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
-    const Rect rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -591,7 +591,7 @@ class _MutantPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = startColor;
+    final paint = Paint()..color = startColor;
 
     painter(canvas, paint);
 

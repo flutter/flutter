@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -1666,7 +1667,7 @@ IOSDevice setUpIOSDevice({
 }
 
 class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
-  var disposed = false;
+  bool disposed = false;
 
   @override
   Future<void> dispose() async {
@@ -1682,7 +1683,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
   bool returnsNull;
   bool allowthrowOnMissingLocalNetworkPermissionsError;
 
-  var completer = Completer<void>();
+  Completer<void> completer = Completer<void>();
   @override
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
@@ -1725,7 +1726,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   final Completer<void>? completer;
 
   @override
-  var debugStarted = false;
+  bool debugStarted = false;
 
   @override
   Future<XcodeDebugProject> createXcodeProjectWithCustomBundle(
@@ -1785,8 +1786,8 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
   FakeIOSCoreDeviceLauncher({this.lldbLaunchResult = true, this.xcodeLaunchResult = true});
   bool lldbLaunchResult;
   bool xcodeLaunchResult;
-  var launchedWithLLDB = false;
-  var launchedWithXcode = false;
+  bool launchedWithLLDB = false;
+  bool launchedWithXcode = false;
 
   Completer<void>? xcodeCompleter;
 
@@ -1802,6 +1803,7 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required ShutdownHooks shutdownHooks,
   }) async {
     launchedWithLLDB = true;
     return lldbLaunchResult;

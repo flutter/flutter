@@ -30,14 +30,14 @@ void main() {
       'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
       () async {
         // Assemble a TextInputConnection so we can verify its change in state.
-        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        final client = FakeDeltaTextInputClient(TextEditingValue.empty);
+        const configuration = TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
         expect(client.configuration.enableDeltaModel, true);
 
         expect(client.latestMethodCall, isEmpty);
 
-        const String jsonDelta =
+        const jsonDelta =
             '{'
             '"oldText": "",'
             ' "deltaText": "let there be text",'
@@ -66,18 +66,16 @@ void main() {
     );
 
     test('Invalid TextRange fails loudly when being converted to JSON - NonTextUpdate', () async {
-      final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+      final record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(
-        const TextEditingValue(text: '1'),
-      );
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final client = FakeDeltaTextInputClient(const TextEditingValue(text: '1'));
+      const configuration = TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
-      const String jsonDelta =
+      const jsonDelta =
           '{'
           '"oldText": "1",'
           ' "deltaText": "",'
@@ -120,16 +118,16 @@ void main() {
     test(
       'Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd',
       () async {
-        final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+        final record = <FlutterErrorDetails>[];
         FlutterError.onError = (FlutterErrorDetails details) {
           record.add(details);
         };
 
-        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        final client = FakeDeltaTextInputClient(TextEditingValue.empty);
+        const configuration = TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
 
-        const String jsonDelta =
+        const jsonDelta =
             '{'
             '"oldText": "",'
             ' "deltaText": "hello",'
@@ -167,16 +165,16 @@ void main() {
     );
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty Selection', () async {
-      final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+      final record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+      final client = FakeDeltaTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration(enableDeltaModel: true);
       TextInput.attach(client, configuration);
 
-      const String jsonDelta =
+      const jsonDelta =
           '{'
           '"oldText": "",'
           ' "deltaText": "hello",'
@@ -219,18 +217,16 @@ void main() {
     test(
       'Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region',
       () async {
-        final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+        final record = <FlutterErrorDetails>[];
         FlutterError.onError = (FlutterErrorDetails details) {
           record.add(details);
         };
 
-        final FakeDeltaTextInputClient client = FakeDeltaTextInputClient(
-          const TextEditingValue(text: 'worl'),
-        );
-        const TextInputConfiguration configuration = TextInputConfiguration(enableDeltaModel: true);
+        final client = FakeDeltaTextInputClient(const TextEditingValue(text: 'worl'));
+        const configuration = TextInputConfiguration(enableDeltaModel: true);
         TextInput.attach(client, configuration);
 
-        const String jsonDelta =
+        const jsonDelta =
             '{'
             '"oldText": "worl",'
             ' "deltaText": "world",'

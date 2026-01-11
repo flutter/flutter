@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final LayerLink link = LayerLink();
+  final link = LayerLink();
 
   testWidgets('Change link during layout', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -49,7 +49,7 @@ void main() {
     }
 
     await tester.pumpWidget(build());
-    final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+    final box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
 
     await tester.pumpWidget(build(linkToUse: LayerLink()));
@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('LeaderLayer should not cause error', (WidgetTester tester) async {
-    final LayerLink link = LayerLink();
+    final link = LayerLink();
 
     Widget buildWidget({
       required double paddingLeft,
@@ -124,7 +124,7 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
       );
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
     });
 
@@ -132,7 +132,7 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
       );
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(118.0, 451.0));
     });
 
@@ -140,7 +140,7 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
       );
-      final RenderBox box = key.currentContext!.findRenderObject()! as RenderBox;
+      final box = key.currentContext!.findRenderObject()! as RenderBox;
       expect(box.localToGlobal(Offset.zero), const Offset(113.0, 466.0));
     });
   });
@@ -187,8 +187,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -198,8 +198,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(40, 5));
       final Offset position2 = box2.localToGlobal(const Offset(20, 10));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -209,8 +209,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(const Offset(80, 10));
       final Offset position2 = box2.localToGlobal(const Offset(40, 0));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -271,8 +271,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.topLeft, followerAlignment: Alignment.topLeft),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Offset.zero);
       final Offset position2 = box2.localToGlobal(Offset.zero);
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -282,8 +282,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.center, followerAlignment: Alignment.center),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(Alignment.center.alongSize(const Size(80, 10)));
       final Offset position2 = box2.localToGlobal(Alignment.center.alongSize(const Size(40, 20)));
       expect(position1, offsetMoreOrLessEquals(position2));
@@ -293,8 +293,8 @@ void main() {
       await tester.pumpWidget(
         build(targetAlignment: Alignment.bottomRight, followerAlignment: Alignment.topRight),
       );
-      final RenderBox box1 = key1.currentContext!.findRenderObject()! as RenderBox;
-      final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+      final box1 = key1.currentContext!.findRenderObject()! as RenderBox;
+      final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
       final Offset position1 = box1.localToGlobal(
         Alignment.bottomRight.alongSize(const Size(80, 10)),
       );
@@ -308,7 +308,7 @@ void main() {
     final GlobalKey key2 = GlobalKey();
     final GlobalKey key3 = GlobalKey();
 
-    bool tapped = false;
+    var tapped = false;
 
     Widget build({required Alignment targetAlignment, required Alignment followerAlignment}) {
       return Directionality(
@@ -339,7 +339,7 @@ void main() {
       );
     }
 
-    const List<Alignment> alignments = <Alignment>[
+    const alignments = <Alignment>[
       Alignment.topLeft,
       Alignment.topRight,
       Alignment.center,
@@ -351,13 +351,13 @@ void main() {
       tapped = false;
     });
 
-    for (final Alignment targetAlignment in alignments) {
-      for (final Alignment followerAlignment in alignments) {
+    for (final targetAlignment in alignments) {
+      for (final followerAlignment in alignments) {
         testWidgets('$targetAlignment - $followerAlignment', (WidgetTester tester) async {
           await tester.pumpWidget(
             build(targetAlignment: targetAlignment, followerAlignment: followerAlignment),
           );
-          final RenderBox box2 = key2.currentContext!.findRenderObject()! as RenderBox;
+          final box2 = key2.currentContext!.findRenderObject()! as RenderBox;
           expect(box2.size, const Size(2.0, 2.0));
           expect(tapped, isFalse);
           await tester.tap(
@@ -371,7 +371,7 @@ void main() {
   });
 
   testWidgets('Leader after Follower asserts', (WidgetTester tester) async {
-    final LayerLink link = LayerLink();
+    final link = LayerLink();
     await tester.pumpWidget(
       CompositedTransformFollower(
         link: link,
@@ -388,7 +388,7 @@ void main() {
   testWidgets(
     '`FollowerLayer` (`CompositedTransformFollower`) has null pointer error when using with some kinds of `Layer`s',
     (WidgetTester tester) async {
-      final LayerLink link = LayerLink();
+      final link = LayerLink();
       await tester.pumpWidget(
         CompositedTransformTarget(
           link: link,

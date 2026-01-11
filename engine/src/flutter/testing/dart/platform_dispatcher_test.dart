@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('ViewConstraints.tight', () {
-    final ViewConstraints tightConstraints = ViewConstraints.tight(const Size(200, 300));
+    final tightConstraints = ViewConstraints.tight(const Size(200, 300));
     expect(tightConstraints.minWidth, 200);
     expect(tightConstraints.maxWidth, 200);
     expect(tightConstraints.minHeight, 300);
@@ -22,7 +22,7 @@ void main() {
   });
 
   test('ViewConstraints unconstrained', () {
-    const ViewConstraints defaultValues = ViewConstraints();
+    const defaultValues = ViewConstraints();
     expect(defaultValues.minWidth, 0);
     expect(defaultValues.maxWidth, double.infinity);
     expect(defaultValues.minHeight, 0);
@@ -35,7 +35,7 @@ void main() {
   });
 
   test('ViewConstraints', () {
-    const ViewConstraints constraints = ViewConstraints(
+    const constraints = ViewConstraints(
       minWidth: 100,
       maxWidth: 200,
       minHeight: 300,
@@ -56,9 +56,9 @@ void main() {
   });
 
   test('scheduleWarmupFrame should call both callbacks and flush microtasks', () async {
-    bool microtaskFlushed = false;
-    bool beginFrameCalled = false;
-    final Completer<void> drawFrameCalled = Completer<void>();
+    var microtaskFlushed = false;
+    var beginFrameCalled = false;
+    final drawFrameCalled = Completer<void>();
     PlatformDispatcher.instance.scheduleWarmUpFrame(
       beginFrame: () {
         expect(microtaskFlushed, false);

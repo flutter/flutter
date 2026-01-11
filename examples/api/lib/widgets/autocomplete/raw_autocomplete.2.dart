@@ -35,7 +35,11 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
   String? _dropdownValue;
   String? _autocompleteSelection;
 
-  static const List<String> _options = <String>['aardvark', 'bobcat', 'chameleon'];
+  static const List<String> _options = <String>[
+    'aardvark',
+    'bobcat',
+    'chameleon',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +58,14 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _dropdownValue = newValue;
               });
             },
-            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((
-              String value,
-            ) {
-              return DropdownMenuItem<String>(value: value, child: Text(value));
-            }).toList(),
+            items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                })
+                .toList(),
             validator: (String? value) {
               if (value == null) {
                 return 'Must make a selection.';
@@ -68,7 +75,9 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
           ),
           TextFormField(
             controller: _textEditingController,
-            decoration: const InputDecoration(hintText: 'This is a regular TextFormField'),
+            decoration: const InputDecoration(
+              hintText: 'This is a regular TextFormField',
+            ),
             validator: (String? value) {
               if (value == null || value.isEmpty) {
                 return "Can't be empty.";
@@ -96,7 +105,9 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 ) {
                   return TextFormField(
                     controller: textEditingController,
-                    decoration: const InputDecoration(hintText: 'This is a RawAutocomplete!'),
+                    decoration: const InputDecoration(
+                      hintText: 'This is a RawAutocomplete!',
+                    ),
                     focusNode: focusNode,
                     onFieldSubmitted: (String value) {
                       onFieldSubmitted();
@@ -154,7 +165,9 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                       child: ListBody(
                         children: <Widget>[
                           Text('DropdownButtonFormField: "$_dropdownValue"'),
-                          Text('TextFormField: "${_textEditingController.text}"'),
+                          Text(
+                            'TextFormField: "${_textEditingController.text}"',
+                          ),
                           Text('RawAutocomplete: "$_autocompleteSelection"'),
                         ],
                       ),

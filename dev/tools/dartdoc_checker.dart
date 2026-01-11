@@ -56,7 +56,7 @@ void checkForUnresolvedDirectives(Directory dartDocDir) {
   print('Scanning for unresolved dartdoc directives...');
 
   final List<FileSystemEntity> toScan = dartDocDir.listSync();
-  int count = 0;
+  var count = 0;
 
   while (toScan.isNotEmpty) {
     final FileSystemEntity entity = toScan.removeLast();
@@ -96,7 +96,7 @@ int _scanFile(File file) {
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');
-    for (final String match in matches) {
+    for (final match in matches) {
       stderr.writeln('  $match');
     }
   }

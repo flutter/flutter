@@ -16,8 +16,8 @@ Future<void> testMain() async {
   setUpUnitTests(setUpTestViewDimensions: false);
 
   test('blanks are equal to each other', () {
-    final ui.TextStyle a = ui.TextStyle();
-    final ui.TextStyle b = ui.TextStyle();
+    final a = ui.TextStyle();
+    final b = ui.TextStyle();
     expect(a, b);
     expect(a.hashCode, b.hashCode);
   });
@@ -26,11 +26,11 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _TextStylePropertyPopulator populator = _populatorsA[property]!;
 
-      final _TestTextStyleBuilder aBuilder = _TestTextStyleBuilder();
+      final aBuilder = _TestTextStyleBuilder();
       populator(aBuilder);
       final ui.TextStyle a = aBuilder.build();
 
-      final _TestTextStyleBuilder bBuilder = _TestTextStyleBuilder();
+      final bBuilder = _TestTextStyleBuilder();
       populator(bBuilder);
       final ui.TextStyle b = bBuilder.build();
 
@@ -43,12 +43,12 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _TextStylePropertyPopulator populatorA = _populatorsA[property]!;
 
-      final _TestTextStyleBuilder aBuilder = _TestTextStyleBuilder();
+      final aBuilder = _TestTextStyleBuilder();
       populatorA(aBuilder);
       final ui.TextStyle a = aBuilder.build();
 
       final _TextStylePropertyPopulator populatorB = _populatorsB[property]!;
-      final _TestTextStyleBuilder bBuilder = _TestTextStyleBuilder();
+      final bBuilder = _TestTextStyleBuilder();
       populatorB(bBuilder);
       final ui.TextStyle b = bBuilder.build();
 
@@ -59,10 +59,10 @@ Future<void> testMain() async {
 
   // `color` and `foreground` cannot be used at the same time, so each test skips
   // one or the other to be able to test all variations.
-  for (final String skipProperty in const <String>['color', 'foreground']) {
+  for (final skipProperty in const <String>['color', 'foreground']) {
     test('all properties (except $skipProperty) altogether equal', () {
-      final _TestTextStyleBuilder aBuilder = _TestTextStyleBuilder();
-      final _TestTextStyleBuilder bBuilder = _TestTextStyleBuilder();
+      final aBuilder = _TestTextStyleBuilder();
+      final bBuilder = _TestTextStyleBuilder();
 
       for (final String property in _populatorsA.keys) {
         if (property == skipProperty) {
@@ -81,8 +81,8 @@ Future<void> testMain() async {
     });
 
     test('all properties (except $skipProperty) altogether not equal', () {
-      final _TestTextStyleBuilder aBuilder = _TestTextStyleBuilder();
-      final _TestTextStyleBuilder bBuilder = _TestTextStyleBuilder();
+      final aBuilder = _TestTextStyleBuilder();
+      final bBuilder = _TestTextStyleBuilder();
 
       for (final String property in _populatorsA.keys) {
         if (property == skipProperty) {
@@ -104,7 +104,7 @@ Future<void> testMain() async {
   }
 
   test('toString() with color', () {
-    final _TestTextStyleBuilder builder = _TestTextStyleBuilder();
+    final builder = _TestTextStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       if (property == 'foreground') {
@@ -145,7 +145,7 @@ Future<void> testMain() async {
   });
 
   test('toString() with foreground', () {
-    final _TestTextStyleBuilder builder = _TestTextStyleBuilder();
+    final builder = _TestTextStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       if (property == 'color') {

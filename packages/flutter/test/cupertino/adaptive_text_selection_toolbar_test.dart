@@ -12,7 +12,7 @@ import '../widgets/live_text_utils.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -34,7 +34,7 @@ void main() {
   testWidgets(
     'Builds the right toolbar on each platform, including web, and shows buttonItems',
     (WidgetTester tester) async {
-      const String buttonText = 'Click me';
+      const buttonText = 'Click me';
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -93,9 +93,9 @@ void main() {
     'Can build from EditableTextState',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final FocusNode focusNode = FocusNode();
+      final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
-      final TextEditingController controller = TextEditingController();
+      final controller = TextEditingController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -234,7 +234,7 @@ void main() {
   );
 
   testWidgets('Builds the correct button per-platform', (WidgetTester tester) async {
-    const String buttonText = 'Click me';
+    const buttonText = 'Click me';
 
     await tester.pumpWidget(
       CupertinoApp(

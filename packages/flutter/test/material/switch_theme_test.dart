@@ -14,12 +14,12 @@ void main() {
   });
 
   test('SwitchThemeData lerp special cases', () {
-    const SwitchThemeData data = SwitchThemeData();
+    const data = SwitchThemeData();
     expect(identical(SwitchThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('SwitchThemeData defaults', () {
-    const SwitchThemeData themeData = SwitchThemeData();
+    const themeData = SwitchThemeData();
     expect(themeData.thumbColor, null);
     expect(themeData.trackColor, null);
     expect(themeData.trackOutlineColor, null);
@@ -31,7 +31,7 @@ void main() {
     expect(themeData.thumbIcon, null);
     expect(themeData.padding, null);
 
-    const SwitchTheme theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
+    const theme = SwitchTheme(data: SwitchThemeData(), child: SizedBox());
     expect(theme.data.thumbColor, null);
     expect(theme.data.trackColor, null);
     expect(theme.data.trackOutlineColor, null);
@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData(
       thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
       trackColor: MaterialStatePropertyAll<Color>(Color(0xfffffff1)),
@@ -91,23 +91,23 @@ void main() {
   testWidgets('Material2 - Switch is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color defaultThumbColor = Color(0xfffffff0);
-    const Color selectedThumbColor = Color(0xfffffff1);
-    const Color defaultTrackColor = Color(0xfffffff2);
-    const Color selectedTrackColor = Color(0xfffffff3);
-    const Color defaultTrackOutlineColor = Color(0xfffffff4);
-    const Color selectedTrackOutlineColor = Color(0xfffffff5);
-    const double defaultTrackOutlineWidth = 3.0;
-    const double selectedTrackOutlineWidth = 6.0;
+    const defaultThumbColor = Color(0xfffffff0);
+    const selectedThumbColor = Color(0xfffffff1);
+    const defaultTrackColor = Color(0xfffffff2);
+    const selectedTrackColor = Color(0xfffffff3);
+    const defaultTrackOutlineColor = Color(0xfffffff4);
+    const selectedTrackOutlineColor = Color(0xfffffff5);
+    const defaultTrackOutlineWidth = 3.0;
+    const selectedTrackOutlineWidth = 6.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Color focusOverlayColor = Color(0xfffffff4);
-    const Color hoverOverlayColor = Color(0xfffffff5);
-    const double splashRadius = 1.0;
-    const Icon icon1 = Icon(Icons.check);
-    const Icon icon2 = Icon(Icons.close);
+    const focusOverlayColor = Color(0xfffffff4);
+    const hoverOverlayColor = Color(0xfffffff5);
+    const splashRadius = 1.0;
+    const icon1 = Icon(Icons.check);
+    const icon2 = Icon(Icons.close);
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -220,23 +220,23 @@ void main() {
   testWidgets('Material3 - Switch is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color defaultThumbColor = Color(0xfffffff0);
-    const Color selectedThumbColor = Color(0xfffffff1);
-    const Color defaultTrackColor = Color(0xfffffff2);
-    const Color selectedTrackColor = Color(0xfffffff3);
-    const Color defaultTrackOutlineColor = Color(0xfffffff4);
-    const Color selectedTrackOutlineColor = Color(0xfffffff5);
-    const double defaultTrackOutlineWidth = 3.0;
-    const double selectedTrackOutlineWidth = 6.0;
+    const defaultThumbColor = Color(0xfffffff0);
+    const selectedThumbColor = Color(0xfffffff1);
+    const defaultTrackColor = Color(0xfffffff2);
+    const selectedTrackColor = Color(0xfffffff3);
+    const defaultTrackOutlineColor = Color(0xfffffff4);
+    const selectedTrackOutlineColor = Color(0xfffffff5);
+    const defaultTrackOutlineWidth = 3.0;
+    const selectedTrackOutlineWidth = 6.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Color focusOverlayColor = Color(0xfffffff4);
-    const Color hoverOverlayColor = Color(0xfffffff5);
-    const double splashRadius = 1.0;
-    const Icon icon1 = Icon(Icons.check);
-    const Icon icon2 = Icon(Icons.close);
+    const focusOverlayColor = Color(0xfffffff4);
+    const hoverOverlayColor = Color(0xfffffff5);
+    const splashRadius = 1.0;
+    const icon1 = Icon(Icons.check);
+    const icon2 = Icon(Icons.close);
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
@@ -346,35 +346,35 @@ void main() {
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color themeDefaultThumbColor = Color(0xfffffff0);
-    const Color themeSelectedThumbColor = Color(0xfffffff1);
-    const Color themeDefaultTrackColor = Color(0xfffffff2);
-    const Color themeSelectedTrackColor = Color(0xfffffff3);
-    const Color themeDefaultOutlineColor = Color(0xfffffff6);
-    const Color themeSelectedOutlineColor = Color(0xfffffff7);
-    const double themeDefaultOutlineWidth = 5.0;
-    const double themeSelectedOutlineWidth = 7.0;
+    const themeDefaultThumbColor = Color(0xfffffff0);
+    const themeSelectedThumbColor = Color(0xfffffff1);
+    const themeDefaultTrackColor = Color(0xfffffff2);
+    const themeSelectedTrackColor = Color(0xfffffff3);
+    const themeDefaultOutlineColor = Color(0xfffffff6);
+    const themeSelectedOutlineColor = Color(0xfffffff7);
+    const themeDefaultOutlineWidth = 5.0;
+    const themeSelectedOutlineWidth = 7.0;
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
-    const Color themeFocusOverlayColor = Color(0xfffffff4);
-    const Color themeHoverOverlayColor = Color(0xfffffff5);
-    const double themeSplashRadius = 1.0;
+    const themeFocusOverlayColor = Color(0xfffffff4);
+    const themeHoverOverlayColor = Color(0xfffffff5);
+    const themeSplashRadius = 1.0;
 
-    const Color defaultThumbColor = Color(0xffffff0f);
-    const Color selectedThumbColor = Color(0xffffff1f);
-    const Color defaultTrackColor = Color(0xffffff2f);
-    const Color selectedTrackColor = Color(0xffffff3f);
-    const Color defaultOutlineColor = Color(0xffffff6f);
-    const Color selectedOutlineColor = Color(0xffffff7f);
-    const double defaultOutlineWidth = 6.0;
-    const double selectedOutlineWidth = 8.0;
+    const defaultThumbColor = Color(0xffffff0f);
+    const selectedThumbColor = Color(0xffffff1f);
+    const defaultTrackColor = Color(0xffffff2f);
+    const selectedTrackColor = Color(0xffffff3f);
+    const defaultOutlineColor = Color(0xffffff6f);
+    const selectedOutlineColor = Color(0xffffff7f);
+    const defaultOutlineWidth = 6.0;
+    const selectedOutlineWidth = 8.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Color focusColor = Color(0xffffff4f);
-    const Color hoverColor = Color(0xffffff5f);
-    const double splashRadius = 2.0;
+    const focusColor = Color(0xffffff4f);
+    const hoverColor = Color(0xffffff5f);
+    const splashRadius = 2.0;
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -521,35 +521,35 @@ void main() {
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color themeDefaultThumbColor = Color(0xfffffff0);
-    const Color themeSelectedThumbColor = Color(0xfffffff1);
-    const Color themeDefaultTrackColor = Color(0xfffffff2);
-    const Color themeSelectedTrackColor = Color(0xfffffff3);
-    const Color themeDefaultOutlineColor = Color(0xfffffff6);
-    const Color themeSelectedOutlineColor = Color(0xfffffff7);
-    const double themeDefaultOutlineWidth = 5.0;
-    const double themeSelectedOutlineWidth = 7.0;
+    const themeDefaultThumbColor = Color(0xfffffff0);
+    const themeSelectedThumbColor = Color(0xfffffff1);
+    const themeDefaultTrackColor = Color(0xfffffff2);
+    const themeSelectedTrackColor = Color(0xfffffff3);
+    const themeDefaultOutlineColor = Color(0xfffffff6);
+    const themeSelectedOutlineColor = Color(0xfffffff7);
+    const themeDefaultOutlineWidth = 5.0;
+    const themeSelectedOutlineWidth = 7.0;
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
     const MaterialTapTargetSize themeMaterialTapTargetSize = MaterialTapTargetSize.padded;
-    const Color themeFocusOverlayColor = Color(0xfffffff4);
-    const Color themeHoverOverlayColor = Color(0xfffffff5);
-    const double themeSplashRadius = 1.0;
+    const themeFocusOverlayColor = Color(0xfffffff4);
+    const themeHoverOverlayColor = Color(0xfffffff5);
+    const themeSplashRadius = 1.0;
 
-    const Color defaultThumbColor = Color(0xffffff0f);
-    const Color selectedThumbColor = Color(0xffffff1f);
-    const Color defaultTrackColor = Color(0xffffff2f);
-    const Color selectedTrackColor = Color(0xffffff3f);
-    const Color defaultOutlineColor = Color(0xffffff6f);
-    const Color selectedOutlineColor = Color(0xffffff7f);
-    const double defaultOutlineWidth = 6.0;
-    const double selectedOutlineWidth = 8.0;
+    const defaultThumbColor = Color(0xffffff0f);
+    const selectedThumbColor = Color(0xffffff1f);
+    const defaultTrackColor = Color(0xffffff2f);
+    const selectedTrackColor = Color(0xffffff3f);
+    const defaultOutlineColor = Color(0xffffff6f);
+    const selectedOutlineColor = Color(0xffffff7f);
+    const defaultOutlineWidth = 6.0;
+    const selectedOutlineWidth = 8.0;
     const MouseCursor mouseCursor = SystemMouseCursors.text;
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-    const Color focusColor = Color(0xffffff4f);
-    const Color hoverColor = Color(0xffffff5f);
-    const double splashRadius = 2.0;
+    const focusColor = Color(0xffffff4f);
+    const hoverColor = Color(0xffffff5f);
+    const splashRadius = 2.0;
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
@@ -690,17 +690,17 @@ void main() {
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color themeDefaultThumbColor = Color(0xfffffff0);
-    const Color themeSelectedThumbColor = Color(0xfffffff1);
-    const Color themeDefaultTrackColor = Color(0xfffffff2);
-    const Color themeSelectedTrackColor = Color(0xfffffff3);
+    const themeDefaultThumbColor = Color(0xfffffff0);
+    const themeSelectedThumbColor = Color(0xfffffff1);
+    const themeDefaultTrackColor = Color(0xfffffff2);
+    const themeSelectedTrackColor = Color(0xfffffff3);
 
-    const Color defaultThumbColor = Color(0xffffff0f);
-    const Color selectedThumbColor = Color(0xffffff1f);
-    const Color defaultTrackColor = Color(0xffffff2f);
-    const Color selectedTrackColor = Color(0xffffff3f);
+    const defaultThumbColor = Color(0xffffff0f);
+    const selectedThumbColor = Color(0xffffff1f);
+    const defaultTrackColor = Color(0xffffff2f);
+    const selectedTrackColor = Color(0xffffff3f);
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -769,17 +769,17 @@ void main() {
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
-    const Color themeDefaultThumbColor = Color(0xfffffff0);
-    const Color themeSelectedThumbColor = Color(0xfffffff1);
-    const Color themeDefaultTrackColor = Color(0xfffffff2);
-    const Color themeSelectedTrackColor = Color(0xfffffff3);
+    const themeDefaultThumbColor = Color(0xfffffff0);
+    const themeSelectedThumbColor = Color(0xfffffff1);
+    const themeDefaultTrackColor = Color(0xfffffff2);
+    const themeSelectedTrackColor = Color(0xfffffff3);
 
-    const Color defaultThumbColor = Color(0xffffff0f);
-    const Color selectedThumbColor = Color(0xffffff1f);
-    const Color defaultTrackColor = Color(0xffffff2f);
-    const Color selectedTrackColor = Color(0xffffff3f);
+    const defaultThumbColor = Color(0xffffff0f);
+    const selectedThumbColor = Color(0xffffff1f);
+    const defaultTrackColor = Color(0xffffff2f);
+    const selectedTrackColor = Color(0xffffff3f);
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
@@ -839,8 +839,8 @@ void main() {
   testWidgets('Material2 - Switch theme overlay color resolves in active/pressed states', (
     WidgetTester tester,
   ) async {
-    const Color activePressedOverlayColor = Color(0xFF000001);
-    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const activePressedOverlayColor = Color(0xFF000001);
+    const inactivePressedOverlayColor = Color(0xFF000002);
 
     Color? getOverlayColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.pressed)) {
@@ -852,8 +852,8 @@ void main() {
       return null;
     }
 
-    const double splashRadius = 24.0;
-    final ThemeData themeData = ThemeData(
+    const splashRadius = 24.0;
+    final themeData = ThemeData(
       useMaterial3: false,
       switchTheme: SwitchThemeData(
         overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
@@ -898,8 +898,8 @@ void main() {
   testWidgets('Material3 - Switch theme overlay color resolves in active/pressed states', (
     WidgetTester tester,
   ) async {
-    const Color activePressedOverlayColor = Color(0xFF000001);
-    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const activePressedOverlayColor = Color(0xFF000001);
+    const inactivePressedOverlayColor = Color(0xFF000002);
 
     Color? getOverlayColor(Set<WidgetState> states) {
       if (states.contains(WidgetState.pressed)) {
@@ -911,8 +911,8 @@ void main() {
       return null;
     }
 
-    const double splashRadius = 24.0;
-    final ThemeData themeData = ThemeData(
+    const splashRadius = 24.0;
+    final themeData = ThemeData(
       switchTheme: SwitchThemeData(
         overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
         splashRadius: splashRadius,
@@ -957,16 +957,16 @@ void main() {
   testWidgets('Material2 - Local SwitchTheme can override global SwitchTheme', (
     WidgetTester tester,
   ) async {
-    const Color globalThemeThumbColor = Color(0xfffffff1);
-    const Color globalThemeTrackColor = Color(0xfffffff2);
-    const Color globalThemeOutlineColor = Color(0xfffffff3);
-    const double globalThemeOutlineWidth = 6.0;
-    const Color localThemeThumbColor = Color(0xffff0000);
-    const Color localThemeTrackColor = Color(0xffff0000);
-    const Color localThemeOutlineColor = Color(0xffff0000);
-    const double localThemeOutlineWidth = 4.0;
+    const globalThemeThumbColor = Color(0xfffffff1);
+    const globalThemeTrackColor = Color(0xfffffff2);
+    const globalThemeOutlineColor = Color(0xfffffff3);
+    const globalThemeOutlineWidth = 6.0;
+    const localThemeThumbColor = Color(0xffff0000);
+    const localThemeTrackColor = Color(0xffff0000);
+    const localThemeOutlineColor = Color(0xffff0000);
+    const localThemeOutlineWidth = 4.0;
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       useMaterial3: false,
       switchTheme: const SwitchThemeData(
         thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
@@ -1009,16 +1009,16 @@ void main() {
   testWidgets('Material3 - Local SwitchTheme can override global SwitchTheme', (
     WidgetTester tester,
   ) async {
-    const Color globalThemeThumbColor = Color(0xfffffff1);
-    const Color globalThemeTrackColor = Color(0xfffffff2);
-    const Color globalThemeOutlineColor = Color(0xfffffff3);
-    const double globalThemeOutlineWidth = 6.0;
-    const Color localThemeThumbColor = Color(0xffff0000);
-    const Color localThemeTrackColor = Color(0xffff0000);
-    const Color localThemeOutlineColor = Color(0xffff0000);
-    const double localThemeOutlineWidth = 4.0;
+    const globalThemeThumbColor = Color(0xfffffff1);
+    const globalThemeTrackColor = Color(0xfffffff2);
+    const globalThemeOutlineColor = Color(0xfffffff3);
+    const globalThemeOutlineWidth = 6.0;
+    const localThemeThumbColor = Color(0xffff0000);
+    const localThemeTrackColor = Color(0xffff0000);
+    const localThemeOutlineColor = Color(0xffff0000);
+    const localThemeOutlineWidth = 4.0;
 
-    final ThemeData themeData = ThemeData(
+    final themeData = ThemeData(
       switchTheme: const SwitchThemeData(
         thumbColor: MaterialStatePropertyAll<Color>(globalThemeThumbColor),
         trackColor: MaterialStatePropertyAll<Color>(globalThemeTrackColor),

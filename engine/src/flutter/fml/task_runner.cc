@@ -13,6 +13,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/message_loop_task_queues.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 
 namespace fml {
 

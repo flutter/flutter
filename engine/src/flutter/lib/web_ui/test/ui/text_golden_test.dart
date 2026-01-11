@@ -539,9 +539,9 @@ Future<void> testMain() async {
 
   test('font variations are correctly rendered', () async {
     const double testWidth = 300;
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    final builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(fontSize: 40.0, textDirection: ui.TextDirection.ltr),
     );
 
@@ -575,9 +575,9 @@ Future<void> testMain() async {
 
   test('font weight is applied to variable fonts', () async {
     const double testWidth = 400;
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    final builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
         fontFamily: 'RobotoVariable',
         fontSize: 40.0,
@@ -673,17 +673,17 @@ Future<void> testTextStyle(
   late ui.Rect region;
   ui.Picture renderPicture() {
     const double testWidth = 512;
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
     canvas.translate(30, 10);
-    final ui.ParagraphBuilder descriptionBuilder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    final descriptionBuilder = ui.ParagraphBuilder(ui.ParagraphStyle());
     descriptionBuilder.addText(name);
     final ui.Paragraph descriptionParagraph = descriptionBuilder.build();
     descriptionParagraph.layout(const ui.ParagraphConstraints(width: testWidth / 2 - 70));
-    const ui.Offset descriptionOffset = ui.Offset(testWidth / 2 + 30, 0);
+    const descriptionOffset = ui.Offset(testWidth / 2 + 30, 0);
     canvas.drawParagraph(descriptionParagraph, descriptionOffset);
 
-    final ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+    final pb = ui.ParagraphBuilder(
       ui.ParagraphStyle(
         textAlign: paragraphTextAlign,
         textDirection: paragraphTextDirection,
@@ -779,11 +779,9 @@ Future<void> testSampleText(
   const double testWidth = 300;
   double paragraphHeight = 0;
   ui.Picture renderPicture() {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
-      ui.ParagraphStyle(textDirection: textDirection),
-    );
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    final paragraphBuilder = ui.ParagraphBuilder(ui.ParagraphStyle(textDirection: textDirection));
     paragraphBuilder.addText(text);
     final ui.Paragraph paragraph = paragraphBuilder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: testWidth - 20));

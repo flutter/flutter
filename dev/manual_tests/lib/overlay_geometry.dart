@@ -26,7 +26,7 @@ class _MarkerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, _) {
-    final Paint paint = Paint()..color = const Color(0x8000FF00);
+    final paint = Paint()..color = const Color(0x8000FF00);
     final double r = size / 2.0;
     canvas.drawCircle(Offset(r, r), r, paint);
 
@@ -138,7 +138,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   @override
   void initState() {
     super.initState();
-    final List<double> cardHeights = <double>[
+    final cardHeights = <double>[
       48.0,
       63.0,
       82.0,
@@ -193,7 +193,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox? box = target.currentContext?.findRenderObject() as RenderBox?;
+      final box = target.currentContext?.findRenderObject() as RenderBox?;
       markers[MarkerType.topLeft] = box!.localToGlobal(Offset.zero);
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));

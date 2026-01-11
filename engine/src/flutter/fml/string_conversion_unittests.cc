@@ -33,5 +33,10 @@ TEST(StringConversion, Utf16ToUtf8Unicode) {
   EXPECT_EQ(Utf16ToUtf8(u"\x2603"), "\xe2\x98\x83");
 }
 
+TEST(StringConversion, PathToUtf8) {
+  EXPECT_EQ(PathToUtf8(std::filesystem::path("abc")), "abc");
+  EXPECT_EQ(PathToUtf8(std::filesystem::path(u"\x2603")), "\xe2\x98\x83");
+}
+
 }  // namespace testing
 }  // namespace fml

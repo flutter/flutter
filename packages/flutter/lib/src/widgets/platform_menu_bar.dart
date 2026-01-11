@@ -23,6 +23,7 @@ const String _kMenuItemClosedMethod = 'Menu.closed';
 // Keys for channel communication map.
 const String _kIdKey = 'id';
 const String _kLabelKey = 'label';
+const String _kTooltipKey = 'tooltip';
 const String _kEnabledKey = 'enabled';
 const String _kChildrenKey = 'children';
 const String _kIsDividerKey = 'isDivider';
@@ -308,15 +309,15 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   @override
   void setMenus(List<PlatformMenuItem> topLevelMenus) {
     _idMap.clear();
-    final List<Map<String, Object?>> representation = <Map<String, Object?>>[];
+    final representation = <Map<String, Object?>>[];
     if (topLevelMenus.isNotEmpty) {
-      for (final PlatformMenuItem childItem in topLevelMenus) {
+      for (final childItem in topLevelMenus) {
         representation.addAll(childItem.toChannelRepresentation(this, getId: _getId));
       }
     }
     // Currently there's only ever one window, but the channel's format allows
     // more than one window's menu hierarchy to be defined.
-    final Map<String, Object?> windowMenu = <String, Object?>{'0': representation};
+    final windowMenu = <String, Object?>{'0': representation};
     channel.invokeMethod<void>(_kMenuSetMethod, windowMenu);
   }
 
@@ -367,7 +368,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   // Handles the method calls from the plugin to forward to selection and
   // open/close callbacks.
   Future<void> _methodCallHandler(MethodCall call) async {
-    final int id = call.arguments as int;
+    final id = call.arguments as int;
     assert(
       _idMap.containsKey(id),
       'Received a menu ${call.method} for a menu item with an ID that was not recognized: $id',
@@ -499,7 +500,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   @override
   void didUpdateWidget(PlatformMenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final List<PlatformMenuItem> newDescendants = <PlatformMenuItem>[
+    final newDescendants = <PlatformMenuItem>[
       for (final PlatformMenuItem item in widget.menus) ...<PlatformMenuItem>[
         item,
         ...item.descendants,
@@ -535,7 +536,13 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
   /// Creates a const [PlatformMenu].
   ///
   /// The [label] and [menus] fields are required.
-  const PlatformMenu({required super.label, this.onOpen, this.onClose, required this.menus});
+  const PlatformMenu({
+    required super.label,
+    super.tooltip,
+    this.onOpen,
+    this.onClose,
+    required this.menus,
+  });
 
   @override
   final VoidCallback? onOpen;
@@ -583,7 +590,7 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
     PlatformMenuDelegate delegate,
     MenuItemSerializableIdGenerator getId,
   ) {
-    final List<Map<String, Object?>> result = <Map<String, Object?>>[];
+    final result = <Map<String, Object?>>[];
     for (final PlatformMenuItem childItem in item.menus) {
       result.addAll(childItem.toChannelRepresentation(delegate, getId: getId));
     }
@@ -612,6 +619,7 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
+      if (item.tooltip != null) _kTooltipKey: item.tooltip,
       _kEnabledKey: item.menus.isNotEmpty,
       _kChildrenKey: result,
     };
@@ -699,6 +707,7 @@ class PlatformMenuItem with Diagnosticable {
   /// The [label] attribute is required.
   const PlatformMenuItem({
     required this.label,
+    this.tooltip,
     this.shortcut,
     this.onSelected,
     this.onSelectedIntent,
@@ -709,6 +718,13 @@ class PlatformMenuItem with Diagnosticable {
 
   /// The required label used for rendering the menu item.
   final String label;
+
+  /// The optional tooltip text.
+  ///
+  /// This text is displayed when the user hovers over the menu item.
+  ///
+  /// If null, no tooltip will be displayed.
+  final String? tooltip;
 
   /// The optional shortcut that selects this [PlatformMenuItem].
   ///
@@ -787,6 +803,7 @@ class PlatformMenuItem with Diagnosticable {
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
+      if (item.tooltip != null) _kTooltipKey: item.tooltip,
       _kEnabledKey: item.onSelected != null || item.onSelectedIntent != null,
       ...?shortcut?.serializeForMenu().toChannelRepresentation(),
     };
@@ -799,6 +816,7 @@ class PlatformMenuItem with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(
       DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null),
     );

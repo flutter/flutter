@@ -27,18 +27,18 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 ///
 /// Gives up after `timeout` has elapsed.
 Future<vms.VmService> _waitAndConnect(Uri uri, {Duration timeout = _kConnectTimeout}) async {
-  int attempts = 0;
+  var attempts = 0;
   late WebSocket socket;
   while (true) {
     try {
       socket = await WebSocket.connect(uri.toString());
-      final StreamController<dynamic> controller = StreamController<dynamic>();
-      final Completer<void> streamClosedCompleter = Completer<void>();
+      final controller = StreamController<dynamic>();
+      final streamClosedCompleter = Completer<void>();
       socket.listen(
         (dynamic data) => controller.add(data),
         onDone: () => streamClosedCompleter.complete(),
       );
-      final vms.VmService service = vms.VmService(
+      final service = vms.VmService(
         controller.stream,
         socket.add,
         disposeHandler: () => socket.close(),
@@ -113,7 +113,7 @@ class DartVm {
   /// matching unintended isolates.
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final vms.VM vmRef = await _vmService.getVM();
-    final List<IsolateRef> result = <IsolateRef>[];
+    final result = <IsolateRef>[];
     for (final vms.IsolateRef isolateRef in vmRef.isolates!) {
       if (pattern.matchAsPrefix(isolateRef.name!) != null) {
         _log.fine('Found Isolate matching "$pattern": "${isolateRef.name}"');
@@ -130,7 +130,7 @@ class DartVm {
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
   Future<List<FlutterView>> getAllFlutterViews() async {
-    final List<FlutterView> views = <FlutterView>[];
+    final views = <FlutterView>[];
     final vms.Response rpcResponse = await _vmService.callMethod('_flutter.listViews');
     for (final Map<String, dynamic> jsonView
         in (rpcResponse.json!['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
@@ -167,8 +167,8 @@ class FlutterView {
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? isolate = json['isolate'] as Map<String, dynamic>?;
-    final String? id = json['id'] as String?;
+    final isolate = json['isolate'] as Map<String, dynamic>?;
+    final id = json['id'] as String?;
     String? name;
     if (id == null) {
       throw RpcFormatError('Unable to find view name for the following JSON structure "$json"');
@@ -209,9 +209,9 @@ class IsolateRef {
   IsolateRef._(this.name, this.number, this.dartVm);
 
   factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
-    final String? number = json['number'] as String?;
-    final String? name = json['name'] as String?;
-    final String? type = json['type'] as String?;
+    final number = json['number'] as String?;
+    final name = json['name'] as String?;
+    final type = json['type'] as String?;
     if (type == null) {
       throw RpcFormatError('Unable to find type within JSON "$json"');
     }

@@ -8,17 +8,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('BoxDecoration.lerp identical a,b', () {
     expect(BoxDecoration.lerp(null, null, 0), null);
-    const BoxDecoration decoration = BoxDecoration();
+    const decoration = BoxDecoration();
     expect(identical(BoxDecoration.lerp(decoration, decoration, 0.5), decoration), true);
   });
 
   test('BoxDecoration with BorderRadiusDirectional', () {
-    const BoxDecoration decoration = BoxDecoration(
+    const decoration = BoxDecoration(
       color: Color(0xFF000000),
       borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(100.0)),
     );
     final BoxPainter painter = decoration.createBoxPainter();
-    const Size size = Size(1000.0, 1000.0);
+    const size = Size(1000.0, 1000.0);
     expect(
       (Canvas canvas) {
         painter.paint(
@@ -62,7 +62,7 @@ void main() {
   });
 
   test('BoxDecoration with LinearGradient using AlignmentDirectional', () {
-    const BoxDecoration decoration = BoxDecoration(
+    const decoration = BoxDecoration(
       color: Color(0xFF000000),
       gradient: LinearGradient(
         begin: AlignmentDirectional.centerStart,
@@ -71,7 +71,7 @@ void main() {
       ),
     );
     final BoxPainter painter = decoration.createBoxPainter();
-    const Size size = Size(1000.0, 1000.0);
+    const size = Size(1000.0, 1000.0);
     expect((Canvas canvas) {
       painter.paint(
         canvas,
@@ -83,8 +83,8 @@ void main() {
 
   test('BoxDecoration.getClipPath with borderRadius', () {
     const double radius = 10;
-    final BoxDecoration decoration = BoxDecoration(borderRadius: BorderRadius.circular(radius));
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final decoration = BoxDecoration(borderRadius: BorderRadius.circular(radius));
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
       includes: const <Offset>[Offset(30.0, 10.0), Offset(50.0, 10.0)],
@@ -94,8 +94,8 @@ void main() {
   });
 
   test('BoxDecoration.getClipPath with shape BoxShape.circle', () {
-    const BoxDecoration decoration = BoxDecoration(shape: BoxShape.circle);
-    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    const decoration = BoxDecoration(shape: BoxShape.circle);
+    const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
     final Matcher isLookLikeExpectedPath = isPathThat(
       includes: const <Offset>[Offset(50.0, 0.0), Offset(40.0, 10.0)],
@@ -106,14 +106,8 @@ void main() {
 
   test('BoxDecorations with different blendModes are not equal', () {
     // Regression test for https://github.com/flutter/flutter/issues/100754.
-    const BoxDecoration one = BoxDecoration(
-      color: Color(0x00000000),
-      backgroundBlendMode: BlendMode.color,
-    );
-    const BoxDecoration two = BoxDecoration(
-      color: Color(0x00000000),
-      backgroundBlendMode: BlendMode.difference,
-    );
+    const one = BoxDecoration(color: Color(0x00000000), backgroundBlendMode: BlendMode.color);
+    const two = BoxDecoration(color: Color(0x00000000), backgroundBlendMode: BlendMode.difference);
     expect(one == two, isFalse);
   });
 }

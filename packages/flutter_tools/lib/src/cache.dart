@@ -305,17 +305,17 @@ class Cache {
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
-  var includeAllPlatforms = false;
+  bool includeAllPlatforms = false;
 
   // Names of artifacts which should be cached even if they would normally
   // be filtered out for the current platform.
   Set<String>? platformOverrideArtifacts;
 
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
-  var useUnsignedMacBinaries = false;
+  bool useUnsignedMacBinaries = false;
 
   // Whether the warning printed when a custom artifact URL is used is fatal.
-  var fatalStorageWarning = true;
+  bool fatalStorageWarning = true;
 
   static RandomAccessFile? _lock;
   static var _lockEnabled = true;

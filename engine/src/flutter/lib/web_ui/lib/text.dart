@@ -228,8 +228,8 @@ enum TextBaseline { alphabetic, ideographic }
 class TextDecoration {
   const TextDecoration._(this._mask);
   factory TextDecoration.combine(List<TextDecoration> decorations) {
-    int mask = 0;
-    for (final TextDecoration decoration in decorations) {
+    var mask = 0;
+    for (final decoration in decorations) {
       mask |= decoration._mask;
     }
     return TextDecoration._(mask);
@@ -261,7 +261,7 @@ class TextDecoration {
     if (_mask == 0) {
       return 'TextDecoration.none';
     }
-    final List<String> values = <String>[];
+    final values = <String>[];
     if (_mask & underline._mask != 0) {
       values.add('underline');
     }

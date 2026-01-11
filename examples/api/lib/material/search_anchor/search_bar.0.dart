@@ -20,7 +20,9 @@ class _SearchBarAppState extends State<SearchBarApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = ThemeData(brightness: isDark ? Brightness.dark : Brightness.light);
+    final ThemeData themeData = ThemeData(
+      brightness: isDark ? Brightness.dark : Brightness.light,
+    );
 
     return MaterialApp(
       theme: themeData,
@@ -59,19 +61,20 @@ class _SearchBarAppState extends State<SearchBarApp> {
                 ],
               );
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
-                final String item = 'item $index';
-                return ListTile(
-                  title: Text(item),
-                  onTap: () {
-                    setState(() {
-                      controller.closeView(item);
-                    });
-                  },
-                );
-              });
-            },
+            suggestionsBuilder:
+                (BuildContext context, SearchController controller) {
+                  return List<ListTile>.generate(5, (int index) {
+                    final String item = 'item $index';
+                    return ListTile(
+                      title: Text(item),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(item);
+                        });
+                      },
+                    );
+                  });
+                },
           ),
         ),
       ),

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/widgets/magnifier/cupertino_text_magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/magnifier/cupertino_text_magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,7 +16,9 @@ void main() {
     final Finder cupertinoTextFieldWidget = find.byType(CupertinoTextField);
     await tester.longPress(cupertinoTextFieldWidget);
 
-    final Finder cupertinoTextMagnifierWidget = find.byType(CupertinoTextMagnifier);
+    final Finder cupertinoTextMagnifierWidget = find.byType(
+      CupertinoTextMagnifier,
+    );
     expect(cupertinoTextMagnifierWidget, findsOneWidget);
   });
 }

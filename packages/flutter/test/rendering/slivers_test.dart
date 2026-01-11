@@ -13,7 +13,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderViewport basic test - no children', () {
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
     );
@@ -55,7 +55,7 @@ void main() {
 
   test('RenderViewport basic test - down', () {
     RenderBox a, b, c, d, e;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -205,14 +205,14 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(e.localToGlobal(Offset.zero), const Offset(0.0, 700.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderViewport basic test - up', () {
     RenderBox a, b, c, d, e;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.up,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
@@ -259,7 +259,7 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(0.0, -100.0));
     expect(e.localToGlobal(Offset.zero), const Offset(0.0, -500.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
@@ -273,7 +273,7 @@ void main() {
 
   test('RenderViewport basic test - right', () {
     RenderBox a, b, c, d, e;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.right,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -290,11 +290,11 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    final RenderSliver sliverA = a.parent! as RenderSliver;
-    final RenderSliver sliverB = b.parent! as RenderSliver;
-    final RenderSliver sliverC = c.parent! as RenderSliver;
-    final RenderSliver sliverD = d.parent! as RenderSliver;
-    final RenderSliver sliverE = e.parent! as RenderSliver;
+    final sliverA = a.parent! as RenderSliver;
+    final sliverB = b.parent! as RenderSliver;
+    final sliverC = c.parent! as RenderSliver;
+    final sliverD = d.parent! as RenderSliver;
+    final sliverE = e.parent! as RenderSliver;
 
     expect(a.localToGlobal(Offset.zero), Offset.zero);
     expect(b.localToGlobal(Offset.zero), const Offset(400.0, 0.0));
@@ -350,14 +350,14 @@ void main() {
     expect(getPaintOrigin(sliverD), const Offset(300.0, 0.0));
     expect(getPaintOrigin(sliverE), const Offset(700.0, 0.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderViewport basic test - left', () {
     RenderBox a, b, c, d, e;
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.left,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -404,7 +404,7 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
     expect(e.localToGlobal(Offset.zero), const Offset(-300.0, 0.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -414,7 +414,7 @@ void main() {
   // TODO(ianh): test semantics
 
   test('RenderShrinkWrappingViewport basic test - no children', () {
-    final RenderShrinkWrappingViewport root = RenderShrinkWrappingViewport(
+    final root = RenderShrinkWrappingViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
     );
@@ -426,7 +426,7 @@ void main() {
 
   test('RenderShrinkWrappingViewport basic test - down', () {
     RenderBox a, b, c, d, e;
-    final RenderShrinkWrappingViewport root = RenderShrinkWrappingViewport(
+    final root = RenderShrinkWrappingViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -478,14 +478,14 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(0.0, 300.0));
     expect(e.localToGlobal(Offset.zero), const Offset(0.0, 700.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - up', () {
     RenderBox a, b, c, d, e;
-    final RenderShrinkWrappingViewport root = RenderShrinkWrappingViewport(
+    final root = RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.up,
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
@@ -532,14 +532,14 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(0.0, -100.0));
     expect(e.localToGlobal(Offset.zero), const Offset(0.0, -500.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - right', () {
     RenderBox a, b, c, d, e;
-    final RenderShrinkWrappingViewport root = RenderShrinkWrappingViewport(
+    final root = RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.right,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -586,14 +586,14 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(300.0, 0.0));
     expect(e.localToGlobal(Offset.zero), const Offset(700.0, 0.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - left', () {
     RenderBox a, b, c, d, e;
-    final RenderShrinkWrappingViewport root = RenderShrinkWrappingViewport(
+    final root = RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.left,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -640,7 +640,7 @@ void main() {
     expect(d.localToGlobal(Offset.zero), const Offset(100.0, 0.0));
     expect(e.localToGlobal(Offset.zero), const Offset(-300.0, 0.0));
 
-    final BoxHitTestResult result = BoxHitTestResult();
+    final result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -711,31 +711,31 @@ void main() {
   });
 
   test('Sliver paintBounds and semanticBounds - vertical', () {
-    const double height = 150.0;
+    const height = 150.0;
 
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(400.0, height)),
     );
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[sliver],
     );
     layout(root);
 
-    final Rect expectedRect = Rect.fromLTWH(0.0, 0.0, root.size.width, height);
+    final expectedRect = Rect.fromLTWH(0.0, 0.0, root.size.width, height);
 
     expect(sliver.paintBounds, expectedRect);
     expect(sliver.semanticBounds, expectedRect);
   });
 
   test('Sliver paintBounds and semanticBounds - horizontal', () {
-    const double width = 150.0;
+    const width = 150.0;
 
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(width, 400.0)),
     );
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       axisDirection: AxisDirection.right,
       crossAxisDirection: AxisDirection.down,
       offset: ViewportOffset.zero(),
@@ -743,18 +743,18 @@ void main() {
     );
     layout(root);
 
-    final Rect expectedRect = Rect.fromLTWH(0.0, 0.0, width, root.size.height);
+    final expectedRect = Rect.fromLTWH(0.0, 0.0, width, root.size.height);
 
     expect(sliver.paintBounds, expectedRect);
     expect(sliver.semanticBounds, expectedRect);
   });
 
   test('precedingScrollExtent is 0.0 for first Sliver in list', () {
-    const double viewportWidth = 800.0;
+    const viewportWidth = 800.0;
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[sliver],
@@ -765,7 +765,7 @@ void main() {
   });
 
   test('precedingScrollExtent accumulates over multiple Slivers', () {
-    const double viewportWidth = 800.0;
+    const viewportWidth = 800.0;
     final RenderSliver sliver1 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
@@ -775,7 +775,7 @@ void main() {
     final RenderSliver sliver3 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       children: <RenderSliver>[sliver1, sliver2, sliver3],
@@ -787,7 +787,7 @@ void main() {
   });
 
   test('precedingScrollExtent is not impacted by scrollOffset', () {
-    const double viewportWidth = 800.0;
+    const viewportWidth = 800.0;
     final RenderSliver sliver1 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
@@ -797,7 +797,7 @@ void main() {
     final RenderSliver sliver3 = RenderSliverToBoxAdapter(
       child: RenderSizedBox(const Size(viewportWidth, 150.0)),
     );
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.fixed(100.0),
       children: <RenderSliver>[sliver1, sliver2, sliver3],
@@ -815,14 +815,14 @@ void main() {
       final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
-      final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
+      final transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
       final HitTestResult wrapped = MyHitTestResult()..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
       expect(entry1.transform, transform);
 
-      final SliverHitTestResult wrapping = SliverHitTestResult.wrap(wrapped);
+      final wrapping = SliverHitTestResult.wrap(wrapped);
       expect(wrapping.path, equals(<HitTestEntry>[entry1]));
       expect(wrapping.path, same(wrapped.path));
 
@@ -838,9 +838,9 @@ void main() {
     });
 
     test('addWithAxisOffset', () {
-      final SliverHitTestResult result = SliverHitTestResult();
-      final List<double> mainAxisPositions = <double>[];
-      final List<double> crossAxisPositions = <double>[];
+      final result = SliverHitTestResult();
+      final mainAxisPositions = <double>[];
+      final crossAxisPositions = <double>[];
       const Offset paintOffsetDummy = Offset.zero;
 
       bool isHit = result.addWithAxisOffset(
@@ -914,11 +914,11 @@ void main() {
     });
 
     test('addWithAxisOffset with non zero paintOffset', () {
-      final SliverHitTestResult result = SliverHitTestResult();
+      final result = SliverHitTestResult();
       late double recordedMainAxisPosition;
       late double recordedCrossAxisPosition;
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
-      const Offset paintOffset = Offset(7, 11);
+      const paintOffset = Offset(7, 11);
 
       final bool isHit = result.addWithAxisOffset(
         paintOffset: paintOffset,
@@ -946,7 +946,7 @@ void main() {
   });
 
   test('SliverConstraints check for NaN on all double properties', () {
-    const SliverConstraints constraints = SliverConstraints(
+    const constraints = SliverConstraints(
       axisDirection: AxisDirection.down,
       cacheOrigin: double.nan,
       crossAxisDirection: AxisDirection.left,
@@ -960,7 +960,7 @@ void main() {
       userScrollDirection: ScrollDirection.idle,
       viewportMainAxisExtent: double.nan,
     );
-    bool threw = false;
+    var threw = false;
     try {
       constraints.debugAssertIsValid();
     } on FlutterError catch (error) {
@@ -986,7 +986,7 @@ void main() {
   });
 
   test('SliverConstraints check for sign on relevant double properties', () {
-    const SliverConstraints constraints = SliverConstraints(
+    const constraints = SliverConstraints(
       axisDirection: AxisDirection.down,
       cacheOrigin: 1.0,
       crossAxisDirection: AxisDirection.left,
@@ -1000,7 +1000,7 @@ void main() {
       userScrollDirection: ScrollDirection.idle,
       viewportMainAxisExtent: 0.0,
     );
-    bool threw = false;
+    var threw = false;
     try {
       constraints.debugAssertIsValid();
     } on FlutterError catch (error) {
@@ -1023,7 +1023,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/150305
   test('SliverLayoutDimensions has correct hashCode', () {
-    const SliverLayoutDimensions dimensions = SliverLayoutDimensions(
+    const dimensions = SliverLayoutDimensions(
       scrollOffset: 1.0,
       precedingScrollExtent: 2.0,
       viewportMainAxisExtent: 3.0,

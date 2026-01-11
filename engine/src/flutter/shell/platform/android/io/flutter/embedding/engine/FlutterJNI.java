@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.image.FlutterImageDecoder;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
+import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -380,12 +381,17 @@ public class FlutterJNI {
 
   @Nullable private DeferredComponentManager deferredComponentManager;
 
+  @Nullable private SettingsChannel settingsChannel;
+
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new CopyOnWriteArraySet<>();
 
   @NonNull
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners =
       new CopyOnWriteArraySet<>();
+
+  @NonNull
+  private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
@@ -533,6 +539,26 @@ public class FlutterJNI {
     flutterUiDisplayListeners.remove(listener);
   }
 
+  /**
+   * Adds a {@link FlutterUiResizeListener}, which receives a callback when Flutter's engine
+   * notifies {@code FlutterJNI} that Flutter is has resized the surface based on the content size.
+   */
+  @UiThread
+  public void addResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link FlutterUiResizeListener} that was added with {@link
+   * #addResizingFlutterUiListener(FlutterUiResizeListener)}.
+   */
+  @UiThread
+  public void removeResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    ensureRunningOnMainThread();
+    flutterUiResizeListeners.remove(listener);
+  }
+
   public static native void nativeImageHeaderCallback(
       long imageGeneratorPointer, int width, int height);
 
@@ -672,9 +698,14 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState) {
+      int[] displayFeaturesState,
+      int minWidth,
+      int maxWidth,
+      int minHeight,
+      int maxHeight) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
+    Log.d(TAG, "Sending viewport metrics to the engine.");
     nativeSetViewportMetrics(
         nativeShellHolderId,
         devicePixelRatio,
@@ -695,7 +726,11 @@ public class FlutterJNI {
         physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        minWidth,
+        maxWidth,
+        minHeight,
+        maxHeight);
   }
 
   private native void nativeSetViewportMetrics(
@@ -718,7 +753,11 @@ public class FlutterJNI {
       int physicalTouchSlop,
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
-      int[] displayFeaturesState);
+      int[] displayFeaturesState,
+      int physicalWidthMin,
+      int physicalWidthMax,
+      int physicalHeightMin,
+      int physicalHeightMax);
 
   // ----- End Render Surface Support -----
 
@@ -791,6 +830,24 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.setLocale(locale);
+    }
+  }
+
+  /**
+   * Invoked by native to notify framework started or stopped compiling accessibility tree.
+   *
+   * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and clean
+   * up when false.
+   *
+   * @param enabled True if the framework is compiling the accessibility tree.
+   */
+  @UiThread
+  public void setSemanticsTreeEnabled(boolean enabled) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      if (!enabled) {
+        accessibilityDelegate.resetSemantics();
+      }
     }
   }
 
@@ -1258,6 +1315,14 @@ public class FlutterJNI {
     }
     platformViewsController.destroyOverlaySurfaces();
   }
+
+  // This will get called on the raster thread.
+  @SuppressWarnings("unused")
+  public void maybeResizeSurfaceView(int width, int height) {
+    for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
+      listener.resizeEngineView(width, height);
+    }
+  }
   // ----- End Engine Lifecycle Support ----
 
   // ----- New Platform Views ----------
@@ -1431,7 +1496,10 @@ public class FlutterJNI {
   // ----- End Localization Support ----
   @Nullable
   public float getScaledFontSize(float fontSize, int configurationId) {
-    final DisplayMetrics metrics = SettingsChannel.getPastDisplayMetrics(configurationId);
+    final DisplayMetrics metrics =
+        this.settingsChannel == null
+            ? null
+            : this.settingsChannel.getPastDisplayMetrics(configurationId);
     if (metrics == null) {
       Log.e(
           TAG,
@@ -1442,6 +1510,13 @@ public class FlutterJNI {
     }
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, fontSize, metrics)
         / metrics.density;
+  }
+
+  // ----- Start Settings Channel Support ----
+  @UiThread
+  public void setSettingsChannel(@Nullable SettingsChannel settingsChannel) {
+    ensureRunningOnMainThread();
+    this.settingsChannel = settingsChannel;
   }
 
   // ----- Start Deferred Components Support ----
@@ -1641,6 +1716,13 @@ public class FlutterJNI {
      * <p>Must be called on the main thread
      */
     void setLocale(@NonNull String locale);
+
+    /**
+     * Invoked by native to notify embedder to reset accessibility tree.
+     *
+     * <p>The embedding needs to be prepare to clean up previously stored caches.
+     */
+    void resetSemantics();
   }
 
   public interface AsyncWaitForVsyncDelegate {

@@ -236,7 +236,7 @@ class FakePathConstructors implements DisposablePathConstructors {
 void testMain() {
   test('LazyPath lifecycle', () {
     final constructors = FakePathConstructors();
-    final LazyPath path = LazyPath(constructors);
+    final path = LazyPath(constructors);
     expect(constructors.createdPaths, isEmpty);
 
     path.moveTo(0, 0);
@@ -265,15 +265,15 @@ void testMain() {
     path.getBounds();
 
     expect(constructors.createdPaths.length, 1);
-    final disposablePath = constructors.createdPaths.first;
+    final FakePath disposablePath = constructors.createdPaths.first;
 
     expect(disposablePath.isDisposed, false);
     expect(disposablePath.apiCallCount, 20);
 
-    final metrics = path.computeMetrics();
+    final LazyPathMetrics metrics = path.computeMetrics();
     expect(metrics.iterator.moveNext(), false);
     expect(disposablePath.computedMetrics.length, 1);
-    final disposableMetrics = disposablePath.computedMetrics.first;
+    final FakePathMetrics disposableMetrics = disposablePath.computedMetrics.first;
     expect(disposableMetrics.iterator.isDisposed, false);
 
     EnginePlatformDispatcher.instance.frameArena.collect();
@@ -286,7 +286,7 @@ void testMain() {
     path.getBounds();
 
     expect(constructors.createdPaths.length, 2);
-    final resurrectedPath = constructors.createdPaths.last;
+    final FakePath resurrectedPath = constructors.createdPaths.last;
 
     expect(resurrectedPath.isDisposed, false);
     expect(resurrectedPath.apiCallCount, 20);

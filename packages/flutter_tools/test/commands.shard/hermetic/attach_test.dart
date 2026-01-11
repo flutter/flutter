@@ -44,12 +44,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  var stdinHasTerminal = false;
+  bool stdinHasTerminal = false;
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  var maxRss = 0;
+  int maxRss = 0;
 }
 
 void main() {
@@ -1495,6 +1495,57 @@ void main() {
       },
     );
 
+    testUsingContext(
+      'does not try to attach to a new target when the original application disappears',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/156692.
+        final device = FakeAndroidDevice(id: '1')
+          ..portForwarder = const NoOpDevicePortForwarder()
+          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final hotRunner = FakeHotRunner();
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        var attachCount = 0;
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool enableDevTools,
+            ) async {
+              // Mimic listening to the `vmServiceUris` stream for the FlutterDevice we're
+              // trying to attach to. Without the fix for
+              // https://github.com/flutter/flutter/issues/156692, calling `HotRunner.attach`
+              // multiple times would result in this stream being listened to again, causing a
+              // `StateError` to be thrown.
+              await hotRunner.flutterDevices.first.vmServiceUris!.toList();
+              attachCount++;
+              return 0;
+            };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await createTestCommandRunner(command).run(<String>['attach', '--verbose']);
+
+        // Ensure `HotRunner.attach` was only called once.
+        expect(attachCount, 1);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
     group('prints warning when too slow', () {
       late SlowWarningCallbackBufferLogger logger;
 
@@ -1547,10 +1598,13 @@ class FakeHotRunner extends Fake implements HotRunner {
   late Future<int> Function(Completer<DebugConnectionInfo>?, Completer<void>?, bool) onAttach;
 
   @override
-  var exited = false;
+  List<FlutterDevice> flutterDevices = <FlutterDevice>[];
 
   @override
-  var isWaitingForVmService = true;
+  bool exited = false;
+
+  @override
+  bool isWaitingForVmService = true;
 
   @override
   Future<int> attach({
@@ -1563,10 +1617,10 @@ class FakeHotRunner extends Fake implements HotRunner {
   }
 
   @override
-  var supportsServiceProtocol = false;
+  bool supportsServiceProtocol = false;
 
   @override
-  var stayResident = true;
+  bool stayResident = true;
 
   @override
   void printHelp({required bool details, bool reloadIsRestart = false}) {}
@@ -1604,6 +1658,9 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     this.devices = devices;
     this.dillOutputPath = dillOutputPath;
     this.projectRootPath = projectRootPath;
+    hotRunner.flutterDevices
+      ..clear()
+      ..addAll(devices);
     return hotRunner;
   }
 }
@@ -1626,7 +1683,7 @@ class RecordingPortForwarder implements DevicePortForwarder {
   }
 
   @override
-  var forwardedPorts = <ForwardedPort>[];
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
@@ -2112,7 +2169,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager({required super.logger});
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {
@@ -2129,10 +2186,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   final bool stdinHasTerminal;
 
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;

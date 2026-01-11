@@ -14,7 +14,7 @@ import 'package:macrobenchmarks/src/animated_image.dart';
 /// passes a callback. This way, we can make sure to consistently wait for a
 /// set number of image frames to render.
 Future<void> main() async {
-  final Completer<void> waiter = Completer<void>();
+  final waiter = Completer<void>();
   enableFlutterDriverExtension(
     handler: (String? request) async {
       if (request != 'waitForAnimation') {

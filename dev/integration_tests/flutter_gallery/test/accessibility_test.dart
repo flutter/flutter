@@ -492,11 +492,11 @@ void main() {
   });
 
   group('All material demos meet text contrast guidelines', () {
-    final List<ThemeData> themes = <ThemeData>[kLightGalleryTheme, kDarkGalleryTheme];
+    final themes = <ThemeData>[kLightGalleryTheme, kDarkGalleryTheme];
 
-    const List<String> themeNames = <String>['kLightGalleryTheme', 'kDarkGalleryTheme'];
+    const themeNames = <String>['kLightGalleryTheme', 'kDarkGalleryTheme'];
 
-    for (int themeIndex = 0; themeIndex < themes.length; themeIndex += 1) {
+    for (var themeIndex = 0; themeIndex < themes.length; themeIndex += 1) {
       final ThemeData theme = themes[themeIndex];
       final String themeName = themeNames[themeIndex];
 

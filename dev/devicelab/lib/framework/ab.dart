@@ -50,7 +50,7 @@ class ABTest {
   final Map<String, List<double>> _bResults;
 
   static Map<String, List<double>> _convertFrom(dynamic results) {
-    final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
+    final resultMap = results as Map<String, dynamic>;
     return <String, List<double>>{
       for (final String key in resultMap.keys)
         key: (resultMap[key] as List<dynamic>).cast<double>(),
@@ -98,7 +98,7 @@ class ABTest {
   };
 
   static void updateColumnLengths(List<int> lengths, List<String?> results) {
-    for (int column = 0; column < lengths.length; column++) {
+    for (var column = 0; column < lengths.length; column++) {
       if (results[column] != null) {
         lengths[column] = math.max(lengths[column], results[column]?.length ?? 0);
       }
@@ -111,7 +111,7 @@ class ABTest {
     List<FieldJustification> aligns,
     List<String?> values,
   ) {
-    for (int column = 0; column < lengths.length; column++) {
+    for (var column = 0; column < lengths.length; column++) {
       final int len = lengths[column];
       String? value = values[column];
       if (value == null) {
@@ -138,7 +138,7 @@ class ABTest {
     final Map<String, _ScoreSummary> summariesA = _summarize(_aResults);
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
 
-    final List<List<String?>> tableRows = <List<String?>>[
+    final tableRows = <List<String?>>[
       for (final String scoreKey in <String>{...summariesA.keys, ...summariesB.keys})
         <String?>[
           scoreKey,
@@ -150,15 +150,8 @@ class ABTest {
         ],
     ];
 
-    final List<String> titles = <String>[
-      'Score',
-      'Average A',
-      '(noise)',
-      'Average B',
-      '(noise)',
-      'Speed-up',
-    ];
-    final List<FieldJustification> alignments = <FieldJustification>[
+    final titles = <String>['Score', 'Average A', '(noise)', 'Average B', '(noise)', 'Speed-up'];
+    final alignments = <FieldJustification>[
       FieldJustification.LEFT,
       FieldJustification.RIGHT,
       FieldJustification.LEFT,
@@ -167,18 +160,18 @@ class ABTest {
       FieldJustification.CENTER,
     ];
 
-    final List<int> lengths = List<int>.filled(6, 0);
+    final lengths = List<int>.filled(6, 0);
     updateColumnLengths(lengths, titles);
-    for (final List<String?> row in tableRows) {
+    for (final row in tableRows) {
       updateColumnLengths(lengths, row);
     }
 
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     formatResult(buffer, lengths, <FieldJustification>[
       FieldJustification.CENTER,
       ...alignments.skip(1),
     ], titles);
-    for (final List<String?> row in tableRows) {
+    for (final row in tableRows) {
       formatResult(buffer, lengths, alignments, row);
     }
 
@@ -188,7 +181,7 @@ class ABTest {
   /// Returns unprocessed data collected by the A/B test formatted as
   /// a tab-separated spreadsheet.
   String rawResults() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     for (final String scoreKey in _allScoreKeys) {
       buffer.writeln('$scoreKey:');
       buffer.write('  A:\t');
@@ -223,9 +216,7 @@ class ABTest {
     final Map<String, _ScoreSummary> summariesA = _summarize(_aResults);
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
 
-    final StringBuffer buffer = StringBuffer(
-      'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n',
-    );
+    final buffer = StringBuffer('Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n');
 
     for (final String scoreKey in _allScoreKeys) {
       final _ScoreSummary? summaryA = summariesA[scoreKey];

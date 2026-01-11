@@ -13,7 +13,7 @@ import 'common.dart';
 
 void main() async {
   group('getBranch', () {
-    const String branchName = 'stable';
+    const branchName = 'stable';
     test('getBranchName does not call git if env LUCI_BRANCH provided', () async {
       final Platform platform = FakePlatform(
         environment: <String, String>{'LUCI_BRANCH': branchName},
@@ -63,7 +63,7 @@ void main() async {
 
   group('gitRevision', () {
     test('Return short format', () async {
-      const String commitHash = 'e65f01793938e13cac2d321b9fcdc7939f9b2ea6';
+      const commitHash = 'e65f01793938e13cac2d321b9fcdc7939f9b2ea6';
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commitHash),
       ]);
@@ -73,7 +73,7 @@ void main() async {
     });
 
     test('Return full length', () async {
-      const String commitHash = 'e65f01793938e13cac2d321b9fcdc7939f9b2ea6';
+      const commitHash = 'e65f01793938e13cac2d321b9fcdc7939f9b2ea6';
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commitHash),
       ]);
@@ -85,7 +85,7 @@ void main() async {
 
   group('runProcessWithValidation', () {
     test('With no error', () async {
-      const List<String> command = <String>['git', 'rev-parse', 'HEAD'];
+      const command = <String>['git', 'rev-parse', 'HEAD'];
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: command),
       ]);
@@ -94,7 +94,7 @@ void main() async {
     });
 
     test('With error', () async {
-      const List<String> command = <String>['git', 'rev-parse', 'HEAD'];
+      const command = <String>['git', 'rev-parse', 'HEAD'];
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(command: command, exitCode: 1),
       ]);
@@ -114,7 +114,7 @@ void main() async {
 
   group('generateFooter', () {
     test('generated correctly', () async {
-      const String expectedContent = '''
+      const expectedContent = '''
 (function() {
   var span = document.querySelector('footer>span');
   if (span) {
@@ -126,7 +126,7 @@ void main() async {
   }
 })();
 ''';
-      final MemoryFileSystem fs = MemoryFileSystem();
+      final fs = MemoryFileSystem();
       final File footerFile = fs.file('/a/b/c/footer.js')..createSync(recursive: true);
       await createFooter(
         footerFile,

@@ -2,9 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/linux/fl_view_accessible.h"
+// Workaround missing C code compatibility in ATK header.
+// Fixed in https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+extern "C" {
+#include <atk/atk.h>
+}
+
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_accessible_text_field.h"
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
@@ -25,6 +31,14 @@ struct _FlViewAccessible {
 };
 
 G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
+
+// Enum copied from ATK 2.50, as the version we are building against doesn't
+// have this.
+typedef enum {
+  FL_ATK_LIVE_NONE,
+  FL_ATK_LIVE_POLITE,
+  FL_ATK_LIVE_ASSERTIVE
+} FlAtkLive;
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,
                                      FlutterSemanticsNode2* semantics) {
@@ -195,4 +209,17 @@ void fl_view_accessible_handle_update_semantics(
         return TRUE;
       },
       self);
+}
+
+void fl_view_accessible_send_announcement(FlViewAccessible* self,
+                                          const char* message,
+                                          gboolean assertive) {
+  g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
+  if (atk_get_major_version() == 2 && atk_get_minor_version() >= 50) {
+    g_signal_emit_by_name(
+        self, "notification", message,
+        assertive ? FL_ATK_LIVE_ASSERTIVE : FL_ATK_LIVE_POLITE);
+  } else if (atk_get_major_version() == 2 && atk_get_minor_version() >= 46) {
+    g_signal_emit_by_name(self, "announcement", message);
+  }
 }

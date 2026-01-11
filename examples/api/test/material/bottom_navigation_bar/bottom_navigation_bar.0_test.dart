@@ -8,10 +8,15 @@ import 'package:flutter_api_samples/material/bottom_navigation_bar/bottom_naviga
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('BottomNavigationBar Updates Screen Content', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar Updates Screen Content', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.BottomNavigationBarExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'BottomNavigationBar Sample'), findsOneWidget);
+    expect(
+      find.widgetWithText(AppBar, 'BottomNavigationBar Sample'),
+      findsOneWidget,
+    );
     expect(find.byType(BottomNavigationBar), findsOneWidget);
     expect(find.widgetWithText(Center, 'Index 0: Home'), findsOneWidget);
 

@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('IconDataDiagnosticsProperty includes valueProperties in JSON', () {
-    IconDataProperty property = IconDataProperty('foo', const IconData(101010));
-    final Map<String, Object> valueProperties =
+    var property = IconDataProperty('foo', const IconData(101010));
+    final valueProperties =
         property.toJsonMap(const DiagnosticsSerializationDelegate())['valueProperties']!
             as Map<String, Object>;
     expect(valueProperties['codePoint'], 101010);

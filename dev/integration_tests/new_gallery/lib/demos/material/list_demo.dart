@@ -28,8 +28,9 @@ class ListDemo extends StatelessWidget {
               ListTile(
                 leading: ExcludeSemantics(child: CircleAvatar(child: Text('$index'))),
                 title: Text(localizations.demoBottomSheetItem(index)),
-                subtitle:
-                    type == ListDemoType.twoLine ? Text(localizations.demoListsSecondary) : null,
+                subtitle: type == ListDemoType.twoLine
+                    ? Text(localizations.demoListsSecondary)
+                    : null,
               ),
           ],
         ),

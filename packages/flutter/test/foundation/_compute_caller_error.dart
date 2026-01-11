@@ -11,7 +11,7 @@ int getLength(String s) {
 }
 
 Future<void> main() async {
-  const String s = 'hello world';
+  const s = 'hello world';
   try {
     await compute(getLength, s);
   } catch (e) {

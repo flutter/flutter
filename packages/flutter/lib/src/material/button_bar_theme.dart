@@ -280,6 +280,7 @@ class ButtonBarTheme extends InheritedWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
+  /// // ignore: deprecated_member_use
   /// ButtonBarThemeData theme = ButtonBarTheme.of(context);
   /// ```
   static ButtonBarThemeData of(BuildContext context) {

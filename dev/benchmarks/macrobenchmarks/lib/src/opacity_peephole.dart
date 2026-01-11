@@ -173,8 +173,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeGridOfOpacityRouteName,
     name: 'Grid of Opacity',
     builder: (double v) {
-      double rowV = v;
-      double colV = rowV;
+      var rowV = v;
+      var colV = rowV;
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -206,8 +206,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeOpacityOfGridRouteName,
     name: 'Opacity of Grid',
     builder: (double v) {
-      double rowV = v;
-      double colV = rowV;
+      var rowV = v;
+      var colV = rowV;
       return Opacity(
         opacity: _opacity(v),
         child: SizedBox(
@@ -238,8 +238,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
     route: kOpacityPeepholeOpacityOfColOfRowsRouteName,
     name: 'Opacity of Column of Rows',
     builder: (double v) {
-      double rowV = v;
-      double colV = v;
+      var rowV = v;
+      var colV = v;
       return Opacity(
         opacity: _opacity(v),
         child: Column(
@@ -297,8 +297,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -306,14 +306,14 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), _opacity(cv));
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
               }
@@ -332,8 +332,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -341,16 +341,16 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              final Paint layerPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              final layerPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
                   layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(cv));
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.saveLayer(null, layerPaint);
                   canvas.drawRect(rect, rectPaint);
                   canvas.restore();
@@ -371,8 +371,8 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         child: SizedBox.expand(
           child: CustomPaint(
             painter: RectGridPainter((Canvas canvas, Size size) {
-              const int numRows = 10;
-              const int numCols = 7;
+              const numRows = 10;
+              const numCols = 7;
               const double rectWidth = 30;
               const double rectHeight = 30;
               final double hGap = (size.width - numCols * rectWidth) / (numCols + 1);
@@ -380,17 +380,17 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
               final double gap = min(hGap, vGap);
               final double xOffset = (size.width - (numCols * (rectWidth + gap) - gap)) * 0.5;
               final double yOffset = (size.height - (numRows * (rectHeight + gap) - gap)) * 0.5;
-              final Paint rectPaint = Paint();
-              final Paint layerPaint = Paint();
-              for (int r = 0; r < numRows; r++, v = 1 - v) {
+              final rectPaint = Paint();
+              final layerPaint = Paint();
+              for (var r = 0; r < numRows; r++, v = 1 - v) {
                 final double y = yOffset + r * (rectHeight + gap);
                 layerPaint.color = Color.fromRGBO(255, 255, 255, _opacity(v));
                 canvas.saveLayer(null, layerPaint);
-                double cv = v;
-                for (int c = 0; c < numCols; c++, cv = 1 - cv) {
+                var cv = v;
+                for (var c = 0; c < numCols; c++, cv = 1 - cv) {
                   final double x = xOffset + c * (rectWidth + gap);
                   rectPaint.color = Color.fromRGBO(_red(cv), _green(cv), _blue(cv), 1.0);
-                  final Rect rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
+                  final rect = Rect.fromLTWH(x, y, rectWidth, rectHeight);
                   canvas.drawRect(rect, rectPaint);
                 }
                 canvas.restore();

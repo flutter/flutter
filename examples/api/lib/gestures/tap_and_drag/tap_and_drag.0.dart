@@ -64,8 +64,10 @@ class _TapAndDragToZoomWidgetState extends State<TapAndDragToZoomWidget> {
   }
 
   void _zoomLogic(Offset currentDragPosition) {
-    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx).abs();
-    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy).abs();
+    final double dx = (_previousDragPosition!.dx - currentDragPosition.dx)
+        .abs();
+    final double dy = (_previousDragPosition!.dy - currentDragPosition.dy)
+        .abs();
 
     if (dx > dy) {
       // Ignore horizontal drags.

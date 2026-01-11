@@ -1082,7 +1082,7 @@ class FakeServerSocket extends Fake implements ServerSocket {
   @override
   final int port;
 
-  var closeCalled = false;
+  bool closeCalled = false;
   final controller = StreamController<Socket>();
 
   @override
@@ -1108,7 +1108,7 @@ class FakeServerSocket extends Fake implements ServerSocket {
 }
 
 class FakeSocket extends Fake implements Socket {
-  var closeCalled = false;
+  bool closeCalled = false;
   final controller = StreamController<Uint8List>();
   final addedData = <List<int>>[];
   final doneCompleter = Completer<bool>();
@@ -1216,10 +1216,10 @@ class FakeProxiedPortForwarder extends Fake implements ProxiedPortForwarder {
 }
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
-  var startCalled = false;
+  bool startCalled = false;
   Uri? startUri;
 
-  var shutdownCalled = false;
+  bool shutdownCalled = false;
 
   @override
   Future<void> get done => _completer.future;

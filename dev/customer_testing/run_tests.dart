@@ -17,7 +17,7 @@ Future<void> main(List<String> arguments) async {
 
 // Return true if successful, false if failed.
 Future<bool> run(List<String> arguments) async {
-  final ArgParser argParser = ArgParser(allowTrailingOptions: false, usageLineLength: 72)
+  final argParser = ArgParser(allowTrailingOptions: false, usageLineLength: 72)
     ..addOption(
       'repeat',
       defaultsTo: '1',
@@ -62,10 +62,10 @@ Future<bool> run(List<String> arguments) async {
   }
 
   final int? repeat = int.tryParse(parsedArguments['repeat'] as String);
-  final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
-  final bool skipTemplate = parsedArguments['skip-template'] as bool;
-  final bool verbose = parsedArguments['verbose'] as bool;
-  final bool help = parsedArguments['help'] as bool;
+  final skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
+  final skipTemplate = parsedArguments['skip-template'] as bool;
+  final verbose = parsedArguments['verbose'] as bool;
+  final help = parsedArguments['help'] as bool;
   final int? numberShards = int.tryParse(parsedArguments['shards'] as String);
   final int? shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments.rest

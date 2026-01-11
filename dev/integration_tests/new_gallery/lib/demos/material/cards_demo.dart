@@ -165,10 +165,9 @@ class SelectableTravelDestinationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String selectedStatus =
-        isSelected
-            ? GalleryLocalizations.of(context)!.selected
-            : GalleryLocalizations.of(context)!.notSelected;
+    final String selectedStatus = isSelected
+        ? GalleryLocalizations.of(context)!.selected
+        : GalleryLocalizations.of(context)!.notSelected;
 
     return SafeArea(
       top: false,
@@ -195,19 +194,17 @@ class SelectableTravelDestinationItem extends StatelessWidget {
                   child: Stack(
                     children: <Widget>[
                       Container(
-                        color:
-                            isSelected
-                                // Generally, material cards use primary with 8% opacity for the selected state.
-                                // See: https://material.io/design/interaction/states.html#anatomy
-                                ? colorScheme.primary.withOpacity(0.08)
-                                : Colors.transparent,
+                        color: isSelected
+                            // Generally, material cards use primary with 8% opacity for the selected state.
+                            // See: https://material.io/design/interaction/states.html#anatomy
+                            ? colorScheme.primary.withOpacity(0.08)
+                            : Colors.transparent,
                       ),
                       Semantics(
                         label: '${destination.title}, $selectedStatus',
-                        onLongPressHint:
-                            isSelected
-                                ? GalleryLocalizations.of(context)!.deselect
-                                : GalleryLocalizations.of(context)!.select,
+                        onLongPressHint: isSelected
+                            ? GalleryLocalizations.of(context)!.deselect
+                            : GalleryLocalizations.of(context)!.select,
                         child: TravelDestinationContent(destination: destination),
                       ),
                       Align(
@@ -400,10 +397,9 @@ class _CardsDemoState extends State<CardsDemo> with RestorationMixin {
                   CardType.selectable => SelectableTravelDestinationItem(
                     destination: destination,
                     isSelected: _isSelected.value,
-                    onSelected:
-                        () => setState(() {
-                          _isSelected.value = !_isSelected.value;
-                        }),
+                    onSelected: () => setState(() {
+                      _isSelected.value = !_isSelected.value;
+                    }),
                   ),
                 },
               ),

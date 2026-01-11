@@ -98,7 +98,7 @@ void main() {
 }
 
 Future<void> pumpViews({required WidgetTester tester, required List<Widget> viewContents}) {
-  final List<Widget> views = <Widget>[
+  final views = <Widget>[
     for (int i = 0; i < viewContents.length; i++)
       View(
         view: FakeView(tester.view, viewId: i + 100),

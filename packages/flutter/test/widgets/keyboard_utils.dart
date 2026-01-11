@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> sendKeyCombination(WidgetTester tester, SingleActivator activator) async {
-  final List<LogicalKeyboardKey> modifiers = <LogicalKeyboardKey>[
+  final modifiers = <LogicalKeyboardKey>[
     if (activator.control) LogicalKeyboardKey.control,
     if (activator.shift) LogicalKeyboardKey.shift,
     if (activator.alt) LogicalKeyboardKey.alt,
     if (activator.meta) LogicalKeyboardKey.meta,
   ];
-  for (final LogicalKeyboardKey modifier in modifiers) {
+  for (final modifier in modifiers) {
     await tester.sendKeyDownEvent(modifier);
   }
   await tester.sendKeyDownEvent(activator.trigger);

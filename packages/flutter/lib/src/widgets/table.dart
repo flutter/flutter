@@ -58,7 +58,7 @@ class TableRow {
 
   @override
   String toString() {
-    final StringBuffer result = StringBuffer();
+    final result = StringBuffer();
     result.write('TableRow(');
     if (key != null) {
       result.write('$key, ');
@@ -291,10 +291,10 @@ class _TableElement extends RenderObjectElement {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
-    int rowIndex = -1;
+    var rowIndex = -1;
     _children = (widget as Table).children
         .map<_TableElementRow>((TableRow row) {
-          int columnIndex = 0;
+          var columnIndex = 0;
           rowIndex += 1;
           return _TableElementRow(
             key: row.key,
@@ -338,7 +338,7 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
-    final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
+    final oldKeyedRows = <LocalKey, List<Element>>{};
     for (final _TableElementRow row in _children) {
       if (row.key != null) {
         oldKeyedRows[row.key!] = row.children;
@@ -347,9 +347,9 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children
         .where((_TableElementRow row) => row.key == null)
         .iterator;
-    final List<_TableElementRow> newChildren = <_TableElementRow>[];
-    final Set<List<Element>> taken = <List<Element>>{};
-    for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
+    final newChildren = <_TableElementRow>[];
+    final taken = <List<Element>>{};
+    for (var rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
       final TableRow row = newWidget.children[rowIndex];
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
@@ -360,7 +360,7 @@ class _TableElement extends RenderObjectElement {
       } else {
         oldChildren = const <Element>[];
       }
-      final List<_TableSlot> slots = List<_TableSlot>.generate(
+      final slots = List<_TableSlot>.generate(
         row.children.length,
         (int columnIndex) => _TableSlot(columnIndex, rowIndex),
       );
@@ -403,7 +403,7 @@ class _TableElement extends RenderObjectElement {
       _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand<RenderBox>((_TableElementRow row) {
         return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject! as RenderBox;
+          final box = child.renderObject! as RenderBox;
           return box;
         });
       }).toList(),
@@ -462,7 +462,7 @@ class _TableCell extends ParentDataWidget<TableCellParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
+    final parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       renderObject.parent?.markNeedsLayout();

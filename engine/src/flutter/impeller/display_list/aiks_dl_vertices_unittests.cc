@@ -16,6 +16,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_runtime_effect_impeller.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -477,11 +478,12 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
   flutter::DlPaint rect_paint;
   rect_paint.setColor(DlColor::kBlue());
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
-
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
@@ -526,11 +528,12 @@ TEST_P(AiksTest,
   flutter::DlPaint rect_paint;
   rect_paint.setColor(DlColor::kBlue());
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
-
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);

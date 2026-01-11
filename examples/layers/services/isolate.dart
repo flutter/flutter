@@ -30,15 +30,15 @@ class Calculator {
 
   // Run the computation associated with this Calculator.
   void run() {
-    int i = 0;
-    final JsonDecoder decoder = JsonDecoder((dynamic key, dynamic value) {
+    var i = 0;
+    final decoder = JsonDecoder((dynamic key, dynamic value) {
       if (key is int && i++ % _NOTIFY_INTERVAL == 0) {
         onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
       }
       return value;
     });
     try {
-      final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
+      final result = decoder.convert(_data) as List<dynamic>;
       final int n = result.length;
       onResultListener('Decoded $n results');
     } on FormatException catch (e, stack) {
@@ -48,8 +48,8 @@ class Calculator {
   }
 
   static String _replicateJson(String? data, int count) {
-    final StringBuffer buffer = StringBuffer()..write('[');
-    for (int i = 0; i < count; i++) {
+    final buffer = StringBuffer()..write('[');
+    for (var i = 0; i < count; i++) {
       buffer.write(data);
       if (i < count - 1) {
         buffer.write(',');
@@ -127,7 +127,7 @@ class CalculationManager {
     // loaded.
     rootBundle.loadString('services/data.json').then<void>((String data) {
       if (isRunning) {
-        final CalculationMessage message = CalculationMessage(data, _receivePort.sendPort);
+        final message = CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
         Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((Isolate isolate) {
@@ -167,7 +167,7 @@ class CalculationManager {
   // in a separate memory space.
   static void _calculate(CalculationMessage message) {
     final SendPort sender = message.sendPort;
-    final Calculator calculator = Calculator(
+    final calculator = Calculator(
       onProgressListener: (double completed, double total) {
         sender.send(<double>[completed, total]);
       },

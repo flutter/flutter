@@ -317,7 +317,7 @@ class PlatformDispatcher {
   // Updates the available displays.
   void _updateDisplays(List<Display> displays) {
     _displays.clear();
-    for (final Display display in displays) {
+    for (final display in displays) {
       _displays[display.id] = display;
     }
     _invoke(onMetricsChanged, _onMetricsChangedZone);
@@ -481,8 +481,8 @@ class PlatformDispatcher {
     const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
     final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
     assert(length * kBytesPerPointerData == packet.lengthInBytes);
-    final List<PointerData> data = <PointerData>[];
-    for (int i = 0; i < length; ++i) {
+    final data = <PointerData>[];
+    for (var i = 0; i < length; ++i) {
       int offset = i * _kPointerDataFieldCount;
       data.add(
         PointerData(
@@ -536,7 +536,7 @@ class PlatformDispatcher {
         _invoke1<KeyData>(
           (KeyData keyData) {
             final bool handled = onKeyData(keyData);
-            final Uint8List response = Uint8List(1);
+            final response = Uint8List(1);
             response[0] = handled ? 1 : 0;
             callback(response.buffer.asByteData());
           },
@@ -573,7 +573,7 @@ class PlatformDispatcher {
   static KeyData _unpackKeyData(ByteData packet) {
     const int kStride = Int64List.bytesPerElement;
 
-    int offset = 0;
+    var offset = 0;
     final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
     final String? character = charDataSize == 0
         ? null
@@ -581,7 +581,7 @@ class PlatformDispatcher {
             packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
           );
 
-    final KeyData keyData = KeyData(
+    final keyData = KeyData(
       timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
       type: KeyEventType.values[packet.getInt64(kStride * offset++, _kFakeHostEndian)],
       physical: packet.getUint64(kStride * offset++, _kFakeHostEndian),
@@ -635,8 +635,8 @@ class PlatformDispatcher {
   // Called from the engine, via hooks.dart
   void _reportTimings(List<int> timings) {
     assert(timings.length % FrameTiming._dataLength == 0);
-    final List<FrameTiming> frameTimings = <FrameTiming>[];
-    for (int i = 0; i < timings.length; i += FrameTiming._dataLength) {
+    final frameTimings = <FrameTiming>[];
+    for (var i = 0; i < timings.length; i += FrameTiming._dataLength) {
       frameTimings.add(FrameTiming._(timings.sublist(i, i + FrameTiming._dataLength)));
     }
     _invoke1(onReportTimings, _onReportTimingsZone, frameTimings);
@@ -929,7 +929,7 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateAccessibilityFeatures(int values) {
-    final AccessibilityFeatures newFeatures = AccessibilityFeatures._(values);
+    final newFeatures = AccessibilityFeatures._(values);
     final _PlatformConfiguration previousConfiguration = _configuration;
     if (newFeatures == previousConfiguration.accessibilityFeatures) {
       return;
@@ -1011,8 +1011,8 @@ class PlatformDispatcher {
   /// This method returns synchronously and is a direct call to
   /// platform specific APIs without invoking method channels.
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
-    final List<String?> supportedLocalesData = <String?>[];
-    for (final Locale locale in supportedLocales) {
+    final supportedLocalesData = <String?>[];
+    for (final locale in supportedLocales) {
       supportedLocalesData.add(locale.languageCode);
       supportedLocalesData.add(locale.countryCode);
       supportedLocalesData.add(locale.scriptCode);
@@ -1057,12 +1057,12 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateLocales(List<String> locales) {
-    const int stringsPerLocale = 4;
+    const stringsPerLocale = 4;
     final int numLocales = locales.length ~/ stringsPerLocale;
     final _PlatformConfiguration previousConfiguration = _configuration;
-    final List<Locale> newLocales = <Locale>[];
-    bool localesDiffer = numLocales != previousConfiguration.locales.length;
-    for (int localeIndex = 0; localeIndex < numLocales; localeIndex++) {
+    final newLocales = <Locale>[];
+    var localesDiffer = numLocales != previousConfiguration.locales.length;
+    for (var localeIndex = 0; localeIndex < numLocales; localeIndex++) {
       final String countryCode = locales[localeIndex * stringsPerLocale + 1];
       final String scriptCode = locales[localeIndex * stringsPerLocale + 2];
 
@@ -1275,22 +1275,21 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _updateUserSettingsData(String jsonData) {
-    final Map<String, Object?> data = json.decode(jsonData) as Map<String, Object?>;
+    final data = json.decode(jsonData) as Map<String, Object?>;
     if (data.isEmpty) {
       return;
     }
 
     final double textScaleFactor = (data['textScaleFactor']! as num).toDouble();
-    final bool alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
-    final bool? nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
+    final alwaysUse24HourFormat = data['alwaysUse24HourFormat']! as bool;
+    final nativeSpellCheckServiceDefined = data['nativeSpellCheckServiceDefined'] as bool?;
     if (nativeSpellCheckServiceDefined != null) {
       _nativeSpellCheckServiceDefined = nativeSpellCheckServiceDefined;
     } else {
       _nativeSpellCheckServiceDefined = false;
     }
 
-    final bool? supportsShowingSystemContextMenu =
-        data['supportsShowingSystemContextMenu'] as bool?;
+    final supportsShowingSystemContextMenu = data['supportsShowingSystemContextMenu'] as bool?;
     if (supportsShowingSystemContextMenu != null) {
       _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
     } else {
@@ -1298,7 +1297,7 @@ class PlatformDispatcher {
     }
 
     // This field is optional.
-    final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
+    final brieflyShowPassword = data['brieflyShowPassword'] as bool?;
     if (brieflyShowPassword != null) {
       _brieflyShowPassword = brieflyShowPassword;
     }
@@ -1307,15 +1306,15 @@ class PlatformDispatcher {
       'light' => Brightness.light,
       final Object? value => throw StateError('$value is not a valid platformBrightness.'),
     };
-    final String? systemFontFamily = data['systemFontFamily'] as String?;
-    final int? configurationId = data['configurationId'] as int?;
+    final systemFontFamily = data['systemFontFamily'] as String?;
+    final configurationId = data['configurationId'] as int?;
     final _PlatformConfiguration previousConfiguration = _configuration;
-    final bool platformBrightnessChanged =
+    final platformBrightnessChanged =
         previousConfiguration.platformBrightness != platformBrightness;
-    final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
-    final bool alwaysUse24HourFormatChanged =
+    final textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
+    final alwaysUse24HourFormatChanged =
         previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
-    final bool systemFontFamilyChanged = previousConfiguration.systemFontFamily != systemFontFamily;
+    final systemFontFamilyChanged = previousConfiguration.systemFontFamily != systemFontFamily;
     if (!platformBrightnessChanged &&
         !textScaleFactorChanged &&
         !alwaysUse24HourFormatChanged &&
@@ -3037,7 +3036,7 @@ class Locale {
   String toLanguageTag() => _rawToString('-');
 
   String _rawToString(String separator) {
-    final StringBuffer out = StringBuffer(languageCode);
+    final out = StringBuffer(languageCode);
     if (scriptCode != null && scriptCode!.isNotEmpty) {
       out.write('$separator$scriptCode');
     }

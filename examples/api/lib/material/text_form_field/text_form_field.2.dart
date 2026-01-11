@@ -99,7 +99,9 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
                 TextFormField(
                   forceErrorText: forceErrorText,
                   controller: controller,
-                  decoration: const InputDecoration(hintText: 'Please write a username'),
+                  decoration: const InputDecoration(
+                    hintText: 'Please write a username',
+                  ),
                   validator: validator,
                   onChanged: onChanged,
                 ),

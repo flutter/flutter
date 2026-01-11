@@ -14,17 +14,17 @@ class StockArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()..color = color;
+    final paint = Paint()..color = color;
     paint.strokeWidth = 1.0;
-    const double padding = 2.0;
+    const padding = 2.0;
     assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
     final double r = (size.shortestSide - padding) / 2.0; // radius of the circle
     final double centerX = padding + r;
     final double centerY = padding + r;
 
     // Draw the arrow.
-    const double w = 8.0;
-    double h = 5.0;
+    const w = 8.0;
+    var h = 5.0;
     double arrowY;
     if (percentChange < 0.0) {
       h = -h;
@@ -32,7 +32,7 @@ class StockArrowPainter extends CustomPainter {
     } else {
       arrowY = centerX - 1.0;
     }
-    final Path path = Path();
+    final path = Path();
     path.moveTo(centerX, arrowY - h); // top of the arrow
     path.lineTo(centerX + w, arrowY + h);
     path.lineTo(centerX - w, arrowY + h);
@@ -57,7 +57,7 @@ class StockArrow extends StatelessWidget {
   final double percentChange;
 
   int _colorIndexForPercentChange(double percentChange) {
-    const double maxPercent = 10.0;
+    const maxPercent = 10.0;
     final double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
     return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }

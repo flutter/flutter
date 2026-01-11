@@ -23,7 +23,7 @@ Future<void> execute() async {
     );
   }
 
-  final List<Matrix4> affineTransforms = <Matrix4>[
+  final affineTransforms = <Matrix4>[
     Matrix4.identity()
       ..scale(1.2, 1.3, 1.0)
       ..rotateZ(0.1),
@@ -32,19 +32,19 @@ Future<void> execute() async {
       ..scale(1.2, 1.3, 1.0)
       ..translate(12.0, 13.0, 10.0),
   ];
-  final List<Matrix4> perspectiveTransforms = <Matrix4>[
+  final perspectiveTransforms = <Matrix4>[
     makePerspective(10.0, math.pi / 8.0, 0.3),
     makePerspective(8.0, math.pi / 8.0, 0.2),
     makePerspective(1.0, math.pi / 4.0, 0.1)..rotateX(0.1),
   ];
-  final List<Rect> rectangles = <Rect>[
+  final rectangles = <Rect>[
     const Rect.fromLTRB(1.1, 1.2, 1.5, 1.8),
     const Rect.fromLTRB(1.1, 1.2, 0.0, 1.0),
     const Rect.fromLTRB(1.1, 1.2, 1.3, 1.0),
     const Rect.fromLTRB(-1.1, -1.2, 0.0, 1.0),
     const Rect.fromLTRB(-1.1, -1.2, -1.5, -1.8),
   ];
-  final List<Offset> offsets = <Offset>[
+  final offsets = <Offset>[
     const Offset(1.1, 1.2),
     const Offset(1.5, 1.8),
     Offset.zero,
@@ -57,14 +57,14 @@ Future<void> execute() async {
   final int nOffsets = offsets.length;
 
   // Warm up lap
-  for (int i = 0; i < _kNumWarmUp; i += 1) {
+  for (var i = 0; i < _kNumWarmUp; i += 1) {
     final Matrix4 transform = perspectiveTransforms[i % nPerspective];
     final Rect rect = rectangles[(i ~/ nPerspective) % nRectangles];
     final Offset offset = offsets[(i ~/ nPerspective) % nOffsets];
     MatrixUtils.transformRect(transform, rect);
     MatrixUtils.transformPoint(transform, offset);
   }
-  for (int i = 0; i < _kNumWarmUp; i += 1) {
+  for (var i = 0; i < _kNumWarmUp; i += 1) {
     final Matrix4 transform = affineTransforms[i % nAffine];
     final Rect rect = rectangles[(i ~/ nAffine) % nRectangles];
     final Offset offset = offsets[(i ~/ nAffine) % nOffsets];
@@ -72,9 +72,9 @@ Future<void> execute() async {
     MatrixUtils.transformPoint(transform, offset);
   }
 
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     final Matrix4 transform = perspectiveTransforms[i % nPerspective];
     final Rect rect = rectangles[(i ~/ nPerspective) % nRectangles];
     MatrixUtils.transformRect(transform, rect);
@@ -84,7 +84,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     final Matrix4 transform = affineTransforms[i % nAffine];
     final Rect rect = rectangles[(i ~/ nAffine) % nRectangles];
     MatrixUtils.transformRect(transform, rect);
@@ -94,7 +94,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     final Matrix4 transform = perspectiveTransforms[i % nPerspective];
     final Offset offset = offsets[(i ~/ nPerspective) % nOffsets];
     MatrixUtils.transformPoint(transform, offset);
@@ -104,7 +104,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     final Matrix4 transform = affineTransforms[i % nAffine];
     final Offset offset = offsets[(i ~/ nAffine) % nOffsets];
     MatrixUtils.transformPoint(transform, offset);
@@ -112,7 +112,7 @@ Future<void> execute() async {
   watch.stop();
   final int pointMicrosecondsAffine = watch.elapsedMicroseconds;
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   const double scale = 1000.0 / _kNumIterations;
   printer.addResult(
     description: 'MatrixUtils.transformRectPerspective',

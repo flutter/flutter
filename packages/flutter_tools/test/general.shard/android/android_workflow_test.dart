@@ -861,13 +861,13 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   String? adbPath;
 
   @override
-  var licensesAvailable = false;
+  bool licensesAvailable = false;
 
   @override
-  var platformToolsAvailable = false;
+  bool platformToolsAvailable = false;
 
   @override
-  var cmdlineToolsAvailable = false;
+  bool cmdlineToolsAvailable = false;
 
   @override
   Directory directory = MemoryFileSystem.test().directory('/foo/bar');
@@ -884,10 +884,10 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
   @override
-  var sdkLevel = 0;
+  int sdkLevel = 0;
 
   @override
-  var buildToolsVersion = Version(0, 0, 0);
+  Version buildToolsVersion = Version(0, 0, 0);
 
   @override
   String get buildToolsVersionName => '';
