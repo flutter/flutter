@@ -1816,6 +1816,105 @@ void main() {
       ),
     );
   });
+
+  group('useStrictAutovalidateMode', () {
+    const invalidValue = 'foo';
+    String errorText(String? value) => '$value/error';
+
+    Widget buildForm({
+      GlobalKey<FormState>? formKey,
+      bool useStrictAutovalidateMode = true,
+      bool withKeys = false,
+    }) {
+      return MaterialApp(
+        home: Center(
+          child: Form(
+            key: formKey,
+            autovalidateMode: AutovalidateMode.always,
+            useStrictAutovalidateMode: useStrictAutovalidateMode,
+            child: Material(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    key: withKeys ? const Key('disabled') : null,
+                    initialValue: invalidValue,
+                    autovalidateMode: AutovalidateMode.disabled,
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    key: withKeys ? const Key('onUserInteraction') : null,
+                    initialValue: invalidValue,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    key: withKeys ? const Key('onUnfocus') : null,
+                    initialValue: invalidValue,
+                    autovalidateMode: AutovalidateMode.onUnfocus,
+                    validator: errorText,
+                  ),
+                  TextFormField(
+                    key: withKeys ? const Key('onUserInteractionIfError') : null,
+                    initialValue: invalidValue,
+                    autovalidateMode: AutovalidateMode.onUserInteractionIfError,
+                    validator: errorText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('does not auto-validate fields that are disabled or require interaction', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildForm());
+
+      expect(find.text(errorText(invalidValue)), findsNothing);
+
+      await tester.pump();
+
+      expect(find.text(errorText(invalidValue)), findsNothing);
+    });
+
+    testWidgets('validates fields according to their own autovalidateMode', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildForm(withKeys: true));
+      await tester.pump();
+
+      expect(find.text(errorText(invalidValue)), findsNothing);
+
+      await tester.enterText(find.byKey(const Key('onUserInteraction')), 'bar');
+      await tester.pumpAndSettle();
+      await tester.pump();
+
+      expect(find.text(errorText('bar')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('disabled')));
+      await tester.pump();
+
+      expect(find.text(errorText('bar')), findsNWidgets(1));
+    });
+
+    testWidgets('validates all fields regardless of autovalidateMode', (WidgetTester tester) async {
+      final formKey = GlobalKey<FormState>();
+
+      await tester.pumpWidget(buildForm(formKey: formKey));
+      await tester.pump();
+
+      expect(find.text('Not valid'), findsNothing);
+
+      final bool result = formKey.currentState!.validate();
+      expect(result, isFalse);
+
+      await tester.pump();
+
+      expect(find.text(errorText(invalidValue)), findsNWidgets(4));
+    });
+  });
 }
 
 class _PlatformAnnounceScenario {
