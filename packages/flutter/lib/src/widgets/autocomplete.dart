@@ -475,6 +475,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final int callId = _onChangedCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
+    if (!mounted) {
+      return;
+    }
+
     // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId || !shouldUpdateOptions) {
       return;
