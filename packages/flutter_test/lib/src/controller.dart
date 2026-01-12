@@ -2102,24 +2102,9 @@ abstract class WidgetController {
       final FlutterView view = _viewOf(finder);
       final result = HitTestResult();
       binding.hitTestInView(result, location, view.viewId);
-      // Check if the box is the target or an ancestor of any target.
-      // This is necessary because some render objects like RenderTransform
-      // don't add themselves to the hit test path, they just transform the
-      // point and pass it to their children.
-      final bool found = result.path.any((HitTestEntry entry) {
-        final HitTestTarget target = entry.target;
-        if (target == box) {
-          return true;
-        }
-        if (target is RenderObject) {
-          for (RenderObject? current = target.parent; current != null; current = current.parent) {
-            if (current == box) {
-              return true;
-            }
-          }
-        }
-        return false;
-      });
+      final bool found = result.path.any(
+        (HitTestEntry entry) => finders.isRenderObjectAncestorOfTarget(box, entry.target),
+      );
       if (!found) {
         final RenderView renderView = binding.renderViews.firstWhere(
           (RenderView r) => r.flutterView == view,

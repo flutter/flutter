@@ -29,6 +29,26 @@ typedef SemanticsNodePredicate = bool Function(SemanticsNode node);
 /// Signature for [FinderBase.describeMatch].
 typedef DescribeMatchCallback = String Function(Plurality plurality);
 
+/// Returns true if [renderObject] is equal to [target] or is an ancestor of
+/// [target] in the render tree.
+///
+/// This is useful for hit testing because some render objects (like
+/// [RenderTransform]) don't add themselves to the hit test path but instead
+/// just transforms the hit test point and pass it to their children.
+bool isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget target) {
+  if (target == renderObject) {
+    return true;
+  }
+  if (target is RenderObject) {
+    for (RenderObject? current = target.parent; current != null; current = current.parent) {
+      if (current == renderObject) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /// The `CandidateType` of finders that search for and filter substrings,
 /// within static text rendered by [RenderParagraph]s.
 final class TextRangeContext {
@@ -1443,29 +1463,11 @@ class _HitTestableWidgetFinder extends ChainedFinder {
       final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
       final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
-      for (final HitTestEntry entry in hitResult.path) {
-        final HitTestTarget target = entry.target;
-        // Check if the candidate's render object is the target or an ancestor
-        // of the target. This is necessary because some render objects like
-        // RenderTransform don't add themselves to the hit test path, they just
-        // transform the point and pass it to their children.
-        if (target == object) {
-          yield candidate;
-          break;
-        }
-        if (target is RenderObject) {
-          var found = false;
-          for (RenderObject? current = target.parent; current != null; current = current.parent) {
-            if (current == object) {
-              yield candidate;
-              found = true;
-              break;
-            }
-          }
-          if (found) {
-            break;
-          }
-        }
+      final bool found = hitResult.path.any(
+        (HitTestEntry entry) => isRenderObjectAncestorOfTarget(object, entry.target),
+      );
+      if (found) {
+        yield candidate;
       }
     }
   }
