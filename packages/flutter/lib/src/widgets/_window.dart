@@ -631,32 +631,9 @@ abstract class DialogWindowController extends BaseWindowController {
 /// * [TooltipWindow], the widget for a tooltip window.
 /// * [RegularWindowControllerDelegate], the delegate for regular window controllers.
 mixin class TooltipWindowControllerDelegate {
-  /// Invoked when the user attempts to close the window.
-  ///
-  /// The default implementation destroys the window. Subclasses
-  /// can override the behavior to delay or prevent the window from closing.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  /// * [onWindowDestroyed], which is invoked after the window is closed.
-  @internal
-  void onWindowCloseRequested(TooltipWindowController controller) {
-    if (!isWindowingEnabled) {
-      throw UnsupportedError(_kWindowingDisabledErrorMessage);
-    }
-
-    controller.destroy();
-  }
-
   /// Invoked after the window is closed.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
-  ///
-  /// See also:
-  ///
-  /// * [onWindowCloseRequested], which is invoked when the user attempts to close the window.
   @internal
   void onWindowDestroyed() {
     if (!isWindowingEnabled) {
@@ -705,6 +682,13 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// The [positioner] argument specifies how the tooltip should be positioned
   /// relative to the [anchorRect].
   ///
+  /// The [preferredConstraints] are the constraints placed upon the size
+  /// of the window.
+  ///
+  /// If [isSizedToContent] is true, the tooltip will size itself to fit its content
+  /// within the given [preferredConstraints]. If false, the tooltip will use
+  /// the [preferredConstraints] as strict constraints for its size.
+  ///
   /// {@macro flutter.widgets.windowing.constraints}
   ///
   /// The [delegate] argument can be used to listen to the window's
@@ -716,14 +700,16 @@ abstract class TooltipWindowController extends BaseWindowController {
     required BaseWindowController parent,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    BoxConstraints? preferredConstraints,
+    BoxConstraints preferredConstraints = const BoxConstraints(),
+    bool isSizedToContent = true,
     TooltipWindowControllerDelegate? delegate,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
     final WindowingOwner owner = WidgetsBinding.instance.windowingOwner;
     final TooltipWindowController controller = owner.createTooltipWindowController(
       parent: parent,
-      preferredConstraints: preferredConstraints ?? const BoxConstraints(),
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
       delegate: delegate ?? TooltipWindowControllerDelegate(),
       anchorRect: anchorRect,
       positioner: positioner,
@@ -761,6 +747,14 @@ abstract class TooltipWindowController extends BaseWindowController {
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setConstraints(BoxConstraints constraints);
+
+  /// Updates the position of the tooltip.
+  ///
+  /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 }
 
 /// Delegate class for popup window controller.
@@ -945,6 +939,7 @@ abstract class WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
@@ -1015,6 +1010,7 @@ class _WindowingOwnerUnsupported extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
