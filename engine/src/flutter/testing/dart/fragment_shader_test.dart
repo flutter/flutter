@@ -456,6 +456,10 @@ void main() async {
   });
 
   _runSkiaTest('FragmentShader with uniforms renders correctly', () async {
+    // Fails in impeller.
+    // Expected: a numeric value within <0.00196078431372549> of <1.0>
+    //  Actual: <0.0>
+    //  Which:  differs by <1.0>
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader()
@@ -478,6 +482,14 @@ void main() async {
   });
 
   _runSkiaTest('FragmentShader shader with array uniforms renders correctly', () async {
+    // Fails in impeller.
+    // Expected: '#ff00ff00'
+    //   Actual: '#ff0000ff'
+    //    Which: is different.
+    //           Expected: #ff00ff00
+    //             Actual: #ff0000ff
+    //                          ^
+    //            Differ at offset 5
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader();
@@ -584,7 +596,7 @@ void main() async {
     expect(identical(filter, filter_3), false);
   });
 
-  _runSkiaTest('FragmentShader The ink_sparkle shader is accepted', () async {
+  test('FragmentShader The ink_sparkle shader is accepted', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('ink_sparkle.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
 
