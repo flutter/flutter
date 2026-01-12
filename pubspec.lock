@@ -219,13 +219,13 @@ packages:
     source: hosted
     version: "2.1.4"
   ffigen:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: ffigen
-      sha256: "72d732c33557fc0ca9b46379d3deff2dadbdc539696dc0b270189e2989be20ef"
+      sha256: b7803707faeec4ce3c1b0c2274906504b796e3b70ad573577e72333bd1c9b3ba
       url: "https://pub.dev"
     source: hosted
-    version: "18.1.0"
+    version: "20.1.1"
   file:
     dependency: "direct main"
     description:
