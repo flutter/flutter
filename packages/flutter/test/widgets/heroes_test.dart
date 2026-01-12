@@ -3289,6 +3289,82 @@ Future<void> main() async {
     },
   );
 
+  testWidgets('Default popped hero uses fastOutSlowIn curve', (WidgetTester tester) async {
+    final Key container1 = UniqueKey();
+    final Key container2 = UniqueKey();
+    final navigator = GlobalKey<NavigatorState>();
+    final observer = TransitionDurationObserver();
+
+    final Animatable<Size?> tween = SizeTween(
+      begin: const Size(200, 200),
+      end: const Size(100, 100),
+    ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        navigatorObservers: <NavigatorObserver>[observer],
+        home: Scaffold(
+          body: Center(
+            child: Hero(
+              tag: 'test',
+              createRectTween: (Rect? begin, Rect? end) {
+                return RectTween(begin: begin, end: end);
+              },
+              child: SizedBox(key: container1, height: 100, width: 100),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Size originalSize = tester.getSize(find.byKey(container1));
+    expect(originalSize, const Size(100, 100));
+
+    navigator.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Center(
+              child: Hero(
+                tag: 'test',
+                createRectTween: (Rect? begin, Rect? end) {
+                  return RectTween(begin: begin, end: end);
+                },
+                child: SizedBox(key: container2, height: 200, width: 200),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    final Size newSize = tester.getSize(find.byKey(container2));
+    expect(newSize, const Size(200, 200));
+
+    navigator.currentState!.pop();
+    await tester.pump();
+
+    // Jump 25% into the transition.
+    await tester.pump(observer.transitionDuration ~/ 4);
+    Size heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.25));
+
+    // Jump to 50% into the transition.
+    await tester.pump(observer.transitionDuration ~/ 4);
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.50));
+
+    // Jump to 75% into the transition.
+    await tester.pump(observer.transitionDuration ~/ 4);
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(0.75));
+
+    // Jump to 100% into the transition.
+    await tester.pump(observer.transitionDuration ~/ 4);
+    heroSize = tester.getSize(find.byKey(container1));
+    expect(heroSize, tween.transform(1.0));
+  });
+
   Future<void> verifyPoppedHeroCurve({
     required WidgetTester tester,
     required Curve curve,
