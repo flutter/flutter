@@ -13,7 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late FakeMenuChannel fakeMenuChannel;
+  late _FakeMenuChannel fakeMenuChannel;
   late PlatformMenuDelegate originalDelegate;
   late DefaultPlatformMenuDelegate delegate;
   final selected = <String>[];
@@ -33,7 +33,7 @@ void main() {
   }
 
   setUp(() {
-    fakeMenuChannel = FakeMenuChannel((MethodCall call) async {});
+    fakeMenuChannel = _FakeMenuChannel((MethodCall call) async {});
     delegate = DefaultPlatformMenuDelegate(channel: fakeMenuChannel);
     originalDelegate = WidgetsBinding.instance.platformMenuDelegate;
     WidgetsBinding.instance.platformMenuDelegate = delegate;
@@ -53,15 +53,27 @@ void main() {
           MaterialApp(
             home: Material(
               child: PlatformMenuBar(
-                menus: createTestMenus(
+                menus: _createTestMenus(
                   onSelected: onSelected,
                   onOpen: onOpen,
                   onClose: onClose,
                   shortcuts: <String, MenuSerializableShortcut>{
-                    subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                    subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                    subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                    subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                    _subSubMenu10[0].label: const SingleActivator(
+                      LogicalKeyboardKey.keyA,
+                      control: true,
+                    ),
+                    _subSubMenu10[1].label: const SingleActivator(
+                      LogicalKeyboardKey.keyB,
+                      shift: true,
+                    ),
+                    _subSubMenu10[2].label: const SingleActivator(
+                      LogicalKeyboardKey.keyC,
+                      alt: true,
+                    ),
+                    _subSubMenu10[3].label: const SingleActivator(
+                      LogicalKeyboardKey.keyD,
+                      meta: true,
+                    ),
                   },
                 ),
                 child: const Center(child: Text('Body')),
@@ -71,22 +83,35 @@ void main() {
         );
 
         expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenus'));
-        expect(fakeMenuChannel.outgoingCalls.last.arguments, equals(expectedStructure));
+        expect(fakeMenuChannel.outgoingCalls.last.arguments, equals(_expectedStructure));
       });
+
       testWidgets('using onSelectedIntent', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
               child: PlatformMenuBar(
-                menus: createTestMenus(
+                menus: _createTestMenus(
                   onSelectedIntent: const DoNothingIntent(),
                   onOpen: onOpen,
                   onClose: onClose,
                   shortcuts: <String, MenuSerializableShortcut>{
-                    subSubMenu10[0]: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
-                    subSubMenu10[1]: const SingleActivator(LogicalKeyboardKey.keyB, shift: true),
-                    subSubMenu10[2]: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
-                    subSubMenu10[3]: const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+                    _subSubMenu10[0].label: const SingleActivator(
+                      LogicalKeyboardKey.keyA,
+                      control: true,
+                    ),
+                    _subSubMenu10[1].label: const SingleActivator(
+                      LogicalKeyboardKey.keyB,
+                      shift: true,
+                    ),
+                    _subSubMenu10[2].label: const SingleActivator(
+                      LogicalKeyboardKey.keyC,
+                      alt: true,
+                    ),
+                    _subSubMenu10[3].label: const SingleActivator(
+                      LogicalKeyboardKey.keyD,
+                      meta: true,
+                    ),
                   },
                 ),
                 child: const Center(child: Text('Body')),
@@ -96,9 +121,10 @@ void main() {
         );
 
         expect(fakeMenuChannel.outgoingCalls.last.method, equals('Menu.setMenus'));
-        expect(fakeMenuChannel.outgoingCalls.last.arguments, equals(expectedStructure));
+        expect(fakeMenuChannel.outgoingCalls.last.arguments, equals(_expectedStructure));
       });
     });
+
     testWidgets(
       'asserts when more than one has locked the delegate',
       experimentalLeakTesting: LeakTesting.settings
@@ -117,9 +143,11 @@ void main() {
         expect(tester.takeException(), isA<AssertionError>());
       },
     );
+
     testWidgets('diagnostics', (WidgetTester tester) async {
       const item = PlatformMenuItem(
         label: 'label2',
+        tooltip: 'tooltip2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
       );
       const menuBar = PlatformMenuBar(menus: <PlatformMenuItem>[item], child: SizedBox());
@@ -133,12 +161,14 @@ void main() {
           'PlatformMenuBar#00000\n'
           ' └─PlatformMenuItem#00000(label2)\n'
           '     label: "label2"\n'
+          '     tooltip: "tooltip2"\n'
           '     shortcut: SingleActivator#00000(keys: Key A)\n'
           '     DISABLED\n',
         ),
       );
     });
   });
+
   group('MenuBarItem', () {
     testWidgets('diagnostics', (WidgetTester tester) async {
       const childItem = PlatformMenuItem(label: 'label');
@@ -202,140 +232,171 @@ void main() {
   });
 }
 
-const List<String> mainMenu = <String>['Menu 0', 'Menu 1', 'Menu 2', 'Menu 3'];
+typedef _MenuItem = ({String label, String? tooltip});
 
-const List<String> subMenu0 = <String>['Sub Menu 00'];
-
-const List<String> subMenu1 = <String>['Sub Menu 10', 'Sub Menu 11', 'Sub Menu 12'];
-
-const List<String> subSubMenu10 = <String>[
-  'Sub Sub Menu 110',
-  'Sub Sub Menu 111',
-  'Sub Sub Menu 112',
-  'Sub Sub Menu 113',
+const List<_MenuItem> _mainMenu = <_MenuItem>[
+  (label: 'Menu 0', tooltip: 'Menu 0 Tooltip'),
+  (label: 'Menu 1', tooltip: null),
+  (label: 'Menu 2', tooltip: 'Menu 2 Tooltip'),
+  (label: 'Menu 3', tooltip: null),
 ];
 
-const List<String> subMenu2 = <String>['Sub Menu 20'];
+const List<_MenuItem> _subMenu0 = <_MenuItem>[
+  (label: 'Sub Menu 00', tooltip: 'Sub Menu 00 Tooltip'),
+];
 
-List<PlatformMenuItem> createTestMenus({
+const List<_MenuItem> _subMenu1 = <_MenuItem>[
+  (label: 'Sub Menu 10', tooltip: 'Sub Menu 10 Tooltip'),
+  (label: 'Sub Menu 11', tooltip: null),
+  (label: 'Sub Menu 12', tooltip: 'Sub Menu 12 Tooltip'),
+];
+
+const List<_MenuItem> _subSubMenu10 = <_MenuItem>[
+  (label: 'Sub Sub Menu 110', tooltip: null),
+  (label: 'Sub Sub Menu 111', tooltip: 'Sub Sub Menu 111 Tooltip'),
+  (label: 'Sub Sub Menu 112', tooltip: null),
+  (label: 'Sub Sub Menu 113', tooltip: 'Sub Sub Menu 113 Tooltip'),
+];
+
+const List<_MenuItem> _subMenu2 = <_MenuItem>[(label: 'Sub Menu 20', tooltip: null)];
+
+List<PlatformMenuItem> _createTestMenus({
   void Function(String)? onSelected,
   Intent? onSelectedIntent,
   void Function(String)? onOpen,
   void Function(String)? onClose,
   Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
-  bool includeStandard = false,
 }) {
   final result = <PlatformMenuItem>[
     PlatformMenu(
-      label: mainMenu[0],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[0]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[0]) : null,
+      label: _mainMenu[0].label,
+      tooltip: _mainMenu[0].tooltip,
+      onOpen: onOpen != null ? () => onOpen(_mainMenu[0].label) : null,
+      onClose: onClose != null ? () => onClose(_mainMenu[0].label) : null,
       menus: <PlatformMenuItem>[
         PlatformMenuItem(
-          label: subMenu0[0],
-          onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
+          label: _subMenu0[0].label,
+          tooltip: _subMenu0[0].tooltip,
+          onSelected: onSelected != null ? () => onSelected(_subMenu0[0].label) : null,
           onSelectedIntent: onSelectedIntent,
-          shortcut: shortcuts[subMenu0[0]],
+          shortcut: shortcuts[_subMenu0[0].label],
         ),
       ],
     ),
     PlatformMenu(
-      label: mainMenu[1],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[1]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[1]) : null,
+      label: _mainMenu[1].label,
+      tooltip: _mainMenu[1].tooltip,
+      onOpen: onOpen != null ? () => onOpen(_mainMenu[1].label) : null,
+      onClose: onClose != null ? () => onClose(_mainMenu[1].label) : null,
       menus: <PlatformMenuItem>[
         PlatformMenuItemGroup(
           members: <PlatformMenuItem>[
             PlatformMenuItem(
-              label: subMenu1[0],
-              onSelected: onSelected != null ? () => onSelected(subMenu0[0]) : null,
+              label: _subMenu1[0].label,
+              tooltip: _subMenu1[0].tooltip,
+              onSelected: onSelected != null ? () => onSelected(_subMenu1[0].label) : null,
               onSelectedIntent: onSelectedIntent,
-              shortcut: shortcuts[subMenu1[0]],
+              shortcut: shortcuts[_subMenu1[0].label],
             ),
           ],
         ),
         PlatformMenu(
-          label: subMenu1[1],
-          onOpen: onOpen != null ? () => onOpen(subMenu1[1]) : null,
-          onClose: onClose != null ? () => onClose(subMenu1[1]) : null,
+          label: _subMenu1[1].label,
+          tooltip: _subMenu1[1].tooltip,
+          onOpen: onOpen != null ? () => onOpen(_subMenu1[1].label) : null,
+          onClose: onClose != null ? () => onClose(_subMenu1[1].label) : null,
           menus: <PlatformMenuItem>[
             PlatformMenuItemGroup(
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
-                  label: subSubMenu10[0],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[0]) : null,
+                  label: _subSubMenu10[0].label,
+                  tooltip: _subSubMenu10[0].tooltip,
+                  onSelected: onSelected != null ? () => onSelected(_subSubMenu10[0].label) : null,
                   onSelectedIntent: onSelectedIntent,
-                  shortcut: shortcuts[subSubMenu10[0]],
+                  shortcut: shortcuts[_subSubMenu10[0].label],
                 ),
               ],
             ),
             PlatformMenuItemGroup(
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
-                  label: subSubMenu10[1],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[1]) : null,
+                  label: _subSubMenu10[1].label,
+                  tooltip: _subSubMenu10[1].tooltip,
+                  onSelected: onSelected != null ? () => onSelected(_subSubMenu10[1].label) : null,
                   onSelectedIntent: onSelectedIntent,
-                  shortcut: shortcuts[subSubMenu10[1]],
+                  shortcut: shortcuts[_subSubMenu10[1].label],
                 ),
               ],
             ),
             PlatformMenuItem(
-              label: subSubMenu10[2],
-              onSelected: onSelected != null ? () => onSelected(subSubMenu10[2]) : null,
+              label: _subSubMenu10[2].label,
+              tooltip: _subSubMenu10[2].tooltip,
+              onSelected: onSelected != null ? () => onSelected(_subSubMenu10[2].label) : null,
               onSelectedIntent: onSelectedIntent,
-              shortcut: shortcuts[subSubMenu10[2]],
+              shortcut: shortcuts[_subSubMenu10[2].label],
             ),
             PlatformMenuItemGroup(
               members: <PlatformMenuItem>[
                 PlatformMenuItem(
-                  label: subSubMenu10[3],
-                  onSelected: onSelected != null ? () => onSelected(subSubMenu10[3]) : null,
+                  label: _subSubMenu10[3].label,
+                  tooltip: _subSubMenu10[3].tooltip,
+                  onSelected: onSelected != null ? () => onSelected(_subSubMenu10[3].label) : null,
                   onSelectedIntent: onSelectedIntent,
-                  shortcut: shortcuts[subSubMenu10[3]],
+                  shortcut: shortcuts[_subSubMenu10[3].label],
                 ),
               ],
             ),
           ],
         ),
         PlatformMenuItem(
-          label: subMenu1[2],
-          onSelected: onSelected != null ? () => onSelected(subMenu1[2]) : null,
+          label: _subMenu1[2].label,
+          tooltip: _subMenu1[2].tooltip,
+          onSelected: onSelected != null ? () => onSelected(_subMenu1[2].label) : null,
           onSelectedIntent: onSelectedIntent,
-          shortcut: shortcuts[subMenu1[2]],
+          shortcut: shortcuts[_subMenu1[2].label],
         ),
       ],
     ),
     PlatformMenu(
-      label: mainMenu[2],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
+      label: _mainMenu[2].label,
+      tooltip: _mainMenu[2].tooltip,
+      onOpen: onOpen != null ? () => onOpen(_mainMenu[2].label) : null,
+      onClose: onClose != null ? () => onClose(_mainMenu[2].label) : null,
       menus: <PlatformMenuItem>[
         PlatformMenuItem(
           // Always disabled.
-          label: subMenu2[0],
-          shortcut: shortcuts[subMenu2[0]],
+          label: _subMenu2[0].label,
+          tooltip: _subMenu2[0].tooltip,
+          shortcut: shortcuts[_subMenu2[0].label],
         ),
       ],
     ),
     // Disabled menu
     PlatformMenu(
-      label: mainMenu[3],
-      onOpen: onOpen != null ? () => onOpen(mainMenu[2]) : null,
-      onClose: onClose != null ? () => onClose(mainMenu[2]) : null,
+      label: _mainMenu[3].label,
+      tooltip: _mainMenu[3].tooltip,
+      onOpen: onOpen != null ? () => onOpen(_mainMenu[3].label) : null,
+      onClose: onClose != null ? () => onClose(_mainMenu[3].label) : null,
       menus: <PlatformMenuItem>[],
     ),
   ];
   return result;
 }
 
-const Map<String, Object?> expectedStructure = <String, Object?>{
+const Map<String, Object?> _expectedStructure = <String, Object?>{
   '0': <Map<String, Object?>>[
     <String, Object?>{
       'id': 2,
       'label': 'Menu 0',
+      'tooltip': 'Menu 0 Tooltip',
       'enabled': true,
       'children': <Map<String, Object?>>[
-        <String, Object?>{'id': 1, 'label': 'Sub Menu 00', 'enabled': true},
+        <String, Object?>{
+          'id': 1,
+          'label': 'Sub Menu 00',
+          'tooltip': 'Sub Menu 00 Tooltip',
+          'enabled': true,
+        },
       ],
     },
     <String, Object?>{
@@ -343,7 +404,12 @@ const Map<String, Object?> expectedStructure = <String, Object?>{
       'label': 'Menu 1',
       'enabled': true,
       'children': <Map<String, Object?>>[
-        <String, Object?>{'id': 4, 'label': 'Sub Menu 10', 'enabled': true},
+        <String, Object?>{
+          'id': 4,
+          'label': 'Sub Menu 10',
+          'tooltip': 'Sub Menu 10 Tooltip',
+          'enabled': true,
+        },
         <String, Object?>{'id': 5, 'isDivider': true},
         <String, Object?>{
           'id': 16,
@@ -361,6 +427,7 @@ const Map<String, Object?> expectedStructure = <String, Object?>{
             <String, Object?>{
               'id': 10,
               'label': 'Sub Sub Menu 111',
+              'tooltip': 'Sub Sub Menu 111 Tooltip',
               'enabled': true,
               'shortcutTrigger': 98,
               'shortcutModifiers': 2,
@@ -377,18 +444,25 @@ const Map<String, Object?> expectedStructure = <String, Object?>{
             <String, Object?>{
               'id': 14,
               'label': 'Sub Sub Menu 113',
+              'tooltip': 'Sub Sub Menu 113 Tooltip',
               'enabled': true,
               'shortcutTrigger': 100,
               'shortcutModifiers': 1,
             },
           ],
         },
-        <String, Object?>{'id': 17, 'label': 'Sub Menu 12', 'enabled': true},
+        <String, Object?>{
+          'id': 17,
+          'label': 'Sub Menu 12',
+          'tooltip': 'Sub Menu 12 Tooltip',
+          'enabled': true,
+        },
       ],
     },
     <String, Object?>{
       'id': 20,
       'label': 'Menu 2',
+      'tooltip': 'Menu 2 Tooltip',
       'enabled': true,
       'children': <Map<String, Object?>>[
         <String, Object?>{'id': 19, 'label': 'Sub Menu 20', 'enabled': false},
@@ -403,8 +477,8 @@ const Map<String, Object?> expectedStructure = <String, Object?>{
   ],
 };
 
-class FakeMenuChannel implements MethodChannel {
-  FakeMenuChannel(this.outgoing);
+class _FakeMenuChannel implements MethodChannel {
+  _FakeMenuChannel(this.outgoing);
 
   Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall)? incoming;
