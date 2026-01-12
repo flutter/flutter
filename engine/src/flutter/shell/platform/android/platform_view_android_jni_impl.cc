@@ -71,6 +71,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
   V(g_set_application_locale_method, setApplicationLocale,                    \
     "(Ljava/lang/String;)V")                                                  \
+  V(g_set_semantics_tree_enabled_method, setSemanticsTreeEnabled, "(Z)V")     \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
@@ -1381,6 +1382,21 @@ void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
 
   env->CallVoidMethod(java_object.obj(), g_set_application_locale_method,
                       jlocale.obj());
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::FlutterViewSetSemanticsTreeEnabled(
+    bool enabled) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_set_semantics_tree_enabled_method,
+                      enabled);
 
   FML_CHECK(fml::jni::CheckException(env));
 }
