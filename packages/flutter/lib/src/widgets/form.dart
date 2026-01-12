@@ -29,6 +29,18 @@ import 'will_pop_scope.dart';
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
 const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
+/// Defines how a [Form] validation is triggered.
+enum _FormValidation {
+  /// Automatic validation driven by the [Form]'s [AutovalidateMode].
+  auto,
+
+  /// Explicit validation via [FormState.validate] or
+  /// [FormState.validateGranularly].
+  manual;
+
+  bool get isAuto => this == _FormValidation.auto;
+}
+
 // Examples can assume:
 // late BuildContext context;
 
@@ -228,12 +240,12 @@ class Form extends StatefulWidget {
   /// never validate automatically, even if the [Form] it belongs to is set to
   /// [AutovalidateMode.always] or [AutovalidateMode.onUserInteraction].
   ///
-  /// When this is false (the default), the [Form]'s [AutovalidateMode] takes
+  /// When this is false, the [Form]'s [AutovalidateMode] takes
   /// precedence over fields that have validation disabled, allowing the form
   /// to trigger validation across all its children at once.
   ///
-  /// Note that [FormState.validate] will still manually trigger validation
-  /// for all fields regardless of this setting.
+  /// Calling [FormState.validate] always triggers validation for all fields,
+  /// regardless of this setting.
   ///
   /// Defaults to false.
   final bool useStrictAutovalidateMode;
@@ -294,14 +306,14 @@ class FormState extends State<Form> {
 
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
-        _validate(View.of(context), false);
+        _validate(View.of(context));
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
-          _validate(View.of(context), false);
+          _validate(View.of(context));
         }
       case AutovalidateMode.onUserInteractionIfError:
         if (_hasInteractedByUser && hasError) {
-          _validate(View.of(context), false);
+          _validate(View.of(context));
         }
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.disabled:
@@ -362,7 +374,7 @@ class FormState extends State<Form> {
   bool validate() {
     _hasInteractedByUser = true;
     _forceRebuild();
-    return _validate(View.of(context), true);
+    return _validate(View.of(context), validation: _FormValidation.manual);
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -379,23 +391,20 @@ class FormState extends State<Form> {
     final invalidFields = <FormFieldState<Object?>>{};
     _hasInteractedByUser = true;
     _forceRebuild();
-    _validate(View.of(context), true, invalidFields);
+    _validate(View.of(context), validation: _FormValidation.manual, invalidFields: invalidFields);
     return invalidFields;
   }
 
-  // TODO(Mairramer): Rename 'isManualChecker' to reflect its role in tracking
-  // manual validation state. The current name is ambiguous regarding whether
-  // it triggers or merely reports state.
   bool _validate(
-    FlutterView view,
-    bool isManualChecker, [
+    FlutterView view, {
+    _FormValidation validation = _FormValidation.auto,
     Set<FormFieldState<Object?>>? invalidFields,
-  ]) {
+  }) {
     var hasError = false;
     var errorMessage = '';
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (!isManualChecker && !field._shouldAutoValidate && widget.useStrictAutovalidateMode) {
+      if (validation.isAuto && !field._shouldAutoValidate && widget.useStrictAutovalidateMode) {
         continue;
       }
 
