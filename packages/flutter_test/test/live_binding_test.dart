@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -94,6 +95,12 @@ void main() {
     widgetCenter = tester.getRect(find.byType(Text)).center;
     expect(widgetCenter.dx, windowCenterX);
     expect(widgetCenter.dy, windowCenterY);
+    addTearDown(() async {
+      // Set the surface size to anything different to dispose the layer. After
+      // that, set surface size back to null to reset the configuration.
+      await binding.setSurfaceSize(const Size(1, 1));
+      await binding.setSurfaceSize(null);
+    });
   });
 
   testWidgets("reassembleApplication doesn't get stuck", (WidgetTester tester) async {
