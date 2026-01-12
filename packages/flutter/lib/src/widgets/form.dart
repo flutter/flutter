@@ -402,7 +402,7 @@ class FormState extends State<Form> {
     var errorMessage = '';
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (validation.isAuto && !field._shouldAutoValidate && widget.useStrictAutovalidateMode) {
+      if (validation.isAuto && !field._shouldValidate && widget.useStrictAutovalidateMode) {
         continue;
       }
 
@@ -731,7 +731,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     _formState?._fieldDidChange();
   }
 
-  bool get _shouldAutoValidate {
+  bool get _shouldValidate {
     return switch (widget.autovalidateMode) {
       AutovalidateMode.always => true,
       AutovalidateMode.onUserInteraction => _hasInteractedByUser.value,
@@ -829,7 +829,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @protected
   @override
   Widget build(BuildContext context) {
-    if (widget.enabled && _shouldAutoValidate) {
+    if (widget.enabled && _shouldValidate) {
       _validate();
     }
 
@@ -842,6 +842,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       child: widget.builder(this),
     );
 
+    // TODO(Mairramer): Refactor this to use switch case instead.
     if (_formState?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
