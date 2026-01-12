@@ -500,6 +500,44 @@ void main() {
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/100758
+    testWidgets('GestureDetector inside Transform is tappable and hit testable', (WidgetTester tester) async {
+      var tapCount = 0;
+
+      await tester.pumpWidget(Center(
+        child: _ButtonWithTransform(
+          onTap: () {
+            tapCount++;
+          },
+        ),
+      ));
+
+      await tester.tap(find.byType(_ButtonWithTransform));
+
+      expect(find.byType(_ButtonWithTransform).hitTestable(), findsOneWidget);
+
+      expect(tapCount, 1);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/99302
+    testWidgets('GestureDetector inside AnimatedScale is tappable and hit testable', (WidgetTester tester) async {
+      var tapCount = 0;
+
+      await tester.pumpWidget(Center(
+        child: _ButtonWithAnimatedScale(
+          onTap: () {
+            tapCount++;
+          },
+        ),
+      ));
+
+      await tester.tap(find.byType(_ButtonWithAnimatedScale));
+
+      expect(find.byType(_ButtonWithAnimatedScale).hitTestable(), findsOneWidget);
+
+      expect(tapCount, 1);
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/67743.
     testWidgets('tapping directly on a Sliver produces an error', (WidgetTester tester) async {
       var sliverToBoxAdapterTapped = 0;
@@ -1787,5 +1825,38 @@ class _FakeFinder extends FinderBase<String> {
   @override
   Iterable<String> findInCandidates(Iterable<String> candidates) {
     return findInCandidatesCallback?.call(candidates) ?? candidates;
+  }
+}
+
+class _ButtonWithTransform extends StatelessWidget {
+  const _ButtonWithTransform({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Transform.scale(
+    scale: 1.1,
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+    ),
+  );
+}
+
+class _ButtonWithAnimatedScale extends StatelessWidget {
+  const _ButtonWithAnimatedScale({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: 0.9,
+      duration: const Duration(milliseconds: 200),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(width: 40, height: 40, color: const Color(0xffff0000)),
+      ),
+    );
   }
 }
