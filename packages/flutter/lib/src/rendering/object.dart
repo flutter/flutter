@@ -1496,24 +1496,44 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
       final List<RenderObject> nodesToProcessGeometry =
           _nodesNeedingSemanticsGeometryUpdate
-              .where((RenderObject object) => !object._needsLayout && object.owner == this)
+              .where(
+                (RenderObject object) =>
+                    !object._needsLayout &&
+                    object.owner == this &&
+                    !object._semantics.parentDataDirty,
+              )
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemanticsGeometryUpdate.clear();
       // print('flush nodesToProcessGeometry $nodesToProcessGeometry');
       // print(rootNode?._semantics.toStringDeep());
+
+      // Clear geometry for nodes that were marked as dirty.
       for (final node in nodesToProcessGeometry) {
+        if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
+          // This is enough to trigger a geomtry update.
+          continue;
+        }
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
         }
       }
+
+      // conduct the geometry update for nodes that were marked as dirty.
       for (final node in nodesToProcessGeometry) {
         _RenderObjectSemantics target = node._semantics;
-        while (!target.isRoot && (target.geometryDirty || !target.shouldFormSemanticsNode)) {
+        var notBlocked = true;
+        while ((notBlocked = !target.parentDataDirty) &&
+            !target.isRoot &&
+            (target.geometryDirty || !target.shouldFormSemanticsNode)) {
           target = target.parent!;
         }
-        // print('process geometry for $target');
-        target.ensureGeometry();
+        // print(
+        //   'process geometry for $target, notBlocked ${notBlocked} target.parentDataDirty, ${target.parentDataDirty}',
+        // );
+        if (notBlocked) {
+          target.ensureGeometry();
+        }
       }
       // if (nodesToProcessGeometry.isNotEmpty) {
       //   debugDumpRenderObjectSemanticsTree();
@@ -6144,10 +6164,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the semantics geometry of the cached semantics node.
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
-    // if (geometry == null) {
-    //   print('geometry is null for $this');
-    //   debugDumpRenderObjectSemanticsTree();
-    // }
+    if (geometry == null) {
+      print('geometry is null for $this');
+      // debugDumpRenderObjectSemanticsTree();
+    }
     final _SemanticsGeometry nodeGeometry = geometry!;
     final bool isSemanticsHidden =
         configProvider.original.isHidden ||
