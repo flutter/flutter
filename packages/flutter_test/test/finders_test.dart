@@ -512,7 +512,9 @@ void main() {
         ),
       ));
 
+      WidgetController.hitTestWarningShouldBeFatal = true;
       await tester.tap(find.byType(_ButtonWithTransform));
+      WidgetController.hitTestWarningShouldBeFatal = false;
 
       expect(find.byType(_ButtonWithTransform).hitTestable(), findsOneWidget);
 
@@ -531,7 +533,9 @@ void main() {
         ),
       ));
 
+      WidgetController.hitTestWarningShouldBeFatal = true;
       await tester.tap(find.byType(_ButtonWithAnimatedScale));
+      WidgetController.hitTestWarningShouldBeFatal = false;
 
       expect(find.byType(_ButtonWithAnimatedScale).hitTestable(), findsOneWidget);
 
