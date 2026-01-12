@@ -1458,6 +1458,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               .where((RenderObject object) => !object._needsLayout && object.owner == this)
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      final Set<RenderObject> nodesToBuild = _nodesNeedingSemantics.toSet();
       _nodesNeedingSemantics.clear();
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.updateChildren');
@@ -1543,6 +1544,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         //   'process geometry for $target, notBlocked ${notBlocked} target.parentDataDirty, ${target.parentDataDirty}',
         // );
         if (notBlocked) {
+          nodesToBuild.add(target.renderObject);
           target.ensureGeometry();
         }
       }
@@ -1556,13 +1558,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       if (!kReleaseMode) {
         FlutterTimeline.startSync('Semantics.ensureSemanticsNode');
       }
-      for (final RenderObject node in nodesToProcess.reversed) {
+      final List<RenderObject> nodesToBuildDepthFirst =
+          nodesToBuild
+              .where((RenderObject object) => !object._needsLayout && object.owner == this)
+              .toList()
+            ..sort((RenderObject a, RenderObject b) => b.depth - a.depth);
+      // print('Semantics.ensureSemanticsNode ${nodesToBuildDepthFirst}');
+      for (final node in nodesToBuildDepthFirst) {
         if (node._semantics.parentDataDirty) {
           // same as above.
           continue;
         }
+        // print('process Semantics.ensureSemanticsNode $node');
         node._semantics.ensureSemanticsNode();
       }
+      // debugDumpRenderObjectSemanticsTree();
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
@@ -5996,7 +6006,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// information from both their parent and child rendering objects to update
   /// its cache, so it can't update by themselves.
   void ensureSemanticsNode() {
-    assert(configProvider.effective.isSemanticBoundary || isRoot);
+    assert(shouldFormSemanticsNode);
     if (!built) {
       _buildSemantics(usedSemanticsIds: <int>{});
     } else {
@@ -6178,7 +6188,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   void _updateSemanticsNodeGeometry() {
     final SemanticsNode node = cachedSemanticsNode!;
     if (geometry == null) {
-      print('geometry is null for $this');
+      // print('geometry is null for $this');
       // debugDumpRenderObjectSemanticsTree();
     }
     final _SemanticsGeometry nodeGeometry = geometry!;
