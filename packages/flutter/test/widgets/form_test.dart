@@ -1838,10 +1838,10 @@ void main() {
       ),
     );
 
-    final FormState? formState = formKey.currentState;
+    final FormState formState = formKey.currentState!;
 
-    expect(formState?.fields.length, equals(2));
-    expect(formState?.fields.map((field) => field.value), containsAll(<String>['A', 'B']));
+    expect(formState.fields.length, equals(2));
+    expect(formState.fields.map((field) => field.value), containsAll(<String>['A', 'B']));
   });
 
   testWidgets('reports all fields as invalid after validation errors', (WidgetTester tester) async {
@@ -1870,9 +1870,9 @@ void main() {
     expect(find.text(errorText('foo')), findsOneWidget);
     expect(find.text(errorText('bar')), findsOneWidget);
 
-    final List<FormFieldState<dynamic>>? fields = formKey.currentState?.fields.toList();
+    final List<FormFieldState<dynamic>> fields = formKey.currentState!.fields.toList();
 
-    expect(fields?.every((field) => field.isValid), isFalse);
+    expect(fields.every((field) => field.isValid), isFalse);
   });
 
   testWidgets('allows collecting and updating values from all field types', (
