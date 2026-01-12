@@ -1919,12 +1919,12 @@ void main() {
                   builder: (field) => const SizedBox.shrink(),
                 ),
                 DropdownButtonFormField<String>(
-                  key: const ValueKey('gender'),
-                  initialValue: 'other',
+                  key: const ValueKey('animal'),
+                  initialValue: 'cat',
                   items: const [
-                    DropdownMenuItem(value: 'male', child: SizedBox.shrink()),
-                    DropdownMenuItem(value: 'female', child: SizedBox.shrink()),
-                    DropdownMenuItem(value: 'other', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'dog', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'cat', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'bird', child: SizedBox.shrink()),
                   ],
                   onChanged: (_) {},
                 ),
@@ -1942,7 +1942,7 @@ void main() {
       };
     }
 
-    expect(collectData(), {'name': 'Name', 'email': 'Email', 'age': 18, 'gender': 'other'});
+    expect(collectData(), {'name': 'Name', 'email': 'Email', 'age': 18, 'animal': 'cat'});
 
     FormFieldState<T> field<T>(String key) => formKey.currentState!.fields
         .whereType<FormFieldState<T>>()
@@ -1951,7 +1951,7 @@ void main() {
     field<String>('name').didChange('New Name');
     field<String>('email').didChange('new@email.com');
     field<int>('age').didChange(30);
-    field<String>('gender').didChange('female');
+    field<String>('animal').didChange('dog');
 
     await tester.pump();
 
@@ -1959,7 +1959,7 @@ void main() {
       'name': 'New Name',
       'email': 'new@email.com',
       'age': 30,
-      'gender': 'female',
+      'animal': 'dog',
     });
   });
 }
