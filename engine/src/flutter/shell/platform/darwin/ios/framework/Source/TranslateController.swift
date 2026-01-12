@@ -7,21 +7,25 @@ import UIKit
 import SwiftUI
 import Translation
 
+/// A wrapper view controller that exposes the SwiftUI translation view to Objective-C.
+///
+/// This is necessary because UIHostingController is a generic class and cannot
+/// be imported directly into Objective-C.
 @available(iOS 17.4, *)
-@objc(TranslateController)
+@objc(FLTTranslateController)
 public class TranslateController: UIViewController {
 
-  private let originalText: String
+  private let termToTranslate: String
   private let ipadBounds: CGRect?
 
   @objc public init(term: String) {
-    self.originalText = term
+    self.termToTranslate = term
     self.ipadBounds = nil
     super.init(nibName: nil, bundle: nil)
   }
 
   @objc public init(term: String, ipadBounds: CGRect) {
-    self.originalText = term
+    self.termToTranslate = term
     self.ipadBounds = ipadBounds
     super.init(nibName: nil, bundle: nil)
   }
@@ -33,7 +37,7 @@ public class TranslateController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    let swiftUIViewController = makeTranslateHostingController(termToTranslate: originalText)
+    let swiftUIViewController = makeTranslateHostingController(termToTranslate: termToTranslate)
 
     addChild(swiftUIViewController)
     view.addSubview(swiftUIViewController.view)
@@ -50,10 +54,11 @@ public class TranslateController: UIViewController {
 
   @objc public func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
     var contentView = ContentView(termToTranslate: termToTranslate, ipadBounds: ipadBounds)
+    guard let strongSelf = self else { return }
     contentView.onDismiss = { [weak self] in
-            self?.willMove(toParent: nil)
-            self?.view.removeFromSuperview()
-            self?.removeFromParent()
+      strongSelf.willMove(toParent: nil)
+      strongSelf.view.removeFromSuperview()
+      strongSelf.removeFromParent()
         }
 
     let hostingController = UIHostingController(rootView: contentView)
@@ -69,14 +74,14 @@ struct ContentView: View {
   let ipadBounds: CGRect?
 
   var onDismiss: (() -> Void)?
-  
+
   var body: some View {
     Color.clear
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .translationPresentation(
           isPresented: $isTranslationPopoverShown,
           text: termToTranslate,
-          attachmentAnchor: ipadBounds != nil ? .rect(.rect(ipadBounds!)) : .rect(.bounds))
+          attachmentAnchor: ipadBounds ?? .rect(.rect(ipadBounds!)) : .rect(.bounds))
         .onChange(of: isTranslationPopoverShown) { _, isShown in
                     if !isShown {
                         onDismiss?()

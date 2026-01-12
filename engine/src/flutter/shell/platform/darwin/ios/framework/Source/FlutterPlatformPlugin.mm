@@ -455,8 +455,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 }
 
 - (void)showTranslateViewController:(NSString*)term {
-  UIViewController* engineViewController = [self.engine viewController];
-  TranslateController* translateController;
+  UIViewController* flutterViewController = [self.engine viewController];
+  FLTTranslateController* translateController;
 
   if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
     // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
@@ -482,14 +482,14 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
                    abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
                    transformedFirstRect.size.height);
 
-    translateController = [[TranslateController alloc] initWithTerm:term ipadBounds:ipadBounds];
+    translateController = [[FLTTranslateController alloc] initWithTerm:term ipadBounds:ipadBounds];
   } else {
-    translateController = [[TranslateController alloc] initWithTerm:term];
+    translateController = [[FLTTranslateController alloc] initWithTerm:term];
   }
 
-  [engineViewController addChildViewController:translateController];
-  [engineViewController.view addSubview:translateController.view];
-  [translateController didMoveToParentViewController:engineViewController];
+  [flutterViewController addChildViewController:translateController];
+  [flutterViewController.view addSubview:translateController.view];
+  [translateController didMoveToParentViewController:flutterViewController];
 }
 
 - (UITextField*)textField {
