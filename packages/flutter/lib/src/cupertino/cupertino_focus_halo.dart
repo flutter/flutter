@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+/// @docImport 'dart:ui';
+library;
 
+import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 
@@ -76,6 +78,11 @@ class CupertinoFocusHalo extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
+  /// See also:
+  ///
+  /// * [RSuperellipse] and [RoundedSuperellipseBorder] for more introduction on
+  ///   the rounded superellipse shape.
   const CupertinoFocusHalo.withRoundedSuperellipse({
     required this.child,
     required BorderRadiusGeometry borderRadius,
