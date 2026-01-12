@@ -1905,7 +1905,7 @@ void main() {
       await tester.pumpWidget(buildForm(formKey: formKey));
       await tester.pump();
 
-      expect(find.text('Not valid'), findsNothing);
+      expect(find.text(errorText(invalidValue)), findsNWidgets(0));
 
       final bool result = formKey.currentState!.validate();
       expect(result, isFalse);

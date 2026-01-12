@@ -793,7 +793,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _formState ??= Form.maybeOf(context);
+    final FormState? newFormState = Form.maybeOf(context);
+    if (_formState != newFormState) {
+      _formState?._unregister(this);
+      _formState = newFormState;
+    }
 
     if (_formState?.widget.useStrictAutovalidateMode ?? false) {
       return;
