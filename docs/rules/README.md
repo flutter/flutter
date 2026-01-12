@@ -16,6 +16,7 @@ Different AI coding assistants and tools have varying limits for their "rules" o
 | :--- | :--- | :--- | :--- |
 | Aider | No Hard Limit | [Aider Conventions](https://aider.chat/docs/usage/conventions.html) | Limited by model context window. |
 | Antigravity (Google) | 12,000 characters (Hard) | Internal Source | Validated via client-side error message. |
+| Claude Code | No Hard Limit | [Claude Code Docs](https://support.claude.com/en/articles/11647753-understanding-usage-and-length-limits) | Uses `CLAUDE.md`. Context limited. |
 | CodeRabbit | 1,000 characters (Hard) | [CodeRabbit Docs](https://docs.coderabbit.ai/pr-reviews/pre-merge-checks#ui-configuration) | Applied to "Instructions" field. |
 | Cursor | No Hard Limit | [Cursor Docs](https://cursor.com/docs/context/rules) | Keep rules under 500 lines |
 | Gemini CLI | 1M+ Tokens (Context) | [Vertex AI Docs](https://cloud.google.com/vertex-ai/generative-ai/docs/long-context) | Pactical limit is model context window. |
