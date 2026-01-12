@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1443,9 +1444,27 @@ class _HitTestableWidgetFinder extends ChainedFinder {
       final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
-        if (entry.target == candidate.renderObject) {
+        final HitTestTarget target = entry.target;
+        // Check if the candidate's render object is the target or an ancestor
+        // of the target. This is necessary because some render objects like
+        // RenderTransform don't add themselves to the hit test path, they just
+        // transform the point and pass it to their children.
+        if (target == object) {
           yield candidate;
           break;
+        }
+        if (target is RenderObject) {
+          var found = false;
+          for (RenderObject? current = target.parent; current != null; current = current.parent) {
+            if (current == object) {
+              yield candidate;
+              found = true;
+              break;
+            }
+          }
+          if (found) {
+            break;
+          }
         }
       }
     }
