@@ -111,8 +111,11 @@ for platform in "${platforms[@]}"; do
   for package in $(cat $package_file_name); do
     echo $package
     split=(${package//:/ })
-    echo "Installing ${split[0]}"
-    yes "y" | $sdkmanager_path --sdk_root=$sdk_root ${split[0]}
+    IFS=',' read -ra ADDR <<< "${split[0]}"
+    for i in "${ADDR[@]}"; do
+      echo "Installing $i"
+      yes "y" | $sdkmanager_path --sdk_root=$sdk_root "$i"
+    done
 
     # We copy only the relevant directories to a temporary dir
     # for upload. sdkmanager creates extra files that we don't need.

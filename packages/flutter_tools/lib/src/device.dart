@@ -987,6 +987,7 @@ class DebuggingOptions {
     this.webBrowserFlags = const <String>[],
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
+    bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.vmserviceOutFile,
@@ -1006,6 +1007,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
   }) : debuggingEnabled = true,
+       webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
 
   DebuggingOptions.disabled(
@@ -1019,6 +1021,7 @@ class DebuggingOptions {
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
     this.webLaunchUrl,
+    bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
     this.traceAllowlist,
@@ -1056,6 +1059,7 @@ class DebuggingOptions {
        devToolsServerAddress = null,
        vmserviceOutFile = null,
        webEnableExpressionEvaluation = false,
+       webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        nativeNullAssertions = false,
        enableDevTools = false,
        ipv6 = false,
@@ -1098,6 +1102,7 @@ class DebuggingOptions {
     required this.webBrowserFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
+    required this.webCrossOriginIsolation,
     required this.webRenderer,
     required this.webUseWasm,
     required this.vmserviceOutFile,
@@ -1185,6 +1190,10 @@ class DebuggingOptions {
 
   /// Allow developers to customize the browser's launch URL
   final String? webLaunchUrl;
+
+  /// Whether to enable cross-origin isolation. This is on by default for the
+  /// skwasm renderer.
+  final bool webCrossOriginIsolation;
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
@@ -1287,6 +1296,7 @@ class DebuggingOptions {
     'webBrowserFlags': webBrowserFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
+    'webCrossOriginIsolation': webCrossOriginIsolation,
     'webHeaders': webDevServerConfig?.headers ?? <String, String>{},
     'webRenderer': webRenderer.name,
     'webUseWasm': webUseWasm,
@@ -1354,6 +1364,7 @@ class DebuggingOptions {
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
         webLaunchUrl: json['webLaunchUrl'] as String?,
+        webCrossOriginIsolation: json['webCrossOriginIsolation']! as bool,
         webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,

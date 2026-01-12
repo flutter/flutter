@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define SUPPORTS_DECAL 1
-
 #include <downsample.glsl>
+
+vec4 Sample(vec2 uv) {
+  return texture(texture_sampler, uv, float16_t(kDefaultMipBias));
+}

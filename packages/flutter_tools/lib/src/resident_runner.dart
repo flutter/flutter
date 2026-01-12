@@ -125,6 +125,7 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
+        includeUnsupportedPlatformLibraryStubs: buildInfo.includeUnsupportedPlatformLibraryStubs,
         fileSystemRoots: buildInfo.fileSystemRoots,
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
@@ -1611,6 +1612,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
