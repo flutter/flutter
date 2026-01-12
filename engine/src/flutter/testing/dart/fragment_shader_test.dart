@@ -331,7 +331,7 @@ void main() async {
       }
     });
 
-    _runSkiaTest('FragmentProgram getUniformFloat unknown', () async {
+    test('FragmentProgram getUniformFloat unknown', () async {
       try {
         shader.getUniformFloat('unknown');
         fail('Unreachable');
