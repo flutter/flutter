@@ -79,7 +79,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires Xcode 16 or higher'));
+      expect(result.messages.last.message, contains('Flutter requires Xcode 15 or higher'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
@@ -101,7 +101,7 @@ void main() {
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
-          version: Version(16, 1, null),
+          version: Version(15, 4, null),
         ),
       );
       final simulatorUtils = FakeIOSSimulatorUtils(
@@ -119,7 +119,7 @@ void main() {
       expect(result.messages.last.type, ValidationMessageType.hint);
       expect(
         result.messages.last.message,
-        contains('Flutter recommends a minimum Xcode version of 16.2'),
+        contains('Flutter recommends a minimum Xcode version of 16'),
       );
       expect(processManager, hasNoRemainingExpectations);
     }, skip: false); // [intended] Skip this test when minimum and required check versions converge.
