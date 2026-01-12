@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
+
 class User {
   const User({required this.email, required this.name});
 
@@ -3432,6 +3434,71 @@ void main() {
     expect(
       tester.takeAnnouncements().first,
       isAccessibilityAnnouncement(localizations.noResultsFound),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('Autocomplete Semantics announce in multi-view', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    const localizations = DefaultWidgetsLocalizations();
+    const viewId = 1;
+
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: View(
+          view: FakeView(tester.view, viewId: viewId),
+          child: MaterialApp(
+            home: Scaffold(
+              body: RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
+                      return TextField(focusNode: focusNode, controller: textEditingController);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      lastOptions = options;
+                      return Container(key: optionsKey);
+                    },
+              ),
+            ),
+          ),
+        ),
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byKey(optionsKey), findsNothing);
+
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, kOptions.length);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.searchResultsFound, viewId: viewId),
     );
 
     handle.dispose();
