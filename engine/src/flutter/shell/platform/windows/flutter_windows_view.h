@@ -29,6 +29,18 @@ namespace flutter {
 // A unique identifier for a view.
 using FlutterViewId = int64_t;
 
+// Optional delegate for views that are sized to contents.
+class FlutterWindowsViewSizingDelegate {
+ public:
+  // This method is called from the raster thread
+  // after the view's surface has been resized but
+  // before the frame has been presented on the view.
+  virtual void DidUpdateViewSize(int32_t width, int32_t height) = 0;
+
+  // Return the work area that the view can be laid out within.
+  virtual WindowRect GetWorkArea() const = 0;
+};
+
 // An OS-windowing neutral abstration for a Flutter view that works
 // with win32 HWNDs.
 class FlutterWindowsView : public WindowBindingHandlerDelegate {
@@ -39,6 +51,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
       FlutterViewId view_id,
       FlutterWindowsEngine* engine,
       std::unique_ptr<WindowBindingHandler> window_binding,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
+      FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr,
       std::shared_ptr<WindowsProcTable> windows_proc_table = nullptr);
 
   virtual ~FlutterWindowsView();
@@ -413,6 +428,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // to prevent screen tearing.
   bool NeedsVsync() const;
 
+  // If true, the view is sized to its content via a sizing delegate.
+  // If false, the view is sized by its parent HWND or by the user.
+  //
+  // This method can be called from the platform or raster threads.
+  bool IsSizedToContent() const;
+
+  // Gets the constraints for this view.
+  BoxConstraints GetConstraints() const;
+
   // The view's unique identifier.
   FlutterViewId view_id_;
 
@@ -454,6 +478,16 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // The accessibility bridge associated with this view.
   std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;
+
+  // If `true`, the view is sized to its content via a sizing delegate.
+  // If `false`, the view is sized by its parent HWND.
+  bool is_sized_to_content_ = false;
+
+  // The constraints for this view.
+  BoxConstraints box_constraints_;
+
+  // Optional sizing delegate for views that are sized to content.
+  FlutterWindowsViewSizingDelegate* sizing_delegate_ = nullptr;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };

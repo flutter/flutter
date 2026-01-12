@@ -79,6 +79,7 @@ void main() {
       'start',
       '--verbose',
       '--${WidgetPreviewStartCommand.kHeadless}',
+      '--${WidgetPreviewStartCommand.kDisableDtdServiceUuid}',
       if (useWebServer) '--${WidgetPreviewStartCommand.kWebServer}',
       if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
       if (devToolsServerAddress != null)
@@ -192,14 +193,15 @@ void main() {
       // The preview scaffold will send a 'Connected' event on this stream once it has initialized
       // and is ready.
       final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
-      const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
       final completer = Completer<void>();
-      dtdConnection.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
-        expect(event.stream, kWidgetPreviewScaffoldStream);
+      dtdConnection.onEvent(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot).listen((
+        DTDEvent event,
+      ) {
+        expect(event.stream, WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
         expect(event.kind, 'Connected');
         completer.complete();
       });
-      await dtdConnection.streamListen(kWidgetPreviewScaffoldStream);
+      await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
@@ -242,17 +244,18 @@ void main() {
       // The preview scaffold will send a 'Connected' event on this stream once it has initialized
       // and is ready.
       final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
-      const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
       final completer = Completer<void>();
       var firstConnection = true;
-      dtdConnection.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
-        expect(event.stream, kWidgetPreviewScaffoldStream);
+      dtdConnection.onEvent(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot).listen((
+        DTDEvent event,
+      ) {
+        expect(event.stream, WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
         expect(event.kind, 'Connected');
         if (firstConnection) {
           firstConnection = false;
           runFlutterClean();
           dtdConnection.call(
-            WidgetPreviewDtdServices.kWidgetPreviewService,
+            WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
             WidgetPreviewDtdServices.kHotRestartPreviewer,
           );
           return;
@@ -262,7 +265,7 @@ void main() {
         // crashed.
         completer.complete();
       });
-      await dtdConnection.streamListen(kWidgetPreviewScaffoldStream);
+      await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, dtdUri: dtdUri);
