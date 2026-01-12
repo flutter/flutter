@@ -76,6 +76,9 @@ abstract class FeatureFlags {
   /// Whether UIScene migration is enabled.
   bool get isUISceneMigrationEnabled;
 
+  /// Wether riscv64 support is enabled.
+  bool get isRiscv64SupportEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -99,6 +102,7 @@ abstract class FeatureFlags {
     windowingFeature,
     lldbDebugging,
     uiSceneMigration,
+    riscv64,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -266,6 +270,16 @@ const uiSceneMigration = Feature(
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// The [Feature] for building code targetting riscv64 architecture
+const riscv64 = Feature(
+  name: 'support for riscv64 architecture',
+  configSetting: 'enable-riscv64',
+  environmentOverride: 'FLUTTER_RISCV64',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

@@ -251,7 +251,7 @@ Future<void> _runIntegrationToolTests() async {
 
 Future<void> _runWidgetPreviewScaffoldToolTests() async {
   await runFlutterTest(
-    path.join(_toolsPath, 'test', 'widget_preview_scaffold.shard', 'widget_preview_scaffold'),
+    path.join(flutterRoot, 'dev', 'integration_tests', 'widget_preview_scaffold'),
   );
 }
 
