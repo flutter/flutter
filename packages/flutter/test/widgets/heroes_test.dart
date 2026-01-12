@@ -3312,7 +3312,7 @@ Future<void> main() async {
                 return RectTween(begin: begin, end: end);
               },
               curve: curve,
-              reverseCurve: reverseCurve,
+              reverseCurve: reverseCurve?.flipped,
               child: SizedBox(key: container1, height: 100, width: 100),
             ),
           ),
@@ -3333,7 +3333,7 @@ Future<void> main() async {
                   return RectTween(begin: begin, end: end);
                 },
                 curve: curve,
-                reverseCurve: reverseCurve,
+                reverseCurve: reverseCurve?.flipped,
                 child: SizedBox(key: container2, height: 200, width: 200),
               ),
             ),
