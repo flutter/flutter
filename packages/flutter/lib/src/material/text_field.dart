@@ -1797,9 +1797,8 @@ class _TextFieldState extends State<TextField>
               // Error takes priority over hint since it requires user action.
               // Note: The visual hintText is already shown as placeholder, so we
               // only need to expose it via semantics when there's no error.
-              final String? errorText =
-                  widget.decoration?.errorText ?? widget.decoration?.error?.toString();
-              final String? semanticsHint = errorText ?? widget.decoration?.hintText;
+              final String? semanticsHint =
+                  widget.decoration?.errorText ?? widget.decoration?.hintText;
               return Semantics(
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
