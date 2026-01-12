@@ -1875,6 +1875,30 @@ void main() {
     expect(fields.every((field) => field.isValid), isFalse);
   });
 
+  testWidgets('isValid evaluates validity without updating error UI', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: TextFormField(initialValue: 'foo', validator: errorText),
+          ),
+        ),
+      ),
+    );
+
+    final FormFieldState<dynamic> field = formKey.currentState!.fields.single;
+
+    expect(field.isValid, isFalse);
+
+    // No error UI should be shown.
+    expect(find.text(errorText('foo')), findsNothing);
+    expect(field.hasError, isFalse);
+  });
+
   testWidgets('allows collecting and updating values from all field types', (
     WidgetTester tester,
   ) async {
