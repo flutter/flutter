@@ -105,6 +105,46 @@ void main() {
       },
     );
   });
+
+  group('multiple target devices', () {
+    late List<_FakeHotCompatibleFlutterDevice> flutterDevices;
+    late MemoryFileSystem fileSystem;
+
+    setUp(() {
+      flutterDevices = [
+        _FakeHotCompatibleFlutterDevice(FakeDevice()),
+        _FakeHotCompatibleFlutterDevice(FakeDevice()),
+      ];
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testUsingContext(
+      'regression test for https://github.com/flutter/flutter/issues/179857',
+      () async {
+        final runner = HotRunner(
+          flutterDevices,
+          target: 'main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          analytics: _FakeAnalytics(),
+        );
+
+        await runner.run();
+        await runner.cleanupAfterSignal();
+
+        // Providing multiple Flutter devices should result in the target platform being set to
+        // 'multiple', which we use to report analytics.
+        expect(runner.targetPlatformName, 'multiple');
+        for (final flutterDevice in flutterDevices) {
+          expect(flutterDevice.wasExited, true);
+          expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
+        }
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
+  });
 }
 
 class _FakeAnalytics extends Fake implements Analytics {
