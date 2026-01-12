@@ -217,7 +217,7 @@ void CompilerSkSL::detect_unsupported_resources() {
       // this.
       auto& block = id.get<SPIRBlock>();
 
-      // File ane line information for use in the error message.
+      // File and line information for use in the error message.
       std::string file;
       uint32_t line = 0;
 
@@ -232,7 +232,7 @@ void CompilerSkSL::detect_unsupported_resources() {
           // Check for OpStore instructions that store an array constant. This
           // detects array initializations which use compile-time constants
           // (e.g. `float[2] nums = float[](1.0, 2.0);`).
-          auto& store_object_id = ir.ids[ir.spirv[instruction.offset + 1]];
+          Variant& store_object_id = ir.ids[ir.spirv[instruction.offset + 1]];
           if (store_object_id.get_type() == TypeConstant) {
             auto& c = store_object_id.get<SPIRConstant>();
             auto& type = get<SPIRType>(c.constant_type);
