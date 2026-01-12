@@ -384,7 +384,7 @@ class Stepper extends StatefulWidget {
   /// The padding around the header row in both [StepperType.vertical] and
   /// [StepperType.horizontal] steppers.
   ///
-  /// If null, defaults to `EdgeInsets.symmetric(horizontal: 24.0)`.
+  /// Defaults to to `EdgeInsets.symmetric(horizontal: 24.0)`.
   final EdgeInsetsGeometry? headerPadding;
 
   /// The padding around the content area in both [StepperType.vertical] and
@@ -393,7 +393,7 @@ class Stepper extends StatefulWidget {
   /// For [StepperType.horizontal], defaults to `EdgeInsets.all(24.0)`.
   ///
   /// For [StepperType.vertical], defaults to
-  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`.
+  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`. The `start` padding is also increased by the `left` value of [stepIconMargin] if it is provided.
   final EdgeInsetsGeometry? contentPadding;
 
   @override
@@ -782,6 +782,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final double? marginRight = _stepIconMargin?.resolve(TextDirection.ltr).right;
     final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
     final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
+    // Default content padding for vertical stepper.
+    const EdgeInsetsDirectional defaultContentPadding = EdgeInsetsDirectional.only(
+      start: 60.0,
+      end: 24.0,
+      bottom: 24.0,
+    );
+     // Adjust padding to align content with step icon when stepIconMargin is set.
+    final EdgeInsetsGeometry effectiveContentPadding = (widget.contentPadding ?? defaultContentPadding)
+      .add(EdgeInsetsDirectional.only(start: marginLeft ?? 0.0));
 
     return Stack(
       children: <Widget>[
@@ -807,14 +816,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
-            padding: widget.contentPadding ??
-                EdgeInsetsDirectional.only(
-                  // Adjust [controlsBuilder] padding so that the content is
-                  // centered vertically.
-                  start: 60.0 + (marginLeft ?? 0.0),
-                  end: 24.0,
-                  bottom: 24.0,
-                ),
+            padding: effectiveContentPadding,
             child: Column(
               children: <Widget>[
                 ClipRect(clipBehavior: widget.clipBehavior, child: widget.steps[index].content),
