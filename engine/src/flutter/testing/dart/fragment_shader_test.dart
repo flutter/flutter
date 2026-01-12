@@ -448,7 +448,7 @@ void main() async {
     });
   }
 
-  _runSkiaTest('FragmentShader simple shader renders correctly', () async {
+  test('FragmentShader simple shader renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('functions.frag.iplr');
     final FragmentShader shader = program.fragmentShader()..setFloat(0, 1.0);
     await _expectShaderRendersGreen(shader);
