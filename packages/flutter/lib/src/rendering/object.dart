@@ -3257,9 +3257,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     if (_needsPaint) {
       return;
     }
-    if (owner case final PipelineOwner owner when (owner._semanticsOwner != null)) {
-      _semantics.markGeometryDirty();
-    }
     _needsPaint = true;
     // If this was not previously a repaint boundary it will not have
     // a layer we can paint from.
@@ -6263,6 +6260,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
   /// The [renderObject]'s semantics information has changed.
   void markNeedsUpdate() {
+    markGeometryDirty();
     final SemanticsNode? producedSemanticsNode = cachedSemanticsNode;
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
