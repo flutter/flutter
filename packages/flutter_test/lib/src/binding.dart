@@ -132,20 +132,28 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 }
 
-/// Accessibility announcement data passed to [SemanticsService.announce] captured in a test.
+/// Accessibility announcement data passed to [SemanticsService.sendAnnouncement] captured in a test.
 ///
 /// This class is intended to be used by the testing API to store the announcements
 /// in a structured form so that tests can verify announcement details. The fields
-/// of this class correspond to parameters of the [SemanticsService.announce] method.
+/// of this class correspond to parameters of the [SemanticsService.sendAnnouncement] method.
 ///
 /// See also:
 ///
 ///  * [WidgetTester.takeAnnouncements], which is the test API that uses this class.
 class CapturedAccessibilityAnnouncement {
-  const CapturedAccessibilityAnnouncement._(this.message, this.textDirection, this.assertiveness);
+  const CapturedAccessibilityAnnouncement._(
+    this.message,
+    this.viewId,
+    this.textDirection,
+    this.assertiveness,
+  );
 
   /// The accessibility message announced by the framework.
   final String message;
+
+  /// The ID of the view that the announcement was sent to.
+  final int viewId;
 
   /// The direction in which the text of the [message] flows.
   final TextDirection textDirection;
@@ -1471,6 +1479,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _announcements.add(
         CapturedAccessibilityAnnouncement._(
           data['message'].toString(),
+          data['viewId']! as int,
           TextDirection.values[data['textDirection']! as int],
           Assertiveness.values[(data['assertiveness'] ?? 0) as int],
         ),
