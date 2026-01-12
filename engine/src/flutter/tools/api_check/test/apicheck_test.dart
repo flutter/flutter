@@ -60,11 +60,26 @@ void checkApiConsistency(String flutterRoot) {
         'AccessibilityBridge.java',
       ),
       enumName: 'AccessibilityFeature',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
+    // Swift values: static let fooBar = AccessibilityFeatureFlag(rawValue: 1 << N).
+    final List<String> swiftOptionSetProperties = getSwiftOptionSetProperties(
+      sourcePath: path.join(
+        flutterRoot,
+        'shell',
+        'platform',
+        'darwin',
+        'ios',
+        'framework',
+        'Source',
+        'AccessibilityFeatures.swift',
+      ),
+      optionSetName: 'AccessibilityFeatureFlag',
+    ).map(camelCaseToPascalCase).toList();
 
     expect(embedderEnumValues, uiFields);
     expect(internalEnumValues, uiFields);
     expect(javaEnumValues, uiFields);
+    expect(swiftOptionSetProperties, uiFields);
   });
 
   test('SemanticsAction enums match', () {
@@ -100,7 +115,7 @@ void checkApiConsistency(String flutterRoot) {
         'AccessibilityBridge.java',
       ),
       enumName: 'Action',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
 
     expect(webuiFields, uiFields);
     expect(embedderEnumValues, uiFields);
@@ -138,7 +153,7 @@ void checkApiConsistency(String flutterRoot) {
         'LifecycleChannel.java',
       ),
       enumName: 'AppLifecycleState',
-    ).map(allCapsToCamelCase).toList();
+    ).map(upperSnakeCaseToPascalCase).toList();
 
     expect(webuiFields, uiFields);
     expect(internalEnumValues, uiFields);
@@ -190,8 +205,8 @@ void checkApiConsistency(String flutterRoot) {
   // });
 }
 
-/// Returns the CamelCase equivalent of an ALL_CAPS identifier.
-String allCapsToCamelCase(String identifier) {
+/// Returns the PascalCase equivalent of an UPPER_SNAKE_CASE identifier.
+String upperSnakeCaseToPascalCase(String identifier) {
   final buffer = StringBuffer();
   for (final String word in identifier.split('_')) {
     if (word.isNotEmpty) {
@@ -202,6 +217,14 @@ String allCapsToCamelCase(String identifier) {
     }
   }
   return buffer.toString();
+}
+
+/// Returns the PascalCase equivalent of an camelCase identifier.
+String camelCaseToPascalCase(String identifier) {
+  if (identifier.isEmpty) {
+    return identifier;
+  }
+  return identifier[0].toUpperCase() + identifier.substring(1);
 }
 
 /// Verify that the native functions in the dart:ui package do not use nullable

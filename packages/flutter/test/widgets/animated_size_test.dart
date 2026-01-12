@@ -489,4 +489,18 @@ void main() {
       );
     });
   });
+
+  testWidgets('AnimatedSize does not crash at zero size', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSize(duration: Duration(milliseconds: 300), child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSize)), Size.zero);
+  });
 }

@@ -239,19 +239,32 @@ mixin _ChildWindowHierarchyMixin {
 
     // Otherwise, traverse the children to find the first activateable window.
     //
-    // Regular windows are only activated if there are no dialog children.
-    // Dialog windows are activated before regular windows.
-    // Tooltips cannot be activated, so they are skipped.
+    // Modal dialogs have focus precedence over popups.
+    // Popups have focus precedence over regular windows.
+    // Regular windows have the lowest precedence.
+    // Tooltips cannot be activated at all, so they are skipped.
     var activateable = this as BaseWindowController;
+    var foundPopup = false;
     for (final BaseWindowController child in _children) {
       switch (child) {
         case final RegularWindowController regularChild:
+          if (foundPopup) {
+            // Already found a popup, skip anything else.
+            break;
+          }
           activateable = (regularChild as _TestRegularWindowController).getFirstActivatableChild();
         case final DialogWindowController dialogChild:
+          // Always return the first dialog found.
           return (dialogChild as _TestDialogWindowController).getFirstActivatableChild();
-        case final TooltipWindowController _:
-          // Tooltips cannot be activated.
+        case final TooltipWindowController _: // Tooltips cannot be activated.
           break;
+        case final PopupWindowController popupChild:
+          if (foundPopup) {
+            // Already found a popup, skip anything else.
+            break;
+          }
+          activateable = (popupChild as _TestPopupWindowController).getFirstActivatableChild();
+          foundPopup = true;
       }
     }
 
@@ -375,6 +388,36 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
   }
 }
 
+void _addChildToParent(BaseWindowController? parent, BaseWindowController child) {
+  if (parent != null) {
+    switch (parent) {
+      case final DialogWindowController testParent:
+        (testParent as _TestDialogWindowController).addChild(child);
+      case final RegularWindowController testParent:
+        (testParent as _TestRegularWindowController).addChild(child);
+      case final PopupWindowController testParent:
+        (testParent as _TestPopupWindowController).addChild(child);
+      case TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of another window controller.');
+    }
+  }
+}
+
+void _removeChildFromParent(BaseWindowController? parent, BaseWindowController child) {
+  if (parent != null) {
+    switch (parent) {
+      case final DialogWindowController testParent:
+        (testParent as _TestDialogWindowController).removeChild(child);
+      case final RegularWindowController testParent:
+        (testParent as _TestRegularWindowController).removeChild(child);
+      case final PopupWindowController testParent:
+        (testParent as _TestPopupWindowController).removeChild(child);
+      case TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of another window controller.');
+    }
+  }
+}
+
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
     required DialogWindowControllerDelegate delegate,
@@ -392,17 +435,7 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        super.empty() {
     _constrainToBounds();
     rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
-
-    if (parent != null) {
-      switch (parent) {
-        case final _TestDialogWindowController testParent:
-          testParent.addChild(this);
-        case final _TestRegularWindowController testParent:
-          testParent.addChild(this);
-        default:
-          fail('Unknown window controller type: ${parent.runtimeType}');
-      }
-    }
+    _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
     activate();
@@ -481,17 +514,68 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
     _delegate.onWindowDestroyed();
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(_parent, this);
+  }
+}
 
-    if (_parent != null) {
-      switch (_parent) {
-        case final RegularWindowController regularParent:
-          (regularParent as _TestRegularWindowController).removeChild(this);
-        case final DialogWindowController dialogParent:
-          (dialogParent as _TestDialogWindowController).removeChild(this);
-        case TooltipWindowController _:
-          fail('TooltipWindowController cannot be a parent of DialogWindowController.');
-      }
-    }
+class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
+  _TestPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    required BoxConstraints preferredConstraints,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _delegate = delegate,
+       _constraints = preferredConstraints,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       _parent = parent,
+       super.empty() {
+    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    _addChildToParent(parent, this);
+
+    // Automatically activate the window when created.
+    activate();
+  }
+
+  final PopupWindowControllerDelegate _delegate;
+  final _TestWindowingOwner windowingOwner;
+  BoxConstraints _constraints;
+  // ignore: unused_field
+  final ui.Rect _anchorRect;
+  // ignore: unused_field
+  final WindowPositioner _positioner;
+  final BaseWindowController _parent;
+
+  @override
+  Size get contentSize => _constraints.biggest;
+
+  @override
+  BaseWindowController get parent => _parent;
+
+  @override
+  bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  void activate() {
+    final BaseWindowController activated = windowingOwner.activateWindowController(this);
+    activated.notifyListeners();
+  }
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    notifyListeners();
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(parent, this);
   }
 }
 
@@ -534,7 +618,31 @@ class _TestWindowingOwner extends WindowingOwner {
         return _activeWindowController!;
       case final TooltipWindowController _:
         fail('Tooltips cannot be activated. Activate the parent window instead.');
+      case final PopupWindowController _:
+        final BaseWindowController leaf = (controller as _TestPopupWindowController)
+            .getFirstActivatableChild();
+        _activeWindowController = leaf;
+        return _activeWindowController!;
     }
+  }
+
+  bool _tryActivateParent(BaseWindowController? parent) {
+    if (parent == null) {
+      return false;
+    }
+
+    switch (parent) {
+      case final RegularWindowController regularParent:
+        regularParent.activate();
+      case final DialogWindowController dialogParent:
+        dialogParent.activate();
+      case final TooltipWindowController _:
+        fail('TooltipWindowController cannot be a parent of DialogWindowController.');
+      case final PopupWindowController popupParent:
+        popupParent.activate();
+    }
+
+    return true;
   }
 
   /// Deactivates the given [controller] if it is currently active.
@@ -547,30 +655,26 @@ class _TestWindowingOwner extends WindowingOwner {
   /// If the controller is a [TooltipWindowController], this method will throw
   /// an error, as tooltips cannot be deactivated because they cannot be activated.
   void deactivateWindowController(BaseWindowController controller) {
-    if (_activeWindowController == controller) {
-      switch (controller) {
-        case final RegularWindowController _:
-          _activeWindowController = null;
-        case final DialogWindowController dialogController:
-          if (dialogController.parent == null) {
-            _activeWindowController = null;
-            break;
-          }
+    if (_activeWindowController != controller) {
+      return;
+    }
 
-          switch (dialogController.parent!) {
-            case final RegularWindowController regularParent:
-              regularParent.activate();
-            case final DialogWindowController dialogParent:
-              dialogParent.activate();
-            case final TooltipWindowController _:
-              fail('TooltipWindowController cannot be a parent of DialogWindowController.');
-          }
-        case final TooltipWindowController tooltipController:
-          fail(
-            'Tooltips cannot be deactivated. Deactivate the parent window instead: '
-            '${tooltipController.parent}.',
-          );
-      }
+    switch (controller) {
+      case final RegularWindowController _:
+        _activeWindowController = null;
+      case final DialogWindowController dialogController:
+        if (!_tryActivateParent(dialogController.parent)) {
+          _activeWindowController = null;
+        }
+      case final TooltipWindowController tooltipController:
+        fail(
+          'Tooltips cannot be deactivated. Deactivate the parent window instead: '
+          '${tooltipController.parent}.',
+        );
+      case final PopupWindowController popupController:
+        if (!_tryActivateParent(popupController.parent)) {
+          _activeWindowController = null;
+        }
     }
   }
 
@@ -621,12 +725,32 @@ class _TestWindowingOwner extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required ui.Rect anchorRect,
+    required bool isSizedToContent,
+    required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
     // TODO(mattkae): implement createTooltipWindowController
     throw UnimplementedError();
+  }
+
+  @override
+  PopupWindowController createPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    return _TestPopupWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      preferredConstraints: preferredConstraints,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
   }
 }
 
