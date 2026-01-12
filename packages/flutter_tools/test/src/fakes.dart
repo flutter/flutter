@@ -412,6 +412,9 @@ class FakeFlutterVersion implements FlutterVersion {
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   var _didFetchTagsAndUpdate = false;
 
+  bool get didUpdateVersionFile => _didUpdateVersionFile;
+  var _didUpdateVersionFile = false;
+
   /// Will be returned by [fetchTagsAndGetVersion] if not null.
   final FlutterVersion? nextFlutterVersion;
 
@@ -510,6 +513,11 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String? engineContentHash;
+
+  @override
+  void updateVersionFile() {
+    _didUpdateVersionFile = true;
+  }
 }
 
 // A test implementation of [FeatureFlags] that allows enabling without reading

@@ -236,6 +236,7 @@ abstract class FlutterVersion {
       : _getTimeSinceCommit(revision: engineRevision);
 
   void ensureVersionFile();
+  void updateVersionFile();
 
   @override
   String toString() {
@@ -595,6 +596,11 @@ class _FlutterVersionFromFile extends FlutterVersion {
   void ensureVersionFile() {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
   }
+
+  @override
+  void updateVersionFile() {
+    // Do nothing.
+  }
 }
 
 class _FlutterVersionGit extends FlutterVersion {
@@ -690,11 +696,16 @@ class _FlutterVersionGit extends FlutterVersion {
   void ensureVersionFile() {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
 
-    const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {
-      newVersionFile.writeAsStringSync(encoder.convert(toJson()));
+      updateVersionFile();
     }
+  }
+
+  @override
+  void updateVersionFile() {
+    const encoder = JsonEncoder.withIndent('  ');
+    FlutterVersion.getVersionFile(fs, flutterRoot).writeAsStringSync(encoder.convert(toJson()));
   }
 
   @override

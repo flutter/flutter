@@ -504,7 +504,7 @@ void main() {
     );
 
     testUsingContext(
-      'Can upgrade to a newer version with the same Git revision',
+      'Can upgrade to a newer version with the same framework Git revision',
       () async {
         const revision = 'abc123';
         const version = '1.2.3';
@@ -538,6 +538,53 @@ void main() {
           testLogger.statusText,
           contains('Upgrading Flutter to 4.5.6 from 1.2.3 in workingDirectory/aaa/bbb...'),
         );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'Can upgrade to a newer version with the same engine revision',
+      () async {
+        const revision = 'abc123';
+        const version = '3.38.1';
+        const upstreamVersion = '3.38.2';
+        const engineRevision = 'zyxw';
+
+        final flutterVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: version,
+          engineRevision: engineRevision,
+          gitTagVersion: GitTagVersion.parse(version),
+        );
+        final latestVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: upstreamVersion,
+          engineRevision: engineRevision,
+          gitTagVersion: GitTagVersion.parse(upstreamVersion),
+        );
+
+        fakeCommandRunner.alreadyUpToDate = false;
+        fakeCommandRunner.remoteVersion = latestVersion;
+        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+          const UpgradePhase.firstHalf(),
+          force: true,
+          testFlow: true,
+          gitTagVersion: gitTagVersion,
+          flutterVersion: flutterVersion,
+          verifyOnly: false,
+        );
+        expect(await result, FlutterCommandResult.success());
+        expect(
+          testLogger.statusText,
+          contains('Upgrading Flutter to 3.38.2 from 3.38.1 in workingDirectory/aaa/bbb...'),
+        );
+        expect(flutterVersion.didUpdateVersionFile, false);
+        expect(latestVersion.didUpdateVersionFile, true);
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
