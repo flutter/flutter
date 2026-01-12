@@ -1514,6 +1514,17 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // This is enough to trigger a geomtry update.
           continue;
         }
+        if (!node._semantics.contributesToSemanticsTree) {
+          // This node merely presents its subtree in the mergeup, so we need to clear
+          // the geometry for all the semantics nodes in the mergeup.
+          for (final _RenderObjectSemantics child
+              in node._semantics.mergeUp.whereType<_RenderObjectSemantics>().where(
+                (_RenderObjectSemantics e) => e.shouldFormSemanticsNode,
+              )) {
+            child.geometry = null;
+          }
+          continue;
+        }
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
         }
@@ -5924,8 +5935,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final _SemanticsGeometry parentGeometry = geometry!;
     for (final _RenderObjectSemantics child in _children) {
       if (onlyDirtyChildren && !child.geometryDirty) {
+        // print('skip geometry for ${child}, parent ${this}');
         continue;
       }
+      // print('process geometry for ${child}, parent ${this}');
       final _SemanticsGeometry childGeometry = _SemanticsGeometry.computeChildGeometry(
         parentPaintClipRect: parentGeometry.paintClipRect,
         parentSemanticsClipRect: parentGeometry.semanticsClipRect,
