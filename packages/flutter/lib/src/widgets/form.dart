@@ -236,13 +236,11 @@ class Form extends StatefulWidget {
   /// Whether descendant [FormField]s should ignore the [Form.autovalidateMode]
   /// and strictly use their own [FormField.autovalidateMode].
   ///
-  /// When this is true, a [FormField] with [AutovalidateMode.disabled] will
-  /// never validate automatically, even if the [Form] it belongs to is set to
-  /// [AutovalidateMode.always] or [AutovalidateMode.onUserInteraction].
+  /// When true, each [FormField] strictly follows its own
+  /// [FormField.autovalidateMode], ignoring the [Form]'s setting.
   ///
-  /// When this is false, the [Form]'s [AutovalidateMode] takes
-  /// precedence over fields that have validation disabled, allowing the form
-  /// to trigger validation across all its children at once.
+  /// When false, the [Form]'s [AutovalidateMode] takes precedence and determines
+  /// the automatic validation behavior of all descendant fields.
   ///
   /// Calling [FormState.validate] always triggers validation for all fields,
   /// regardless of this setting.
