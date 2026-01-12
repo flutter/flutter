@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [TabBar].
+/// Flutter code sample for a [TabBar] that displays custom effects on top of
+/// the tab bar itself when there are more tabs in the scroll direction.
 
 void main() => runApp(const TabBarApp());
 
@@ -41,12 +42,12 @@ class _TabBarExampleState extends State<TabBarExample> {
               onNotification: (Notification notification) {
                 // ScrollMetricsNotification is for initial layout.
                 // ScrollNotification is for real-time scroll updates.
-                if (notification is ScrollMetricsNotification ||
-                    notification is ScrollNotification) {
-                  final ScrollMetrics metrics =
-                      notification is ScrollMetricsNotification
-                      ? notification.metrics
-                      : (notification as ScrollNotification).metrics;
+                final ScrollMetrics? metrics = switch (notification) {
+                  ScrollMetricsNotification(:final metrics) => metrics,
+                  ScrollNotification(:final metrics) => metrics,
+                  _ => null,
+                };
+                if (metrics != null) {
                   setState(() {
                     scrollOffset = metrics.pixels;
                     maxScrollExtent = metrics.maxScrollExtent;
