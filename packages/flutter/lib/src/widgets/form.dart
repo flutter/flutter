@@ -657,8 +657,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser.value = false;
-      _errorText.value = null;
+      _clearErrorInternal();
     });
     widget.onReset?.call();
     Form.maybeOf(context)?._fieldDidChange();
@@ -670,8 +669,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// effectively hiding any validation messages until the next validation or interaction.
   void clearError() {
     setState(() {
-      _errorText.value = null;
-      _hasInteractedByUser.value = false;
+      _clearErrorInternal();
     });
     Form.maybeOf(context)?._fieldDidChange();
   }
@@ -689,6 +687,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _validate();
     });
     return !hasError;
+  }
+
+  void _clearErrorInternal() {
+    _errorText.value = null;
+    _hasInteractedByUser.value = false;
   }
 
   void _validate() {
