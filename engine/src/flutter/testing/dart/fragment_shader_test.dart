@@ -543,11 +543,6 @@ void main() async {
   });
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
-    // ignore: dead_code
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final recorder = PictureRecorder();
@@ -559,9 +554,16 @@ void main() async {
     );
     final Image image = await recorder.endRecording().toImage(1, 1);
     final ByteData data = (await image.toByteData())!;
-    final color = Color(data.buffer.asUint32List()[0]);
+    expect(data.lengthInBytes, 4);
 
-    expect(color, const Color(0xFF00FF00));
+    final Uint8List colorComponentsRGBA = data.buffer.asUint8List();
+    final color = Color.fromARGB(
+      colorComponentsRGBA[3],
+      colorComponentsRGBA[0],
+      colorComponentsRGBA[1],
+      colorComponentsRGBA[2],
+    );
+    expect(color, const Color(0xFF0000FF));
   });
 
   // For an explaination of the problem see https://github.com/flutter/flutter/issues/163302 .
