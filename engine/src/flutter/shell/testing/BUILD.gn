@@ -13,7 +13,7 @@ shell_gpu_configuration("tester_gpu_configuration") {
   enable_software = true
   enable_gl = true
   enable_vulkan = true
-  enable_metal = false
+  enable_metal = shell_enable_metal
 }
 
 executable("testing") {
@@ -26,6 +26,7 @@ executable("testing") {
 
   sources = [
     "tester_context.h",
+    "tester_context_mtl_factory.h",
     "tester_context_vk_factory.h",
     "tester_main.cc",
   ]
@@ -61,6 +62,9 @@ executable("testing") {
       "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
     ]
     sources += [ "tester_context_vk_factory.cc" ]
+    if (shell_enable_metal) {
+      sources += [ "tester_context_mtl_factory.mm" ]
+    }
   }
 
   metadata = {
