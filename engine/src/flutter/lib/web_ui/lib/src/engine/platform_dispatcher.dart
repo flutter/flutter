@@ -75,7 +75,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
     final builder = EngineAccessibilityFeaturesBuilder(0);
-    if (HighContrastSupport.instance.isHighContrastEnabled) {
+    if (_isHighContrastEnabled) {
       builder.highContrast = true;
     }
     return builder.build();
@@ -1235,10 +1235,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   String? get systemFontFamily => configuration.systemFontFamily;
 
+  /// Whether high contrast mode is enabled by the platform.
+  ///
+  /// Used statically by [computeAccessibilityFeatures] to create the initial
+  /// [configuration] object.
+  static bool _isHighContrastEnabled = false;
+
   /// Updates [_highContrast] and invokes [onHighContrastModeChanged]
   /// callback if [_highContrast] changed.
   void _updateHighContrast(bool enabled) {
-    HighContrastSupport.instance.isHighContrastEnabled = enabled;
+    _isHighContrastEnabled = enabled;
     if (configuration.accessibilityFeatures.highContrast != enabled) {
       final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(

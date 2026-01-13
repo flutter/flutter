@@ -3,24 +3,7 @@
 // found in the LICENSE file.
 import 'package:ui/ui.dart' as ui;
 
-import 'dom.dart';
-
-/// A class to hold whether the user wants high contrast or not.
-///
-/// This used to do a bunch of stuff with media queries, but now all of this
-/// is handled by the [MediaQueryManager] object of the
-/// [EnginePlatformDispatcher]. See [_registerMediaQueryListeners].
-class HighContrastSupport {
-  /// The singleton instance.
-  static HighContrastSupport instance = HighContrastSupport();
-
-  /// Whether or not the engine has determined that high contrast is enabled
-  /// or not.
-  ///
-  /// This is set from [_updateHighContrast] and used by
-  /// [computeAccessibilityFeatures] in the [EnginePlatformDispatcher].
-  bool isHighContrastEnabled = false;
-}
+import '../dom.dart';
 
 const List<String> systemColorNames = <String>[
   'AccentColor',
