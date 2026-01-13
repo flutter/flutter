@@ -189,7 +189,7 @@ See below for instructions on bringing up test scaffolding in a plugin (*does no
 #### Enabling XCUITests
 
 1. Open `<path_to_plugin>/example/ios/Runner.xcworkspace` using Xcode. (For macOS, replace `ios` with `macos`.)
-1. Create a new "UI Testing Bundle" depending on the type of test.
+1. Create a new "UI Testing Bundle".
 1. In the target options window, populate the details as follows, then click on "Finish":
     * In the "product name" field, type "RunnerUITests".
     * In the "Team" field, select "None".
@@ -202,7 +202,7 @@ See below for instructions on bringing up test scaffolding in a plugin (*does no
         * `CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER` is currently incompatible with Flutter.
         * `IPHONEOS_DEPLOYMENT_TARGET` and `TARGETED_DEVICE_FAMILY` may cause issues running tests.
         * The compiler settings (`CLANG_*`, `GCC_*`, and `MTL_*`) shouldn't be needed.
-1. A RunnerUITests folder should be created and you can start hacking in the added `.m`/`.swift` file.
+1. A RunnerUITests folder should be created and you can start hacking in the added `.swift` file.
 
 #### Enabling Android UI tests
 
