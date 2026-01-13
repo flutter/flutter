@@ -135,6 +135,33 @@ void main() {
       binding.shouldPropagateDevicePointerEvents = false;
     },
   );
+
+  testWidgets('resetLayers resets configuration and replaces root layer', (
+    WidgetTester tester,
+  ) async {
+    final ViewConfiguration currentConfig = binding.renderView.configuration;
+    await binding.setSurfaceSize(const Size(400, 400));
+    binding.renderView.configuration = const ViewConfiguration(devicePixelRatio: 10.0);
+    final Layer? currentRootLayer = binding.renderView.debugLayer;
+
+    await binding.resetLayers();
+    // Verify that all properties have been reset
+    expect(
+      binding.renderView.configuration.logicalConstraints,
+      equals(currentConfig.logicalConstraints),
+    );
+    expect(
+      binding.renderView.configuration.physicalConstraints,
+      equals(currentConfig.physicalConstraints),
+    );
+    expect(
+      binding.renderView.configuration.devicePixelRatio,
+      equals(currentConfig.devicePixelRatio),
+    );
+    // Verify that root layer has been replaced
+    expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
+    addTearDown(binding.resetLayers);
+  });
 }
 
 /// A widget that shows the number of times it has been tapped.
