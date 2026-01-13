@@ -70,7 +70,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     } else {
       final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
-        badLines.add(entry);
+        badLines.add('badline(nomatch): "$entry"');
       } else {
         if (step.index >= TestStep.testWritesFirstCarriageReturn.index &&
             step.index <= TestStep.testLoading.index &&
@@ -86,7 +86,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
           // then the test finishes
           step = TestStep.testPassed;
         } else {
-          badLines.add(entry);
+          badLines.add('badline(fallthrough): "$entry"');
         }
       }
     }
@@ -95,7 +95,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     String entry,
   ) {
     print('test stderr: $entry');
-    badLines.add(entry);
+    badLines.add('badline(stderr): "$entry"');
   });
   final int result = await analysis.exitCode;
   clock.stop();
@@ -104,7 +104,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   }
   if (badLines.isNotEmpty) {
     const seperator = '\n  ';
-    throw Exception('flutter test rendered unexpected output ${badLines.join(seperator)}');
+    throw Exception('flutter test rendered unexpected output:$seperator${badLines.join(seperator)}');
   }
   if (step != TestStep.testPassed) {
     throw Exception('flutter test did not finish (only reached step $step)');
