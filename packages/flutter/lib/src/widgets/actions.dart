@@ -188,7 +188,6 @@ abstract class Action<T extends Intent> with Diagnosticable {
   }
 
   // Checks if the intent's type is a subtype of T.
-  // This is an instance method instead of standalone function because
   bool _debugCanHandleIntent<I extends Intent>(I? intent) {
     final Object? badIntentString = switch (intent) {
       T() => null,
