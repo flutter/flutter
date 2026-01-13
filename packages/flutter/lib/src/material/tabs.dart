@@ -468,8 +468,57 @@ class _DividerPainter extends CustomPainter {
   }
 }
 
+// A ChangeNotifier for triggering repaints when async resources load.
+class _IndicatorPainterNotifier extends ChangeNotifier {
+  void notify() {
+    notifyListeners();
+  }
+
+  @override
+  String toString() => describeIdentity(this);
+}
+
 class _IndicatorPainter extends CustomPainter {
-  _IndicatorPainter({
+  factory _IndicatorPainter({
+    required TabController controller,
+    required Decoration indicator,
+    required TabBarIndicatorSize indicatorSize,
+    required List<GlobalKey> tabKeys,
+    required _IndicatorPainter? old,
+    required EdgeInsetsGeometry indicatorPadding,
+    required List<EdgeInsetsGeometry> labelPaddings,
+    Color? dividerColor,
+    double? dividerHeight,
+    required bool showDivider,
+    double? devicePixelRatio,
+    required TabIndicatorAnimation indicatorAnimation,
+    required TextDirection textDirection,
+  }) {
+    /// Initializing [_IndicatorPainterNotifier] here that allows the
+    /// repaint notifier to be used in the super constructor call
+    /// (within [Listenable.merge]) while also being stored as a private field.
+    ///
+    /// The notifier is to trigger a repaint when asynchronous resources,
+    /// like images in the indicator [Decoration], are finished loading.
+    return _IndicatorPainter._(
+      controller: controller,
+      indicator: indicator,
+      indicatorSize: indicatorSize,
+      tabKeys: tabKeys,
+      old: old,
+      indicatorPadding: indicatorPadding,
+      labelPaddings: labelPaddings,
+      dividerColor: dividerColor,
+      dividerHeight: dividerHeight,
+      showDivider: showDivider,
+      devicePixelRatio: devicePixelRatio,
+      indicatorAnimation: indicatorAnimation,
+      textDirection: textDirection,
+      repaint: _IndicatorPainterNotifier(),
+    );
+  }
+
+  _IndicatorPainter._({
     required this.controller,
     required this.indicator,
     required this.indicatorSize,
@@ -483,7 +532,9 @@ class _IndicatorPainter extends CustomPainter {
     this.devicePixelRatio,
     required this.indicatorAnimation,
     required this.textDirection,
-  }) : super(repaint: controller.animation) {
+    required _IndicatorPainterNotifier repaint,
+  }) : _repaint = repaint,
+       super(repaint: Listenable.merge(<Listenable?>[controller.animation, repaint])) {
     assert(debugMaybeDispatchCreated('material', '_IndicatorPainter', this));
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
@@ -502,6 +553,7 @@ class _IndicatorPainter extends CustomPainter {
   final double? devicePixelRatio;
   final TabIndicatorAnimation indicatorAnimation;
   final TextDirection textDirection;
+  final _IndicatorPainterNotifier _repaint;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
   // layout is completed. These values can be null when TabBar contains no
@@ -514,11 +566,13 @@ class _IndicatorPainter extends CustomPainter {
   bool _needsPaint = false;
   void markNeedsPaint() {
     _needsPaint = true;
+    _repaint.notify();
   }
 
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
     _painter?.dispose();
+    _repaint.dispose();
   }
 
   void saveTabOffsets(List<double>? tabOffsets, TextDirection? textDirection) {
