@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -3602,4 +3604,68 @@ void main() {
       expect(find.byKey(optionsKey), findsOne);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/170403.
+  testWidgets('does not crash when disposed during async optionsBuilder', (
+    WidgetTester tester,
+  ) async {
+    final optionsCompleter = Completer<List<String>>();
+    late StateSetter setState;
+    var showAutocomplete = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter innerSetState) {
+              setState = innerSetState;
+              if (!showAutocomplete) {
+                return const SizedBox.shrink();
+              }
+              return RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  return optionsCompleter.future;
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(
+                        focusNode: fieldFocusNode,
+                        controller: fieldTextEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return Container();
+                    },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Focus the field to trigger optionsBuilder.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Dispose the widget while optionsBuilder is still pending.
+    setState(() {
+      showAutocomplete = false;
+    });
+    await tester.pump();
+
+    optionsCompleter.complete(<String>['option1', 'option2']);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }
