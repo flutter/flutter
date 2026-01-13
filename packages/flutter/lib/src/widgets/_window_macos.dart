@@ -286,17 +286,17 @@ class TooltipWindowControllerMacOS extends TooltipWindowController with _WindowC
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
     if (anchorRect != null) {
-      this._anchorRect = anchorRect;
+      _anchorRect = anchorRect;
     }
     if (positioner != null) {
-      this._positioner = positioner;
+      _positioner = positioner;
     }
     _MacOSPlatformInterface.updateWindowPosition(getWindowHandle());
   }
 
   @override
   void _handleOnShouldClose() {
-    _delegate.onWindowCloseRequested(this);
+    destroy();
   }
 
   @override

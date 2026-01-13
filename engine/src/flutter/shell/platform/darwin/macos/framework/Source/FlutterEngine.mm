@@ -1188,6 +1188,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       .top = static_cast<size_t>(scaledBounds.origin.y),
       .display_id = static_cast<uint64_t>(displayId),
       .view_id = viewController.viewIdentifier,
+      .has_constraints = view.sizedToContents,
       .min_width_constraint = static_cast<size_t>(minimumContentSize.width),
       .min_height_constraint = static_cast<size_t>(minimumContentSize.height),
       .max_width_constraint = static_cast<size_t>(maximumContentSize.width),
