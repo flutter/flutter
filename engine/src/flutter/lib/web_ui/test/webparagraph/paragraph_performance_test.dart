@@ -119,6 +119,35 @@ Future<void> testMain() async {
     );
   }, timeout: Timeout.none);
 
+  test('Paint text by sizes', () async {
+    WebParagraphProfiler.reset();
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 1000);
+    for (var textSize = 10; textSize < 1000; textSize += (textSize == 10 ? 40 : 50)) {
+      final Paragraph paragraph = timeAction('build$textSize', () {
+        final arialStyle = ParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
+        final builder = ParagraphBuilder(arialStyle);
+        builder.pushStyle(TextStyle(color: const Color(0xFF000000)));
+        builder.addText('0123456789' * (textSize ~/ 10));
+        return builder.build();
+      });
+      timeAction('layout$textSize', () {
+        paragraph.layout(const ParagraphConstraints(width: 1000));
+      });
+      final canvas = Canvas(recorder, region);
+      canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+      await timeActionAsync('paint$textSize', () async {
+        canvas.drawParagraph(paragraph, const Offset(20, 20));
+        await drawPictureUsingCurrentRenderer(
+          recorder.endRecording(),
+        ); // This is a hack to make sure the canvas is flushed
+      });
+    }
+
+    await matchGoldenFile('textSize.png', region: region);
+    WebParagraphProfiler.log();
+  }, timeout: Timeout.none);
+
   /*
   test('Subsequent layout small text no cache', () async {
     final ParagraphStyle arialStyle = ParagraphStyle(fontFamily: 'Roboto', fontSize: 20);

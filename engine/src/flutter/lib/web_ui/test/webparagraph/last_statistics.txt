@@ -50,6 +50,15 @@ layout: 2ms
 paint.first: 51ms
 paint: 4413ms
 
+00:06 +0 ~1: Build/Layout/Paint medium text                                                                                                                                        
+build.first: 0ms
+layout.first: 13ms
+build: 0ms
+layout: 5ms
+paint.first: 163ms
+paint: 4350ms
+
+
 00:17 +2: Build/Layout/Paint large text                                                                                                                                            
 build.first: 0ms
 layout.first: 10ms
