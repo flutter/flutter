@@ -14,29 +14,23 @@ void main() {
     image = await createTestImage(width: 8, height: 8);
   });
 
-  _MutantPainter painterOfCustomPaintByKey(Key key) {
-    return (find.byKey(key).evaluate().first.widget as CustomPaint).painter! as _MutantPainter;
-  }
-
   testWidgets('paints.circle is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawCircle(Offset.zero, 10.0, paint);
+      },
+    );
+    addTearDown(painter.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawCircle(Offset.zero, 10.0, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -46,23 +40,21 @@ void main() {
 
   testWidgets('paints.rect is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawRect(const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0), paint);
+      },
+    );
+    addTearDown(painter.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawRect(const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0), paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -73,24 +65,22 @@ void main() {
   testWidgets('paints.drawRRect is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
     const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawRRect(RRect.fromRectXY(rect, 4.0, 4.0), paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawRRect(RRect.fromRectXY(rect, 4.0, 4.0), paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -101,30 +91,24 @@ void main() {
   testWidgets('paints.drawDRRect is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
     const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        final rRect = RRect.fromRectXY(rect, 4.0, 4.0);
+        final innerRRect = RRect.fromRectXY(const Rect.fromLTRB(10.0, 10.0, 80.0, 80.0), 4.0, 4.0);
+        canvas.drawDRRect(rRect, innerRRect, paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  final rRect = RRect.fromRectXY(rect, 4.0, 4.0);
-                  final innerRRect = RRect.fromRectXY(
-                    const Rect.fromLTRB(10.0, 10.0, 80.0, 80.0),
-                    4.0,
-                    4.0,
-                  );
-                  canvas.drawDRRect(rRect, innerRRect, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -134,24 +118,22 @@ void main() {
 
   testWidgets('paints.drawPath is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawPath(Path(), paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawPath(Path(), paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -161,24 +143,22 @@ void main() {
 
   testWidgets('paints.drawLine is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawLine(Offset.zero, const Offset(10.0, 10.0), paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawLine(Offset.zero, const Offset(10.0, 10.0), paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -188,25 +168,23 @@ void main() {
 
   testWidgets('paints.drawArc is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+        canvas.drawArc(rect, 10.0, 10.0, true, paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-                  canvas.drawArc(rect, 10.0, 10.0, true, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -216,24 +194,22 @@ void main() {
 
   testWidgets('paints.drawPaint is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawPaint(paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawPaint(paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -250,27 +226,25 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawRSuperellipse(
+          RSuperellipse.fromLTRBR(0.0, 0.0, 100.0, 100.0, const Radius.circular(10.0)),
+          paint,
+        );
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawRSuperellipse(
-                    RSuperellipse.fromLTRBR(0.0, 0.0, 100.0, 100.0, const Radius.circular(10.0)),
-                    paint,
-                  );
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -280,25 +254,23 @@ void main() {
 
   testWidgets('paints.drawOval is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+        canvas.drawOval(rect, paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-                  canvas.drawOval(rect, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -313,23 +285,21 @@ void main() {
 
   testWidgets('paints.image is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawImage(image, Offset.zero, paint);
+      },
+    );
+    addTearDown(painter.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawImage(image, Offset.zero, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -347,24 +317,22 @@ void main() {
   ) async {
     final Key customPaintKey = UniqueKey();
     const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawImageRect(image, rect, rect, paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawImageRect(image, rect, rect, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -377,24 +345,22 @@ void main() {
   ) async {
     final Key customPaintKey = UniqueKey();
     const rect = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawImageNine(image, rect, rect, paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawImageNine(image, rect, rect, paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -409,27 +375,25 @@ void main() {
 
   testWidgets('paints.drawPoints is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawPoints(ui.PointMode.lines, <Offset>[
+          Offset.zero,
+          const Offset(10.0, 10.0),
+        ], paint);
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawPoints(ui.PointMode.lines, <Offset>[
-                    Offset.zero,
-                    const Offset(10.0, 10.0),
-                  ], paint);
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -446,28 +410,26 @@ void main() {
     WidgetTester tester,
   ) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawRawPoints(
+          ui.PointMode.lines,
+          Float32List.fromList(<double>[0.0, 0.0, 10.0, 10.0]),
+          paint,
+        );
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawRawPoints(
-                    ui.PointMode.lines,
-                    Float32List.fromList(<double>[0.0, 0.0, 10.0, 10.0]),
-                    paint,
-                  );
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -482,32 +444,30 @@ void main() {
 
   testWidgets('paints.drawVertices is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawVertices(
+          ui.Vertices(ui.VertexMode.triangles, <Offset>[
+            Offset.zero,
+            const Offset(0.0, 10.0),
+            const Offset(10.0, 10.0),
+          ]),
+          BlendMode.src,
+          paint,
+        );
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawVertices(
-                    ui.Vertices(ui.VertexMode.triangles, <Offset>[
-                      Offset.zero,
-                      const Offset(0.0, 10.0),
-                      const Offset(10.0, 10.0),
-                    ]),
-                    BlendMode.src,
-                    paint,
-                  );
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -522,32 +482,30 @@ void main() {
 
   testWidgets('paints.drawAtlas is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawAtlas(
+          image,
+          <RSTransform>[],
+          <Rect>[],
+          <Color>[],
+          BlendMode.src,
+          const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+          paint,
+        );
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawAtlas(
-                    image,
-                    <RSTransform>[],
-                    <Rect>[],
-                    <Color>[],
-                    BlendMode.src,
-                    const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
-                    paint,
-                  );
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),
@@ -562,32 +520,30 @@ void main() {
 
   testWidgets('paints.drawRawAtlas is not affected by mutated colors', (WidgetTester tester) async {
     final Key customPaintKey = UniqueKey();
+    final painter = _MutantPainter(
+      painter: (Canvas canvas, Paint paint) {
+        canvas.drawRawAtlas(
+          image,
+          Float32List.fromList(<double>[]),
+          Float32List.fromList(<double>[]),
+          Int32List.fromList(<int>[]),
+          BlendMode.src,
+          const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
+          paint,
+        );
+      },
+    );
+    addTearDown(painter.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: CustomPaint(
-              key: customPaintKey,
-              painter: _MutantPainter(
-                painter: (Canvas canvas, Paint paint) {
-                  canvas.drawRawAtlas(
-                    image,
-                    Float32List.fromList(<double>[]),
-                    Float32List.fromList(<double>[]),
-                    Int32List.fromList(<int>[]),
-                    BlendMode.src,
-                    const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
-                    paint,
-                  );
-                },
-              ),
-            ),
+            child: CustomPaint(key: customPaintKey, painter: painter),
           ),
         ),
       ),
     );
-    addTearDown(painterOfCustomPaintByKey(customPaintKey).dispose);
 
     expect(
       Material.of(tester.element(find.byKey(customPaintKey))),

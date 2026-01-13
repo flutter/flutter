@@ -1856,7 +1856,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///  * [setSurfaceSize], which often necessitates calling this method during
   ///    tear down.
   Future<void> resetLayers() async {
-    setSurfaceSize(null);
+    await setSurfaceSize(null);
     for (final RenderView renderView in renderViews) {
       // Trigger a layer replacement by changing the device pixel ratio.
       renderView.configuration = ViewConfiguration(
