@@ -129,10 +129,9 @@ class _AnimatedRallyPieChart extends AnimatedWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // When the widget is larger, we increase the font size.
-        TextStyle? headlineStyle =
-            constraints.maxHeight >= pieChartMaxSize
-                ? textTheme.headlineSmall!.copyWith(fontSize: 70)
-                : textTheme.headlineSmall;
+        TextStyle? headlineStyle = constraints.maxHeight >= pieChartMaxSize
+            ? textTheme.headlineSmall!.copyWith(fontSize: 70)
+            : textTheme.headlineSmall;
 
         // With a large text scale factor, we set a max font size.
         if (GalleryOptions.of(context).textScaleFactor(context) > 1.0) {
@@ -205,22 +204,22 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     // Create two padded reacts to draw arcs in: one for colored arcs and one for
     // inner bg arc.
-    const double strokeWidth = 4.0;
+    const strokeWidth = 4.0;
     final double outerRadius = math.min(configuration.size!.width, configuration.size!.height) / 2;
-    final Rect outerRect = Rect.fromCircle(
+    final outerRect = Rect.fromCircle(
       center: configuration.size!.center(offset),
       radius: outerRadius - strokeWidth * 3,
     );
-    final Rect innerRect = Rect.fromCircle(
+    final innerRect = Rect.fromCircle(
       center: configuration.size!.center(offset),
       radius: outerRadius - strokeWidth * 4,
     );
 
     // Paint each arc with spacing.
-    double cumulativeSpace = 0.0;
-    double cumulativeTotal = 0.0;
+    var cumulativeSpace = 0.0;
+    var cumulativeTotal = 0.0;
     for (final RallyPieChartSegment segment in segments) {
-      final Paint paint = Paint()..color = segment.color;
+      final paint = Paint()..color = segment.color;
       final double startAngle = _calculateStartAngle(cumulativeTotal, cumulativeSpace);
       final double sweepAngle = _calculateSweepAngle(segment.value, 0);
       canvas.drawArc(outerRect, startAngle, sweepAngle, true, paint);
@@ -231,7 +230,7 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
     // Paint any remaining space black (e.g. budget amount remaining).
     final double remaining = wholeAmount - cumulativeTotal;
     if (remaining > 0) {
-      final Paint paint = Paint()..color = Colors.black;
+      final paint = Paint()..color = Colors.black;
       final double startAngle = _calculateStartAngle(
         cumulativeTotal,
         spaceRadians * segments.length,
@@ -242,7 +241,7 @@ class _RallyPieChartOutlineBoxPainter extends BoxPainter {
 
     // Paint a smaller inner circle to cover the painted arcs, so they are
     // display as segments.
-    final Paint bgPaint = Paint()..color = RallyColors.primaryBackground;
+    final bgPaint = Paint()..color = RallyColors.primaryBackground;
     canvas.drawArc(innerRect, 0, 2 * math.pi, true, bgPaint);
   }
 

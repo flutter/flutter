@@ -15,7 +15,10 @@ class RestorablePushAndRemoveUntilExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const RootRestorationScope(
       restorationId: 'app',
-      child: MaterialApp(restorationScopeId: 'app', home: RestorablePushAndRemoveUntilExample()),
+      child: MaterialApp(
+        restorationScopeId: 'app',
+        home: RestorablePushAndRemoveUntilExample(),
+      ),
     );
   }
 }
@@ -29,11 +32,13 @@ class RestorablePushAndRemoveUntilExample extends StatefulWidget {
 }
 
 @pragma('vm:entry-point')
-class _RestorablePushAndRemoveUntilExampleState extends State<RestorablePushAndRemoveUntilExample> {
+class _RestorablePushAndRemoveUntilExampleState
+    extends State<RestorablePushAndRemoveUntilExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const RestorablePushAndRemoveUntilExample(),
+      builder: (BuildContext context) =>
+          const RestorablePushAndRemoveUntilExample(),
     );
   }
 

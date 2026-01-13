@@ -10,7 +10,9 @@ import 'package:flutter_api_samples/widgets/implicit_animations/animated_positio
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedPositioned animates on tap', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned animates on tap', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AnimatedPositionedExampleApp());
 
     final Finder positionedFinder = find.descendant(

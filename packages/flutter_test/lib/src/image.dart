@@ -48,7 +48,7 @@ Future<ui.Image> createTestImage({int width = 1, int height = 1, bool cache = tr
     });
 
 Future<ui.Image> _createImage(int width, int height) async {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
+  final completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
     Uint8List.fromList(List<int>.filled(width * height * 4, 0)),
     width,

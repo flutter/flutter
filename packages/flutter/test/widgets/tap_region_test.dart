@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('TapRegionSurface detects outside tap down events', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
+    final tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -84,7 +84,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects outside tap up events', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
+    final tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -150,8 +150,8 @@ void main() {
   });
 
   testWidgets('TapRegionSurface consumes outside taps when asked', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
-    int propagatedTaps = 0;
+    final tappedOutside = <String>{};
+    var propagatedTaps = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -236,7 +236,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects inside tap down events', (WidgetTester tester) async {
-    final Set<String> tappedInside = <String>{};
+    final tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -310,7 +310,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects inside tap up events', (WidgetTester tester) async {
-    final Set<String> tappedInside = <String>{};
+    final tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -378,10 +378,10 @@ void main() {
   testWidgets('TapRegionSurface detects inside taps correctly with behavior', (
     WidgetTester tester,
   ) async {
-    final Set<String> tappedInside = <String>{};
-    const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
-    const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
-    const ValueKey<String> group1BKey = ValueKey<String>('Group 1 B');
+    final tappedInside = <String>{};
+    const noGroupKey = ValueKey<String>('No Group');
+    const group1AKey = ValueKey<String>('Group 1 A');
+    const group1BKey = ValueKey<String>('Group 1 B');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -458,7 +458,7 @@ void main() {
   });
 
   testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
+    final tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -549,7 +549,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects outside right click', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
+    final tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -623,7 +623,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects outside middle click', (WidgetTester tester) async {
-    final Set<String> tappedOutside = <String>{};
+    final tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -699,8 +699,8 @@ void main() {
   testWidgets('TapRegionSurface consumes outside right click when asked', (
     WidgetTester tester,
   ) async {
-    final Set<String> tappedOutside = <String>{};
-    int propagatedTaps = 0;
+    final tappedOutside = <String>{};
+    var propagatedTaps = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -788,8 +788,8 @@ void main() {
   testWidgets('TapRegionSurface consumes outside middle click when asked', (
     WidgetTester tester,
   ) async {
-    final Set<String> tappedOutside = <String>{};
-    int propagatedTaps = 0;
+    final tappedOutside = <String>{};
+    var propagatedTaps = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -875,7 +875,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects inside right click', (WidgetTester tester) async {
-    final Set<String> tappedInside = <String>{};
+    final tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -949,7 +949,7 @@ void main() {
   });
 
   testWidgets('TapRegionSurface detects inside middle click', (WidgetTester tester) async {
-    final Set<String> tappedInside = <String>{};
+    final tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1026,13 +1026,13 @@ void main() {
   testWidgets('TapRegion onTapOutside should only trigger on the current route during navigation', (
     WidgetTester tester,
   ) async {
-    const ValueKey<String> tapRegion1Key = ValueKey<String>('TapRegion');
-    const ValueKey<String> tapRegion2Key = ValueKey<String>('TapRegion2');
+    const tapRegion1Key = ValueKey<String>('TapRegion');
+    const tapRegion2Key = ValueKey<String>('TapRegion2');
 
-    int count1 = 0;
-    int count2 = 0;
+    var count1 = 0;
+    var count2 = 0;
 
-    final TapRegion tapRegion1 = TapRegion(
+    final tapRegion1 = TapRegion(
       key: tapRegion1Key,
       onTapOutside: (PointerEvent event) {
         count1 += 1;
@@ -1041,7 +1041,7 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    final TapRegion tapRegion2 = TapRegion(
+    final tapRegion2 = TapRegion(
       key: tapRegion2Key,
       onTapOutside: (PointerEvent event) {
         count2 += 1;
@@ -1107,13 +1107,13 @@ void main() {
   testWidgets('TapRegion on non-current routes should not respond to onTapOutside events', (
     WidgetTester tester,
   ) async {
-    const ValueKey<String> tapRegion1Key = ValueKey<String>('TapRegion1');
-    const ValueKey<String> tapRegion2Key = ValueKey<String>('TapRegion2');
+    const tapRegion1Key = ValueKey<String>('TapRegion1');
+    const tapRegion2Key = ValueKey<String>('TapRegion2');
 
-    int count1 = 0;
-    int count2 = 0;
+    var count1 = 0;
+    var count2 = 0;
 
-    final TapRegion tapRegion1 = TapRegion(
+    final tapRegion1 = TapRegion(
       key: tapRegion1Key,
       onTapOutside: (PointerEvent event) {
         count1 += 1;
@@ -1122,7 +1122,7 @@ void main() {
       child: const SizedBox.square(dimension: 100),
     );
 
-    final TapRegion tapRegion2 = TapRegion(
+    final tapRegion2 = TapRegion(
       key: tapRegion2Key,
       onTapOutside: (PointerEvent event) {
         count2 += 1;
@@ -1182,10 +1182,10 @@ void main() {
   testWidgets('TapRegion with consumeOutsideTaps should not consume taps after navigation', (
     WidgetTester tester,
   ) async {
-    const ValueKey<String> tapRegionKey = ValueKey<String>('TapRegion');
-    const ValueKey<String> buttonKey = ValueKey<String>('Button');
+    const tapRegionKey = ValueKey<String>('TapRegion');
+    const buttonKey = ValueKey<String>('Button');
 
-    bool buttonTapped = false;
+    var buttonTapped = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1201,18 +1201,17 @@ void main() {
                   Navigator.push(
                     tester.element(find.byType(GestureDetector)),
                     MaterialPageRoute<void>(
-                      builder:
-                          (BuildContext context) => Scaffold(
-                            body: Center(
-                              child: ElevatedButton(
-                                key: buttonKey,
-                                onPressed: () {
-                                  buttonTapped = true;
-                                },
-                                child: const Text('Test Button'),
-                              ),
-                            ),
+                      builder: (BuildContext context) => Scaffold(
+                        body: Center(
+                          child: ElevatedButton(
+                            key: buttonKey,
+                            onPressed: () {
+                              buttonTapped = true;
+                            },
+                            child: const Text('Test Button'),
                           ),
+                        ),
+                      ),
                     ),
                   );
                 },

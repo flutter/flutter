@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_anchor/radio_menu_button.0.dart' as example;
+import 'package:flutter_api_samples/material/menu_anchor/radio_menu_button.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -19,12 +20,18 @@ void main() {
     expect(find.text('Green Background'), findsOneWidget);
     expect(find.text('Blue Background'), findsOneWidget);
     expect(find.byType(Radio<Color>), findsNWidgets(3));
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.red),
+    );
 
     await tester.tap(find.text('Green Background'));
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.green),
+    );
   });
 
   testWidgets('Shortcuts work', (WidgetTester tester) async {
@@ -39,7 +46,10 @@ void main() {
     expect(find.text('Green Background'), findsOneWidget);
     expect(find.text('Blue Background'), findsOneWidget);
     expect(find.byType(Radio<Color>), findsNWidgets(3));
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.red),
+    );
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyG);
@@ -51,16 +61,16 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(0),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           .groupValue,
       equals(Colors.green),
     );
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.green),
+    );
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
@@ -70,16 +80,16 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(1),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           .groupValue,
       equals(Colors.red),
     );
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.red));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.red),
+    );
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
@@ -89,27 +99,34 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(2),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
           .groupValue,
       equals(Colors.blue),
     );
-    expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.blue));
+    expect(
+      tester.widget<Container>(find.byType(Container)).color,
+      equals(Colors.blue),
+    );
   });
 
-  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (
+    WidgetTester tester,
+  ) async {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
         child: example.MenuApp(),
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
+    expect(
+      tester.getTopLeft(find.byType(MenuAnchor)),
+      const Offset(0.0, safeAreaPadding),
+    );
   });
 }

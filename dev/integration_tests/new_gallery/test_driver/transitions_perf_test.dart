@@ -128,7 +128,7 @@ Future<void> runDemos(
   late SerializableFinder demoList;
   SerializableFinder? demoItem;
 
-  for (final String demo in demos) {
+  for (final demo in demos) {
     if (_skippedDemos.contains(demo)) {
       continue;
     }
@@ -194,7 +194,7 @@ Future<void> runDemos(
 
     // We launch each demo twice to be able to measure and compare first and
     // subsequent builds.
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       stdout.writeln('tapping demo');
       await driver.tap(demoItem); // Launch the demo
 
@@ -270,13 +270,13 @@ void main([List<String> args = const <String>[]]) {
         await runDemos(
           <String>['crane@study'],
           driver,
-          additionalActions:
-              () async => driver.scroll(craneFlyList, 0, -1000, const Duration(seconds: 1)),
+          additionalActions: () async =>
+              driver.scroll(craneFlyList, 0, -1000, const Duration(seconds: 1)),
           scrollToTopWhenDone: false,
         );
       }, streams: const <TimelineStream>[TimelineStream.dart, TimelineStream.embedder]);
 
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-crane', pretty: true);
     }, timeout: Timeout.none);
 
@@ -316,7 +316,7 @@ void main([List<String> args = const <String>[]]) {
         );
       }, streams: const <TimelineStream>[TimelineStream.dart, TimelineStream.embedder]);
 
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions-reply', pretty: true);
     }, timeout: Timeout.none);
 
@@ -334,11 +334,11 @@ void main([List<String> args = const <String>[]]) {
         retainPriorEvents: true,
       );
 
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions', pretty: true);
 
       // Execute the remaining tests.
-      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(_profiledDemos);
+      final unprofiledDemos = Set<String>.from(_allDemos)..removeAll(_profiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
     }, timeout: Timeout.none);
   });

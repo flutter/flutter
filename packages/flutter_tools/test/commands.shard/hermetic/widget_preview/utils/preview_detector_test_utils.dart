@@ -10,12 +10,16 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
+import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
+import 'package:meta/meta.dart';
 
 import '../../../../src/common.dart';
+import '../../../../src/context.dart';
 import '../../../../src/fakes.dart';
 import 'preview_project.dart';
 
@@ -25,6 +29,7 @@ var _stateInitialized = false;
 void Function(PreviewDependencyGraph)? _onChangeDetectedImpl;
 void Function(String path)? _onPubspecChangeDetected;
 Directory? _projectRoot;
+
 late FileSystem _fs;
 
 /// Registers setup and tear down logic for [PreviewDetector] tests.
@@ -45,12 +50,36 @@ void initializeTestPreviewDetectorState() {
   _stateInitialized = true;
 }
 
+@isTest
+void testPreviewDetector(
+  String description,
+  FutureOr<void> Function(PreviewDetector) testMethod, {
+  Map<Type, Generator> overrides = const <Type, Generator>{},
+}) {
+  testUsingContext(
+    description,
+    () async {
+      PreviewDetector? previewDetector;
+      try {
+        previewDetector = createTestPreviewDetector();
+        await testMethod(previewDetector);
+      } finally {
+        await previewDetector?.dispose();
+      }
+    },
+    overrides: {
+      FlutterProjectFactory: () =>
+          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
+    },
+  );
+}
+
 PreviewDetector createTestPreviewDetector() {
   if (!_stateInitialized) {
     throw StateError('$initializeTestPreviewDetectorState was not called!');
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
-  final FlutterProject project = FlutterProject.fromDirectoryTest(_projectRoot!);
+  final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
 
   return PreviewDetector(
     platform: FakePlatform(),
@@ -67,6 +96,18 @@ PreviewDetector createTestPreviewDetector() {
     fs: _fs,
     onChangeDetected: _onChangeDetectedRoot,
     onPubspecChangeDetected: _onPubspecChangeDetectedRoot,
+  );
+}
+
+PreviewManifest createPreviewManifest() {
+  if (!_stateInitialized) {
+    throw StateError('$initializeTestPreviewDetectorState was not called!');
+  }
+  return PreviewManifest(
+    logger: BufferLogger.test(),
+    rootProject: FlutterProject.fromDirectory(_projectRoot!),
+    fs: _fs,
+    cache: Cache.test(processManager: FakeProcessManager.any()),
   );
 }
 

@@ -90,14 +90,14 @@ class HeroExample extends StatelessWidget {
                   },
                   child: BoxWidget(
                     size: const Size(400.0, 400.0),
-                    color: Colors.blue[700]!.withOpacity(0.5),
+                    color: Colors.blue[700]!.withValues(alpha: 0.5),
                   ),
                 ),
                 Hero(
                   tag: 'hero-default-tween',
                   child: BoxWidget(
                     size: const Size(400.0, 400.0),
-                    color: Colors.red[700]!.withOpacity(0.5),
+                    color: Colors.red[700]!.withValues(alpha: 0.5),
                   ),
                 ),
               ],

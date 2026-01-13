@@ -271,6 +271,24 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not crash if the application exits during DDS startup',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178151
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      webDevFS.exception = DartDevelopmentServiceException.failedToStart();
+
+      await expectLater(residentWebRunner.run(), throwsToolExit());
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'WebRunner copies compiled app.dill to cache during startup',
     () async {
       final debuggingOptions = DebuggingOptions.enabled(
@@ -1972,7 +1990,7 @@ class FakeWebServerDevice extends FakeDevice implements WebServerDevice {}
 
 class FakeDevice extends Fake implements WebDevice {
   @override
-  var name = 'FakeDevice';
+  String name = 'FakeDevice';
 
   @override
   String get displayName => name;
@@ -1980,9 +1998,9 @@ class FakeDevice extends Fake implements WebDevice {
   @override
   Uri? devToolsUri;
 
-  var count = 0;
+  int count = 0;
 
-  var isRunning = false;
+  bool isRunning = false;
 
   @override
   Future<String> get sdkNameAndVersion async => 'SDK Name and Version';
@@ -2035,7 +2053,7 @@ class FakeDebugConnection extends Fake implements DebugConnection {
   late String dtdUri;
 
   final completer = Completer<void>();
-  var didClose = false;
+  bool didClose = false;
 
   @override
   Future<void> get onDone => completer.future;
@@ -2047,7 +2065,7 @@ class FakeDebugConnection extends Fake implements DebugConnection {
 }
 
 class FakeAppConnection extends Fake implements AppConnection {
-  var ranMain = false;
+  bool ranMain = false;
 
   @override
   void runMain() {
@@ -2102,7 +2120,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   Uri? mainUri;
 
   @override
-  var sources = <Uri>[];
+  List<Uri> sources = <Uri>[];
 
   @override
   Uri baseUri = Uri.parse('http://localhost:12345');
@@ -2114,7 +2132,7 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   PackageConfig? lastPackageConfig = PackageConfig.empty;
 
   @override
-  var useDwdsWebSocketConnection = false;
+  bool useDwdsWebSocketConnection = false;
 
   @override
   Future<Uri> create() async {
@@ -2215,7 +2233,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   }
 
   @override
-  var currentCompleter = Completer<Chromium>();
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
 
   @override
   bool canFindExecutable() {
@@ -2253,7 +2271,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   Uri? testUri;
-  var report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+  UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
 
   @override

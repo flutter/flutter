@@ -98,7 +98,10 @@ class NextPage extends StatelessWidget {
                 Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.
-                Text('Tap on the leading button to navigate back', textAlign: TextAlign.center),
+                Text(
+                  'Tap on the leading button to navigate back',
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),

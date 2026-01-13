@@ -52,7 +52,10 @@ class _AnimatedBuilderExampleState extends State<AnimatedBuilderExample>
         child: const Center(child: Text('Whee!')),
       ),
       builder: (BuildContext context, Widget? child) {
-        return Transform.rotate(angle: _controller.value * 2.0 * math.pi, child: child);
+        return Transform.rotate(
+          angle: _controller.value * 2.0 * math.pi,
+          child: child,
+        );
       },
     );
   }

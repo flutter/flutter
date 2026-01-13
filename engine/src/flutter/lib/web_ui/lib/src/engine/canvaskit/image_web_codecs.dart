@@ -29,7 +29,7 @@ class CkBrowserImageDecoder extends BrowserImageDecoder {
     required String contentType,
     required String debugSource,
   }) async {
-    final CkBrowserImageDecoder decoder = CkBrowserImageDecoder._(
+    final decoder = CkBrowserImageDecoder._(
       contentType: contentType,
       dataSource: data.toJS,
       debugSource: debugSource,
@@ -82,7 +82,7 @@ Future<ByteData> readPixelsFromVideoFrame(VideoFrame videoFrame, ui.ImageByteFor
 
   // At this point we know we want to read unencoded pixels, and that the video
   // frame is _not_ using the same format as the requested one.
-  final bool isBgrx = videoFrame.format == 'BGRX';
+  final isBgrx = videoFrame.format == 'BGRX';
   final bool isBgrFrame = videoFrame.format == 'BGRA' || isBgrx;
   if (isBgrFrame) {
     if (format == ui.ImageByteFormat.rawStraightRgba || isBgrx) {
@@ -116,7 +116,7 @@ Future<ByteData> readPixelsFromDomImageSource(
 /// Mutates the [pixels], converting them from BGRX/BGRA to RGBA.
 void _bgrToStraightRgba(ByteBuffer pixels, bool isBgrx) {
   final Uint8List pixelBytes = pixels.asUint8List();
-  for (int i = 0; i < pixelBytes.length; i += 4) {
+  for (var i = 0; i < pixelBytes.length; i += 4) {
     // It seems even in little-endian machines the BGR_ pixels are encoded as
     // big-endian, i.e. the blue byte is written into the lowest byte in the
     // memory address space.
@@ -148,7 +148,7 @@ int _premultiply(int value, int alpha) {
 /// premultiplied alpha.
 void _bgrToRawRgba(ByteBuffer pixels) {
   final Uint8List pixelBytes = pixels.asUint8List();
-  for (int i = 0; i < pixelBytes.length; i += 4) {
+  for (var i = 0; i < pixelBytes.length; i += 4) {
     final int a = pixelBytes[i + 3];
     final int r = _premultiply(pixelBytes[i + 2], a);
     final int g = _premultiply(pixelBytes[i + 1], a);
@@ -176,7 +176,7 @@ Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
 
   // In dart2wasm, Uint8List is not the same as a JS Uint8Array. So we
   // explicitly construct the JS object here.
-  final JSUint8Array destination = JSUint8Array.withLength(size);
+  final destination = JSUint8Array.withLength(size);
   final JSPromise<JSAny?> copyPromise = videoFrame.copyTo(destination);
   await copyPromise.toDart;
 
@@ -191,8 +191,7 @@ ByteBuffer readDomImageSourcePixelsUnmodified(
   int height,
 ) {
   final DomHTMLCanvasElement htmlCanvas = createDomCanvasElement(width: width, height: height);
-  final DomCanvasRenderingContext2D ctx =
-      htmlCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+  final ctx = htmlCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
   ctx.drawImage(imageSource, 0, 0);
   final DomImageData imageData = ctx.getImageData(0, 0, width, height);
   // Resize the canvas to 0x0 to cause the browser to reclaim its memory

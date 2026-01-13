@@ -273,7 +273,7 @@ void testMain() {
 
 EngineFlutterView createAndRegisterView(EnginePlatformDispatcher dispatcher) {
   final DomElement div = createDomElement('div');
-  final EngineFlutterView view = EngineFlutterView(dispatcher, div);
+  final view = EngineFlutterView(dispatcher, div);
   domDocument.body!.append(div);
   dispatcher.viewManager.registerView(view);
   return view;

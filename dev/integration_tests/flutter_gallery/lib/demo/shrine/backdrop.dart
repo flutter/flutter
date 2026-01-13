@@ -39,7 +39,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   }
 
   void _handleStatusChange(AnimationStatus status) {
-    final bool value = widget.controller!.status == widget.status;
+    final value = widget.controller!.status == widget.status;
     if (_active != value) {
       setState(() {
         _active = value;
@@ -282,7 +282,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const double layerTitleHeight = 48.0;
+    const layerTitleHeight = 48.0;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
 
@@ -313,7 +313,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final AppBar appBar = AppBar(
+    final appBar = AppBar(
       elevation: 0.0,
       titleSpacing: 0.0,
       title: _BackdropTitle(

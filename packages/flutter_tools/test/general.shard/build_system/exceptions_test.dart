@@ -56,14 +56,14 @@ class TestTarget extends Target {
   Future<void> build(Environment environment) async {}
 
   @override
-  var dependencies = <Target>[];
+  List<Target> dependencies = <Target>[];
 
   @override
-  var inputs = <Source>[];
+  List<Source> inputs = <Source>[];
 
   @override
-  var name = 'test';
+  String name = 'test';
 
   @override
-  var outputs = <Source>[];
+  List<Source> outputs = <Source>[];
 }

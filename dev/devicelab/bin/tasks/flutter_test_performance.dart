@@ -37,7 +37,7 @@ enum TestStep {
 }
 
 Future<int> runTest({bool coverage = false, bool noPub = false}) async {
-  final Stopwatch clock = Stopwatch()..start();
+  final clock = Stopwatch()..start();
   final Process analysis = await startFlutter(
     'test',
     options: <String>[
@@ -47,7 +47,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     ],
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
-  int badLines = 0;
+  var badLines = 0;
   TestStep step = TestStep.starting;
 
   analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
@@ -65,16 +65,15 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
-      // we have a blank line at the start
+      // flutter_tools will print a blank line at the start of the test when using some versions
+      // of the Dart test package.  In test package version 1.29 this line is no longer present.
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
       final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index &&
-            step.index <= TestStep.testLoading.index &&
-            match.group(1)!.startsWith('loading ')) {
+        if (step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index &&
@@ -113,7 +112,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
 }
 
 Future<void> pubGetDependencies(List<Directory> directories) async {
-  for (final Directory directory in directories) {
+  for (final directory in directories) {
     await inDirectory<void>(directory, () async {
       await flutter('pub', options: <String>['get']);
     });
@@ -122,7 +121,7 @@ Future<void> pubGetDependencies(List<Directory> directories) async {
 
 void main() {
   task(() async {
-    final File nodeSourceFile = File(
+    final nodeSourceFile = File(
       path.join(
         flutterDirectory.path,
         'packages',
@@ -161,7 +160,7 @@ void main() {
       ); // run test again with interface changed
       // run test with coverage enabled.
       final int withCoverage = await runTest(coverage: true, noPub: true);
-      final Map<String, dynamic> data = <String, dynamic>{
+      final data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,
         'interface_change_elapsed_time_ms': interfaceChange,

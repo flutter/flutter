@@ -181,8 +181,8 @@ class CombinedCondition extends SerializableWaitCondition {
       return const CombinedCondition(<SerializableWaitCondition>[]);
     }
 
-    final List<SerializableWaitCondition> conditions = <SerializableWaitCondition>[];
-    int i = 0;
+    final conditions = <SerializableWaitCondition>[];
+    var i = 0;
     for (final Map<String, dynamic> condition
         in (json.decode(jsonMap['conditions']!) as List<dynamic>).cast<Map<String, dynamic>>()) {
       conditions.add(

@@ -24,6 +24,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
+import 'view.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -309,7 +310,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///  * [focusNode] and [textEditingController], which contain a code example
   ///    showing how to create a separate field outside of fieldViewBuilder.
   static void onFieldSubmitted<T extends Object>(GlobalKey key) {
-    final _RawAutocompleteState<T> rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
+    final rawAutocomplete = key.currentState! as _RawAutocompleteState<T>;
     rawAutocomplete._onFieldSubmitted();
   }
 
@@ -449,7 +450,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
         : localizations.noResultsFound;
-    SemanticsService.announce(optionsHint, localizations.textDirection);
+    SemanticsService.sendAnnouncement(View.of(context), optionsHint, localizations.textDirection);
   }
 
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
@@ -466,7 +467,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final TextEditingValue value = _textEditingController.value;
 
     // Makes sure that options change only when content of the field changes.
-    bool shouldUpdateOptions = false;
+    var shouldUpdateOptions = false;
     if (value.text != _lastFieldText) {
       shouldUpdateOptions = true;
       _onChangedCallId += 1;
@@ -474,6 +475,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _lastFieldText = value.text;
     final int callId = _onChangedCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
+
+    if (!mounted) {
+      return;
+    }
 
     // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId || !shouldUpdateOptions) {
@@ -599,7 +604,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
         ? -overlayRectInField.top
         : overlayRectInField.bottom - fieldSize.height;
 
-    final Size optionsViewBoundingBox = Size(
+    final optionsViewBoundingBox = Size(
       fieldSize.width,
       math.max(optionsViewMaxHeight, _kMinUsableHeight),
     );

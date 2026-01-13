@@ -98,10 +98,10 @@ class ChromeInstaller {
         'Expected a concrete Chromer version, but got $version. Maybe use ChromeInstaller.latest()?',
       );
     }
-    final io.Directory chromeInstallationDir = io.Directory(
+    final chromeInstallationDir = io.Directory(
       path.join(environment.webUiDartToolDir.path, 'chrome'),
     );
-    final io.Directory versionDir = io.Directory(path.join(chromeInstallationDir.path, version));
+    final versionDir = io.Directory(path.join(chromeInstallationDir.path, version));
     return ChromeInstaller._(
       version: version,
       chromeInstallationDir: chromeInstallationDir,
@@ -165,7 +165,7 @@ class ChromeInstaller {
 
     final StreamedResponse download = await client.send(Request('GET', Uri.parse(url)));
 
-    final io.File downloadedFile = io.File(path.join(versionDir.path, 'chrome.zip'));
+    final downloadedFile = io.File(path.join(versionDir.path, 'chrome.zip'));
     await download.stream.pipe(downloadedFile.openWrite());
 
     /// Windows LUCI bots does not have a `unzip`. Instead we are
@@ -176,7 +176,7 @@ class ChromeInstaller {
     /// from dart.
     /// See: https://github.com/dart-lang/sdk/issues/15078.
     if (io.Platform.isWindows) {
-      final Stopwatch stopwatch = Stopwatch()..start();
+      final stopwatch = Stopwatch()..start();
 
       // Read the Zip file from disk.
       final Uint8List bytes = downloadedFile.readAsBytesSync();
@@ -184,10 +184,10 @@ class ChromeInstaller {
       final Archive archive = ZipDecoder().decodeBytes(bytes);
 
       // Extract the contents of the Zip archive to disk.
-      for (final ArchiveFile file in archive) {
+      for (final file in archive) {
         final String filename = file.name;
         if (file.isFile) {
-          final List<int> data = file.content as List<int>;
+          final data = file.content as List<int>;
           io.File(
               path.joinAll(<String>[
                 versionDir.path,
@@ -210,7 +210,7 @@ class ChromeInstaller {
       // named e.g. 'chrome-linux'. We need to copy the files out of that
       // directory and into the version directory.
       final io.Directory tmpDir = await chromeInstallationDir.createTemp();
-      final io.Directory unzipDir = tmpDir;
+      final unzipDir = tmpDir;
       final io.ProcessResult unzipResult = await io.Process.run('unzip', <String>[
         downloadedFile.path,
         '-d',
@@ -224,7 +224,7 @@ class ChromeInstaller {
         );
       }
 
-      final io.Directory topLevelDir = await tmpDir.list().single as io.Directory;
+      final topLevelDir = await tmpDir.list().single as io.Directory;
       await for (final io.FileSystemEntity entity in topLevelDir.list()) {
         await entity.rename(path.join(versionDir.path, path.basename(entity.path)));
       }
@@ -241,7 +241,7 @@ class ChromeInstaller {
 
 /// Fetches the latest available Chrome build version.
 Future<String> fetchLatestChromeVersion() async {
-  final Client client = Client();
+  final client = Client();
   try {
     final Response response = await client.get(
       Uri.parse(

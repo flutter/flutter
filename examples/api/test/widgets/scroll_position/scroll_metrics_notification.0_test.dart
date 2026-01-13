@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/widgets/scroll_position/scroll_metrics_notif
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('A snackbar is shown when the scroll metrics change', (WidgetTester tester) async {
+  testWidgets('A snackbar is shown when the scroll metrics change', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ScrollMetricsDemo());
 
     expect(find.widgetWithText(AppBar, 'ScrollMetrics Demo'), findsOne);

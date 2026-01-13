@@ -29,7 +29,8 @@ class MyRouterDelegate extends RouterDelegate<Object>
     with PopNavigatorRouterDelegateMixin<Object>, ChangeNotifier {
   // This example doesn't use RouteInformationProvider.
   @override
-  Future<void> setNewRoutePath(Object configuration) async => throw UnimplementedError();
+  Future<void> setNewRoutePath(Object configuration) async =>
+      throw UnimplementedError();
 
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -87,7 +88,10 @@ class MyRouterDelegate extends RouterDelegate<Object>
 
   List<Page<Object?>> _getPages() {
     return <Page<Object?>>[
-      const MaterialPage<void>(key: ValueKey<String>('home'), child: _HomePage()),
+      const MaterialPage<void>(
+        key: ValueKey<String>('home'),
+        child: _HomePage(),
+      ),
       if (showDetailPage)
         MaterialPage<void>(
           key: const ValueKey<String>('details'),

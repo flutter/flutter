@@ -3,6 +3,28 @@
   "_comment2": "See `generate_builder_json.dart` for the generator code",
   "builds": [
     {
+      "name": "web_tests/test_bundles/dart2wasm-skwasm-ui",
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Linux"
+      ],
+      "generators": {
+        "tasks": [
+          {
+            "name": "compile bundle dart2wasm-skwasm-ui",
+            "parameters": [
+              "test",
+              "--compile",
+              "--bundle=dart2wasm-skwasm-ui"
+            ],
+            "scripts": [
+              "flutter/lib/web_ui/dev/felt"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "web_tests/test_bundles/dart2js-canvaskit-engine",
       "drone_dimensions": [
         "device_type=none",
@@ -91,28 +113,6 @@
       }
     },
     {
-      "name": "web_tests/test_bundles/dart2wasm-skwasm-ui",
-      "drone_dimensions": [
-        "device_type=none",
-        "os=Linux"
-      ],
-      "generators": {
-        "tasks": [
-          {
-            "name": "compile bundle dart2wasm-skwasm-ui",
-            "parameters": [
-              "test",
-              "--compile",
-              "--bundle=dart2wasm-skwasm-ui"
-            ],
-            "scripts": [
-              "flutter/lib/web_ui/dev/felt"
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "web_tests/test_bundles/fallbacks",
       "drone_dimensions": [
         "device_type=none",
@@ -165,11 +165,11 @@
         "download_jdk": false
       },
       "dependencies": [
+        "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/dart2js-canvaskit-engine",
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
         "web_tests/test_bundles/dart2wasm-canvaskit-engine",
-        "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/fallbacks"
       ],
       "test_dependencies": [
@@ -188,6 +188,7 @@
           "parameters": [
             "test",
             "--copy-artifacts",
+            "--suite=chrome-dart2wasm-wimp-ui",
             "--suite=chrome-dart2js-canvaskit-engine",
             "--suite=chrome-dart2js-canvaskit-canvaskit",
             "--suite=chrome-dart2js-canvaskit-ui",
@@ -199,6 +200,15 @@
             "--suite=chrome-fallbacks",
             "--suite=chrome-coi-fallbacks",
             "--suite=chrome-force-st-fallbacks"
+          ],
+          "script": "flutter/lib/web_ui/dev/felt"
+        },
+        {
+          "name": "run suite chrome-dart2wasm-wimp-ui",
+          "parameters": [
+            "test",
+            "--run",
+            "--suite=chrome-dart2wasm-wimp-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },

@@ -245,10 +245,10 @@ class Placeholder {
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
-  var isPlural = false;
-  var isSelect = false;
-  var isDateTime = false;
-  var requiresDateFormatting = false;
+  bool isPlural = false;
+  bool isSelect = false;
+  bool isDateTime = false;
+  bool requiresDateFormatting = false;
 
   bool get requiresFormatting => requiresDateFormatting || requiresNumFormatting;
   bool get requiresNumFormatting =>
@@ -412,7 +412,7 @@ class Message {
   final bool useEscaping;
   final bool useRelaxedSyntax;
   final Logger? logger;
-  var hadErrors = false;
+  bool hadErrors = false;
 
   Iterable<Placeholder> getPlaceholders(LocaleInfo locale) {
     final Map<String, Placeholder>? placeholders = localePlaceholders[locale];
@@ -638,38 +638,42 @@ class AppResourceBundle {
     // Look for the first instance of an ISO 639-1 language code, matching exactly.
     final String fileName = file.fileSystem.path.basenameWithoutExtension(file.path);
 
-    for (var index = 0; index < fileName.length; index += 1) {
-      // If an underscore was found, check if locale string follows.
-      if (fileName[index] == '_') {
-        // If Locale.tryParse fails, it returns null.
-        final Locale? parserResult = Locale.tryParse(fileName.substring(index + 1));
-        // If the parserResult is not an actual locale identifier, end the loop.
-        if (parserResult != null && _iso639Languages.contains(parserResult.languageCode)) {
-          // The parsed result uses dashes ('-'), but we want underscores ('_').
-          final String parserLocaleString = parserResult.toString().replaceAll('-', '_');
+    // Try to parse a locale from the filename.
+    String? fileNameLocale;
 
-          if (localeString == null) {
-            // If @@locale was not defined, use the filename locale suffix.
-            localeString = parserLocaleString;
-          } else {
-            // If the localeString was defined in @@locale and in the filename, verify to
-            // see if the parsed locale matches, throw an error if it does not. This
-            // prevents developers from confusing issues when both @@locale and
-            // "_{locale}" is specified in the filename.
-            if (localeString != parserLocaleString) {
-              throw L10nException(
-                'The locale specified in @@locale and the arb filename do not match. \n'
-                'Please make sure that they match, since this prevents any confusion \n'
-                'with which locale to use. Otherwise, specify the locale in either the \n'
-                'filename or the @@locale key only.\n'
-                'Current @@locale value: $localeString\n'
-                'Current filename extension: $parserLocaleString',
-              );
-            }
+    // First, try parsing the whole filename as a locale.
+    Locale? parserResult = Locale.tryParse(fileName);
+    if (parserResult != null && _iso639Languages.contains(parserResult.languageCode)) {
+      fileNameLocale = parserResult.toString().replaceAll('-', '_');
+    } else {
+      // If that fails, look for underscores and try parsing after each one.
+      for (var index = 0; index < fileName.length; index += 1) {
+        if (fileName[index] == '_') {
+          parserResult = Locale.tryParse(fileName.substring(index + 1));
+          if (parserResult != null && _iso639Languages.contains(parserResult.languageCode)) {
+            // The parsed result uses dashes ('-'), but we want underscores ('_').
+            fileNameLocale = parserResult.toString().replaceAll('-', '_');
+            break;
           }
-          break;
         }
       }
+    }
+
+    if (localeString != null) {
+      // If @@locale is provided, check if there's a conflicting locale in the filename.
+      if (fileNameLocale != null && localeString != fileNameLocale) {
+        throw L10nException(
+          'The locale specified in @@locale and the arb filename do not match. \n'
+          'Please make sure that they match, since this prevents any confusion \n'
+          'with which locale to use. Otherwise, specify the locale in either the \n'
+          'filename or the @@locale key only.\n'
+          'Current @@locale value: $localeString\n'
+          'Current filename extension: $fileNameLocale',
+        );
+      }
+    } else {
+      // If @@locale is not provided, use the locale parsed from the filename.
+      localeString = fileNameLocale;
     }
 
     if (localeString == null) {

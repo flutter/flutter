@@ -44,7 +44,7 @@ void testMain() {
       EnginePlatformDispatcher.instance.onReportTimings = (_) {};
       expect(FrameTimingRecorder.frameTimingsEnabled, isTrue);
 
-      const int frameNumber1 = 333;
+      const frameNumber1 = 333;
       FrameTimingRecorder.recordCurrentFrameNumber(frameNumber1);
 
       FrameTimingRecorder()
@@ -57,7 +57,7 @@ void testMain() {
       final ui.FrameTiming timing1 = FrameTimingRecorder.debugFrameTimings.first;
       expect(timing1.frameNumber, frameNumber1);
 
-      const int frameNumber2 = 334;
+      const frameNumber2 = 334;
       FrameTimingRecorder.recordCurrentFrameNumber(frameNumber2);
 
       FrameTimingRecorder()

@@ -438,21 +438,29 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
 void Rasterizer::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(sk_sp<DlImage>)> callback) {
+    std::function<void(sk_sp<DlImage>)> callback,
+    SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size,
-                                                  callback);
+                                                  callback, pixel_format);
 }
 
 sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize picture_size) {
-  return snapshot_controller_->MakeRasterSnapshotSync(display_list,
-                                                      picture_size);
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeRasterSnapshotSync(
+      display_list, picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   return snapshot_controller_->ConvertToRasterImage(image);
+}
+
+sk_sp<DlImage> Rasterizer::MakeTextureImage(sk_sp<SkImage> image,
+                                            SnapshotPixelFormat pixel_format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+  return snapshot_controller_->MakeTextureImage(image, pixel_format);
 }
 
 // |SnapshotDelegate|
@@ -854,7 +862,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #else
   SkSerialProcs procs = {0};
   procs.fTypefaceProc = SerializeTypefaceWithData;
-  procs.fImageProc = [](SkImage* img, void*) -> sk_sp<SkData> {
+  procs.fImageProc = [](SkImage* img, void*) -> SkSerialReturnType {
     return SkPngEncoder::Encode(nullptr, img, SkPngEncoder::Options{});
   };
 #endif

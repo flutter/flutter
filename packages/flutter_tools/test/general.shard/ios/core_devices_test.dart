@@ -30,7 +30,7 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 class LocalFileSystemFake extends Fake implements LocalFileSystem {
-  var memoryFileSystem = MemoryFileSystem.test();
+  MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
 
   @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
@@ -3871,10 +3871,10 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
 
 class FakeXcodeDebug extends Fake implements XcodeDebug {
   FakeXcodeDebug({this.tempXcodeProject, this.expectedProject, this.expectedLaunchArguments});
-  var exitSuccess = true;
+  bool exitSuccess = true;
   var _debugStarted = false;
-  var exitCalled = false;
-  var isTemporaryProject = false;
+  bool exitCalled = false;
+  bool isTemporaryProject = false;
   Directory? tempXcodeProject;
   XcodeDebugProject? expectedProject;
   List<String>? expectedLaunchArguments;
@@ -3936,11 +3936,11 @@ class FakeLLDB extends Fake implements LLDB {
   FakeLLDB({this.attachSuccess = true});
   bool attachSuccess;
 
-  var attemptedToAttach = false;
+  bool attemptedToAttach = false;
 
   var _isRunning = false;
   int? _processId;
-  var exitCalled = false;
+  bool exitCalled = false;
 
   @override
   bool get isRunning => _isRunning;

@@ -13,25 +13,25 @@ void main() {
 
 void testMain() {
   test('parseCssColor(rgb)', () {
-    final color1 = parseCssRgb('rgb(12, 34, 56)');
+    final ui.Color? color1 = parseCssRgb('rgb(12, 34, 56)');
     expect(color1, const ui.Color(0xff0c2238));
 
-    final color2 = parseCssRgb('rgb(255, 0, 0)');
+    final ui.Color? color2 = parseCssRgb('rgb(255, 0, 0)');
     expect(color2, const ui.Color(0xffff0000));
 
-    final color3 = parseCssRgb('rgb(0, 255, 0)');
+    final ui.Color? color3 = parseCssRgb('rgb(0, 255, 0)');
     expect(color3, const ui.Color(0xff00ff00));
 
-    final color4 = parseCssRgb('rgb(0, 0, 255)');
+    final ui.Color? color4 = parseCssRgb('rgb(0, 0, 255)');
     expect(color4, const ui.Color(0xff0000ff));
 
-    final color5 = parseCssRgb('rgb(255,255,255)');
+    final ui.Color? color5 = parseCssRgb('rgb(255,255,255)');
     expect(color5, const ui.Color(0xffffffff));
 
-    final color6 = parseCssRgb('rgb(0,0,0)');
+    final ui.Color? color6 = parseCssRgb('rgb(0,0,0)');
     expect(color6, const ui.Color(0xff000000));
 
-    final color7 = parseCssRgb('  rgb( 10, 20 ,30 )  ');
+    final ui.Color? color7 = parseCssRgb('  rgb( 10, 20 ,30 )  ');
     expect(color7, const ui.Color(0xff0a141e));
 
     // Invalid input:
@@ -41,25 +41,25 @@ void testMain() {
   });
 
   test('parseCssColor(rgba)', () {
-    final color1 = parseCssRgb('rgba(12, 34, 56, 0.5)');
+    final ui.Color? color1 = parseCssRgb('rgba(12, 34, 56, 0.5)');
     expect(color1?.toCssString(), const ui.Color.fromRGBO(12, 34, 56, 0.5).toCssString());
 
-    final color2 = parseCssRgb('rgba(255, 0, 0, 0.0)');
+    final ui.Color? color2 = parseCssRgb('rgba(255, 0, 0, 0.0)');
     expect(color2, const ui.Color.fromRGBO(255, 0, 0, 0.0));
 
-    final color3 = parseCssRgb('rgba(0, 255, 0, 1.0)');
+    final ui.Color? color3 = parseCssRgb('rgba(0, 255, 0, 1.0)');
     expect(color3, const ui.Color.fromRGBO(0, 255, 0, 1.0));
 
-    final color4 = parseCssRgb('rgba(0, 0, 255, 0.7)');
+    final ui.Color? color4 = parseCssRgb('rgba(0, 0, 255, 0.7)');
     expect(color4, const ui.Color.fromRGBO(0, 0, 255, 0.7));
 
-    final color5 = parseCssRgb('rgba(255,255,255,0.2)');
+    final ui.Color? color5 = parseCssRgb('rgba(255,255,255,0.2)');
     expect(color5, const ui.Color.fromRGBO(255, 255, 255, 0.2));
 
-    final color6 = parseCssRgb('rgba(0,0,0,1.0)');
+    final ui.Color? color6 = parseCssRgb('rgba(0,0,0,1.0)');
     expect(color6, const ui.Color.fromRGBO(0, 0, 0, 1.0));
 
-    final color7 = parseCssRgb('  rgba( 10, 20 ,30,     0.8 )  ');
+    final ui.Color? color7 = parseCssRgb('  rgba( 10, 20 ,30,     0.8 )  ');
     expect(color7, const ui.Color.fromRGBO(10, 20, 30, 0.8));
 
     // Invalid input:
@@ -115,10 +115,10 @@ void testMain() {
     );
 
     // Ensure that at least some colors are different between light and dark mode.
-    int differentCount = 0;
+    var differentCount = 0;
     for (final colorName in systemColorNames) {
-      final lightColor = detectorLight.systemColors[colorName];
-      final darkColor = detectorDark.systemColors[colorName];
+      final ui.SystemColor? lightColor = detectorLight.systemColors[colorName];
+      final ui.SystemColor? darkColor = detectorDark.systemColors[colorName];
       if (lightColor != null &&
           darkColor != null &&
           lightColor.isSupported &&

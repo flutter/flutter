@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Path tests', () {
-    final Path path = Path()
+    final path = Path()
       ..lineTo(10, 0)
       ..lineTo(10, 10)
       ..lineTo(0, 10)
@@ -26,7 +26,7 @@ void main() {
     ]);
     expect(path.points, <double>[0, 0, 10, 0, 10, 10, 0, 10, 0, 0, 30, 30, 40, 40, 50, 50]);
 
-    final SvgPathProxy proxy = SvgPathProxy();
+    final proxy = SvgPathProxy();
     path.replay(proxy);
     expect(
       proxy.toString(),
@@ -36,13 +36,13 @@ void main() {
   });
 
   test('Ops test', () {
-    final Path cubics = Path()
+    final cubics = Path()
       ..moveTo(16, 128)
       ..cubicTo(16, 66, 66, 16, 128, 16)
       ..cubicTo(240, 66, 16, 66, 240, 128)
       ..close();
 
-    final Path quad = Path()
+    final quad = Path()
       ..moveTo(55, 16)
       ..lineTo(200, 80)
       ..lineTo(198, 230)
@@ -94,7 +94,7 @@ void main() {
   });
 
   test('Ops where fill type changes', () {
-    final Path a = Path(FillType.evenOdd)
+    final a = Path(FillType.evenOdd)
       ..moveTo(9.989999771118164, 20.0)
       ..cubicTo(4.46999979019165, 20.0, 0.0, 15.520000457763672, 0.0, 10.0)
       ..cubicTo(0.0, 4.480000019073486, 4.46999979019165, 0.0, 9.989999771118164, 0.0)
@@ -119,7 +119,7 @@ void main() {
       ..lineTo(9.0, 13.0)
       ..lineTo(11.0, 13.0)
       ..close();
-    final Path b = Path()
+    final b = Path()
       ..moveTo(0, 0)
       ..lineTo(0, 20)
       ..lineTo(20, 20)

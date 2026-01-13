@@ -32,8 +32,8 @@ Future<void> main(List<String> rawArgs) async {
 
   final List<String> jsonFiles = args.rest.isNotEmpty ? args.rest : <String>['ABresults.json'];
 
-  for (final String filename in jsonFiles) {
-    final File file = File(filename);
+  for (final filename in jsonFiles) {
+    final file = File(filename);
     if (!file.existsSync()) {
       _usage('File "$filename" does not exist');
       return;

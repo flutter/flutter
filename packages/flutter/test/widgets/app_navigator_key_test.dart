@@ -14,7 +14,7 @@ Route<void> generateRoute(RouteSettings settings) => PageRouteBuilder<void>(
 
 void main() {
   testWidgets('WidgetsApp.navigatorKey', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       WidgetsApp(navigatorKey: key, color: const Color(0xFF112233), onGenerateRoute: generateRoute),
     );

@@ -48,6 +48,7 @@ export 'package:flutter/rendering.dart'
         FlowPaintingContext,
         FractionalOffsetTween,
         HitTestBehavior,
+        ImageFilterConfig,
         LayerLink,
         MainAxisAlignment,
         MainAxisSize,
@@ -531,7 +532,7 @@ class BackdropGroup extends InheritedWidget {
 ///                sigmaY: 40,
 ///              ),
 ///              child: Container(
-///                color: Colors.black.withOpacity(0.2),
+///                color: Colors.black.withValues(alpha: 0.2),
 ///                height: 200,
 ///                child: const Text('Blur item'),
 ///              ),
@@ -635,14 +636,26 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
   /// null if provided.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : _useSharedKey = false;
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
   /// [BackdropGroup].
@@ -653,20 +666,48 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter.grouped({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : backdropGroupKey = null,
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       backdropGroupKey = null,
        _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  ///
+  /// The [filter] parameter is equivalent to [filterConfig] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ui.ImageFilter? filter;
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filterConfig] parameter is equivalent to [filter] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ImageFilterConfig? filterConfig;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -696,10 +737,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     return backdropGroupKey;
   }
 
+  ImageFilterConfig get _effectiveFilterConfig {
+    return filterConfig ?? ImageFilterConfig(filter!);
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
-      filter: filter,
+      filterConfig: _effectiveFilterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -709,10 +754,21 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
-      ..filter = filter
+      ..filterConfig = _effectiveFilterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
@@ -1711,7 +1767,7 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 
   static Matrix4 _createZRotation(double sin, double cos) {
-    final Matrix4 result = Matrix4.zero();
+    final result = Matrix4.zero();
     result.storage[0] = cos;
     result.storage[1] = sin;
     result.storage[4] = -sin;
@@ -2550,8 +2606,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData =
-        renderObject.parentData! as MultiChildLayoutParentData;
+    final parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       renderObject.parent?.markNeedsLayout();
@@ -4053,6 +4108,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
+    required String? minValue,
+    required String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4138,6 +4195,8 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            validationResult: validationResult,
            hitTestBehavior: hitTestBehavior,
            inputType: inputType,
+           minValue: minValue,
+           maxValue: maxValue,
          ),
        );
 
@@ -4155,11 +4214,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -4389,6 +4444,8 @@ class SliverSemantics extends _SemanticsBase {
     super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -4823,7 +4880,7 @@ class IndexedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+    final wrappedChildren = List<Widget>.generate(children.length, (int i) {
       return Visibility(
         visible: i == index,
         maintainInteractivity: true,
@@ -5108,8 +5165,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData! as StackParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as StackParentData;
+    var needsLayout = false;
 
     if (parentData.left != left) {
       parentData.left = left;
@@ -6006,8 +6063,8 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData! as FlexParentData;
-    bool needsLayout = false;
+    final parentData = renderObject.parentData! as FlexParentData;
+    var needsLayout = false;
 
     if (parentData.flex != flex) {
       parentData.flex = flex;
@@ -7277,7 +7334,7 @@ class Listener extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onPointerDown != null) 'down',
       if (onPointerMove != null) 'move',
       if (onPointerUp != null) 'up',
@@ -7515,7 +7572,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[
+    final listeners = <String>[
       if (onEnter != null) 'enter',
       if (onExit != null) 'exit',
       if (onHover != null) 'hover',
@@ -7972,6 +8029,8 @@ class Semantics extends _SemanticsBase {
     super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -8221,7 +8280,7 @@ class KeyedSubtree extends StatelessWidget {
       return items;
     }
 
-    final List<Widget> itemsWithUniqueKeys = <Widget>[
+    final itemsWithUniqueKeys = <Widget>[
       for (final (int i, Widget item) in items.indexed) KeyedSubtree.wrap(item, baseIndex + i),
     ];
 
@@ -8365,17 +8424,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 groupValue: selectedRadio,
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),

@@ -12,18 +12,18 @@
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/shader_archive/shader_archive_types.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
 class ShaderArchive {
  public:
-  explicit ShaderArchive(std::shared_ptr<fml::Mapping> payload);
+  static absl::StatusOr<ShaderArchive> Create(
+      std::shared_ptr<fml::Mapping> payload);
 
   ShaderArchive(ShaderArchive&&);
 
   ~ShaderArchive();
-
-  bool IsValid() const;
 
   size_t GetShaderCount() const;
 
@@ -37,6 +37,8 @@ class ShaderArchive {
       const;
 
  private:
+  explicit ShaderArchive(std::shared_ptr<fml::Mapping> payload);
+
   struct ShaderKey {
     ArchiveShaderType type = ArchiveShaderType::kFragment;
     std::string name;
@@ -63,7 +65,8 @@ class ShaderArchive {
 
   std::shared_ptr<fml::Mapping> payload_;
   Shaders shaders_;
-  bool is_valid_ = false;
+
+  ShaderArchive(std::shared_ptr<fml::Mapping> payload, Shaders shaders);
 
   ShaderArchive(const ShaderArchive&) = delete;
 

@@ -29,7 +29,10 @@ class AppBarContent extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             children: <Widget>[
-              const Text('PreferredSize Sample', style: TextStyle(color: Colors.white)),
+              const Text(
+                'PreferredSize Sample',
+                style: TextStyle(color: Colors.white),
+              ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.search, size: 20),

@@ -32,6 +32,31 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.6](https://github.com/flutter/flutter/releases/tag/3.38.6)
+
+- [flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
+- [flutter/178896](https://github.com/flutter/flutter/issues/178896) - Apps crash during launch on Windows when run from paths containing non-ASCII characters.
+- [flutter/176943](https://github.com/flutter/flutter/issues/176943) - Configuration changes to run tests on macOS 15 or 15.7.2 for Flutter's CI.
+- [flutter/179914](https://github.com/flutter/flutter/issues/179914) - Flutter Android apps that upgrade to AGP 9.0.0 require migration steps.
+- [flutter/175099](https://github.com/flutter/flutter/issues/175099) - When WebViews are scrolled on iOS 26, they become unclickable.
+- [flutter/175074](https://github.com/flutter/flutter/issues/175074) - When the virtual keyboard is closed on Android web, the area behind it remains blank and the app only draws in the area that used to be above the keyboard.
+- [flutter/180381](https://github.com/flutter/flutter/issues/180381) - Apps crash on Android when enabling accessibility, hiding a platform view, and pulling out the top curtain.
+
+### [3.38.5](https://github.com/flutter/flutter/releases/tag/3.38.5)
+
+- [flutter/179700](https://github.com/flutter/flutter/issues/179700) Update dart to 3.10.4.
+
+### [3.38.4](https://github.com/flutter/flutter/releases/tag/3.38.4)
+
+- [flutter/178547](https://github.com/flutter/flutter/issues/178547) Rendering issues in the Linux desktop embedder when using Skia.
+- [flutter/178529](https://github.com/flutter/flutter/issues/178529) AppLocalizations getting deleted when running debug web
+- [flutter/178660](https://github.com/flutter/flutter/issues/178660) `flutter widget-preview start` can crash if `.dart_tool/widget_preview_scaffold/.dart_tool` doesn't exist on subsequent runs.
+- [flutter/175227](https://github.com/flutter/flutter/issues/175227) Flutter Web applications launched in Chrome show a warning related to --no-sandbox.
+- [flutter/179155](https://github.com/flutter/flutter/issues/179155) `flutter widget-preview start` crashes if a file named `pubspec.yaml` is modified outside the root of the previewed project.
+- [flutter/156692](https://github.com/flutter/flutter/issues/156692) `flutter attach` can crash if the target application disconnects unexpectedly.
+- [flutter/179008](https://github.com/flutter/flutter/issues/179008) `flutter pub get` could be spawned multiple times on MacOS when `pubspec.yaml`s outside of the project were modified after a `flutter pub get` in the root project.
+- [flutter/178715](https://github.com/flutter/flutter/issues/178715) Running flutter test on Linux/MacOS for Android projects with build hooks fails without the desktop native tooling installed.
+
 ### [3.38.3](https://github.com/flutter/flutter/releases/tag/3.38.3)
 
 - [flutter/178772](https://github.com/flutter/flutter/issues/178772) Flutter engine reports a different version than the framework.

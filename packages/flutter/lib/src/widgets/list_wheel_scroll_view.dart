@@ -265,7 +265,7 @@ class FixedExtentScrollController extends ScrollController {
       'The selectedItem property cannot be read when multiple scroll views are '
       'attached to the same FixedExtentScrollController.',
     );
-    final _FixedExtentScrollPosition position = this.position as _FixedExtentScrollPosition;
+    final position = this.position as _FixedExtentScrollPosition;
     return position.itemIndex;
   }
 
@@ -397,7 +397,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext
        super(initialPixels: _getItemExtentFromScrollContext(context) * initialItem);
 
   static double _getItemExtentFromScrollContext(ScrollContext context) {
-    final _FixedExtentScrollableState scrollable = context as _FixedExtentScrollableState;
+    final scrollable = context as _FixedExtentScrollableState;
     return scrollable.itemExtent;
   }
 
@@ -461,7 +461,7 @@ class _FixedExtentScrollable extends Scrollable {
 class _FixedExtentScrollableState extends ScrollableState {
   double get itemExtent {
     // Downcast because only _FixedExtentScrollable can make _FixedExtentScrollableState.
-    final _FixedExtentScrollable actualWidget = widget as _FixedExtentScrollable;
+    final actualWidget = widget as _FixedExtentScrollable;
     return actualWidget.itemExtent;
   }
 }
@@ -493,7 +493,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       'the FixedExtentScrollController',
     );
 
-    final _FixedExtentScrollPosition metrics = position as _FixedExtentScrollPosition;
+    final metrics = position as _FixedExtentScrollPosition;
 
     // Scenario 1:
     // If we're out of range and not headed back in range, defer to the parent
@@ -755,8 +755,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   void initState() {
     super.initState();
     if (widget.controller is FixedExtentScrollController) {
-      final FixedExtentScrollController controller =
-          widget.controller! as FixedExtentScrollController;
+      final controller = widget.controller! as FixedExtentScrollController;
       _lastReportedItemIndex = controller.initialItem;
     }
   }
@@ -768,7 +767,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   }
 
   void _reportSelectedItemChanged(ScrollNotification notification) {
-    final FixedExtentMetrics metrics = notification.metrics as FixedExtentMetrics;
+    final metrics = notification.metrics as FixedExtentMetrics;
     final int currentItemIndex = metrics.itemIndex;
     if (currentItemIndex != _lastReportedItemIndex) {
       _lastReportedItemIndex = currentItemIndex;
@@ -855,7 +854,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void update(ListWheelViewport newWidget) {
-    final ListWheelViewport oldWidget = widget as ListWheelViewport;
+    final oldWidget = widget as ListWheelViewport;
     super.update(newWidget);
     final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
     final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
@@ -881,7 +880,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
     final int firstIndex = _childElements.firstKey()!;
     final int lastIndex = _childElements.lastKey()!;
 
-    for (int index = firstIndex; index <= lastIndex; ++index) {
+    for (var index = firstIndex; index <= lastIndex; ++index) {
       final Element? newChild = updateChild(_childElements[index], retrieveWidget(index), index);
       if (newChild != null) {
         _childElements[index] = newChild;
@@ -909,7 +908,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   @override
   void createChild(int index, {required RenderBox? after}) {
     owner!.buildScope(this, () {
-      final bool insertFirst = after == null;
+      final insertFirst = after == null;
       assert(insertFirst || _childElements[index - 1] != null);
       final Element? newChild = updateChild(_childElements[index], retrieveWidget(index), index);
       if (newChild != null) {
@@ -934,11 +933,9 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   Element? updateChild(Element? child, Widget? newWidget, Object? newSlot) {
-    final ListWheelParentData? oldParentData =
-        child?.renderObject?.parentData as ListWheelParentData?;
+    final oldParentData = child?.renderObject?.parentData as ListWheelParentData?;
     final Element? newChild = super.updateChild(child, newWidget, newSlot);
-    final ListWheelParentData? newParentData =
-        newChild?.renderObject?.parentData as ListWheelParentData?;
+    final newParentData = newChild?.renderObject?.parentData as ListWheelParentData?;
     if (newParentData != null) {
       newParentData.index = newSlot! as int;
       if (oldParentData != null) {
@@ -962,7 +959,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void moveRenderObjectChild(RenderObject child, int oldSlot, int newSlot) {
-    const String moveChildRenderObjectErrorMessage =
+    const moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
         'moving children around is not allowed.';
     assert(false, moveChildRenderObjectErrorMessage);
@@ -1086,7 +1083,7 @@ class ListWheelViewport extends RenderObjectWidget {
 
   @override
   RenderListWheelViewport createRenderObject(BuildContext context) {
-    final ListWheelElement childManager = context as ListWheelElement;
+    final childManager = context as ListWheelElement;
     return RenderListWheelViewport(
       childManager: childManager,
       offset: offset,

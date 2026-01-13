@@ -38,7 +38,7 @@ String get testSelector {
 /// Runs a specific web test
 Future<void> runWebTest(WebTest test) async {
   ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
-  final Completer<void> completer = Completer<void>();
+  final completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
 
@@ -65,8 +65,8 @@ StreamChannel<Object?> _serializeSuite(EntryPoint Function() getMain, {bool hide
     RemoteListener.start(getMain, hidePrints: hidePrints);
 
 StreamChannel<Object?> _postMessageChannel() {
-  final StreamChannelController<Object?> controller = StreamChannelController<Object?>(sync: true);
-  final web.MessageChannel channel = web.MessageChannel();
+  final controller = StreamChannelController<Object?>(sync: true);
+  final channel = web.MessageChannel();
   web.window.parent!.postMessage(
     'port'.toJS,
     web.window.location.origin,

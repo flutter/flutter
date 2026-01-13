@@ -72,9 +72,9 @@ class ArcsPainter extends CustomPainter {
       return;
     }
     canvas.drawPaint(Paint()..color = Colors.white);
-    for (int row = 0; row < numRows; row++) {
-      for (int col = 0; col < numCols; col++) {
-        final Offset center = Offset((col / numCols) * size.width, (row / numRows) * size.height);
+    for (var row = 0; row < numRows; row++) {
+      for (var col = 0; col < numCols; col++) {
+        final center = Offset((col / numCols) * size.width, (row / numRows) * size.height);
         // Radius increases with row.
         final double radius = row.toDouble();
         // Sweep angle repeatedly goes from -2pi to 2pi.

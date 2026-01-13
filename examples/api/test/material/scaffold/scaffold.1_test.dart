@@ -3,26 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/scaffold/scaffold.1.dart' as example;
+import 'package:flutter_api_samples/material/scaffold/scaffold.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('The count should be incremented when the floating action button is tapped', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.ScaffoldExampleApp());
+  testWidgets(
+    'The count should be incremented when the floating action button is tapped',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.ScaffoldExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'Sample Code'), findsOne);
-    expect(find.widgetWithIcon(FloatingActionButton, Icons.add), findsOne);
-    expect(find.text('You have pressed the button 0 times.'), findsOne);
+      expect(find.widgetWithText(AppBar, 'Sample Code'), findsOne);
+      expect(find.widgetWithIcon(FloatingActionButton, Icons.add), findsOne);
+      expect(find.text('You have pressed the button 0 times.'), findsOne);
 
-    for (int i = 1; i <= 5; i++) {
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pump();
-      expect(find.text('You have pressed the button $i times.'), findsOne);
-    }
+      for (int i = 1; i <= 5; i++) {
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pump();
+        expect(find.text('You have pressed the button $i times.'), findsOne);
+      }
 
-    final Scaffold scaffold = tester.firstWidget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.backgroundColor, Colors.blueGrey.shade200);
-  });
+      final Scaffold scaffold = tester.firstWidget<Scaffold>(
+        find.byType(Scaffold),
+      );
+      expect(scaffold.backgroundColor, Colors.blueGrey.shade200);
+    },
+  );
 }

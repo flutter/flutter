@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
+#include "display_list/geometry/dl_geometry_types.h"
+#include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
@@ -496,6 +498,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
   DlMatrix transformMatrix;
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
+  NSMutableArray<PendingRRectClip*>* pendingClipRRects = [[NSMutableArray alloc] init];
+
   FML_DCHECK(!clipView.maskView ||
              [clipView.maskView isKindOfClass:[FlutterClippingMaskView class]]);
   if (clipView.maskView) {
@@ -576,14 +580,51 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+
+        // TODO(https://github.com/flutter/flutter/issues/179126)
+        CGFloat cornerRadius = 0.0;
+        if ([pendingClipRRects count] > 0) {
+          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          [pendingClipRRects removeAllObjects];
+        }
+        visualEffectView.layer.cornerRadius = cornerRadius;
+        visualEffectView.clipsToBounds = YES;
+
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
+                                                                  cornerRadius:cornerRadius
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
         } else {
           [blurFilters addObject:filter];
         }
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRect: {
+        // The frame already handles cropping into the rect so this can
+        // no-op
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRRect: {
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        DlRoundRect rrect = (*iter)->GetBackdropClipRRect().rrect;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rrect.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        [pendingClipRRects addObject:clip];
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipRSuperellipse: {
+        // TODO(https://github.com/flutter/flutter/issues/179125)
+        break;
+      }
+      case flutter::MutatorType::kBackdropClipPath: {
+        // TODO(https://github.com/flutter/flutter/issues/179127)
         break;
       }
     }
@@ -665,8 +706,22 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
      withIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext {
   TRACE_EVENT0("flutter", "PlatformViewsController::SubmitFrame");
 
-  // No platform views to render; we're done.
+  // No platform views to render.
   if (self.flutterView == nil || (self.compositionOrder.empty() && !self.hadPlatformViews)) {
+    // No platform views to render but the FlutterView may need to be resized.
+    __weak FlutterPlatformViewsController* weakSelf = self;
+    if (self.flutterView != nil) {
+      fml::TaskRunner::RunNowOrPostTask(
+          weakSelf.platformTaskRunner,
+          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize]() {
+            FlutterPlatformViewsController* strongSelf = weakSelf;
+            if (!strongSelf) {
+              return;
+            }
+            [strongSelf performResize:frameSize];
+          }));
+    }
+
     self.hadPlatformViews = NO;
     return background_frame->Submit();
   }
@@ -752,15 +807,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-
   auto task = [self,                                                      //
                platformViewLayers = std::move(platformViewLayers),        //
                currentCompositionParams = self.currentCompositionParams,  //
                viewsToRecomposite = self.viewsToRecomposite,              //
                compositionOrder = self.compositionOrder,                  //
                unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)                   //
-  ]() mutable {
+               surfaceFrames = std::move(surfaceFrames)]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
@@ -770,7 +823,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   };
 
   fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
-
   return didEncode;
 }
 
@@ -796,6 +848,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       });
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
+  }
+}
+
+- (void)performResize:(const flutter::DlISize&)frameSize {
+  TRACE_EVENT0("flutter", "PlatformViewsController::PerformResize");
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
+
+  if (self.flutterView != nil) {
+    [(FlutterView*)self.flutterView
+        setIntrinsicContentSize:CGSizeMake(frameSize.width, frameSize.height)];
   }
 }
 
@@ -949,6 +1011,38 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)pushVisitedPlatformViewId:(int64_t)viewId {
   self.visitedPlatformViews.push_back(viewId);
+}
+
+- (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRect(clipRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRRect(clipRRect);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipRSuperellipseToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipRSuperellipse(clipRse);
+    self.currentCompositionParams[id] = params;
+  }
+}
+
+- (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath {
+  for (int64_t id : self.visitedPlatformViews) {
+    flutter::EmbeddedViewParams params = self.currentCompositionParams[id];
+    params.PushPlatformViewClipPath(clipPath);
+    self.currentCompositionParams[id] = params;
+  }
 }
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {

@@ -12,7 +12,7 @@ void main() {
 
   group('RenderAligningShiftedBox', () {
     test('RenderAligningShiftedBox has computeDryBaseline method implemented', () {
-      final RenderPositionedBox positionedBox = RenderPositionedBox();
+      final positionedBox = RenderPositionedBox();
 
       // Verify the method exists and can be called
       expect(
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('computeDryBaseline returns null when child is null', () {
-      final RenderPositionedBox positioner = RenderPositionedBox(alignment: Alignment.topLeft);
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
@@ -43,8 +43,8 @@ void main() {
     });
 
     test('computeDryBaseline returns null when child has no baseline', () {
-      final MockRenderBoxNoBaseline child = MockRenderBoxNoBaseline();
-      final RenderPositionedBox positioner = RenderPositionedBox(child: child);
+      final child = MockRenderBoxNoBaseline();
+      final positioner = RenderPositionedBox(child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
@@ -55,8 +55,8 @@ void main() {
     });
 
     test('computeDryBaseline works with center alignment', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(child: child);
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -69,11 +69,8 @@ void main() {
     });
 
     test('computeDryBaseline works with top-left alignment', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -85,11 +82,8 @@ void main() {
     });
 
     test('computeDryBaseline works with bottom-right alignment', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.bottomRight,
-        child: child,
-      );
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(alignment: Alignment.bottomRight, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 200.0, maxHeight: 200.0),
@@ -102,11 +96,8 @@ void main() {
     });
 
     test('computeDryBaseline with different TextBaseline types', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       // Test alphabetic baseline
       final double? alphabeticBaseline = positioner.computeDryBaseline(
@@ -127,8 +118,8 @@ void main() {
     });
 
     test('computeDryBaseline works with width and height factors', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(
         alignment: Alignment.topLeft,
         widthFactor: 2.0,
         heightFactor: 1.5,
@@ -145,11 +136,8 @@ void main() {
     });
 
     test('computeDryBaseline works with infinite constraints', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(
-        alignment: Alignment.topLeft,
-        child: child,
-      );
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(alignment: Alignment.topLeft, child: child);
 
       final double? baseline = positioner.computeDryBaseline(
         const BoxConstraints(),
@@ -162,8 +150,8 @@ void main() {
 
   group('Other RenderShiftedBox classes', () {
     test('RenderConstrainedOverflowBox computeDryBaseline', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderConstrainedOverflowBox constrainedBox = RenderConstrainedOverflowBox(
+      final child = MockRenderBox();
+      final constrainedBox = RenderConstrainedOverflowBox(
         alignment: Alignment.topLeft,
         child: child,
       );
@@ -177,8 +165,8 @@ void main() {
     });
 
     test('RenderSizedOverflowBox computeDryBaseline', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderSizedOverflowBox sizedBox = RenderSizedOverflowBox(
+      final child = MockRenderBox();
+      final sizedBox = RenderSizedOverflowBox(
         requestedSize: const Size(100.0, 100.0),
         alignment: Alignment.topLeft,
         child: child,
@@ -193,8 +181,8 @@ void main() {
     });
 
     test('RenderFractionallySizedOverflowBox computeDryBaseline', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderFractionallySizedOverflowBox fractionalBox = RenderFractionallySizedOverflowBox(
+      final child = MockRenderBox();
+      final fractionalBox = RenderFractionallySizedOverflowBox(
         alignment: Alignment.topLeft,
         widthFactor: 0.5,
         heightFactor: 0.5,
@@ -210,11 +198,8 @@ void main() {
     });
 
     test('RenderPadding computeDryBaseline', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderPadding padding = RenderPadding(
-        padding: const EdgeInsets.all(10.0),
-        child: child,
-      );
+      final child = MockRenderBox();
+      final padding = RenderPadding(padding: const EdgeInsets.all(10.0), child: child);
 
       final double? baseline = padding.computeDryBaseline(
         const BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
@@ -225,8 +210,8 @@ void main() {
     });
 
     test('RenderBaseline computeDryBaseline', () {
-      final MockRenderBox child = MockRenderBox();
-      final RenderBaseline baselineBox = RenderBaseline(
+      final child = MockRenderBox();
+      final baselineBox = RenderBaseline(
         baseline: 30.0,
         baselineType: TextBaseline.alphabetic,
         child: child,
@@ -242,8 +227,8 @@ void main() {
 
     test('computeDryBaseline handles edge cases consistently', () {
       // Test with very small constraints
-      final MockRenderBox child = MockRenderBox();
-      final RenderPositionedBox positioner = RenderPositionedBox(child: child);
+      final child = MockRenderBox();
+      final positioner = RenderPositionedBox(child: child);
 
       final double? smallBaseline = positioner.computeDryBaseline(
         const BoxConstraints(maxWidth: 1.0, maxHeight: 1.0),

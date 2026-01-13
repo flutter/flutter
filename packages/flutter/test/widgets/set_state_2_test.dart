@@ -7,14 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('setState() overbuild test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-    final Builder inner = Builder(
+    final log = <String>[];
+    final inner = Builder(
       builder: (BuildContext context) {
         log.add('inner');
         return const Text('inner', textDirection: TextDirection.ltr);
       },
     );
-    int value = 0;
+    var value = 0;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
