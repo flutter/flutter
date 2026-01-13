@@ -188,14 +188,16 @@ abstract class Action<T extends Intent> with Diagnosticable {
   }
 
   // Checks if the intent's type is a subtype of T.
+  // Prefer using the runtime type but if intent is null, this method will try
+  // using the specified type parameter.
   bool _debugCanHandleIntent<I extends Intent>(I? intent) {
     final Object? badIntentString = switch (intent) {
       T() => null,
-      // The List literal is needed to reify the type I
+      Object(:final runtimeType) => runtimeType,
+      // The List literal is needed to reify the type I.
       // ignore: literal_only_boolean_expressions
       null when <I>[] is List<T> => null,
       null => I.toString(),
-      Object(:final runtimeType) => runtimeType,
     };
     assert(
       badIntentString == null,
@@ -246,7 +248,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// ```
   /// {@end-tool}
   @protected
-  Action<Intent>? get callingAction => _currentCallingAction;
+  Action<T>? get callingAction => _currentCallingAction as Action<T>?;
 
   /// Gets the type of intent this action responds to.
   Type get intentType => T;
@@ -803,7 +805,7 @@ class Actions extends StatefulWidget {
   /// returned callback is called. If the return value is needed, consider using
   /// [Actions.invoke] instead.
   static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
-    final Action<T>? action = Actions.maybeFind<T>(context);
+    final Action<Intent>? action = Actions.maybeFind(context);
     if (action != null && action._isEnabled(intent, context)) {
       return () {
         // Could be that the action was enabled when the closure was created,
@@ -889,15 +891,21 @@ class Actions extends StatefulWidget {
     if (action case final Action<T>? action) {
       return action;
     }
-    assert(
-      false,
-      'An ${action.runtimeType} cannot be cast to an Action<$T>. '
-      'This is a current limitation of the Actions widget, '
-      'see https://github.com/flutter/flutter/issues/180871 for more details. '
-      'Consider using Actions.invoke or Actions.maybeInvoke instead, '
-      'or explicitly relax the type constraint specified in this method. '
-      'For example, use Actions.maybeFind<Intent> instead of Actions.maybeFind<MyIntent>(). ',
-    );
+    assert(() {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('An ${action.runtimeType} cannot be cast to an Action<$T>.'),
+        ErrorDescription(
+          'A valid action $action was found but could not be returned by Actions.maybeFind<$T>.',
+        ),
+        ErrorHint(
+          'This is a current limitation of the Actions widget, '
+          'see https://github.com/flutter/flutter/issues/180871 for more details. '
+          'As a workaround, consider using Actions.invoke or Actions.maybeInvoke instead, '
+          'or explicitly set the type parameter to Intent: '
+          'Actions.maybeFind<Intent>(context, intent)',
+        ),
+      ]);
+    }());
     return null;
   }
 
@@ -1592,7 +1600,7 @@ class PrioritizedAction extends ContextAction<PrioritizedIntents> {
       return false;
     }
     for (final Intent candidateIntent in intent.orderedIntents) {
-      final Action<Intent>? candidateAction = Actions.maybeFind<Intent>(
+      final Action<Intent>? candidateAction = Actions.maybeFind(
         focus.context!,
         intent: candidateIntent,
       );
@@ -1632,8 +1640,8 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
   Action<Intent>? getOverrideAction<U extends Intent>(U? intent, {bool declareDependency = false}) {
     final Action<Intent>? override = declareDependency
-        ? Actions.maybeFind<U>(lookupContext, intent: intent)
-        : Actions._maybeFindWithoutDependingOn<U>(lookupContext, intent);
+        ? Actions.maybeFind(lookupContext, intent: intent)
+        : Actions._maybeFindWithoutDependingOn(lookupContext, intent);
     assert(!identical(override, this));
     return override;
   }
@@ -1831,7 +1839,7 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   }
 
   @override
-  Action<Intent>? get callingAction => action.callingAction;
+  Action<T>? get callingAction => action.callingAction;
 
   @override
   bool isEnabled(T intent) => action.isEnabled(intent, invokeContext);
