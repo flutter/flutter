@@ -509,7 +509,7 @@ void main() async {
           error = err;
         }
         expect(error, isA<StateError>());
-        final String errorMessage = error.toString();
+        final errorMessage = error.toString();
         if (testCase.floatError) {
           expect(errorMessage, contains('shader has fewer than two float'));
         }
