@@ -11,7 +11,7 @@ void main() {
   testWidgets('RawTooltip is visible when tapping button', (
     WidgetTester tester,
   ) async {
-    const String rawTooltipText = 'I am a RawToolTip message';
+    const String rawTooltipText = 'I am a RawTooltip message';
 
     await tester.pumpWidget(const example.RawTooltipExampleApp());
 
