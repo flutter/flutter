@@ -265,12 +265,12 @@ class Hero extends StatefulWidget {
 
   /// The curve to use in the forward direction.
   ///
-  /// Defaults to Curves.fastOutSlowIn.
+  /// Defaults to [Curves.fastOutSlowIn].
   final Curve curve;
 
   /// The curve to use in the reverse direction.
   ///
-  /// If this property is null, Hero.curve.flipped is used.
+  /// If this property is null, [Hero.curve].flipped is used.
   final Curve? reverseCurve;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
