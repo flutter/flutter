@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -9,9 +10,22 @@ import 'package:ui/ui.dart' as ui;
 /// all the rendering. It transfers bitmaps created in the OffscreenCanvas to
 /// one or many on-screen <canvas> elements to actually display the scene.
 class OffscreenCanvasRasterizer extends Rasterizer {
+  OffscreenCanvasRasterizer(
+    OffscreenSurface Function(OffscreenCanvasProvider) offscreenSurfaceCreateFn,
+  ) : _surfaceProvider = OffscreenSurfaceProvider(
+        OffscreenCanvasProvider(),
+        offscreenSurfaceCreateFn,
+      );
+
+  final OffscreenSurfaceProvider _surfaceProvider;
+
+  @override
+  @visibleForTesting
+  SurfaceProvider get surfaceProvider => _surfaceProvider;
+
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
-  final Surface offscreenSurface = Surface();
+  late final OffscreenSurface offscreenSurface = _surfaceProvider.createSurface();
 
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
@@ -23,15 +37,20 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
-    offscreenSurface.setSkiaResourceCacheMaxBytes(bytes);
+    _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
   }
 
   @override
   void dispose() {
-    offscreenSurface.dispose();
+    _surfaceProvider.dispose();
     for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
       viewRasterizer.dispose();
     }
+  }
+
+  @override
+  Surface createPictureToImageSurface() {
+    return _surfaceProvider.createSurface();
   }
 }
 
@@ -45,18 +64,9 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     createCanvas: () => RenderCanvas(),
   );
 
-  /// Render the given [picture] so it is displayed by the given [canvas].
-  Future<void> rasterizeToCanvas(DisplayCanvas canvas, ui.Picture picture) async {
-    await rasterizer.offscreenSurface.rasterizeToCanvas(
-      currentFrameSize,
-      canvas as RenderCanvas,
-      picture,
-    );
-  }
-
   @override
-  void prepareToDraw() {
-    rasterizer.offscreenSurface.createOrUpdateSurface(currentFrameSize);
+  Future<void> prepareToDraw() async {
+    await rasterizer.offscreenSurface.setSize(currentFrameSize);
   }
 
   @override
@@ -68,12 +78,23 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    final rasterizeFutures = <Future<void>>[];
-    for (var i = 0; i < displayCanvases.length; i++) {
-      rasterizeFutures.add(rasterizeToCanvas(displayCanvases[i], pictures[i]));
-    }
     recorder?.recordRasterStart();
-    await Future.wait<void>(rasterizeFutures);
+    if (browserSupportsCreateImageBitmap) {
+      final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
+          .rasterizeToImageBitmaps(pictures);
+      for (var i = 0; i < displayCanvases.length; i++) {
+        (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
+      }
+    } else {
+      for (var i = 0; i < displayCanvases.length; i++) {
+        await rasterizer.offscreenSurface.rasterizeToCanvas(pictures[i]);
+        (displayCanvases[i] as RenderCanvas).renderWithNoBitmapSupport(
+          rasterizer.offscreenSurface.canvasImageSource,
+          currentFrameSize.height,
+          currentFrameSize,
+        );
+      }
+    }
     recorder?.recordRasterFinish();
   }
 }
