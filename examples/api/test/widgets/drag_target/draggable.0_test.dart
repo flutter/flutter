@@ -114,4 +114,52 @@ void main() {
       );
     }
   });
+
+  testWidgets('LongPressDraggable does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (_) => LongPressDraggable<bool>(
+                  feedback: const Text('Y'),
+                  child: const Text('X'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(LongPressDraggable<bool>)), Size.zero);
+  });
+
+  testWidgets('Draggable does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (_) =>
+                      Draggable<bool>(feedback: Text('Y'), child: Text('X')),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Draggable<bool>)), Size.zero);
+  });
 }
