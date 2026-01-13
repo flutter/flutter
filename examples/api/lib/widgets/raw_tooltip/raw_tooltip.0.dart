@@ -41,7 +41,7 @@ class RawTooltipSample extends StatelessWidget {
           tooltipBuilder: (BuildContext context, Animation<double> animation) {
             return FadeTransition(
               opacity: animation,
-              child: Text('I am a RawToolTip message'),
+              child: Text('I am a RawTooltip message'),
             );
           },
           child: Container(color: Colors.blue, height: 100, width: 200),
