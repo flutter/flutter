@@ -2073,4 +2073,25 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
   });
+
+  testWidgets('ExpansionTile forwards stateController to ListTile', (WidgetTester tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: const Text('Test Tile'),
+            statesController: controller,
+            children: const <Widget>[Text('Child')],
+          ),
+        ),
+      ),
+    );
+
+    final ListTile tile = tester.widget<ListTile>(find.byType(ListTile));
+
+    expect(tile.statesController, same(controller));
+  });
 }
