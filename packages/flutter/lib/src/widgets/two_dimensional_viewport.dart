@@ -1342,10 +1342,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         _sortByXIndex();
     }
     for (final ChildVicinity vicinity in _currentChildVicinities) {
-      previousChild = _completeChildParentData(
-        vicinity,
-        previousChild: previousChild,
-      ) ?? previousChild;
+      previousChild =
+          _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
     }
     _lastChild = previousChild;
     if (_lastChild != null) {

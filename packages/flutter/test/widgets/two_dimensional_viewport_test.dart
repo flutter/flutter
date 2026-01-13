@@ -2983,18 +2983,12 @@ void main() {
         maxYIndex: maxYCount - 1,
         builder: (BuildContext context, ChildVicinity vicinity) {
           childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
-          return SizedBox.square(
-            key: childKeys[vicinity],
-            dimension: 200,
-          );
+          return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         },
       );
 
       // Set viewport size to fit all children exactly (no overflow, no partial visibility)
-      tester.view.physicalSize = Size(
-        200 * maxXCount.toDouble(),
-        200 * maxYCount.toDouble(),
-      );
+      tester.view.physicalSize = Size(200 * maxXCount.toDouble(), 200 * maxYCount.toDouble());
       tester.view.devicePixelRatio = 1.0;
       // Clean up resources after test: dispose delegate and reset viewport settings
       addTearDown(() {
@@ -3027,19 +3021,15 @@ void main() {
           expect(
             verticalOrder[expectedListIndex],
             expectedVicinity,
-            reason: 'Vertical main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+            reason:
+                'Vertical main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
                 'got ${verticalOrder[expectedListIndex]}',
           );
         }
       }
 
       // 2. Test with main axis set to horizontal
-      await tester.pumpWidget(
-        simpleBuilderTest(
-          delegate: delegate,
-          mainAxis: Axis.horizontal,
-        ),
-      );
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate, mainAxis: Axis.horizontal));
       await tester.pumpAndSettle();
       viewport = getViewport(tester, childKeys.values.first);
       final horizontalOrder = <ChildVicinity>[];
@@ -3063,7 +3053,8 @@ void main() {
           expect(
             horizontalOrder[expectedListIndex],
             expectedVicinity,
-            reason: 'Horizontal main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
+            reason:
+                'Horizontal main axis: Expected vicinity $expectedVicinity at index $expectedListIndex, '
                 'got ${horizontalOrder[expectedListIndex]}',
           );
         }
