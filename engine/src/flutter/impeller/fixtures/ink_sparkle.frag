@@ -5,7 +5,8 @@
 // found in the LICENSE file.
 
 // If updating this file, also update
-// engine/src/flutter/lib/web_ui/test/canvaskit/fragment_program_test.dart
+// engine/src/flutter/lib/web_ui/test/canvaskit/fragment_program_test.dart and
+// engine/src/flutter/lib/web_ui/test/ui/fragment_shader_test.dart
 
 precision highp float;
 
