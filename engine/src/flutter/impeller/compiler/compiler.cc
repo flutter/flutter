@@ -22,6 +22,8 @@
 #include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
+#include "third_party/skia/include/core/SkString.h"
+#include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
 namespace impeller {
 namespace compiler {
@@ -445,8 +447,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // We need to invoke the compiler even if we don't use the SL mapping later
   // for Vulkan. The reflector needs information that is only valid after a
   // successful compilation call.
+  auto sl_compilation_result_str = sl_compiler.GetCompiler()->compile();
   auto sl_compilation_result =
-      CreateMappingWithString(sl_compiler.GetCompiler()->compile());
+      CreateMappingWithString(sl_compilation_result_str);
 
   // If the target is Vulkan, our shading language is SPIRV which we already
   // have. We just need to strip it of debug information. If it isn't, we need
@@ -464,6 +467,19 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   if (!sl_mapping_) {
     COMPILER_ERROR(error_stream_) << "Could not generate SL from SPIRV";
     return;
+  }
+
+  if (sl_compiler.GetType() == CompilerBackend::Type::kSkSL) {
+    // Validate compiled SkSL by trying to create a SkRuntimeEffect.
+    SkRuntimeEffect::Result result =
+        SkRuntimeEffect::MakeForShader(SkString(sl_compilation_result_str));
+    if (result.effect == nullptr) {
+      COMPILER_ERROR(error_stream_)
+          << "Compiled to invalid SkSL:\n"
+          << sl_compilation_result_str << "\nSkSL Error:\n"
+          << result.errorText.c_str();
+      return;
+    }
   }
 
   reflector_ = std::make_unique<Reflector>(std::move(reflector_options),  //

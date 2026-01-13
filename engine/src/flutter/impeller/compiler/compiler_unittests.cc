@@ -343,6 +343,40 @@ TEST_P(CompilerTestSkSL, CanCompileStructs) {
                                    SourceType::kFragmentShader));
 }
 
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayInitializerWithConstants) {
+  auto expected_err =
+      "There was a compiler error: SkSL does not support array initializers: "
+      "array_initializer_with_constants.frag:6";
+
+  EXPECT_EXIT(CanCompileAndReflect("array_initializer_with_constants.frag",
+                                   SourceType::kFragmentShader),
+              ::testing::ExitedWithCode(1), expected_err);
+}
+
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayInitializerWithVariables) {
+  auto expected_err =
+      "There was a compiler error: SkSL does not support array initializers: "
+      "array_initializer_with_variables.frag:12";
+
+  EXPECT_EXIT(CanCompileAndReflect("array_initializer_with_variables.frag",
+                                   SourceType::kFragmentShader),
+              ::testing::ExitedWithCode(1), expected_err);
+}
+
+TEST_P(CompilerTestSkSL, FailsToCompileDueToArrayAssignment) {
+  // Does not EXIT because the backend SkSL compiler doesn't detect the invalid
+  // SkSL. Returns false because the Impeller Compiler's post-compile validation
+  // fails.
+  ASSERT_FALSE(CanCompileAndReflect("array_assignment.frag",
+                                    SourceType::kFragmentShader));
+}
+
+TEST_P(CompilerTestSkSL, CompilesWithValidArrayInitialization) {
+  ASSERT_TRUE(
+      CanCompileAndReflect("array_initialization_without_initializer.frag",
+                           SourceType::kFragmentShader));
+}
+
 #define INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(suite_name)               \
   INSTANTIATE_TEST_SUITE_P(                                                \
       suite_name, CompilerTest,                                            \
