@@ -97,6 +97,8 @@ source_set("flutter_windows_source") {
     "host_window_dialog.h",
     "host_window_regular.cc",
     "host_window_regular.h",
+    "host_window_tooltip.cc",
+    "host_window_tooltip.h",
     "keyboard_handler_base.h",
     "keyboard_key_channel_handler.cc",
     "keyboard_key_channel_handler.h",
