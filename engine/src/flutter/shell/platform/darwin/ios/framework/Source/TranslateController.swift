@@ -69,7 +69,6 @@ public class TranslateController: UIViewController {
 
 @available(iOS 17.4, *)
 struct ContentView: View {
-  @State private var isTranslationPopoverShown = true
   let termToTranslate : String
   let ipadBounds: CGRect?
 
@@ -86,13 +85,16 @@ struct ContentView: View {
     Color.clear
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .translationPresentation(
-          isPresented: $isTranslationPopoverShown,
-          text: termToTranslate,
-          attachmentAnchor: .rect(anchorSource))
-        .onChange(of: isTranslationPopoverShown) { _, isShown in
-                    if !isShown {
-                        onDismiss?()
-                    }
+            isPresented: Binding(
+              get: { true },
+              set: { isShown in
+                if !isShown {
+                  onDismiss?()
                 }
+              }
+            ),
+            text: termToTranslate,
+            attachmentAnchor: .rect(anchorSource)
+        )
   }
 }
