@@ -1829,6 +1829,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }());
   }
 
+  Future<void> cleanUpLayer() async {
+    setSurfaceSize(null);
+    for (final RenderView renderView in renderViews) {
+      // Trigger a layer replacement by changing the device pixel ratio.
+      renderView.configuration = ViewConfiguration(
+        devicePixelRatio: renderView.flutterView.devicePixelRatio + 1.0,
+      );
+      renderView.configuration = createViewConfigurationFor(renderView);
+    }
+  }
+
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);

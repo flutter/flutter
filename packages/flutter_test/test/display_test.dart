@@ -133,6 +133,8 @@ void main() {
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
+
+      addTearDown(tester.binding.cleanUpLayer);
     });
   });
 }
