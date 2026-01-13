@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2072,5 +2073,71 @@ void main() {
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('ExpansionTile statesController', (WidgetTester tester) async {
+    var count = 0;
+    void valueChanged() {
+      count += 1;
+    }
+
+    final controller = MaterialStatesController();
+    addTearDown(controller.dispose);
+    controller.addListener(valueChanged);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ExpansionTile(
+              statesController: controller,
+              title: const Text('Title'),
+              children: const <Widget>[Text('Child')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 0);
+
+    // Test hover state
+    final Offset center = tester.getCenter(find.text('Title'));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 1);
+
+    // Test removing hover
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{});
+    expect(count, 2);
+
+    // Test hover again
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 3);
+
+    // Test pressed state
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered, MaterialState.pressed});
+    expect(count, 4);
+
+    // Release press
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <MaterialState>{MaterialState.hovered});
+    expect(count, 5);
   });
 }

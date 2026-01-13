@@ -20,6 +20,7 @@ import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -152,6 +153,7 @@ class ExpansionTile extends StatefulWidget {
     this.enabled = true,
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
+    this.statesController,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -484,6 +486,9 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -626,6 +631,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
             : null,
         minTileHeight: widget.minTileHeight,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        statesController: widget.statesController,
       ),
     );
 
