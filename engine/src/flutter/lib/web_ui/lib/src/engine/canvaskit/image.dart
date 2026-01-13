@@ -115,7 +115,12 @@ class CkResizingCodec extends ResizingCodec {
       scaledHeight,
     );
     final DomImageBitmap bitmap = offscreenCanvas.transferToImageBitmap();
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    SkImage? skImage;
+    if (CanvasKitRenderer.instance.isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(bitmap);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    }
 
     // Resize the canvas to 0x0 to cause the browser to eagerly reclaim its
     // memory.
