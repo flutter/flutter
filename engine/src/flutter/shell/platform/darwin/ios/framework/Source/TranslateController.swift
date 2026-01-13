@@ -13,18 +13,18 @@ import Translation
 /// be imported directly into Objective-C.
 @available(iOS 17.4, *)
 @objc(FLTTranslateController)
-public class TranslateController: UIViewController {
+class TranslateController: UIViewController {
 
   private let termToTranslate: String
   private let ipadBounds: CGRect?
 
-  @objc public init(term: String) {
+  @objc init(term: String) {
     self.termToTranslate = term
     self.ipadBounds = nil
     super.init(nibName: nil, bundle: nil)
   }
 
-  @objc public init(term: String, ipadBounds: CGRect) {
+  @objc init(term: String, ipadBounds: CGRect) {
     self.termToTranslate = term
     self.ipadBounds = ipadBounds
     super.init(nibName: nil, bundle: nil)
@@ -35,7 +35,7 @@ public class TranslateController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  override public func viewDidLoad() {
+  override func viewDidLoad() {
     super.viewDidLoad()
     let swiftUIViewController = makeTranslateHostingController(termToTranslate: termToTranslate)
 
@@ -52,7 +52,7 @@ public class TranslateController: UIViewController {
     swiftUIViewController.didMove(toParent: self)
   }
 
-  @objc public func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
+  @objc func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
     var contentView = ContentView(termToTranslate: termToTranslate, ipadBounds: ipadBounds)
     contentView.onDismiss = { [weak self] in
           guard let self = self else { return }
