@@ -17,7 +17,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.7.8
+  test_api: 0.7.9
   matcher: 0.12.18
 
   # Used by golden file comparator
@@ -47,4 +47,4 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
-# PUBSPEC CHECKSUM: pbetap
+# PUBSPEC CHECKSUM: tcp4n8
