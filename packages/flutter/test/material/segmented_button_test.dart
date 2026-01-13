@@ -1592,7 +1592,7 @@ void main() {
     tester.view
       ..physicalSize = const Size(800, 1200)
       ..devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.reset);
 
     const double screenWidth = 800;
 
