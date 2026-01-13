@@ -18,7 +18,12 @@ if (enable_unittests) {
 
   impellerc("ink_sparkle") {
     shaders = [ "//flutter/impeller/fixtures/ink_sparkle.frag" ]
-    shader_target_flags = [ "--sksl" ]
+    shader_target_flags = [
+      "--sksl",
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+      "--runtime-stage-vulkan",
+    ]
     intermediates_subdir = "iplr"
     sl_file_extension = "iplr"
     iplr = true
