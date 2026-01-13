@@ -320,7 +320,7 @@ void main() {
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
 
-      addTearDown(tester.binding.cleanUpLayer);
+      addTearDown(tester.binding.resetLayers);
     });
 
     testWidgets('render is passed through to backing FlutterView', (WidgetTester tester) async {

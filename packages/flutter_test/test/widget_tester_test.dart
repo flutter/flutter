@@ -797,23 +797,22 @@ void main() {
     expect(find.byType(View), findsNothing);
   });
 
-  testWidgets('passing a view to pumpWidget with wrapWithView: true throws',
+  testWidgets(
+    'passing a view to pumpWidget with wrapWithView: true throws',
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // leaking by design because of exception
-  (
-
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
-    expect(
-      tester.takeException(),
-      isFlutterError.having(
-        (FlutterError e) => e.message,
-        'message',
-        contains('consider setting the "wrapWithView" parameter of that method to false'),
-      ),
-    );
-  });
+    (WidgetTester tester) async {
+      await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('consider setting the "wrapWithView" parameter of that method to false'),
+        ),
+      );
+    },
+  );
 
   testWidgets('can pass a View to pumpWidget when wrapWithView: false', (
     WidgetTester tester,

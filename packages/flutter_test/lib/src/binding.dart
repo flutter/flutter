@@ -1838,7 +1838,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }());
   }
 
-  Future<void> cleanUpLayer() async {
+  /// Resets the root layers of all managed [renderViews] to their initial state.
+  ///
+  /// This method is typically used in a test's [addTearDown] to ensure that
+  /// resources associated with the root transform layer are properly disposed
+  /// of between tests.
+  ///
+  /// When a test modifies the view configuration (for example, by calling
+  /// [setSurfaceSize] or changing [ViewConfiguration]), the root layer may
+  /// not be automatically disposed, potentially leading to resource leaks or
+  /// interference with subsequent tests. This method forces a layer
+  /// replacement by temporarily toggling the device pixel ratio, which
+  /// triggers a clean disposal of the old layer tree.
+  ///
+  /// See also:
+  ///
+  ///  * [setSurfaceSize], which often necessitates calling this method during
+  ///    tear down.
+  Future<void> resetLayers() async {
     setSurfaceSize(null);
     for (final RenderView renderView in renderViews) {
       // Trigger a layer replacement by changing the device pixel ratio.

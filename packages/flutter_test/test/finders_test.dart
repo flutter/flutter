@@ -172,11 +172,7 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: _boilerplate(
-              TextField(controller: controller),
-            ),
-          ),
+          home: Scaffold(body: _boilerplate(TextField(controller: controller))),
         ),
       );
 

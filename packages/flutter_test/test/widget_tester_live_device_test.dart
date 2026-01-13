@@ -137,7 +137,7 @@ No widgets found at Offset(1.0, 1.0).
     } finally {
       await tester.binding.setSurfaceSize(originalSize);
     }
-    addTearDown(tester.binding.cleanUpLayer);
+    addTearDown(tester.binding.resetLayers);
   });
 }
 

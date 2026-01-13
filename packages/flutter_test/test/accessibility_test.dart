@@ -241,12 +241,7 @@ void main() {
       final controller = TextEditingController(text: 'this is a test');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        _boilerplate(
-          SizedBox(
-            width: 100,
-            child: TextField(controller: controller),
-          ),
-        ),
+        _boilerplate(SizedBox(width: 100, child: TextField(controller: controller))),
       );
       await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));

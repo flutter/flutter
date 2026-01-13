@@ -15,8 +15,7 @@ void main() {
   });
 
   _MutantPainter painterOfCustomPaintByKey(Key key) {
-    return (find.byKey(key).evaluate().first.widget as CustomPaint)
-        .painter! as _MutantPainter;
+    return (find.byKey(key).evaluate().first.widget as CustomPaint).painter! as _MutantPainter;
   }
 
   testWidgets('paints.circle is not affected by mutated colors', (WidgetTester tester) async {
