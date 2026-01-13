@@ -969,10 +969,10 @@ class AccessibilityFeatures {
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
   /// Whether the platform supports accessibility  announcement API,
-  /// i.e. [SemanticsService.announce].
+  /// i.e. [SemanticsService.sendAnnouncement].
   ///
   /// Some platforms do not support or discourage the use of
-  /// announcement. Using [SemanticsService.announce] on those platform
+  /// announcement. Using [SemanticsService.sendAnnouncement] on those platform
   /// may be ignored. Consider using other way to convey message to the
   /// user. For example, Android discourages the uses of direct message
   /// announcement, and rather encourages using other semantic
