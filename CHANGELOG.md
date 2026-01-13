@@ -32,6 +32,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.7](https://github.com/flutter/flutter/releases/tag/3.38.7)
+
+- [flutter/179857](https://github.com/flutter/flutter/issues/179857] - `flutter run -d all` crashes if multiple devices are available.
+
 ### [3.38.6](https://github.com/flutter/flutter/releases/tag/3.38.6)
 
 - [flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
