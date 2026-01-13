@@ -1544,7 +1544,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         //   'process geometry for $target, notBlocked ${notBlocked} target.parentDataDirty, ${target.parentDataDirty}',
         // );
         if (notBlocked) {
-          nodesToBuild.add(target.renderObject);
           target.ensureGeometry();
         }
       }
