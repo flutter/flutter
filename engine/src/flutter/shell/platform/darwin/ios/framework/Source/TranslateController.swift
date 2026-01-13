@@ -12,8 +12,8 @@ import Translation
 /// This is necessary because UIHostingController is a generic class and cannot
 /// be imported directly into Objective-C.
 @available(iOS 17.4, *)
-@objc(FLTTranslateController)
-class TranslateController: UIViewController {
+@objc(FLTTranslateViewController)
+class TranslateViewController: UIViewController {
 
   private let termToTranslate: String
   private let ipadBounds: CGRect?

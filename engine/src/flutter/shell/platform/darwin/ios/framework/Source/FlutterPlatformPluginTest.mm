@@ -55,7 +55,7 @@ FLUTTER_ASSERT_ARC
                                                                       arguments:@"Test"];
     FlutterResult result = ^(id result) {
       OCMVerify([mockEngineViewController
-          addChildViewController:[OCMArg isKindOfClass:[FLTTranslateController class]]]);
+          addChildViewController:[OCMArg isKindOfClass:[FLTTranslateViewController class]]]);
       [presentExpectation fulfill];
     };
     [mockPlugin handleMethodCall:methodCall result:result];
