@@ -507,14 +507,10 @@ class HotRunner extends ResidentRunner {
           packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
           flavor: debuggingOptions.buildInfo.flavor,
           targetPlatform: targetPlatform,
-          environment: environment,
-          logger: _logger,
-        ),
-        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        flavor: debuggingOptions.buildInfo.flavor,
-      );
-      if (result != 0) {
-        return UpdateFSReport();
+        );
+        if (result != 0) {
+          return UpdateFSReport();
+        }
       }
     }
 
