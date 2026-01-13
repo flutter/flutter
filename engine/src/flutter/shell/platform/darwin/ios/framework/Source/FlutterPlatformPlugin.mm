@@ -482,7 +482,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
                    abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
                    transformedFirstRect.size.height);
 
-    translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term ipadBounds:ipadBounds];
+    translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term
+                                                                    ipadBounds:ipadBounds];
   } else {
     translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term];
   }
