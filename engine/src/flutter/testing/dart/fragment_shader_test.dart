@@ -553,6 +553,9 @@ void main() async {
         ..imageFilter = ImageFilter.shader(shader),
     );
     final Image image = await recorder.endRecording().toImage(1, 1);
+
+    // Image's byte data consists of color values for each pixel in RGBA format. The image is 1
+    // pixel, so the byte data is expected to be 4 bytes.
     final ByteData data = (await image.toByteData())!;
     expect(data.lengthInBytes, 4);
 
@@ -563,6 +566,8 @@ void main() async {
       colorComponentsRGBA[1],
       colorComponentsRGBA[2],
     );
+    // filter_shader.frag swaps red and blue color channels. The drawn color is red, so the expected
+    // result color is blue.
     expect(color, const Color(0xFF0000FF));
   });
 
