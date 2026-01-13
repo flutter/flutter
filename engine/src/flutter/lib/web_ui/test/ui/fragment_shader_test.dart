@@ -159,6 +159,11 @@ Future<void> testMain() async {
       await matchGoldenFile(goldenFilename, region: region);
     }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
   }
+
+  test('fragment shader with space in name loads correctly', () async {
+    assetScope.setAsset('voronoi%20shader', ByteData.sublistView(utf8.encode(kVoronoiShaderSksl)));
+    await expectLater(ui.FragmentProgram.fromAsset('voronoi shader'), completes);
+  }, skip: isWimp); // https://github.com/flutter/flutter/issues/175431
 }
 
 // Image of an oval painted with a linear gradient.
