@@ -1692,10 +1692,48 @@ void main() {
       } catch (e) {
         exception = e;
       }
-      expect(
-        exception?.toString(),
-        contains('cannot be handled by an Action of runtime type TestContextAction.'),
+      expect(exception?.toString(), contains('cannot be handled by TestContextAction: '));
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/180435.
+    testWidgets('Contravariant action override', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return Actions(
+              // DoNothingAction extends Action<Intent> and should be able to
+              // handle any Intent.
+              actions: <Type, Action<Intent>>{LogIntent: DoNothingAction()},
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Actions(
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<LogIntent>.overridable(
+                        defaultAction: LogInvocationAction(actionName: 'action1'),
+                        context: context,
+                      ),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context1) {
+                        invokingContext = context1;
+                        return const SizedBox();
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       );
+
+      Object? exception;
+      try {
+        Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      } catch (e) {
+        exception = e;
+      }
+      expect(exception, isNull);
     });
 
     testWidgets('Make an overridable action overridable', (WidgetTester tester) async {
@@ -2045,7 +2083,7 @@ class LogInvocationAction extends Action<LogIntent> {
 
   @override
   void invoke(LogIntent intent) {
-    final Action<LogIntent>? callingAction = this.callingAction;
+    final Action<Intent>? callingAction = this.callingAction;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
     } else {
@@ -2077,7 +2115,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
   @override
   void invoke(LogIntent intent, [BuildContext? context]) {
     invokeContext = context;
-    final Action<LogIntent>? callingAction = this.callingAction;
+    final Action<Intent>? callingAction = this.callingAction;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
     } else {
