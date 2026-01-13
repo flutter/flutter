@@ -950,6 +950,16 @@ typedef TabValueChanged<T> = void Function(T value, int index);
 /// ** See code in examples/api/lib/material/tabs/tab_bar.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample showcases how to apply custom behavior based on the scroll in [TabBar].
+/// It utilizes scroll notifications ([ScrollMetricsNotification]
+/// and [ScrollNotification]) within [NotificationListener] callback
+/// to monitor the scroll offset, allowing for interface customization
+/// based on the obtained offset.
+///
+/// ** See code in examples/api/lib/material/tabs/tab_bar.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TabBar.secondary], for a secondary tab bar.
