@@ -36,7 +36,7 @@ class RawTooltipSample extends StatelessWidget {
           // Provide a global key with the "RawTooltipState" type to show
           // the rawTooltip manually when trigger mode is set to manual.
           key: rawTooltipKey,
-          semanticsTooltip: 'I am a RawToolTip message',
+          semanticsTooltip: 'I am a RawTooltip message',
           triggerMode: TooltipTriggerMode.manual,
           tooltipBuilder: (BuildContext context, Animation<double> animation) {
             return FadeTransition(
