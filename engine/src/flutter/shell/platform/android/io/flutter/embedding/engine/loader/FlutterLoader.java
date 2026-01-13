@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
+  private static final String SHELL_ARGS_FROM_COMMAND_LINE_METADATA_KEY = "androidEngineShellArgs";
   private static final String OLD_GEN_HEAP_SIZE_META_DATA_KEY =
       "io.flutter.embedding.android.OldGenHeapSize";
   private static final String ENABLE_IMPELLER_META_DATA_KEY =
@@ -319,6 +320,47 @@ public class FlutterLoader {
               + File.separator
               + DEFAULT_LIBRARY);
 
+      // TODO(camsim99): Assuming https://github.com/flutter/flutter/pull/177127 lands first, this
+      // code will need to be properly merged with those changes,
+      // but this demonstrates the core logic that will be required.
+      ApplicationInfo applicationInfo =
+          applicationContext
+              .getPackageManager()
+              .getApplicationInfo(
+                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+      Bundle metaData = applicationInfo.metaData;
+      if (metaData != null) {
+        String shellArgsFromCommandLine =
+            metaData.getString(SHELL_ARGS_FROM_COMMAND_LINE_METADATA_KEY);
+        if (shellArgsFromCommandLine != null) {
+          String[] commandLineArgs = shellArgsFromCommandLine.split(",");
+          for (String arg : commandLineArgs) {
+            // Perform security check for path containing application's compiled Dart code and
+            // potentially user-provided compiled native code.
+            if (arg.startsWith(aotSharedLibraryNameFlag)) {
+              String safeAotSharedLibraryNameFlag =
+                  getSafeAotSharedLibraryNameFlag(applicationContext, arg);
+              if (safeAotSharedLibraryNameFlag != null) {
+                arg = safeAotSharedLibraryNameFlag;
+              } else {
+                // If the library path is not safe, we will skip adding this argument.
+                Log.w(
+                    TAG,
+                    "Skipping unsafe AOT shared library name flag: "
+                        + arg
+                        + ". Please ensure that the library is vetted and placed in your application's internal storage.");
+                continue;
+              }
+            }
+
+            // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
+            // arguments to be used for engine initialization and should be fixed. See
+            // https://github.com/flutter/flutter/issues/172553.
+            shellArgs.add(arg);
+          }
+        }
+      }
+
       if (args != null) {
         for (String arg : args) {
           // Perform security check for path containing application's compiled Dart code and
@@ -384,15 +426,6 @@ public class FlutterLoader {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      ApplicationInfo applicationInfo =
-          applicationContext
-              .getPackageManager()
-              .getApplicationInfo(
-                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-      Bundle metaData = applicationInfo.metaData;
-      if (metaData != null) {
-        Log.e("CAMILLE BUNDLE CHECKPOINT", metaData.toString());
-      }
       int oldGenHeapSizeMegaBytes =
           metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
       if (oldGenHeapSizeMegaBytes == 0) {
