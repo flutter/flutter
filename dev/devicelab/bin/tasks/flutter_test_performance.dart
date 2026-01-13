@@ -73,8 +73,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index <= TestStep.testLoading.index &&
-            match.group(1)!.startsWith('loading ')) {
+        if (step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index &&
