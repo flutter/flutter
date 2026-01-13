@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -377,24 +378,32 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on HttpException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on DartDevelopmentServiceException catch (error) {
+      // The application may have started shutting down before DDS was able to finish establishing
+      // its connection to DWDS. Don't treat this as an unhandled exception.
+      appFailedToStart();
+      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
+        throwToolExit(kExitMessage);
+      }
+      rethrow;
     } on Exception {
       appFailedToStart();
       rethrow;
