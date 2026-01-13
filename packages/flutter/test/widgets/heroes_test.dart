@@ -24,6 +24,115 @@ Future<ui.Image> createTestImage() {
   return picture.toImage(300, 300);
 }
 
+Future<void> verifyPoppedHeroCurve({
+  required WidgetTester tester,
+  required Curve curve,
+  required Curve? reverseCurve,
+}) async {
+  final Key container1 = UniqueKey();
+  final Key container2 = UniqueKey();
+  final navigator = GlobalKey<NavigatorState>();
+  final observer = TransitionDurationObserver();
+
+  await tester.pumpWidget(
+    MaterialApp(
+      key: UniqueKey(),
+      navigatorKey: navigator,
+      navigatorObservers: <NavigatorObserver>[observer],
+      home: Scaffold(
+        body: Center(
+          child: Hero(
+            tag: 'test',
+            createRectTween: (Rect? begin, Rect? end) {
+              return RectTween(begin: begin, end: end);
+            },
+            curve: curve,
+            reverseCurve: reverseCurve?.flipped,
+            child: SizedBox(key: container1, height: 100, width: 100),
+          ),
+        ),
+      ),
+    ),
+  );
+  final Size originalSize = tester.getSize(find.byKey(container1));
+  expect(originalSize, const Size(100, 100));
+
+  navigator.currentState!.push(
+    MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          body: Center(
+            child: Hero(
+              tag: 'test',
+              createRectTween: (Rect? begin, Rect? end) {
+                return RectTween(begin: begin, end: end);
+              },
+              curve: curve,
+              reverseCurve: reverseCurve?.flipped,
+              child: SizedBox(key: container2, height: 200, width: 200),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+  await tester.pumpAndSettle();
+  final Size newSize = tester.getSize(find.byKey(container2));
+  expect(newSize, const Size(200, 200));
+
+  navigator.currentState!.pop();
+  await tester.pump();
+
+  final Duration duration = observer.transitionDuration;
+  final Curve expectedCurve = reverseCurve ?? curve;
+  final expectedCurveName = expectedCurve.toString();
+  const epsilon = 0.001;
+  final Animatable<Size?> tween = SizeTween(
+    begin: newSize,
+    end: originalSize,
+  ).chain(CurveTween(curve: expectedCurve));
+
+  // Jump 25% into the transition.
+  await tester.pump(duration ~/ 4);
+  Size heroSize = tester.getSize(find.byKey(container1));
+  Size expectedSize = tween.transform(0.25)!;
+  expect(
+    heroSize,
+    within<Size>(distance: epsilon, from: expectedSize),
+    reason: 'curve=$expectedCurveName, t=0.25, duration=$duration',
+  );
+
+  // Jump to 50% into the transition.
+  await tester.pump(duration ~/ 4);
+  heroSize = tester.getSize(find.byKey(container1));
+  expectedSize = tween.transform(0.50)!;
+  expect(
+    heroSize,
+    within<Size>(distance: epsilon, from: expectedSize),
+    reason: 'curve=$expectedCurveName, t=0.50, duration=$duration',
+  );
+
+  // Jump to 75% into the transition.
+  await tester.pump(duration ~/ 4);
+  heroSize = tester.getSize(find.byKey(container1));
+  expectedSize = tween.transform(0.75)!;
+  expect(
+    heroSize,
+    within<Size>(distance: epsilon, from: expectedSize),
+    reason: 'curve=$expectedCurveName, t=0.75, duration=$duration',
+  );
+
+  // Jump to 100% into the transition.
+  await tester.pump(duration ~/ 4);
+  heroSize = tester.getSize(find.byKey(container1));
+  expectedSize = tween.transform(1.0)!;
+  expect(
+    heroSize,
+    within<Size>(distance: epsilon, from: expectedSize),
+    reason: 'curve=$expectedCurveName, t=1.00, duration=$duration',
+  );
+}
+
 Key firstKey = const Key('first');
 Key secondKey = const Key('second');
 Key thirdKey = const Key('third');
@@ -3364,115 +3473,6 @@ Future<void> main() async {
     heroSize = tester.getSize(find.byKey(container1));
     expect(heroSize, tween.transform(1.0));
   });
-
-  Future<void> verifyPoppedHeroCurve({
-    required WidgetTester tester,
-    required Curve curve,
-    required Curve? reverseCurve,
-  }) async {
-    final Key container1 = UniqueKey();
-    final Key container2 = UniqueKey();
-    final navigator = GlobalKey<NavigatorState>();
-    final observer = TransitionDurationObserver();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        key: UniqueKey(),
-        navigatorKey: navigator,
-        navigatorObservers: <NavigatorObserver>[observer],
-        home: Scaffold(
-          body: Center(
-            child: Hero(
-              tag: 'test',
-              createRectTween: (Rect? begin, Rect? end) {
-                return RectTween(begin: begin, end: end);
-              },
-              curve: curve,
-              reverseCurve: reverseCurve?.flipped,
-              child: SizedBox(key: container1, height: 100, width: 100),
-            ),
-          ),
-        ),
-      ),
-    );
-    final Size originalSize = tester.getSize(find.byKey(container1));
-    expect(originalSize, const Size(100, 100));
-
-    navigator.currentState!.push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return Scaffold(
-            body: Center(
-              child: Hero(
-                tag: 'test',
-                createRectTween: (Rect? begin, Rect? end) {
-                  return RectTween(begin: begin, end: end);
-                },
-                curve: curve,
-                reverseCurve: reverseCurve?.flipped,
-                child: SizedBox(key: container2, height: 200, width: 200),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-    await tester.pumpAndSettle();
-    final Size newSize = tester.getSize(find.byKey(container2));
-    expect(newSize, const Size(200, 200));
-
-    navigator.currentState!.pop();
-    await tester.pump();
-
-    final Duration duration = observer.transitionDuration;
-    final Curve expectedCurve = reverseCurve ?? curve;
-    final expectedCurveName = expectedCurve.toString();
-    const epsilon = 0.001;
-    final Animatable<Size?> tween = SizeTween(
-      begin: newSize,
-      end: originalSize,
-    ).chain(CurveTween(curve: expectedCurve));
-
-    // Jump 25% into the transition.
-    await tester.pump(duration ~/ 4);
-    Size heroSize = tester.getSize(find.byKey(container1));
-    Size expectedSize = tween.transform(0.25)!;
-    expect(
-      heroSize,
-      within<Size>(distance: epsilon, from: expectedSize),
-      reason: 'curve=$expectedCurveName, t=0.25, duration=$duration',
-    );
-
-    // Jump to 50% into the transition.
-    await tester.pump(duration ~/ 4);
-    heroSize = tester.getSize(find.byKey(container1));
-    expectedSize = tween.transform(0.50)!;
-    expect(
-      heroSize,
-      within<Size>(distance: epsilon, from: expectedSize),
-      reason: 'curve=$expectedCurveName, t=0.50, duration=$duration',
-    );
-
-    // Jump to 75% into the transition.
-    await tester.pump(duration ~/ 4);
-    heroSize = tester.getSize(find.byKey(container1));
-    expectedSize = tween.transform(0.75)!;
-    expect(
-      heroSize,
-      within<Size>(distance: epsilon, from: expectedSize),
-      reason: 'curve=$expectedCurveName, t=0.75, duration=$duration',
-    );
-
-    // Jump to 100% into the transition.
-    await tester.pump(duration ~/ 4);
-    heroSize = tester.getSize(find.byKey(container1));
-    expectedSize = tween.transform(1.0)!;
-    expect(
-      heroSize,
-      within<Size>(distance: epsilon, from: expectedSize),
-      reason: 'curve=$expectedCurveName, t=1.00, duration=$duration',
-    );
-  }
 
   testWidgets('popped hero curve is customizable', (WidgetTester tester) async {
     final testReverseCurvesList = <Curve>[
