@@ -492,15 +492,14 @@ void main() async {
   _runImpellerTest(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
     () async {
-      const shaders = <String>[
-        'no_uniforms.frag.iplr',
-        'missing_size.frag.iplr',
-        'missing_texture.frag.iplr',
+      const List<({String file, bool floatError, bool samplerError})> testCases = [
+        (file: 'no_uniforms.frag.iplr', floatError: true, samplerError: true),
+        (file: 'missing_size.frag.iplr', floatError: true, samplerError: false),
+        (file: 'missing_texture.frag.iplr', floatError: false, samplerError: true),
       ];
-      const errors = <(bool, bool)>[(true, true), (true, false), (false, false)];
-      for (var i = 0; i < 3; i++) {
-        final String fileName = shaders[i];
-        final FragmentProgram program = await FragmentProgram.fromAsset(fileName);
+
+      for (final testCase in testCases) {
+        final FragmentProgram program = await FragmentProgram.fromAsset(testCase.file);
         final FragmentShader shader = program.fragmentShader();
 
         Object? error;
@@ -509,13 +508,13 @@ void main() async {
         } catch (err) {
           error = err;
         }
-        expect(error is StateError, true);
-        final (bool floatError, bool samplerError) = errors[i];
-        if (floatError) {
-          expect(error.toString(), contains('shader has fewer than two float'));
+        expect(error, isA<StateError>());
+        final String errorMessage = error.toString();
+        if (testCase.floatError) {
+          expect(errorMessage, contains('shader has fewer than two float'));
         }
-        if (samplerError) {
-          expect(error.toString(), contains('shader is missing a sampler uniform'));
+        if (testCase.samplerError) {
+          expect(errorMessage, contains('shader is missing a sampler uniform'));
         }
       }
     },
