@@ -43,6 +43,8 @@ impeller_shaders("entity_shaders") {
     "shaders/rrect_like_blur.vert",
     "shaders/rsuperellipse_blur.frag",
     "shaders/runtime_effect.vert",
+    "shaders/shadow_vertices.frag",
+    "shaders/shadow_vertices.vert",
     "shaders/solid_fill.frag",
     "shaders/solid_fill.vert",
     "shaders/texture_fill.frag",
@@ -67,6 +69,7 @@ impeller_shaders("entity_shaders") {
     "shaders/gradients/fast_gradient.vert",
     "shaders/gradients/fast_gradient.frag",
     "shaders/texture_downsample.frag",
+    "shaders/texture_downsample_bounded.frag",
     "shaders/texture_downsample_gles.frag",
   ]
 }
@@ -177,6 +180,8 @@ impeller_component("entity") {
     "contents/radial_gradient_contents.h",
     "contents/runtime_effect_contents.cc",
     "contents/runtime_effect_contents.h",
+    "contents/shadow_vertices_contents.cc",
+    "contents/shadow_vertices_contents.h",
     "contents/solid_color_contents.cc",
     "contents/solid_color_contents.h",
     "contents/solid_rrect_blur_contents.cc",
@@ -227,6 +232,8 @@ impeller_component("entity") {
     "geometry/round_rect_geometry.h",
     "geometry/round_superellipse_geometry.cc",
     "geometry/round_superellipse_geometry.h",
+    "geometry/shadow_path_geometry.cc",
+    "geometry/shadow_path_geometry.h",
     "geometry/stroke_path_geometry.cc",
     "geometry/stroke_path_geometry.h",
     "geometry/superellipse_geometry.cc",
@@ -285,6 +292,7 @@ impeller_component("entity_unittests") {
     "entity_playground.h",
     "entity_unittests.cc",
     "geometry/geometry_unittests.cc",
+    "geometry/shadow_path_geometry_unittests.cc",
     "render_target_cache_unittests.cc",
     "save_layer_utils_unittests.cc",
   ]
@@ -297,6 +305,7 @@ impeller_component("entity_unittests") {
     "//flutter/display_list/testing:display_list_testing",
     "//flutter/impeller/renderer/testing:mocks",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+    "//flutter/testing",
     "//flutter/txt",
   ]
 }

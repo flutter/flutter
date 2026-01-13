@@ -65,16 +65,15 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
-      // we have a blank line at the start
+      // flutter_tools will print a blank line at the start of the test when using some versions
+      // of the Dart test package.  In test package version 1.29 this line is no longer present.
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
       final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
         badLines += 1;
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index &&
-            step.index <= TestStep.testLoading.index &&
-            match.group(1)!.startsWith('loading ')) {
+        if (step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index &&
