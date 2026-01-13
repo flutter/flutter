@@ -263,6 +263,9 @@ abstract class UnpackIOS extends UnpackDarwin {
   BuildMode get buildMode;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -295,7 +298,22 @@ abstract class UnpackIOS extends UnpackDarwin {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
-    await _signFramework(environment, frameworkBinary, buildMode);
+
+    var codesignFramework = true;
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
+      // Skip codesigning during "prepare" when using SwiftPM. When SwiftPM places the Flutter
+      // framework in the BUILT_PRODUCTS_DIR, it does not codesign it (it is later codesigned
+      // in TARGET_BUILD_DIR). Skipping codesigning will improve the caching for the "prepare" script.
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+      if (xcodeProject.usesSwiftPackageManager &&
+          xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
+        codesignFramework = false;
+      }
+    }
+    if (codesignFramework) {
+      await _signFramework(environment, frameworkBinary, buildMode);
+    }
   }
 
   Future<void> _copyFrameworkDysm(

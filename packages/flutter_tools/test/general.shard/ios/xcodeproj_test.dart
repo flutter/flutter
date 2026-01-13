@@ -2124,6 +2124,36 @@ flutter:
           Xcode: () => xcode,
         },
       );
+
+      testUsingContext(
+        'Sets FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH for iOS',
+        () async {
+          const BuildInfo buildInfo = BuildInfo.debug;
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fs.directory('path/to/project'),
+          );
+          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+
+          final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          expect(config.existsSync(), isTrue);
+
+          final String contents = config.readAsStringSync();
+          expect(
+            contents,
+            contains(
+              'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=path/to/project/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => localIosArtifacts,
+          // Platform: () => macOS,
+          FileSystem: () => fs,
+          ProcessManager: () => fakeProcessManager,
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          Xcode: () => xcode,
+        },
+      );
     });
   });
 }

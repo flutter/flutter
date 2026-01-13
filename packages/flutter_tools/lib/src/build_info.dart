@@ -1079,11 +1079,22 @@ const kBuildNumber = 'BuildNumber';
 /// Will be "build" when building and "install" when archiving.
 const kXcodeAction = 'Action';
 
-/// The define of the Xcode build Pre-action.
-///
-/// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
-/// to the BUILT_PRODUCTS_DIR prior to the build.
-const kXcodePreAction = 'PreBuildAction';
+// The define of the Xcode Build Script.
+/// This may be [kXcodeBuildScriptValuePrepare], [kXcodeBuildScriptValueBuild], or [kXcodeBuildScriptValueEmbed].
+const kXcodeBuildScript = 'XcodeBuildScript';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by a scheme pre-action.
+const kXcodeBuildScriptValuePrepare = 'prepare';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by the first Run Script in the Xcode build process that happens before compiling.
+const kXcodeBuildScriptValueBuild = 'build';
+
+/// When [kXcodeBuildScript] equals this value, that indicates that the target was trigged to run
+/// by the second Run Script in the Xcode build process that happens after compiling, linking, and
+/// embedding.
+const kXcodeBuildScriptValueEmbed = 'embed';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);

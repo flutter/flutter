@@ -65,13 +65,25 @@ class DarwinDependencyManagement {
   Future<void> setUp({required FlutterDarwinPlatform platform}) async {
     final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
+      // When using SwiftPM, Xcode outputs the FlutterMacOS framework binary, so
+      // reset the output list file to avoid conflicts.
+      if (platform == FlutterDarwinPlatform.macos &&
+          _project.macos.outputFileList.existsSync() &&
+          _project.macos.outputFileList.readAsStringSync().contains('FlutterMacOS')) {
+        _project.macos.outputFileList.writeAsStringSync('');
+      }
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.
       // This will still generate the required Package.swift, but it will have
       // no dependencies.
-      await _swiftPackageManager.generatePluginsSwiftPackage(<Plugin>[], platform, xcodeProject);
+      await _swiftPackageManager.generatePluginsSwiftPackage(
+        <Plugin>[],
+        platform,
+        xcodeProject,
+        flutterAsADependency: false,
+      );
     }
 
     // Skip updating Podfile if project is a module, since it will use a

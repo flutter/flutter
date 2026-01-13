@@ -154,6 +154,12 @@ Future<void> buildMacOS({
   );
 
   if (flutterProject.macos.usesSwiftPackageManager) {
+    SwiftPackageManager.updateFlutterFrameworkSymlink(
+      buildMode: buildInfo.mode,
+      fileSystem: globals.fs,
+      platform: FlutterDarwinPlatform.macos,
+      project: flutterProject.macos,
+    );
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(

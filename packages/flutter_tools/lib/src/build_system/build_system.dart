@@ -795,8 +795,8 @@ class FlutterBuildSystem extends BuildSystem {
     Map<String, File> currentOutputs,
     Set<String> preservedOutputFilePaths,
   ) {
-    if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
-      // If the current build is the PrepareFramework Xcode pre-action, skip
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
+      // If the current build is the "prepare" Xcode pre-action, skip
       // updating the last build identifier and cleaning up the previous build
       // since this build is not a complete build.
       return;
