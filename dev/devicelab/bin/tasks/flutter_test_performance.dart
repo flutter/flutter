@@ -103,8 +103,10 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     throw Exception('flutter test failed with exit code $result');
   }
   if (badLines.isNotEmpty) {
-    const seperator = '\n  ';
-    throw Exception('flutter test rendered unexpected output:$seperator${badLines.join(seperator)}');
+    const separator = '\n  ';
+    throw Exception(
+      'flutter test rendered unexpected output:$separator${badLines.join(separator)}',
+    );
   }
   if (step != TestStep.testPassed) {
     throw Exception('flutter test did not finish (only reached step $step)');
