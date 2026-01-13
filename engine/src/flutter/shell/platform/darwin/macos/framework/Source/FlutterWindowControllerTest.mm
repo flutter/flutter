@@ -80,6 +80,50 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   }
 }
 
+TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
+  IsolateScope isolate_scope(isolate());
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engineId = reinterpret_cast<int64_t>(engine);
+
+  auto request = FlutterWindowCreationRequest{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+  int64_t parentViewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  EXPECT_EQ(parentViewId, 1);
+
+  auto position_callback = [](const FlutterWindowSize& child_size,
+                              const FlutterWindowRect& parent_rect,
+                              const FlutterWindowRect& output_rect) -> FlutterWindowRect* {
+    FlutterWindowRect* rect = static_cast<FlutterWindowRect*>(malloc(sizeof(FlutterWindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  request = FlutterWindowCreationRequest{
+      .has_constraints = true,
+      .constraints{
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .parent_view_id = parentViewId,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+      .on_get_window_position = position_callback,
+  };
+
+  const int64_t tooltipViewId =
+      InternalFlutter_WindowController_CreateTooltipWindow(engineId, &request);
+  EXPECT_NE(tooltipViewId, 0);
+}
+
 TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
       .has_size = true,
