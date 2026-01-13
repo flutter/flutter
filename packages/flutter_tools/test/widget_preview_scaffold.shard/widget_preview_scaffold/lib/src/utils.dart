@@ -36,13 +36,9 @@ WidgetPreview buildWidgetPreview({
   required Object? Function() previewFunction,
 }) {
   Widget Function() previewBuilder;
-  if (previewFunction is WidgetBuilder Function()) {
-    previewBuilder = () {
-      return Builder(builder: previewFunction());
-    };
-  } else {
-    previewBuilder = previewFunction as Widget Function();
-  }
+  previewBuilder = () {
+    return Builder(builder: previewFunction());
+  };
   return WidgetPreview(
     builder: previewBuilder,
     scriptUri: scriptUri,
