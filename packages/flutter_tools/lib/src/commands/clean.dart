@@ -30,7 +30,7 @@ class CleanCommand extends FlutterCommand {
       help: 'Controls Xcode workspace cleanup.',
       allowed: <String>['workspace', 'app', 'skip'],
       allowedHelp: <String, String>{
-        'workspace': 'Clean all Xcode schemes (default).',
+        'workspace': 'Clean all Xcode schemes.',
         'app': 'Clean only application schemes.',
         'skip': 'Skip Xcode workspace cleaning.',
       },
