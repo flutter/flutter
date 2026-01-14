@@ -299,10 +299,8 @@ List<String> parseVendoredFrameworks(String podspecContents) {
   final String? singleValue = lastMatch.group(1);
   final String? arrayContent = lastMatch.group(2);
 
-  if (singleValue != null) {
-    if (singleValue.isNotEmpty) {
-      results.add(singleValue);
-    }
+  if (singleValue != null && singleValue.isNotEmpty) {
+    results.add(singleValue);
   } else if (arrayContent != null) {
     // Extract individual paths from the array content.
     final pathPattern = RegExp(r'''["']([^"']+)["']''');
