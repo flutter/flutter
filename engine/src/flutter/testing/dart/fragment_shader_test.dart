@@ -489,39 +489,36 @@ void main() async {
     shader.dispose();
   });
 
-  test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
-    // ignore: dead_code
-    const shaders = <String>[
-      'no_uniforms.frag.iplr',
-      'missing_size.frag.iplr',
-      'missing_texture.frag.iplr',
-    ];
-    const errors = <(bool, bool)>[(true, true), (true, false), (false, false)];
-    for (var i = 0; i < 3; i++) {
-      final String fileName = shaders[i];
-      final FragmentProgram program = await FragmentProgram.fromAsset(fileName);
-      final FragmentShader shader = program.fragmentShader();
+  _runImpellerTest(
+    'ImageFilter.shader errors if shader does not have correct uniform layout',
+    () async {
+      const List<({String file, bool floatError, bool samplerError})> testCases = [
+        (file: 'no_uniforms.frag.iplr', floatError: true, samplerError: true),
+        (file: 'missing_size.frag.iplr', floatError: true, samplerError: false),
+        (file: 'missing_texture.frag.iplr', floatError: false, samplerError: true),
+      ];
 
-      Object? error;
-      try {
-        ImageFilter.shader(shader);
-      } catch (err) {
-        error = err;
+      for (final testCase in testCases) {
+        final FragmentProgram program = await FragmentProgram.fromAsset(testCase.file);
+        final FragmentShader shader = program.fragmentShader();
+
+        Object? error;
+        try {
+          ImageFilter.shader(shader);
+        } catch (err) {
+          error = err;
+        }
+        expect(error, isA<StateError>());
+        final errorMessage = error.toString();
+        if (testCase.floatError) {
+          expect(errorMessage, contains('shader has fewer than two float'));
+        }
+        if (testCase.samplerError) {
+          expect(errorMessage, contains('shader is missing a sampler uniform'));
+        }
       }
-      expect(error is StateError, true);
-      final (bool floatError, bool samplerError) = errors[i];
-      if (floatError) {
-        expect(error.toString(), contains('shader has fewer than two float'));
-      }
-      if (samplerError) {
-        expect(error.toString(), contains('shader is missing a sampler uniform'));
-      }
-    }
-  });
+    },
+  );
 
   _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
     // TODO(gaaclarke): This test was disabled for a long time and has been
@@ -543,11 +540,6 @@ void main() async {
   });
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
-    // ignore: dead_code
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     final recorder = PictureRecorder();
@@ -558,10 +550,22 @@ void main() async {
         ..imageFilter = ImageFilter.shader(shader),
     );
     final Image image = await recorder.endRecording().toImage(1, 1);
-    final ByteData data = (await image.toByteData())!;
-    final color = Color(data.buffer.asUint32List()[0]);
 
-    expect(color, const Color(0xFF00FF00));
+    // Image's byte data consists of color values for each pixel in RGBA format. The image is 1
+    // pixel, so the byte data is expected to be 4 bytes.
+    final ByteData data = (await image.toByteData())!;
+    expect(data.lengthInBytes, 4);
+
+    final Uint8List colorComponentsRGBA = data.buffer.asUint8List();
+    final color = Color.fromARGB(
+      colorComponentsRGBA[3],
+      colorComponentsRGBA[0],
+      colorComponentsRGBA[1],
+      colorComponentsRGBA[2],
+    );
+    // filter_shader.frag swaps red and blue color channels. The drawn color is red, so the expected
+    // result color is blue.
+    expect(color, const Color(0xFF0000FF));
   });
 
   // For an explaination of the problem see https://github.com/flutter/flutter/issues/163302 .
