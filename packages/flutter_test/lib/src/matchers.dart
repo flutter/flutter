@@ -1260,11 +1260,13 @@ Matcher isAccessibilityAnnouncement(
   String message, {
   TextDirection? textDirection,
   Assertiveness? assertiveness,
+  int? viewId,
 }) {
   return _MatchesAccessibilityAnnouncement(
     expectedMessage: message,
     expectedTextDirection: textDirection,
     expectedAssertiveness: assertiveness,
+    expectedViewId: viewId,
   );
 }
 
@@ -3197,11 +3199,13 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
     required this.expectedMessage,
     required this.expectedTextDirection,
     required this.expectedAssertiveness,
+    required this.expectedViewId,
   });
 
   final String expectedMessage;
   final TextDirection? expectedTextDirection;
   final Assertiveness? expectedAssertiveness;
+  final int? expectedViewId;
 
   @override
   bool matches(
@@ -3210,7 +3214,8 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
   ) {
     return event.message == expectedMessage &&
         (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
-        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness);
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness) &&
+        (expectedViewId == null || event.viewId == expectedViewId);
   }
 
   @override
@@ -3221,6 +3226,9 @@ class _MatchesAccessibilityAnnouncement extends Matcher {
     }
     if (expectedAssertiveness != null) {
       description.add(', assertiveness: $expectedAssertiveness');
+    }
+    if (expectedViewId != null) {
+      description.add(', viewId: $expectedViewId');
     }
     return description;
   }

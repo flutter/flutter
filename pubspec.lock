@@ -214,18 +214,18 @@ packages:
     dependency: "direct main"
     description:
       name: ffi
-      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
+      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   ffigen:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: ffigen
-      sha256: "72d732c33557fc0ca9b46379d3deff2dadbdc539696dc0b270189e2989be20ef"
+      sha256: b7803707faeec4ce3c1b0c2274906504b796e3b70ad573577e72333bd1c9b3ba
       url: "https://pub.dev"
     source: hosted
-    version: "18.1.0"
+    version: "20.1.1"
   file:
     dependency: "direct main"
     description:
@@ -827,26 +827,26 @@ packages:
     dependency: "direct main"
     description:
       name: test
-      sha256: "77cc98ea27006c84e71a7356cf3daf9ddbde2d91d84f77dbfe64cf0e4d9611ae"
+      sha256: "54c516bbb7cee2754d327ad4fca637f78abfc3cbcc5ace83b3eda117e42cd71a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.28.0"
+    version: "1.29.0"
   test_api:
     dependency: "direct main"
     description:
       name: test_api
-      sha256: "19a78f63e83d3a61f00826d09bc2f60e191bf3504183c001262be6ac75589fb8"
+      sha256: "93167629bfc610f71560ab9312acdda4959de4df6fac7492c89ff0d3886f6636"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.8"
+    version: "0.7.9"
   test_core:
     dependency: "direct main"
     description:
       name: test_core
-      sha256: f1072617a6657e5fc09662e721307f7fb009b4ed89b19f47175d11d5254a62d4
+      sha256: "394f07d21f0f2255ec9e3989f21e54d3c7dc0e6e9dbce160e5a9c1a6be0e2943"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.14"
+    version: "0.6.15"
   typed_data:
     dependency: "direct main"
     description:
@@ -947,10 +947,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: e4d33b79a064498c6eb3a6a492b6a5012573d4943c28d566caf1a6c0840fe78d
+      sha256: d1eb970495a76abb35e5fa93ee3c58bd76fb6839e2ddf2fbb636674f2b971dd4
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.8"
+    version: "2.8.9"
   video_player_platform_interface:
     dependency: "direct main"
     description:
@@ -987,10 +987,10 @@ packages:
     dependency: "direct main"
     description:
       name: watcher
-      sha256: f52385d4f73589977c80797e60fe51014f7f2b957b5e9a62c3f6ada439889249
+      sha256: "1398c9f081a753f9226febe8900fce8f7d0a67163334e1c94a2438339d79d635"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1"
   web:
     dependency: "direct main"
     description:

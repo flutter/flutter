@@ -100,7 +100,7 @@ dependencies:
   device_info: 2.0.3
   device_info_platform_interface: 2.0.1
   fake_async: 1.3.3
-  ffi: 2.1.4
+  ffi: 2.1.5
   file: 7.0.1
   fixnum: 1.1.1
   flutter_gallery_assets: 1.0.2
@@ -170,9 +170,9 @@ dependencies:
   string_scanner: 1.4.1
   sync_http: 0.3.1
   term_glyph: 1.2.2
-  test: 1.28.0
-  test_api: 0.7.8
-  test_core: 0.6.14
+  test: 1.29.0
+  test_api: 0.7.9
+  test_core: 0.6.15
   typed_data: 1.4.0
   url_launcher: 6.3.2
   url_launcher_android: 6.3.28
@@ -185,12 +185,12 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.1
   video_player_android: 2.9.1
-  video_player_avfoundation: 2.8.8
+  video_player_avfoundation: 2.8.9
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
   vm_service: 15.0.2
   vm_snapshot_analysis: 0.7.6
-  watcher: 1.2.0
+  watcher: 1.2.1
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
@@ -205,11 +205,14 @@ dependencies:
   yaml: 3.1.3
   cli_util: 0.4.2
   dart_style: 3.1.3
-  ffigen: 18.1.0
   file_testing: 3.0.2
   flutter_lints: 6.0.0
   lints: 6.0.0
   pedantic: 1.11.1
   quiver: 3.2.2
   yaml_edit: 2.2.3
-# PUBSPEC CHECKSUM: unhors
+
+dev_dependencies:
+  ffigen: 20.1.1
+
+# PUBSPEC CHECKSUM: 4qr9q8
