@@ -58,7 +58,7 @@ class CleanCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
     if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
-      final XcodeCleanScope xcodeCleanScope = switch (argResults?['xcode-clean'] as String) {
+      final XcodeCleanScope xcodeCleanScope = switch (argResults!['xcode-clean'] as String) {
         'workspace' => XcodeCleanScope.workspace,
         'skip' => XcodeCleanScope.skip,
         'app' => XcodeCleanScope.app,
@@ -125,7 +125,7 @@ class CleanCommand extends FlutterCommand {
           verbose: _verbose,
         );
       } else {
-        final Iterable<String> schemesToClean = switch (xcodeCleanScope) {
+        final List<String> schemesToClean = switch (xcodeCleanScope) {
           XcodeCleanScope.skip => const <String>[],
           XcodeCleanScope.workspace => projectInfo.schemes,
           XcodeCleanScope.app => _applicationSchemes(
@@ -202,7 +202,13 @@ class CleanCommand extends FlutterCommand {
     }
   }
 
-  Iterable<String> _applicationSchemes({
+  /// Returns schemes that are considered part of the application, and not a dependency.
+  ///
+  /// This is a heuristic that includes:
+  /// - The main scheme matching the host app name.
+  /// - Schemes that are flavors of the main scheme.
+  /// - Schemes that match a target name.
+  List<String> _applicationSchemes({
     required XcodeProjectInfo projectInfo,
     required XcodeBasedProject xcodeProject,
   }) {
@@ -226,6 +232,6 @@ class CleanCommand extends FlutterCommand {
 
       globals.printTrace('Skipping Xcode scheme "$scheme" (non-application scheme).');
       return false;
-    });
+    }).toList();
   }
 }
