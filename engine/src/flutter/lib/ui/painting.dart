@@ -5634,7 +5634,7 @@ base class UniformVec4Slot extends UniformType {
 ///
 /// ```dart
 /// void updateShader(ui.FragmentShader shader) {
-///   UniformArray<UniformVec4Slot> colors = shader.getUniformVec4Array('uColorArray');
+///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColorArray');
 ///   colors[0].set(1.0, 0.0, 1.0, 0.3);
 /// }
 /// ```
@@ -5906,7 +5906,7 @@ base class FragmentShader extends Shader {
   ///
   /// ```dart
   /// void updateShader(ui.FragmentShader shader) {
-  ///   final UniformArray<UniformFloatSlot> values = shader.getUniformFloatArray('uValues');
+  ///   final ui.UniformArray<ui.UniformFloatSlot> values = shader.getUniformFloatArray('uValues');
   ///   values[2].set(1.0);
   /// }
   /// ```
@@ -5924,7 +5924,7 @@ base class FragmentShader extends Shader {
   ///
   /// ```dart
   /// void updateShader(ui.FragmentShader shader) {
-  ///   final UniformArray<UniformVec2Slot> positions = shader.getUniformVec2Array('uPositions');
+  ///   final ui.UniformArray<ui.UniformVec2Slot> positions = shader.getUniformVec2Array('uPositions');
   ///   positions[2].set(6.0, 7.0);
   /// }
   /// ```
@@ -5949,7 +5949,7 @@ base class FragmentShader extends Shader {
   ///
   /// ```dart
   /// void updateShader(ui.FragmentShader shader) {
-  ///   final UniformArray<UniformVec3Slot> colors = shader.getUniformVec3Array('uColors');
+  ///   final ui.UniformArray<ui.UniformVec3Slot> colors = shader.getUniformVec3Array('uColors');
   ///   colors[0].set(1.0, 0.0, 1.0);
   /// }
   /// ```
@@ -5971,7 +5971,7 @@ base class FragmentShader extends Shader {
   ///
   /// ```dart
   /// void updateShader(ui.FragmentShader shader) {
-  ///   final UniformArray<UniformVec4Slot> colors = shader.getUniformVec4Array('uColors');
+  ///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColors');
   ///   colors[0].set(1.0, 0.0, 1.0, 0.5);
   /// }
   /// ```
