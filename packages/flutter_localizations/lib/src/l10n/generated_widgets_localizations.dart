@@ -867,9 +867,6 @@ class WidgetsLocalizationDeCh extends WidgetsLocalizationDe {
   ///
   /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
   const WidgetsLocalizationDeCh();
-
-  @override
-  String get radioButtonUnselectedLabel => 'Not selected';
 }
 
 /// The translations for Modern Greek (`el`).
