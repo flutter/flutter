@@ -1468,8 +1468,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // the parent node would have updated this node's parent data and it
           // would not be dirty.
           //
-          // Updating the parent data now may create a gap of render object with
-          // dirty parent data when this branch later rejoin the rendering tree.
+          // We MUST NOT update the parent data now since it may create a gap of render
+          // object with dirty parent data when this branch later rejoin the rendering tree.
           continue;
         }
         node._semantics.updateChildren();
@@ -1504,10 +1504,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemanticsGeometryUpdate.clear();
 
-      // Clear geometry for nodes that were marked as dirty.
+      // Clear geometry for nodes that needs geometry update.
       for (final node in nodesToProcessGeometry) {
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
-          // This is enough to trigger a geomtry update.
+          // This is node is already dirty, skip it.
           continue;
         }
         if (!node._semantics.contributesToSemanticsTree) {
@@ -1526,16 +1526,34 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         }
       }
 
-      // conduct the geometry update for nodes that were marked as dirty.
+      // Conduct the geometry update
       for (final node in nodesToProcessGeometry) {
         _RenderObjectSemantics target = node._semantics;
-        var notBlocked = true;
-        while ((notBlocked = !target.parentDataDirty) &&
+        // All the parent data on the active tree should be up to date at this point
+        // except for the blocked branch.
+        //
+        // We MUST NOT update the geometry of the blocked branch since ensureGeometry short
+        // circuited when it reaches a node whose geometry is up to date. Updating
+        // the geometry of the blocked branch half-heartly will cause a gap of render
+        // object with dirty geometry where the future update may never reach.
+        //
+        // Either we update entire tree regardless of been blocked or not, or we only update
+        // the tree that is not blocked. If we go with the first option, we will waste
+        // time updating something that will not be showing up in the final semantics tree.
+        //
+        // Thus, we go for the second option, and the geometry update will only be conducted
+        // once the branch is not blocked.
+        bool isBlocked = target.parentDataDirty;
+        // Find the first render object semantics that forms a semantics node
+        // and whose geometry is not dirty as the anchor point to start the geometry update.
+        while (!isBlocked &&
             !target.isRoot &&
             (target.geometryDirty || !target.shouldFormSemanticsNode)) {
           target = target.parent!;
+          isBlocked = target.parentDataDirty;
         }
-        if (notBlocked) {
+
+        if (!isBlocked) {
           target.ensureGeometry();
         }
       }
