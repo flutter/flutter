@@ -2023,7 +2023,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
-    final MediaQueryData overlayData = MediaQuery.of(Overlay.of(context).context);
+    final OverlayState? overlay = Overlay.maybeOf(context);
+    final MediaQueryData? overlayData = overlay != null ? MediaQuery.of(overlay.context) : null;
     final MediaQueryData data = MediaQuery.of(context);
     if (zOrderIndex == null) {
       return _OverlayPortal(
@@ -2037,11 +2038,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
       overlayChild: _DeferredLayout(
         childIdentifier: this,
         child: MediaQuery(
-          data: data.copyWith(
-            padding: overlayData.padding,
-            viewPadding: overlayData.viewPadding,
-            viewInsets: overlayData.viewInsets,
-          ),
+          data: overlayData == null
+              ? data
+              : data.copyWith(
+                  padding: overlayData.padding,
+                  viewPadding: overlayData.viewPadding,
+                  viewInsets: overlayData.viewInsets,
+                ),
           child: Builder(builder: widget.overlayChildBuilder),
         ),
       ),
