@@ -43,7 +43,6 @@ void main() {
     final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
-      cacheExtent: 0.0,
       children: children,
     );
     layout(renderViewport, phase: EnginePhase.flushSemantics);
@@ -77,7 +76,6 @@ void main() {
     final renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
-      cacheExtent: 0.0,
       cacheExtentStyle: CacheExtentStyle.viewport,
       children: children,
     );

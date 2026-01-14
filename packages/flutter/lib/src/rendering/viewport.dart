@@ -1423,7 +1423,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     super.paintOrder,
     super.clipBehavior,
   }) : assert(anchor >= 0.0 && anchor <= 1.0),
-       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        _anchor = anchor,
        _center = center {
     addAll(children);
