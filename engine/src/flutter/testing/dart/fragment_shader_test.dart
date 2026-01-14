@@ -477,7 +477,7 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest('FragmentShader shader with array uniforms renders correctly', () async {
+  test('FragmentShader shader with array uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader();

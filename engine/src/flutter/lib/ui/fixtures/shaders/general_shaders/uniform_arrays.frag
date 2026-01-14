@@ -20,22 +20,83 @@ void main() {
   // The test populates the uniforms with strictly increasing values, so if
   // out-of-order values are read out of the uniforms, then the bad color that
   // causes the test to fail is returned.
-  if (floatArray[0] >= floatArray[1] || floatArray[1] >= vec2Array[0].x ||
-      vec2Array[0].x >= vec2Array[0].y || vec2Array[0].y >= vec2Array[1].x ||
-      vec2Array[1].x >= vec2Array[1].y || vec2Array[1].y >= vec3Array[0].x ||
-      vec3Array[0].x >= vec3Array[0].y || vec3Array[0].y >= vec3Array[0].z ||
-      vec3Array[0].z >= vec3Array[1].x || vec3Array[1].x >= vec3Array[1].y ||
-      vec3Array[1].y >= vec3Array[1].z ||
-      vec3Array[1].z >= mat2Array[0][0][0] ||
-      mat2Array[0][0][0] >= mat2Array[0][0][1] ||
-      mat2Array[0][0][1] >= mat2Array[0][1][0] ||
-      mat2Array[0][1][0] >= mat2Array[0][1][1] ||
-      mat2Array[0][1][1] >= mat2Array[1][0][0] ||
-      mat2Array[1][0][0] >= mat2Array[1][0][1] ||
-      mat2Array[1][0][1] >= mat2Array[1][1][0] ||
-      mat2Array[1][1][0] >= mat2Array[1][1][1]) {
-    oColor = badColor;
-  } else {
-    oColor = goodColor;
+  // if (floatArray[0] >= floatArray[1]) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (floatArray[1] >= vec2Array[0].x) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec2Array[0].x >= vec2Array[0].y) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec2Array[0].y >= vec2Array[1].x) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec2Array[1].x >= vec2Array[1].y) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec2Array[1].y >= vec3Array[0].x) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[0].x >= vec3Array[0].y) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[0].y >= vec3Array[0].z) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[0].z >= vec3Array[1].x) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[1].x >= vec3Array[1].y) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[1].y >= vec3Array[1].z) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (vec3Array[1].z >= mat2Array[0][0][0]) {
+  //   oColor = badColor;
+  //   return;
+  // }
+  // if (mat2Array[0][0][0] >= mat2Array[0][0][1]) {
+  //   oColor = vec4(1.0, 1.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+  // if (mat2Array[0][0][1] >= mat2Array[0][1][0]) {
+  //   oColor = vec4(1.0, 2.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+  // if (mat2Array[0][1][0] >= mat2Array[0][1][1]) {
+  //   oColor = vec4(1.0, 3.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+  if (mat2Array[0][1][1] >= mat2Array[1][0][0]) {
+    oColor = vec4(1.0, mat2Array[0][1][1]/20.0, mat2Array[1][0][0]/20.0, 1.0);
+    //oColor = vec4(1.0, 4.0 / 7.0, 0, 1.0);
+    return;
   }
+  // if (mat2Array[1][0][0] >= mat2Array[1][0][1]) {
+  //   oColor = vec4(1.0, 5.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+  // if (mat2Array[1][0][1] >= mat2Array[1][1][0]) {
+  //   oColor = vec4(1.0, 6.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+  // if (mat2Array[1][1][0] >= mat2Array[1][1][1]) {
+  //   oColor = vec4(1.0, 7.0 / 7.0, 0, 1.0);
+  //   return;
+  // }
+
+  oColor = goodColor;
 }

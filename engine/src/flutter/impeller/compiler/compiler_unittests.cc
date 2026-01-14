@@ -409,6 +409,48 @@ INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
 INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
+TEST_P(CompilerTestRuntime, Mat2Reflection) {
+  ASSERT_TRUE(CanCompileAndReflect(
+      "mat2_test.frag", SourceType::kFragmentShader, SourceLanguage::kGLSL));
+
+  std::unique_ptr<fml::FileMapping> json_fd =
+      GetReflectionJson("mat2_test.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  nlohmann::json::value_type buffers = shader_json["buffers"];
+
+  // uParams should be in buffers.
+  ASSERT_GE(buffers.size(), 1u);
+  nlohmann::json::value_type uParams = buffers[0];
+  EXPECT_EQ(uParams["name"], "Params");
+
+  nlohmann::json::value_type members = uParams["type"]["members"];
+  // We expect 2 members for the SINGLE mat2 member of the struct.
+  // Because our fix splits the mat2 into 2 columns in the reflection.
+  ASSERT_EQ(members.size(), 2u);
+
+  nlohmann::json::value_type col0 = members[0];
+  nlohmann::json::value_type col1 = members[1];
+
+  // Both should be Point (vec2)
+  EXPECT_EQ(col0["type"], "Point");
+  EXPECT_EQ(col1["type"], "Point");
+
+  // Size 8 bytes (vec2)
+  EXPECT_EQ(col0["size"], 8u);
+  EXPECT_EQ(col1["size"], 8u);
+
+  // Stride 16 bytes (std140 alignment of vec2) -> byte_length
+  EXPECT_EQ(col0["byte_length"], 16u);
+  EXPECT_EQ(col1["byte_length"], 16u);
+
+  // Offsets
+  // col0 at 0
+  // col1 at 16
+  EXPECT_EQ(col0["offset"], 0u);
+  EXPECT_EQ(col1["offset"], 16u);
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

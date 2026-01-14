@@ -832,13 +832,14 @@ std::vector<StructMember> Reflector::ReadStructMembers(
   size_t max_member_alignment = 0;
 
   for (size_t i = 0; i < struct_type.member_types.size(); i++) {
-    const auto& member = compiler_->get_type(struct_type.member_types[i]);
-    const auto struct_member_offset =
+    const spirv_cross::SPIRType& member =
+        compiler_->get_type(struct_type.member_types[i]);
+    const uint32_t struct_member_offset =
         compiler_->type_struct_member_offset(struct_type, i);
-    auto array_elements = GetArrayElements(member);
+    std::optional<uint32_t> array_elements = GetArrayElements(member);
 
     if (struct_member_offset > current_byte_offset) {
-      const auto alignment_pad = struct_member_offset - current_byte_offset;
+      const size_t alignment_pad = struct_member_offset - current_byte_offset;
       result.emplace_back(StructMember{
           TypeNameWithPaddingOfSize(alignment_pad),  // type
           spirv_cross::SPIRType::BaseType::Void,     // basetype
@@ -879,6 +880,32 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           element_padding,                       // element_padding
       });
       current_byte_offset += stride * array_elements.value_or(1);
+      continue;
+    }
+
+    // Mat2
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
+        member.width == 32 && member.columns == 2 && member.vecsize == 2) {
+      // Column 0
+      result.emplace_back(StructMember{
+          "Point",  // type
+          spirv_cross::SPIRType::BaseType::Float,
+          GetMemberNameAtIndex(struct_type, i),  // name
+          struct_member_offset,                  // offset
+          sizeof(Point),                         // size (8)
+          16,            // byte_length (std140 vec2 alignment -> 16)
+          std::nullopt,  // array_elements
+          8              // element_padding
+      });
+      // Column 1
+      result.emplace_back(StructMember{"Point",
+                                       spirv_cross::SPIRType::BaseType::Float,
+                                       GetMemberNameAtIndex(struct_type, i),
+                                       struct_member_offset + 16,  // offset
+                                       sizeof(Point),              // size (8)
+                                       16,  // byte_length
+                                       std::nullopt, 8});
+      current_byte_offset += 32;
       continue;
     }
 
@@ -1122,7 +1149,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       if (stride == 0) {
         stride = size;
       }
-      auto element_padding = stride - size;
+      size_t element_padding = stride - size;
       result.emplace_back(StructMember{
           TypeNameWithPaddingOfSize(size),       // type
           member.basetype,                       // basetype
@@ -1139,9 +1166,9 @@ std::vector<StructMember> Reflector::ReadStructMembers(
   }
 
   if (max_member_alignment > 0u) {
-    const auto struct_length = current_byte_offset;
+    const size_t struct_length = current_byte_offset;
     {
-      const auto excess = struct_length % max_member_alignment;
+      const size_t excess = struct_length % max_member_alignment;
       if (excess != 0) {
         const auto padding = max_member_alignment - excess;
         result.emplace_back(StructMember{
