@@ -34,7 +34,7 @@ import '../../src/throwing_pub.dart';
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   FakeXcodeProjectInterpreterWithBuildSettings({Map<String, String>? overrides, Version? version})
     : _overrides = overrides ?? const <String, String>{},
-      version = version ?? Version(16, 0, 0);
+      version = version ?? Version(15, 0, 0);
 
   final Map<String, String> _overrides;
   Map<String, String> get overrides => _overrides;
@@ -142,7 +142,8 @@ void main() {
     command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
   );
 
-  FakeCommand setUpXCResultCommand({
+  // Sets up xcresulttool command for Xcode versions below 16.
+  FakeCommand setUpLegacyXCResultCommand({
     String stdout = '',
     void Function(List<String> command)? onRun,
   }) {
@@ -151,7 +152,6 @@ void main() {
         'xcrun',
         'xcresulttool',
         'get',
-        'build-results',
         '--path',
         _xcBundleFilePath,
         '--format',
@@ -436,7 +436,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -922,7 +923,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -983,7 +985,8 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -1330,7 +1333,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(),
+        setUpLegacyXCResultCommand(),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1371,7 +1374,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1416,7 +1419,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
       ]);
       createMinimalMockProjectFiles();
 
@@ -1507,7 +1510,7 @@ void main() {
             fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
           },
         ),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
       ]);
       createMinimalMockProjectFiles();
 
