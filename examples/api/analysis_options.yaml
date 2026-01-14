@@ -4,12 +4,6 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-analyzer:
-  errors:
-    # Snippets do not provide the context needed to validate @override annotations.
-    invalid_annotation_target: ignore
-    override_on_non_overriding_member: ignore
-
 linter:
   rules:
     # Samples want to print things pretty often.
