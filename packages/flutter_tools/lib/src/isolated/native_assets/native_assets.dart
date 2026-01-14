@@ -44,6 +44,21 @@ class FlutterCodeAsset {
 /// support more asset types in the future.
 enum SupportedAssetTypes { codeAssets, dataAssets }
 
+/// Hook options specific to building code assets.
+final class BuildCodeAssetsOptions {
+  const BuildCodeAssetsOptions({required this.appBuildDirectory});
+
+  /// The build directory of the main app build, e.g. `/path/to/app/build`.
+  ///
+  /// Depending on the target platform, we may try to lookup compiler options
+  /// based on files in this directory to align code assets toolchains with the
+  /// main app build.
+  ///
+  /// Null for hook invocations not associated with an app build (e.g. widget
+  /// tests).
+  final Directory? appBuildDirectory;
+}
+
 /// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
 Future<DartHooksResult> runFlutterSpecificHooks({
@@ -52,7 +67,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
-  required bool buildCodeAssets,
+  required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
@@ -60,14 +75,38 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   }
 
   final supportedAssetTypes = <SupportedAssetTypes>[
-    if (featureFlags.isNativeAssetsEnabled && buildCodeAssets) SupportedAssetTypes.codeAssets,
+    if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
+      SupportedAssetTypes.codeAssets,
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
+
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
+
+  // When building for Linux, we need access to the native build directory to
+  // read compiler options from CMakeLists.txt that are then forwarded to build
+  // hooks.
+  Directory? nativeBuildDirectory;
+  if (buildCodeAssets?.appBuildDirectory case final appBuildDirectory?) {
+    if (targetPlatform
+        case TargetPlatform.linux_x64 ||
+            TargetPlatform.linux_arm64 ||
+            TargetPlatform.linux_riscv64) {
+      nativeBuildDirectory = appBuildDirectory
+          .childDirectory('linux')
+          .childDirectory(targetPlatform.simpleName)
+          .childDirectory(buildMode.cliName);
+    }
+  }
+
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
     environmentDefines: environmentDefines,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
+    nativeBuildDirectory: nativeBuildDirectory,
   );
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
@@ -76,10 +115,6 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     await buildRunner.setCCompilerConfig(target);
   }
 
-  final BuildMode buildMode = _getBuildMode(
-    environmentDefines,
-    targetPlatform == TargetPlatform.tester,
-  );
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
 
   return _runDartHooks(
