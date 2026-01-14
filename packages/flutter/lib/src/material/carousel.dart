@@ -455,11 +455,12 @@ class CarouselView extends StatefulWidget {
   /// {@template flutter.material.CarouselView.onIndexChanged}
   /// A callback invoked when the leading item changes.
   ///
-  /// For both [CarouselView] and [CarouselView.weighted], the leading item is
-  /// the first visible item in the carousel view.
+  /// The leading item is the first visible item in the carousel view.
   ///
-  /// The callback fires only when the leading index actually changes,
-  /// whether due to user interaction or programmatic scrolling.
+  /// The callback fires only when the leading item is completely out of view,
+  /// whether due to user interaction or programmatic scrolling. If the leading item
+  /// remains partially visible, the leading index will not change and the callback will
+  /// not be invoked.
   /// {@endtemplate}
   ///
   /// Example:
@@ -514,6 +515,7 @@ class _CarouselViewState extends State<CarouselView> {
     }
     _lastReportedLeadingItem = _getInitialLeadingItem();
     _controller._attach(this);
+    _controller.addListener(_handleScroll);
   }
 
   @override
@@ -546,15 +548,30 @@ class _CarouselViewState extends State<CarouselView> {
 
   @override
   void dispose() {
+    _controller.removeListener(_handleScroll);
     _controller._detach(this);
     _internalController?.dispose();
     super.dispose();
   }
 
-  // The initialItem means the index of the item to occupy the first maximum weight
-  // when flexWeights is not null. So it might be negative when initialItem value
-  // is small but the first max weight index is large. In that case, the initial
-  // leading item should be 0.
+  void _handleScroll() {
+    if (widget.onIndexChanged == null) {
+      return;
+    }
+
+    final ScrollPosition position = _controller.position;
+    final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
+
+    if (currentLeadingIndex != _lastReportedLeadingItem) {
+      _lastReportedLeadingItem = currentLeadingIndex;
+      widget.onIndexChanged!(currentLeadingIndex);
+    }
+  }
+
+  // For weighted carousel, the initialItem means the index of the item to occupy the first maximum weight
+  // in flexWeights. To get the initial leading item, it should be initialItem - index of the first max weight in flexWeights.
+  // So it might be negative when initialItem value is small but the first max weight index is large. In that case,
+  // the initial leading item should be 0.
   int _getInitialLeadingItem() {
     if (widget.flexWeights != null) {
       final int maxWeight = widget.flexWeights!.max;
@@ -682,35 +699,20 @@ class _CarouselViewState extends State<CarouselView> {
         _itemExtent = widget.itemExtent == null
             ? null
             : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
-        return NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification notification) {
-            if (notification.depth == 0 &&
-                widget.onIndexChanged != null &&
-                notification is ScrollUpdateNotification) {
-              final ScrollPosition position = _controller.position;
-              final int currentLeadingIndex = (position as _CarouselPosition).leadingItem;
-              if (currentLeadingIndex != _lastReportedLeadingItem) {
-                _lastReportedLeadingItem = currentLeadingIndex;
-                widget.onIndexChanged?.call(currentLeadingIndex);
-              }
-            }
-            return false;
+        return Scrollable(
+          axisDirection: axisDirection,
+          controller: _controller,
+          physics: physics,
+          viewportBuilder: (BuildContext context, ViewportOffset position) {
+            return Viewport(
+              cacheExtent: 0.0,
+              cacheExtentStyle: CacheExtentStyle.viewport,
+              axisDirection: axisDirection,
+              offset: position,
+              clipBehavior: Clip.antiAlias,
+              slivers: <Widget>[_buildSliverCarousel(theme)],
+            );
           },
-          child: Scrollable(
-            axisDirection: axisDirection,
-            controller: _controller,
-            physics: physics,
-            viewportBuilder: (BuildContext context, ViewportOffset position) {
-              return Viewport(
-                cacheExtent: 0.0,
-                cacheExtentStyle: CacheExtentStyle.viewport,
-                axisDirection: axisDirection,
-                offset: position,
-                clipBehavior: Clip.antiAlias,
-                slivers: <Widget>[_buildSliverCarousel(theme)],
-              );
-            },
-          ),
         );
       },
     );
