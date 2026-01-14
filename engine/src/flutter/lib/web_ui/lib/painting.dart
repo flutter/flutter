@@ -1004,7 +1004,12 @@ class ImageDescriptor {
 
 abstract class FragmentProgram {
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    return engine.renderer.createFragmentProgram(assetKey);
+    // The flutter tool converts all asset keys with spaces into URI
+    // encoded paths (replacing ' ' with '%20', for example). We perform
+    // the same encoding here so that users can load assets with the same
+    // key they have written in the pubspec.
+    final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
+    return engine.renderer.createFragmentProgram(encodedKey);
   }
 
   FragmentShader fragmentShader();
