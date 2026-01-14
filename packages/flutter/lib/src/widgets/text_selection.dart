@@ -353,7 +353,6 @@ class TextSelectionOverlay {
     required LayerLink endHandleLayerLink,
     required this.renderObject,
     this.selectionControls,
-    required this.cursorWidth,
     bool handlesVisible = false,
     required this.selectionDelegate,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
@@ -395,7 +394,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
-      cursorWidth: cursorWidth,
+      cursorWidth: renderObject.cursorWidth,
     );
   }
 
@@ -416,7 +415,9 @@ class TextSelectionOverlay {
   final TextSelectionControls? selectionControls;
 
   /// {@macro flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
-  final double cursorWidth;
+  ///
+  /// This value is read directly from [renderObject.cursorWidth].
+  double get cursorWidth => renderObject.cursorWidth;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
   final TextSelectionDelegate selectionDelegate;

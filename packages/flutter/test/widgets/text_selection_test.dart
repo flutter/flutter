@@ -1845,7 +1845,6 @@ void main() {
       }
 
       return TextSelectionOverlay(
-        cursorWidth: 2.0,
         value: value ?? TextEditingValue.empty,
         renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
