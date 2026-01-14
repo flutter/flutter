@@ -242,6 +242,8 @@ _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix'
 
   // Auxiliary method for handling the difference between platforms
   void _announce(String message) {
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
     if (Theme.of(context).platform == TargetPlatform.android) {
         _announcementText = message;
     } else {
