@@ -53,9 +53,6 @@ class CupertinoContextMenuAction extends StatefulWidget {
 
   /// The color of the background that highlights active focus.
   ///
-  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
-  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
-  ///
   /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
   final Color? focusColor;
 
@@ -135,7 +132,8 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   }
 
   Color get effectiveFocusBackgroundColor =>
-      (widget.focusColor ?? CupertinoColors.activeBlue).withValues(
+      widget.focusColor ??
+      CupertinoColors.activeBlue.withValues(
         alpha: CupertinoTheme.brightnessOf(context) == Brightness.light
             ? kCupertinoButtonTintedOpacityLight
             : kCupertinoButtonTintedOpacityDark,

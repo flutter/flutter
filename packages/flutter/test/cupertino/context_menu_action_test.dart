@@ -189,14 +189,7 @@ void main() {
     lightCustomFocusNode.requestFocus();
     await tester.pump();
 
-    final Color customFocusBackgroundLight = customFocusColor.withValues(
-      alpha: kCupertinoButtonTintedOpacityLight,
-    );
-
-    expect(
-      find.byType(CupertinoContextMenuAction),
-      paints..rect(color: customFocusBackgroundLight),
-    );
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: customFocusColor));
 
     // Custom focus color, dark theme
     await tester.pumpWidget(
@@ -216,11 +209,7 @@ void main() {
     darkCustomFocusNode.requestFocus();
     await tester.pump();
 
-    final Color customFocusBackgroundDark = customFocusColor.withValues(
-      alpha: kCupertinoButtonTintedOpacityDark,
-    );
-
-    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: customFocusBackgroundDark));
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: customFocusColor));
   });
 
   testWidgets('can be traversed and responds to focus action when onPressed is not null', (

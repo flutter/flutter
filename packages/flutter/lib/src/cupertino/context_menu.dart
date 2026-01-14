@@ -372,7 +372,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// The radius of the border rendered around this widget when focused.
+  /// The radius of the focus halo rendered around this widget when focused.
   final BorderRadiusGeometry focusBorderRadius;
 
   @override
@@ -409,7 +409,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   }
 
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    _ContextMenuIntent: CallbackAction<_ContextMenuIntent>(onInvoke: _handleOpenIntent),
+    _ContextMenuIntent: CallbackAction<_ContextMenuIntent>(
+      onInvoke: (_) => _performOpenMenu(fromTap: false),
+    ),
   };
 
   void _listenerCallback() {
@@ -585,9 +587,9 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _onTapCompleted();
   }
 
-  void _onTapDown(TapDownDetails details) => _handleOpenIntent();
+  void _onTapDown(TapDownDetails details) => _performOpenMenu(fromTap: true);
 
-  void _handleOpenIntent([Intent? intent]) {
+  void _performOpenMenu({required bool fromTap}) {
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     _openController.addListener(_listenerCallback);
     setState(() {
@@ -626,7 +628,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       },
     );
     Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
-    _openController.forward(from: intent is _ContextMenuIntent ? 1.0 : null);
+    _openController.forward(from: !fromTap ? 1.0 : null);
   }
 
   void _onShowFocusHighlight(bool showHighlight) {
