@@ -240,8 +240,8 @@ class UpgradeCommandRunner {
     );
     await attemptReset(upstreamVersion.frameworkRevision);
 
-    // Regenerate the version file based on the latest branch state.
-    upstreamVersion.updateVersionFile();
+    // Regenerate the version file based on the latest branch state during the second half.
+    flutterVersion.deleteVersionFile();
 
     if (!testFlow) {
       await flutterUpgradeContinue(startedAt: startedAt);

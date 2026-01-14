@@ -412,8 +412,11 @@ class FakeFlutterVersion implements FlutterVersion {
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   var _didFetchTagsAndUpdate = false;
 
-  bool get didUpdateVersionFile => _didUpdateVersionFile;
-  var _didUpdateVersionFile = false;
+  bool get didEnsureVersionFile => _didEnsureVersionFile;
+  var _didEnsureVersionFile = false;
+
+  bool get didDeleteVersionFile => _didDeleteVersionFile;
+  var _didDeleteVersionFile = false;
 
   /// Will be returned by [fetchTagsAndGetVersion] if not null.
   final FlutterVersion? nextFlutterVersion;
@@ -486,7 +489,14 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  Future<void> ensureVersionFile() async {}
+  Future<void> ensureVersionFile() async {
+    _didEnsureVersionFile = true;
+  }
+
+  @override
+  void deleteVersionFile() {
+    _didDeleteVersionFile = true;
+  }
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -513,11 +523,6 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String? engineContentHash;
-
-  @override
-  void updateVersionFile() {
-    _didUpdateVersionFile = true;
-  }
 }
 
 // A test implementation of [FeatureFlags] that allows enabling without reading
