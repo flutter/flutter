@@ -57,7 +57,7 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      RadioGroup(
+                      RadioGroup<UnfocusDisposition>(
                         groupValue: disposition,
                         onChanged: (UnfocusDisposition? value) {
                           setState(() {
@@ -66,7 +66,9 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                             }
                           });
                         },
-                        child: Radio(value: UnfocusDisposition.values[index]),
+                        child: Radio<UnfocusDisposition>(
+                          value: UnfocusDisposition.values[index],
+                        ),
                       ),
                       Text(UnfocusDisposition.values[index].name),
                     ],
