@@ -10,7 +10,6 @@ void main() {
     // Regression test for: https://github.com/flutter/flutter/issues/169214
     // Tests that RenderAligningShiftedBox properly implements computeDryBaseline
     // by using a widget tree that previously caused crashes before the implementation
-    print('before pump');
     testWidgets(
       'DropdownButtonFormField in Wrap in AlertDialog should not crash due to missing computeDryBaseline',
       (WidgetTester tester) async {
@@ -79,38 +78,38 @@ void main() {
           ),
         );
 
-        // // Verify the button is present
-        // expect(find.byKey(const Key('show_dialog_button')), findsOneWidget);
+        // Verify the button is present
+        expect(find.byKey(const Key('show_dialog_button')), findsOneWidget);
 
-        // // Tap the button to show the dialog
-        // await tester.tap(find.byKey(const Key('show_dialog_button')));
-        // await tester.pumpAndSettle();
+        // Tap the button to show the dialog
+        await tester.tap(find.byKey(const Key('show_dialog_button')));
+        await tester.pumpAndSettle();
 
-        // // Verify the dialog is shown
-        // expect(find.byType(AlertDialog), findsOneWidget);
-        // expect(find.text('Alert Dialog'), findsOneWidget);
+        // Verify the dialog is shown
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.text('Alert Dialog'), findsOneWidget);
 
-        // // Find the dropdown button
-        // final Finder dropdownButton = find.byKey(const Key('dropdown_button'));
-        // expect(dropdownButton, findsOneWidget);
+        // Find the dropdown button
+        final Finder dropdownButton = find.byKey(const Key('dropdown_button'));
+        expect(dropdownButton, findsOneWidget);
 
-        // // This is the critical test: tapping the dropdown should not crash
-        // // Before the computeDryBaseline implementation in RenderAligningShiftedBox,
-        // // this would throw an exception during baseline calculations
-        // await tester.tap(dropdownButton);
-        // await tester.pumpAndSettle();
+        // This is the critical test: tapping the dropdown should not crash
+        // Before the computeDryBaseline implementation in RenderAligningShiftedBox,
+        // this would throw an exception during baseline calculations
+        await tester.tap(dropdownButton);
+        await tester.pumpAndSettle();
 
-        // // Verify the dropdown menu is opened without crashing
-        // expect(find.text('Option 1'), findsOneWidget);
-        // expect(find.text('Option 2'), findsOneWidget);
-        // expect(find.text('Option 3'), findsOneWidget);
+        // Verify the dropdown menu is opened without crashing
+        expect(find.text('Option 1'), findsOneWidget);
+        expect(find.text('Option 2'), findsOneWidget);
+        expect(find.text('Option 3'), findsOneWidget);
 
-        // // Test selecting an option to ensure full functionality
-        // await tester.tap(find.text('Option 2'));
-        // await tester.pumpAndSettle();
+        // Test selecting an option to ensure full functionality
+        await tester.tap(find.text('Option 2'));
+        await tester.pumpAndSettle();
 
-        // // Verify the dropdown closed and option was selected
-        // expect(selectedValue, equals('option2'));
+        // Verify the dropdown closed and option was selected
+        expect(selectedValue, equals('option2'));
       },
     );
   });

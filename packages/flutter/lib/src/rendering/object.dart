@@ -2569,7 +2569,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsLayout = true;
-    if (owner case final PipelineOwner owner when (_isRelayoutBoundary ?? false)) {
+    if (owner case final PipelineOwner owner? when (_isRelayoutBoundary ?? false)) {
       assert(() {
         if (debugPrintMarkNeedsLayoutStacks) {
           debugPrintStack(label: 'markNeedsLayout() called for $this');
