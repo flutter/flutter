@@ -891,7 +891,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       uint32_t total_length = stride * count;
 
       result.emplace_back(StructMember{
-          /*p_type=*/"Point",
+          /*p_type=*/"Mat2",
           /*p_base_type=*/spirv_cross::SPIRType::BaseType::Float,
           /*p_name=*/GetMemberNameAtIndex(struct_type, i),
           /*p_offset=*/struct_member_offset,

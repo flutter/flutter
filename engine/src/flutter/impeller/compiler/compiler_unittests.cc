@@ -431,8 +431,8 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
 
   nlohmann::json::value_type mat2Member = members[0];
 
-  // Should be Point (vec2)
-  EXPECT_EQ(mat2Member["type"], "Point");
+  // Should be Mat2 (vec2)
+  EXPECT_EQ(mat2Member["type"], "Mat2");
 
   // Size 8 bytes (vec2)
   EXPECT_EQ(mat2Member["size"], 8u);
