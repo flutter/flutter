@@ -12,7 +12,7 @@ void main() {
   testWidgets('RawTooltip is visible when tapping button', (
     WidgetTester tester,
   ) async {
-    const String rawTooltipText = 'I am a RawToolTip message';
+    const String rawTooltipText = 'I am a RawTooltip message';
 
     await tester.pumpWidget(const example.RawTooltipExampleApp());
 
@@ -31,7 +31,7 @@ void main() {
   testWidgets('RawTooltip text appears when hovering over the container', (
     WidgetTester tester,
   ) async {
-    const String rawTooltipText = 'I am a RawToolTip message';
+    const String rawTooltipText = 'I am a RawTooltip message';
 
     await tester.pumpWidget(const example.RawTooltipExampleApp());
 

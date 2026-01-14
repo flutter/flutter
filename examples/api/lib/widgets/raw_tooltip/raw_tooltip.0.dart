@@ -38,13 +38,33 @@ class RawTooltipSample extends StatelessWidget {
           key: rawTooltipKey,
           semanticsTooltip: 'I am a RawTooltip message',
           triggerMode: TooltipTriggerMode.manual,
+          positionDelegate: (TooltipPositionContext context) {
+            // Use the context information to position the tooltip to the right of
+            // the target.
+            return Offset(
+              context.target.dx + context.targetSize.width / 2,
+              context.target.dy - context.tooltipSize.height / 2,
+            );
+          },
           tooltipBuilder: (BuildContext context, Animation<double> animation) {
             return FadeTransition(
               opacity: animation,
               child: Text('I am a RawTooltip message'),
             );
           },
-          child: Container(color: Colors.blue, height: 100, width: 200),
+          child: Container(
+            height: 100,
+            width: 200,
+            color: Colors.blue,
+            padding: const EdgeInsets.all(8),
+            alignment: Alignment.center,
+            child: const Text(
+              'Hover to always show the tooltip.\n'
+              'Press the FAB to show it manually.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
