@@ -21,7 +21,7 @@ import 'theme_data.dart';
 /// Defines default property values for descendant [Radio] widgets.
 ///
 /// Descendant widgets obtain the current [RadioThemeData] object using
-/// `RadioTheme.of(context)`. Instances of [RadioThemeData] can be customized
+/// [RadioTheme.of]. Instances of [RadioThemeData] can be customized
 /// with [RadioThemeData.copyWith].
 ///
 /// Typically a [RadioThemeData] is specified as part of the overall [Theme]

@@ -729,7 +729,7 @@ class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> 
   MyFakeStreamSubscription(this.parent);
 
   StreamSubscription<T> parent;
-  var canceled = false;
+  bool canceled = false;
 
   @override
   Future<void> cancel() {

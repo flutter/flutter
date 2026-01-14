@@ -24,13 +24,6 @@ const int kMaxSemanticsActivationAttempts = 20;
 /// Otherwise these events can cause unintended gestures on the framework side.
 const Duration _periodToConsumeEvents = Duration(milliseconds: 300);
 
-/// The message in the label for the placeholder element used to enable
-/// accessibility.
-///
-/// This uses US English as the default message. Set this value prior to
-/// calling `runApp` to translate to another language.
-String placeholderMessage = 'Enable accessibility';
-
 /// A helper for [EngineSemanticsOwner].
 ///
 /// [SemanticsHelper] prepares and placeholder to enable semantics.
@@ -56,8 +49,10 @@ class SemanticsHelper {
     return _semanticsEnabler.shouldEnableSemantics(event);
   }
 
-  DomElement prepareAccessibilityPlaceholder() {
-    return _semanticsEnabler.prepareAccessibilityPlaceholder();
+  DomElement get accessibilityPlaceholder => _semanticsEnabler.accessibilityPlaceholder;
+
+  void updatePlaceholderLabel(String message) {
+    _semanticsEnabler.updatePlaceholderLabel(message);
   }
 
   /// Stops waiting for the user to enable semantics and removes the
@@ -103,13 +98,16 @@ abstract class SemanticsEnabler {
   /// should be forwarded to the framework.
   bool tryEnableSemantics(DomEvent event);
 
-  /// Creates the placeholder for accessibility.
-  ///
-  /// Puts it inside the glasspane.
+  /// The placeholder element for enabling accessibility.
   ///
   /// On focus the element announces that accessibility can be enabled by
   /// tapping/clicking. (Announcement depends on the assistive technology)
-  DomElement prepareAccessibilityPlaceholder();
+  late final DomElement accessibilityPlaceholder = _prepareAccessibilityPlaceholder();
+
+  DomElement _prepareAccessibilityPlaceholder();
+
+  /// Updates the placeholder's label to the given [message].
+  void updatePlaceholderLabel(String message);
 
   /// Whether platform is still considering enabling semantics.
   ///
@@ -155,7 +153,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     // In touch screen laptops, the touch is received as a mouse click
-    const Set<String> kInterestingEventTypes = <String>{
+    const kInterestingEventTypes = <String>{
       'click',
       'keyup',
       'keydown',
@@ -171,7 +169,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     // Check for the event target.
-    final bool enableConditionPassed = event.target == _semanticsPlaceholder;
+    final enableConditionPassed = event.target == _semanticsPlaceholder;
 
     if (!enableConditionPassed) {
       // This was not a semantics activating event; forward as normal.
@@ -184,7 +182,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  DomElement prepareAccessibilityPlaceholder() {
+  DomElement _prepareAccessibilityPlaceholder() {
     final DomElement placeholder = _semanticsPlaceholder = createDomElement(
       'flt-semantics-placeholder',
     );
@@ -207,8 +205,9 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     placeholder
       ..setAttribute('role', 'button')
       ..setAttribute('aria-live', 'polite')
-      ..setAttribute('tabindex', '0')
-      ..setAttribute('aria-label', placeholderMessage);
+      ..setAttribute('tabindex', '0');
+
+    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
 
     // The placeholder sits just outside the window so only AT can reach it.
     placeholder.style
@@ -218,6 +217,11 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       ..width = '1px'
       ..height = '1px';
     return placeholder;
+  }
+
+  @override
+  void updatePlaceholderLabel(String message) {
+    _semanticsPlaceholder?.setAttribute('aria-label', message);
   }
 
   @override
@@ -301,7 +305,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // ios-safari browsers which starts sending `pointer` events instead of
     // `touch` events. (Tested with 12.1 which uses touch events vs 13.5
     // which uses pointer events.)
-    const Set<String> kInterestingEventTypes = <String>{
+    const kInterestingEventTypes = <String>{
       'click',
       'touchstart',
       'touchend',
@@ -336,20 +340,20 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     // than normal, but the app will continue functioning as normal. Our
     // semantics tree is designed to not interfere with Flutter's gesture
     // detection.
-    bool enableConditionPassed = false;
+    var enableConditionPassed = false;
     late final DomPoint activationPoint;
 
     switch (event.type) {
       case 'click':
-        final DomMouseEvent click = event as DomMouseEvent;
+        final click = event as DomMouseEvent;
         activationPoint = click.offset;
       case 'touchstart':
       case 'touchend':
-        final DomTouchEvent touchEvent = event as DomTouchEvent;
+        final touchEvent = event as DomTouchEvent;
         activationPoint = touchEvent.changedTouches.first.client;
       case 'pointerdown':
       case 'pointerup':
-        final DomPointerEvent touch = event as DomPointerEvent;
+        final touch = event as DomPointerEvent;
         activationPoint = touch.client;
       default:
         // The event is not relevant, forward to framework as normal.
@@ -383,7 +387,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   }
 
   @override
-  DomElement prepareAccessibilityPlaceholder() {
+  DomElement _prepareAccessibilityPlaceholder() {
     final DomElement placeholder = _semanticsPlaceholder = createDomElement(
       'flt-semantics-placeholder',
     );
@@ -398,9 +402,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       true.toJS,
     );
 
-    placeholder
-      ..setAttribute('role', 'button')
-      ..setAttribute('aria-label', placeholderMessage);
+    placeholder.setAttribute('role', 'button');
+    updatePlaceholderLabel(ui_web.accessibilityPlaceholderMessage);
     placeholder.style
       ..position = 'absolute'
       ..left = '0'
@@ -409,6 +412,11 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       ..bottom = '0';
 
     return placeholder;
+  }
+
+  @override
+  void updatePlaceholderLabel(String message) {
+    _semanticsPlaceholder?.setAttribute('aria-label', message);
   }
 
   @override

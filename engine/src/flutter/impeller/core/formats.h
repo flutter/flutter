@@ -110,6 +110,7 @@ enum class PixelFormat : uint8_t {
   kB10G10R10XR,
   kB10G10R10XRSRGB,
   kB10G10R10A10XR,
+  kR32Float,
   // Depth and stencil formats.
   kS8UInt,
   kD24UnormS8Uint,
@@ -171,6 +172,8 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "D24UnormS8Uint";
     case PixelFormat::kD32FloatS8UInt:
       return "D32FloatS8UInt";
+    case PixelFormat::kR32Float:
+      return "R32Float";
   }
   FML_UNREACHABLE();
 }
@@ -479,6 +482,7 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kB8G8R8A8UNormIntSRGB:
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
+    case PixelFormat::kR32Float:
       return 4u;
     case PixelFormat::kD24UnormS8Uint:
       return 4u;

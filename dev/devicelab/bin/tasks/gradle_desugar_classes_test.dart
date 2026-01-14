@@ -21,7 +21,7 @@ Future<void> main() async {
             'build',
             options: <String>['apk', '--debug', '--target-platform=android-arm64'],
           );
-          final File apk = File(
+          final apk = File(
             '${flutterProject.rootPath}/build/app/outputs/flutter-apk/app-debug.apk',
           );
           if (!apk.existsSync()) {

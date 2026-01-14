@@ -139,7 +139,7 @@ class UpgradeCommandRunner {
   String? workingDirectory; // set in runCommand() above
 
   @visibleForTesting
-  var clock = const SystemClock();
+  SystemClock clock = const SystemClock();
 
   Future<FlutterCommandResult> runCommand(
     UpgradePhase phase, {

@@ -30,7 +30,7 @@ class KeyCodesJavaGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _physicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>('Physical Key list');
+    final lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(
         entry.usbHidCode,
@@ -43,10 +43,7 @@ class KeyCodesJavaGenerator extends BaseCodeGenerator {
 
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get _logicalDefinitions {
-    final OutputLines<int> lines = OutputLines<int>(
-      'Logical Key list',
-      behavior: DeduplicateBehavior.kSkip,
-    );
+    final lines = OutputLines<int>('Logical Key list', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(
         entry.value,

@@ -27,14 +27,14 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
         ? endpoints[1]
         : endpoints[0];
-    final Offset anchorAbove = Offset(
+    final anchorAbove = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
       globalEditableRegion.top +
           startTextSelectionPoint.point.dy -
           textLineHeight -
           _kToolbarContentDistance,
     );
-    final Offset anchorBelow = Offset(
+    final anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
       globalEditableRegion.top +
           endTextSelectionPoint.point.dy +
@@ -82,7 +82,7 @@ void main() {
 
   testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final children = List<Widget>.generate(7, (int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -128,9 +128,9 @@ void main() {
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 44.0;
-    const double anchorBelowY = 500.0;
-    double anchorAboveY = 0.0;
+    const height = 44.0;
+    const anchorBelowY = 500.0;
+    var anchorAboveY = 0.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -207,10 +207,7 @@ void main() {
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
 
-  for (final ColorScheme colorScheme in <ColorScheme>[
-    ThemeData().colorScheme,
-    ThemeData.dark().colorScheme,
-  ]) {
+  for (final colorScheme in <ColorScheme>[ThemeData().colorScheme, ThemeData.dark().colorScheme]) {
     testWidgets('default background color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -299,7 +296,7 @@ void main() {
   testWidgets('Overflowed menu expands children horizontally', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/144089.
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final children = List<Widget>.generate(7, (int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -322,9 +319,9 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(children.length));
     expect(findOverflowButton(), findsNothing);
 
-    const String short = 'Short';
-    const String medium = 'Medium length';
-    const String long = 'Long label in the overflow menu';
+    const short = 'Short';
+    const medium = 'Medium length';
+    const long = 'Long label in the overflow menu';
 
     // Adding several children makes the menu overflow.
     setState(() {
@@ -356,8 +353,8 @@ void main() {
   });
 
   testWidgets('items are ordered right-to-left in RTL', (WidgetTester tester) async {
-    const int itemCount = 3;
-    final List<Widget> children = List<Widget>.generate(
+    const itemCount = 3;
+    final children = List<Widget>.generate(
       itemCount,
       (int i) => TestBox(key: ValueKey<String>('item_$i'), child: Text('$i')),
     );
@@ -381,14 +378,11 @@ void main() {
     expect(find.byType(TestBox), findsNWidgets(itemCount));
 
     // Find all text widgets by their content and get their positions.
-    final List<Rect> textRects = List<Rect>.generate(
-      itemCount,
-      (int i) => tester.getRect(find.text('$i')),
-    );
+    final textRects = List<Rect>.generate(itemCount, (int i) => tester.getRect(find.text('$i')));
 
     // In RTL, items should be in reverse order (2, 1, 0).
     // So item 2 should be leftmost, then 1, then 0.
-    for (int i = 0; i < itemCount - 1; i++) {
+    for (var i = 0; i < itemCount - 1; i++) {
       final Rect current = textRects[i];
       final Rect next = textRects[i + 1];
 
@@ -402,7 +396,7 @@ void main() {
 
     // Verify the visual order by checking the rightmost position.
     final List<double> rightEdges = textRects.map((Rect r) => r.right).toList();
-    final List<double> sortedRightEdges = List<double>.from(rightEdges)
+    final sortedRightEdges = List<double>.from(rightEdges)
       ..sort((double a, double b) => b.compareTo(a));
     expect(
       rightEdges,
@@ -415,7 +409,7 @@ void main() {
     WidgetTester tester,
   ) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final children = List<Widget>.generate(7, (int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(

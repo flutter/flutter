@@ -122,30 +122,23 @@ class MobileAsymmetricView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: PageStatus.of(context)!.cartController,
-      builder:
-          (BuildContext context, Widget? child) => AnimatedBuilder(
-            animation: PageStatus.of(context)!.menuController,
-            builder:
-                (BuildContext context, Widget? child) => ExcludeSemantics(
-                  excluding: !productPageIsVisible(context),
-                  child: LayoutBuilder(
-                    builder: (BuildContext context, BoxConstraints constraints) {
-                      return ListView(
-                        restorationId: 'product_page_list_view',
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                          0,
-                          _topPadding,
-                          16,
-                          _bottomPadding,
-                        ),
-                        physics: const BouncingScrollPhysics(),
-                        children: _buildColumns(context, constraints),
-                      );
-                    },
-                  ),
-                ),
+      builder: (BuildContext context, Widget? child) => AnimatedBuilder(
+        animation: PageStatus.of(context)!.menuController,
+        builder: (BuildContext context, Widget? child) => ExcludeSemantics(
+          excluding: !productPageIsVisible(context),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return ListView(
+                restorationId: 'product_page_list_view',
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsetsDirectional.fromSTEB(0, _topPadding, 16, _bottomPadding),
+                physics: const BouncingScrollPhysics(),
+                children: _buildColumns(context, constraints),
+              );
+            },
           ),
+        ),
+      ),
     );
   }
 }
@@ -183,25 +176,23 @@ class DesktopAsymmetricView extends StatelessWidget {
     );
 
     // Limit column width to fit within window when there is only one column.
-    final double actualColumnWidth =
-        idealColumnCount == 1
-            ? min(columnWidth, windowWidth - sidebar - 2 * minimumBoundaryWidth)
-            : columnWidth;
+    final double actualColumnWidth = idealColumnCount == 1
+        ? min(columnWidth, windowWidth - sidebar - 2 * minimumBoundaryWidth)
+        : columnWidth;
 
     final int columnCount = min(idealColumnCount, max(products.length, 1));
 
     return AnimatedBuilder(
       animation: PageStatus.of(context)!.cartController,
-      builder:
-          (BuildContext context, Widget? child) => ExcludeSemantics(
-            excluding: !productPageIsVisible(context),
-            child: DesktopColumns(
-              columnCount: columnCount,
-              products: products,
-              largeImageWidth: actualColumnWidth,
-              smallImageWidth: columnCount > 1 ? columnWidth - columnGapWidth : actualColumnWidth,
-            ),
-          ),
+      builder: (BuildContext context, Widget? child) => ExcludeSemantics(
+        excluding: !productPageIsVisible(context),
+        child: DesktopColumns(
+          columnCount: columnCount,
+          products: products,
+          largeImageWidth: actualColumnWidth,
+          smallImageWidth: columnCount > 1 ? columnWidth - columnGapWidth : actualColumnWidth,
+        ),
+      ),
     );
   }
 }
@@ -232,20 +223,19 @@ class DesktopColumns extends StatelessWidget {
       smallImageWidth: smallImageWidth,
     );
 
-    final List<DesktopProductCardColumn> productCardColumns =
-        List<DesktopProductCardColumn>.generate(columnCount, (int column) {
-          final bool alignToEnd = column.isOdd || (column == columnCount - 1);
-          final bool startLarge = column.isOdd;
-          final bool lowerStart = column.isOdd;
-          return DesktopProductCardColumn(
-            alignToEnd: alignToEnd,
-            startLarge: startLarge,
-            lowerStart: lowerStart,
-            products: productCardLists[column],
-            largeImageWidth: largeImageWidth,
-            smallImageWidth: smallImageWidth,
-          );
-        });
+    final productCardColumns = List<DesktopProductCardColumn>.generate(columnCount, (int column) {
+      final bool alignToEnd = column.isOdd || (column == columnCount - 1);
+      final bool startLarge = column.isOdd;
+      final bool lowerStart = column.isOdd;
+      return DesktopProductCardColumn(
+        alignToEnd: alignToEnd,
+        startLarge: startLarge,
+        lowerStart: lowerStart,
+        products: productCardLists[column],
+        largeImageWidth: largeImageWidth,
+        smallImageWidth: smallImageWidth,
+      );
+    });
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),

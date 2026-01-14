@@ -129,11 +129,11 @@ class InlineSpanSemanticsInformation {
 List<InlineSpanSemanticsInformation> combineSemanticsInfo(
   List<InlineSpanSemanticsInformation> infoList,
 ) {
-  final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
-  String workingText = '';
-  String workingLabel = '';
-  List<ui.StringAttribute> workingAttributes = <ui.StringAttribute>[];
-  for (final InlineSpanSemanticsInformation info in infoList) {
+  final combined = <InlineSpanSemanticsInformation>[];
+  var workingText = '';
+  var workingLabel = '';
+  var workingAttributes = <ui.StringAttribute>[];
+  for (final info in infoList) {
     if (info.requiresOwnNode) {
       combined.add(
         InlineSpanSemanticsInformation(
@@ -277,7 +277,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Returns the [InlineSpan] that contains the given position in the text.
   InlineSpan? getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
-    final Accumulator offset = Accumulator();
+    final offset = Accumulator();
     InlineSpan? result;
     visitChildren((InlineSpan span) {
       result = span.getSpanForPositionVisitor(position, offset);
@@ -306,7 +306,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     computeToPlainText(
       buffer,
       includeSemanticsLabels: includeSemanticsLabels,
@@ -321,7 +321,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// [PlaceholderSpan]s in the tree will be represented with a
   /// [InlineSpanSemanticsInformation.placeholder] value.
   List<InlineSpanSemanticsInformation> getSemanticsInformation() {
-    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    final collector = <InlineSpanSemanticsInformation>[];
     computeSemanticsInformation(collector);
     return collector;
   }
@@ -367,7 +367,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (index < 0) {
       return null;
     }
-    final Accumulator offset = Accumulator();
+    final offset = Accumulator();
     int? result;
     visitChildren((InlineSpan span) {
       result = span.codeUnitAtVisitor(index, offset);

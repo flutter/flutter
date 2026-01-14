@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -31,12 +32,12 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-  FakeXcodeProjectInterpreterWithBuildSettings({
-    this.overrides = const <String, String>{},
-    Version? version,
-  }) : version = version ?? Version(14, 0, 0);
+  FakeXcodeProjectInterpreterWithBuildSettings({Map<String, String>? overrides, Version? version})
+    : _overrides = overrides ?? const <String, String>{},
+      version = version ?? Version(14, 0, 0);
 
-  final Map<String, String> overrides;
+  final Map<String, String> _overrides;
+  Map<String, String> get overrides => _overrides;
   @override
   Future<Map<String, String>> getBuildSettings(
     String projectPath, {
@@ -44,9 +45,9 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{
-      ...overrides,
       'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
       'DEVELOPMENT_TEAM': 'abc',
+      ...overrides,
     };
   }
 
@@ -109,6 +110,13 @@ void main() {
         .createSync(recursive: true);
     fileSystem
         .file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
+        .createSync();
+    // Create Flutter.xcodeproj directory for IosProject.existsSync() check
+    fileSystem
+        .directory(fileSystem.path.join('ios', 'Flutter', 'Flutter.xcodeproj'))
+        .createSync(recursive: true);
+    fileSystem
+        .file(fileSystem.path.join('ios', 'Flutter', 'Flutter.xcodeproj', 'project.pbxproj'))
         .createSync();
     final packageConfigPath =
         '${Cache.flutterRoot!}/packages/flutter_tools/.dart_tool/package_config.json';
@@ -428,6 +436,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -483,6 +492,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -538,6 +548,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -593,6 +604,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -625,6 +637,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -680,6 +693,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 4, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -712,6 +726,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -753,6 +768,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -811,6 +827,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -846,6 +863,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -904,6 +922,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -964,6 +983,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1024,6 +1044,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1054,6 +1075,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1085,6 +1107,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1145,6 +1168,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1174,6 +1198,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1235,6 +1260,7 @@ void main() {
       FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       Analytics: () => fakeAnalytics,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1281,6 +1307,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1321,6 +1348,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1365,6 +1393,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1417,6 +1446,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1454,6 +1484,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1509,6 +1540,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1567,6 +1599,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1630,6 +1663,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1692,6 +1726,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1740,6 +1775,7 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1790,6 +1826,7 @@ void main() {
       Pub: ThrowingPub.new,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1882,6 +1919,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -1974,6 +2012,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2048,6 +2087,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2122,6 +2162,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2196,6 +2237,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2272,6 +2314,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2392,6 +2435,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2482,6 +2526,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -2574,6 +2619,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 }

@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 /// Matches a thrown [FatalError].
-final throwsFatalError = throwsA(isA<FatalError>());
+final Matcher throwsFatalError = throwsA(isA<FatalError>());
 
 /// Returns a matcher that matches a [LogRecord] with a [message].
 ///

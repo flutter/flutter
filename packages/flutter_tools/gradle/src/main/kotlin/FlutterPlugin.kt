@@ -166,13 +166,15 @@ class FlutterPlugin : Plugin<Project> {
             //
             // If the user has specified abiFilters in their build.gradle file, those
             // settings will take precedence over these defaults.
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                    val abiValue: String =
-                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                            ?: throw GradleException("Invalid platform: $platform")
-                    buildType.ndk.abiFilters.add(abiValue)
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
+                FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                    buildType.ndk.abiFilters.clear()
+                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
+                        val abiValue: String =
+                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                                ?: throw GradleException("Invalid platform: $platform")
+                        buildType.ndk.abiFilters.add(abiValue)
+                    }
                 }
             }
         }
@@ -263,15 +265,18 @@ class FlutterPlugin : Plugin<Project> {
                     // Enables resource shrinking, which is performed by the Android Gradle plugin.
                     // The resource shrinker can't be used for libraries.
                     isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-                    // Fallback to `android/app/proguard-rules.pro`.
-                    // This way, custom Proguard rules can be configured as needed.
                     proguardFiles(
                         FlutterPluginUtils
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules,
-                        "proguard-rules.pro"
+                        flutterProguardRules
                     )
+
+                    // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
+                    // Starting AGP 9.0 Proguard files must exist to be added to the configuration.
+                    if (File("${project.projectDir}/proguard-rules.pro").exists()) {
+                        proguardFile("proguard-rules.pro")
+                    }
                 }
             }
         }

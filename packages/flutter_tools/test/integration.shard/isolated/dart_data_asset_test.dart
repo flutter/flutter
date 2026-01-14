@@ -97,7 +97,10 @@ void main() {
               '-d',
               device,
               '--$mode',
-              if (device == 'chrome') '--no-web-resources-cdn',
+              if (device == 'chrome') ...[
+                '--no-web-resources-cdn',
+                '--web-browser-flag=--no-sandbox',
+              ],
             ],
             root.path,
             <Transition>[

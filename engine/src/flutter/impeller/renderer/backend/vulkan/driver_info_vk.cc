@@ -361,7 +361,11 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // Fall back to OpenGL ES on older Adreno devices that require additional
   // workarounds in the Impeller Vulkan back end such as disabling framebuffer
   // fetch.
-  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno630) {
+  //
+  // See the following issues:
+  // https://github.com/flutter/flutter/issues/178285
+  // https://github.com/flutter/flutter/issues/178498
+  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno650) {
     return true;
   }
 

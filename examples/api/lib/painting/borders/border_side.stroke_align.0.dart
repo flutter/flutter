@@ -17,33 +17,8 @@ class StrokeAlignApp extends StatelessWidget {
   }
 }
 
-class StrokeAlignExample extends StatefulWidget {
+class StrokeAlignExample extends StatelessWidget {
   const StrokeAlignExample({super.key});
-
-  @override
-  State<StrokeAlignExample> createState() => _StrokeAlignExampleState();
-}
-
-class _StrokeAlignExampleState extends State<StrokeAlignExample> with TickerProviderStateMixin {
-  late final AnimationController animation;
-
-  @override
-  void initState() {
-    super.initState();
-    animation = AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    animation.repeat(reverse: true);
-    animation.addListener(_markDirty);
-  }
-
-  @override
-  void dispose() {
-    animation.dispose();
-    super.dispose();
-  }
-
-  void _markDirty() {
-    setState(() {});
-  }
 
   static const double borderWidth = 10;
   static const double cornerRadius = 10;
@@ -53,127 +28,134 @@ class _StrokeAlignExampleState extends State<StrokeAlignExample> with TickerProv
   Widget build(BuildContext context) {
     return Material(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            BorderedBox(
-              shape: StadiumBorder(
-                side: BorderSide(
-                  color: borderColor,
-                  width: borderWidth,
-                  strokeAlign: (animation.value * 2) - 1,
-                ),
-              ),
-            ),
-            Row(
+        child: RepeatingAnimationBuilder<double>(
+          animatable: Tween<double>(begin: -1.0, end: 1.0),
+          duration: const Duration(seconds: 1),
+          repeatMode: RepeatMode.reverse,
+          builder: (BuildContext context, double strokeAlign, Widget? child) {
+            return Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 BorderedBox(
-                  shape: CircleBorder(
+                  shape: StadiumBorder(
                     side: BorderSide(
                       color: borderColor,
                       width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
+                      strokeAlign: strokeAlign,
                     ),
                   ),
                 ),
-                BorderedBox(
-                  shape: OvalBorder(
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    BorderedBox(
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
                     ),
-                  ),
+                    BorderedBox(
+                      shape: OvalBorder(
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    BorderedBox(
+                      shape: BeveledRectangleBorder(
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                    BorderedBox(
+                      shape: BeveledRectangleBorder(
+                        borderRadius: BorderRadius.circular(cornerRadius),
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    BorderedBox(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                    BorderedBox(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cornerRadius),
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    BorderedBox(
+                      shape: StarBorder(
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                    BorderedBox(
+                      shape: StarBorder(
+                        pointRounding: 1,
+                        innerRadiusRatio: 0.5,
+                        points: 8,
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                    BorderedBox(
+                      shape: StarBorder.polygon(
+                        sides: 6,
+                        pointRounding: 0.5,
+                        side: BorderSide(
+                          color: borderColor,
+                          width: borderWidth,
+                          strokeAlign: strokeAlign,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                BorderedBox(
-                  shape: BeveledRectangleBorder(
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-                BorderedBox(
-                  shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.circular(cornerRadius),
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                BorderedBox(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-                BorderedBox(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(cornerRadius),
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                BorderedBox(
-                  shape: StarBorder(
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-                BorderedBox(
-                  shape: StarBorder(
-                    pointRounding: 1,
-                    innerRadiusRatio: 0.5,
-                    points: 8,
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-                BorderedBox(
-                  shape: StarBorder.polygon(
-                    sides: 6,
-                    pointRounding: 0.5,
-                    side: BorderSide(
-                      color: borderColor,
-                      width: borderWidth,
-                      strokeAlign: (animation.value * 2) - 1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

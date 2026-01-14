@@ -6,11 +6,13 @@
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
 #include "fml/mapping.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
+
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif

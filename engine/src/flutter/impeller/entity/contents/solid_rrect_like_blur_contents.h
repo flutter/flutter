@@ -15,9 +15,19 @@
 
 namespace impeller {
 
+/// @brief  A base class for any accelerated single color blur Contents
+///         that lets the |Canvas::AttemptDrawBlur| call deliver the
+///         color after the contents has been constructed and the method
+///         has a chance to re-consider the actual color that will be
+///         used to render the shadow.
+class SolidBlurContents : public Contents {
+ public:
+  virtual void SetColor(Color color) = 0;
+};
+
 /// @brief  A base class for SolidRRectBlurContents and
 /// SolidRSuperellipseBlurContents.
-class SolidRRectLikeBlurContents : public Contents {
+class SolidRRectLikeBlurContents : public SolidBlurContents {
  public:
   ~SolidRRectLikeBlurContents() override;
 
@@ -25,7 +35,8 @@ class SolidRRectLikeBlurContents : public Contents {
 
   void SetSigma(Sigma sigma);
 
-  void SetColor(Color color);
+  // |SolidBlurContents|
+  void SetColor(Color color) override;
 
   Color GetColor() const;
 

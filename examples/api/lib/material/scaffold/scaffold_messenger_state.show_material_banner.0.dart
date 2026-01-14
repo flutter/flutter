@@ -32,7 +32,9 @@ class ShowMaterialBannerExample extends StatelessWidget {
         ScaffoldMessenger.of(context).showMaterialBanner(
           const MaterialBanner(
             content: Text('This is a MaterialBanner'),
-            actions: <Widget>[TextButton(onPressed: null, child: Text('DISMISS'))],
+            actions: <Widget>[
+              TextButton(onPressed: null, child: Text('DISMISS')),
+            ],
           ),
         );
       },

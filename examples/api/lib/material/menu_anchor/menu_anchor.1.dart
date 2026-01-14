@@ -16,12 +16,27 @@ void main() => runApp(const ContextMenuApp());
 /// they could be used for simple menu systems.
 enum MenuEntry {
   about('About'),
-  showMessage('Show Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  hideMessage('Hide Message', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
+  showMessage(
+    'Show Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
+  hideMessage(
+    'Hide Message',
+    SingleActivator(LogicalKeyboardKey.keyS, control: true),
+  ),
   colorMenu('Color Menu'),
-  colorRed('Red Background', SingleActivator(LogicalKeyboardKey.keyR, control: true)),
-  colorGreen('Green Background', SingleActivator(LogicalKeyboardKey.keyG, control: true)),
-  colorBlue('Blue Background', SingleActivator(LogicalKeyboardKey.keyB, control: true));
+  colorRed(
+    'Red Background',
+    SingleActivator(LogicalKeyboardKey.keyR, control: true),
+  ),
+  colorGreen(
+    'Green Background',
+    SingleActivator(LogicalKeyboardKey.keyG, control: true),
+  ),
+  colorBlue(
+    'Blue Background',
+    SingleActivator(LogicalKeyboardKey.keyB, control: true),
+  );
 
   const MenuEntry(this.label, [this.shortcut]);
   final String label;
@@ -79,10 +94,12 @@ class _MyContextMenuState extends State<MyContextMenu> {
     // Collect the shortcuts from the different menu selections so that they can
     // be registered to apply to the entire app. Menus don't register their
     // shortcuts, they only display the shortcut hint text.
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
-      for (final MenuEntry item in MenuEntry.values)
-        if (item.shortcut != null) item.shortcut!: VoidCallbackIntent(() => _activate(item)),
-    };
+    final Map<ShortcutActivator, Intent> shortcuts =
+        <ShortcutActivator, Intent>{
+          for (final MenuEntry item in MenuEntry.values)
+            if (item.shortcut != null)
+              item.shortcut!: VoidCallbackIntent(() => _activate(item)),
+        };
     // Register the shortcuts with the ShortcutRegistry so that they are
     // available to the entire application.
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
@@ -172,7 +189,9 @@ class _MyContextMenuState extends State<MyContextMenu> {
               children: <Widget>[
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Right-click anywhere on the background to show the menu.'),
+                  child: Text(
+                    'Right-click anywhere on the background to show the menu.',
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -181,7 +200,11 @@ class _MyContextMenuState extends State<MyContextMenu> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
-                Text(_lastSelection != null ? 'Last Selected: ${_lastSelection!.label}' : ''),
+                Text(
+                  _lastSelection != null
+                      ? 'Last Selected: ${_lastSelection!.label}'
+                      : '',
+                ),
               ],
             ),
           ),
@@ -236,7 +259,9 @@ class _MyContextMenuState extends State<MyContextMenu> {
       case TargetPlatform.macOS:
         // Only open the menu on these platforms if the control button is down
         // when the tap occurs.
-        if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+        if (HardwareKeyboard.instance.logicalKeysPressed.contains(
+              LogicalKeyboardKey.controlLeft,
+            ) ||
             HardwareKeyboard.instance.logicalKeysPressed.contains(
               LogicalKeyboardKey.controlRight,
             )) {

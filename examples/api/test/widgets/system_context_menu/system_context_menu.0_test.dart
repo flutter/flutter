@@ -20,7 +20,8 @@ void main() {
               data: mediaQueryData.copyWith(
                 // Faking this value, which is usually set to true only on
                 // devices running iOS 16+.
-                supportsShowingSystemContextMenu: defaultTargetPlatform == TargetPlatform.iOS,
+                supportsShowingSystemContextMenu:
+                    defaultTargetPlatform == TargetPlatform.iOS,
               ),
               child: const example.SystemContextMenuExampleApp(),
             );

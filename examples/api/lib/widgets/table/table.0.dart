@@ -51,7 +51,9 @@ class TableExample extends StatelessWidget {
           children: <Widget>[
             Container(height: 64, width: 128, color: Colors.purple),
             Container(height: 32, color: Colors.yellow),
-            Center(child: Container(height: 32, width: 32, color: Colors.orange)),
+            Center(
+              child: Container(height: 32, width: 32, color: Colors.orange),
+            ),
           ],
         ),
       ],

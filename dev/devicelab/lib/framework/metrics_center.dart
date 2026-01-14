@@ -13,7 +13,7 @@ import 'package:metrics_center/metrics_center.dart';
 /// It supports both token and credential authentications.
 Future<FlutterDestination> connectFlutterDestination() async {
   final Map<String, String> env = Platform.environment;
-  final bool isTesting = env['IS_TESTING'] == 'true';
+  final isTesting = env['IS_TESTING'] == 'true';
   if (env case {'TOKEN_PATH': final String path, 'GCP_PROJECT': final String project}) {
     return FlutterDestination.makeFromAccessToken(
       File(path).readAsStringSync(),
@@ -65,9 +65,9 @@ List<MetricPoint> parse(
       resultsJson['ResultData'] as Map<String, dynamic>? ?? const <String, dynamic>{};
   final String gitBranch = (resultsJson['CommitBranch'] as String).trim();
   final String gitSha = (resultsJson['CommitSha'] as String).trim();
-  final List<MetricPoint> metricPoints = <MetricPoint>[];
-  for (final String scoreKey in scoreKeys) {
-    Map<String, String> tags = <String, String>{
+  final metricPoints = <MetricPoint>[];
+  for (final scoreKey in scoreKeys) {
+    var tags = <String, String>{
       kGithubRepoKey: kFlutterFrameworkRepo,
       kGitRevisionKey: gitSha,
       'branch': gitBranch,
@@ -130,10 +130,9 @@ Future<void> uploadToSkiaPerf(
     commitTimeSinceEpoch = DateTime.now().millisecondsSinceEpoch;
   }
   taskName = taskName ?? 'default';
-  final Map<String, dynamic> benchmarkTagsMap =
-      jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
-  final File resultFile = File(resultsPath);
-  Map<String, dynamic> resultsJson = <String, dynamic>{};
+  final benchmarkTagsMap = jsonDecode(benchmarkTags ?? '{}') as Map<String, dynamic>;
+  final resultFile = File(resultsPath);
+  var resultsJson = <String, dynamic>{};
   resultsJson = json.decode(await resultFile.readAsString()) as Map<String, dynamic>;
   final List<MetricPoint> metricPoints = parse(resultsJson, benchmarkTagsMap, taskName);
   final FlutterDestination metricsDestination = await connectFlutterDestination();
@@ -157,7 +156,7 @@ Future<void> uploadToSkiaPerf(
 ///   Old file name: `backdrop_filter_perf__timeline_summary`
 ///   New file name: `backdrop_filter_perf__timeline_summary_intel_linux_motoG4`
 String metricFileName(String taskName, Map<String, dynamic> benchmarkTagsMap) {
-  final StringBuffer fileName = StringBuffer(taskName);
+  final fileName = StringBuffer(taskName);
   if (benchmarkTagsMap.containsKey('arch')) {
     fileName
       ..write('_')

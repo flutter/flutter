@@ -28,7 +28,7 @@ class VertexDescriptor final : public Comparable<VertexDescriptor> {
   VertexDescriptor();
 
   // |Comparable<PipelineVertexDescriptor>|
-  virtual ~VertexDescriptor();
+  ~VertexDescriptor();
 
   template <size_t Size, size_t LayoutSize>
   void SetStageInputs(

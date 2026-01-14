@@ -41,8 +41,8 @@ class FrameRequestPendingLatencySummarizer {
   }
 
   List<double> _computeFrameRequestPendingLatencies() {
-    final List<double> result = <double>[];
-    final Map<String, int> starts = <String, int>{};
+    final result = <double>[];
+    final starts = <String, int>{};
     for (final TimelineEvent event in frameRequestPendingEvents) {
       switch (event) {
         case TimelineEvent(phase: 'b', json: {'id': final String id}):

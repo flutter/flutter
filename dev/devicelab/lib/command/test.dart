@@ -94,7 +94,7 @@ class TestCommand extends Command<void> {
 
   @override
   Future<void> run() async {
-    final List<String> taskArgsRaw = argResults!['task-args'] as List<String>;
+    final taskArgsRaw = argResults!['task-args'] as List<String>;
     // Prepend '--' to convert args to options when passed to task
     final List<String> taskArgs = taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
     print(taskArgs);

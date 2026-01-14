@@ -88,7 +88,7 @@ void main() {
   });
 
   testWidgets('listens to AppLifecycleState', (WidgetTester tester) async {
-    final List<AppLifecycleState> states = <AppLifecycleState>[tester.binding.lifecycleState!];
+    final states = <AppLifecycleState>[tester.binding.lifecycleState!];
     void stateChange(AppLifecycleState state) {
       states.add(state);
     }
@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('Triggers correct state transition callbacks', (WidgetTester tester) async {
-    final List<String> transitions = <String>[];
+    final transitions = <String>[];
     listener = TestAppLifecycleListener(
       binding: WidgetsBinding.instance,
       onDetach: () => transitions.add('detach'),
@@ -189,7 +189,7 @@ void main() {
   });
 
   testWidgets('Receives exit requests', (WidgetTester tester) async {
-    bool exitRequested = false;
+    var exitRequested = false;
     Future<AppExitResponse> handleExitRequested() async {
       exitRequested = true;
       return AppExitResponse.cancel;

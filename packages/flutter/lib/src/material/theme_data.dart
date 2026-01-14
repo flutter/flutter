@@ -433,7 +433,7 @@ class ThemeData with Diagnosticable {
     assert(colorSchemeSeed == null || primaryColor == null);
     final Brightness effectiveBrightness =
         brightness ?? colorScheme?.brightness ?? Brightness.light;
-    final bool isDark = effectiveBrightness == Brightness.dark;
+    final isDark = effectiveBrightness == Brightness.dark;
     if (colorSchemeSeed != null || useMaterial3) {
       if (colorSchemeSeed != null) {
         colorScheme = ColorScheme.fromSeed(
@@ -463,7 +463,7 @@ class ThemeData with Diagnosticable {
     final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
-    final bool primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
+    final primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
     shadowColor ??= Colors.black;
@@ -587,7 +587,7 @@ class ThemeData with Diagnosticable {
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
     indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
 
-    ThemeData theme = ThemeData.raw(
+    var theme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -842,7 +842,7 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     bool? useMaterial3,
   }) {
-    final bool isDark = colorScheme.brightness == Brightness.dark;
+    final isDark = colorScheme.brightness == Brightness.dark;
 
     // For surfaces that use primary color in light themes and surface color in dark
     final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
@@ -897,7 +897,7 @@ class ThemeData with Diagnosticable {
   static Map<Type, Adaptation<Object>> _createAdaptationMap(
     Iterable<Adaptation<Object>> adaptations,
   ) {
-    final Map<Type, Adaptation<Object>> adaptationMap = <Type, Adaptation<Object>>{
+    final adaptationMap = <Type, Adaptation<Object>>{
       for (final Adaptation<Object> adaptation in adaptations) adaptation.type: adaptation,
     };
     return adaptationMap;
@@ -1427,9 +1427,7 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData segmentedButtonTheme;
 
-  /// The colors and shapes used to render [Slider].
-  ///
-  /// This is the value returned from [SliderTheme.of].
+  /// A theme for customizing the appearance and layout of [Slider] widgets.
   final SliderThemeData sliderTheme;
 
   /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
@@ -1445,18 +1443,17 @@ class ThemeData with Diagnosticable {
   /// [TextButton]s.
   final TextButtonThemeData textButtonTheme;
 
-  /// A theme for customizing the appearance and layout of [TextField] widgets.
+  /// A theme for customizing the appearance for text selection in [TextField] and
+  /// [SelectableText] widgets.
   final TextSelectionThemeData textSelectionTheme;
 
   /// A theme for customizing the appearance and layout of time picker widgets.
   final TimePickerThemeData timePickerTheme;
 
-  /// Defines the default configuration of [ToggleButtons] widgets.
+  /// A theme for customizing the appearance and layout of [ToggleButtons] widgets.
   final ToggleButtonsThemeData toggleButtonsTheme;
 
-  /// A theme for customizing the visual properties of [Tooltip]s.
-  ///
-  /// This is the value returned from [TooltipTheme.of].
+  /// A theme for customizing the appearance and layout of [Tooltip] widgets.
   final TooltipThemeData tooltipTheme;
 
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
@@ -1782,7 +1779,7 @@ class ThemeData with Diagnosticable {
     // doesn't say what value to use, but 0.15 seemed close to what the Material
     // Design spec shows for its color palette on
     // <https://material.io/go/design-theming#color-color-palette>.
-    const double kThreshold = 0.15;
+    const kThreshold = 0.15;
     if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold) {
       return Brightness.light;
     }
@@ -1838,7 +1835,7 @@ class ThemeData with Diagnosticable {
         ? SystemColor.dark
         : SystemColor.light;
 
-    ThemeData theme = this;
+    var theme = this;
 
     theme = theme.copyWith(
       colorScheme: colorScheme.copyWith(
@@ -2190,7 +2187,7 @@ class ThemeData with Diagnosticable {
 
   @override
   int get hashCode {
-    final List<Object?> values = <Object?>[
+    final values = <Object?>[
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -2293,7 +2290,7 @@ class ThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final ThemeData defaultData = ThemeData.fallback();
+    final defaultData = ThemeData.fallback();
     // For the sanity of the reader, make sure these properties are in the same
     // order in every place that they are separated by section comments (e.g.
     // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -3311,7 +3308,7 @@ class VisualDensity with Diagnosticable {
     // The number of logical pixels represented by an increase or decrease in
     // density by one. The Material Design guidelines say to increment/decrement
     // sizes in terms of four pixel increments.
-    const double interval = 4.0;
+    const interval = 4.0;
 
     return Offset(horizontal, vertical) * interval;
   }

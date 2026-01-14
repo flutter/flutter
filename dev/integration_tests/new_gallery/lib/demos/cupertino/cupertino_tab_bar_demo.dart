@@ -21,7 +21,7 @@ class CupertinoTabBarDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    final List<_TabInfo> tabInfo = <_TabInfo>[
+    final tabInfo = <_TabInfo>[
       _TabInfo(localizations.cupertinoTabBarHomeTab, CupertinoIcons.home),
       _TabInfo(localizations.cupertinoTabBarChatTab, CupertinoIcons.conversation_bubble),
       _TabInfo(localizations.cupertinoTabBarProfileTab, CupertinoIcons.profile_circled),
@@ -40,9 +40,8 @@ class CupertinoTabBarDemo extends StatelessWidget {
         tabBuilder: (BuildContext context, int index) {
           return CupertinoTabView(
             restorationScopeId: 'cupertino_tab_view_$index',
-            builder:
-                (BuildContext context) =>
-                    _CupertinoDemoTab(title: tabInfo[index].title, icon: tabInfo[index].icon),
+            builder: (BuildContext context) =>
+                _CupertinoDemoTab(title: tabInfo[index].title, icon: tabInfo[index].icon),
             defaultTitle: tabInfo[index].title,
           );
         },

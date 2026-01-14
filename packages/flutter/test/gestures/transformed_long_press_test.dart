@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('gets local coordinates', (WidgetTester tester) async {
-    int longPressCount = 0;
-    int longPressUpCount = 0;
-    final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
-    final List<LongPressMoveUpdateDetails> moveDetails = <LongPressMoveUpdateDetails>[];
-    final List<LongPressStartDetails> startDetails = <LongPressStartDetails>[];
+    var longPressCount = 0;
+    var longPressUpCount = 0;
+    final endDetails = <LongPressEndDetails>[];
+    final moveDetails = <LongPressMoveUpdateDetails>[];
+    final startDetails = <LongPressStartDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(
@@ -49,11 +49,11 @@ void main() {
   });
 
   testWidgets('scaled up', (WidgetTester tester) async {
-    int longPressCount = 0;
-    int longPressUpCount = 0;
-    final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
-    final List<LongPressMoveUpdateDetails> moveDetails = <LongPressMoveUpdateDetails>[];
-    final List<LongPressStartDetails> startDetails = <LongPressStartDetails>[];
+    var longPressCount = 0;
+    var longPressUpCount = 0;
+    final endDetails = <LongPressEndDetails>[];
+    final moveDetails = <LongPressMoveUpdateDetails>[];
+    final startDetails = <LongPressStartDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(
@@ -119,11 +119,11 @@ void main() {
   });
 
   testWidgets('scaled down', (WidgetTester tester) async {
-    int longPressCount = 0;
-    int longPressUpCount = 0;
-    final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
-    final List<LongPressMoveUpdateDetails> moveDetails = <LongPressMoveUpdateDetails>[];
-    final List<LongPressStartDetails> startDetails = <LongPressStartDetails>[];
+    var longPressCount = 0;
+    var longPressUpCount = 0;
+    final endDetails = <LongPressEndDetails>[];
+    final moveDetails = <LongPressMoveUpdateDetails>[];
+    final startDetails = <LongPressStartDetails>[];
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(

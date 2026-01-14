@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/scaffold/scaffold_messenger.0.dart' as example;
+import 'package:flutter_api_samples/material/scaffold/scaffold_messenger.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,6 +18,9 @@ void main() {
     await tester.tap(find.widgetWithText(OutlinedButton, 'Show SnackBar'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(SnackBar, 'A SnackBar has been shown.'), findsOne);
+    expect(
+      find.widgetWithText(SnackBar, 'A SnackBar has been shown.'),
+      findsOne,
+    );
   });
 }

@@ -16,7 +16,9 @@ G_BEGIN_DECLS
  * @name: method name.
  * @args: (allow-none): method arguments, or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Encodes a method call.
  *
@@ -37,7 +39,9 @@ GBytes* fl_method_codec_encode_method_call(FlMethodCodec* codec,
  * @args: (transfer full): location to write method arguments, or %NULL if not
  * required.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Decodes a method call.
  *
@@ -54,7 +58,9 @@ gboolean fl_method_codec_decode_method_call(FlMethodCodec* codec,
  * @codec: an #FlMethodCodec.
  * @result: (allow-none): method result, or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Encodes a successful response to a method call.
  *
@@ -72,7 +78,9 @@ GBytes* fl_method_codec_encode_success_envelope(FlMethodCodec* codec,
  * @message: (allow-none): an error message or %NULL.
  * @details: (allow-none): error details, or %NULL.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Encodes an error response to a method call.
  *
@@ -90,7 +98,9 @@ GBytes* fl_method_codec_encode_error_envelope(FlMethodCodec* codec,
  * @codec: an #FlMethodCodec.
  * @response: response to encode.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Encodes a response to a method call.
  *
@@ -105,7 +115,9 @@ GBytes* fl_method_codec_encode_response(FlMethodCodec* codec,
  * @codec: an #FlMethodCodec.
  * @message: message to decode.
  * @error: (allow-none): #GError location to store the error occurring, or
- * %NULL.
+ * %NULL. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Decodes a response to a method call.
  *

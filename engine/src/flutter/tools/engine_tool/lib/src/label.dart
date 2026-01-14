@@ -113,7 +113,7 @@ final class Label {
 
     // Check each component of the package name for valid identifier characters.
     // We use a standard loop to give a better error message.
-    int i = 2;
+    var i = 2;
     while (true) {
       final int j = package.indexOf('/', i);
       final String component = j == -1 ? package.substring(i) : package.substring(i, j);
@@ -152,7 +152,7 @@ final class TargetPattern {
   factory TargetPattern(String package, [String? target]) {
     // We are so close to a Label that we can reuse the same checks.
     // The only difference is that the package name can end with `...`.
-    bool packageEndsWithWildcard = false;
+    var packageEndsWithWildcard = false;
     if (package.endsWith('/...')) {
       packageEndsWithWildcard = true;
       package = package.substring(0, package.length - 4);
@@ -164,7 +164,7 @@ final class TargetPattern {
     }
 
     // Throws a FormatException if the package or target name is invalid.
-    final Label label = Label(package, target);
+    final label = Label(package, target);
     return TargetPattern._(
       packageEndsWithWildcard ? '${label.package}...' : label.package,
       packageEndsWithWildcard ? null : label.target,

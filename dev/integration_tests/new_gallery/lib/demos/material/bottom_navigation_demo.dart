@@ -52,7 +52,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Restor
     final TextTheme textTheme = Theme.of(context).textTheme;
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    List<BottomNavigationBarItem> bottomNavigationBarItems = <BottomNavigationBarItem>[
+    var bottomNavigationBarItems = <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: const Icon(Icons.add_comment),
         label: localizations.bottomNavigationCommentsTab,
@@ -87,17 +87,14 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo> with Restor
       appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
       body: Center(
         child: PageTransitionSwitcher(
-          transitionBuilder: (
-            Widget child,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return FadeThroughTransition(
-              animation: animation,
-              secondaryAnimation: secondaryAnimation,
-              child: child,
-            );
-          },
+          transitionBuilder:
+              (Widget child, Animation<double> animation, Animation<double> secondaryAnimation) {
+                return FadeThroughTransition(
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  child: child,
+                );
+              },
           child: _NavigationDestinationView(
             // Adding [UniqueKey] to make sure the widget rebuilds when transitioning.
             key: UniqueKey(),

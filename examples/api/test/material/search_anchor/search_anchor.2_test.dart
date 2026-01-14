@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/search_anchor/search_anchor.2.dart' as example;
+import 'package:flutter_api_samples/material/search_anchor/search_anchor.2.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Suggestion of the search bar can be selected', (WidgetTester tester) async {
+  testWidgets('Suggestion of the search bar can be selected', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SearchBarApp());
 
     expect(find.widgetWithText(AppBar, 'Search Anchor Sample'), findsOne);

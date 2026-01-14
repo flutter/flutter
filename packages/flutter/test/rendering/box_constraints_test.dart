@@ -15,7 +15,7 @@ void main() {
   });
 
   test('BoxConstraints copyWith', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const constraints = BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('BoxConstraints operators', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const constraints = BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -59,7 +59,7 @@ void main() {
 
   test('BoxConstraints lerp', () {
     expect(BoxConstraints.lerp(null, null, 0.5), isNull);
-    const BoxConstraints constraints = BoxConstraints(
+    const constraints = BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -88,22 +88,22 @@ void main() {
 
   test('BoxConstraints.lerp identical a,b', () {
     expect(BoxConstraints.lerp(null, null, 0), null);
-    const BoxConstraints constraints = BoxConstraints();
+    const constraints = BoxConstraints();
     expect(identical(BoxConstraints.lerp(constraints, constraints, 0.5), constraints), true);
   });
 
   test('BoxConstraints lerp with unbounded width', () {
-    const BoxConstraints constraints1 = BoxConstraints(
+    const constraints1 = BoxConstraints(
       minWidth: double.infinity,
       minHeight: 10.0,
       maxHeight: 20.0,
     );
-    const BoxConstraints constraints2 = BoxConstraints(
+    const constraints2 = BoxConstraints(
       minWidth: double.infinity,
       minHeight: 20.0,
       maxHeight: 30.0,
     );
-    const BoxConstraints constraints3 = BoxConstraints(
+    const constraints3 = BoxConstraints(
       minWidth: double.infinity,
       minHeight: 15.0,
       maxHeight: 25.0,
@@ -112,35 +112,16 @@ void main() {
   });
 
   test('BoxConstraints lerp with unbounded height', () {
-    const BoxConstraints constraints1 = BoxConstraints(
-      minWidth: 10.0,
-      maxWidth: 20.0,
-      minHeight: double.infinity,
-    );
-    const BoxConstraints constraints2 = BoxConstraints(
-      minWidth: 20.0,
-      maxWidth: 30.0,
-      minHeight: double.infinity,
-    );
-    const BoxConstraints constraints3 = BoxConstraints(
-      minWidth: 15.0,
-      maxWidth: 25.0,
-      minHeight: double.infinity,
-    );
+    const constraints1 = BoxConstraints(minWidth: 10.0, maxWidth: 20.0, minHeight: double.infinity);
+    const constraints2 = BoxConstraints(minWidth: 20.0, maxWidth: 30.0, minHeight: double.infinity);
+    const constraints3 = BoxConstraints(minWidth: 15.0, maxWidth: 25.0, minHeight: double.infinity);
     expect(BoxConstraints.lerp(constraints1, constraints2, 0.5), constraints3);
   });
 
   test('BoxConstraints lerp from bounded to unbounded', () {
-    const BoxConstraints constraints1 = BoxConstraints(
-      minWidth: double.infinity,
-      minHeight: double.infinity,
-    );
-    const BoxConstraints constraints2 = BoxConstraints(
-      minWidth: 20.0,
-      maxWidth: 30.0,
-      minHeight: double.infinity,
-    );
-    const BoxConstraints constraints3 = BoxConstraints(
+    const constraints1 = BoxConstraints(minWidth: double.infinity, minHeight: double.infinity);
+    const constraints2 = BoxConstraints(minWidth: 20.0, maxWidth: 30.0, minHeight: double.infinity);
+    const constraints3 = BoxConstraints(
       minWidth: double.infinity,
       minHeight: 20.0,
       maxHeight: 30.0,
@@ -151,7 +132,7 @@ void main() {
   });
 
   test('BoxConstraints normalize', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const constraints = BoxConstraints(
       minWidth: 3.0,
       maxWidth: 2.0,
       minHeight: 11.0,
@@ -165,25 +146,23 @@ void main() {
   });
 
   test('BoxConstraints.fromViewConstraints', () {
-    final BoxConstraints unconstrained = BoxConstraints.fromViewConstraints(
-      const ViewConstraints(),
-    );
+    final unconstrained = BoxConstraints.fromViewConstraints(const ViewConstraints());
     expect(unconstrained, const BoxConstraints());
 
-    final BoxConstraints constraints = BoxConstraints.fromViewConstraints(
+    final constraints = BoxConstraints.fromViewConstraints(
       const ViewConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4),
     );
     expect(constraints, const BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4));
   });
 
   test('BoxConstraints.constrainSizeAndAttemptToPreserveAspectRatio can handle empty size', () {
-    const BoxConstraints constraints = BoxConstraints(
+    const constraints = BoxConstraints(
       minWidth: 10.0,
       maxWidth: 20.0,
       minHeight: 10.0,
       maxHeight: 20.0,
     );
-    const Size unconstrainedSize = Size(15.0, 0.0);
+    const unconstrainedSize = Size(15.0, 0.0);
     final Size constrainedSize = constraints.constrainSizeAndAttemptToPreserveAspectRatio(
       unconstrainedSize,
     );
