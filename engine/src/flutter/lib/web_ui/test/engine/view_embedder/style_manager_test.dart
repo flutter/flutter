@@ -31,7 +31,8 @@ void doTests() {
       final String got = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
 
       expect(got, expected);
-    });
+    // Skip until we fix the flake on Firefox. See: https://github.com/flutter/flutter/issues/180940
+    }, skip: isFirefox);
 
     test('styleSceneHost', () {
       expect(() => StyleManager.styleSceneHost(createDomHTMLDivElement()), throwsAssertionError);
