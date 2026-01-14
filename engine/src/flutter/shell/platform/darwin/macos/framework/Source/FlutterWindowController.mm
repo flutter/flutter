@@ -27,6 +27,7 @@
 
 @property(readonly, nonatomic) NSWindow* window;
 @property(readonly, nonatomic) FlutterViewController* flutterViewController;
+@property(readwrite, nonatomic) BOOL closeWhenParentResignsKey;
 
 - (instancetype)initWithWindow:(NSWindow*)window
          flutterViewController:(FlutterViewController*)viewController
@@ -66,6 +67,14 @@
 
 @end
 
+@interface FlutterWindowController () {
+  NSMutableArray<FlutterWindowOwner*>* _windows;
+}
+
+- (void)windowDidResignKey:(FlutterWindowOwner*)window;
+
+@end
+
 @implementation FlutterWindowOwner
 
 @synthesize window = _window;
@@ -89,6 +98,7 @@
 
 - (void)windowDidResignKey:(NSNotification*)notification {
   [_flutterViewController.engine windowDidResignKey:_flutterViewController.viewIdentifier];
+  [[_flutterViewController.engine windowController] windowDidResignKey:self];
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender {
@@ -236,12 +246,6 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
 @end
 
-@interface FlutterWindowController () {
-  NSMutableArray<FlutterWindowOwner*>* _windows;
-}
-
-@end
-
 @implementation FlutterWindowController
 
 - (instancetype)init {
@@ -334,6 +338,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [c.flutterView setBackgroundColor:[NSColor clearColor]];
   // Resend configure event after setting the sizing delegate.
   [c.flutterView constraintsDidChange];
+  w.closeWhenParentResignsKey = YES;
 
   window.delegate = w;
   [_windows addObject:w];
@@ -421,6 +426,27 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     [owner.window close];
   }
   [_windows removeAllObjects];
+}
+
+static BOOL IsChildParent(NSWindow* child, NSWindow* parent) {
+  NSWindow* current = child.parentWindow;
+  while (current) {
+    if (current == parent) {
+      return YES;
+    }
+    current = current.parentWindow;
+  }
+
+  return NO;
+}
+
+- (void)windowDidResignKey:(FlutterWindowOwner*)parent {
+  for (FlutterWindowOwner* possibleChild in _windows) {
+    if (possibleChild.closeWhenParentResignsKey &&
+        IsChildParent(possibleChild.window, parent.window)) {
+      [possibleChild windowShouldClose:possibleChild.window];
+    }
+  }
 }
 
 @end
