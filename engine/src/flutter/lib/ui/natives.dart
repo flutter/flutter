@@ -81,6 +81,8 @@ Future<developer.ServiceExtensionResponse> _getImpellerEnabled(
   );
 }
 
+const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
+
 @pragma('vm:entry-point')
 void _setupHooks() {
   assert(() {
@@ -98,8 +100,6 @@ void _setupHooks() {
     developer.registerExtension('ext.ui.window.impellerEnabled', _getImpellerEnabled);
   }
 }
-
-const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 @Native<Void Function(Handle)>(symbol: 'DartRuntimeHooks::ScheduleMicrotask')
 external void _scheduleMicrotask(void Function() callback);
