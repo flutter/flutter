@@ -425,30 +425,27 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
   EXPECT_EQ(uParams["name"], "Params");
 
   nlohmann::json::value_type members = uParams["type"]["members"];
-  // We expect 2 members for the SINGLE mat2 member of the struct.
-  // Because our fix splits the mat2 into 2 columns in the reflection.
-  ASSERT_EQ(members.size(), 2u);
+  // We expect 1 member (for the mat2) which is a Point (vec2) with array
+  // size 2.
+  ASSERT_EQ(members.size(), 1u);
 
-  nlohmann::json::value_type col0 = members[0];
-  nlohmann::json::value_type col1 = members[1];
+  nlohmann::json::value_type mat2Member = members[0];
 
-  // Both should be Point (vec2)
-  EXPECT_EQ(col0["type"], "Point");
-  EXPECT_EQ(col1["type"], "Point");
+  // Should be Point (vec2)
+  EXPECT_EQ(mat2Member["type"], "Point");
 
   // Size 8 bytes (vec2)
-  EXPECT_EQ(col0["size"], 8u);
-  EXPECT_EQ(col1["size"], 8u);
+  EXPECT_EQ(mat2Member["size"], 8u);
 
-  // Stride 16 bytes (std140 alignment of vec2) -> byte_length
-  EXPECT_EQ(col0["byte_length"], 16u);
-  EXPECT_EQ(col1["byte_length"], 16u);
+  // Byte length should be total array size (stride * count)
+  // Stride 16 * 2 = 32.
+  EXPECT_EQ(mat2Member["byte_length"], 32u);
 
-  // Offsets
-  // col0 at 0
-  // col1 at 16
-  EXPECT_EQ(col0["offset"], 0u);
-  EXPECT_EQ(col1["offset"], 16u);
+  // Array elements should be 2 (columns).
+  EXPECT_EQ(mat2Member["array_elements"], 2u);
+
+  // Offset 0
+  EXPECT_EQ(mat2Member["offset"], 0u);
 }
 
 }  // namespace testing

@@ -886,26 +886,21 @@ std::vector<StructMember> Reflector::ReadStructMembers(
     // Mat2
     if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
         member.width == 32 && member.columns == 2 && member.vecsize == 2) {
-      // Column 0
+      uint32_t count = array_elements.value_or(1) * 2;
+      uint32_t stride = 16;
+      uint32_t total_length = stride * count;
+
       result.emplace_back(StructMember{
           "Point",  // type
           spirv_cross::SPIRType::BaseType::Float,
           GetMemberNameAtIndex(struct_type, i),  // name
           struct_member_offset,                  // offset
           sizeof(Point),                         // size (8)
-          16,            // byte_length (std140 vec2 alignment -> 16)
-          std::nullopt,  // array_elements
-          8              // element_padding
+          total_length,                          // byte_length
+          count,                                 // array_elements
+          8  // element_padding (stride - size)
       });
-      // Column 1
-      result.emplace_back(StructMember{"Point",
-                                       spirv_cross::SPIRType::BaseType::Float,
-                                       GetMemberNameAtIndex(struct_type, i),
-                                       struct_member_offset + 16,  // offset
-                                       sizeof(Point),              // size (8)
-                                       16,  // byte_length
-                                       std::nullopt, 8});
-      current_byte_offset += 32;
+      current_byte_offset += total_length;
       continue;
     }
 
