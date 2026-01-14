@@ -14,13 +14,13 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.1.0
-  dwds: 26.2.3
+  dwds: 26.2.4
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
   coverage: 1.15.0
   crypto: 3.0.7
-  ffi: 2.1.4
+  ffi: 2.1.5
   file: 7.0.1
   flutter_template_images: 5.0.0
   html: 0.15.6
@@ -28,7 +28,7 @@ dependencies:
   intl: 0.20.2
   meta: 1.17.0
   multicast_dns: 0.3.3
-  mustache_template: 2.0.2
+  mustache_template: 2.0.3
   package_config: 2.2.0
   process: 5.0.5
   fake_async: 1.3.3
@@ -66,8 +66,8 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.7.8
-  test_core: 0.6.14
+  test_api: 0.7.9
+  test_core: 0.6.15
 
   vm_service: 15.0.2
 
@@ -80,7 +80,7 @@ dependencies:
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.12.1
+  built_value: 8.12.2
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
@@ -110,7 +110,7 @@ dependencies:
   term_glyph: 1.2.2
   typed_data: 1.4.0
   vm_service_interface: 2.0.1
-  watcher: 1.2.0
+  watcher: 1.2.1
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.3
@@ -122,10 +122,10 @@ dev_dependencies:
   js: 0.7.2
   json_annotation: 4.9.0
   node_preamble: 2.0.2
-  test: 1.28.0
+  test: 1.29.0
 
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ot91td
+# PUBSPEC CHECKSUM: lds9hm

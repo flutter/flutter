@@ -651,13 +651,13 @@ class FlutterTesterOptions():
   def __init__( # pylint: disable=too-many-arguments
       self,
       multithreaded: bool = False,
-      enable_impeller: bool = False,
+      impeller_backend: str = '',
       enable_vm_service: bool = False,
       enable_microtask_profiling: bool = False,
       expect_failure: bool = False
   ) -> None:
     self.multithreaded = multithreaded
-    self.enable_impeller = enable_impeller
+    self.impeller_backend = impeller_backend
     self.enable_vm_service = enable_vm_service
     self.enable_microtask_profiling = enable_microtask_profiling
     self.expect_failure = expect_failure
@@ -666,8 +666,10 @@ class FlutterTesterOptions():
     if not self.enable_vm_service:
       command_args.append('--disable-vm-service')
 
-    if self.enable_impeller:
-      command_args += ['--enable-impeller', '--enable-flutter-gpu']
+    if self.impeller_backend != '':
+      command_args += [
+          '--enable-impeller', '--enable-flutter-gpu', f'--impeller-backend={self.impeller_backend}'
+      ]
     else:
       command_args += ['--no-enable-impeller']
 
@@ -683,8 +685,8 @@ class FlutterTesterOptions():
     return 'single-threaded'
 
   def impeller_enabled(self) -> str:
-    if self.enable_impeller:
-      return 'impeller swiftshader'
+    if self.impeller_backend != '':
+      return f'impeller {self.impeller_backend}'
     return 'skia software'
 
 
@@ -935,12 +937,12 @@ def gather_dart_tests(
       else:
         _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
-          for enable_impeller in [False, True]:
+          for impeller in ['', 'vulkan', 'metal']:
             yield gather_dart_test(
                 build_dir, dart_test_file,
                 FlutterTesterOptions(
                     multithreaded=multithreaded,
-                    enable_impeller=enable_impeller,
+                    impeller_backend=impeller,
                     enable_vm_service=True,
                     enable_microtask_profiling=dart_test_basename ==
                     'microtask_profiling_test.dart',
@@ -953,10 +955,10 @@ def gather_dart_tests(
     else:
       _logger.info("Gathering dart test '%s'", dart_test_file)
       for multithreaded in [False, True]:
-        for enable_impeller in [False, True]:
+        for impeller in ['', 'vulkan', 'metal']:
           yield gather_dart_test(
               build_dir, dart_test_file,
-              FlutterTesterOptions(multithreaded=multithreaded, enable_impeller=enable_impeller)
+              FlutterTesterOptions(multithreaded=multithreaded, impeller_backend=impeller)
           )
 
 

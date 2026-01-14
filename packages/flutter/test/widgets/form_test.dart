@@ -1828,6 +1828,20 @@ void main() {
     );
     expect(tester.getSize(find.byType(Form)), Size.zero);
   });
+
+  testWidgets('FormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: FormField<String>(builder: (FormFieldState<String> field) => const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FormField<String>)), Size.zero);
+  });
 }
 
 class _PlatformAnnounceScenario {
