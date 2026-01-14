@@ -365,8 +365,8 @@ class RoundSuperellipseBuilder {
     Point A = {0, param.se_a};
     const Point& J = param.circle_start;
 
-    auto factors = SuperellipseBezierFactors(param.se_n, J.x / param.se_a,
-                                             J.y / param.se_a);
+    std::tuple<Scalar, Scalar, Scalar> factors = SuperellipseBezierFactors(
+        param.se_n, J.x / param.se_a, J.y / param.se_a);
     Scalar weight1 = std::get<0>(factors);
     Scalar weight2 = std::get<1>(factors);
     Scalar yHOverA = std::get<2>(factors);
@@ -509,9 +509,9 @@ class RoundSuperellipseBuilder {
                                      kNumRecords - 2);
     Scalar frac = steps - left;
 
-    Scalar weight1 = (1 - frac) * kPrecomputedVariables[left][0] +
+    Scalar weight1 = (1.f - frac) * kPrecomputedVariables[left][0] +
                      frac * kPrecomputedVariables[left + 1][0] * sqrt(n);
-    Scalar weight2 = (1 - frac) * kPrecomputedVariables[left][1] +
+    Scalar weight2 = (1.f - frac) * kPrecomputedVariables[left][1] +
                      frac * kPrecomputedVariables[left + 1][1] * xJOverA;
 
     // Compute yHOverA
