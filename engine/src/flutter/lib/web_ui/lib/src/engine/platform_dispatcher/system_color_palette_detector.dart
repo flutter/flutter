@@ -1,54 +1,9 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:js_interop';
-
 import 'package:ui/ui.dart' as ui;
 
-import 'dom.dart';
-
-/// Signature of functions added as a listener to high contrast changes
-typedef HighContrastListener = void Function(bool enabled);
-
-/// Determines if high contrast is enabled using media query 'forced-colors: active' for Windows
-class HighContrastSupport {
-  static HighContrastSupport instance = HighContrastSupport();
-  static const String _highContrastMediaQueryString = '(forced-colors: active)';
-
-  final List<HighContrastListener> _listeners = <HighContrastListener>[];
-
-  /// Reference to css media query that indicates whether high contrast is on.
-  final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(
-    _highContrastMediaQueryString,
-  );
-  late final DomEventListener _onHighContrastChangeListener = _onHighContrastChange.toJS;
-
-  bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
-
-  /// Adds function to the list of listeners on high contrast changes
-  void addListener(HighContrastListener listener) {
-    if (_listeners.isEmpty) {
-      _highContrastMediaQuery.addListener(_onHighContrastChangeListener);
-    }
-    _listeners.add(listener);
-  }
-
-  /// Removes function from the list of listeners on high contrast changes
-  void removeListener(HighContrastListener listener) {
-    _listeners.remove(listener);
-    if (_listeners.isEmpty) {
-      _highContrastMediaQuery.removeListener(_onHighContrastChangeListener);
-    }
-  }
-
-  void _onHighContrastChange(DomEvent event) {
-    final mqEvent = event as DomMediaQueryListEvent;
-    final bool isHighContrastEnabled = mqEvent.matches!;
-    for (final HighContrastListener listener in _listeners) {
-      listener(isHighContrastEnabled);
-    }
-  }
-}
+import '../dom.dart';
 
 const List<String> systemColorNames = <String>[
   'AccentColor',
