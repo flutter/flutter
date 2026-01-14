@@ -394,7 +394,7 @@ void main() {
     expect(result, true);
   });
 
-  group('getLocalInetAddresses', () {
+  group('getLocalInternetAddresses', () {
     tearDown(() {
       io.resetNetworkInterfaceLister();
     });
@@ -417,7 +417,7 @@ void main() {
         ];
       });
 
-      final List<io.InternetAddress> addresses = await getLocalInetAddresses();
+      final List<io.InternetAddress> addresses = await getLocalInternetAddresses();
       expect(addresses, hasLength(2));
       expect(addresses.map((a) => a.address), containsAll(<String>['1.2.3.4', '2001:db8::1']));
       expect(addresses.map((a) => a.address), isNot(contains('127.0.0.1')));
@@ -433,7 +433,7 @@ void main() {
         return <io.NetworkInterface>[];
       });
 
-      final List<io.InternetAddress> addresses = await getLocalInetAddresses();
+      final List<io.InternetAddress> addresses = await getLocalInternetAddresses();
       expect(addresses, hasLength(2));
       expect(addresses.map((a) => a.address), containsAll(<String>['127.0.0.1', '::1']));
     });

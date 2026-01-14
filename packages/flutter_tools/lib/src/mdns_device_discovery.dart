@@ -73,7 +73,7 @@ class MDNSDeviceDiscovery {
         log.Logger('mdns_dart').level = log.Level.SEVERE;
       }
 
-      final List<InternetAddress> ips = await getLocalInetAddresses();
+      final List<InternetAddress> ips = await getLocalInternetAddresses();
       final String hostname = platform.localHostname;
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final String frameworkVersion = flutterVersion.frameworkVersion;
