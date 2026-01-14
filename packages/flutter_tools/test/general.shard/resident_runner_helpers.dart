@@ -371,9 +371,9 @@ class FakeDevice extends Fake implements Device {
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;
   final String _sdkNameAndVersion;
-  
+
   @override
-  var id = 'test-device-id';
+  String id = 'test-device-id';
 
   bool disposed = false;
   bool appStopped = false;
