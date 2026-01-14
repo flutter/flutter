@@ -91,6 +91,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          appBuildDirectory: null,
         );
         await installCodeAssets(
           dartHookResult: result,
@@ -132,6 +133,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
+        appBuildDirectory: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -157,6 +159,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+          appBuildDirectory: null,
         ),
         isA<DartHooksResult>(),
       );

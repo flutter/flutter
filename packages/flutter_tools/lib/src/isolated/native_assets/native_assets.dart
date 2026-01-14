@@ -52,6 +52,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required Directory? appBuildDirectory,
 }) async {
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
   final Directory buildDir = fileSystem.directory(buildUri);
@@ -69,11 +70,34 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     if (featureFlags.isNativeAssetsEnabled) SupportedAssetTypes.codeAssets,
     if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
   ];
+
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
+
+  // When building for Linux, we need access to the native build directory to
+  // read compiler options from CMakeLists.txt that are then forwarded to build
+  // hooks.
+  Directory? nativeBuildDirectory;
+  if (appBuildDirectory != null) {
+    if (targetPlatform
+        case TargetPlatform.linux_x64 ||
+            TargetPlatform.linux_arm64 ||
+            TargetPlatform.linux_riscv64) {
+      nativeBuildDirectory = appBuildDirectory
+          .childDirectory('linux')
+          .childDirectory(targetPlatform.simpleName)
+          .childDirectory(buildMode.cliName);
+    }
+  }
+
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
     environmentDefines: environmentDefines,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
+    nativeBuildDirectory: nativeBuildDirectory,
   );
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
@@ -82,10 +106,6 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     await buildRunner.setCCompilerConfig(target);
   }
 
-  final BuildMode buildMode = _getBuildMode(
-    environmentDefines,
-    targetPlatform == TargetPlatform.tester,
-  );
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
 
   return _runDartHooks(
