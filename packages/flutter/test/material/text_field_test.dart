@@ -9653,6 +9653,36 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField does not announce hintText when error widget is present', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final TextEditingController controller = _textEditingController();
+    final Key key = UniqueKey();
+
+    // When error widget is present but errorText is null, we should NOT
+    // announce hintText since the visual state shows an error
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            hintText: 'Enter your email',
+            error: Text('Custom error widget'), // error widget, not errorText
+          ),
+        ),
+      ),
+    );
+
+    final SemanticsNode node = tester.getSemantics(find.byKey(key));
+    // semantics hint should be empty, not hintText, because an error is displayed
+    expect(node.hint, isEmpty);
+
+    semantics.dispose();
+  });
+
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
   ) async {

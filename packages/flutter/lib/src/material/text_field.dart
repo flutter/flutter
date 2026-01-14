@@ -1795,10 +1795,13 @@ class _TextFieldState extends State<TextField>
               // Pass error or hint text to semantics so screen readers announce it
               // along with the input field (via aria-description on web).
               // Error takes priority over hint since it requires user action.
-              // Note: The visual hintText is already shown as placeholder, so we
-              // only need to expose it via semantics when there's no error.
-              final String? semanticsHint =
-                  widget.decoration?.errorText ?? widget.decoration?.hintText;
+              // Note: When an error widget is displayed (even without errorText),
+              // we don't announce hintText since the visual state shows an error.
+              final bool hasErrorWidget =
+                  widget.decoration?.error != null || widget.decoration?.errorText != null;
+              final String? semanticsHint = hasErrorWidget
+                  ? widget.decoration?.errorText
+                  : widget.decoration?.hintText;
               return Semantics(
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
