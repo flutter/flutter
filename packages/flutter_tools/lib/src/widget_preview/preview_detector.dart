@@ -67,6 +67,8 @@ class PreviewDetector {
   PreviewDependencyGraph get dependencyGraph => _dependencyGraph;
   final PreviewDependencyGraph _dependencyGraph = PreviewDependencyGraph();
 
+  @visibleForTesting
+  AnalysisContextCollection get collection => _collection;
   late AnalysisContextCollection _collection;
 
   late final String _packageConfigPath = fs.path.join(
