@@ -464,18 +464,6 @@ class RoundSuperellipseBuilder {
   std::tuple<Scalar, Scalar, Scalar> SuperellipseBezierFactors(Scalar n,
                                                                Scalar xJOverA,
                                                                Scalar yJOverA) {
-    // H, the splitting point between the two conic curves, is picked by its y
-    // coordinate proportionally between A and J.
-    //
-    // The proportion between (yA-yH) and (yH-yJ) is positively correlated to n,
-    // so that when n increases, H moves closer to A. This is because the
-    // flatter segment of the superellipse curve is much harder to approximate.
-    // The exact formula of sqrt(n) is found empirically.
-    Scalar yH_proportion = sqrt(n);
-    constexpr Scalar yAOverA = 1.0;
-    Scalar yHOverA =
-        (yAOverA * yH_proportion + yJOverA) / (yH_proportion + 1.0f);
-
     // Precomputed (factor1, factor2) tuples for interpolation and
     // extrapolation.
     //
@@ -513,6 +501,22 @@ class RoundSuperellipseBuilder {
       // The optimized factors stabilize as n grows large.
       n = kMaxN;
     }
+
+    // Compute yHOverA
+
+    // H, the splitting point between the two conic curves, is picked by its y
+    // coordinate proportionally between A and J.
+    //
+    // The proportion between (yA-yH) and (yH-yJ) is positively correlated to n,
+    // so that when n increases, H moves closer to A. This is because the
+    // flatter segment of the superellipse curve is much harder to approximate.
+    // The exact formula of sqrt(n) is found empirically.
+    Scalar yH_proportion = sqrt(n);
+    constexpr Scalar yAOverA = 1.0;
+    Scalar yHOverA =
+        (yAOverA * yH_proportion + yJOverA) / (yH_proportion + 1.0f);
+
+    // Compute weight1 and weight 2
 
     Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
     size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
