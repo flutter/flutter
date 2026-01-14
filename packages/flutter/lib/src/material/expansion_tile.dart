@@ -485,37 +485,6 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
-  /// {@tool snippet}
-  /// This example listens for hover and press states on an [ExpansionTile].
-  ///
-  /// ```dart
-  /// class ExpansionTileStatesExample extends StatelessWidget {
-  ///   ExpansionTileStatesExample({super.key});
-  ///
-  ///   final WidgetStatesController controller = WidgetStatesController();
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     controller.addListener(() {
-  ///       if (controller.value.contains(WidgetState.hovered)) {
-  ///         debugPrint('Tile is hovered');
-  ///       }
-  ///     });
-  ///
-  ///     return MaterialApp(
-  ///       home: Scaffold(
-  ///         body: ExpansionTile(
-  ///           title: const Text('Settings'),
-  ///           statesController: controller,
-  ///         ),
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-
-
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
