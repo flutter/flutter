@@ -83,7 +83,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
             jni_facade->hidePlatformView2(view_id);
           }
 
-          jni_facade->applyTransaction();
+          jni_facade->swapTransaction();  // Moves pending -> active
+          jni_facade->onEndFrame2();  // Calls applyTransactionOnDraw(active)
         }));
     views_visible_last_frame_.clear();
     return;
