@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
+import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
 /// Returns a [CCompilerConfig] suitable for compiling code assets for Linux apps.
@@ -85,7 +84,7 @@ Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async
   return CCompilerConfig(
     compiler: clangFile.uri,
     linker: requireTool(linker, linkerVariable),
-    archiver: requireTool(archiver, linkerVariable),
+    archiver: requireTool(archiver, archiverVariable),
   );
 }
 
