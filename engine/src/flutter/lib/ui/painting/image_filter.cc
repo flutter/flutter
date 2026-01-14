@@ -136,8 +136,22 @@ void ImageFilter::initShader(ReusableFragmentShader* shader) {
   filter_ = shader->as_image_filter();
 }
 
-bool ImageFilter::equals(ImageFilter* a, ImageFilter* b) {
-  return a->filter_ == b->filter_;
+bool ImageFilter::equals(Dart_Handle a_handle, Dart_Handle b_handle) {
+  ImageFilter* a = tonic::DartConverter<ImageFilter*>::FromDart(a_handle);
+  ImageFilter* b = tonic::DartConverter<ImageFilter*>::FromDart(b_handle);
+  if (a == b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  if (a->filter_ == b->filter_) {
+    return true;
+  }
+  if (!a->filter_ || !b->filter_) {
+    return false;
+  }
+  return *a->filter_ == *b->filter_;
 }
 
 }  // namespace flutter
