@@ -1733,6 +1733,53 @@ void main() {
       } catch (e) {
         exception = e;
       }
+      expect(invocations, isEmpty);
+      expect(exception, isNull);
+    });
+
+    testWidgets('Contravariant action override', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                LogIntent: Action<LogIntent>.overridable(
+                  defaultAction: LogInvocationAction(actionName: 'action1', shouldCallSuper: false),
+                  context: context,
+                ),
+              },
+              // DoNothingAction extends Action<Intent> and should be able to
+              // handle any Intent.
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Actions(
+                    actions: <Type, Action<Intent>>{
+                      LogIntent: Action<Intent>.overridable(
+                        defaultAction: DoNothingAction(),
+                        context: context,
+                      ),
+                    },
+                    child: Builder(
+                      builder: (BuildContext context1) {
+                        invokingContext = context1;
+                        return const SizedBox();
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      Object? exception;
+      try {
+        Actions.invoke(invokingContext!, LogIntent(log: invocations));
+      } catch (e) {
+        exception = e;
+      }
+      expect(invocations, <String>['action1.invoke']);
       expect(exception, isNull);
     });
 
@@ -2104,18 +2151,20 @@ class LogIntent extends Intent {
 }
 
 class LogInvocationAction extends Action<LogIntent> {
-  LogInvocationAction({required this.actionName, this.enabled = true});
+  LogInvocationAction({required this.actionName, this.enabled = true, this.shouldCallSuper = true});
 
   final String actionName;
 
   final bool enabled;
+
+  final bool shouldCallSuper;
 
   @override
   bool get isActionEnabled => enabled;
 
   @override
   void invoke(LogIntent intent) {
-    final Action<LogIntent>? callingAction = this.callingAction;
+    final Action<LogIntent>? callingAction = shouldCallSuper ? this.callingAction : null;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
     } else {
