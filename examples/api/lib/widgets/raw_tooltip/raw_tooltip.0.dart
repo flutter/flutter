@@ -39,7 +39,7 @@ class RawTooltipSample extends StatelessWidget {
           semanticsTooltip: 'I am a RawTooltip message',
           triggerMode: TooltipTriggerMode.manual,
           positionDelegate: (TooltipPositionContext context) {
-            // Use the context information to position the tooltip to the right of
+            // Use the context information to position the rawTooltip to the right of
             // the target.
             return Offset(
               context.target.dx + context.targetSize.width / 2,
