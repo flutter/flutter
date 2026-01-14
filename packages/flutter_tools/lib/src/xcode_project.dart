@@ -170,10 +170,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
-  /// The Flutter generated directory for the Swift package handling the Flutter framework.
-  Directory get flutterFrameworkSwiftPackageDirectory => relativeSwiftPackagesDirectory
-      .childDirectory(kFlutterGeneratedFrameworkSwiftPackageTargetName);
-
   /// Checks if FlutterFramework has been added to the project's build settings by checking the
   /// contents of the pbxproj.
   bool get flutterFrameworkSwiftPackageInProjectSettings {
