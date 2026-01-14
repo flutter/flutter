@@ -4,7 +4,8 @@
 
 layout(std140) uniform Params {
   mat2 uMat2;
-} uParams;
+}
+uParams;
 
 out vec4 frag_color;
 

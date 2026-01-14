@@ -477,17 +477,21 @@ void main() async {
     shader.dispose();
   });
 
-  test('FragmentShader shader with array uniforms renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test(
+    'FragmentShader shader with array uniforms renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-    final FragmentShader shader = program.fragmentShader();
-    for (var i = 0; i < 20; i++) {
-      shader.setFloat(i, i.toDouble());
-    }
+      final FragmentShader shader = program.fragmentShader();
+      for (var i = 0; i < 20; i++) {
+        shader.setFloat(i, i.toDouble());
+      }
 
-    await _expectShaderRendersGreen(shader);
-    shader.dispose();
-  });
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.isMacOS && !Platform.executableArguments.contains('--enable-vulkan'),
+  );
 
   test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
     // TODO(gaaclarke): This test was disabled for a long time and has been
@@ -618,22 +622,14 @@ void main() async {
 
 void _runSkiaTest(String name, Future<void> Function() callback) {
   test(name, () async {
-    if (impellerEnabled) {
-      print('skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
-      return;
-    }
     await callback();
-  });
+  }, skip: impellerEnabled);
 }
 
 void _runImpellerTest(String name, Future<void> Function() callback) {
   test(name, () async {
-    if (!impellerEnabled) {
-      print('skipped for Skia');
-      return;
-    }
     await callback();
-  });
+  }, skip: !impellerEnabled);
 }
 
 // Expect that all of the shaders in this folder render green.
