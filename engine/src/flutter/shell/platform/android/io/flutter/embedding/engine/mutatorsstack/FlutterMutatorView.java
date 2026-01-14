@@ -32,8 +32,6 @@ public class FlutterMutatorView extends FrameLayout {
   private float screenDensity;
   private int left;
   private int top;
-  private int prevLeft;
-  private int prevTop;
 
   private final AndroidTouchProcessor androidTouchProcessor;
   private Paint paint;
@@ -197,27 +195,8 @@ public class FlutterMutatorView extends FrameLayout {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
-
     final Matrix screenMatrix = new Matrix();
-
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_DOWN:
-        prevLeft = left;
-        prevTop = top;
-        screenMatrix.postTranslate(left, top);
-        break;
-      case MotionEvent.ACTION_MOVE:
-        // While the view is dragged, use the left and top positions as
-        // they were at the moment the touch event fired.
-        screenMatrix.postTranslate(prevLeft, prevTop);
-        prevLeft = left;
-        prevTop = top;
-        break;
-      case MotionEvent.ACTION_UP:
-      default:
-        screenMatrix.postTranslate(left, top);
-        break;
-    }
+    screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }

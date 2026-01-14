@@ -6,7 +6,7 @@
 #include <fstream>
 #include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
-absl::StatusOr<Filter> Filter::Open(std::string_view path) {
+absl::StatusOr<Filter> Filter::Open(const std::string& path) {
   std::ifstream input;
   input.open(path);
   absl::StatusOr<Filter> result = Open(input);

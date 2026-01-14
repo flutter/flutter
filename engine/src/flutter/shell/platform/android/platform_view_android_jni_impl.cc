@@ -71,6 +71,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
   V(g_set_application_locale_method, setApplicationLocale,                    \
     "(Ljava/lang/String;)V")                                                  \
+  V(g_set_semantics_tree_enabled_method, setSemanticsTreeEnabled, "(Z)V")     \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
@@ -1385,6 +1386,21 @@ void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+void PlatformViewAndroidJNIImpl::FlutterViewSetSemanticsTreeEnabled(
+    bool enabled) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_set_semantics_tree_enabled_method,
+                      enabled);
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
 void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessageResponse(
     int responseId,
     std::unique_ptr<fml::Mapping> data) {
@@ -1791,6 +1807,10 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
       case MutatorType::kClipPath:
       case MutatorType::kOpacity:
       case MutatorType::kBackdropFilter:
+      case MutatorType::kBackdropClipRect:
+      case MutatorType::kBackdropClipRRect:
+      case MutatorType::kBackdropClipRSuperellipse:
+      case MutatorType::kBackdropClipPath:
         break;
     }
     ++iter;
@@ -2300,6 +2320,10 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
       case MutatorType::kBackdropFilter:
+      case MutatorType::kBackdropClipRect:
+      case MutatorType::kBackdropClipRRect:
+      case MutatorType::kBackdropClipRSuperellipse:
+      case MutatorType::kBackdropClipPath:
         break;
     }
     ++iter;

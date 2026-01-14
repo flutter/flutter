@@ -720,7 +720,9 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
 
     final config = SemanticsConfiguration()
@@ -868,7 +870,9 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   indexInParent: null\n'
-      '   headingLevel: 0\n',
+      '   headingLevel: 0\n'
+      '   minValue: null\n'
+      '   maxValue: null\n',
     );
   });
 
@@ -1033,6 +1037,34 @@ void main() {
     expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
     expect(config.onTap, same(onTap));
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
+  });
+
+  test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
+    final config = SemanticsConfiguration()
+      ..isSemanticBoundary = true
+      ..label = 'test'
+      ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
+
+    expect(config.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final SemanticsConfiguration copy = config.copy();
+
+    expect(copy.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+    expect(copy.isSemanticBoundary, isTrue);
+    expect(copy.label, 'test');
+  });
+
+  test('SemanticsConfiguration.copy() preserves all hitTestBehavior values', () {
+    final deferConfig = SemanticsConfiguration();
+    expect(deferConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.defer);
+
+    final opaqueConfig = SemanticsConfiguration()
+      ..hitTestBehavior = SemanticsHitTestBehavior.opaque;
+    expect(opaqueConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    final transparentConfig = SemanticsConfiguration()
+      ..hitTestBehavior = SemanticsHitTestBehavior.transparent;
+    expect(transparentConfig.copy().hitTestBehavior, SemanticsHitTestBehavior.transparent);
   });
 
   test('SemanticsOwner dispatches memory events', () async {
