@@ -127,7 +127,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// the example app.
   ///
   /// If the app is not an example app or the plugin cannot be found, this will return null.
-  late final _PluginRelativeToExample? _examplePlugin = _PluginRelativeToExample.loadFromProject(
+  late final ({String name, String path})? _examplePlugin = _loadPluginFromExampleProject(
     xcodeProject: _xcodeProject,
     fileSystem: _fileSystem,
     logger: logger,
@@ -1136,6 +1136,44 @@ $newContent
     }
     return (startSectionIndex, endSectionIndex);
   }
+
+  /// If the [xcodeProject] is within a plugin's example app, return the plugin's name and its
+  /// path relative to ios/macos directory the [xcodeProject] is in.
+  ///
+  /// If the [xcodeProject] is not within an example app or the plugin can't be found, return null.
+  static ({String name, String path})? _loadPluginFromExampleProject({
+    required XcodeBasedProject xcodeProject,
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
+    try {
+      final FlutterProject flutterProject = xcodeProject.parent;
+      if (flutterProject.directory.path.endsWith('example') &&
+          flutterProject.directory.parent.childFile('pubspec.yaml').existsSync()) {
+        final FlutterProject parentProject = FlutterProject.fromDirectory(
+          flutterProject.directory.parent,
+        );
+        if (parentProject.isPlugin && parentProject.hasExampleApp) {
+          final String pluginName = parentProject.manifest.appName;
+          final Link linkedPlugin = xcodeProject.relativeSwiftPackagesDirectory.childLink(
+            pluginName,
+          );
+          if (linkedPlugin.existsSync()) {
+            final String absolutePath = linkedPlugin.targetSync();
+            final String relativePath = fileSystem.path.relative(
+              absolutePath,
+              from: xcodeProject.hostAppRoot.path,
+            );
+            return (name: pluginName, path: relativePath);
+          }
+        }
+      }
+    } on Exception catch (e) {
+      logger.printTrace('Failed to load project: $e');
+      return null;
+    }
+    return null;
+  }
 }
 
 class SchemeInfo {
@@ -1295,48 +1333,4 @@ class ParsedProject {
   final Map<String, Object?> data;
   final String identifier;
   final List<String>? packageReferences;
-}
-
-class _PluginRelativeToExample {
-  _PluginRelativeToExample(this.name, this.path);
-  final String name;
-  final String path;
-
-  /// If the [xcodeProject] is within a plugin's example app, return the plugin's name and its
-  /// path relative to ios/macos directory the [xcodeProject] is in.
-  ///
-  /// If the [xcodeProject] is not within an example app or the plugin can't be found, return null.
-  static _PluginRelativeToExample? loadFromProject({
-    required XcodeBasedProject xcodeProject,
-    required FileSystem fileSystem,
-    required Logger logger,
-  }) {
-    try {
-      final FlutterProject flutterProject = xcodeProject.parent;
-      if (flutterProject.directory.path.endsWith('example') &&
-          flutterProject.directory.parent.childFile('pubspec.yaml').existsSync()) {
-        final FlutterProject parentProject = FlutterProject.fromDirectory(
-          flutterProject.directory.parent,
-        );
-        if (parentProject.isPlugin && parentProject.hasExampleApp) {
-          final String pluginName = parentProject.manifest.appName;
-          final Link linkedPlugin = xcodeProject.relativeSwiftPackagesDirectory.childLink(
-            pluginName,
-          );
-          if (linkedPlugin.existsSync()) {
-            final String absolutePath = linkedPlugin.targetSync();
-            final String relativePath = fileSystem.path.relative(
-              absolutePath,
-              from: xcodeProject.hostAppRoot.path,
-            );
-            return _PluginRelativeToExample(pluginName, relativePath);
-          }
-        }
-      }
-    } on Exception catch (e) {
-      logger.printTrace('Failed to load project: $e');
-      return null;
-    }
-    return null;
-  }
 }
