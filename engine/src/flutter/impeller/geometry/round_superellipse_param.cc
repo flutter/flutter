@@ -479,8 +479,9 @@ class RoundSuperellipseBuilder {
     // Precomputed (factor1, factor2) tuples for interpolation and
     // extrapolation.
     //
-    // These factors are normalized conic weights defined as: weight1 = factor1
-    // * sqrt(n) weight2 = factor2 * xJOverA
+    // These factors are normalized conic weights defined as:
+    //   weight1 = factor1 * sqrt(n)
+    //   weight2 = factor2 * xJOverA
     //
     // Rationale: Empirical analysis shows these quotients converge to stable
     // constants as n -> infinity. Normalizing by sqrt(n) and xJOverA ensures
