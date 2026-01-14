@@ -232,6 +232,8 @@ bool isIPv6Address(String address) {
 }
 
 /// Finds all non-loopback IPv4 and IPv6 addresses of the local machine.
+///
+/// If no non-loopback addresses are found, returns loopback addresses.
 Future<List<InternetAddress>> getLocalInetAddresses() async {
   final addresses = <InternetAddress>[];
   try {
@@ -255,6 +257,8 @@ Future<List<InternetAddress>> getLocalInetAddresses() async {
 
 /// Finds the primary non-loopback IPv4 address of the local machine.
 ///
+/// If no non-loopback IPv4 address is found, returns the loopback IPv4 address.
+///
 /// This address is often used to tell other network devices how to reach
 /// the service running on this machine.
 Future<InternetAddress> getLocalIpAddress() async {
@@ -274,10 +278,6 @@ Future<int> findUnusedPort({String hostname = '0.0.0.0'}) async {
 
     final int port = socket.port;
     return port;
-  } on SocketException {
-    // If the bind operation fails for any reason (e.g., no interfaces available),
-    // rethrow.
-    rethrow;
   } finally {
     // Crucially, close the socket immediately to free the port for your service.
     await socket?.close();

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
+import '../base/logger.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../globals.dart' as globals;
@@ -17,12 +18,28 @@ const _noRunningAppsFoundMessage = 'No running Flutter apps found.';
 
 /// Command to list running Flutter applications.
 class RunningAppsCommand extends FlutterCommand {
-  RunningAppsCommand({this.hidden = false, @visibleForTesting MDnsClient? mdnsClient})
-    : _mdnsClient = mdnsClient {
+  RunningAppsCommand({
+    this.hidden = false,
+    @visibleForTesting MDnsClient? mdnsClient,
+    @visibleForTesting SystemClock? systemClock,
+    required Logger logger,
+  }) : _mdnsClient = mdnsClient,
+       _systemClock = systemClock ?? globals.systemClock,
+       _logger = logger {
     argParser.addFlag('machine', negatable: false, help: 'Print output in JSON format.');
   }
 
   final MDnsClient? _mdnsClient;
+  final SystemClock _systemClock;
+  final Logger _logger;
+
+  static const String _kProjectName = 'project_name';
+  static const String _kDeviceName = 'device_name';
+  static const String _kDeviceId = 'device_id';
+  static const String _kTargetPlatform = 'target_platform';
+  static const String _kMode = 'mode';
+  static const String _kWsUri = 'ws_uri';
+  static const String _kEpoch = 'epoch';
 
   @override
   final name = 'running-apps';
@@ -42,7 +59,7 @@ class RunningAppsCommand extends FlutterCommand {
     // used instead of mdns_dart as the discovery functionality is insufficient
     // in the mdns_dart package, only discovering a maximum of one service.
 
-    globals.printStatus('Searching for running Flutter apps...');
+    _logger.printStatus('Searching for running Flutter apps...');
     final MDnsClient client = _mdnsClient ?? MDnsClient();
 
     final List<Map<String, String>> apps = [];
@@ -67,18 +84,8 @@ class RunningAppsCommand extends FlutterCommand {
                 ResourceRecordQuery.text(ptr.domainName),
               )) {
                 final metadata = <String, String>{};
-                // multicast_dns might return multiple TXT records or one with multiple strings.
-                // In many implementations, TXT records are a set of strings.
-                // The 'text' property might join them or we might need to access raw data.
-                // Assuming 'text' contains the joined strings, we split by common separators if needed,
-                // but usually it's one key-value pair per string in the TXT record.
-                // For now, let's try to parse it as key=value pairs, assuming they might be separated by commas or newlines if joined.
-
-                // If txt.text is used, we need to know how it's joined.
-                // Let's try to split by common delimiters just in case, or handle it as a single pair.
-                // Given the serving side uses a list of strings, they might come as separate TXT records or joined.
-
-                final List<String> parts = txt.text.split('\n'); // Try newline first
+                // The multicast_dns package joins the strings of a TXT record with newlines.
+                final List<String> parts = txt.text.split('\n');
                 for (final part in parts) {
                   final int equalsIndex = part.indexOf('=');
                   if (equalsIndex != -1) {
@@ -86,7 +93,7 @@ class RunningAppsCommand extends FlutterCommand {
                   }
                 }
                 if (metadata.isNotEmpty) {
-                  final String? uri = metadata['ws_uri'];
+                  final String? uri = metadata[_kWsUri];
                   if (uri != null) {
                     if (seenUris.contains(uri)) {
                       continue;
@@ -108,17 +115,17 @@ class RunningAppsCommand extends FlutterCommand {
     }
 
     if (boolArg('machine')) {
-      globals.printStatus(json.encode(apps));
+      _logger.printStatus(json.encode(apps));
     } else {
       if (apps.isEmpty) {
-        globals.printStatus(_noRunningAppsFoundMessage);
+        _logger.printStatus(_noRunningAppsFoundMessage);
         return FlutterCommandResult.success();
       }
 
       // Sort by epoch descending (newest/shortest duration first).
-      apps.sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-        final int? epochA = int.tryParse(a['epoch'] as String? ?? '');
-        final int? epochB = int.tryParse(b['epoch'] as String? ?? '');
+      apps.sort((Map<String, String> a, Map<String, String> b) {
+        final int? epochA = int.tryParse(a[_kEpoch] ?? '');
+        final int? epochB = int.tryParse(b[_kEpoch] ?? '');
         if (epochA == null && epochB == null) {
           return 0;
         }
@@ -131,31 +138,27 @@ class RunningAppsCommand extends FlutterCommand {
         return epochB.compareTo(epochA);
       });
 
-      globals.printStatus('Found ${apps.length} running Flutter ${pluralize('app', apps.length)}:');
+      _logger.printStatus('Found ${apps.length} running Flutter ${pluralize('app', apps.length)}:');
       final table = <List<String>>[];
-      for (final Map<String, dynamic> app in apps) {
-        final String projectName = app['project_name'] as String? ?? 'Unknown';
-        final String mode = app['mode'] as String? ?? 'Unknown';
-        final String deviceName = app['device_name'] as String? ?? 'Unknown';
-        final String deviceId = app['device_id'] as String? ?? 'Unknown';
-        final String platform = app['target_platform'] as String? ?? 'Unknown';
-        final String vmServiceUri = app['ws_uri'] as String? ?? 'Unknown';
-        final String age = getProcessAge(app['epoch'] as String?, globals.systemClock);
+      for (final app in apps) {
+        final String projectName = app[_kProjectName] ?? 'Unknown';
+        final String mode = app[_kMode] ?? 'Unknown';
+        final String deviceName = app[_kDeviceName] ?? 'Unknown';
+        final String deviceId = app[_kDeviceId] ?? 'Unknown';
+        final String platform = app[_kTargetPlatform] ?? 'Unknown';
+        final String vmServiceUri = app[_kWsUri] ?? 'Unknown';
+        final String age = getProcessAge(app[_kEpoch], _systemClock);
 
         // If the device name and ID are effectively the same (e.g. "macos" and "macos"),
         // only show the name to avoid redundancy like "macos (macos)".
         final deviceString = (deviceName.toLowerCase() == deviceId.toLowerCase())
             ? deviceName
             : '$deviceName ($deviceId)';
-        table.add(<String>[
-          '$projectName ($mode)',
-          deviceString,
-          platform,
-          vmServiceUri,
-          age,
-        ]);
+        table.add(<String>['$projectName ($mode)', deviceString, platform, vmServiceUri, age]);
       }
 
+      // TODO(jwren): consider combining this logic with the logic in `flutter devices`,
+      // see https://github.com/flutter/flutter/issues/180949
       // Calculate column widths
       final indices = List<int>.generate(table[0].length - 1, (int i) => i);
       List<int> widths = indices.map<int>((int i) => 0).toList();
@@ -165,9 +168,11 @@ class RunningAppsCommand extends FlutterCommand {
 
       // Join columns into lines of text
       for (final row in table) {
-        globals.printStatus(
-          '  ${indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(' • ')}',
-        );
+        final String rowString = indices
+            .map<String>((int i) => row[i].padRight(widths[i]))
+            .followedBy(<String>[row.last])
+            .join(' • ');
+        _logger.printStatus('  $rowString');
       }
     }
     return FlutterCommandResult.success();

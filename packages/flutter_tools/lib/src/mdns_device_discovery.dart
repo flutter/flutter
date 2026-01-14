@@ -30,6 +30,19 @@ class MDNSDeviceDiscovery {
     required this.systemClock,
   });
 
+  static const String _kWsUri = 'ws_uri';
+  static const String _kPid = 'pid';
+  static const String _kHostname = 'hostname';
+  static const String _kTarget = 'target';
+  static const String _kMode = 'mode';
+  static const String _kTargetPlatform = 'target_platform';
+  static const String _kEpoch = 'epoch';
+  static const String _kProjectName = 'project_name';
+  static const String _kDeviceName = 'device_name';
+  static const String _kDeviceId = 'device_id';
+  static const String _kFlutterVersion = 'flutter_version';
+  static const String _kDartVersion = 'dart_version';
+
   final Device device;
   final vmservice.VmService vmService;
   final DebuggingOptions debuggingOptions;
@@ -67,18 +80,18 @@ class MDNSDeviceDiscovery {
       final String dartVersion = flutterVersion.dartSdkVersion;
 
       final txt = <String>[
-        'ws_uri=$vmServiceUri',
-        'pid=$pid',
-        'hostname=$hostname',
-        'target=${device.name}',
-        'mode=${debuggingOptions.buildInfo.modeName}',
-        'target_platform=${getNameForTargetPlatform(targetPlatform)}',
-        'epoch=${systemClock.now().millisecondsSinceEpoch}',
-        'project_name=$appName',
-        'device_name=${device.name}',
-        'device_id=${device.id}',
-        'flutter_version=$frameworkVersion',
-        'dart_version=$dartVersion',
+        '$_kWsUri=$vmServiceUri',
+        '$_kPid=$pid',
+        '$_kHostname=$hostname',
+        '$_kTarget=${device.name}',
+        '$_kMode=${debuggingOptions.buildInfo.modeName}',
+        '$_kTargetPlatform=${getNameForTargetPlatform(targetPlatform)}',
+        '$_kEpoch=${systemClock.now().millisecondsSinceEpoch}',
+        '$_kProjectName=$appName',
+        '$_kDeviceName=${device.name}',
+        '$_kDeviceId=${device.id}',
+        '$_kFlutterVersion=$frameworkVersion',
+        '$_kDartVersion=$dartVersion',
       ];
 
       // Advertise on all available interfaces (IPv4 and IPv6).
@@ -87,7 +100,7 @@ class MDNSDeviceDiscovery {
           final MDNSService mdnsService = await MDNSService.create(
             instance: 'Flutter Tools on $hostname',
             service: '_flutter_devices._tcp',
-            port: await findUnusedPort(),
+            port: vmServiceUri.port,
             ips: <InternetAddress>[ip],
             txt: txt,
           );

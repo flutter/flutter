@@ -12,7 +12,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   testUsingContext('running-apps command returns success', () async {
-    final command = RunningAppsCommand();
+    final command = RunningAppsCommand(logger: testLogger);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
   });
@@ -23,7 +23,7 @@ void main() {
       <String, List<SrvResourceRecord>>{},
       <String, List<TxtResourceRecord>>{},
     );
-    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient);
+    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
 
@@ -56,7 +56,7 @@ void main() {
         ],
       },
     );
-    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient);
+    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
 
@@ -114,12 +114,12 @@ void main() {
         ],
       },
     );
-    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient);
+      final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
 
     expect(testLogger.statusText, contains('Found 2 running Flutter apps:'));
-    
+
       // Verify sorting: app_one (1s, younger) should come before app_two (2s, older).
       final int index1 = testLogger.statusText.indexOf('app_one');
       final int index2 = testLogger.statusText.indexOf('app_two');
@@ -196,7 +196,7 @@ void main() {
           ],
         },
       );
-      final command = RunningAppsCommand(mdnsClient: fakeMDnsClient);
+      final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['running-apps']);
 
