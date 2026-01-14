@@ -1176,6 +1176,10 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // only after placing it to the correct position. Hence autofill menu
       // does not appear on top-left of the page.
       // Refocus on the elements after applying the geometry.
+      // placeForm() involves DOM manipulation which can trigger synchronous
+      // events (like blur). These events might invalidate the current
+      // inputConfiguration or disable the strategy before placeForm() returns.
+      // Therefore, we must defensively check if the element is still valid/present.
       focusedFormElement?.focusWithoutScroll();
       moveFocusToActiveDomElement();
     }
