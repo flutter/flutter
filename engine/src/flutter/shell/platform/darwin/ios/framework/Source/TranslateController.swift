@@ -61,7 +61,7 @@ class TranslateViewController: UIViewController {
   }
 
   @objc func makeTranslateHostingController(termToTranslate: String)
-    -> UIViewController
+  -> UIViewController
   {
     var contentView = ContentView(
       termToTranslate: termToTranslate,
@@ -88,6 +88,8 @@ struct ContentView: View {
   var onDismiss: (() -> Void)?
 
   private var anchorSource: Anchor<CGRect>.Source {
+    // On iPad, the translate screen is presented in a popover view
+    // anchored to the textbox rather than a sheet
     if let rect = ipadBounds {
       return .rect(rect)
     }
