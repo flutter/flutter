@@ -135,7 +135,7 @@ final class DartHooksResult {
         .map(
           (FontAsset asset) => FontHookAsset(
             file: asset.file,
-            fontFamily: asset.fontFamily,
+            fontFamily: asset.family,
             package: asset.package,
             weight: asset.weight,
           ),

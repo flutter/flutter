@@ -302,10 +302,10 @@ packages:
     dependency: "direct main"
     description:
       name: font_asset
-      sha256: "49e3380d1de3e48ac380204ee194e46974de3127d34b0280da88f22f323661a7"
+      sha256: b7e14aac8ceae33448824ea15e688b12db60ebdbd25d4610920f0a95eefb11fe
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.8"
+    version: "0.0.9"
   frontend_server_client:
     dependency: "direct main"
     description:

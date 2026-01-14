@@ -111,7 +111,7 @@ Future<Depfile> copyAssets(
 
   for (final FontAsset fontAsset in dartHookResult.fontAssets) {
     final File file = environment.fileSystem.file(
-      environment.fileSystem.path.join(outputDirectory.path, fontAsset.fontFamily),
+      environment.fileSystem.path.join(outputDirectory.path, fontAsset.family),
     );
     outputs.add(file);
     await environment.fileSystem.file(fontAsset.file).copy(file.path);

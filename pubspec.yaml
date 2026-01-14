@@ -109,7 +109,7 @@ dependencies:
   flutter_staggered_grid_view: 0.7.0
   frontend_server_client: 4.0.0
   flutter_hook_config: 0.0.3
-  font_asset: 0.0.8
+  font_asset: 0.0.9
   gcloud: 0.8.19
   glob: 2.1.3
   google_fonts: 6.3.3
