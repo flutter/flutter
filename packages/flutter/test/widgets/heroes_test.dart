@@ -3664,6 +3664,20 @@ Future<void> main() async {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('Hero does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Hero(tag: 'imageHero', child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Hero)), Size.zero);
+  });
 }
 
 class TestDependencies extends StatelessWidget {
