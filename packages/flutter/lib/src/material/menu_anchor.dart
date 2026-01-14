@@ -3421,7 +3421,7 @@ class _Submenu extends StatelessWidget {
                 orientation: anchor._orientation,
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
                 reservedPadding: reservedPadding,
-                mediaQueryData: mediaQuery
+                mediaQueryData: mediaQuery,
               ),
               child: menuPanel,
             );
