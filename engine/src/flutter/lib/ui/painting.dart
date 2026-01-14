@@ -4400,6 +4400,7 @@ abstract class ImageFilter {
       if (invalidSampler) {
         buffer.write('The shader is missing a sampler uniform.\n');
       }
+      throw StateError(buffer.toString());
     }
     return _FragmentShaderImageFilter(shader);
   }
