@@ -556,9 +556,6 @@ class DialogWindowControllerMacOS extends DialogWindowController with _WindowCon
   }
 
   final DialogWindowControllerDelegate _delegate;
-  late final NativeCallable<Void Function()> _onShouldClose;
-  late final NativeCallable<Void Function()> _onWillClose;
-  late final NativeCallable<Void Function()> _onResize;
 
   @override
   Size get contentSize {
