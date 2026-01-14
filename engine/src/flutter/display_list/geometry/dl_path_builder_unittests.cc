@@ -336,21 +336,21 @@ TEST(DisplayListPathBuilder, AddRoundSuperellipse) {
                                        PointEq(DlPoint(99.9232, 21.2114))));
     EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(99.9636, 23.0102)),
                                        PointEq(DlPoint(99.9805, 25.6229)),
-                                       ScalarEq(1.0379051)))
+                                       ScalarEq(1.17059147)))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver,
                 ConicTo(PointEq(DlPoint(100, 28.6213)),
-                        PointEq(DlPoint(100, 51.7857)), ScalarEq(2.74153543)))
+                        PointEq(DlPoint(100, 51.7857)), ScalarEq(2.12785244)))
         .WillOnce(Return(true));
 
     // 3
     EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(100, 78.514)),
                                        PointEq(DlPoint(99.9675, 81.9736)),
-                                       ScalarEq(2.74153543)))
+                                       ScalarEq(2.12785244)))
         .WillOnce(Return(true));
-    EXPECT_CALL(mock_receiver,
-                ConicTo(PointEq(DlPoint(99.9393, 84.9882)),
-                        PointEq(DlPoint(99.872, 87.0638)), ScalarEq(1.0379051)))
+    EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(99.9393, 84.9882)),
+                                       PointEq(DlPoint(99.872, 87.0638)),
+                                       ScalarEq(1.17059147)))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(99.7697, 90.2897)),
                                        PointEq(DlPoint(99.2973, 93.3092)),
@@ -388,21 +388,21 @@ TEST(DisplayListPathBuilder, AddRoundSuperellipse) {
                                        PointEq(DlPoint(10.0993, 87.8409))));
     EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10.0462, 85.8435)),
                                        PointEq(DlPoint(10.0244, 82.8947)),
-                                       ScalarEq(1.04069757)))
+                                       ScalarEq(1.2416352)))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver,
                 ConicTo(PointEq(DlPoint(10, 79.594)),
-                        PointEq(DlPoint(10, 51.5385)), ScalarEq(2.88494563)))
+                        PointEq(DlPoint(10, 51.5385)), ScalarEq(1.77972043)))
         .WillOnce(Return(true));
 
     // 7
     EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10, 27.4909)),
                                        PointEq(DlPoint(10.0122, 24.6616)),
-                                       ScalarEq(2.88494563)))
+                                       ScalarEq(1.77972043)))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, ConicTo(PointEq(DlPoint(10.0231, 22.1342)),
                                        PointEq(DlPoint(10.0496, 20.4221)),
-                                       ScalarEq(1.04069769)))
+                                       ScalarEq(1.2416352)))
         .WillOnce(Return(true));
     EXPECT_CALL(mock_receiver, CubicTo(PointEq(DlPoint(10.0888, 17.8153)),
                                        PointEq(DlPoint(10.2785, 15.3723)),
