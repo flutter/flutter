@@ -4,26 +4,38 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
+import 'package:path/path.dart' as path;
 
-import 'widget_preview_scaffold/test/widget_preview_scaffold_change_detector.dart';
+import 'test/widget_preview_scaffold_change_detector.dart';
 
 /// Regenerates the widget_preview_scaffold if needed.
 void main() {
   if (WidgetPreviewScaffoldChangeDetector.checkForTemplateUpdates(
-    widgetPreviewScaffoldProject: Directory(
-      Platform.script.resolve('widget_preview_scaffold/').path,
-    ),
+    widgetPreviewScaffoldProject: Directory(Platform.script.resolve('.').path),
     widgetPreviewScaffoldTemplateDir: Directory(
-      Platform.script.resolve(path.join('..', '..', 'templates', 'widget_preview_scaffold')).path,
+      Platform.script
+          .resolve(
+            path.join(
+              '..',
+              '..',
+              '..',
+              'packages',
+              'flutter_tools',
+              'templates',
+              'widget_preview_scaffold',
+            ),
+          )
+          .path,
     ),
   )) {
-    stdout.writeln('Changes detected in the widget_preview_scaffold project templates.');
+    stdout.writeln(
+      'Changes detected in the widget_preview_scaffold project templates.',
+    );
     stdout.writeln('Regenerating...');
     final args = <String>[
       'widget-preview',
       'start',
-      '--scaffold-output-dir=${Platform.script.resolve('widget_preview_scaffold').path}',
+      '--scaffold-output-dir=${Platform.script.resolve('.').path}',
     ];
     stdout.writeln('Executing: flutter ${args.join(' ')}');
     final ProcessResult result = Process.runSync('flutter', args);
@@ -31,6 +43,8 @@ void main() {
     stderr.writeln(result.stderr);
     stdout.writeln('Regenerated widget_preview_scaffold.');
   } else {
-    stdout.writeln('No changes detected in the widget_preview_scaffold project templates.');
+    stdout.writeln(
+      'No changes detected in the widget_preview_scaffold project templates.',
+    );
   }
 }
