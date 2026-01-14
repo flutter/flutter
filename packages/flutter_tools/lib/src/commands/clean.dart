@@ -15,12 +15,25 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
+enum XcodeCleanScope { workspace, app, skip }
+
 class CleanCommand extends FlutterCommand {
   CleanCommand({bool verbose = false}) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
       help: 'When cleaning Xcode schemes, clean only the specified scheme.',
+    );
+    argParser.addOption(
+      'xcode-clean',
+      defaultsTo: 'workspace',
+      help: 'Controls Xcode workspace cleanup.',
+      allowed: <String>['workspace', 'app', 'skip'],
+      allowedHelp: <String, String>{
+        'workspace': 'Clean all Xcode schemes (default).',
+        'app': 'Clean only application schemes.',
+        'skip': 'Skip Xcode workspace cleaning.',
+      },
     );
   }
 
@@ -45,8 +58,14 @@ class CleanCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
     if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
-      await _cleanXcode(flutterProject.ios);
-      await _cleanXcode(flutterProject.macos);
+      final XcodeCleanScope xcodeCleanScope = switch (argResults?['xcode-clean'] as String) {
+        'workspace' => XcodeCleanScope.workspace,
+        'skip' => XcodeCleanScope.skip,
+        'app' => XcodeCleanScope.app,
+        _ => XcodeCleanScope.workspace,
+      };
+      await _cleanXcode(xcodeProject: flutterProject.ios, xcodeCleanScope: xcodeCleanScope);
+      await _cleanXcode(xcodeProject: flutterProject.macos, xcodeCleanScope: xcodeCleanScope);
     }
 
     final Directory buildDir = globals.fs.directory(getBuildDirectory());
@@ -72,11 +91,20 @@ class CleanCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
+  Future<void> _cleanXcode({
+    required XcodeBasedProject xcodeProject,
+    required XcodeCleanScope xcodeCleanScope,
+  }) async {
     final Directory? xcodeWorkspace = xcodeProject.xcodeWorkspace;
     if (xcodeWorkspace == null) {
       return;
     }
+
+    if (xcodeCleanScope == XcodeCleanScope.skip) {
+      globals.printTrace('Skipping Xcode workspace cleaning.');
+      return;
+    }
+
     final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
@@ -97,12 +125,28 @@ class CleanCommand extends FlutterCommand {
           verbose: _verbose,
         );
       } else {
-        for (final String scheme in projectInfo.schemes) {
-          await xcodeProjectInterpreter.cleanWorkspace(
-            xcodeWorkspace.path,
-            scheme,
-            verbose: _verbose,
+        final Iterable<String> schemesToClean = switch (xcodeCleanScope) {
+          XcodeCleanScope.skip => const <String>[],
+          XcodeCleanScope.workspace => projectInfo.schemes,
+          XcodeCleanScope.app => _applicationSchemes(
+            projectInfo: projectInfo,
+            xcodeProject: xcodeProject,
+          ),
+        };
+        if (schemesToClean.isEmpty) {
+          globals.printTrace('No Xcode schemes selected for cleaning for the current clean scope.');
+        } else {
+          globals.printTrace(
+            'Cleaning ${schemesToClean.length} Xcode scheme(s): '
+            '${schemesToClean.join(', ')}',
           );
+          for (final scheme in schemesToClean) {
+            await xcodeProjectInterpreter.cleanWorkspace(
+              xcodeWorkspace.path,
+              scheme,
+              verbose: _verbose,
+            );
+          }
         }
       }
     } on Exception catch (error) {
@@ -156,5 +200,32 @@ class CleanCommand extends FlutterCommand {
     } finally {
       deletionStatus.stop();
     }
+  }
+
+  Iterable<String> _applicationSchemes({
+    required XcodeProjectInfo projectInfo,
+    required XcodeBasedProject xcodeProject,
+  }) {
+    final String hostProjectName = xcodeProject.hostAppProjectName;
+    final applicationSchemePrefix = '$hostProjectName-';
+    return projectInfo.schemes.where((String scheme) {
+      if (scheme == hostProjectName) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application scheme).');
+        return true;
+      }
+
+      if (scheme.startsWith(applicationSchemePrefix)) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application flavor).');
+        return true;
+      }
+
+      if (projectInfo.targets.contains(scheme)) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application target).');
+        return true;
+      }
+
+      globals.printTrace('Skipping Xcode scheme "$scheme" (non-application scheme).');
+      return false;
+    });
   }
 }
