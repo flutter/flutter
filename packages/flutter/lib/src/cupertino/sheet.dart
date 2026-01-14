@@ -585,9 +585,13 @@ class _StretchDragControllerProvider extends InheritedWidget {
 /// The sheet will be dismissed by dragging downwards on the screen, or a call to
 /// [CupertinoSheetRoute.popSheet].
 ///
-/// Any scrollable content that uses the [ScrollController] provided by
-/// `scrollableBuilder` will trigger the drag to dismiss behavior when a downward
-/// gesture happens on the scrollable area when the content is already at the top.
+/// Any time a CupertinoSheetRoute contains a large scrollable that might conflict
+/// with the dismiss drag gesture, pass the provided [ScrollController] from `scrollableBuilder`
+/// to the scrollable. A scrollable widget used within the sheet that does not use
+/// this [ScrollController] will still scroll in response to user gestures, but
+/// the drag to dismiss behavior of the sheet will not trigger. If there is no
+/// scrollable area within the sheet, this parameter can be ignored. See below
+/// for an example.
 ///
 /// {@tool dartpad}
 /// This example shows how to navigate to [CupertinoSheetRoute] by using it the
@@ -644,21 +648,21 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   /// Builds the primary contents of the sheet route with a provided [ScrollController].
   ///
-  /// Use this instead of [builder] when the contents of the sheet need to both
-  /// scroll in the Y-axis, while still being able to drag the sheet downwards to
-  /// pop the route.
+  /// If the scrollable content built by this builder uses the provided [ScrollController],
+  /// then when a downward drag is applied to the scrollable area while the content
+  /// is scrolled to the top, the drag to dismiss behavior of the sheet will be triggered.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to show a Cupertino Sheet with scrollable content.
+  ///
+  /// ** See code in examples/api/lib/cupertino/sheet/cupertino_sheet.3.dart **
+  /// {@end-tool}
   final ScrollableWidgetBuilder? scrollableBuilder;
 
-  WidgetBuilder get _effectiveBuilder =>
-      builder ??
-      (BuildContext context) => _CupertinoDraggableScrollableSheet<T>(
-        enabledCallback: () => enableDrag,
-        onStartPopGesture: () =>
-            _CupertinoSheetRouteTransitionMixin._startPopGesture<T>(this, topGap),
-        builder:
-            scrollableBuilder ??
-            (BuildContext context, ScrollController controller) => builder!(context),
-      );
+  ScrollableWidgetBuilder get _effectiveBuilder {
+    return scrollableBuilder ??
+        (BuildContext context, ScrollController controller) => builder!(context);
+  }
 
   @override
   final bool enableDrag;
@@ -677,9 +681,9 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
   /// Defaults to false.
   final bool showDragHandle;
 
-  Widget _sheetWithDragHandle(BuildContext context) {
+  Widget _sheetWithDragHandle(BuildContext context, ScrollController controller) {
     if (!showDragHandle) {
-      return _effectiveBuilder(context);
+      return _effectiveBuilder(context, controller);
     }
 
     // Values derived from Apple's Figma files and a simulator running iOS 18.2.
@@ -695,7 +699,7 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
           data: MediaQuery.of(
             context,
           ).copyWith(padding: const EdgeInsets.only(top: dragHandlePadding)),
-          child: _effectiveBuilder(context),
+          child: _effectiveBuilder(context, controller),
         ),
         const Align(
           alignment: Alignment.topCenter,
@@ -725,7 +729,14 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: _sheetWithDragHandle(context)),
+          child: _CupertinoSheetScope(
+            child: _CupertinoDraggableScrollableSheet<T>(
+              enabledCallback: () => enableDrag,
+              onStartPopGesture: () =>
+                  _CupertinoSheetRouteTransitionMixin._startPopGesture<T>(this, topGap),
+              builder: _sheetWithDragHandle,
+            ),
+          ),
         ),
       ),
     );
@@ -963,9 +974,10 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
     if (_stretchDragController == null) {
       return;
     }
+    final double delta = sheetHeight > 0 ? details.primaryDelta! / sheetHeight : 0.0;
     _dragGestureController!.dragUpdate(
       // Divide by size of the sheet.
-      details.primaryDelta! / sheetHeight,
+      delta,
       _stretchDragController!.controller,
     );
   }
@@ -977,10 +989,10 @@ class _CupertinoDragGestureDetectorState<T> extends State<_CupertinoDragGestureD
       _dragGestureController = null;
       return;
     }
-    _dragGestureController!.dragEnd(
-      details.velocity.pixelsPerSecond.dy / sheetHeight,
-      _stretchDragController!.controller,
-    );
+    final double velocity = sheetHeight > 0
+        ? details.velocity.pixelsPerSecond.dy / sheetHeight
+        : 0.0;
+    _dragGestureController!.dragEnd(velocity, _stretchDragController!.controller);
     _dragGestureController = null;
   }
 
@@ -1144,12 +1156,12 @@ class _CupertinoSheetScrollController extends ScrollController {
   final bool Function() sheetIsDraggedDown;
 
   @override
-  _DraggableScrollableSheetScrollPosition createScrollPosition(
+  _CupertinoSheetScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
-    return _DraggableScrollableSheetScrollPosition(
+    return _CupertinoSheetScrollPosition(
       physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
       context: context,
       oldPosition: oldPosition,
@@ -1162,19 +1174,16 @@ class _CupertinoSheetScrollController extends ScrollController {
 }
 
 /// A scroll position that manages scroll activities for
-/// [_DraggableScrollableSheetScrollController].
+/// [_CupertinoSheetScrollController].
 ///
 /// This class is a concrete subclass of [ScrollPosition] logic that handles a
 /// single [ScrollContext], such as a [Scrollable]. An instance of this class
-/// manages [ScrollActivity] instances, which changes the
-/// [_DraggableSheetExtent.currentSize] or visible content offset in the
-/// [Scrollable]'s [Viewport]
-///
-/// See also:
-///
-///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
-class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleContext {
-  _DraggableScrollableSheetScrollPosition({
+/// manages [ScrollActivity] instances, which in response to user gestures either
+/// changes the visible content offset in the [Scrollable]'s [Viewport], or reports
+/// the delta change or velocity of the user's gestures back to
+/// [_CupertinoDragGestureController] through [_CupertinoSheetScrollController].
+class _CupertinoSheetScrollPosition extends ScrollPositionWithSingleContext {
+  _CupertinoSheetScrollPosition({
     required super.physics,
     required super.context,
     super.oldPosition,
@@ -1199,7 +1208,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     super.absorb(other);
     assert(_dragCancelCallback == null);
 
-    if (other is! _DraggableScrollableSheetScrollPosition) {
+    if (other is! _CupertinoSheetScrollPosition) {
       return;
     }
 
