@@ -131,16 +131,9 @@ class HotRunner extends ResidentRunner {
   @visibleForTesting
   String? get targetPlatformName => _targetPlatformName;
 
-  TargetPlatform get _targetPlatform {
-    if (_targetPlatformName == 'multiple') {
-      return _baseTargetPlatform ?? TargetPlatform.android;
-    }
-    return _targetPlatformName != null
-      ? getTargetPlatformForName(_targetPlatformName!)
-      : throw ArgumentError(
-          'Access to the target platform needs a call to _calculateTargetPlatform first',
-        );
-  }
+  String? _targetPlatformName;
+  final Set<TargetPlatform> _targetPlatforms = <TargetPlatform>{};
+
   String? _sdkName;
   bool? _emulator;
 
@@ -173,9 +166,9 @@ class HotRunner extends ResidentRunner {
         );
         _sdkName = 'multiple';
         _emulator = false;
-        // Use the first device's platform as the base for building assets.
-        // This is better than an arbitrary default.
-        _baseTargetPlatform = await flutterDevices.first.device!.targetPlatform;
+      // Use the first device's platform as the base for building assets.
+      // This is better than an arbitrary default.
+
       default:
         _targetPlatformName = 'unknown';
         _sdkName = 'unknown';
