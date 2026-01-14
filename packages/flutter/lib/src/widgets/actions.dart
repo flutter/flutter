@@ -1672,7 +1672,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   Object? invoke(T intent, [BuildContext? context]) {
     final Action<Intent>? overrideAction = getOverrideAction(intent);
     final Object? returnValue = overrideAction == null
-        ? invokeDefaultAction(intent, callingAction, context)
+        ? invokeDefaultAction(intent, _currentCallingAction, context)
         : _invokeOverride(overrideAction, intent, context);
     return returnValue;
   }
