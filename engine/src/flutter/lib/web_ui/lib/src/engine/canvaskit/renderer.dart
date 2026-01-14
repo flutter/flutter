@@ -23,6 +23,9 @@ class CanvasKitRenderer extends Renderer {
   @override
   String get rendererTag => 'canvaskit';
 
+  /// Whether the renderer is using software rendering.
+  bool get isSoftware => _pictureToImageSurface.isSoftware;
+
   late final FlutterFontCollection _fontCollection = isExperimentalWebParagraph
       ? WebFontCollection()
       : SkiaFontCollection();
@@ -211,7 +214,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
+    SkImage? skImage;
+    if (isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(imageBitmap);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
+    }
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
@@ -234,16 +242,31 @@ class CanvasKitRenderer extends Renderer {
       ));
       return createImageFromImageBitmap(bitmap);
     }
-    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-      object,
-      SkPartialImageInfo(
-        width: width.toDouble(),
-        height: height.toDouble(),
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-      ),
-    );
+    SkImage? skImage;
+    if (isSoftware) {
+      if (object.isA<VideoFrame>()) {
+        // If the object is a VideoFrame, we need to draw it to a canvas first to
+        // avoid a bug in CanvasKit where MakeImageFromCanvasImageSource doesn't
+        // work with VideoFrames.
+        final DomHTMLCanvasElement canvas = createDomCanvasElement(width: width, height: height);
+        final DomCanvasRenderingContext2D ctx = canvas.context2D;
+        ctx.drawImage(object as VideoFrame, 0, 0);
+        skImage = canvasKit.MakeImageFromCanvasImageSource(canvas);
+      } else {
+        skImage = canvasKit.MakeImageFromCanvasImageSource(object);
+      }
+    } else {
+      skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+        object,
+        SkPartialImageInfo(
+          width: width.toDouble(),
+          height: height.toDouble(),
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+        ),
+      );
+    }
 
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');

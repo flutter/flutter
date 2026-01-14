@@ -52,6 +52,9 @@ abstract class CkSurface extends Surface {
     return true;
   }
 
+  /// Whether this surface is using software rendering.
+  bool get isSoftware => !supportsWebGl;
+
   String? _fallbackToSoftwareReason;
 
   /// When true, the surface will fail to create a GL context and fall back to

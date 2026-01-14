@@ -170,11 +170,23 @@ extension type CanvasKit(JSObject _) implements JSObject {
     bool srcIsPremultiplied,
   );
 
-  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) =>
-      _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  SkImage? MakeLazyImageFromTextureSourceWithInfo(Object src, SkPartialImageInfo info) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromTextureSourceWithInfo` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource2(src.toJSAnyShallow, info);
+  }
 
-  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) =>
-      _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  SkImage? MakeLazyImageFromImageBitmap(DomImageBitmap imageBitmap, bool hasPremultipliedAlpha) {
+    assert(
+      !CanvasKitRenderer.instance.isSoftware,
+      'Cannot use `MakeLazyImageFromImageBitmap` in CPU-only mode.',
+    );
+    return _MakeLazyImageFromTextureSource3(imageBitmap, 0, hasPremultipliedAlpha);
+  }
+
+  external SkImage? MakeImageFromCanvasImageSource(JSAny src);
 }
 
 extension type CanvasKitModule(JSObject _) implements JSObject {
