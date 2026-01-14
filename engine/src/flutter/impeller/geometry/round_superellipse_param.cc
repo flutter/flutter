@@ -502,6 +502,18 @@ class RoundSuperellipseBuilder {
       n = kMaxN;
     }
 
+    // Compute weight1 and weight 2
+
+    Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
+    size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
+                                     kNumRecords - 2);
+    Scalar frac = steps - left;
+
+    Scalar weight1 = (1 - frac) * kPrecomputedVariables[left][0] +
+                     frac * kPrecomputedVariables[left + 1][0] * sqrt(n);
+    Scalar weight2 = (1 - frac) * kPrecomputedVariables[left][1] +
+                     frac * kPrecomputedVariables[left + 1][1] * xJOverA;
+
     // Compute yHOverA
 
     // H, the splitting point between the two conic curves, is picked by its y
@@ -516,17 +528,6 @@ class RoundSuperellipseBuilder {
     Scalar yHOverA =
         (yAOverA * yH_proportion + yJOverA) / (yH_proportion + 1.0f);
 
-    // Compute weight1 and weight 2
-
-    Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
-    size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
-                                     kNumRecords - 2);
-    Scalar frac = steps - left;
-
-    Scalar weight1 = (1 - frac) * kPrecomputedVariables[left][0] +
-                     frac * kPrecomputedVariables[left + 1][0] * sqrt(n);
-    Scalar weight2 = (1 - frac) * kPrecomputedVariables[left][1] +
-                     frac * kPrecomputedVariables[left + 1][1] * xJOverA;
     return {weight1, weight2, yHOverA};
   }
 
