@@ -347,7 +347,7 @@ class SwiftPackageManagerUtils {
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
           RegExp(
-            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
+            '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}',
           ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
@@ -405,6 +405,7 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
+          '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}',
           '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
