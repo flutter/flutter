@@ -169,6 +169,14 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   ///
   ///  * [RevealedOffset], which describes the return value of this method.
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect? rect, Axis? axis});
+
+  /// Deprecated, the viewport defaults cache extent by using [CacheExtentStyle.viewport]
+  /// and [RawGestureDetector.kDefaultSemanticsScrollFactor].
+  @Deprecated(
+    'Use CacheExtentStyle.viewport and RawGestureDetector.kDefaultSemanticsScrollFactor instead. '
+    'This feature was deprecated after v3.41.0.'
+  )
+  static const double defaultCacheExtent = 250.0;
 }
 
 /// Return value for [RenderAbstractViewport.getOffsetToReveal].
