@@ -92,7 +92,11 @@ class WidgetPreviewWorkspace {
       PackageConfig(
         <Package>[
           for (final String package in [..._packages.keys, ?injectNonExistentProject])
-            Package(package, workspaceRoot.childDirectory('packages').childDirectory(package).uri),
+            Package(
+              package,
+              workspaceRoot.childDirectory('packages').childDirectory(package).uri,
+              packageUriRoot: Uri(path: 'lib/'),
+            ),
           Package(
             'flutter',
             Uri(scheme: 'file', path: '$flutterRoot/packages/flutter/'),
