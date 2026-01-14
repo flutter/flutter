@@ -5,6 +5,7 @@
 package com.flutter.gradle.tasks
 
 import org.gradle.api.DefaultTask
+import groovy.util.Node
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -29,15 +30,36 @@ abstract class ManifestModifierTask : DefaultTask() {
     fun modifyManifest() {
         println("CAMILLE: androidEngineShellArgsStr")
         println(androidEngineShellArgsStr.get())
-        // TODO(camsim99): try out xml parser instead for safety
-        val originalManifestText = manifestFile.get().asFile.readText()
-        // val androidEngineShellArgs = androidEngineShellArgsStr.split(',')
-        val updatedManifestText = originalManifestText.replace(
-            "</application>",
-            "    <meta-data android:name=\"androidEngineShellArgs\" android:value=\"${androidEngineShellArgsStr.get()}\" />\n    </application>"
-        )
-        // println("CAMILLE: ManifestModifierTask print out:")
-        // println(updatedManifestText)
-        updatedManifestFile.get().asFile.writeText(updatedManifestText)
+
+        val manifest: Node =
+            groovy.xml
+                .XmlParser(false, false)
+                .parse(manifestFile.get().asFile)
+        val applicationNode: Node? =
+            manifest.children().find { node ->
+                node is Node && node.name() == "application"
+            } as Node?
+
+        // We are attempting to modify the wrong manifest file. Do not attempt to modify.
+        if (applicationNode == null) {
+            return
+        }
+
+        applicationNode.appendNode("meta-data", mapOf(
+            "android:name" to "androidEngineShellArgs",
+            "android:value" to androidEngineShellArgsStr.get()
+        ))
+
+        updatedManifestFile.get().asFile.bufferedWriter().use { writer ->
+            groovy.xml.XmlUtil.serialize(manifest, writer)
+        }
+
+        /////////////// IMPLEMENTATION WITHOUT XMLPARSER BELOW: ///////////////
+        // val originalManifestText = manifestFile.get().asFile.readText()
+        // val updatedManifestText = originalManifestText.replace(
+        //     "</application>",
+        //     "    <meta-data android:name=\"androidEngineShellArgs\" android:value=\"${androidEngineShellArgsStr.get()}\" />\n    </application>"
+        // )
+        // updatedManifestFile.get().asFile.writeText(updatedManifestText)
     }
 }

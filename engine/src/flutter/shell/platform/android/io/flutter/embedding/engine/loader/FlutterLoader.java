@@ -329,6 +329,7 @@ public class FlutterLoader {
               .getApplicationInfo(
                   applicationContext.getPackageName(), PackageManager.GET_META_DATA);
       Bundle metaData = applicationInfo.metaData;
+      Log.e("CAMILLE", "metadata: " + metaData);
       if (metaData != null) {
         String shellArgsFromCommandLine =
             metaData.getString(SHELL_ARGS_FROM_COMMAND_LINE_METADATA_KEY);
