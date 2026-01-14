@@ -5,6 +5,5 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true,
-    "dart.flutterSdkPath": "bin"
+    "files.trimTrailingWhitespace": true
 }
