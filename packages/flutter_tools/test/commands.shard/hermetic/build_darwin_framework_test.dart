@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import '../../src/common.dart';
@@ -732,91 +733,199 @@ void main() {
     });
   });
 
-  group('parseVendoredFrameworks', () {
-    testWithoutContext('returns empty list when no vendored_frameworks', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.name = 'test'
-  s.version = '1.0.0'
-end
-''';
-      expect(parseVendoredFrameworks(podspec), isEmpty);
+  group('parseVendoredFrameworksFromPbxproj', () {
+    late MemoryFileSystem fileSystem;
+    late BufferLogger logger;
+    late FakePlistParser fakePlistParser;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+      fakePlistParser = FakePlistParser();
     });
 
-    testWithoutContext('parses single string value with single quotes', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.name = 'test'
-  s.vendored_frameworks = 'Frameworks/SomeSDK.framework'
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['Frameworks/SomeSDK.framework']);
+    testWithoutContext('returns empty list when project file does not exist', () {
+      final File projectFile = fileSystem.file('/nonexistent/project.pbxproj');
+      fakePlistParser.setJsonContent(projectFile.path, null);
+
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
+
+      expect(result, isEmpty);
     });
 
-    testWithoutContext('parses single string value with double quotes', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.name = "test"
-  s.vendored_frameworks = "Frameworks/SomeSDK.framework"
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['Frameworks/SomeSDK.framework']);
+    testWithoutContext('returns empty list when no Frameworks group exists', () {
+      final File projectFile = fileSystem.file('/test/project.pbxproj')..createSync(recursive: true);
+      fakePlistParser.setJsonContent(
+        projectFile.path,
+        '''
+{
+  "objects": {
+    "ABC123": {
+      "isa": "PBXGroup",
+      "name": "Sources",
+      "children": ["DEF456"]
+    }
+  }
+}
+''',
+      );
+
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
+
+      expect(result, isEmpty);
     });
 
-    testWithoutContext('parses array value', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.name = 'test'
-  s.vendored_frameworks = ['First.framework', 'Second.framework']
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['First.framework', 'Second.framework']);
+    testWithoutContext('parses frameworks from Frameworks group', () {
+      final File projectFile = fileSystem.file('/test/project.pbxproj')..createSync(recursive: true);
+      fakePlistParser.setJsonContent(
+        projectFile.path,
+        '''
+{
+  "objects": {
+    "GROUP1": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF1", "REF2"]
+    },
+    "REF1": {
+      "isa": "PBXFileReference",
+      "path": "MySDK.xcframework"
+    },
+    "REF2": {
+      "isa": "PBXFileReference",
+      "path": "AnotherSDK.framework"
+    }
+  }
+}
+''',
+      );
+
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
+
+      expect(result, containsAll(<String>['MySDK.xcframework', 'AnotherSDK.framework']));
     });
 
-    testWithoutContext('parses array with mixed quotes', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.vendored_frameworks = ['First.framework', "Second.framework"]
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['First.framework', 'Second.framework']);
+    testWithoutContext('skips non-framework files in Frameworks group', () {
+      final File projectFile = fileSystem.file('/test/project.pbxproj')..createSync(recursive: true);
+      fakePlistParser.setJsonContent(
+        projectFile.path,
+        '''
+{
+  "objects": {
+    "GROUP1": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF1", "REF2", "REF3"]
+    },
+    "REF1": {
+      "isa": "PBXFileReference",
+      "path": "MySDK.xcframework"
+    },
+    "REF2": {
+      "isa": "PBXFileReference",
+      "path": "libsomething.a"
+    },
+    "REF3": {
+      "isa": "PBXFileReference",
+      "path": "something.dylib"
+    }
+  }
+}
+''',
+      );
+
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
+
+      expect(result, <String>['MySDK.xcframework']);
     });
 
-    testWithoutContext('parses with spec variable name', () {
-      const podspec = '''
-Pod::Spec.new do |spec|
-  spec.vendored_frameworks = 'SDK.framework'
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['SDK.framework']);
+    testWithoutContext('handles multiple Frameworks groups', () {
+      final File projectFile = fileSystem.file('/test/project.pbxproj')..createSync(recursive: true);
+      fakePlistParser.setJsonContent(
+        projectFile.path,
+        '''
+{
+  "objects": {
+    "GROUP1": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF1"]
+    },
+    "GROUP2": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF2"]
+    },
+    "REF1": {
+      "isa": "PBXFileReference",
+      "path": "SDK1.xcframework"
+    },
+    "REF2": {
+      "isa": "PBXFileReference",
+      "path": "SDK2.xcframework"
+    }
+  }
+}
+''',
+      );
+
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
+
+      expect(result, containsAll(<String>['SDK1.xcframework', 'SDK2.xcframework']));
     });
 
-    testWithoutContext('handles paths with subdirectories', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.vendored_frameworks = 'FairDynamicFlutter/Products/FairDynamicFlutter.framework'
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['FairDynamicFlutter/Products/FairDynamicFlutter.framework']);
-    });
+    testWithoutContext('handles invalid JSON gracefully', () {
+      final File projectFile = fileSystem.file('/test/project.pbxproj')..createSync(recursive: true);
+      fakePlistParser.setJsonContent(projectFile.path, 'not valid json');
 
-    testWithoutContext('handles xcframework extension', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.vendored_frameworks = 'SDK.xcframework'
-end
-''';
-      expect(parseVendoredFrameworks(podspec), ['SDK.xcframework']);
-    });
+      final List<String> result = parseVendoredFrameworksFromPbxproj(
+        projectFile,
+        fakePlistParser,
+        logger,
+      );
 
-    testWithoutContext('parses placeholder path', () {
-      const podspec = '''
-Pod::Spec.new do |s|
-  s.vendored_frameworks = 'path/to/nothing'
-end
-''';
-      // The function returns all paths; filtering of 'path/to/nothing' is done in _copyVendoredFrameworks
-      expect(parseVendoredFrameworks(podspec), ['path/to/nothing']);
+      expect(result, isEmpty);
     });
   });
+}
+
+/// A fake PlistParser for testing that returns pre-configured JSON content.
+class FakePlistParser extends PlistParser {
+  FakePlistParser()
+      : super(
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        );
+
+  final Map<String, String?> _jsonContentByPath = <String, String?>{};
+
+  void setJsonContent(String path, String? content) {
+    _jsonContentByPath[path] = content;
+  }
+
+  @override
+  String? plistJsonContent(String filePath) {
+    return _jsonContentByPath[filePath];
+  }
 }

@@ -368,8 +368,12 @@ end
         }
       }
 
-      // Copy vendored frameworks from plugin podspecs.
-      await copyVendoredFrameworks(modeDirectory, 'macos');
+      // Copy vendored frameworks from CocoaPods plugins.
+      await copyVendoredFrameworks(
+        modeDirectory,
+        project.macos.hostAppRoot,
+        globals.plistParser,
+      );
     } finally {
       status.stop();
     }
