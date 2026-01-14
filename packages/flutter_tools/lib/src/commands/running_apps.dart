@@ -62,7 +62,7 @@ class RunningAppsCommand extends FlutterCommand {
     _logger.printStatus('Searching for running Flutter apps...');
     final MDnsClient client = _mdnsClient ?? MDnsClient();
 
-    final List<Map<String, String>> apps = [];
+    final apps = <Map<String, String>>[];
     final seenUris = <String>{};
     try {
       await client.start();
@@ -182,6 +182,9 @@ class RunningAppsCommand extends FlutterCommand {
 /// Formats the elapsed time since the given epoch.
 @visibleForTesting
 String getProcessAge(String? epochString, SystemClock systemClock) {
+  // TODO(jwren): Consider using [DurationAgo] from `lib/src/base/utils.dart`.
+  // We need to decide on the width and precision, possibly modifying the utility
+  // to support a shorter form (e.g. "5m" versus "5 minutes ago").
   if (epochString == null) {
     return 'unknown age';
   }
