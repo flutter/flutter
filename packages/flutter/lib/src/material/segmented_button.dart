@@ -999,14 +999,15 @@ class _RenderSegmentedButton<T> extends RenderBox
       child = childAfter(child);
     }
 
-    // When the parent enforces a bounded width, ensure each child
-    // occupies the full available width, preventing segments from
-    // shrinking to their intrinsic content size.
-    if (constraints.hasBoundedWidth) {
-      maxWidth = math.max(maxWidth, constraints.maxWidth);
+    var childSize = Size(maxWidth, childHeight);
+
+    // When the parent provides a tight width constraint, use that width for
+    // layout so the visual size and the interactive area match. This preserves
+    if (constraints.hasTightWidth && childSize.width < constraints.maxWidth) {
+      childSize = Size(constraints.maxWidth, childSize.height);
     }
 
-    return Size(maxWidth, childHeight);
+    return childSize;
   }
 
   Size _computeOverallSizeFromChildSize(Size childSize) {
