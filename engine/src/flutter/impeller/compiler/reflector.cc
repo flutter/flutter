@@ -886,6 +886,8 @@ std::vector<StructMember> Reflector::ReadStructMembers(
     // Mat2
     if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
         member.width == 32 && member.columns == 2 && member.vecsize == 2) {
+      // Mat2's are packaged like 2 vec2's, ie
+      // {val, val, padding, padding, val, val, padding, padding}.
       uint32_t count = array_elements.value_or(1) * 2;
       uint32_t stride = 16;
       uint32_t total_length = stride * count;
