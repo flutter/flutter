@@ -196,7 +196,7 @@ Future<T?> showCupertinoSheet<T>({
 
     return Navigator.of(context, rootNavigator: true).push<T>(route);
   } else {
-    Widget nestedNavigationContent(Widget child) {
+    Widget nestedNavigationContent(WidgetBuilder builder) {
       return NavigatorPopHandler(
         onPopWithResult: (T? result) {
           nestedNavigatorKey.currentState!.maybePop();
@@ -216,7 +216,7 @@ Future<T?> showCupertinoSheet<T>({
                       }
                       Navigator.of(context, rootNavigator: true).pop(result);
                     },
-                    child: child,
+                    child: builder(context),
                   );
                 },
               ),
@@ -227,21 +227,21 @@ Future<T?> showCupertinoSheet<T>({
     }
 
     final route = effectiveBuilder != null
-      ? CupertinoSheetRoute<T>(
-          builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
-          settings: settings,
-          enableDrag: enableDrag,
-          topGap: topGap,
-        )
-      : CupertinoSheetRoute<T>(
-          scrollableBuilder: (BuildContext context, ScrollController controller) =>
-              nestedNavigationContent(
-                (BuildContext context) => scrollableBuilder!(context, controller),
-              ),
-          settings: settings,
-          enableDrag: enableDrag,
-          topGap: topGap,
-        );
+        ? CupertinoSheetRoute<T>(
+            builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
+            settings: settings,
+            enableDrag: enableDrag,
+            topGap: topGap,
+          )
+        : CupertinoSheetRoute<T>(
+            scrollableBuilder: (BuildContext context, ScrollController controller) =>
+                nestedNavigationContent(
+                  (BuildContext context) => scrollableBuilder!(context, controller),
+                ),
+            settings: settings,
+            enableDrag: enableDrag,
+            topGap: topGap,
+          );
     return Navigator.of(context, rootNavigator: true).push<T>(route);
   }
 }
