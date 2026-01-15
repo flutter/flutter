@@ -1243,8 +1243,7 @@ class TextureAndroidViewController extends AndroidViewController {
     super.creationParamsCodec,
   }) : super._();
 
-  final _TextureAndroidViewControllerInternals _internals =
-      _TextureAndroidViewControllerInternals();
+  _AndroidViewControllerInternals _internals = _TextureAndroidViewControllerInternals();
 
   @override
   bool get _createRequiresSize => true;
@@ -1256,17 +1255,21 @@ class TextureAndroidViewController extends AndroidViewController {
       'trying to create $TextureAndroidViewController without setting a valid size.',
     );
 
-    _internals.textureId =
-        await _AndroidViewControllerInternals.sendCreateMessage(
-              viewId: viewId,
-              viewType: _viewType,
-              hybrid: false,
-              layoutDirection: _layoutDirection,
-              creationParams: _creationParams,
-              size: size,
-              position: position,
-            )
-            as int;
+    final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: false,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      size: size,
+      position: position,
+    );
+    if (response is int) {
+      (_internals as _TextureAndroidViewControllerInternals).textureId = response;
+    } else {
+      // Fallback to HCPP.
+      _internals = _Hybrid2AndroidViewControllerInternals();
+    }
   }
 
   @override
@@ -1477,8 +1480,8 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
   }
 
   @override
-  int get textureId {
-    throw UnimplementedError('Not supported for hybrid composition.');
+  int? get textureId {
+    return null;
   }
 
   @override
@@ -1486,7 +1489,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
 
   @override
   Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
-    throw UnimplementedError('Not supported for hybrid composition.');
+    return Future<Size>.value(size);
   }
 
   @override
@@ -1495,7 +1498,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
     required int viewId,
     required _AndroidViewState viewState,
   }) {
-    throw UnimplementedError('Not supported for hybrid composition.');
+    return Future<void>.value();
   }
 
   @override
