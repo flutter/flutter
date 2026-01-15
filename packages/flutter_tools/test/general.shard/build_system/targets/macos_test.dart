@@ -7,9 +7,11 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -971,13 +973,92 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+
+  testUsingContext(
+    'can be skipped with Swift Package Manager',
+    () async {
+      final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
+        'my_project',
+      );
+      projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
+      projectDirectory.childDirectory('macos').createSync();
+      projectDirectory
+          .childDirectory('macos')
+          .childDirectory('Flutter')
+          .childDirectory('ephemeral')
+          .childDirectory('Packages')
+          .childDirectory('.packages')
+          .childDirectory('FlutterFramework')
+          .createSync(recursive: true);
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+        projectDir: projectDirectory,
+        defines: <String, String>{kXcodeBuildScript: 'build'},
+      );
+      const Target target = ReleaseUnpackMacOS();
+      expect(await target.canSkip(environment), isTrue);
+    },
+    overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+    },
+  );
+
+  group('FlutterMacOS output', () {
+    late MemoryFileSystem testFileSystem;
+
+    setUp(() {
+      testFileSystem = MemoryFileSystem.test();
+      testFileSystem.file('pubspec.yaml').createSync(recursive: true);
+      testFileSystem.directory('macos').createSync(recursive: true);
+      testFileSystem
+          .directory('macos/Flutter/ephemeral/Packages/.packages/FlutterFramework')
+          .createSync(recursive: true);
+    });
+
+    testUsingContext(
+      'not included when using SwiftPM',
+      () async {
+        const Target target = ReleaseUnpackMacOS();
+        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+    testUsingContext(
+      'included when not using SwiftPM',
+      () async {
+        const Target target = ReleaseUnpackMacOS();
+        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
+
+  @override
+  final Version? version;
 
   List<String> schemes;
 
