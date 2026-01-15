@@ -10,6 +10,11 @@
 
 namespace {
 using ::testing::Return;
+
+MATCHER_P(ScalarEq, a, "") {
+  *result_listener << "isn't equal to " << a;
+  return abs(arg - a) <= impeller::kEhCloseEnough;
+}
 }  // namespace
 
 namespace flutter {
