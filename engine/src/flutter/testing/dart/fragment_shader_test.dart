@@ -455,7 +455,7 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest('FragmentShader with uniforms renders correctly', () async {
+  test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader()
@@ -622,14 +622,22 @@ void main() async {
 
 void _runSkiaTest(String name, Future<void> Function() callback) {
   test(name, () async {
+    if (impellerEnabled) {
+      print('Skipped for Impeller.');
+      return;
+    }
     await callback();
-  }, skip: impellerEnabled);
+  });
 }
 
 void _runImpellerTest(String name, Future<void> Function() callback) {
   test(name, () async {
+    if (!impellerEnabled) {
+      print('Skipped for Skia.');
+      return;
+    }
     await callback();
-  }, skip: !impellerEnabled);
+  });
 }
 
 // Expect that all of the shaders in this folder render green.
