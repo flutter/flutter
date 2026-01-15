@@ -439,7 +439,7 @@ final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem w
 ///
 /// The [title] is optional, but it must be specified before being sent to the
 /// platform. Typically it should be set to
-/// [WidgetsLocalizations.translationButtonLabel].
+/// [WidgetsLocalizations.translateButtonLabel].
 ///
 /// The action is handled by the platform.
 ///
