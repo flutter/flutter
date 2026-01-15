@@ -60,7 +60,7 @@ void main() async {
       shader = program.fragmentShader();
     });
 
-    test('FragmentProgram uniform info', () async {
+    _runSkiaTest('FragmentProgram uniform info', () async {
       final List<UniformFloatSlot> slots = [
         shader.getUniformFloat('iFloatUniform'),
         shader.getUniformFloat('iVec2Uniform', 0),
@@ -90,7 +90,7 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformFloat offset overflow', () async {
+    _runSkiaTest('FragmentProgram getUniformFloat offset overflow', () async {
       expect(
         () => shader.getUniformFloat('iVec2Uniform', 2),
         throwsA(
@@ -103,7 +103,7 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformFloat offset underflow', () async {
+    _runSkiaTest('FragmentProgram getUniformFloat offset underflow', () async {
       expect(
         () => shader.getUniformFloat('iVec2Uniform', -1),
         throwsA(
@@ -116,12 +116,12 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformVec2', () async {
+    _runSkiaTest('FragmentProgram getUniformVec2', () async {
       final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
       slot.set(6.0, 7.0);
     });
 
-    test('FragmentProgram getUniformVec2 wrong size', () async {
+    _runSkiaTest('FragmentProgram getUniformVec2 wrong size', () async {
       expect(
         () => shader.getUniformVec2('iVec3Uniform'),
         throwsA(
@@ -144,12 +144,12 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformVec3', () async {
+    _runSkiaTest('FragmentProgram getUniformVec3', () async {
       final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
       slot.set(0.8, 0.1, 0.3);
     });
 
-    test('FragmentProgram getUniformVec3 wrong size', () async {
+    _runSkiaTest('FragmentProgram getUniformVec3 wrong size', () async {
       expect(
         () => shader.getUniformVec3('iVec2Uniform'),
         throwsA(
@@ -172,12 +172,12 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformVec4', () async {
+    _runSkiaTest('FragmentProgram getUniformVec4', () async {
       final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
       slot.set(11.0, 22.0, 19.0, 96.0);
     });
 
-    test('FragmentProgram getUniformVec4 wrong size', () async {
+    _runSkiaTest('FragmentProgram getUniformVec4 wrong size', () async {
       expect(
         () => shader.getUniformVec4('iVec3Uniform'),
         throwsA(
@@ -190,7 +190,7 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformArray float', () async {
+    _runSkiaTest('FragmentProgram getUniformArray float', () async {
       final UniformArray<UniformFloatSlot> slots = shader.getUniformFloatArray(
         'iFloatArrayUniform',
       );
@@ -199,7 +199,7 @@ void main() async {
       slots[1].set(1.0);
     });
 
-    test('FragmentProgram getUniformArray not found', () async {
+    _runSkiaTest('FragmentProgram getUniformArray not found', () async {
       expect(
         () => shader.getUniformFloatArray('unknown'),
         throwsA(
@@ -212,13 +212,13 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformArrayVec2', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec2', () async {
       final UniformArray<UniformVec2Slot> slots = shader.getUniformVec2Array('iVec2ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0);
     });
 
-    test('FragmentProgram getUniformArrayVec2 wrong type', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec2 wrong type', () async {
       expect(
         () => shader.getUniformVec2Array('iVec3ArrayUniform'),
         throwsA(
@@ -231,13 +231,13 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformArrayVec3', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec3', () async {
       final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0);
     });
 
-    test('FragmentProgram getUniformArrayVec3 wrong type', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec3 wrong type', () async {
       expect(
         () => shader.getUniformVec3Array('iFloatArrayUniform'),
         throwsA(
@@ -250,13 +250,13 @@ void main() async {
       );
     });
 
-    test('FragmentProgram getUniformArrayVec4', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec4', () async {
       final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0, 1.0);
     });
 
-    test('FragmentProgram getUniformArrayVec4 wrong type', () async {
+    _runSkiaTest('FragmentProgram getUniformArrayVec4 wrong type', () async {
       expect(
         () => shader.getUniformVec4Array('iFloatArrayUniform'),
         throwsA(
