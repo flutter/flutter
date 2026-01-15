@@ -257,7 +257,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
     }
 
     if (_viewController.requiresViewComposition) {
-      context.addLayer(PlatformViewLayer(rect: offset & _currentTextureSize!, viewId: _viewController.viewId));
+      context.addLayer(
+        PlatformViewLayer(rect: offset & _currentTextureSize!, viewId: _viewController.viewId),
+      );
       return;
     }
 
