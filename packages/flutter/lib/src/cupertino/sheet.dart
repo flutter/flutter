@@ -178,7 +178,10 @@ Future<T?> showCupertinoSheet<T>({
 }) {
   assert(topGap == null || (topGap >= 0.0 && topGap <= 0.9), 'topGap must be between 0.0 and 0.9');
   assert(pageBuilder != null || builder != null || scrollableBuilder != null);
-  assert((pageBuilder == null && builder == null) || scrollableBuilder == null);
+  assert(
+    (pageBuilder == null && builder == null && scrollableBuilder != null) ||
+        scrollableBuilder == null,
+  );
 
   final WidgetBuilder? effectiveBuilder = builder ?? pageBuilder;
   final nestedNavigatorKey = GlobalKey<NavigatorState>();
