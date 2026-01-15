@@ -351,11 +351,11 @@ abstract class Renderer {
   /// Clears the state of this renderer. Used in tests.
   @mustCallSuper
   void debugClear() {
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.debugClear();
-    }
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
+    for (final ViewRasterizer rasterizer in rasterizers.values) {
+      rasterizer.dispose();
+    }
     rasterizers.clear();
     _setUpViewListeners();
   }
