@@ -2059,20 +2059,18 @@ void main() {
             )
           : BorderSide.none;
 
-      ShapeBorder getExpectedActionHaloBorder({required bool hasFocus}) =>
-          RoundedSuperellipseBorder(
-            side: getExpectedBorderSide(hasFocus: hasFocus),
-            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
-              topLeft: Radius.zero,
-              topRight: Radius.zero,
-            ),
-          );
+      ShapeBorder getExpectedActionHaloBorder({required bool hasFocus}) => RoundedRectangleBorder(
+        side: getExpectedBorderSide(hasFocus: hasFocus),
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
+          topLeft: Radius.zero,
+          topRight: Radius.zero,
+        ),
+      );
 
-      ShapeBorder getExpectedCancelHaloBorder({required bool hasFocus}) =>
-          RoundedSuperellipseBorder(
-            side: getExpectedBorderSide(hasFocus: hasFocus),
-            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large],
-          );
+      ShapeBorder getExpectedCancelHaloBorder({required bool hasFocus}) => RoundedRectangleBorder(
+        side: getExpectedBorderSide(hasFocus: hasFocus),
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
+      );
 
       expect(actionsDecoratedBoxFinder, findsOneWidget);
       expect(cancelDecoratedBoxFinder, findsOneWidget);
