@@ -5503,8 +5503,8 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 }
 
-// A binding into a uniform defined in a shader. Used now to restrict the types
-// of UniformArrays that can be created.
+/// A binding into a uniform defined in a shader. Used now to restrict the types
+/// of UniformArrays that can be created.
 sealed class UniformType {}
 
 /// A binding to a uniform of type float. Calling [set] on this object updates
@@ -5645,12 +5645,12 @@ base class UniformVec4Slot extends UniformType {
 class UniformArray<T extends UniformType> {
   UniformArray._(this._elements);
 
-  // Access an elements of the UniformArray.
+  /// Access an element of the UniformArray.
   T operator [](int index) {
     return _elements[index];
   }
 
-  // The number of Uniforms in the UniformArray.
+  /// The number of Uniforms in the UniformArray.
   int get length => _elements.length;
 
   final List<T> _elements;
