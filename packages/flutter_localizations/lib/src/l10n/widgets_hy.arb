@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Նշել բոլորը",
   "searchResultsFound": "Գտնվել են արդյունքներ",
   "noResultsFound": "Ոչինչ չի գտնվել",
-  "radioButtonUnselectedLabel": "Ընտրված չէ"
+  "radioButtonUnselectedLabel": "Ընտրված չէ",
+  "translateButtonLabel": "Translate"
 }

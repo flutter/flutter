@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Pilih semua",
   "searchResultsFound": "Hasil carian ditemukan",
   "noResultsFound": "Tiada hasil carian ditemukan",
-  "radioButtonUnselectedLabel": "Tidak dipilih"
+  "radioButtonUnselectedLabel": "Tidak dipilih",
+  "translateButtonLabel": "Translate"
 }

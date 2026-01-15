@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "എല്ലാം തിരഞ്ഞെടുക്കുക",
   "searchResultsFound": "തിരയൽ ഫലങ്ങൾ കണ്ടെത്തി",
   "noResultsFound": "ഫലങ്ങളൊന്നും കണ്ടെത്തിയില്ല",
-  "radioButtonUnselectedLabel": "തിരഞ്ഞെടുത്തില്ല"
+  "radioButtonUnselectedLabel": "തിരഞ്ഞെടുത്തില്ല",
+  "translateButtonLabel": "Translate"
 }

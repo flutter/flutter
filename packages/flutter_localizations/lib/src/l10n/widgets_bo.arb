@@ -14,5 +14,6 @@
   "shareButtonLabel": "མཉམ་སྤྱོད།",
   "pasteButtonLabel": "འཕོས་པ།",
   "selectAllButtonLabel": "ཚང་འདེམས།",
-  "radioButtonUnselectedLabel": "འདེམ་སྒྲུག·མེད"
+  "radioButtonUnselectedLabel": "འདེམ་སྒྲུག·མེད",
+  "translateButtonLabel": "Translate"
 }

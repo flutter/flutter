@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "सर्व निवडा",
   "searchResultsFound": "शोध परिणाम आढळले",
   "noResultsFound": "परिणाम आढळले नाहीत",
-  "radioButtonUnselectedLabel": "निवडलेले नाही"
+  "radioButtonUnselectedLabel": "निवडलेले नाही",
+  "translateButtonLabel": "Translate"
 }

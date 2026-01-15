@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Markér alt",
   "searchResultsFound": "Søgeresultater fundet",
   "noResultsFound": "Der blev ikke fundet nogen resultater",
-  "radioButtonUnselectedLabel": "Ikke valgt"
+  "radioButtonUnselectedLabel": "Ikke valgt",
+  "translateButtonLabel": "Translate"
 }

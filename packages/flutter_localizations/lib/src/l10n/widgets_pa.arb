@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
   "searchResultsFound": "ਖੋਜ ਨਤੀਜੇ ਮਿਲੇ",
   "noResultsFound": "ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ",
-  "radioButtonUnselectedLabel": "ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ"
+  "radioButtonUnselectedLabel": "ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ",
+  "translateButtonLabel": "Translate"
 }

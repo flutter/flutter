@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Вибрати всі",
   "searchResultsFound": "Знайдено результати пошуку",
   "noResultsFound": "Результатів не знайдено",
-  "radioButtonUnselectedLabel": "Не вибрано"
+  "radioButtonUnselectedLabel": "Не вибрано",
+  "translateButtonLabel": "Translate"
 }
