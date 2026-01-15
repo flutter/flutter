@@ -1779,6 +1779,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
           ? leadingItem
           : leadingItem + flexWeights!.indexOf(flexWeights!.max);
     } else {
+      if (!newConsumeMaxWeight) {
+        return _itemToShowOnStartup;
+      }
       maxItem = _itemToShowOnStartup;
     }
     if (newFlexWeights != null && !newConsumeMaxWeight) {
