@@ -1792,21 +1792,10 @@ class _TextFieldState extends State<TextField>
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
-              // Pass error or hint text to semantics so screen readers announce it
-              // along with the input field (via aria-description on web).
-              // Error takes priority over hint since it requires user action.
-              // Note: When an error widget is displayed (even without errorText),
-              // we don't announce hintText since the visual state shows an error.
-              final bool hasErrorWidget =
-                  widget.decoration?.error != null || widget.decoration?.errorText != null;
-              final String? semanticsHint = hasErrorWidget
-                  ? widget.decoration?.errorText
-                  : widget.decoration?.hintText;
               return Semantics(
                 enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
-                hint: semanticsHint,
                 onTap: widget.readOnly
                     ? null
                     : () {
