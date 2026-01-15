@@ -12,7 +12,7 @@
   "shareButtonLabel": "Поділитися",
   "pasteButtonLabel": "Вставити",
   "selectAllButtonLabel": "Вибрати всі",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Знайдено результати пошуку",
+  "noResultsFound": "Результатів не знайдено",
+  "radioButtonUnselectedLabel": "Не вибрано"
 }
