@@ -109,8 +109,7 @@ class BottomNavigationBarItem {
   /// The semantic label for this [BottomNavigationBarItem].
   ///
   /// This is used by accessibility tools to describe the item. When provided,
-  /// it overrides the default semantic label which is typically composed of
-  /// the [label] and the tab position information.
+  /// it overrides the default [label] String when read by accessibility tools.
   ///
   /// This is useful when the visual label does not fully describe the action
   /// or destination, or when you want to provide additional context for
