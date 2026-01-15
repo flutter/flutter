@@ -17,9 +17,15 @@ void main() {
     });
 
     test('returns HourFormat.HH for zero-padded 24-hour formats', () {
-      expect(hourFormat(of: TimeOfDayFormat.HH_dot_mm), HourFormat.HH);
-      expect(hourFormat(of: TimeOfDayFormat.HH_colon_mm), HourFormat.HH);
-      expect(hourFormat(of: TimeOfDayFormat.frenchCanadian), HourFormat.HH);
+      const formats = <TimeOfDayFormat>[
+        TimeOfDayFormat.HH_dot_mm,
+        TimeOfDayFormat.HH_colon_mm,
+        TimeOfDayFormat.frenchCanadian,
+      ];
+
+      for (final format in formats) {
+        expect(hourFormat(of: format), HourFormat.HH, reason: 'for $format');
+      }
     });
   });
 
