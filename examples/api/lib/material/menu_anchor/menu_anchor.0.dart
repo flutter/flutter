@@ -55,6 +55,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   MenuEntry? _lastSelection;
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
   ShortcutRegistryEntry? _shortcutsEntry;
+  AnimationStatus _animationStatus = AnimationStatus.dismissed;
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
@@ -110,6 +111,12 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
       children: <Widget>[
         MenuAnchor(
           animated: true,
+          onAnimationStatusChanged: (AnimationStatus status) {
+            // Store the animation status so that it can be used to determine
+            // whether the menu is opening or closing when the button is
+            // pressed.
+            _animationStatus = status;
+          },
           childFocusNode: _buttonFocusNode,
           menuChildren: <Widget>[
             MenuItemButton(
@@ -155,7 +162,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
                 return TextButton(
                   focusNode: _buttonFocusNode,
                   onPressed: () {
-                    if (controller.isOpen) {
+                    if (_animationStatus.isForwardOrCompleted) {
                       controller.close();
                     } else {
                       controller.open();

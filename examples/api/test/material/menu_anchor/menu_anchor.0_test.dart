@@ -146,7 +146,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    final Finder panel = find
+    Finder panel = find
         .descendant(
           of: find.byType(MenuAnchor),
           matching: find.byType(FadeTransition),
