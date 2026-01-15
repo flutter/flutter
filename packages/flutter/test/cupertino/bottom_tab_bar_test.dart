@@ -704,8 +704,8 @@ Future<void> main() async {
   });
 
   testWidgets('CupertinoTabBar item semanticsLabel overrides label for accessibility', (
-      WidgetTester tester,
-      ) async {
+    WidgetTester tester,
+  ) async {
     final semantics = SemanticsTester(tester);
 
     await pumpWidgetWithBoilerplate(

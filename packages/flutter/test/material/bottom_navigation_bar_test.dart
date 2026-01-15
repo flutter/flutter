@@ -3117,10 +3117,7 @@ void main() {
               label: 'A',
               semanticsLabel: 'Custom A label',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.access_alarm),
-              label: 'B',
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'B'),
           ],
         ),
       ),
@@ -3131,10 +3128,7 @@ void main() {
       containsSemantics(label: 'Custom A label\nTab 1 of 2'),
     );
 
-    expect(
-      tester.getSemantics(find.text('B')),
-      containsSemantics(label: 'B\nTab 2 of 2'),
-    );
+    expect(tester.getSemantics(find.text('B')), containsSemantics(label: 'B\nTab 2 of 2'));
   });
 }
 
