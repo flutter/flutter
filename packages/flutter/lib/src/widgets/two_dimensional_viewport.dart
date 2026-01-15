@@ -733,15 +733,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   @override
   bool get sizedByParent => true;
 
-  // Keeps track of the upper and lower bounds of ChildVicinity indices when
-  // subclasses call buildOrObtainChildFor during layoutChildSequence. These
-  // values are used to sort children in accordance with the mainAxis for
-  // paint order.
-  int? _leadingXIndex;
-  int? _trailingXIndex;
-  int? _leadingYIndex;
-  int? _trailingYIndex;
-
   /// The first child of the viewport according to the traversal order of the
   /// [mainAxis].
   ///
@@ -1320,10 +1311,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   // Ensures all children have a layoutOffset, sets paintExtent & paintOffset,
   // and arranges children in paint order.
   void _reifyChildren() {
-    assert(_leadingXIndex != null);
-    assert(_trailingXIndex != null);
-    assert(_leadingYIndex != null);
-    assert(_trailingYIndex != null);
     assert(_firstChild == null);
     assert(_lastChild == null);
     RenderBox? previousChild;
@@ -1350,10 +1337,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       parentDataOf(_lastChild!)._nextSibling = null;
     }
     // Reset for next layout pass.
-    _leadingXIndex = null;
-    _trailingXIndex = null;
-    _leadingYIndex = null;
-    _trailingYIndex = null;
     _currentChildVicinities.clear();
   }
 
@@ -1427,28 +1410,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(vicinity != ChildVicinity.invalid);
     // This should only be called during layout.
     assert(debugDoingThisLayout);
-    if (_leadingXIndex == null ||
-        _trailingXIndex == null ||
-        _leadingXIndex == null ||
-        _trailingYIndex == null) {
-      // First child of this layout pass. Set leading and trailing trackers.
-      _leadingXIndex = vicinity.xIndex;
-      _trailingXIndex = vicinity.xIndex;
-      _leadingYIndex = vicinity.yIndex;
-      _trailingYIndex = vicinity.yIndex;
-    } else {
-      // If any of these are still null, we missed a child.
-      assert(_leadingXIndex != null);
-      assert(_trailingXIndex != null);
-      assert(_leadingYIndex != null);
-      assert(_trailingYIndex != null);
-
-      // Update as we go.
-      _leadingXIndex = math.min(vicinity.xIndex, _leadingXIndex!);
-      _trailingXIndex = math.max(vicinity.xIndex, _trailingXIndex!);
-      _leadingYIndex = math.min(vicinity.yIndex, _leadingYIndex!);
-      _trailingYIndex = math.max(vicinity.yIndex, _trailingYIndex!);
-    }
     if (_needsDelegateRebuild ||
         (!_children.containsKey(vicinity) && !_keepAliveBucket.containsKey(vicinity))) {
       invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
