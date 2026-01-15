@@ -1214,7 +1214,7 @@ class _DayState extends State<_Day> {
       states,
     )!;
     final bool hasCustomBorderColor =
-        datePickerTheme.todayBorder != null && datePickerTheme.todayBorder?.color.opacity != 0.0;
+        datePickerTheme.todayBorder != null && datePickerTheme.todayBorder!.color.opacity != 0.0;
     final BorderSide todayBorderSide = hasCustomBorderColor
         ? datePickerTheme.todayBorder!
         : (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
