@@ -6,6 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('hourFormat', () {
+    test('returns HourFormat.h for 12-hour formats', () {
+      expect(hourFormat(of: TimeOfDayFormat.h_colon_mm_space_a), HourFormat.h);
+      expect(hourFormat(of: TimeOfDayFormat.a_space_h_colon_mm), HourFormat.h);
+    });
+
+    test('returns HourFormat.H for non-padded 24-hour format', () {
+      expect(hourFormat(of: TimeOfDayFormat.H_colon_mm), HourFormat.H);
+    });
+
+    test('returns HourFormat.HH for zero-padded 24-hour formats', () {
+      expect(hourFormat(of: TimeOfDayFormat.HH_dot_mm), HourFormat.HH);
+      expect(hourFormat(of: TimeOfDayFormat.HH_colon_mm), HourFormat.HH);
+      expect(hourFormat(of: TimeOfDayFormat.frenchCanadian), HourFormat.HH);
+    });
+  });
+
   group('TimeOfDay.format', () {
     testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
