@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class ExpansionPanelItem {
   final int panelIndex;
   final bool isHeader;
@@ -8,58 +7,133 @@ class ExpansionPanelItem {
   const ExpansionPanelItem({required this.panelIndex, required this.isHeader});
 }
 
+typedef RemovedItemBuilder<E> =
+Widget Function(E item, BuildContext context, Animation<double> animation);
+
+class ListModel<T> {
+  ListModel({
+    required this.listKey,
+    required this.removedItemBuilder,
+    required Iterable<T>? initialItems,
+  }) : _items = List<T>.from(initialItems ?? <T>[]);
+
+  final GlobalKey<SliverAnimatedListState> listKey;
+  final RemovedItemBuilder<T> removedItemBuilder;
+  final List<T> _items;
+
+  SliverAnimatedListState get _animatedList => listKey.currentState!;
+
+  void insert(int index, T item) {
+    _items.insert(index, item);
+    _animatedList.insertItem(index);
+  }
+
+  T removeAt(int index) {
+    final T removedItem = _items.removeAt(index);
+    if (removedItem != null) {
+      _animatedList.removeItem(
+        index,
+            (BuildContext context, Animation<double> animation) =>
+            removedItemBuilder(removedItem, context, animation),
+      );
+    }
+    return removedItem;
+  }
+
+  int get length => _items.length;
+
+  T operator [](int index) => _items[index];
+
+  int indexOf(T item) => _items.indexOf(item);
+}
+
 /// SliverExpansion Panel List
-class SliverExpansionPanelList extends StatelessWidget {
+class SliverExpansionPanelList extends StatefulWidget {
   final List<ExpansionPanel> expansionPanels;
-
-  final List<ExpansionPanelItem> _panelItems = [];
-
   final ExpansionPanelCallback expansionCallback;
 
-  SliverExpansionPanelList({
+  const SliverExpansionPanelList({
     super.key,
     required this.expansionPanels,
     required this.expansionCallback,
   });
 
   @override
-  Widget build(BuildContext context) {
-    /// Flatten the given ExpasionPanel into ExpansionPanelItem
-    _updatePanels();
+  State<SliverExpansionPanelList> createState() =>
+      _SliverExpansionPanelListState();
+}
 
-    /// Calculate the child count
-    int childCount = _panelItems.length;
+class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
+  final GlobalKey<SliverAnimatedListState> _listKey =
+  GlobalKey<SliverAnimatedListState>();
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final ExpansionPanelItem item = _panelItems[index];
-        final ExpansionPanel currentPanel = expansionPanels[item.panelIndex];
+  late ListModel<ExpansionPanelItem> _list;
 
-        if (item.isHeader) {
-          return _buildHeader(context, currentPanel, item.panelIndex);
-        } else {
-          return _buildBody(currentPanel);
-        }
-      }, childCount: childCount),
+  @override
+  void initState() {
+    super.initState();
+    List<ExpansionPanelItem> items = _updatePanels();
+    _list = ListModel(
+      listKey: _listKey,
+      removedItemBuilder: _buildRemovedItem,
+      initialItems: items,
     );
   }
 
-  void _updatePanels() {
-    for (int i = 0; i < expansionPanels.length; i++) {
-      final headerPanel = ExpansionPanelItem(panelIndex: i, isHeader: true);
-      _panelItems.add(headerPanel);
-      if (expansionPanels[i].isExpanded) {
-        final bodyPanel = ExpansionPanelItem(panelIndex: i, isHeader: false);
-        _panelItems.add(bodyPanel);
-      }
+  @override
+  void didUpdateWidget(covariant SliverExpansionPanelList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    List<ExpansionPanelItem> items = _updatePanels();
+    // If counts don't match. Sync
+    if(_list._items.length != items.length){
+      _list = ListModel(
+        listKey: _listKey,
+        removedItemBuilder: _buildRemovedItem,
+        initialItems: items,
+      );
     }
   }
 
-  Widget _buildHeader(
-      BuildContext context,
-      ExpansionPanel panel,
-      int panelIndex,
-      ) {
+  @override
+  Widget build(BuildContext context) {
+    return SliverAnimatedList(
+      key: _listKey,
+      initialItemCount: _list.length,
+      itemBuilder: (context, index, animation) {
+        final ExpansionPanelItem item = _list._items[index];
+        final ExpansionPanel currentPanel =
+        widget.expansionPanels[item.panelIndex];
+
+        if (item.isHeader) {
+          return _buildHeader(context, index);
+        } else {
+          return SizeTransition(
+            sizeFactor: animation,
+            child: _buildBody(currentPanel),
+          );
+        }
+      },
+    );
+  }
+
+  List<ExpansionPanelItem> _updatePanels() {
+    final result = <ExpansionPanelItem>[];
+    for (int i = 0; i < widget.expansionPanels.length; i++) {
+      final headerPanel = ExpansionPanelItem(panelIndex: i, isHeader: true);
+      result.add(headerPanel);
+      if (widget.expansionPanels[i].isExpanded) {
+        final bodyPanel = ExpansionPanelItem(panelIndex: i, isHeader: false);
+        result.add(bodyPanel);
+      }
+    }
+    return result;
+  }
+
+  Widget _buildHeader(BuildContext context, int index) {
+    final ExpansionPanelItem item = _list._items[index];
+    final int panelIndex = item.panelIndex;
+    final ExpansionPanel panel = widget.expansionPanels[panelIndex];
+
     final Widget headerWidget = panel.headerBuilder(context, panel.isExpanded);
 
     Widget expandIconPadded = Padding(
@@ -75,7 +149,7 @@ class SliverExpansionPanelList extends StatelessWidget {
           splashColor: Theme.of(context).splashColor,
           //highlightColor: child.highlightColor, // TODO: - Replace with widget's highlightColor
           highlightColor: Theme.of(context).highlightColor,
-          onPressed: (bool isExpanded) => _handlePressed(panel, panelIndex),
+          onPressed: (bool isExpanded) => _handlePressed(index),
         ),
       ),
     );
@@ -124,7 +198,7 @@ class SliverExpansionPanelList extends StatelessWidget {
         child: InkWell(
           splashColor: panel.splashColor,
           highlightColor: panel.highlightColor,
-          onTap: () => _handlePressed(panel, panelIndex),
+          onTap: () => _handlePressed(index),
           child: header,
         ),
       );
@@ -133,11 +207,37 @@ class SliverExpansionPanelList extends StatelessWidget {
     return header;
   }
 
-  void _handlePressed(ExpansionPanel panel, int panelIndex) {
-    expansionCallback(panelIndex, !panel.isExpanded);
+  void _handlePressed(int index) {
+    final ExpansionPanelItem item = _list._items[index];
+    final int panelIndex = item.panelIndex;
+    final ExpansionPanel panel = widget.expansionPanels[panelIndex];
+
+    /// TODO:- Update the internal _listModel
+    if(panel.isExpanded){
+      /// Must Remove at index + 1
+      _list.removeAt(index + 1);
+    } else {
+      /// Must Add at index + 1
+      ExpansionPanelItem itemToAdd = ExpansionPanelItem(panelIndex: panelIndex, isHeader: false);
+      _list.insert(index + 1, itemToAdd);
+    }
+
+    widget.expansionCallback(panelIndex, !panel.isExpanded);
   }
 
   Widget _buildBody(ExpansionPanel panel) {
     return panel.body;
+  }
+
+  /// Build Removed Item
+  Widget _buildRemovedItem(
+      ExpansionPanelItem item,
+      BuildContext context,
+      Animation<double> animation,
+      ) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: widget.expansionPanels[item.panelIndex].body,
+    );
   }
 }
