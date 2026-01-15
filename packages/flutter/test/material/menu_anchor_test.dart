@@ -5883,13 +5883,15 @@ void main() {
         MaterialApp(
           home: Material(
             child: MenuAnchor(
+              style: const MenuStyle(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              ),
               controller: controller,
               animated: true,
-              menuChildren: <Widget>[
-                MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
-                MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
-              ],
+              // Different platforms have different default menu item heights.
+              // To make the test consistent across platforms, use a fixed
+              // height.
+              menuChildren: const <Widget>[SizedBox(height: 160)],
             ),
           ),
         ),
@@ -5898,7 +5900,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      const animatedHeights = <int, double>{
+      const Map<int, double> animatedHeights = <int, double>{
         0: 0.0,
         100: 60.5,
         200: 125.5,
@@ -5913,7 +5915,7 @@ void main() {
       );
       for (final int key in animatedHeights.keys) {
         final double height = tester.getSize(panel).height;
-        expect(height, closeTo(animatedHeights[key]!, 1.0), reason: 'at t=$key');
+        expect(height, closeTo(animatedHeights[key]!, 1), reason: 'at t=$key');
         await tester.pump(const Duration(milliseconds: 100));
       }
     });
@@ -5923,13 +5925,15 @@ void main() {
         MaterialApp(
           home: Material(
             child: MenuAnchor(
+              style: const MenuStyle(
+                padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.zero),
+              ),
               controller: controller,
               animated: true,
-              menuChildren: <Widget>[
-                MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
-                MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
-                MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
-              ],
+              // Different platforms have different default menu item heights.
+              // To make the test consistent across platforms, use a fixed
+              // height.
+              menuChildren: const <Widget>[SizedBox(height: 160)],
             ),
           ),
         ),
@@ -5941,7 +5945,7 @@ void main() {
       controller.close();
       await tester.pump();
 
-      const animatedHeights = <int, double>{
+      const Map<int, double> animatedHeights = <int, double>{
         100: 129,
         110: 120,
         120: 110,
