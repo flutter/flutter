@@ -2176,7 +2176,6 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
         if (onTranslate != null)
           ContextMenuButtonItem(onPressed: onTranslate, type: ContextMenuButtonType.translate),
-
       ]);
     }
 
@@ -2970,7 +2969,7 @@ class EditableTextState extends State<EditableText>
 
     final String text = textEditingValue.selection.textInside(textEditingValue.text);
     if (text.isNotEmpty) {
-    await SystemChannels.platform.invokeMethod('Translate.invoke', text);
+      await SystemChannels.platform.invokeMethod('Translate.invoke', text);
     }
   }
 
@@ -3208,7 +3207,9 @@ class EditableTextState extends State<EditableText>
                 ? () => searchWebForSelection(SelectionChangedCause.toolbar)
                 : null,
             onShare: shareEnabled ? () => shareSelection(SelectionChangedCause.toolbar) : null,
-            onTranslate: translateEnabled ? () => translateSelection(SelectionChangedCause.toolbar) : null,
+            onTranslate: translateEnabled
+                ? () => translateSelection(SelectionChangedCause.toolbar)
+                : null,
             onLiveTextInput: liveTextInputEnabled
                 ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
                 : null,

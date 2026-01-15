@@ -3098,7 +3098,8 @@ final class IOSSystemContextMenuItemDataShare extends IOSSystemContextMenuItemDa
 ///  * [IOSSystemContextMenuItemTranslate], which performs a similar role but at
 ///    the widget level, where the title can be replaced with a default localized
 ///    value.
-final class IOSSystemContextMenuItemDataTranslate extends IOSSystemContextMenuItemData with Diagnosticable{
+final class IOSSystemContextMenuItemDataTranslate extends IOSSystemContextMenuItemData
+    with Diagnosticable {
   /// Creates an instance of [IOSSystemContextMenuItemDataTranslate].
   const IOSSystemContextMenuItemDataTranslate({required this.title});
 
