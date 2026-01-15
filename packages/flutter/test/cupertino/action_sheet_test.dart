@@ -2046,42 +2046,31 @@ void main() {
         return decoration.shape;
       }
 
-      RoundedSuperellipseBorder getExpectedActionHaloBorder({required bool hasFocus}) =>
-          RoundedSuperellipseBorder(
-            side: hasFocus
-                ? BorderSide(
-                    color:
-                        HSLColor.fromColor(
-                              CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
-                            )
-                            .withLightness(kCupertinoFocusColorBrightness)
-                            .withSaturation(kCupertinoFocusColorSaturation)
-                            .toColor(),
-                    width: 3.5,
-                  )
-                : BorderSide.none,
-            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
-              topLeft: Radius.zero,
-              topRight: Radius.zero,
-            ),
-          );
+      BorderSide getExpectedBorderSide({required bool hasFocus}) => hasFocus
+          ? BorderSide(
+              color:
+                  HSLColor.fromColor(
+                        CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
+                      )
+                      .withLightness(kCupertinoFocusColorBrightness)
+                      .withSaturation(kCupertinoFocusColorSaturation)
+                      .toColor(),
+              width: 3.5,
+            )
+          : BorderSide.none;
 
-      RoundedSuperellipseBorder getExpectedCancelHaloBorder({required bool hasFocus}) =>
-          RoundedSuperellipseBorder(
-            side: hasFocus
-                ? BorderSide(
-                    color:
-                        HSLColor.fromColor(
-                              CupertinoColors.activeBlue.withOpacity(kCupertinoFocusColorOpacity),
-                            )
-                            .withLightness(kCupertinoFocusColorBrightness)
-                            .withSaturation(kCupertinoFocusColorSaturation)
-                            .toColor(),
-                    width: 3.5,
-                  )
-                : BorderSide.none,
-            borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large],
-          );
+      ShapeBorder getExpectedActionHaloBorder({required bool hasFocus}) => RoundedSuperellipseBorder(
+        side: getExpectedBorderSide(hasFocus: hasFocus),
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
+          topLeft: Radius.zero,
+          topRight: Radius.zero,
+        ),
+      );
+
+      ShapeBorder getExpectedCancelHaloBorder({required bool hasFocus}) => RoundedSuperellipseBorder(
+        side: getExpectedBorderSide(hasFocus: hasFocus),
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large],
+      );
 
       expect(actionsDecoratedBoxFinder, findsOneWidget);
       expect(cancelDecoratedBoxFinder, findsOneWidget);

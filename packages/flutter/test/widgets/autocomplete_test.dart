@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'multi_view_testing.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -3437,6 +3441,71 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('Autocomplete Semantics announce in multi-view', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    const localizations = DefaultWidgetsLocalizations();
+    const viewId = 1;
+
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: View(
+          view: FakeView(tester.view, viewId: viewId),
+          child: MaterialApp(
+            home: Scaffold(
+              body: RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
+                      return TextField(focusNode: focusNode, controller: textEditingController);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      lastOptions = options;
+                      return Container(key: optionsKey);
+                    },
+              ),
+            ),
+          ),
+        ),
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byKey(optionsKey), findsNothing);
+
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, kOptions.length);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.searchResultsFound, viewId: viewId),
+    );
+
+    handle.dispose();
+  });
+
   testWidgets('RawAutocomplete renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -3535,4 +3604,68 @@ void main() {
       expect(find.byKey(optionsKey), findsOne);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/170403.
+  testWidgets('does not crash when disposed during async optionsBuilder', (
+    WidgetTester tester,
+  ) async {
+    final optionsCompleter = Completer<List<String>>();
+    late StateSetter setState;
+    var showAutocomplete = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter innerSetState) {
+              setState = innerSetState;
+              if (!showAutocomplete) {
+                return const SizedBox.shrink();
+              }
+              return RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  return optionsCompleter.future;
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(
+                        focusNode: fieldFocusNode,
+                        controller: fieldTextEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return Container();
+                    },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Focus the field to trigger optionsBuilder.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Dispose the widget while optionsBuilder is still pending.
+    setState(() {
+      showAutocomplete = false;
+    });
+    await tester.pump();
+
+    optionsCompleter.complete(<String>['option1', 'option2']);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }

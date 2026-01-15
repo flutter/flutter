@@ -672,8 +672,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
                 LogicalKeySet(LogicalKeyboardKey.tab, LogicalKeyboardKey.keyM):
                     const _ContextMenuIntent(),
               },
-              // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
-              child: CupertinoFocusHalo.withRRect(
+              child: CupertinoFocusHalo.withRoundedSuperellipse(
                 borderRadius: widget.focusBorderRadius,
                 child: FocusableActionDetector(
                   actions: _actionMap,
@@ -1442,8 +1441,7 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
       child: IntrinsicHeight(
         child: ClipRSuperellipse(
           borderRadius: _borderRadius,
-          // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
-          child: CupertinoFocusHalo.withRRect(
+          child: CupertinoFocusHalo.withRoundedSuperellipse(
             borderRadius: _borderRadius,
             child: ColoredBox(
               color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
