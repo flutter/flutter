@@ -43,7 +43,7 @@ dependencies:
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.8
+  test_api: 0.7.9
   typed_data: 1.4.0
   unified_analytics: 8.0.10
   url_launcher_android: 6.3.28
@@ -58,14 +58,14 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
-  webview_flutter: 4.13.0
+  webview_flutter: 4.9.0
   webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_tools:
     path: ../../../packages/flutter_tools/
-  test: 1.28.0
+  test: 1.29.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: p85g55
+# PUBSPEC CHECKSUM: gvaod1
