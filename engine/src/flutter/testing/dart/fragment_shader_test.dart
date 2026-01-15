@@ -490,7 +490,7 @@ void main() async {
       await _expectShaderRendersGreen(shader);
       shader.dispose();
     },
-    skip: Platform.isMacOS && !Platform.executableArguments.contains('--enable-vulkan'),
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
   );
 
   test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
