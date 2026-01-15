@@ -2226,8 +2226,8 @@ void main() {
     expect(find.text('Item 1'), findsOneWidget);
     expect(find.text('Item 2'), findsOneWidget);
 
-    // Scroll forward and verify items shift correctly.
-    await tester.drag(find.byType(CarouselView), const Offset(-300, 0));
+    // Scroll forward by one item worth (first item extent = 800 * 1/9 ≈ 88.89 pixels).
+    await tester.drag(find.byType(CarouselView), const Offset(-89, 0));
     await tester.pumpAndSettle();
 
     // Items should have shifted, with later items now visible.
@@ -2236,7 +2236,7 @@ void main() {
     expect(find.text('Item 3'), findsOneWidget);
 
     // Scroll backward beyond initial position (should still work due to infinite).
-    await tester.drag(find.byType(CarouselView), const Offset(500, 0));
+    await tester.drag(find.byType(CarouselView), const Offset(200, 0));
     await tester.pumpAndSettle();
     expect(find.text('Item 0'), findsOneWidget);
   });
