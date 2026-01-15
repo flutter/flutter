@@ -53,7 +53,9 @@ class CupertinoContextMenuAction extends StatefulWidget {
 
   /// The color of the background that highlights active focus.
   ///
-  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue] with
+  /// a transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode).
   final Color? focusColor;
 
   @override
