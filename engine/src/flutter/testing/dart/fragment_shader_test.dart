@@ -493,6 +493,24 @@ void main() async {
     skip: Platform.executableArguments.contains('--impeller-backend=metal'),
   );
 
+  test(
+    'FragmentShader shader with mat2 uniform renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+
+      final FragmentShader shader = program.fragmentShader();
+
+      shader.setFloat(0, 4.0); // m00
+      shader.setFloat(1, 8.0); // m01
+      shader.setFloat(2, 16.0); // m10
+      shader.setFloat(3, 32.0); // m11
+
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
+
   test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
     // TODO(gaaclarke): This test was disabled for a long time and has been
     // atrophied. Fix it or remove it.
