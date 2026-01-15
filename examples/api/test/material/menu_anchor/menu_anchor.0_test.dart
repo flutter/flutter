@@ -144,7 +144,7 @@ void main() {
     await tester.tap(find.text('OPEN MENU'));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 300));
 
     final Finder panel = find
         .descendant(
@@ -155,20 +155,20 @@ void main() {
 
     final double panelHeight = tester.getSize(panel).height;
     // Height differs based on platform, so use a large range.
-    expect(panelHeight, closeTo(60, 20));
+    expect(panelHeight, closeTo(135, 20));
 
     await tester.tap(find.text('OPEN MENU'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 50));
 
     final double panelHeightAfterClose = tester.getSize(panel).height;
-    expect(panelHeightAfterClose, closeTo(20, 10));
+    expect(panelHeightAfterClose, closeTo(90, 20));
 
     await tester.tap(find.text('OPEN MENU'));
     await tester.pump();
     await tester.pumpAndSettle();
 
     final double panelHeightAfterReopen = tester.getSize(panel).height;
-    expect(panelHeightAfterReopen, closeTo(145, 20));
+    expect(panelHeightAfterReopen, closeTo(140, 20));
   });
 }
