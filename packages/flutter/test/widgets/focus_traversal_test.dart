@@ -4097,6 +4097,65 @@ void main() {
   );
 }
 
+class TestPage<T> extends Page<T> {
+  const TestPage({required this.child, super.key, super.name});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => child,
+    );
+  }
+}
+
+class TestPageRoute<T> extends PageRoute<T> {
+  TestPageRoute({
+    required this.builder,
+    super.settings,
+    super.requestFocus,
+    this.maintainState = true,
+    super.fullscreenDialog,
+    super.allowSnapshotting = true,
+    super.barrierDismissible = false,
+    super.traversalEdgeBehavior,
+    super.directionalTraversalEdgeBehavior,
+  });
+
+  final WidgetBuilder builder;
+
+  @override
+  final bool maintainState;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${settings.name})';
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => 'TestPageRoute barrier';
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
+
+  @override
+  Duration get transitionDuration => Duration.zero;
+}
+
 /// Used to test removal of nodes while sorting.
 class SkipAllButFirstAndLastPolicy extends FocusTraversalPolicy
     with DirectionalFocusTraversalPolicyMixin {
