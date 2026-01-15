@@ -1274,6 +1274,10 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   int? get textureId {
+    // If we've fallen back to HCPP, we don't have a texture ID.
+    if (_internals.requiresViewComposition) {
+      return null;
+    }
     return _internals.textureId;
   }
 
@@ -1289,11 +1293,17 @@ class TextureAndroidViewController extends AndroidViewController {
 
   @override
   Future<Size> _sendResizeMessage(Size size) {
+    if (_internals.requiresViewComposition) {
+      return Future<Size>.value(size);
+    }
     return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
   Future<void> setOffset(Offset off) {
+    if (_internals.requiresViewComposition) {
+      return Future<void>.value();
+    }
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
@@ -1480,8 +1490,8 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
   }
 
   @override
-  int? get textureId {
-    return null;
+  int get textureId {
+    throw UnimplementedError('Not supported for hybrid composition.');
   }
 
   @override
@@ -1489,7 +1499,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
 
   @override
   Future<Size> setSize(Size size, {required int viewId, required _AndroidViewState viewState}) {
-    return Future<Size>.value(size);
+    throw UnimplementedError('Not supported for hybrid composition.');
   }
 
   @override
@@ -1498,7 +1508,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
     required int viewId,
     required _AndroidViewState viewState,
   }) {
-    return Future<void>.value();
+    throw UnimplementedError('Not supported for hybrid composition.');
   }
 
   @override
