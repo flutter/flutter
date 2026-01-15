@@ -12,8 +12,7 @@
   "shareButtonLabel": "Del",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected",
-  "translateButtonLabel": "Translate"
+  "searchResultsFound": "Søkeresultater ble funnet",
+  "noResultsFound": "Fant ingen resultater",
+  "radioButtonUnselectedLabel": "Ikke valgt"
 }

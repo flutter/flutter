@@ -12,8 +12,7 @@
   "shareButtonLabel": "Megosztás",
   "pasteButtonLabel": "Beillesztés",
   "selectAllButtonLabel": "Összes kijelölése",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected",
-  "translateButtonLabel": "Translate"
+  "searchResultsFound": "Rendelkezésre állnak keresési találatok",
+  "noResultsFound": "Nincs találat",
+  "radioButtonUnselectedLabel": "Nincs kiválasztva"
 }

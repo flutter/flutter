@@ -12,8 +12,7 @@
   "shareButtonLabel": "Дели",
   "pasteButtonLabel": "Налепи",
   "selectAllButtonLabel": "Изабери све",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected",
-  "translateButtonLabel": "Translate"
+  "searchResultsFound": "Пронађени су резултати претраге",
+  "noResultsFound": "Није пронађен ниједан резултат",
+  "radioButtonUnselectedLabel": "Није изабрано"
 }

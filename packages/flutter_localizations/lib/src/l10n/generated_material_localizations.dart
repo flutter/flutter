@@ -2347,7 +2347,7 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get moreButtonTooltip => 'Daha çox';
 
   @override
-  String get nextMonthTooltip => 'Növbəti ay';
+  String get nextMonthTooltip => 'Gələn ay';
 
   @override
   String get nextPageTooltip => 'Növbəti səhifə';
@@ -6030,7 +6030,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   });
 
   @override
-  String get aboutListTileTitleRaw => r'Ynglŷn â $applicationName';
+  String get aboutListTileTitleRaw => r'Ynghylch $applicationName';
 
   @override
   String get alertDialogLabel => 'Rhybudd';
@@ -6186,7 +6186,7 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get keyboardKeyEject => 'Eject';
 
   @override
-  String get keyboardKeyEnd => 'End';
+  String get keyboardKeyEnd => 'Gorffen';
 
   @override
   String get keyboardKeyEscape => 'Esc';
@@ -14608,7 +14608,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get anteMeridiemAbbreviation => 'ق.ظ.';
 
   @override
-  String get backButtonTooltip => 'برگشت';
+  String get backButtonTooltip => 'برگشتن';
 
   @override
   String get bottomSheetLabel => 'برگ زیرین';
@@ -14632,7 +14632,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get collapsedHint => 'ازهم بازشده';
 
   @override
-  String get collapsedIconTapHint => 'بزرگ کردن';
+  String get collapsedIconTapHint => 'ازهم باز کردن';
 
   @override
   String get continueButtonLabel => 'ادامه';
@@ -14686,13 +14686,13 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get dialogLabel => 'کادر گفتگو';
 
   @override
-  String get drawerLabel => 'منوی پیمایش';
+  String get drawerLabel => 'منو پیمایش';
 
   @override
   String get expandedHint => 'جمع‌شده';
 
   @override
-  String get expandedIconTapHint => 'کوچک کردن';
+  String get expandedIconTapHint => 'جمع کردن';
 
   @override
   String get expansionTileCollapsedHint => 'برای ازهم بازکردن، دو تک‌ضرب بزنید';
@@ -14713,7 +14713,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get hideAccountsLabel => 'پنهان کردن حساب‌ها';
 
   @override
-  String get inputDateModeButtonLabel => 'رفتن به ورودی';
+  String get inputDateModeButtonLabel => 'تغییر به ورودی';
 
   @override
   String get inputTimeModeButtonLabel => 'رفتن به حالت ورودی نوشتاری';
@@ -14896,13 +14896,13 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get lookUpButtonLabel => 'جستجو';
 
   @override
-  String get menuBarMenuLabel => 'منوی نوار منو';
+  String get menuBarMenuLabel => 'منو نوار منو';
 
   @override
   String get menuDismissLabel => 'بستن منو';
 
   @override
-  String get modalBarrierDismissLabel => 'نپذیرفتن';
+  String get modalBarrierDismissLabel => 'بستن';
 
   @override
   String get moreButtonTooltip => 'بیشتر';
@@ -14929,7 +14929,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
-  String get popupMenuLabel => 'منوی بازشو';
+  String get popupMenuLabel => 'منو بازشو';
 
   @override
   String get postMeridiemAbbreviation => 'ب.ظ.';
@@ -19268,7 +19268,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get cancelButtonLabel => 'रद्द करें';
 
   @override
-  String get clearButtonTooltip => 'टेक्स्ट मिटाएं';
+  String get clearButtonTooltip => 'टेक्स्ट हटाएं';
 
   @override
   String get closeButtonLabel => 'बंद करें';
@@ -19346,7 +19346,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'बड़ा करने के लिए दो बार टैप करें';
 
   @override
-  String get expansionTileCollapsedTapHint => 'ज़्यादा जानकारी के लिए बड़ा करें';
+  String get expansionTileCollapsedTapHint => 'ज़्यादा जानने के लिए बड़ा करें';
 
   @override
   String get expansionTileExpandedHint => 'छोटा करने के लिए दो बार टैप करें';
@@ -31268,7 +31268,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get currentDateLabel => 'आज';
 
   @override
-  String get cutButtonLabel => 'काट्नुहोस्';
+  String get cutButtonLabel => 'कट गर्नुहोस्';
 
   @override
   String get dateHelpText => 'yyyy/mm/dd';
@@ -31550,7 +31550,7 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => r'लगभग $rowCount को $firstRow–$lastRow';
 
   @override
-  String get pasteButtonLabel => 'टाँस्नुहोस्';
+  String get pasteButtonLabel => 'पेस्ट गर्नुहोस्';
 
   @override
   String get popupMenuLabel => 'पपअप मेनु';
@@ -46051,7 +46051,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchWebButtonLabel => '搜尋';
 
   @override
-  String get selectAllButtonLabel => '全選';
+  String get selectAllButtonLabel => '全部選取';
 
   @override
   String get selectYearSemanticsLabel => '揀年份';
@@ -46225,6 +46225,9 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 
   @override
   String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow - $lastRow 列 (總共約 $rowCount 列)';
+
+  @override
+  String get selectAllButtonLabel => '全選';
 
   @override
   String get timePickerHourModeAnnouncement => '選取小時數';
