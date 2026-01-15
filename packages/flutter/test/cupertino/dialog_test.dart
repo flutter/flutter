@@ -2465,10 +2465,6 @@ void main() {
 
       const Color focusColor = Colors.teal;
 
-      final Color defaultLightFocusColor = focusColor.withValues(
-        alpha: kCupertinoButtonTintedOpacityLight,
-      );
-
       await tester.pumpWidget(
         TestScaffoldApp(
           theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -2503,7 +2499,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(getDecoration().color, defaultLightFocusColor);
+      expect(getDecoration().color, focusColor);
 
       focusNode.unfocus();
       await tester.pumpAndSettle();
@@ -2522,10 +2518,6 @@ void main() {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
       const Color focusColor = Colors.teal;
-
-      final Color defaultDarkFocusColor = focusColor.withValues(
-        alpha: kCupertinoButtonTintedOpacityDark,
-      );
 
       await tester.pumpWidget(
         TestScaffoldApp(
@@ -2561,7 +2553,7 @@ void main() {
       focusNode.requestFocus();
       await tester.pumpAndSettle();
 
-      expect(getDecoration().color, defaultDarkFocusColor);
+      expect(getDecoration().color, focusColor);
 
       focusNode.unfocus();
       await tester.pumpAndSettle();

@@ -1207,8 +1207,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
-      child: CupertinoFocusHalo.withRRect(
+      child: CupertinoFocusHalo.withRoundedSuperellipse(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
         child: _ActionSheetButtonBackground(
           isCancel: true,
@@ -1902,8 +1901,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
-      child: CupertinoFocusHalo.withRRect(
+      child: CupertinoFocusHalo.withRoundedSuperellipse(
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,
@@ -2101,8 +2099,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       );
     }
 
-    // TODO(O-Hannonen): Change to superellipse once this lands: https://github.com/flutter/flutter/pull/180724
-    return CupertinoFocusHalo.withRRect(
+    return CupertinoFocusHalo.withRoundedSuperellipse(
       borderRadius: BorderRadius.only(
         bottomLeft: CupertinoPopupSurface._clipper.bottomLeft,
         bottomRight: CupertinoPopupSurface._clipper.bottomRight,
@@ -2257,10 +2254,9 @@ class CupertinoDialogAction extends StatefulWidget {
 
   /// The color of the background that highlights active focus.
   ///
-  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
-  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
-  ///
-  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue] with
+  /// a transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode).
   final Color? focusColor;
 
   /// The cursor that will be shown when hovering over the button.
@@ -2318,7 +2314,8 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
   }
 
   Color get effectiveFocusBackgroundColor =>
-      (widget.focusColor ?? CupertinoColors.activeBlue).withValues(
+      widget.focusColor ??
+      CupertinoColors.activeBlue.withValues(
         alpha: CupertinoTheme.brightnessOf(context) == Brightness.light
             ? kCupertinoButtonTintedOpacityLight
             : kCupertinoButtonTintedOpacityDark,
