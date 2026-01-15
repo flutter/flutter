@@ -547,6 +547,9 @@ class WidgetsLocalizationBo extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'མཉམ་སྤྱོད།';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -2109,6 +2112,9 @@ class WidgetsLocalizationGa extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Comhroinn';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Galician (`gl`).
@@ -5202,6 +5208,9 @@ class WidgetsLocalizationUg extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'ھەمبەھرلەش';
+
+  @override
+  String get translateButtonLabel => 'Translate';
 }
 
 /// The translations for Ukrainian (`uk`).
