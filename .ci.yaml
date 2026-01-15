@@ -1,3 +1,5 @@
+# Copyright 2026 The Flutter Authors. All rights reserved.
+#
 # Describes the targets run in continuous integration environment.
 #
 # Flutter infra uses this file to generate a checklist of tasks to be performed
