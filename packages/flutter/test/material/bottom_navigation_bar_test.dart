@@ -3123,12 +3123,9 @@ void main() {
       ),
     );
 
-    expect(
-      tester.getSemantics(find.text('A')),
-      containsSemantics(label: 'Custom A label\nTab 1 of 2'),
-    );
+    expect(tester.getSemantics(find.text('A')), isSemantics(label: 'Custom A label\nTab 1 of 2'));
 
-    expect(tester.getSemantics(find.text('B')), containsSemantics(label: 'B\nTab 2 of 2'));
+    expect(tester.getSemantics(find.text('B')), isSemantics(label: 'B\nTab 2 of 2'));
   });
 }
 
