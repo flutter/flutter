@@ -1186,6 +1186,9 @@ class _CupertinoSheetScrollController extends ScrollController {
 /// the delta change or velocity of the user's gestures back to
 /// [_CupertinoDragGestureController] through [_CupertinoSheetScrollController].
 class _CupertinoSheetScrollPosition extends ScrollPositionWithSingleContext {
+  // This class is modified version of _DraggableScrollableSheetScrollPosition
+  // from DraggableScrollableSheet. If a change needs to be made to this, check and
+  // see if the original class needs the change as well.
   _CupertinoSheetScrollPosition({
     required super.physics,
     required super.context,
