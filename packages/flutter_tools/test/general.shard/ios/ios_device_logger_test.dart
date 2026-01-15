@@ -1168,7 +1168,6 @@ class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
   }
 }
 
-@override
 class FakeXcode extends Fake implements Xcode {
   FakeXcode({this.version});
 

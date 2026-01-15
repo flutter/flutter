@@ -89,6 +89,9 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       x86_64)
         ARCH="x64"
         ;;
+      riscv64)
+        ARCH="riscv64"
+        ;;
       *)
         ARCH="arm64"
         ;;

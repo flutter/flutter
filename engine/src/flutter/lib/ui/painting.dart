@@ -4165,7 +4165,7 @@ class ColorFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription {
+  String get debugShortDescription {
     switch (_type) {
       case _kTypeMode:
         return 'ColorFilter.mode($_color, $_blendMode)';
@@ -4334,6 +4334,20 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
+  /// > [!WARNING]
+  /// > This API is only supported when using the Impeller rendering engine.
+  /// > On other backends, an [UnsupportedError] will be thrown.
+  ///
+  /// > To check at runtime whether this API is supported, use [isShaderFilterSupported].
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// if (ui.ImageFilter.isShaderFilterSupported) {
+  ///   // Use the filter...
+  /// }
+  /// ```
+  ///
   /// The fragment shader provided here has additional requirements to be used
   /// by the engine for filtering. The first uniform value must be a vec2, this
   /// will be set by the engine to the size of the bound texture. There must
@@ -4369,10 +4383,6 @@ abstract class ImageFilter {
   /// }
   ///
   /// ```
-  ///
-  /// This API is only supported when using the Impeller rendering engine. On
-  /// other backends a [UnsupportedError] will be thrown. To check at runtime
-  /// whether this API is suppored use [isShaderFilterSupported].
   factory ImageFilter.shader(FragmentShader shader) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
@@ -4390,20 +4400,25 @@ abstract class ImageFilter {
       if (invalidSampler) {
         buffer.write('The shader is missing a sampler uniform.\n');
       }
+      throw StateError(buffer.toString());
     }
     return _FragmentShaderImageFilter(shader);
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
+  ///
+  /// > [!WARNING]
+  /// > This property will only return true when the Impeller rendering engine is enabled.
+  /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
   // subclasses for the exact type of DlImageFilter this method converts to.
   _ImageFilter _toNativeImageFilter();
 
-  // The description text to show when the filter is part of a composite
-  // [ImageFilter] created using [ImageFilter.compose].
-  String get _shortDescription;
+  /// The description text to show when the filter is part of a composite
+  /// [ImageFilter] created using [ImageFilter.compose].
+  String get debugShortDescription => toString();
 }
 
 class _MatrixImageFilter implements ImageFilter {
@@ -4418,7 +4433,7 @@ class _MatrixImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'matrix($data, $filterQuality)';
+  String get debugShortDescription => 'matrix($data, $filterQuality)';
 
   @override
   String toString() => 'ImageFilter.matrix($data, $filterQuality)';
@@ -4471,7 +4486,7 @@ class _GaussianBlurImageFilter implements ImageFilter {
   }
 
   @override
-  String get _shortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
+  String get debugShortDescription => 'blur($sigmaX, $sigmaY, $_modeString${_boundsString()})';
 
   String _boundsString() => bounds == null ? '' : ', bounds: $bounds';
 
@@ -4505,7 +4520,7 @@ class _DilateImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'dilate($radiusX, $radiusY)';
+  String get debugShortDescription => 'dilate($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.dilate($radiusX, $radiusY)';
@@ -4533,7 +4548,7 @@ class _ErodeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'erode($radiusX, $radiusY)';
+  String get debugShortDescription => 'erode($radiusX, $radiusY)';
 
   @override
   String toString() => 'ImageFilter.erode($radiusX, $radiusY)';
@@ -4562,11 +4577,11 @@ class _ComposeImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription =>
-      '${innerFilter._shortDescription} -> ${outerFilter._shortDescription}';
+  String get debugShortDescription =>
+      '${innerFilter.debugShortDescription} -> ${outerFilter.debugShortDescription}';
 
   @override
-  String toString() => 'ImageFilter.compose(source -> $_shortDescription -> result)';
+  String toString() => 'ImageFilter.compose(source -> $debugShortDescription -> result)';
 
   @override
   bool operator ==(Object other) {
@@ -4593,7 +4608,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   _ImageFilter _toNativeImageFilter() => nativeFilter;
 
   @override
-  String get _shortDescription => 'shader';
+  String get debugShortDescription => 'shader';
 
   @override
   String toString() => 'ImageFilter.shader(Shader#${shader.hashCode})';
@@ -5391,6 +5406,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
+        if (!program._hasUniform(slot.name)) {
+          return true;
+        }
+
         slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
         return false;
       });
@@ -5407,6 +5426,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
       return false;
     });
+  }
+
+  bool _hasUniform(String name) {
+    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
   }
 
   int _getImageSamplerIndex(String name) {

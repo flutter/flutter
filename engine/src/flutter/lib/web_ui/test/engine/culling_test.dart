@@ -178,7 +178,7 @@ class FakeRasterizer extends ViewRasterizer {
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
 
   @override
-  void prepareToDraw() {
+  Future<void> prepareToDraw() {
     throw UnimplementedError();
   }
 
