@@ -279,7 +279,7 @@ class DatePickerThemeData with Diagnosticable {
   /// If the border side's [BorderSide.color] is transparent (has 0 opacity),
   /// [todayForegroundColor] is used instead. Otherwise, the border's color
   /// is used as specified. To omit the border entirely,
-  /// set [todayBorder} to {BorderSide.none}
+  /// set [todayBorder] to [BorderSide.none].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the day selector shape decoration
