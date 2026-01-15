@@ -12,7 +12,7 @@
   "shareButtonLabel": "ແບ່ງປັນ",
   "pasteButtonLabel": "ວາງ",
   "selectAllButtonLabel": "ເລືອກທັງໝົດ",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "ພົບຜົນການຊອກຫາ",
+  "noResultsFound": "ບໍ່ພົບຜົນການຊອກຫາ",
+  "radioButtonUnselectedLabel": "ບໍ່ໄດ້ເລືອກ"
 }
