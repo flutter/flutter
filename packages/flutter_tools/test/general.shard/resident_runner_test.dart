@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -68,6 +69,7 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
           fs: MemoryFileSystem.test(),
         ),
+        BotDetector: () => const FakeBotDetector(false),
       },
     );
     device = FakeDevice();

@@ -1,3 +1,7 @@
+// Copyright 2025 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -67,14 +71,16 @@ void main() {
     );
   });
 
-  testUsingContext('running-apps finds multiple apps with formatting', () async {
-    final fakeMDnsClient = FakeMDnsClient(
-      <PtrResourceRecord>[
+  testUsingContext(
+    'running-apps finds multiple apps with formatting',
+    () async {
+      final fakeMDnsClient = FakeMDnsClient(
+        <PtrResourceRecord>[
           const PtrResourceRecord('bar', 100, domainName: 'service2.local'),
           const PtrResourceRecord('foo', 100, domainName: 'service1.local'),
-      ],
-      <String, List<SrvResourceRecord>>{
-        'service1.local': <SrvResourceRecord>[
+        ],
+        <String, List<SrvResourceRecord>>{
+          'service1.local': <SrvResourceRecord>[
             const SrvResourceRecord(
               'service1.local',
               100,
@@ -83,8 +89,8 @@ void main() {
               priority: 0,
               target: 'target1.local',
             ),
-        ],
-        'service2.local': <SrvResourceRecord>[
+          ],
+          'service2.local': <SrvResourceRecord>[
             const SrvResourceRecord(
               'service2.local',
               100,
@@ -93,32 +99,32 @@ void main() {
               priority: 0,
               target: 'target2.local',
             ),
-        ],
-      },
-      <String, List<TxtResourceRecord>>{
-        'service1.local': <TxtResourceRecord>[
+          ],
+        },
+        <String, List<TxtResourceRecord>>{
+          'service1.local': <TxtResourceRecord>[
             const TxtResourceRecord(
               'service1.local',
               100,
               text:
                   'project_name=app_one\ndevice_name=macos\ndevice_id=macos\ntarget_platform=darwin-arm64\nmode=debug\nws_uri=ws://127.0.0.1:1234/ws\nepoch=1000',
             ),
-        ],
-        'service2.local': <TxtResourceRecord>[
+          ],
+          'service2.local': <TxtResourceRecord>[
             const TxtResourceRecord(
               'service2.local',
               100,
               text:
                   'project_name=app_two\ndevice_name=chrome\ndevice_id=chrome\ntarget_platform=web-javascript\nmode=release\nws_uri=ws://127.0.0.1:5678/ws\nepoch=0',
             ),
-        ],
-      },
-    );
+          ],
+        },
+      );
       final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    await runner.run(<String>['running-apps']);
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['running-apps']);
 
-    expect(testLogger.statusText, contains('Found 2 running Flutter apps:'));
+      expect(testLogger.statusText, contains('Found 2 running Flutter apps:'));
 
       // Verify sorting: app_one (1s, younger) should come before app_two (2s, older).
       final int index1 = testLogger.statusText.indexOf('app_one');
@@ -129,19 +135,15 @@ void main() {
         reason: 'app_one (younger) should be listed before app_two (older)',
       );
 
-    // Verify formatting - 2 spaces indent, bullet separator
-    expect(
-      testLogger.statusText,
-        contains(
-          '  app_one (debug)   • macos  • darwin-arm64   • ws://127.0.0.1:1234/ws • 1s',
-        ),
-    );
-    expect(
-      testLogger.statusText,
-        contains(
-          '  app_two (release) • chrome • web-javascript • ws://127.0.0.1:5678/ws • 2s',
-        ),
-    );
+      // Verify formatting - 2 spaces indent, bullet separator
+      expect(
+        testLogger.statusText,
+        contains('  app_one (debug)   • macos  • darwin-arm64   • ws://127.0.0.1:1234/ws • 1s'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('  app_two (release) • chrome • web-javascript • ws://127.0.0.1:5678/ws • 2s'),
+      );
     },
     overrides: <Type, Generator>{
       SystemClock: () => SystemClock.fixed(DateTime.fromMillisecondsSinceEpoch(2000)),

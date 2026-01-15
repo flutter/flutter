@@ -1385,6 +1385,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         platform: globals.platform,
         flutterVersion: globals.flutterVersion,
         systemClock: globals.systemClock,
+        botDetector: globals.botDetector,
       );
       _mdnsDiscoveries.add(mdnsDeviceDiscovery);
       await mdnsDeviceDiscovery.advertise(
