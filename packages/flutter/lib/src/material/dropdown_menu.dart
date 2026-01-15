@@ -1151,31 +1151,28 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
 
   T? _restoreSelectionFromText() {
     final String currentText = _effectiveTextEditingController.text;
-    final bool textMatchesLastSelected =
-        _lastSelectedValue != null &&
-        widget.dropdownMenuEntries.any(
-          (DropdownMenuEntry<T> entry) =>
-              entry.value == _lastSelectedValue && entry.label == currentText,
-        );
-
-    if (textMatchesLastSelected) {
-      return _lastSelectedValue;
-    } else {
-      if (_lastSelectedValue != null) {
-        final int index = widget.dropdownMenuEntries.indexWhere(
-          (DropdownMenuEntry<T> entry) => entry.value == _lastSelectedValue,
-        );
-        if (index != -1) {
-          final DropdownMenuEntry<T> entry = widget.dropdownMenuEntries[index];
-          _effectiveTextEditingController.value = TextEditingValue(
-            text: entry.label,
-            selection: TextSelection.collapsed(offset: entry.label.length),
-          );
-          return _lastSelectedValue;
-        }
-      }
+    if (_lastSelectedValue == null) {
       return null;
     }
+
+    final int index = widget.dropdownMenuEntries.indexWhere(
+      (DropdownMenuEntry<T> entry) => entry.value == _lastSelectedValue,
+    );
+
+    if (index == -1) {
+      return null;
+    }
+
+    final DropdownMenuEntry<T> entry = widget.dropdownMenuEntries[index];
+    if (entry.label == currentText) {
+      return _lastSelectedValue;
+    }
+
+    _effectiveTextEditingController.value = TextEditingValue(
+      text: entry.label,
+      selection: TextSelection.collapsed(offset: entry.label.length),
+    );
+    return _lastSelectedValue;
   }
 
   void _handleSubmitted() {
