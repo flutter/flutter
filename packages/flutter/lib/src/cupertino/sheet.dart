@@ -164,6 +164,7 @@ Future<T?> showCupertinoSheet<T>({
   WidgetBuilder? builder,
   bool useNestedNavigation = false,
   bool enableDrag = true,
+  RouteSettings? settings,
   double? topGap,
   bool showDragHandle = false,
 }) {
@@ -211,6 +212,7 @@ Future<T?> showCupertinoSheet<T>({
     CupertinoSheetRoute<T>(
       builder: widgetBuilder,
       enableDrag: enableDrag,
+      settings: settings,
       showDragHandle: showDragHandle,
       topGap: topGap,
     ),
