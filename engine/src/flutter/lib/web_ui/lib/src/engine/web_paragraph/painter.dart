@@ -17,15 +17,16 @@ import 'paragraph.dart';
 // TODO(mdebbar): Discuss it: we use this canvas for painting the entire block (entire line)
 // so we need to make sure it's big enough to hold the biggest line.
 // Also, we use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
-const int _paintWidth = 1000;
-const int _paintHeight = 500;
 double? currentDevicePixelRatio;
-final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(_paintWidth, _paintHeight);
-final paintContext = paintCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
+final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
+final paintContext =
+    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
 /// Abstracts the interface for painting text clusters, shadows, and decorations.
 abstract class Painter {
   Painter();
+
+  bool get hasSingleImageCache => false;
 
   /// Fills out the information needed to paint the text cluster.
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
@@ -48,10 +49,20 @@ abstract class Painter {
   /// Paints the decorations previously filled by [fillDecorations].
   void paintDecorations(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
+  void addTextCluster(WebCluster webTextCluster);
+  void addShadow(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
+
+  void paintTextBlockAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+  void paintShadowAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
+  void resetCache();
+  bool hasCache();
+
   /// Adjust the _paintCanvas scale based on device pixel ratio
-  void resizePaintCanvas(double devicePixelRatio) {
-    if (currentDevicePixelRatio == devicePixelRatio) {
-      // Nothing changed
+  void resizePaintCanvas(double devicePixelRatio, double width, double height) {
+    if (currentDevicePixelRatio == devicePixelRatio &&
+        paintCanvas.width == (width * devicePixelRatio).ceilToDouble() &&
+        paintCanvas.height == (height * devicePixelRatio).ceilToDouble()) {
+      // We need to resize canvas whenever the requested size changes
       return;
     }
 
@@ -61,8 +72,8 @@ abstract class Painter {
     if (currentDevicePixelRatio != null) {
       paintContext.restore(); // Restore to unscaled state
     }
-    paintCanvas.width = (_paintWidth * devicePixelRatio).ceilToDouble();
-    paintCanvas.height = (_paintHeight * devicePixelRatio).ceilToDouble();
+    paintCanvas.width = (width * devicePixelRatio).ceilToDouble();
+    paintCanvas.height = (height * devicePixelRatio).ceilToDouble();
     paintContext.scale(devicePixelRatio, devicePixelRatio);
     paintContext.save();
 
@@ -75,6 +86,11 @@ abstract class Painter {
 }
 
 class CanvasKitPainter extends Painter {
+  CkImage? singleImageCache;
+
+  @override
+  bool get hasSingleImageCache => singleImageCache != null;
+
   @override
   void paintBackground(ui.Canvas canvas, LineBlock block, ui.Rect sourceRect, ui.Rect targetRect) {
     // We need to snap the block edges because Skia draws rectangles with subpixel accuracy
@@ -260,6 +276,100 @@ class CanvasKitPainter extends Painter {
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+  }
+
+  @override
+  void addTextCluster(WebCluster webTextCluster) {
+    final WebTextStyle style = webTextCluster.style;
+    paintContext.fillStyle = style.getForegroundColor().toCssString();
+    webTextCluster.addToContext(paintContext, 0, 0);
+  }
+
+  @override
+  void addShadow(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
+    final WebTextStyle style = webTextCluster.style;
+
+    // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
+    // Answer: we cannot, and also there is a question of calculating the size of the shadow which we have to
+    // take from Chrome as well (performing another measure text operation with shadow attribute set).
+    paintContext.fillStyle = style.getForegroundColor().toCssString();
+    paintContext.shadowColor = shadow.color.toCssString();
+    paintContext.shadowBlur = shadow.blurRadius;
+    paintContext.shadowOffsetX = shadow.offset.dx;
+    paintContext.shadowOffsetY = shadow.offset.dy;
+    WebParagraphDebug.log(
+      'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
+    );
+
+    // TODO(jlavrova): calculate the proper shift for the shadow
+    webTextCluster.addToContext(paintContext, 0, 0);
+  }
+
+  DomImageBitmap _createSmallBitmapSync(ui.Rect bounds) {
+    // We should have resized the small canvas before calling this method
+    if (bounds.width != paintCanvas.width || bounds.height != paintCanvas.height) {
+      WebParagraphDebug.error(
+        '_resizePaintCanvas needed: '
+        'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${bounds.width}x${bounds.height}',
+      );
+      assert(false);
+    }
+    // Transfer the buffer from the small canvas
+    // This is synchronous and returns the handle immediately
+    final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+    return bitmap;
+  }
+
+  @override
+  void paintTextBlockAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    if (!hasSingleImageCache) {
+      final DomImageBitmap bitmap = _createSmallBitmapSync(sourceRect);
+
+      final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+      if (skImage == null) {
+        throw Exception('Failed to convert text image bitmap to an SkImage.');
+      }
+      singleImageCache = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+    }
+
+    canvas.drawImageRect(
+      singleImageCache!,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  @override
+  void paintShadowAsSingleImage(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    // TODO(jlavrova): calculate the shadow bounds properly
+    final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
+    final ui.Rect shadowTargetRect = targetRect.inflate(100);
+    // TODO(jlavrova): we could cache the shadow image as well but should we?..
+    final DomImageBitmap bitmap = _createSmallBitmapSync(shadowSourceRect);
+
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    if (skImage == null) {
+      throw Exception('Failed to convert text image bitmap to an SkImage.');
+    }
+    singleImageCache = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
+
+    canvas.drawImageRect(
+      singleImageCache!,
+      shadowSourceRect,
+      shadowTargetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  @override
+  void resetCache() {
+    singleImageCache = null;
+  }
+
+  @override
+  bool hasCache() {
+    return singleImageCache != null;
   }
 
   double calculateThickness(WebTextStyle textStyle) {

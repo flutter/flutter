@@ -361,4 +361,187 @@ class TextPaint {
     WebParagraphDebug.log('paintLineOnCanvasKit.Text: ${line.textRange}');
     _paintByClustersOnCanvas2D(StyleElements.text, canvas, layout, line, x, y);
   }
+
+  void fillAsSingleImage(
+    ui.Canvas canvas,
+    TextLayout layout,
+    ui.Rect sourceRect,
+    ui.Offset offset,
+  ) {
+    if (painter.hasSingleImageCache) {
+      return;
+    }
+
+    painter.resizePaintCanvas(ui.window.devicePixelRatio, sourceRect.width, sourceRect.height);
+    // Paint the entire paragraph as a single image on Canvas2D
+    double yOffset = 0;
+    for (final TextLine line in layout.lines) {
+      paintContext.save();
+      paintContext.translate(line.formattingShift, yOffset);
+      WebParagraphDebug.log('fillAsSingleImage line at ${line.formattingShift}, $yOffset');
+      yOffset += line.advance.height;
+
+      for (final LineBlock block in line.visualBlocks) {
+        // Placeholders do not need painting, just reserving the space
+        if (block.clusterRange.size == 1 &&
+            layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
+          continue;
+        }
+
+        WebParagraphDebug.log(
+          '+addClustersToCanvas2D: ${block.textRange} ${block.clusterRange} ${paragraph.getText(block.textRange.start, block.textRange.end)} '
+          '${(block as TextBlock).clusterRangeWithoutWhitespaces} ${block.whitespacesWidth} '
+          '${block.isLtr} ${line.advance.left} + ${block.spanShiftFromLineStart}',
+        );
+
+        paintContext.save();
+        paintContext.translate(block.spanShiftFromLineStart, 0);
+        addTextClusters(layout, block);
+        paintContext.restore();
+
+        paintContext.save();
+        paintContext.translate(block.spanShiftFromLineStart, 0);
+        addShadows(layout, block);
+        paintContext.restore();
+      }
+
+      paintContext.restore();
+    }
+  }
+
+  void paintAsSingleImage(
+    ui.Canvas canvas,
+    TextLayout layout,
+    ui.Rect sourceRectParagraph,
+    ui.Rect targetRectParagraph,
+    ui.Offset offset,
+  ) {
+    for (final TextLine line in layout.lines) {
+      for (final LineBlock block in line.visualBlocks) {
+        // Placeholders do not need painting, just reserving the space
+        if (block is! TextBlock) {
+          continue;
+        }
+        // Let's calculate the sizes
+        final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
+          layout,
+          block,
+          ui.Offset(
+            line.advance.left + line.formattingShift + block.shiftFromLineStart,
+            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+          ),
+          offset,
+          ui.window.devicePixelRatio,
+        );
+        if (block.style.hasElement(StyleElements.background)) {
+          painter.paintBackground(canvas, block, sourceRect, targetRect);
+        }
+      }
+    }
+
+    painter.paintTextBlockAsSingleImage(canvas, sourceRectParagraph, targetRectParagraph);
+
+    for (final TextLine line in layout.lines) {
+      for (final LineBlock block in line.visualBlocks) {
+        // Placeholders do not need painting, just reserving the space
+        if (block is! TextBlock) {
+          continue;
+        }
+        // Let's calculate the sizes
+        final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
+          layout,
+          block,
+          ui.Offset(
+            line.advance.left + line.formattingShift + block.shiftFromLineStart,
+            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+          ),
+          offset,
+          ui.window.devicePixelRatio,
+        );
+        if (block.style.hasElement(StyleElements.decorations)) {
+          painter.fillDecorations(block, sourceRect);
+          painter.paintDecorations(canvas, sourceRect, targetRect);
+        }
+      }
+    }
+  }
+
+  void addTextClusters(TextLayout layout, TextBlock block) {
+    final int start = block.isLtr
+        ? block.clusterRangeWithoutWhitespaces.start
+        : block.clusterRangeWithoutWhitespaces.end - 1;
+    final int end = block.isLtr
+        ? block.clusterRangeWithoutWhitespaces.end
+        : block.clusterRangeWithoutWhitespaces.start - 1;
+    final step = block.isLtr ? 1 : -1;
+    for (var i = start; i != end; i += step) {
+      final WebCluster clusterText = block is EllipsisBlock
+          ? layout.ellipsisClusters[i]
+          : layout.allClusters[i];
+
+      painter.addTextCluster(clusterText);
+    }
+  }
+
+  void addShadows(TextLayout layout, TextBlock block) {
+    if (!block.style.hasElement(StyleElements.shadows) || block.style.shadows == null) {
+      return;
+    }
+
+    final int start = block.isLtr
+        ? block.clusterRangeWithoutWhitespaces.start
+        : block.clusterRangeWithoutWhitespaces.end - 1;
+    final int end = block.isLtr
+        ? block.clusterRangeWithoutWhitespaces.end
+        : block.clusterRangeWithoutWhitespaces.start - 1;
+    final step = block.isLtr ? 1 : -1;
+    for (var i = start; i != end; i += step) {
+      final WebCluster clusterText = block is EllipsisBlock
+          ? layout.ellipsisClusters[i]
+          : layout.allClusters[i];
+
+      for (final ui.Shadow shadow in clusterText.style.shadows!) {
+        painter.addShadow(clusterText, shadow, block.isLtr);
+      }
+    }
+  }
+
+  (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
+    TextLayout layout,
+    ui.Offset offset,
+    double devicePixelRatio,
+  ) {
+    // Calculate the longest line taking in account the formatting shifts
+    double maxWidth = 0;
+    for (final TextLine line in layout.lines) {
+      final double lineWidth = line.advance.width + line.formattingShift + line.trailingSpacesWidth;
+      if (lineWidth > maxWidth) {
+        maxWidth = lineWidth;
+      }
+    }
+
+    // Define the paragraph rect (using advances, not selected rects)
+    // Source rect must take in account the scaling
+    final sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      (maxWidth * devicePixelRatio).ceilToDouble(),
+      (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
+    );
+    // Target rect will be scaled by the canvas transform, so we don't scale it here
+    final zeroRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      maxWidth.ceilToDouble(),
+      layout.paragraph.height.ceilToDouble(),
+    );
+    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
+
+    WebParagraphDebug.log(
+      'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
+      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
+    );
+
+    return (sourceRect, targetRect);
+  }
 }

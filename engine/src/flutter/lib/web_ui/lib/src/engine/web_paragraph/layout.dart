@@ -954,6 +954,8 @@ abstract class WebCluster {
 
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
 
+  void addToContext(DomCanvasRenderingContext2D context, double x, double y);
+
   @override
   String toString() {
     return 'WebCluster [$start:$end)';
@@ -993,6 +995,11 @@ class TextCluster extends WebCluster {
   }
 
   @override
+  void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
+    context.fillTextCluster(_cluster, /*left:*/ x, /*top:*/ y + span.fontBoundingBoxAscent);
+  }
+
+  @override
   String toString() {
     return 'TextCluster [$start:$end) ${end - start}';
   }
@@ -1028,6 +1035,11 @@ class EmptyCluster extends WebCluster {
   String toString() {
     return 'EmptyCluster [$start:$end)';
   }
+
+  @override
+  void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
+    assert(false, 'We should not call addToContext method on this object');
+  }
 }
 
 class PlaceholderCluster extends WebCluster {
@@ -1054,6 +1066,11 @@ class PlaceholderCluster extends WebCluster {
   @override
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
     // No-op. Placeholders don't draw anything.
+  }
+
+  @override
+  void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
+    assert(false, 'We should not call addToContext method on this object');
   }
 }
 

@@ -993,7 +993,7 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('ellipsisLTR.png', region: region);
-  });
+  }, solo: true);
 
   test('Ellipsis RTL', () async {
     final recorder = PictureRecorder();
@@ -1030,7 +1030,7 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('ellipsisRTL.png', region: region);
-  });
+  }, solo: true);
 
   test('MaxLines, no ellipsis', () async {
     final recorder = PictureRecorder();
