@@ -12,7 +12,7 @@
   "shareButtonLabel": "Del",
   "pasteButtonLabel": "Indsæt",
   "selectAllButtonLabel": "Markér alt",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Søgeresultater fundet",
+  "noResultsFound": "Der blev ikke fundet nogen resultater",
+  "radioButtonUnselectedLabel": "Ikke valgt"
 }

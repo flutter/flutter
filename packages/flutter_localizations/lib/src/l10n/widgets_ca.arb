@@ -12,7 +12,7 @@
   "shareButtonLabel": "Comparteix",
   "pasteButtonLabel": "Enganxa",
   "selectAllButtonLabel": "Selecciona-ho tot",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "S'han trobat resultats de cerca",
+  "noResultsFound": "No s'ha trobat cap resultat",
+  "radioButtonUnselectedLabel": "No seleccionat"
 }

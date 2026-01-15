@@ -38,13 +38,13 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Kyk op';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Geen resultate gekry nie';
 
   @override
   String get pasteButtonLabel => 'Plak';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nie gekies nie';
 
   @override
   String get reorderItemDown => 'Skuif af';
@@ -65,7 +65,7 @@ class WidgetsLocalizationAf extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Skuif op';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Soekresultate gevind';
 
   @override
   String get searchWebButtonLabel => 'Deursoek web';
@@ -94,13 +94,13 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'ይመልከቱ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ምንም ውጤቶች አልተገኙም';
 
   @override
   String get pasteButtonLabel => 'ለጥፍ';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'አልተመረጠም';
 
   @override
   String get reorderItemDown => 'ወደ ታች ውሰድ';
@@ -121,7 +121,7 @@ class WidgetsLocalizationAm extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ወደ ላይ ውሰድ';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'የፍለጋ ውጤቶች ተገኝተዋል';
 
   @override
   String get searchWebButtonLabel => 'ድርን ፈልግ';
@@ -150,13 +150,13 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'بحث عام';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'لم يتم العثور على نتائج';
 
   @override
   String get pasteButtonLabel => 'لصق';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'غير محدّد';
 
   @override
   String get reorderItemDown => 'نقل لأسفل';
@@ -177,7 +177,7 @@ class WidgetsLocalizationAr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'نقل لأعلى';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'تم العثور على نتائج بحث';
 
   @override
   String get searchWebButtonLabel => 'البحث على الويب';
@@ -206,40 +206,40 @@ class WidgetsLocalizationAs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'ওপৰলৈ চাওক';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'কোনো ফলাফল পোৱা নগ’ল';
 
   @override
   String get pasteButtonLabel => "পে'ষ্ট কৰক";
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'বাছনি কৰা হোৱা নাই';
 
   @override
-  String get reorderItemDown => 'তললৈ স্থানান্তৰ কৰক';
+  String get reorderItemDown => 'তললৈ নিয়ক';
 
   @override
   String get reorderItemLeft => 'বাওঁফাললৈ স্থানান্তৰ কৰক';
 
   @override
-  String get reorderItemRight => 'সোঁফাললৈ স্থানান্তৰ কৰক';
+  String get reorderItemRight => 'সোঁফাললৈ নিয়ক';
 
   @override
-  String get reorderItemToEnd => 'শেষলৈ স্থানান্তৰ কৰক';
+  String get reorderItemToEnd => 'শেষলৈ নিয়ক';
 
   @override
-  String get reorderItemToStart => 'আৰম্ভণিলৈ স্থানান্তৰ কৰক';
+  String get reorderItemToStart => 'আৰম্ভণিলৈ নিয়ক';
 
   @override
   String get reorderItemUp => 'ওপৰলৈ নিয়ক';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'সন্ধানৰ ফলাফল পোৱা গৈছে';
 
   @override
   String get searchWebButtonLabel => 'ৱেবত সন্ধান কৰক';
 
   @override
-  String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+  String get selectAllButtonLabel => 'আটাইবোৰ বাছনি কৰক';
 
   @override
   String get shareButtonLabel => 'শ্বেয়াৰ কৰক';
@@ -262,13 +262,13 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Axtarın';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nəticə tapılmadı';
 
   @override
   String get pasteButtonLabel => 'Yerləşdirin';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Seçilmədi';
 
   @override
   String get reorderItemDown => 'Aşağı köçürün';
@@ -289,7 +289,7 @@ class WidgetsLocalizationAz extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Yuxarı köçürün';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Axtarış nəticələri tapıldı';
 
   @override
   String get searchWebButtonLabel => 'Vebdə axtarın';
@@ -318,13 +318,13 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Знайсці';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Вынікі не знойдзены';
 
   @override
   String get pasteButtonLabel => 'Уставіць';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Не выбрана';
 
   @override
   String get reorderItemDown => 'Перамясціць уніз';
@@ -345,7 +345,7 @@ class WidgetsLocalizationBe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Перамясціць уверх';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Знойдзены вынікі пошуку';
 
   @override
   String get searchWebButtonLabel => 'Пошук у сетцы';
@@ -374,13 +374,13 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Няма намерени резултати';
 
   @override
   String get pasteButtonLabel => 'Поставяне';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Не е избран';
 
   @override
   String get reorderItemDown => 'Преместване надолу';
@@ -401,7 +401,7 @@ class WidgetsLocalizationBg extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Преместване нагоре';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Намерени резултати от търсенето';
 
   @override
   String get searchWebButtonLabel => 'Търсене в мрежата';
@@ -430,13 +430,13 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'লুক-আপ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'কোনো ফলাফল পাওয়া যায়নি';
 
   @override
   String get pasteButtonLabel => 'পেস্ট করুন';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'বেছে নেওয়া হয়নি';
 
   @override
   String get reorderItemDown => 'নিচের দিকে সরান';
@@ -457,7 +457,7 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'উপরের দিকে সরান';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'সার্চ ফলাফল পাওয়া গেছে';
 
   @override
   String get searchWebButtonLabel => 'ওয়েবে সার্চ করুন';
@@ -467,6 +467,62 @@ class WidgetsLocalizationBn extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'শেয়ার করুন';
+}
+
+/// The translations for Tibetan (`bo`).
+class WidgetsLocalizationBo extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Tibetan.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationBo() : super(TextDirection.ltr);
+
+  @override
+  String get copyButtonLabel => 'བཤུས།';
+
+  @override
+  String get cutButtonLabel => 'གཅོད།';
+
+  @override
+  String get lookUpButtonLabel => 'འཚོལ་བ།';
+
+  @override
+  String get noResultsFound => 'འཚོལ་ཞིབ·གྲུབ་འབྲས·མེད';
+
+  @override
+  String get pasteButtonLabel => 'འཕོས་པ།';
+
+  @override
+  String get radioButtonUnselectedLabel => 'འདེམ་སྒྲུག·མེད';
+
+  @override
+  String get reorderItemDown => 'འོག་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemLeft => 'གཡོན་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemRight => 'གཡས་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemToEnd => 'མཇུག་བསྡུ་སར་འགྲོ།';
+
+  @override
+  String get reorderItemToStart => 'འགོ་འཛུགས་སར་འགྲོ།';
+
+  @override
+  String get reorderItemUp => 'སྒང་ལ་འགྲོ།';
+
+  @override
+  String get searchResultsFound => 'འཚོལ་ཞིབ·གྲུབ་འབྲས·རྙེད་ཡོད';
+
+  @override
+  String get searchWebButtonLabel => 'དྲ་ཐོག་འཚོལ་བཤེར།';
+
+  @override
+  String get selectAllButtonLabel => 'ཚང་འདེམས།';
+
+  @override
+  String get shareButtonLabel => 'མཉམ་སྤྱོད།';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -486,13 +542,13 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nije pronađen nijedan rezultat';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nije odabrano';
 
   @override
   String get reorderItemDown => 'Pomjeri nadolje';
@@ -513,7 +569,7 @@ class WidgetsLocalizationBs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pomjeri nagore';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Pronađeni su rezultati pretraživanja';
 
   @override
   String get searchWebButtonLabel => 'Pretraži Web';
@@ -542,13 +598,13 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Mira amunt';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => "No s'ha trobat cap resultat";
 
   @override
   String get pasteButtonLabel => 'Enganxa';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'No seleccionat';
 
   @override
   String get reorderItemDown => 'Mou avall';
@@ -569,7 +625,7 @@ class WidgetsLocalizationCa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mou amunt';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => "S'han trobat resultats de cerca";
 
   @override
   String get searchWebButtonLabel => 'Cerca al web';
@@ -598,13 +654,13 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Vyhledat';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nebyly nalezeny žádné výsledky';
 
   @override
   String get pasteButtonLabel => 'Vložit';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nevybráno';
 
   @override
   String get reorderItemDown => 'Přesunout dolů';
@@ -625,7 +681,7 @@ class WidgetsLocalizationCs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Přesunout nahoru';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Byly nalezeny výsledky vyhledávání';
 
   @override
   String get searchWebButtonLabel => 'Vyhledávat na webu';
@@ -654,13 +710,13 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Chwilio';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ni chanfuwyd unrhyw ganlyniadau';
 
   @override
   String get pasteButtonLabel => 'Gludo';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Heb ei dewis';
 
   @override
   String get reorderItemDown => 'Symud i lawr';
@@ -681,13 +737,13 @@ class WidgetsLocalizationCy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Symud i fyny';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Canfuwyd canlyniadau chwilio';
 
   @override
   String get searchWebButtonLabel => "Chwilio'r We";
 
   @override
-  String get selectAllButtonLabel => 'Dewis y Cyfan';
+  String get selectAllButtonLabel => 'Dewis y cyfan';
 
   @override
   String get shareButtonLabel => 'Rhannu';
@@ -710,13 +766,13 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Slå op';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Der blev ikke fundet nogen resultater';
 
   @override
   String get pasteButtonLabel => 'Indsæt';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ikke valgt';
 
   @override
   String get reorderItemDown => 'Flyt ned';
@@ -737,7 +793,7 @@ class WidgetsLocalizationDa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flyt op';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Søgeresultater fundet';
 
   @override
   String get searchWebButtonLabel => 'Søg på nettet';
@@ -766,13 +822,13 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Keine Ergebnisse gefunden';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nicht ausgewählt';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -793,7 +849,7 @@ class WidgetsLocalizationDe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Nach oben verschieben';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Suchergebnisse gefunden';
 
   @override
   String get searchWebButtonLabel => 'Im Web suchen';
@@ -830,13 +886,13 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Δεν βρέθηκαν αποτελέσματα';
 
   @override
   String get pasteButtonLabel => 'Επικόλληση';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Δεν έχει επιλεγεί';
 
   @override
   String get reorderItemDown => 'Μετακίνηση προς τα κάτω';
@@ -857,7 +913,7 @@ class WidgetsLocalizationEl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Μετακίνηση προς τα πάνω';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Βρέθηκαν αποτελέσματα αναζήτησης';
 
   @override
   String get searchWebButtonLabel => 'Αναζήτηση στον ιστό';
@@ -1075,13 +1131,13 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Buscador visual';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'No se han encontrado resultados';
 
   @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'No seleccionado';
 
   @override
   String get reorderItemDown => 'Mover hacia abajo';
@@ -1102,7 +1158,7 @@ class WidgetsLocalizationEs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover hacia arriba';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Resultados de búsqueda obtenidos';
 
   @override
   String get searchWebButtonLabel => 'Buscar en la Web';
@@ -1122,10 +1178,19 @@ class WidgetsLocalizationEs419 extends WidgetsLocalizationEs {
   const WidgetsLocalizationEs419();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -1136,10 +1201,19 @@ class WidgetsLocalizationEsAr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsAr();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -1150,10 +1224,19 @@ class WidgetsLocalizationEsBo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsBo();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -1164,10 +1247,19 @@ class WidgetsLocalizationEsCl extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCl();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -1178,10 +1270,19 @@ class WidgetsLocalizationEsCo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCo();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -1192,10 +1293,19 @@ class WidgetsLocalizationEsCr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsCr();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -1206,10 +1316,19 @@ class WidgetsLocalizationEsDo extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsDo();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -1220,10 +1339,19 @@ class WidgetsLocalizationEsEc extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsEc();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -1234,10 +1362,19 @@ class WidgetsLocalizationEsGt extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsGt();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -1248,10 +1385,19 @@ class WidgetsLocalizationEsHn extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsHn();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -1262,10 +1408,19 @@ class WidgetsLocalizationEsMx extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsMx();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -1276,10 +1431,19 @@ class WidgetsLocalizationEsNi extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsNi();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -1290,10 +1454,19 @@ class WidgetsLocalizationEsPa extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPa();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -1304,10 +1477,19 @@ class WidgetsLocalizationEsPe extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPe();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -1318,10 +1500,19 @@ class WidgetsLocalizationEsPr extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPr();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -1332,10 +1523,19 @@ class WidgetsLocalizationEsPy extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsPy();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -1346,10 +1546,19 @@ class WidgetsLocalizationEsSv extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsSv();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -1360,10 +1569,19 @@ class WidgetsLocalizationEsUs extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsUs();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -1374,10 +1592,19 @@ class WidgetsLocalizationEsUy extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsUy();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -1388,10 +1615,19 @@ class WidgetsLocalizationEsVe extends WidgetsLocalizationEs {
   const WidgetsLocalizationEsVe();
 
   @override
+  String get searchResultsFound => 'Se encontraron resultados de la búsqueda';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
   String get reorderItemToStart => 'Mover al inicio';
 
   @override
   String get lookUpButtonLabel => 'Mirar hacia arriba';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Sin seleccionar';
 }
 
 /// The translations for Estonian (`et`).
@@ -1411,13 +1647,13 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Tulemusi ei leitud';
 
   @override
   String get pasteButtonLabel => 'Kleebi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Pole valitud';
 
   @override
   String get reorderItemDown => 'Teisalda alla';
@@ -1438,7 +1674,7 @@ class WidgetsLocalizationEt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Teisalda üles';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Leiti otsingutulemusi';
 
   @override
   String get searchWebButtonLabel => 'Otsi veebist';
@@ -1467,13 +1703,13 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Bilatu';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ez da aurkitu emaitzarik';
 
   @override
   String get pasteButtonLabel => 'Itsatsi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Hautatu gabe';
 
   @override
   String get reorderItemDown => 'Eraman behera';
@@ -1494,7 +1730,7 @@ class WidgetsLocalizationEu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Eraman gora';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Bilaketa-emaitzak aurkitu dira';
 
   @override
   String get searchWebButtonLabel => 'Bilatu sarean';
@@ -1523,13 +1759,13 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'جستجو';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'نتیجه‌ای پیدا نشد';
 
   @override
   String get pasteButtonLabel => 'جای‌گذاری';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'انتخاب‌نشده';
 
   @override
   String get reorderItemDown => 'انتقال به پایین';
@@ -1550,7 +1786,7 @@ class WidgetsLocalizationFa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'انتقال به بالا';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'نتایج جستجو پیدا شد';
 
   @override
   String get searchWebButtonLabel => 'جستجو در وب';
@@ -1579,13 +1815,13 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Hae';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ei tuloksia';
 
   @override
   String get pasteButtonLabel => 'Liitä';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ei valittu';
 
   @override
   String get reorderItemDown => 'Siirrä alas';
@@ -1606,7 +1842,7 @@ class WidgetsLocalizationFi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Siirrä ylös';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Hakutuloksia löytyi';
 
   @override
   String get searchWebButtonLabel => 'Hae verkosta';
@@ -1635,13 +1871,13 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Walang nakitang resulta';
 
   @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Hindi napili';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -1662,7 +1898,7 @@ class WidgetsLocalizationFil extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Ilipat pataas';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Nakakita ng mga resulta ng paghahanap';
 
   @override
   String get searchWebButtonLabel => 'Maghanap sa Web';
@@ -1691,13 +1927,13 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Recherche visuelle';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Aucun résultat';
 
   @override
   String get pasteButtonLabel => 'Coller';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Non sélectionné';
 
   @override
   String get reorderItemDown => 'Déplacer vers le bas';
@@ -1718,7 +1954,7 @@ class WidgetsLocalizationFr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Déplacer vers le haut';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Résultats de recherche trouvés';
 
   @override
   String get searchWebButtonLabel => 'Rechercher sur le Web';
@@ -1738,6 +1974,9 @@ class WidgetsLocalizationFrCa extends WidgetsLocalizationFr {
   const WidgetsLocalizationFrCa();
 
   @override
+  String get noResultsFound => 'Aucun résultat trouvé';
+
+  @override
   String get reorderItemToStart => 'Déplacer au début';
 
   @override
@@ -1745,6 +1984,62 @@ class WidgetsLocalizationFrCa extends WidgetsLocalizationFr {
 
   @override
   String get lookUpButtonLabel => 'Regarder en haut';
+}
+
+/// The translations for Irish (`ga`).
+class WidgetsLocalizationGa extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Irish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationGa() : super(TextDirection.ltr);
+
+  @override
+  String get copyButtonLabel => 'Cóipeáil';
+
+  @override
+  String get cutButtonLabel => 'Gearr';
+
+  @override
+  String get lookUpButtonLabel => 'Cuardaigh';
+
+  @override
+  String get noResultsFound => 'Níor aimsíodh aon toradh';
+
+  @override
+  String get pasteButtonLabel => 'Greamaigh';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Níor roghnaíodh é';
+
+  @override
+  String get reorderItemDown => 'Bog síos';
+
+  @override
+  String get reorderItemLeft => 'Bog ar chlé';
+
+  @override
+  String get reorderItemRight => 'Bog ar dheis';
+
+  @override
+  String get reorderItemToEnd => 'Bog chuig an deireadh';
+
+  @override
+  String get reorderItemToStart => 'Bog chuig an tús';
+
+  @override
+  String get reorderItemUp => 'Bog suas';
+
+  @override
+  String get searchResultsFound => 'Aimsíodh torthaí cuardaigh';
+
+  @override
+  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
+
+  @override
+  String get selectAllButtonLabel => 'Roghnaigh gach rud';
+
+  @override
+  String get shareButtonLabel => 'Comhroinn';
 }
 
 /// The translations for Galician (`gl`).
@@ -1764,13 +2059,13 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Mirar cara arriba';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ningún resultado atopado';
 
   @override
   String get pasteButtonLabel => 'Pegar';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Botón non seleccionado';
 
   @override
   String get reorderItemDown => 'Mover cara abaixo';
@@ -1791,7 +2086,7 @@ class WidgetsLocalizationGl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover cara arriba';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Resultados da busca atopados';
 
   @override
   String get searchWebButtonLabel => 'Buscar na Web';
@@ -1820,13 +2115,13 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Nachschlagen';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Keine Ergebnisse gefunden';
 
   @override
   String get pasteButtonLabel => 'Einsetzen';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nicht ausgewählt';
 
   @override
   String get reorderItemDown => 'Nach unten verschieben';
@@ -1847,7 +2142,7 @@ class WidgetsLocalizationGsw extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Nach oben verschieben';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Suchergebnisse gefunden';
 
   @override
   String get searchWebButtonLabel => 'Im Web suchen';
@@ -1876,13 +2171,13 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'શોધો';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'કોઈ પરિણામ મળ્યું નથી';
 
   @override
   String get pasteButtonLabel => 'પેસ્ટ કરો';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'પસંદગી કરી નથી';
 
   @override
   String get reorderItemDown => 'નીચે ખસેડો';
@@ -1903,7 +2198,7 @@ class WidgetsLocalizationGu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ઉપર ખસેડો';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'શોધ પરિણામો મળ્યાં';
 
   @override
   String get searchWebButtonLabel => 'વેબ પર શોધો';
@@ -1932,13 +2227,13 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'חיפוש';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'לא נמצאו תוצאות';
 
   @override
   String get pasteButtonLabel => 'הדבקה';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'לא נבחר';
 
   @override
   String get reorderItemDown => 'העברה למטה';
@@ -1959,7 +2254,7 @@ class WidgetsLocalizationHe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'העברה למעלה';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'נמצאו תוצאות חיפוש';
 
   @override
   String get searchWebButtonLabel => 'חיפוש באינטרנט';
@@ -1988,13 +2283,13 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'लुक अप बटन';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'कोई नतीजा नहीं मिला';
 
   @override
   String get pasteButtonLabel => 'चिपकाएं';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'नहीं चुना गया';
 
   @override
   String get reorderItemDown => 'नीचे ले जाएं';
@@ -2015,7 +2310,7 @@ class WidgetsLocalizationHi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ऊपर ले जाएं';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'खोज के नतीजे मिले';
 
   @override
   String get searchWebButtonLabel => 'वेब पर खोजें';
@@ -2044,13 +2339,13 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Pogled prema gore';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nema rezultata';
 
   @override
   String get pasteButtonLabel => 'Zalijepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nije odabrano';
 
   @override
   String get reorderItemDown => 'Pomakni prema dolje';
@@ -2071,7 +2366,7 @@ class WidgetsLocalizationHr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pomakni prema gore';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Pronađeni su rezultati pretraživanja';
 
   @override
   String get searchWebButtonLabel => 'Pretraži web';
@@ -2100,13 +2395,13 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Felfelé nézés';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nincs találat';
 
   @override
   String get pasteButtonLabel => 'Beillesztés';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nincs kiválasztva';
 
   @override
   String get reorderItemDown => 'Áthelyezés lefelé';
@@ -2127,7 +2422,7 @@ class WidgetsLocalizationHu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Áthelyezés felfelé';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Rendelkezésre állnak keresési találatok';
 
   @override
   String get searchWebButtonLabel => 'Keresés az interneten';
@@ -2156,13 +2451,13 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Փնտրել';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ոչինչ չի գտնվել';
 
   @override
   String get pasteButtonLabel => 'Տեղադրել';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ընտրված չէ';
 
   @override
   String get reorderItemDown => 'Տեղափոխել ներքև';
@@ -2183,7 +2478,7 @@ class WidgetsLocalizationHy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Տեղափոխել վերև';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Գտնվել են արդյունքներ';
 
   @override
   String get searchWebButtonLabel => 'Որոնել համացանցում';
@@ -2212,13 +2507,13 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Cari';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Tidak ditemukan hasil';
 
   @override
   String get pasteButtonLabel => 'Tempel';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Tidak dipilih';
 
   @override
   String get reorderItemDown => 'Turunkan';
@@ -2239,7 +2534,7 @@ class WidgetsLocalizationId extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Naikkan';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Hasil penelusuran ditemukan';
 
   @override
   String get searchWebButtonLabel => 'Telusuri di Web';
@@ -2268,13 +2563,13 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Look Up';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Engar niðurstöður fundust';
 
   @override
   String get pasteButtonLabel => 'Líma';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ekki valið';
 
   @override
   String get reorderItemDown => 'Færa niður';
@@ -2295,7 +2590,7 @@ class WidgetsLocalizationIs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Færa upp';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Leitarniðurstöður fundust';
 
   @override
   String get searchWebButtonLabel => 'Leita á vefnum';
@@ -2324,13 +2619,13 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Cerca';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nessun risultato trovato';
 
   @override
   String get pasteButtonLabel => 'Incolla';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Non selezionato';
 
   @override
   String get reorderItemDown => 'Sposta giù';
@@ -2351,7 +2646,7 @@ class WidgetsLocalizationIt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Sposta su';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Risultati di ricerca trovati';
 
   @override
   String get searchWebButtonLabel => 'Cerca sul web';
@@ -2380,13 +2675,13 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => '調べる';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => '一致する検索結果はありません';
 
   @override
   String get pasteButtonLabel => '貼り付け';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => '選択されていません';
 
   @override
   String get reorderItemDown => '下に移動';
@@ -2407,7 +2702,7 @@ class WidgetsLocalizationJa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '上に移動';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => '検索結果が見つかりました';
 
   @override
   String get searchWebButtonLabel => 'ウェブを検索';
@@ -2436,13 +2731,13 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'აიხედეთ ზემოთ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'შედეგები ვერ მოიძებნა';
 
   @override
   String get pasteButtonLabel => 'ჩასმა';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'არ არის არჩეული';
 
   @override
   String get reorderItemDown => 'ქვემოთ გადატანა';
@@ -2463,7 +2758,7 @@ class WidgetsLocalizationKa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ზემოთ გადატანა';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'ძიების შედეგები ნაპოვნია';
 
   @override
   String get searchWebButtonLabel => 'ვებში ძიება';
@@ -2492,13 +2787,13 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Іздеу';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ешбір нәтиже табылмады';
 
   @override
   String get pasteButtonLabel => 'Қою';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Таңдалмады';
 
   @override
   String get reorderItemDown => 'Төменге жылжыту';
@@ -2519,7 +2814,7 @@ class WidgetsLocalizationKk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Жоғарыға жылжыту';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Табылған нәтижелер';
 
   @override
   String get searchWebButtonLabel => 'Интернеттен іздеу';
@@ -2548,13 +2843,13 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'រកមើល';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'រក​មិន​ឃើញ​លទ្ធផលទេ';
 
   @override
   String get pasteButtonLabel => 'ដាក់​ចូល';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'មិនបាន​ជ្រើសរើសទេ';
 
   @override
   String get reorderItemDown => 'ផ្លាស់ទី​ចុះ​ក្រោម';
@@ -2575,7 +2870,7 @@ class WidgetsLocalizationKm extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ផ្លាស់ទី​ឡើង​លើ';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'បាន​រក​ឃើញ​លទ្ធផល​ស្វែងរក';
 
   @override
   String get searchWebButtonLabel => 'ស្វែងរក​លើបណ្ដាញ';
@@ -2595,7 +2890,7 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   const WidgetsLocalizationKn() : super(TextDirection.ltr);
 
   @override
-  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+  String get copyButtonLabel => '\u{c95}\u{cbe}\u{caa}\u{cbf}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -2604,13 +2899,13 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{ca8}\u{ccb}\u{ca1}\u{cbf}';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => '\u{caf}\u{cbe}\u{cb5}\u{cc1}\u{ca6}\u{cc7}\u{20}\u{cab}\u{cb2}\u{cbf}\u{ca4}\u{cbe}\u{c82}\u{cb6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
 
   @override
   String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => '\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cb2}\u{cbe}\u{c97}\u{cbf}\u{cb2}\u{ccd}\u{cb2}';
 
   @override
   String get reorderItemDown => '\u{c95}\u{cc6}\u{cb3}\u{c97}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -2631,7 +2926,7 @@ class WidgetsLocalizationKn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '\u{cae}\u{cc7}\u{cb2}\u{cc6}\u{20}\u{cb8}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => '\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbe}\u{c9f}\u{20}\u{cab}\u{cb2}\u{cbf}\u{ca4}\u{cbe}\u{c82}\u{cb6}\u{c97}\u{cb3}\u{cc1}\u{20}\u{c95}\u{c82}\u{ca1}\u{cc1}\u{cac}\u{c82}\u{ca6}\u{cbf}\u{cb5}\u{cc6}';
 
   @override
   String get searchWebButtonLabel => '\u{cb5}\u{cc6}\u{cac}\u{ccd}\u{200c}\u{ca8}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{20}\u{cb9}\u{cc1}\u{ca1}\u{cc1}\u{c95}\u{cbf}';
@@ -2660,13 +2955,13 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => '찾기';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => '검색 결과 없음';
 
   @override
   String get pasteButtonLabel => '붙여넣기';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => '선택되지 않음';
 
   @override
   String get reorderItemDown => '아래로 이동';
@@ -2687,7 +2982,7 @@ class WidgetsLocalizationKo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '위로 이동';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => '검색 결과 찾음';
 
   @override
   String get searchWebButtonLabel => '웹 검색';
@@ -2716,13 +3011,13 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Издөө';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Эч нерсе табылган жок';
 
   @override
   String get pasteButtonLabel => 'Чаптоо';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Тандалган жок';
 
   @override
   String get reorderItemDown => 'Төмөн жылдыруу';
@@ -2743,7 +3038,7 @@ class WidgetsLocalizationKy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Жогору жылдыруу';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Изделген нерсе табылды';
 
   @override
   String get searchWebButtonLabel => 'Интернеттен издөө';
@@ -2772,13 +3067,13 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'ຊອກຫາຂໍ້ມູນ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ບໍ່ພົບຜົນການຊອກຫາ';
 
   @override
   String get pasteButtonLabel => 'ວາງ';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ບໍ່ໄດ້ເລືອກ';
 
   @override
   String get reorderItemDown => 'ຍ້າຍລົງ';
@@ -2799,7 +3094,7 @@ class WidgetsLocalizationLo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ຍ້າຍຂຶ້ນ';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'ພົບຜົນການຊອກຫາ';
 
   @override
   String get searchWebButtonLabel => 'ຊອກຫາຢູ່ອິນເຕີເນັດ';
@@ -2828,13 +3123,13 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Ieškoti';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Rezultatų nerasta';
 
   @override
   String get pasteButtonLabel => 'Įklijuoti';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nepasirinkta';
 
   @override
   String get reorderItemDown => 'Perkelti žemyn';
@@ -2855,7 +3150,7 @@ class WidgetsLocalizationLt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Perkelti aukštyn';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Rasta paieškos rezultatų';
 
   @override
   String get searchWebButtonLabel => 'Ieškoti žiniatinklyje';
@@ -2884,13 +3179,13 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Meklēt';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Netika atrasts neviens rezultāts';
 
   @override
   String get pasteButtonLabel => 'Ielīmēt';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nav atlasīts';
 
   @override
   String get reorderItemDown => 'Pārvietot uz leju';
@@ -2911,7 +3206,7 @@ class WidgetsLocalizationLv extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Pārvietot uz augšu';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Tika atrasti meklēšanas rezultāti';
 
   @override
   String get searchWebButtonLabel => 'Meklēt tīmeklī';
@@ -2940,13 +3235,13 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Погледнете нагоре';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Не се најдени резултати';
 
   @override
   String get pasteButtonLabel => 'Залепи';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Не е избрано';
 
   @override
   String get reorderItemDown => 'Преместете надолу';
@@ -2967,7 +3262,7 @@ class WidgetsLocalizationMk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Преместете нагоре';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Најдени се резултати од пребарувањето';
 
   @override
   String get searchWebButtonLabel => 'Пребарајте на интернет';
@@ -2996,13 +3291,13 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'മുകളിലേക്ക് നോക്കുക';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ഫലങ്ങളൊന്നും കണ്ടെത്തിയില്ല';
 
   @override
   String get pasteButtonLabel => 'ഒട്ടിക്കുക';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'തിരഞ്ഞെടുത്തില്ല';
 
   @override
   String get reorderItemDown => 'താഴോട്ട് നീക്കുക';
@@ -3023,7 +3318,7 @@ class WidgetsLocalizationMl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'മുകളിലോട്ട് നീക്കുക';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'തിരയൽ ഫലങ്ങൾ കണ്ടെത്തി';
 
   @override
   String get searchWebButtonLabel => 'വെബിൽ തിരയുക';
@@ -3052,13 +3347,13 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Дээшээ харах';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Илэрц олдсонгүй';
 
   @override
   String get pasteButtonLabel => 'Буулгах';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Сонгоогүй';
 
   @override
   String get reorderItemDown => 'Доош зөөх';
@@ -3079,7 +3374,7 @@ class WidgetsLocalizationMn extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Дээш зөөх';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Хайлтын илэрцүүд олдлоо';
 
   @override
   String get searchWebButtonLabel => 'Вебээс хайх';
@@ -3108,13 +3403,13 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'शोध घ्या';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'परिणाम आढळले नाहीत';
 
   @override
   String get pasteButtonLabel => 'पेस्ट करा';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'निवडलेले नाही';
 
   @override
   String get reorderItemDown => 'खाली हलवा';
@@ -3135,7 +3430,7 @@ class WidgetsLocalizationMr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'वर हलवा';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'शोध परिणाम आढळले';
 
   @override
   String get searchWebButtonLabel => 'वेबवर शोधा';
@@ -3164,13 +3459,13 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Lihat ke Atas';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Tiada hasil carian ditemukan';
 
   @override
   String get pasteButtonLabel => 'Tampal';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Tidak dipilih';
 
   @override
   String get reorderItemDown => 'Alih ke bawah';
@@ -3191,7 +3486,7 @@ class WidgetsLocalizationMs extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Alih ke atas';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Hasil carian ditemukan';
 
   @override
   String get searchWebButtonLabel => 'Buat carian pada Web';
@@ -3220,13 +3515,13 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'အပေါ်ကြည့်ရန်';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ရလဒ်မတွေ့ပါ';
 
   @override
   String get pasteButtonLabel => 'ကူးထည့်ရန်';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ရွေးမထားပါ';
 
   @override
   String get reorderItemDown => 'အောက်သို့ရွှေ့ရန်';
@@ -3247,7 +3542,7 @@ class WidgetsLocalizationMy extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'အပေါ်သို့ ရွှေ့ရန်';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'ရှာဖွေမှုရလဒ်များ တွေ့ထားသည်';
 
   @override
   String get searchWebButtonLabel => 'ဝဘ်တွင်ရှာရန်';
@@ -3276,13 +3571,13 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Slå opp';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Fant ingen resultater';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ikke valgt';
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -3303,7 +3598,7 @@ class WidgetsLocalizationNb extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytt opp';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Søkeresultater ble funnet';
 
   @override
   String get searchWebButtonLabel => 'Søk på nettet';
@@ -3326,19 +3621,19 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   String get copyButtonLabel => 'कपी गर्नुहोस्';
 
   @override
-  String get cutButtonLabel => 'काट्नुहोस्';
+  String get cutButtonLabel => 'कट गर्नुहोस्';
 
   @override
   String get lookUpButtonLabel => 'माथितिर हेर्नुहोस्';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'कुनै पनि परिणाम भेटिएन';
 
   @override
-  String get pasteButtonLabel => 'टाँस्नुहोस्';
+  String get pasteButtonLabel => 'पेस्ट गर्नुहोस्';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'चयन गरिएको छैन';
 
   @override
   String get reorderItemDown => 'तल सार्नुहोस्';
@@ -3359,7 +3654,7 @@ class WidgetsLocalizationNe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'माथि सार्नुहोस्';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'खोज परिणाम भेटिएका छन्';
 
   @override
   String get searchWebButtonLabel => 'वेबमा खोज्नुहोस्';
@@ -3388,13 +3683,13 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Opzoeken';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Geen resultaten gevonden';
 
   @override
   String get pasteButtonLabel => 'Plakken';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Niet geselecteerd';
 
   @override
   String get reorderItemDown => 'Omlaag verplaatsen';
@@ -3415,7 +3710,7 @@ class WidgetsLocalizationNl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Omhoog verplaatsen';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Zoekresultaten gevonden';
 
   @override
   String get searchWebButtonLabel => 'Op internet zoeken';
@@ -3444,13 +3739,13 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Slå opp';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Fant ingen resultater';
 
   @override
   String get pasteButtonLabel => 'Lim inn';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ikke valgt';
 
   @override
   String get reorderItemDown => 'Flytt ned';
@@ -3471,7 +3766,7 @@ class WidgetsLocalizationNo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytt opp';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Søkeresultater ble funnet';
 
   @override
   String get searchWebButtonLabel => 'Søk på nettet';
@@ -3494,40 +3789,40 @@ class WidgetsLocalizationOr extends GlobalWidgetsLocalizations {
   String get copyButtonLabel => 'କପି କରନ୍ତୁ';
 
   @override
-  String get cutButtonLabel => 'କଟ୍ କରନ୍ତୁ';
+  String get cutButtonLabel => 'କଟ କରନ୍ତୁ';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'କୌଣସି ଫଳାଫଳ ମିଳିଲା ନାହିଁ';
 
   @override
   String get pasteButtonLabel => 'ପେଷ୍ଟ କରନ୍ତୁ';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ଚୟନ କରାଯାଇନାହିଁ';
 
   @override
-  String get reorderItemDown => 'ତଳକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemDown => 'ତଳକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemLeft => 'ବାମକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemLeft => 'ବାମକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemRight => 'ଡାହାଣକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemRight => 'ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemToEnd => 'ଶେଷକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemToEnd => 'ଶେଷକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ';
+  String get reorderItemToStart => 'ଆରମ୍ଭକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get reorderItemUp => 'ଉପରକୁ ନିଅନ୍ତୁ';
+  String get reorderItemUp => 'ଉପରକୁ ମୁଭ କରନ୍ତୁ';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'ସର୍ଚ୍ଚ ଫଳାଫଳ ମିଳିଛି';
 
   @override
   String get searchWebButtonLabel => 'ୱେବ ସର୍ଚ୍ଚ କରନ୍ତୁ';
@@ -3556,13 +3851,13 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'ਖੋਜੋ';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ';
 
   @override
   String get pasteButtonLabel => 'ਪੇਸਟ ਕਰੋ';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ';
 
   @override
   String get reorderItemDown => 'ਹੇਠਾਂ ਲਿਜਾਓ';
@@ -3583,7 +3878,7 @@ class WidgetsLocalizationPa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ਉੱਪਰ ਲਿਜਾਓ';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'ਖੋਜ ਨਤੀਜੇ ਮਿਲੇ';
 
   @override
   String get searchWebButtonLabel => "ਵੈੱਬ 'ਤੇ ਖੋਜੋ";
@@ -3612,13 +3907,13 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Sprawdź';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Brak wyników';
 
   @override
   String get pasteButtonLabel => 'Wklej';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nie wybrano';
 
   @override
   String get reorderItemDown => 'Przenieś w dół';
@@ -3639,7 +3934,7 @@ class WidgetsLocalizationPl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Przenieś w górę';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Znaleziono wyniki wyszukiwania';
 
   @override
   String get searchWebButtonLabel => 'Szukaj w internecie';
@@ -3724,13 +4019,13 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Pesquisar';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nenhum resultado encontrado';
 
   @override
   String get pasteButtonLabel => 'Colar';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Não selecionado';
 
   @override
   String get reorderItemDown => 'Mover para baixo';
@@ -3751,7 +4046,7 @@ class WidgetsLocalizationPt extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mover para cima';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Resultados da pesquisa encontrados';
 
   @override
   String get searchWebButtonLabel => 'Pesquisar na Web';
@@ -3769,6 +4064,12 @@ class WidgetsLocalizationPtPt extends WidgetsLocalizationPt {
   ///
   /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
   const WidgetsLocalizationPtPt();
+
+  @override
+  String get searchResultsFound => 'Foram encontrados resultados da pesquisa';
+
+  @override
+  String get noResultsFound => 'Não foram encontrados resultados';
 
   @override
   String get reorderItemToEnd => 'Mover para o fim';
@@ -3797,13 +4098,13 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Privire în sus';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Niciun rezultat';
 
   @override
   String get pasteButtonLabel => 'Inserați';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Neselectat';
 
   @override
   String get reorderItemDown => 'Mutați în jos';
@@ -3824,7 +4125,7 @@ class WidgetsLocalizationRo extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Mutați în sus';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Am găsit rezultate ale căutării';
 
   @override
   String get searchWebButtonLabel => 'Căutați pe web';
@@ -3853,13 +4154,13 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Найти';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ничего не найдено';
 
   @override
   String get pasteButtonLabel => 'Вставить';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Не выбрано';
 
   @override
   String get reorderItemDown => 'Переместить вниз';
@@ -3880,7 +4181,7 @@ class WidgetsLocalizationRu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Переместить вверх';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Поиск дал результаты';
 
   @override
   String get searchWebButtonLabel => 'Искать в интернете';
@@ -3909,13 +4210,13 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'උඩ බලන්න';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ප්‍රතිඵල හමු නොවුණි';
 
   @override
   String get pasteButtonLabel => 'අලවන්න';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'තෝරා නොමැත';
 
   @override
   String get reorderItemDown => 'පහළට ගෙන යන්න';
@@ -3936,7 +4237,7 @@ class WidgetsLocalizationSi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ඉහළට ගෙන යන්න';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'සෙවීම් ප්‍රතිඵල හමු විය';
 
   @override
   String get searchWebButtonLabel => 'වෙබය සොයන්න';
@@ -3965,13 +4266,13 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Pohľad nahor';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nenašli sa žiadne výsledky';
 
   @override
   String get pasteButtonLabel => 'Prilepiť';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nevybrané';
 
   @override
   String get reorderItemDown => 'Presunúť nadol';
@@ -3992,7 +4293,7 @@ class WidgetsLocalizationSk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Presunúť nahor';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Našli sa výsledky vyhľadávania';
 
   @override
   String get searchWebButtonLabel => 'Hľadať na webe';
@@ -4021,13 +4322,13 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Pogled gor';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ni rezultatov';
 
   @override
   String get pasteButtonLabel => 'Prilepi';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ni izbrano';
 
   @override
   String get reorderItemDown => 'Premakni navzdol';
@@ -4048,7 +4349,7 @@ class WidgetsLocalizationSl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Premakni navzgor';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Najdeni so rezultati iskanja';
 
   @override
   String get searchWebButtonLabel => 'Iskanje v spletu';
@@ -4077,13 +4378,13 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Kërko';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Nuk u gjet asnjë rezultat';
 
   @override
   String get pasteButtonLabel => 'Ngjit';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Nuk është zgjedhur';
 
   @override
   String get reorderItemDown => 'Lëvize poshtë';
@@ -4104,7 +4405,7 @@ class WidgetsLocalizationSq extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Lëvize lart';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'U gjetën rezultate kërkimi';
 
   @override
   String get searchWebButtonLabel => 'Kërko në ueb';
@@ -4133,13 +4434,13 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Поглед нагоре';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Није пронађен ниједан резултат';
 
   @override
   String get pasteButtonLabel => 'Налепи';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Није изабрано';
 
   @override
   String get reorderItemDown => 'Померите надоле';
@@ -4160,7 +4461,7 @@ class WidgetsLocalizationSr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Померите нагоре';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Пронађени су резултати претраге';
 
   @override
   String get searchWebButtonLabel => 'Претражи веб';
@@ -4197,7 +4498,13 @@ class WidgetsLocalizationSrLatn extends WidgetsLocalizationSr {
   String get lookUpButtonLabel => 'Pogled nagore';
 
   @override
+  String get noResultsFound => 'Nije pronađen nijedan rezultat';
+
+  @override
   String get pasteButtonLabel => 'Nalepi';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Nije izabrano';
 
   @override
   String get reorderItemDown => 'Pomerite nadole';
@@ -4216,6 +4523,9 @@ class WidgetsLocalizationSrLatn extends WidgetsLocalizationSr {
 
   @override
   String get reorderItemUp => 'Pomerite nagore';
+
+  @override
+  String get searchResultsFound => 'Pronađeni su rezultati pretrage';
 
   @override
   String get searchWebButtonLabel => 'Pretraži veb';
@@ -4244,13 +4554,13 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Titta upp';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Inga resultat hittades';
 
   @override
   String get pasteButtonLabel => 'Klistra in';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Inte markerad';
 
   @override
   String get reorderItemDown => 'Flytta nedåt';
@@ -4271,7 +4581,7 @@ class WidgetsLocalizationSv extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Flytta uppåt';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Sökresultat hittades';
 
   @override
   String get searchWebButtonLabel => 'Sök på webben';
@@ -4300,13 +4610,13 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Tafuta';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Hakuna matokeo yaliyopatikana';
 
   @override
   String get pasteButtonLabel => 'Bandika';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Hayajachaguliwa';
 
   @override
   String get reorderItemDown => 'Sogeza chini';
@@ -4327,7 +4637,7 @@ class WidgetsLocalizationSw extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Sogeza juu';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Matokeo ya utafutaji yamepatikana';
 
   @override
   String get searchWebButtonLabel => 'Tafuta kwenye Wavuti';
@@ -4356,13 +4666,13 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'தேடு';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'முடிவுகள் இல்லை';
 
   @override
   String get pasteButtonLabel => 'ஒட்டு';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'தேர்ந்தெடுக்கப்படவில்லை';
 
   @override
   String get reorderItemDown => 'கீழே நகர்த்தவும்';
@@ -4383,7 +4693,7 @@ class WidgetsLocalizationTa extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'மேலே நகர்த்தவும்';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'தேடல் முடிவுகள் கண்டறியப்பட்டன';
 
   @override
   String get searchWebButtonLabel => 'இணையத்தில் தேடு';
@@ -4412,13 +4722,13 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'వెతకండి';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ఫలితాలు ఏవీ కనుగొనబడలేదు';
 
   @override
   String get pasteButtonLabel => 'పేస్ట్ చేయండి';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ఎంచుకోబడలేదు';
 
   @override
   String get reorderItemDown => 'కిందికు జరుపు';
@@ -4439,7 +4749,7 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'పైకి జరపండి';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'సెర్చ్ ఫలితాలు కనుగొనబడ్డాయి';
 
   @override
   String get searchWebButtonLabel => 'వెబ్‌లో సెర్చ్ చేయండి';
@@ -4468,13 +4778,13 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'ค้นหา';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'ไม่พบผลลัพธ์';
 
   @override
   String get pasteButtonLabel => 'วาง';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'ไม่ได้เลือก';
 
   @override
   String get reorderItemDown => 'ย้ายลง';
@@ -4495,7 +4805,7 @@ class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'ย้ายขึ้น';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'พบผลการค้นหา';
 
   @override
   String get searchWebButtonLabel => 'ค้นหาบนอินเทอร์เน็ต';
@@ -4524,13 +4834,13 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Tumingin sa Itaas';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Walang nakitang resulta';
 
   @override
   String get pasteButtonLabel => 'I-paste';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Hindi napili';
 
   @override
   String get reorderItemDown => 'Ilipat pababa';
@@ -4551,7 +4861,7 @@ class WidgetsLocalizationTl extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Ilipat pataas';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Nakakita ng mga resulta ng paghahanap';
 
   @override
   String get searchWebButtonLabel => 'Maghanap sa Web';
@@ -4580,13 +4890,13 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Ara';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Sonuç bulunamadı';
 
   @override
   String get pasteButtonLabel => 'Yapıştır';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Seçili değil';
 
   @override
   String get reorderItemDown => 'Aşağı taşı';
@@ -4607,7 +4917,7 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Yukarı taşı';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Arama sonuçları bulundu';
 
   @override
   String get searchWebButtonLabel => "Web'de Ara";
@@ -4617,6 +4927,62 @@ class WidgetsLocalizationTr extends GlobalWidgetsLocalizations {
 
   @override
   String get shareButtonLabel => 'Paylaş';
+}
+
+/// The translations for Uighur Uyghur (`ug`).
+class WidgetsLocalizationUg extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Uighur Uyghur.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationUg() : super(TextDirection.ltr);
+
+  @override
+  String get copyButtonLabel => 'كۆچۈرۈش';
+
+  @override
+  String get cutButtonLabel => 'كېسىش';
+
+  @override
+  String get lookUpButtonLabel => 'ئىزدەش';
+
+  @override
+  String get noResultsFound => 'نەتىجە تېپىلمىدى';
+
+  @override
+  String get pasteButtonLabel => 'چاپلاش';
+
+  @override
+  String get radioButtonUnselectedLabel => 'تاللانمىدى';
+
+  @override
+  String get reorderItemDown => 'ئاستىغا يۆتكەش';
+
+  @override
+  String get reorderItemLeft => 'سولغا يۆتكەش';
+
+  @override
+  String get reorderItemRight => 'ئوڭغا يۆتكەش';
+
+  @override
+  String get reorderItemToEnd => 'ئاخىرىغا يۆتكەش';
+
+  @override
+  String get reorderItemToStart => 'باشلىنىشقا يۆتكەش';
+
+  @override
+  String get reorderItemUp => 'يۇقىرىغا يۆتكەش';
+
+  @override
+  String get searchResultsFound => 'ئىزدەش نەتىجىلىرى تېپىلدى';
+
+  @override
+  String get searchWebButtonLabel => 'توردا ئىزدەش';
+
+  @override
+  String get selectAllButtonLabel => 'ھەممىنى تاللاش';
+
+  @override
+  String get shareButtonLabel => 'ھەمبەھرلەش';
 }
 
 /// The translations for Ukrainian (`uk`).
@@ -4636,13 +5002,13 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Шукати';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Результатів не знайдено';
 
   @override
   String get pasteButtonLabel => 'Вставити';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Не вибрано';
 
   @override
   String get reorderItemDown => 'Перемістити вниз';
@@ -4663,7 +5029,7 @@ class WidgetsLocalizationUk extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Перемістити вгору';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Знайдено результати пошуку';
 
   @override
   String get searchWebButtonLabel => 'Пошук в Інтернеті';
@@ -4692,13 +5058,13 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'تفصیل دیکھیں';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'کوئی نتائج نہیں ملے';
 
   @override
   String get pasteButtonLabel => 'پیسٹ کریں';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'غیر منتخب کردہ';
 
   @override
   String get reorderItemDown => 'نیچے منتقل کریں';
@@ -4719,7 +5085,7 @@ class WidgetsLocalizationUr extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'اوپر منتقل کریں';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'تلاش کے نتائج مل گئے';
 
   @override
   String get searchWebButtonLabel => 'ویب تلاش کریں';
@@ -4748,13 +5114,13 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Tepaga qarang';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Hech narsa topilmadi';
 
   @override
   String get pasteButtonLabel => 'Joylash';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Tanlanmagan';
 
   @override
   String get reorderItemDown => 'Pastga siljitish';
@@ -4775,7 +5141,7 @@ class WidgetsLocalizationUz extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Tepaga siljitish';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Qidiruv natijalari topildi';
 
   @override
   String get searchWebButtonLabel => 'Internetdan qidirish';
@@ -4804,13 +5170,13 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Tra cứu';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Không tìm thấy kết quả';
 
   @override
   String get pasteButtonLabel => 'Dán';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Chưa chọn';
 
   @override
   String get reorderItemDown => 'Di chuyển xuống';
@@ -4831,7 +5197,7 @@ class WidgetsLocalizationVi extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Di chuyển lên';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Có kết quả tìm kiếm';
 
   @override
   String get searchWebButtonLabel => 'Tìm kiếm trên web';
@@ -4860,13 +5226,13 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => '查询';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => '未找到任何结果';
 
   @override
   String get pasteButtonLabel => '粘贴';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => '未选择';
 
   @override
   String get reorderItemDown => '下移';
@@ -4887,7 +5253,7 @@ class WidgetsLocalizationZh extends GlobalWidgetsLocalizations {
   String get reorderItemUp => '上移';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => '找到搜索结果';
 
   @override
   String get searchWebButtonLabel => '搜索';
@@ -4924,7 +5290,13 @@ class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
   String get lookUpButtonLabel => '查詢';
 
   @override
+  String get noResultsFound => '搵唔到任何結果';
+
+  @override
   String get pasteButtonLabel => '貼上';
+
+  @override
+  String get radioButtonUnselectedLabel => '未揀選';
 
   @override
   String get reorderItemDown => '向下移';
@@ -4943,6 +5315,9 @@ class WidgetsLocalizationZhHant extends WidgetsLocalizationZh {
 
   @override
   String get reorderItemUp => '向上移';
+
+  @override
+  String get searchResultsFound => '搜尋到結果';
 
   @override
   String get searchWebButtonLabel => '搜尋';
@@ -4967,6 +5342,12 @@ class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
   const WidgetsLocalizationZhHantTw();
 
   @override
+  String get searchResultsFound => '已找到搜尋結果';
+
+  @override
+  String get noResultsFound => '找不到結果';
+
+  @override
   String get reorderItemToStart => '移至開頭';
 
   @override
@@ -4974,6 +5355,9 @@ class WidgetsLocalizationZhHantTw extends WidgetsLocalizationZhHant {
 
   @override
   String get selectAllButtonLabel => '全選';
+
+  @override
+  String get radioButtonUnselectedLabel => '未選取';
 }
 
 /// The translations for Zulu (`zu`).
@@ -4993,13 +5377,13 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
   String get lookUpButtonLabel => 'Bheka Phezulu';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'Ayikho imiphumela etholakele';
 
   @override
   String get pasteButtonLabel => 'Namathisela';
 
   @override
-  String get radioButtonUnselectedLabel => 'Not selected';
+  String get radioButtonUnselectedLabel => 'Ayikhethiwe';
 
   @override
   String get reorderItemDown => 'Iya phansi';
@@ -5020,7 +5404,7 @@ class WidgetsLocalizationZu extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'Iya phezulu';
 
   @override
-  String get searchResultsFound => 'Search results found';
+  String get searchResultsFound => 'Imiphumela yokusesha itholakele';
 
   @override
   String get searchWebButtonLabel => 'Sesha Iwebhu';
@@ -5052,6 +5436,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'be', // Belarusian
   'bg', // Bulgarian
   'bn', // Bengali Bangla
+  'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -5067,6 +5452,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -5117,6 +5503,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
+  'ug', // Uighur Uyghur
   'uk', // Ukrainian
   'ur', // Urdu
   'uz', // Uzbek
@@ -5143,6 +5530,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
 ///  * `bn` - Bengali Bangla
+///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
@@ -5158,6 +5546,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -5208,6 +5597,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
+///  * `ug` - Uighur Uyghur
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
@@ -5238,6 +5628,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationBg();
     case 'bn':
       return const WidgetsLocalizationBn();
+    case 'bo':
+      return const WidgetsLocalizationBo();
     case 'bs':
       return const WidgetsLocalizationBs();
     case 'ca':
@@ -5340,6 +5732,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       }
       return const WidgetsLocalizationFr();
     }
+    case 'ga':
+      return const WidgetsLocalizationGa();
     case 'gl':
       return const WidgetsLocalizationGl();
     case 'gsw':
@@ -5454,6 +5848,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationTl();
     case 'tr':
       return const WidgetsLocalizationTr();
+    case 'ug':
+      return const WidgetsLocalizationUg();
     case 'uk':
       return const WidgetsLocalizationUk();
     case 'ur':

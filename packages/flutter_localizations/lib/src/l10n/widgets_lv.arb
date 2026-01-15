@@ -12,7 +12,7 @@
   "shareButtonLabel": "Kopīgot",
   "pasteButtonLabel": "Ielīmēt",
   "selectAllButtonLabel": "Atlasīt visu",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Tika atrasti meklēšanas rezultāti",
+  "noResultsFound": "Netika atrasts neviens rezultāts",
+  "radioButtonUnselectedLabel": "Nav atlasīts"
 }

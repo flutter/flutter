@@ -1,4 +1,6 @@
 {
+  "searchResultsFound": "Se encontraron resultados de la búsqueda",
+  "noResultsFound": "No se encontraron resultados",
   "reorderItemDown": "Mover hacia abajo",
   "reorderItemLeft": "Mover hacia la izquierda",
   "reorderItemToEnd": "Mover al final",
@@ -12,5 +14,5 @@
   "shareButtonLabel": "Compartir",
   "pasteButtonLabel": "Pegar",
   "selectAllButtonLabel": "Seleccionar todo",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Sin seleccionar"
 }

@@ -12,7 +12,7 @@
   "shareButtonLabel": "Condividi",
   "pasteButtonLabel": "Incolla",
   "selectAllButtonLabel": "Seleziona tutto",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Risultati di ricerca trovati",
+  "noResultsFound": "Nessun risultato trovato",
+  "radioButtonUnselectedLabel": "Non selezionato"
 }

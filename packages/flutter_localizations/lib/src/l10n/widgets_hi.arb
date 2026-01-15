@@ -12,7 +12,7 @@
   "shareButtonLabel": "शेयर करें",
   "pasteButtonLabel": "चिपकाएं",
   "selectAllButtonLabel": "सभी को चुनें",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "खोज के नतीजे मिले",
+  "noResultsFound": "कोई नतीजा नहीं मिला",
+  "radioButtonUnselectedLabel": "नहीं चुना गया"
 }

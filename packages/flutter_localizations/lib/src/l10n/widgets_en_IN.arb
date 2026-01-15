@@ -1,4 +1,6 @@
 {
+  "searchResultsFound": "Search results found",
+  "noResultsFound": "No results found",
   "reorderItemToStart": "Move to the start",
   "reorderItemToEnd": "Move to the end",
   "reorderItemUp": "Move up",

@@ -12,7 +12,7 @@
   "shareButtonLabel": "Kongsi",
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih semua",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Hasil carian ditemukan",
+  "noResultsFound": "Tiada hasil carian ditemukan",
+  "radioButtonUnselectedLabel": "Tidak dipilih"
 }

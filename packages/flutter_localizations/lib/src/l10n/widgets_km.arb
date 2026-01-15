@@ -12,7 +12,7 @@
   "shareButtonLabel": "ចែករំលែក",
   "pasteButtonLabel": "ដាក់​ចូល",
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "បាន​រក​ឃើញ​លទ្ធផល​ស្វែងរក",
+  "noResultsFound": "រក​មិន​ឃើញ​លទ្ធផលទេ",
+  "radioButtonUnselectedLabel": "មិនបាន​ជ្រើសរើសទេ"
 }
