@@ -105,9 +105,8 @@ class FinancialEntityCategoryView extends StatelessWidget {
       // TODO(x): State restoration of FinancialEntityCategoryDetailsPage on mobile is blocked because OpenContainer does not support restorablePush, https://github.com/flutter/gallery/issues/570.
       child: OpenContainer(
         transitionDuration: const Duration(milliseconds: 350),
-        openBuilder:
-            (BuildContext context, void Function() openContainer) =>
-                FinancialEntityCategoryDetailsPage(),
+        openBuilder: (BuildContext context, void Function() openContainer) =>
+            FinancialEntityCategoryDetailsPage(),
         openColor: RallyColors.primaryBackground,
         closedColor: RallyColors.primaryBackground,
         closedElevation: 0,
@@ -314,7 +313,11 @@ class FinancialEntityCategoryDetailsPage extends StatelessWidget {
         ),
         body: Column(
           children: <Widget>[
-            SizedBox(height: 200, width: double.infinity, child: RallyLineChart(events: items)),
+            SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: RallyLineChart(events: items),
+            ),
             Expanded(
               child: Padding(
                 padding: isDesktop ? const EdgeInsets.all(40) : EdgeInsets.zero,
@@ -359,31 +362,33 @@ class _DetailedEventCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             width: double.infinity,
-            child:
-                isDesktop
-                    ? Row(
-                      children: <Widget>[
-                        Expanded(child: _EventTitle(title: title)),
-                        _EventDate(date: date),
-                        Expanded(
-                          child: Align(
-                            alignment: AlignmentDirectional.centerEnd,
-                            child: _EventAmount(amount: amount),
-                          ),
+            child: isDesktop
+                ? Row(
+                    children: <Widget>[
+                      Expanded(child: _EventTitle(title: title)),
+                      _EventDate(date: date),
+                      Expanded(
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: _EventAmount(amount: amount),
                         ),
-                      ],
-                    )
-                    : Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[_EventTitle(title: title), _EventDate(date: date)],
-                        ),
-                        _EventAmount(amount: amount),
-                      ],
-                    ),
+                      ),
+                    ],
+                  )
+                : Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _EventTitle(title: title),
+                          _EventDate(date: date),
+                        ],
+                      ),
+                      _EventAmount(amount: amount),
+                    ],
+                  ),
           ),
           SizedBox(height: 1, child: Container(color: RallyColors.dividerColor)),
         ],

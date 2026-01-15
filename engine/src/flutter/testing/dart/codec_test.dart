@@ -27,7 +27,7 @@ void main() {
   });
 
   test('Fails with invalid data', () async {
-    final Uint8List data = Uint8List.fromList(<int>[1, 2, 3]);
+    final data = Uint8List.fromList(<int>[1, 2, 3]);
     try {
       await ui.instantiateImageCodec(data);
       fail('exception not thrown');
@@ -57,8 +57,8 @@ void main() {
   test('nextFrame', () async {
     final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
-    final List<List<int>> decodedFrameInfos = <List<int>>[];
-    for (int i = 0; i < 5; i++) {
+    final decodedFrameInfos = <List<int>>[];
+    for (var i = 0; i < 5; i++) {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
@@ -82,8 +82,8 @@ void main() {
   test('non animated image', () async {
     final Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
-    final List<List<int>> decodedFrameInfos = <List<int>>[];
-    for (int i = 0; i < 2; i++) {
+    final decodedFrameInfos = <List<int>>[];
+    for (var i = 0; i < 2; i++) {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
@@ -110,8 +110,8 @@ void main() {
         return ui.TargetImageSize(width: intrinsicWidth ~/ 2, height: intrinsicHeight ~/ 2);
       },
     );
-    final List<List<int>> decodedFrameInfos = <List<int>>[];
-    for (int i = 0; i < 2; i++) {
+    final decodedFrameInfos = <List<int>>[];
+    for (var i = 0; i < 2; i++) {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       decodedFrameInfos.add(<int>[
         frameInfo.duration.inMilliseconds,
@@ -155,7 +155,7 @@ void main() {
     // Capture the final frame of animation. If we have not composited
     // correctly, it will be clipped strangely.
     late ui.FrameInfo frameInfo;
-    for (int i = 0; i < 4; i++) {
+    for (var i = 0; i < 4; i++) {
       frameInfo = await codec.getNextFrame();
     }
     codec.dispose();
@@ -163,7 +163,7 @@ void main() {
     final ui.Image image = frameInfo.image;
     final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
 
-    final String fileName = impellerEnabled
+    final fileName = impellerEnabled
         ? 'impeller_four_frame_with_reuse_end.png'
         : 'four_frame_with_reuse_end.png';
     final Uint8List goldenData = File(
@@ -184,7 +184,7 @@ void main() {
     // Capture the final frame of animation. If we have not composited
     // correctly, the hearts will be incorrectly repeated in the image.
     late ui.FrameInfo frameInfo;
-    for (int i = 0; i < 69; i++) {
+    for (var i = 0; i < 69; i++) {
       frameInfo = await codec.getNextFrame();
     }
     codec.dispose();
@@ -192,7 +192,7 @@ void main() {
     final ui.Image image = frameInfo.image;
     final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
 
-    final String fileName = impellerEnabled ? 'impeller_heart_end.png' : 'heart_end.png';
+    final fileName = impellerEnabled ? 'impeller_heart_end.png' : 'heart_end.png';
 
     final Uint8List goldenData = File(
       path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
@@ -211,13 +211,13 @@ void main() {
 
     // Capture the 67,68,69 frames of animation and then compare the pixels.
     late ui.FrameInfo frameInfo;
-    for (int i = 0; i < 70; i++) {
+    for (var i = 0; i < 70; i++) {
       frameInfo = await codec.getNextFrame();
       if (i >= 67) {
         final ui.Image image = frameInfo.image;
         final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
 
-        final String fileName = impellerEnabled
+        final fileName = impellerEnabled
             ? 'impeller_2_dispose_op_restore_previous.apng.$i.png'
             : '2_dispose_op_restore_previous.apng.$i.png';
 

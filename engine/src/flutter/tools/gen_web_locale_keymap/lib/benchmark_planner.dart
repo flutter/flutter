@@ -35,9 +35,9 @@ Map<String, int> planLayout(Map<String, LayoutEntry> entries) {
 
   // Unresolved mandatory goals, mapped from printables to KeyboardEvent.code.
   // This map will be modified during this function and thus is a clone.
-  final Map<String, String> mandatoryGoalsByChar = <String, String>{..._kMandatoryGoalsByChar};
+  final mandatoryGoalsByChar = <String, String>{..._kMandatoryGoalsByChar};
   // The result mapping from KeyboardEvent.code to logical key.
-  final Map<String, int> result = <String, int>{};
+  final result = <String, int>{};
 
   entries.forEach((String eventCode, LayoutEntry entry) {
     for (final String printable in entry.printables) {
@@ -71,8 +71,8 @@ bool _isLetterOrMappedToKeyCode(int charCode) {
 ///
 /// Entries that can be derived using heuristics are omitted.
 Map<String, Map<String, int>> combineLayouts(Iterable<Layout> layouts) {
-  final Map<String, Map<String, int>> result = <String, Map<String, int>>{};
-  for (final Layout layout in layouts) {
+  final result = <String, Map<String, int>>{};
+  for (final layout in layouts) {
     planLayout(layout.entries).forEach((String eventCode, int logicalKey) {
       final Map<String, int> codeMap = result.putIfAbsent(eventCode, () => <String, int>{});
       final LayoutEntry entry = layout.entries[eventCode]!;

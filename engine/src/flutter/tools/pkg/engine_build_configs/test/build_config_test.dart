@@ -12,7 +12,7 @@ import 'fixtures.dart' as fixtures;
 
 int main() {
   test('BuildConfig parser works', () {
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(fixtures.buildConfigJson) as Map<String, Object?>,
     );
@@ -88,14 +88,14 @@ int main() {
   });
 
   test('BuildConfig flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": 5,
   "generators": {},
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -107,7 +107,7 @@ int main() {
   });
 
   test('GlobalBuild flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": [
     {
@@ -118,7 +118,7 @@ int main() {
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -132,7 +132,7 @@ int main() {
   });
 
   test('BuildNinja flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": [
     {
@@ -145,7 +145,7 @@ int main() {
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -160,7 +160,7 @@ int main() {
   });
 
   test('BuildTest flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": [
     {
@@ -175,7 +175,7 @@ int main() {
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -190,7 +190,7 @@ int main() {
   });
 
   test('BuildTask flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": [
     {
@@ -207,7 +207,7 @@ int main() {
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -222,7 +222,7 @@ int main() {
   });
 
   test('BuildArchive flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "builds": [
     {
@@ -237,7 +237,7 @@ int main() {
   "tests": []
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -252,7 +252,7 @@ int main() {
   });
 
   test('GlobalTest flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "tests": [
     {
@@ -261,7 +261,7 @@ int main() {
   ]
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );
@@ -275,7 +275,7 @@ int main() {
   });
 
   test('TestTask flags invalid input', () {
-    const String invalidInput = '''
+    const invalidInput = '''
 {
   "tests": [
     {
@@ -288,7 +288,7 @@ int main() {
   ]
 }
 ''';
-    final BuilderConfig buildConfig = BuilderConfig.fromJson(
+    final buildConfig = BuilderConfig.fromJson(
       path: 'linux_test_config',
       map: convert.jsonDecode(invalidInput) as Map<String, Object?>,
     );

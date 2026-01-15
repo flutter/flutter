@@ -19,7 +19,7 @@ int main() {
     buildConfigFile.create(recursive: true);
     buildConfigFile.writeAsStringSync(fixtures.buildConfigJson);
 
-    final BuildConfigLoader loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
+    final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
     expect(loader.configs, isNotNull);
     expect(loader.errors, isEmpty);
@@ -35,7 +35,7 @@ int main() {
       'linux_test_build.json',
     );
     final Directory buildConfigsDir = fs.directory(buildConfigPath);
-    final BuildConfigLoader loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
+    final loader = BuildConfigLoader(buildConfigsDir: buildConfigsDir);
 
     expect(loader.configs, isNotNull);
     expect(loader.errors[0], equals('flutter/ci/builders/linux_test_build.json does not exist.'));

@@ -56,7 +56,7 @@ void debugEmulateHotRestart() {
   while (_hotRestartListeners.isNotEmpty) {
     final List<ui.VoidCallback> copyOfListeners = _hotRestartListeners.toList();
     _hotRestartListeners.clear();
-    for (final ui.VoidCallback listener in copyOfListeners) {
+    for (final listener in copyOfListeners) {
       listener();
     }
   }

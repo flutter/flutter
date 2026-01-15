@@ -1210,6 +1210,39 @@ class AppLocalizationsEn extends AppLocalizations {
       },
     );
 
+    testWithoutContext('handles pt_BR locale correctly', () {
+      const ptArbFileString = '''
+{
+  "@@locale": "pt",
+  "test": "test_PT"
+}''';
+
+      const ptBrArbFileString = '''
+{
+  "@@locale": "pt_BR",
+  "test": "test_PT_BR"
+}''';
+
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true)
+        ..childFile('pt.arb').writeAsStringSync(ptArbFileString)
+        ..childFile('pt_BR.arb').writeAsStringSync(ptBrArbFileString);
+
+      final generator = LocalizationsGenerator(
+        fileSystem: fs,
+        inputPathString: defaultL10nPath,
+        outputPathString: defaultL10nPath,
+        templateArbFileName: 'pt.arb',
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        projectPathString: fs.currentDirectory.path,
+        logger: logger,
+      )..loadResources();
+
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('pt')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('pt_BR')), true);
+    });
+
     testWithoutContext("throws when arb file's locale could not be determined", () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true)

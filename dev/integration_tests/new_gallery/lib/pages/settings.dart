@@ -72,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /// native name can't be determined, it is omitted. If the locale can't be
   /// determined, the locale code is used.
   DisplayOption _getLocaleDisplayOption(BuildContext context, Locale? locale) {
-    final String localeCode = locale.toString();
+    final localeCode = locale.toString();
     final String? localeName = LocaleNames.of(context)!.nameOf(localeCode);
     if (localeName != null) {
       final String? localeNativeName =
@@ -99,27 +99,25 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Create a sorted — by native name – map of supported locales to their
   /// intended display string, with a system option as the first element.
   Map<Locale, DisplayOption> _getLocaleOptions() {
-    final Map<Locale, DisplayOption> localeOptions =
-        Map<Locale, DisplayOption>.of(<Locale, DisplayOption>{
-          systemLocaleOption: DisplayOption(
-            GalleryLocalizations.of(context)!.settingsSystemDefault +
-                (deviceLocale != null
-                    ? ' - ${_getLocaleDisplayOption(context, deviceLocale).title}'
-                    : ''),
-          ),
-        });
-    final List<Locale> supportedLocales = List<Locale>.from(GalleryLocalizations.supportedLocales);
+    final localeOptions = Map<Locale, DisplayOption>.of(<Locale, DisplayOption>{
+      systemLocaleOption: DisplayOption(
+        GalleryLocalizations.of(context)!.settingsSystemDefault +
+            (deviceLocale != null
+                ? ' - ${_getLocaleDisplayOption(context, deviceLocale).title}'
+                : ''),
+      ),
+    });
+    final supportedLocales = List<Locale>.from(GalleryLocalizations.supportedLocales);
     supportedLocales.removeWhere((Locale locale) => locale == deviceLocale);
 
     final List<MapEntry<Locale, DisplayOption>> displayLocales =
         Map<Locale, DisplayOption>.fromIterable(
-            supportedLocales,
-            value: (dynamic locale) => _getLocaleDisplayOption(context, locale as Locale?),
-          ).entries.toList()
-          ..sort(
-            (MapEntry<Locale, DisplayOption> l1, MapEntry<Locale, DisplayOption> l2) =>
-                compareAsciiUpperCase(l1.value.title, l2.value.title),
-          );
+          supportedLocales,
+          value: (dynamic locale) => _getLocaleDisplayOption(context, locale as Locale?),
+        ).entries.toList()..sort(
+          (MapEntry<Locale, DisplayOption> l1, MapEntry<Locale, DisplayOption> l2) =>
+              compareAsciiUpperCase(l1.value.title, l2.value.title),
+        );
 
     localeOptions.addAll(Map<Locale, DisplayOption>.fromEntries(displayLocales));
     return localeOptions;
@@ -132,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final bool isDesktop = isDisplayDesktop(context);
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
 
-    final List<Widget> settingsListItems = <Widget>[
+    final settingsListItems = <Widget>[
       SettingsListItem<double?>(
         title: localizations.settingsTextScaling,
         selectedOption: options.textScaleFactor(context, useSentinel: true),
@@ -143,9 +141,8 @@ class _SettingsPageState extends State<SettingsPage> {
           2.0: DisplayOption(localizations.settingsTextScalingLarge),
           3.0: DisplayOption(localizations.settingsTextScalingHuge),
         }),
-        onOptionChanged:
-            (double? newTextScale) =>
-                GalleryOptions.update(context, options.copyWith(textScaleFactor: newTextScale)),
+        onOptionChanged: (double? newTextScale) =>
+            GalleryOptions.update(context, options.copyWith(textScaleFactor: newTextScale)),
         onTapSetting: () => onTapSetting(_ExpandableSetting.textScale),
         isExpanded: _expandedSettingId == _ExpandableSetting.textScale,
       ),
@@ -160,11 +157,8 @@ class _SettingsPageState extends State<SettingsPage> {
               CustomTextDirection.ltr: DisplayOption(localizations.settingsTextDirectionLTR),
               CustomTextDirection.rtl: DisplayOption(localizations.settingsTextDirectionRTL),
             }),
-        onOptionChanged:
-            (CustomTextDirection? newTextDirection) => GalleryOptions.update(
-              context,
-              options.copyWith(customTextDirection: newTextDirection),
-            ),
+        onOptionChanged: (CustomTextDirection? newTextDirection) =>
+            GalleryOptions.update(context, options.copyWith(customTextDirection: newTextDirection)),
         onTapSetting: () => onTapSetting(_ExpandableSetting.textDirection),
         isExpanded: _expandedSettingId == _ExpandableSetting.textDirection,
       ),
@@ -191,9 +185,8 @@ class _SettingsPageState extends State<SettingsPage> {
           TargetPlatform.linux: DisplayOption('Linux'),
           TargetPlatform.windows: DisplayOption('Windows'),
         }),
-        onOptionChanged:
-            (TargetPlatform? newPlatform) =>
-                GalleryOptions.update(context, options.copyWith(platform: newPlatform)),
+        onOptionChanged: (TargetPlatform? newPlatform) =>
+            GalleryOptions.update(context, options.copyWith(platform: newPlatform)),
         onTapSetting: () => onTapSetting(_ExpandableSetting.platform),
         isExpanded: _expandedSettingId == _ExpandableSetting.platform,
       ),
@@ -205,18 +198,16 @@ class _SettingsPageState extends State<SettingsPage> {
           ThemeMode.dark: DisplayOption(localizations.settingsDarkTheme),
           ThemeMode.light: DisplayOption(localizations.settingsLightTheme),
         }),
-        onOptionChanged:
-            (ThemeMode? newThemeMode) =>
-                GalleryOptions.update(context, options.copyWith(themeMode: newThemeMode)),
+        onOptionChanged: (ThemeMode? newThemeMode) =>
+            GalleryOptions.update(context, options.copyWith(themeMode: newThemeMode)),
         onTapSetting: () => onTapSetting(_ExpandableSetting.theme),
         isExpanded: _expandedSettingId == _ExpandableSetting.theme,
       ),
       ToggleSetting(
         text: GalleryLocalizations.of(context)!.settingsSlowMotion,
         value: options.timeDilation != 1.0,
-        onChanged:
-            (bool isOn) =>
-                GalleryOptions.update(context, options.copyWith(timeDilation: isOn ? 5.0 : 1.0)),
+        onChanged: (bool isOn) =>
+            GalleryOptions.update(context, options.copyWith(timeDilation: isOn ? 5.0 : 1.0)),
       ),
     ];
 
@@ -303,7 +294,7 @@ class SettingsAttribution extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
-    final double verticalPadding = isDesktop ? 0.0 : 28.0;
+    final verticalPadding = isDesktop ? 0.0 : 28.0;
     return MergeSemantics(
       child: Padding(
         padding: EdgeInsetsDirectional.only(
@@ -371,8 +362,8 @@ class _AnimateSettingsListItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double dividingPadding = 4.0;
-    final Tween<double> dividerTween = Tween<double>(begin: 0, end: dividingPadding);
+    const dividingPadding = 4.0;
+    final dividerTween = Tween<double>(begin: 0, end: dividingPadding);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),

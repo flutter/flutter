@@ -15,12 +15,12 @@ void _expectStartsWith(List<String?> actual, List<String?> matcher) {
 }
 
 void main() {
-  final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
+  final binding = _MockLiveTestWidgetsFlutterBinding();
 
   testWidgets('Should print message on pointer events', (WidgetTester tester) async {
-    final List<String?> printedMessages = <String?>[];
+    final printedMessages = <String?>[];
 
-    int invocations = 0;
+    var invocations = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -78,9 +78,9 @@ No widgets found at Offset(1.0, 1.0).
   testWidgets('Should print message on pointer events with setSurfaceSize', (
     WidgetTester tester,
   ) async {
-    final List<String?> printedMessages = <String?>[];
+    final printedMessages = <String?>[];
 
-    int invocations = 0;
+    var invocations = 0;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

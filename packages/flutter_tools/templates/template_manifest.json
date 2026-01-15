@@ -328,6 +328,17 @@
     "templates/plugin_shared/pubspec.yaml.tmpl",
     "templates/plugin_shared/windows.tmpl/.gitignore",
 
+    "templates/plugin_darwin_cocoapods/darwin.tmpl/.gitignore",
+    "templates/plugin_darwin_cocoapods/darwin.tmpl/Classes/pluginClass.swift.tmpl",
+    "templates/plugin_darwin_cocoapods/darwin.tmpl/Resources/PrivacyInfo.xcprivacy",
+    "templates/plugin_darwin_cocoapods/darwin.tmpl/projectName.podspec.tmpl",
+
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Package.swift.tmpl",
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Sources/projectName.tmpl/PrivacyInfo.xcprivacy",
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
+    "templates/plugin_darwin_spm/darwin.tmpl/projectName.podspec.tmpl",
+
     "templates/plugin_cocoapods/ios.tmpl/Classes/pluginClass.swift.tmpl",
     "templates/plugin_cocoapods/ios.tmpl/Assets/.gitkeep",
     "templates/plugin_cocoapods/ios.tmpl/Resources/PrivacyInfo.xcprivacy",
@@ -348,7 +359,9 @@
     "templates/widget_preview_scaffold/lib/src/widget_preview_rendering.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/widget_preview_scaffold_controller.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/controls.dart.tmpl",
+    "templates/widget_preview_scaffold/lib/src/split.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/utils.dart.tmpl",
+    "templates/widget_preview_scaffold/lib/src/dtd/dtd_connection_info.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/dtd_services.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/dtd/editor_service.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/generated_preview.dart.tmpl",

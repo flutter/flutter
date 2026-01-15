@@ -626,7 +626,21 @@ if (custom_toolchain != "") {
   win_toolchain_version = ""
   clang_win = ""
   clang_win_version = ""
-  host_toolchain = "//build/toolchain/wasm"
+  if (host_os == "linux") {
+    # Use clang for the x86/64 Linux host builds.
+    if (host_cpu == "x86" || host_cpu == "x64") {
+      host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+    } else {
+      host_toolchain = "//build/toolchain/linux:$host_cpu"
+    }
+  } else if (host_os == "mac") {
+    host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
+  } else if (host_os == "win") {
+    assert(is_clang)
+    host_toolchain = "//build/toolchain/win:clang_$host_cpu"
+  } else {
+    assert(false, "Unknown host for wasm compile")
+  }
   set_default_toolchain("//build/toolchain/wasm")
 } else if (is_qnx) {
   host_toolchain = "//build/toolchain/linux:clang_$host_cpu"

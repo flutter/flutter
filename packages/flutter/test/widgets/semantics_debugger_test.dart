@@ -155,7 +155,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger interaction test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -193,7 +193,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -290,7 +290,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger long press', (WidgetTester tester) async {
-    bool didLongPress = false;
+    var didLongPress = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -312,7 +312,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger slider', (WidgetTester tester) async {
-    double value = 0.75;
+    var value = 0.75;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -481,7 +481,7 @@ void main() {
     (WidgetTester tester) async {
       final Key child = UniqueKey();
       final Key debugger = UniqueKey();
-      final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+      final isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -507,8 +507,8 @@ void main() {
   );
 
   testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
-    final UniqueKey textField = UniqueKey();
-    final UniqueKey debugger = UniqueKey();
+    final textField = UniqueKey();
+    final debugger = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -535,8 +535,8 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
-    final UniqueKey debugger = UniqueKey();
-    const TextStyle labelStyle = TextStyle(color: Colors.amber);
+    final debugger = UniqueKey();
+    const labelStyle = TextStyle(color: Colors.amber);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -556,7 +556,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {
-    final UniqueKey debugger = UniqueKey();
+    final debugger = UniqueKey();
     final Key label = UniqueKey();
 
     await tester.pumpWidget(
@@ -605,7 +605,7 @@ String _getMessageShownInSemanticsDebugger({
 }
 
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {
-  final CustomPaint customPaint =
+  final customPaint =
       tester
               .widgetList(
                 find.descendant(of: find.byKey(debuggerKey), matching: find.byType(CustomPaint)),

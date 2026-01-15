@@ -30,7 +30,6 @@ const kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
-  '--no-sandbox',
 ];
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
@@ -536,6 +535,7 @@ void main() {
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
           ...kChromeArgs,
+          '--no-sandbox',
           '--headless',
           '--disable-gpu',
           '--window-size=2400,1800',
@@ -621,6 +621,7 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
+      '--no-sandbox',
       '--headless',
       '--disable-gpu',
       '--window-size=2400,1800',
@@ -654,6 +655,7 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
+      '--no-sandbox',
       '--headless',
       '--disable-gpu',
       '--window-size=2400,1800',
@@ -691,6 +693,7 @@ void main() {
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
             '--remote-debugging-port=12345',
             ...kChromeArgs,
+            '--no-sandbox',
             '--headless',
             '--disable-gpu',
             '--window-size=2400,1800',
@@ -1005,7 +1008,7 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
-  var throwSocketExceptions = false;
+  bool throwSocketExceptions = false;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {

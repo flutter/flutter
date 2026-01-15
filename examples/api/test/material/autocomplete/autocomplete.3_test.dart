@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/autocomplete/autocomplete.3.dart' as example;
+import 'package:flutter_api_samples/material/autocomplete/autocomplete.3.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,32 +40,42 @@ void main() {
     },
   );
 
-  testWidgets('debounce is reset each time a character is entered', (WidgetTester tester) async {
+  testWidgets('debounce is reset each time a character is entered', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
 
     await tester.enterText(find.byType(TextFormField), 'c');
-    await tester.pump(example.debounceDuration - const Duration(milliseconds: 100));
+    await tester.pump(
+      example.debounceDuration - const Duration(milliseconds: 100),
+    );
 
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'ch');
-    await tester.pump(example.debounceDuration - const Duration(milliseconds: 100));
+    await tester.pump(
+      example.debounceDuration - const Duration(milliseconds: 100),
+    );
 
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'cha');
-    await tester.pump(example.debounceDuration - const Duration(milliseconds: 100));
+    await tester.pump(
+      example.debounceDuration - const Duration(milliseconds: 100),
+    );
 
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'cham');
-    await tester.pump(example.debounceDuration - const Duration(milliseconds: 100));
+    await tester.pump(
+      example.debounceDuration - const Duration(milliseconds: 100),
+    );
 
     // Despite the total elapsed time being greater than debounceDuration +
     // fakeAPIDuration, the search has not yet completed, because the debounce

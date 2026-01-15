@@ -302,16 +302,16 @@ class GLFWKeyHelper implements KeyHelper {
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GLFW Key codes for modifier keys.
-    const int shiftLeftKeyCode = 340;
-    const int shiftRightKeyCode = 344;
-    const int controlLeftKeyCode = 341;
-    const int controlRightKeyCode = 345;
-    const int altLeftKeyCode = 342;
-    const int altRightKeyCode = 346;
-    const int metaLeftKeyCode = 343;
-    const int metaRightKeyCode = 347;
-    const int capsLockKeyCode = 280;
-    const int numLockKeyCode = 282;
+    const shiftLeftKeyCode = 340;
+    const shiftRightKeyCode = 344;
+    const controlLeftKeyCode = 341;
+    const controlRightKeyCode = 345;
+    const altLeftKeyCode = 342;
+    const altRightKeyCode = 346;
+    const metaLeftKeyCode = 343;
+    const metaRightKeyCode = 347;
+    const capsLockKeyCode = 280;
+    const numLockKeyCode = 282;
 
     // On GLFW, the "modifiers" bitfield is the state as it is BEFORE this event
     // happened, not AFTER, like every other platform. Consequently, if this is
@@ -432,17 +432,17 @@ class GtkKeyHelper implements KeyHelper {
 
   int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
     // GTK Key codes for modifier keys.
-    const int shiftLeftKeyCode = 0xffe1;
-    const int shiftRightKeyCode = 0xffe2;
-    const int controlLeftKeyCode = 0xffe3;
-    const int controlRightKeyCode = 0xffe4;
-    const int capsLockKeyCode = 0xffe5;
-    const int shiftLockKeyCode = 0xffe6;
-    const int altLeftKeyCode = 0xffe9;
-    const int altRightKeyCode = 0xffea;
-    const int metaLeftKeyCode = 0xffeb;
-    const int metaRightKeyCode = 0xffec;
-    const int numLockKeyCode = 0xff7f;
+    const shiftLeftKeyCode = 0xffe1;
+    const shiftRightKeyCode = 0xffe2;
+    const controlLeftKeyCode = 0xffe3;
+    const controlRightKeyCode = 0xffe4;
+    const capsLockKeyCode = 0xffe5;
+    const shiftLockKeyCode = 0xffe6;
+    const altLeftKeyCode = 0xffe9;
+    const altRightKeyCode = 0xffea;
+    const metaLeftKeyCode = 0xffeb;
+    const metaRightKeyCode = 0xffec;
+    const numLockKeyCode = 0xff7f;
 
     // On GTK, the "modifiers" bitfield is the state as it is BEFORE this event
     // happened, not AFTER, like every other platform. Consequently, if this is

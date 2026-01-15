@@ -47,12 +47,16 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
   }
 
   Future<void> _quit() async {
-    final AppExitType exitType = _shouldExit ? AppExitType.required : AppExitType.cancelable;
+    final AppExitType exitType = _shouldExit
+        ? AppExitType.required
+        : AppExitType.cancelable;
     await ServicesBinding.instance.exitApplication(exitType);
   }
 
   Future<AppExitResponse> _handleExitRequest() async {
-    final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
+    final AppExitResponse response = _shouldExit
+        ? AppExitResponse.exit
+        : AppExitResponse.cancel;
     setState(() {
       _lastExitResponse = 'App responded ${response.name} to exit request';
     });
@@ -80,7 +84,10 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const RadioListTile<bool>(title: Text('Do Not Allow Exit'), value: false),
+              const RadioListTile<bool>(
+                title: Text('Do Not Allow Exit'),
+                value: false,
+              ),
               const RadioListTile<bool>(title: Text('Allow Exit'), value: true),
               const SizedBox(height: 30),
               ElevatedButton(onPressed: _quit, child: const Text('Quit')),

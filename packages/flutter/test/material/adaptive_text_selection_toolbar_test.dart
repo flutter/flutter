@@ -13,7 +13,7 @@ import '../widgets/live_text_utils.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
+  final mockClipboard = MockClipboard();
 
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +29,7 @@ void main() {
   testWidgets(
     'Builds the right toolbar on each platform, including web, and shows buttonItems',
     (WidgetTester tester) async {
-      const String buttonText = 'Click me';
+      const buttonText = 'Click me';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -100,8 +100,8 @@ void main() {
     'Can build from EditableTextState',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = TextEditingController();
-      final FocusNode focusNode = FocusNode();
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -299,9 +299,9 @@ void main() {
         // selection menu.
         await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
 
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final TextEditingController controller = TextEditingController();
-        final FocusNode focusNode = FocusNode();
+        var buttonTypes = <ContextMenuButtonType>{};
+        final controller = TextEditingController();
+        final focusNode = FocusNode();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -340,7 +340,7 @@ void main() {
         expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
 
         // With text but no selection.
-        const String text = 'lorem ipsum';
+        const text = 'lorem ipsum';
         controller.value = const TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: text.length),
@@ -393,7 +393,7 @@ void main() {
     testWidgets(
       'getAdaptiveButtons builds the correct button widgets per-platform',
       (WidgetTester tester) async {
-        const String buttonText = 'Click me';
+        const buttonText = 'Click me';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -401,7 +401,7 @@ void main() {
               body: Center(
                 child: Builder(
                   builder: (BuildContext context) {
-                    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[
+                    final buttonItems = <ContextMenuButtonItem>[
                       ContextMenuButtonItem(label: buttonText, onPressed: () {}),
                     ];
                     return ListView(

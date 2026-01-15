@@ -21,7 +21,8 @@ class RotationTransitionExample extends StatefulWidget {
   const RotationTransitionExample({super.key});
 
   @override
-  State<RotationTransitionExample> createState() => _RotationTransitionExampleState();
+  State<RotationTransitionExample> createState() =>
+      _RotationTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
@@ -49,7 +50,10 @@ class _RotationTransitionExampleState extends State<RotationTransitionExample>
       body: Center(
         child: RotationTransition(
           turns: _animation,
-          child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: FlutterLogo(size: 150.0),
+          ),
         ),
       ),
     );

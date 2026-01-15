@@ -1154,13 +1154,13 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 }
 
 class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
-  var detached = false;
+  bool detached = false;
 
   @override
-  var debuggerAttached = false;
+  bool debuggerAttached = false;
 
   @override
-  var logLines = const Stream<String>.empty();
+  Stream<String> logLines = const Stream<String>.empty();
 
   @override
   Future<void> detach() async {
@@ -1168,7 +1168,6 @@ class FakeIOSDeployDebugger extends Fake implements IOSDeployDebugger {
   }
 }
 
-@override
 class FakeXcode extends Fake implements Xcode {
   FakeXcode({this.version});
 

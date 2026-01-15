@@ -22,7 +22,8 @@ namespace {
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
-    const std::shared_ptr<impeller::AiksContext>& context) {
+    const std::shared_ptr<impeller::AiksContext>& context,
+    SnapshotPixelFormat pixel_format) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   if (!context) {
     return nullptr;
@@ -47,17 +48,32 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     render_target_size.height *= scale_factor;
   }
 
+  std::optional<impeller::PixelFormat> impeller_pixel_format;
+  switch (pixel_format) {
+    case SnapshotPixelFormat::kDontCare:
+      impeller_pixel_format = std::nullopt;
+      break;
+    case SnapshotPixelFormat::kRGBA32Float:
+      impeller_pixel_format = impeller::PixelFormat::kR32G32B32A32Float;
+      break;
+    case SnapshotPixelFormat::kR32Float:
+      impeller_pixel_format = impeller::PixelFormat::kR32Float;
+      break;
+  }
+
   return impeller::DlImageImpeller::Make(
       impeller::DisplayListToTexture(display_list, render_target_size, *context,
                                      /*reset_host_buffer=*/false,
-                                     /*generate_mips=*/true),
+                                     /*generate_mips=*/true,
+                                     impeller_pixel_format),
       DlImage::OwningContext::kRaster);
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     DlISize size,
-    const SnapshotController::Delegate& delegate) {
+    const SnapshotController::Delegate& delegate,
+    SnapshotPixelFormat pixel_format) {
   // Ensure that the current thread has a rendering context. This must be done
   // before calling GetAiksContext because constructing the AiksContext may
   // invoke graphics APIs.
@@ -72,14 +88,16 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     }
   }
 
-  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext());
+  return DoMakeRasterSnapshot(display_list, size, delegate.GetAiksContext(),
+                              pixel_format);
 }
 
 sk_sp<DlImage> DoMakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
     const std::shared_ptr<const fml::SyncSwitch>& sync_switch,
-    const std::shared_ptr<impeller::AiksContext>& context) {
+    const std::shared_ptr<impeller::AiksContext>& context,
+    SnapshotPixelFormat pixel_format) {
   sk_sp<DlImage> result;
   sync_switch->Execute(fml::SyncSwitch::Handlers()
                            .SetIfTrue([&] {
@@ -87,7 +105,8 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
                            })
                            .SetIfFalse([&] {
                              result = DoMakeRasterSnapshot(
-                                 display_list, picture_size, context);
+                                 display_list, picture_size, context,
+                                 pixel_format);
                            }));
 
   return result;
@@ -97,7 +116,8 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
 void SnapshotControllerImpeller::MakeRasterSnapshot(
     sk_sp<DisplayList> display_list,
     DlISize picture_size,
-    std::function<void(const sk_sp<DlImage>&)> callback) {
+    std::function<void(const sk_sp<DlImage>&)> callback,
+    SnapshotPixelFormat pixel_format) {
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
   sync_switch->Execute(
@@ -108,9 +128,10 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             if (context) {
               context->GetContext()->StoreTaskForGPU(
                   [context, sync_switch, display_list = std::move(display_list),
-                   picture_size, callback] {
+                   picture_size, callback, pixel_format] {
                     callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                                  sync_switch, context));
+                                                  sync_switch, context,
+                                                  pixel_format));
                   },
                   [callback]() { callback(nullptr); });
             } else {
@@ -134,14 +155,85 @@ void SnapshotControllerImpeller::MakeRasterSnapshot(
             }
 #endif
             callback(DoMakeRasterSnapshot(display_list, picture_size,
-                                          GetDelegate()));
+                                          GetDelegate(), pixel_format));
           }));
 }
 
 sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize picture_size) {
-  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate());
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  return DoMakeRasterSnapshot(display_list, picture_size, GetDelegate(),
+                              pixel_format);
+}
+
+sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  auto aiks_context = GetDelegate().GetAiksContext();
+  if (!aiks_context) {
+    return nullptr;
+  }
+  auto context = aiks_context->GetContext();
+  if (!context) {
+    return nullptr;
+  }
+
+  impeller::TextureDescriptor desc;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize(image->width(), image->height());
+  desc.mip_count = 1;
+
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  if (!texture) {
+    return nullptr;
+  }
+
+  size_t byte_size = image->width() * image->height() * 4;
+  auto buffer = context->GetResourceAllocator()->CreateBuffer(
+      impeller::DeviceBufferDescriptor{
+          .storage_mode = impeller::StorageMode::kHostVisible,
+          .size = byte_size,
+      });
+
+  if (!buffer) {
+    return nullptr;
+  }
+
+  {
+    uint8_t* map = buffer->OnGetContents();
+    if (!map) {
+      return nullptr;
+    }
+    SkImageInfo info =
+        SkImageInfo::Make(image->width(), image->height(),
+                          kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+    if (!image->readPixels(info, map, image->width() * 4, 0, 0)) {
+      return nullptr;
+    }
+    buffer->Flush(impeller::Range(0, byte_size));
+  }
+
+  auto command_buffer = context->CreateCommandBuffer();
+  if (!command_buffer) {
+    return nullptr;
+  }
+  auto blit_pass = command_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return nullptr;
+  }
+
+  blit_pass->AddCopy(
+      impeller::BufferView{buffer, impeller::Range(0, byte_size)}, texture);
+  blit_pass->EncodeCommands();
+
+  if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+    return nullptr;
+  }
+
+  return impeller::DlImageImpeller::Make(texture,
+                                         DlImage::OwningContext::kRaster);
 }
 
 void SnapshotControllerImpeller::CacheRuntimeStage(

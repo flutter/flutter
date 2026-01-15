@@ -11,12 +11,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TextSpan equals', () {
-    const TextSpan a1 = TextSpan(text: 'a');
-    const TextSpan a2 = TextSpan(text: 'a');
-    const TextSpan b1 = TextSpan(children: <TextSpan>[a1]);
-    const TextSpan b2 = TextSpan(children: <TextSpan>[a2]);
-    const TextSpan c1 = TextSpan();
-    const TextSpan c2 = TextSpan();
+    const a1 = TextSpan(text: 'a');
+    const a2 = TextSpan(text: 'a');
+    const b1 = TextSpan(children: <TextSpan>[a1]);
+    const b2 = TextSpan(children: <TextSpan>[a2]);
+    const c1 = TextSpan();
+    const c2 = TextSpan();
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -33,19 +33,11 @@ void main() {
     void callback1(PointerEnterEvent _) {}
     void callback2(PointerEnterEvent _) {}
 
-    final TextSpan d1 = TextSpan(text: 'a', onEnter: callback1);
-    final TextSpan d2 = TextSpan(text: 'a', onEnter: callback1);
-    final TextSpan d3 = TextSpan(text: 'a', onEnter: callback2);
-    final TextSpan e1 = TextSpan(
-      text: 'a',
-      onEnter: callback2,
-      mouseCursor: SystemMouseCursors.forbidden,
-    );
-    final TextSpan e2 = TextSpan(
-      text: 'a',
-      onEnter: callback2,
-      mouseCursor: SystemMouseCursors.forbidden,
-    );
+    final d1 = TextSpan(text: 'a', onEnter: callback1);
+    final d2 = TextSpan(text: 'a', onEnter: callback1);
+    final d3 = TextSpan(text: 'a', onEnter: callback2);
+    final e1 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
+    final e2 = TextSpan(text: 'a', onEnter: callback2, mouseCursor: SystemMouseCursors.forbidden);
 
     expect(a1 == d1, isFalse);
     expect(d1 == d2, isTrue);
@@ -55,7 +47,7 @@ void main() {
   });
 
   test('TextSpan toStringDeep', () {
-    const TextSpan test = TextSpan(
+    const test = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
@@ -81,7 +73,7 @@ void main() {
   });
 
   test('TextSpan toStringDeep for mouse', () {
-    const TextSpan test1 = TextSpan(text: 'a');
+    const test1 = TextSpan(text: 'a');
     expect(
       test1.toStringDeep(),
       equals(
@@ -90,7 +82,7 @@ void main() {
       ),
     );
 
-    final TextSpan test2 = TextSpan(
+    final test2 = TextSpan(
       text: 'a',
       onEnter: (_) {},
       onExit: (_) {},
@@ -108,7 +100,7 @@ void main() {
   });
 
   test('TextSpan toPlainText', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <TextSpan>[
         TextSpan(text: 'b'),
@@ -119,7 +111,7 @@ void main() {
   });
 
   test('WidgetSpan toPlainText', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -131,7 +123,7 @@ void main() {
   });
 
   test('TextSpan toPlainText with semanticsLabel', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <TextSpan>[
         TextSpan(text: 'b', semanticsLabel: 'foo'),
@@ -143,7 +135,7 @@ void main() {
   });
 
   test('TextSpan widget change test', () {
-    const TextSpan textSpan1 = TextSpan(
+    const textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -152,7 +144,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan2 = TextSpan(
+    const textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -161,7 +153,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan3 = TextSpan(
+    const textSpan3 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -170,7 +162,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan4 = TextSpan(
+    const textSpan4 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -179,7 +171,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan5 = TextSpan(
+    const textSpan5 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -188,7 +180,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan6 = TextSpan(
+    const textSpan6 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -211,7 +203,7 @@ void main() {
   });
 
   test('TextSpan nested widget change test', () {
-    const TextSpan textSpan1 = TextSpan(
+    const textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -229,7 +221,7 @@ void main() {
       ],
     );
 
-    const TextSpan textSpan2 = TextSpan(
+    const textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -253,7 +245,7 @@ void main() {
   });
 
   test('GetSpanForPosition', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: '',
       children: <InlineSpan>[
         TextSpan(
@@ -272,7 +264,7 @@ void main() {
   });
 
   test('GetSpanForPosition with WidgetSpan', () {
-    const TextSpan textSpan = TextSpan(
+    const textSpan = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -297,7 +289,7 @@ void main() {
   });
 
   test('TextSpan computeSemanticsInformation', () {
-    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    final collector = <InlineSpanSemanticsInformation>[];
     const TextSpan(
       text: 'aaa',
       semanticsLabel: 'bbb',
@@ -310,7 +302,7 @@ void main() {
 
   test('TextSpan visitDirectChildren', () {
     List<InlineSpan> directChildrenOf(InlineSpan root) {
-      final List<InlineSpan> visitOrder = <InlineSpan>[];
+      final visitOrder = <InlineSpan>[];
       root.visitDirectChildren((InlineSpan span) {
         visitOrder.add(span);
         return true;
@@ -318,13 +310,13 @@ void main() {
       return visitOrder;
     }
 
-    const TextSpan leaf1 = TextSpan(text: 'leaf1');
-    const TextSpan leaf2 = TextSpan(text: 'leaf2');
+    const leaf1 = TextSpan(text: 'leaf1');
+    const leaf2 = TextSpan(text: 'leaf2');
 
-    const TextSpan branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
-    const TextSpan branch2 = TextSpan(text: 'branch2');
+    const branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
+    const branch2 = TextSpan(text: 'branch2');
 
-    const TextSpan root = TextSpan(children: <InlineSpan>[branch1, branch2]);
+    const root = TextSpan(children: <InlineSpan>[branch1, branch2]);
 
     expect(directChildrenOf(root), <TextSpan>[branch1, branch2]);
     expect(directChildrenOf(branch1), <TextSpan>[leaf1, leaf2]);
@@ -333,7 +325,7 @@ void main() {
     expect(directChildrenOf(leaf2), isEmpty);
 
     int? indexInTree(InlineSpan target) {
-      int index = 0;
+      var index = 0;
       bool findInSubtree(InlineSpan subtreeRoot) {
         if (identical(target, subtreeRoot)) {
           // return false to stop traversal.
@@ -396,7 +388,7 @@ void main() {
   });
 
   testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
-    final List<PointerEvent> logEvents = <PointerEvent>[];
+    final logEvents = <PointerEvent>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -439,7 +431,7 @@ void main() {
   });
 
   testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
-    const TextSpan span = TextSpan(
+    const span = TextSpan(
       text: 'aaaaa',
       spellOut: true,
       children: <InlineSpan>[
@@ -454,7 +446,7 @@ void main() {
         ),
       ],
     );
-    final List<InlineSpanSemanticsInformation> collector = <InlineSpanSemanticsInformation>[];
+    final collector = <InlineSpanSemanticsInformation>[];
     span.computeSemanticsInformation(collector);
     expect(collector.length, 5);
     expect(collector[0].stringAttributes.length, 1);
@@ -465,8 +457,7 @@ void main() {
     expect(collector[1].stringAttributes[0].range, const TextRange(start: 0, end: 5));
     expect(collector[1].stringAttributes[1], isA<LocaleStringAttribute>());
     expect(collector[1].stringAttributes[1].range, const TextRange(start: 0, end: 5));
-    final LocaleStringAttribute localeStringAttribute =
-        collector[1].stringAttributes[1] as LocaleStringAttribute;
+    final localeStringAttribute = collector[1].stringAttributes[1] as LocaleStringAttribute;
     expect(localeStringAttribute.locale, const Locale('es', 'MX'));
     expect(collector[2].stringAttributes.length, 0);
     expect(collector[3].stringAttributes.length, 0);
@@ -483,8 +474,7 @@ void main() {
     expect(combined[0].stringAttributes[1].range, const TextRange(start: 5, end: 10));
     expect(combined[0].stringAttributes[2], isA<LocaleStringAttribute>());
     expect(combined[0].stringAttributes[2].range, const TextRange(start: 5, end: 10));
-    final LocaleStringAttribute combinedLocaleStringAttribute =
-        combined[0].stringAttributes[2] as LocaleStringAttribute;
+    final combinedLocaleStringAttribute = combined[0].stringAttributes[2] as LocaleStringAttribute;
     expect(combinedLocaleStringAttribute.locale, const Locale('es', 'MX'));
     expect(combined[0].stringAttributes[3], isA<SpellOutStringAttribute>());
     expect(combined[0].stringAttributes[3].range, const TextRange(start: 20, end: 25));

@@ -430,7 +430,7 @@ abstract class FakeProcessManager implements ProcessManager {
   bool canRun(dynamic executable, {String? workingDirectory}) =>
       !excludedExecutables.contains(executable);
 
-  var excludedExecutables = <String>{};
+  Set<String> excludedExecutables = <String>{};
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

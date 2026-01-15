@@ -8,13 +8,21 @@ import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.s
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Pressing the button should display a snack bar', (WidgetTester tester) async {
+  testWidgets('Pressing the button should display a snack bar', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.ShowSnackBarExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'ScaffoldMessengerState Sample'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'ScaffoldMessengerState Sample'),
+      findsOne,
+    );
     await tester.tap(find.widgetWithText(OutlinedButton, 'Show SnackBar'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(SnackBar, 'A SnackBar has been shown.'), findsOne);
+    expect(
+      find.widgetWithText(SnackBar, 'A SnackBar has been shown.'),
+      findsOne,
+    );
   });
 }

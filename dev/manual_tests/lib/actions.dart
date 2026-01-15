@@ -173,7 +173,7 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 
@@ -183,7 +183,7 @@ class UndoAction extends Action<UndoIntent> {
     if (buildContext == null) {
       return;
     }
-    final UndoableActionDispatcher manager =
+    final manager =
         Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext!)
             as UndoableActionDispatcher;
     manager.undo();
@@ -201,7 +201,7 @@ class RedoAction extends Action<RedoIntent> {
     if (buildContext == null) {
       return false;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 
@@ -211,7 +211,7 @@ class RedoAction extends Action<RedoIntent> {
     if (buildContext == null) {
       return this;
     }
-    final UndoableActionDispatcher manager = Actions.of(buildContext) as UndoableActionDispatcher;
+    final manager = Actions.of(buildContext) as UndoableActionDispatcher;
     manager.redo();
     return this;
   }

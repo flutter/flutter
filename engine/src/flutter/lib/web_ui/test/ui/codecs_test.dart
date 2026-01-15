@@ -12,6 +12,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -135,8 +136,8 @@ Future<void> testMain() async {
     assert(testFiles.any((String testFile) => testFile.endsWith('.webp')));
     assert(testFiles.any((String testFile) => testFile.endsWith('.bmp')));
 
-    final List<TestCodec> testCodecs = <TestCodec>[];
-    for (final String testFile in testFiles) {
+    final testCodecs = <TestCodec>[];
+    for (final testFile in testFiles) {
       if (testFile == 'xOffsetTooBig.gif' && isSafari) {
         // This file causes Safari to crash with `EncodingError`. See:
         // https://github.com/flutter/flutter/issues/152709
@@ -208,7 +209,7 @@ Future<void> testMain() async {
           problematicFrames = <int>{};
         }
 
-        for (int i = 0; i < codec.frameCount; i++) {
+        for (var i = 0; i < codec.frameCount; i++) {
           if (problematicFrames.contains(i)) {
             printWarning(
               'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
@@ -255,7 +256,7 @@ Future<void> testMain() async {
 
     group('Codecs (default browserSupportsImageDecoder)', () {
       createTestCodecs().forEach(runCodecTest);
-    });
+    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
 
     if (browserSupportsImageDecoder) {
       // For the sake of completeness, test codec fallback logic on browsers that support
@@ -269,13 +270,13 @@ Future<void> testMain() async {
         });
 
         createTestCodecs().forEach(runCodecTest);
-      });
+      }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
     }
   });
 
   test('crossOrigin requests cause an error', () async {
     final String otherOrigin = domWindow.location.origin.replaceAll('localhost', '127.0.0.1');
-    bool gotError = false;
+    var gotError = false;
     try {
       final ui.Codec _ = await renderer.instantiateImageCodecFromUrl(
         Uri.parse('$otherOrigin/test_images/1x1.png'),

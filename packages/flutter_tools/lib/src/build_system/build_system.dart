@@ -455,6 +455,28 @@ class Environment {
     required this.generateDartPluginRegistry,
   });
 
+  Environment copyWith({Directory? outputDir}) {
+    return Environment._(
+      outputDir: outputDir ?? this.outputDir,
+      projectDir: projectDir,
+      packageConfigPath: packageConfigPath,
+      buildDir: buildDir,
+      rootBuildDir: rootBuildDir,
+      cacheDir: cacheDir,
+      defines: defines,
+      flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+      platform: platform,
+      analytics: analytics,
+      engineVersion: engineVersion,
+      inputs: inputs,
+      generateDartPluginRegistry: generateDartPluginRegistry,
+    );
+  }
+
   /// The [Source] value which is substituted with the path to [projectDir].
   static const kProjectDirectory = '{PROJECT_DIR}';
 
@@ -773,8 +795,8 @@ class FlutterBuildSystem extends BuildSystem {
     Map<String, File> currentOutputs,
     Set<String> preservedOutputFilePaths,
   ) {
-    if (environment.defines[kXcodePreAction] == 'PrepareFramework') {
-      // If the current build is the PrepareFramework Xcode pre-action, skip
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
+      // If the current build is the "prepare" Xcode pre-action, skip
       // updating the last build identifier and cleaning up the previous build
       // since this build is not a complete build.
       return;

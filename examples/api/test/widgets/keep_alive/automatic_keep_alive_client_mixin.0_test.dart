@@ -29,38 +29,43 @@ void main() {
     await tester.fling(find.byType(ListView), const Offset(0, 6000), 1000);
     await tester.pumpAndSettle();
 
-    expect(find.text('Item 0: 1'), findsOne, reason: 'The state of item 0 should be maintained');
-  });
-
-  testWidgets('The state is not maintained when the item is scrolled out of view', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const AutomaticKeepAliveClientMixinExampleApp());
-
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Item 0: 0'), findsOne);
-
-    await tester.tap(find.widgetWithIcon(IconButton, Icons.add).first);
-    await tester.pump();
-
-    expect(find.text('Item 0: 1'), findsOne);
-
-    // Scrolls all the way down to the bottom of the list.
-    await tester.fling(find.byType(ListView), const Offset(0, -6000), 1000);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Item 99: 0'), findsOne);
-
-    // Scrolls all the way back to the top of the list.
-    await tester.fling(find.byType(ListView), const Offset(0, 6000), 1000);
-    await tester.pumpAndSettle();
-
     expect(
-      find.text('Item 0: 0'),
+      find.text('Item 0: 1'),
       findsOne,
-      reason: 'The state of item 0 should not be maintained',
+      reason: 'The state of item 0 should be maintained',
     );
   });
+
+  testWidgets(
+    'The state is not maintained when the item is scrolled out of view',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const AutomaticKeepAliveClientMixinExampleApp());
+
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 0: 0'), findsOne);
+
+      await tester.tap(find.widgetWithIcon(IconButton, Icons.add).first);
+      await tester.pump();
+
+      expect(find.text('Item 0: 1'), findsOne);
+
+      // Scrolls all the way down to the bottom of the list.
+      await tester.fling(find.byType(ListView), const Offset(0, -6000), 1000);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 99: 0'), findsOne);
+
+      // Scrolls all the way back to the top of the list.
+      await tester.fling(find.byType(ListView), const Offset(0, 6000), 1000);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Item 0: 0'),
+        findsOne,
+        reason: 'The state of item 0 should not be maintained',
+      );
+    },
+  );
 }

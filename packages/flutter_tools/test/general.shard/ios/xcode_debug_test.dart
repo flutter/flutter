@@ -1227,7 +1227,7 @@ Xcode setupXcode({
 }
 
 class FakeProcess extends Fake implements Process {
-  var killed = false;
+  bool killed = false;
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {

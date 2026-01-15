@@ -8,7 +8,9 @@ import 'package:flutter_api_samples/material/switch_list_tile/custom_labeled_swi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tapping LabeledSwitch toggles the switch', (WidgetTester tester) async {
+  testWidgets('Tapping LabeledSwitch toggles the switch', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.LabeledSwitchApp());
 
     // Switch is initially off.

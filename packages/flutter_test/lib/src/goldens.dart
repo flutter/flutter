@@ -96,7 +96,7 @@ abstract class GoldenFileComparator {
     if (version == null) {
       return key;
     }
-    final String keyString = key.toString();
+    final keyString = key.toString();
     final String extension = path.extension(keyString);
     return Uri.parse('${keyString.split(extension).join()}.$version$extension');
   }

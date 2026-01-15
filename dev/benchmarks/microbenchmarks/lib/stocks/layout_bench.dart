@@ -18,11 +18,10 @@ Future<void> execute() async {
 
   // We control the framePolicy below to prevent us from scheduling frames in
   // the engine, so that the engine does not interfere with our timings.
-  final LiveTestWidgetsFlutterBinding binding =
-      TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
+  final binding = TestWidgetsFlutterBinding.ensureInitialized() as LiveTestWidgetsFlutterBinding;
 
-  final Stopwatch watch = Stopwatch();
-  int iterations = 0;
+  final watch = Stopwatch();
+  var iterations = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
@@ -32,14 +31,8 @@ Future<void> execute() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration.fromView(
-      size: const Size(360.0, 640.0),
-      view: tester.view,
-    );
-    final TestViewConfiguration small = TestViewConfiguration.fromView(
-      size: const Size(355.0, 635.0),
-      view: tester.view,
-    );
+    final big = TestViewConfiguration.fromView(size: const Size(360.0, 640.0), view: tester.view);
+    final small = TestViewConfiguration.fromView(size: const Size(355.0, 635.0), view: tester.view);
     final RenderView renderView = WidgetsBinding.instance.renderViews.single;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
@@ -52,7 +45,7 @@ Future<void> execute() async {
     watch.stop();
   });
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock layout',
     value: watch.elapsedMicroseconds / iterations,

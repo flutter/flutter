@@ -12,84 +12,84 @@ void main() {
   }
 
   test('Setting the level works', () {
-    final Logger logger = Logger.test((_) {}, level: Logger.infoLevel);
+    final logger = Logger.test((_) {}, level: Logger.infoLevel);
     expect(logger.level, equals(Logger.infoLevel));
   });
 
   test('error messages are recorded at the default log level', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.error('Error');
     expect(stringsFromLogs(testLogs), equals(<String>['Error\n']));
   });
 
   test('warning messages are recorded at the default log level', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.warning('Warning');
     expect(stringsFromLogs(testLogs), equals(<String>['Warning\n']));
   });
 
   test('status messages are recorded at the default log level', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.status('Status');
     expect(stringsFromLogs(testLogs), equals(<String>['Status\n']));
   });
 
   test('info messages are not recorded at the default log level', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.info('info');
     expect(stringsFromLogs(testLogs), equals(<String>[]));
   });
 
   test('info messages are recorded at the infoLevel log level', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add, level: Logger.infoLevel);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add, level: Logger.infoLevel);
     logger.info('info');
     expect(stringsFromLogs(testLogs), equals(<String>['info\n']));
   });
 
   test('indent indents the message', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.status('Status', indent: 1);
     expect(stringsFromLogs(testLogs), equals(<String>[' Status\n']));
   });
 
   test('newlines in error() can be disabled', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.error('Error', newline: false);
     expect(stringsFromLogs(testLogs), equals(<String>['Error']));
   });
 
   test('newlines in warning() can be disabled', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.warning('Warning', newline: false);
     expect(stringsFromLogs(testLogs), equals(<String>['Warning']));
   });
 
   test('newlines in status() can be disabled', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add);
     logger.status('Status', newline: false);
     expect(stringsFromLogs(testLogs), equals(<String>['Status']));
   });
 
   test('newlines in info() can be disabled', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add, level: Logger.infoLevel);
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add, level: Logger.infoLevel);
     logger.info('info', newline: false);
     expect(stringsFromLogs(testLogs), equals(<String>['info']));
   });
 
   test('fatal throws exception', () {
-    final List<LogRecord> testLogs = <LogRecord>[];
-    final Logger logger = Logger.test(testLogs.add, level: Logger.infoLevel);
-    bool caught = false;
+    final testLogs = <LogRecord>[];
+    final logger = Logger.test(testLogs.add, level: Logger.infoLevel);
+    var caught = false;
     try {
       logger.fatal('test', newline: false);
     } on FatalError catch (_) {
@@ -134,8 +134,8 @@ void main() {
   });
 
   test('Spinner calls onFinish callback', () {
-    final Logger logger = Logger.test((_) {});
-    bool called = false;
+    final logger = Logger.test((_) {});
+    var called = false;
     final Spinner spinner = logger.startSpinner(
       onFinish: () {
         called = true;

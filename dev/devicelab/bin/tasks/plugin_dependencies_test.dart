@@ -31,7 +31,7 @@ Future<void> main() async {
     try {
       section('Create plugin A');
 
-      final Directory pluginADirectory = Directory(path.join(tempDir.path, 'plugin_a'));
+      final pluginADirectory = Directory(path.join(tempDir.path, 'plugin_a'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -47,7 +47,7 @@ Future<void> main() async {
 
       section('Create plugin B');
 
-      final Directory pluginBDirectory = Directory(path.join(tempDir.path, 'plugin_b'));
+      final pluginBDirectory = Directory(path.join(tempDir.path, 'plugin_b'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -63,7 +63,7 @@ Future<void> main() async {
 
       section('Create plugin C without android/ directory');
 
-      final Directory pluginCDirectory = Directory(path.join(tempDir.path, 'plugin_c'));
+      final pluginCDirectory = Directory(path.join(tempDir.path, 'plugin_c'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -79,7 +79,7 @@ Future<void> main() async {
 
       checkDirectoryNotExists(path.join(pluginCDirectory.path, 'android'));
 
-      final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
+      final pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
       await pluginCpubspec.writeAsString('''
 name: plugin_c
 version: 0.0.1
@@ -101,7 +101,7 @@ environment:
 
       section('Create plugin D without ios/ directory');
 
-      final Directory pluginDDirectory = Directory(path.join(tempDir.path, 'plugin_d'));
+      final pluginDDirectory = Directory(path.join(tempDir.path, 'plugin_d'));
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
@@ -119,7 +119,7 @@ environment:
 
       section('Write dummy Kotlin code in plugin B');
 
-      final File pluginBKotlinClass = File(
+      final pluginBKotlinClass = File(
         path.join(
           pluginBDirectory.path,
           'android',
@@ -143,7 +143,7 @@ public class DummyPluginBClass {
 
       section('Make plugin A depend on plugin B, C, and D');
 
-      final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
+      final pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
       String pluginApubspecContent = await pluginApubspec.readAsString();
       pluginApubspecContent = pluginApubspecContent.replaceFirst(
         '${Platform.lineTerminator}dependencies:${Platform.lineTerminator}',
@@ -159,7 +159,7 @@ public class DummyPluginBClass {
 
       section('Write Kotlin code in plugin A that references Kotlin code from plugin B');
 
-      final File pluginAKotlinClass = File(
+      final pluginAKotlinClass = File(
         path.join(
           pluginADirectory.path,
           'android',
@@ -185,13 +185,13 @@ public class DummyPluginAClass {
 
       section('Verify .flutter-plugins-dependencies');
 
-      final Directory exampleApp = Directory(path.join(pluginADirectory.path, 'example'));
+      final exampleApp = Directory(path.join(pluginADirectory.path, 'example'));
 
       await inDirectory(exampleApp, () async {
         await flutter('packages', options: <String>['get']);
       });
 
-      final File flutterPluginsDependenciesFile = File(
+      final flutterPluginsDependenciesFile = File(
         path.join(exampleApp.path, '.flutter-plugins-dependencies'),
       );
 
@@ -202,15 +202,15 @@ public class DummyPluginAClass {
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile
           .readAsStringSync();
 
-      final Map<String, dynamic> jsonContent =
+      final jsonContent =
           json.decode(flutterPluginsDependenciesFileContent) as Map<String, dynamic>;
-      final Map<String, dynamic>? swiftPackageManagerJson =
+      final swiftPackageManagerJson =
           jsonContent['swift_package_manager_enabled'] as Map<String, dynamic>?;
 
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
-      final List<dynamic> dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
-      const String kExpectedPluginsDependenciesContent =
+      final dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
+      const kExpectedPluginsDependenciesContent =
           '['
           '{'
           '"name":"integration_test",'
@@ -243,7 +243,7 @@ public class DummyPluginAClass {
 
       section('Build plugin A example Android app');
 
-      final StringBuffer stderr = StringBuffer();
+      final stderr = StringBuffer();
       await inDirectory(exampleApp, () async {
         await evalFlutter(
           'build',
@@ -283,7 +283,7 @@ public class DummyPluginAClass {
           await evalFlutter('build', options: <String>['ios', '--no-codesign']);
         });
 
-        final Directory appBundle = Directory(
+        final appBundle = Directory(
           path.join(pluginADirectory.path, 'example', 'build', 'ios', 'iphoneos', 'Runner.app'),
         );
 
@@ -291,7 +291,7 @@ public class DummyPluginAClass {
           return TaskResult.failure('Failed to build plugin A example iOS app');
         }
 
-        final bool? swiftPackageManagerEnabled = swiftPackageManagerJson?['ios'] as bool?;
+        final swiftPackageManagerEnabled = swiftPackageManagerJson?['ios'] as bool?;
         if (swiftPackageManagerEnabled == null) {
           return TaskResult.failure(
             '${flutterPluginsDependenciesFile.path} is missing the '

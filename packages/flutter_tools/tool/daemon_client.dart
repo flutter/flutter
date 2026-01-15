@@ -93,7 +93,7 @@ Future<void> main() async {
   );
 }
 
-var id = 0;
+int id = 0;
 
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;

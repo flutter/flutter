@@ -3,14 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/navigator/restorable_route_future.0.dart' as example;
+import 'package:flutter_api_samples/widgets/navigator/restorable_route_future.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It pushes a restorable route and pops it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and pops it', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorableRouteFutureExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'RestorableRouteFuture Example'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'RestorableRouteFuture Example'),
+      findsOne,
+    );
     expect(find.byType(BackButton), findsNothing);
 
     expect(find.text('Last count: 0'), findsOne);
@@ -29,14 +35,22 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(AppBar, 'RestorableRouteFuture Example'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'RestorableRouteFuture Example'),
+      findsOne,
+    );
     expect(find.text('Last count: 1'), findsOne);
   });
 
-  testWidgets('It pushes a restorable route and restores it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and restores it', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorableRouteFutureExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'RestorableRouteFuture Example'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'RestorableRouteFuture Example'),
+      findsOne,
+    );
     expect(find.byType(BackButton), findsNothing);
 
     expect(find.text('Last count: 0'), findsOne);
@@ -64,7 +78,10 @@ void main() {
 
     expect(find.byType(BackButton), findsNothing);
 
-    expect(find.widgetWithText(AppBar, 'RestorableRouteFuture Example'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'RestorableRouteFuture Example'),
+      findsOne,
+    );
     expect(find.text('Last count: 1'), findsOne);
 
     await tester.restoreFrom(data);

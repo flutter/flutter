@@ -42,10 +42,10 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
     cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
     rectSize = cellSize * 0.8;
 
-    final Paint paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
-    for (int i = 0; i < kRows * kColumns; i++) {
-      final PictureRecorder pictureRecorder = PictureRecorder();
-      final Canvas canvas = Canvas(pictureRecorder);
+    final paint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
+    for (var i = 0; i < kRows * kColumns; i++) {
+      final pictureRecorder = PictureRecorder();
+      final canvas = Canvas(pictureRecorder);
       canvas.drawRect(Offset.zero & rectSize, paint);
       _pictures.add(pictureRecorder.endRecording());
     }
@@ -57,8 +57,8 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
     _rootLayer = sceneBuilder.pushOffset(0, 0, oldLayer: _rootLayer);
-    for (int row = 0; row < kRows; row++) {
-      for (int col = 0; col < kColumns; col++) {
+    for (var row = 0; row < kRows; row++) {
+      for (var col = 0; col < kColumns; col++) {
         final int layerId = 1000000 * row + col;
         final OffsetEngineLayer? oldLayer = _layers[layerId];
         final double wobbleOffsetX = col * cellSize.width + (wobbleCounter - 5).abs();

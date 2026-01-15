@@ -26,12 +26,7 @@ void main(List<String> args) async {
   // Get a list of files changed between this commit and the base SHA.
   final List<String> filesChanged;
   {
-    final List<String> args = <String>[
-      'diff',
-      '--name-only',
-      '--full-index',
-      argResults.option('since')!,
-    ];
+    final args = <String>['diff', '--name-only', '--full-index', argResults.option('since')!];
     final io.ProcessResult git = await io.Process.run('git', args);
     if (git.exitCode != 0) {
       io.stderr.writeln('$args failed (exit code: ${git.exitCode}):');
@@ -41,7 +36,7 @@ void main(List<String> args) async {
       return;
     }
 
-    final String stdout = git.stdout as String;
+    final stdout = git.stdout as String;
     filesChanged = const LineSplitter().convert(stdout);
   }
 

@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'multi_view_testing.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -20,7 +24,7 @@ class User {
 }
 
 void main() {
-  const List<String> kOptions = <String>[
+  const kOptions = <String>[
     'aardvark',
     'bobcat',
     'chameleon',
@@ -37,7 +41,7 @@ void main() {
     'northern white rhinoceros',
   ];
 
-  const List<User> kOptionsUsers = <User>[
+  const kOptionsUsers = <User>[
     User(name: 'Alice', email: 'alice@example.com'),
     User(name: 'Bob', email: 'bob@example.com'),
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
@@ -145,8 +149,8 @@ void main() {
     late AutocompleteOnSelected<String> lastOnSelected;
 
     final GlobalKey autocompleteKey = GlobalKey();
-    final TextEditingController textEditingController = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    final textEditingController = TextEditingController();
+    final focusNode = FocusNode();
     addTearDown(textEditingController.dispose);
     addTearDown(focusNode.dispose);
 
@@ -345,7 +349,7 @@ void main() {
     testWidgets('when not enough room for options, options cover field ($openDirection)', (
       WidgetTester tester,
     ) async {
-      const double padding = 32.0;
+      const padding = 32.0;
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
       late StateSetter setState;
@@ -506,7 +510,7 @@ void main() {
     ) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      const double kOptionsWidth = 100.0;
+      const kOptionsWidth = 100.0;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -1079,9 +1083,9 @@ void main() {
     group('fieldViewBuilder not passed', () {
       testWidgets('down', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
-        final TextEditingController controller = TextEditingController();
+        final controller = TextEditingController();
         addTearDown(controller.dispose);
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -1121,9 +1125,9 @@ void main() {
 
       testWidgets('up', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
-        final TextEditingController controller = TextEditingController();
+        final controller = TextEditingController();
         addTearDown(controller.dispose);
-        final FocusNode focusNode = FocusNode();
+        final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
@@ -1389,9 +1393,9 @@ void main() {
     final GlobalKey optionsKey = GlobalKey();
     final GlobalKey autocompleteKey = GlobalKey();
     late Iterable<String> lastOptions;
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final TextEditingController textEditingController = TextEditingController();
+    final textEditingController = TextEditingController();
     addTearDown(textEditingController.dispose);
 
     await tester.pumpWidget(
@@ -1531,9 +1535,9 @@ void main() {
   testWidgets('initialValue cannot be defined if TextEditingController is defined', (
     WidgetTester tester,
   ) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
-    final TextEditingController textEditingController = TextEditingController();
+    final textEditingController = TextEditingController();
     addTearDown(textEditingController.dispose);
 
     expect(() {
@@ -2039,7 +2043,7 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
-    bool wrappingActionInvoked = false;
+    var wrappingActionInvoked = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2273,7 +2277,7 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late StateSetter setState;
-    double width = 100.0;
+    var width = 100.0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2350,9 +2354,9 @@ void main() {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late StateSetter setState;
-    double width = 100.0;
+    var width = 100.0;
 
-    final RawAutocomplete<String> autocomplete = RawAutocomplete<String>(
+    final autocomplete = RawAutocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         return kOptions.where((String option) {
           return option.contains(textEditingValue.text.toLowerCase());
@@ -2494,7 +2498,7 @@ void main() {
     testWidgets('options when screen changes landscape to portrait', (WidgetTester tester) async {
       // Start with a portrait-sized window, with enough space for all of the
       // options.
-      const Size wideWindowSize = Size(1920.0, 1080.0);
+      const wideWindowSize = Size(1920.0, 1080.0);
       tester.view.physicalSize = wideWindowSize;
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -2536,7 +2540,7 @@ void main() {
       );
 
       // Change the screen size to portrait.
-      const Size narrowWindowSize = Size(1070.0, 1770.0);
+      const narrowWindowSize = Size(1070.0, 1770.0);
       tester.view.physicalSize = narrowWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
@@ -2565,7 +2569,7 @@ void main() {
     ) async {
       // Start with a portrait-sized window, with enough space for all of the
       // options.
-      const Size narrowWindowSize = Size(1070.0, 1770.0);
+      const narrowWindowSize = Size(1070.0, 1770.0);
       tester.view.physicalSize = narrowWindowSize;
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -2608,7 +2612,7 @@ void main() {
 
       // Change the screen size to landscape where the options can't all fit on
       // the screen.
-      const Size wideWindowSize = Size(1920.0, 580.0);
+      const wideWindowSize = Size(1920.0, 580.0);
       tester.view.physicalSize = wideWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
@@ -2638,7 +2642,7 @@ void main() {
     testWidgets('screen changes portrait to landscape and overflows', (WidgetTester tester) async {
       // Start with a portrait-sized window, with enough space for all of the
       // options.
-      const Size narrowWindowSize = Size(1070.0, 1770.0);
+      const narrowWindowSize = Size(1070.0, 1770.0);
       tester.view.physicalSize = narrowWindowSize;
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -2675,7 +2679,7 @@ void main() {
 
       // Change the screen size to landscape where the options can't all fit on
       // the screen.
-      const Size wideWindowSize = Size(1920.0, 580.0);
+      const wideWindowSize = Size(1920.0, 580.0);
       tester.view.physicalSize = wideWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
@@ -2704,13 +2708,13 @@ void main() {
 
       // Shrink the screen further so that the options become smaller than
       // kMinInteractiveDimension and move to overlap the field.
-      const Size shortWindowSize = Size(1920.0, 90.0);
+      const shortWindowSize = Size(1920.0, 90.0);
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
       expect(find.byKey(fieldKey), findsOneWidget);
 
-      const int visibleOptions3 = 1;
+      const visibleOptions3 = 1;
       expect(find.byType(InkWell), findsNWidgets(visibleOptions3));
       final Offset optionsTopLeft3 = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsTopLeft3.dx, optionsTopLeft1.dx);
@@ -2735,7 +2739,7 @@ void main() {
     ) async {
       // Start with a portrait-sized window, with enough space for all of the
       // options.
-      const Size narrowWindowSize = Size(1070.0, 1770.0);
+      const narrowWindowSize = Size(1070.0, 1770.0);
       tester.view.physicalSize = narrowWindowSize;
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -2773,7 +2777,7 @@ void main() {
 
       // Change the screen size to landscape where the options can't all fit on
       // the screen.
-      const Size wideWindowSize = Size(1920.0, 580.0);
+      const wideWindowSize = Size(1920.0, 580.0);
       tester.view.physicalSize = wideWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
@@ -2796,13 +2800,13 @@ void main() {
 
       // Shrink the screen further so that the options become smaller than
       // kMinInteractiveDimension and move to overlap the field.
-      const Size shortWindowSize = Size(1920.0, 90.0);
+      const shortWindowSize = Size(1920.0, 90.0);
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
 
       expect(find.byKey(fieldKey), findsOneWidget);
-      const int visibleOptions3 = 1;
+      const visibleOptions3 = 1;
       expect(find.byType(InkWell), findsNWidgets(visibleOptions3));
       final Offset optionsTopLeft3 = tester.getTopLeft(find.byKey(optionsKey));
       expect(optionsTopLeft3.dx, optionsTopLeft1.dx);
@@ -2826,7 +2830,7 @@ void main() {
     (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -2934,7 +2938,7 @@ void main() {
     (WidgetTester tester) async {
       final GlobalKey fieldKey = GlobalKey();
       final GlobalKey optionsKey = GlobalKey();
-      final ScrollController scrollController = ScrollController();
+      final scrollController = ScrollController();
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
@@ -3091,8 +3095,8 @@ void main() {
       ),
     );
 
-    const Duration longRequestDelay = Duration(milliseconds: 5000);
-    const Duration shortRequestDelay = Duration(milliseconds: 1000);
+    const longRequestDelay = Duration(milliseconds: 5000);
+    const shortRequestDelay = Duration(milliseconds: 1000);
     focusNode.requestFocus();
 
     // Enter the first letter.
@@ -3172,9 +3176,9 @@ void main() {
     );
 
     focusNode.requestFocus();
-    const Duration firstRequestDelay = Duration(milliseconds: 1000);
-    const Duration secondRequestDelay = Duration(milliseconds: 2000);
-    const Duration thirdRequestDelay = Duration(milliseconds: 3000);
+    const firstRequestDelay = Duration(milliseconds: 1000);
+    const secondRequestDelay = Duration(milliseconds: 2000);
+    const thirdRequestDelay = Duration(milliseconds: 3000);
 
     // Enter the first letter.
     delay = firstRequestDelay;
@@ -3216,7 +3220,7 @@ void main() {
     late FocusNode focusNode;
     late TextEditingController textEditingController;
     Iterable<String>? lastOptions;
-    const Duration delay = Duration(milliseconds: 100);
+    const delay = Duration(milliseconds: 100);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3288,11 +3292,11 @@ void main() {
     late FocusNode focusNode;
     late TextEditingController textEditingController;
     Iterable<String>? lastOptions;
-    const Duration delay = Duration(milliseconds: 100);
+    const delay = Duration(milliseconds: 100);
 
     // This is used to tell optionsBuilder to return something different after
     // being called with "ele" the second time. I.e. it is not a pure function.
-    int timesOptionsBuilderCalledWithEle = 0;
+    var timesOptionsBuilderCalledWithEle = 0;
     final Iterable<String> altEleOptions = <String>['something new and crazy for ele!'];
 
     await tester.pumpWidget(
@@ -3366,7 +3370,7 @@ void main() {
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
-    const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
+    const localizations = DefaultWidgetsLocalizations();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3415,7 +3419,10 @@ void main() {
     await tester.pump();
     expect(find.byKey(optionsKey), findsOneWidget);
     expect(lastOptions.length, kOptions.length);
-    expect(tester.takeAnnouncements().first.message, localizations.searchResultsFound);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.searchResultsFound),
+    );
 
     await tester.enterText(find.byKey(fieldKey), 'a');
     await tester.pump();
@@ -3426,7 +3433,75 @@ void main() {
     await tester.enterText(find.byKey(fieldKey), 'zzzz');
     await tester.pump();
     expect(find.byKey(optionsKey), findsNothing);
-    expect(tester.takeAnnouncements().first.message, localizations.noResultsFound);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.noResultsFound),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('Autocomplete Semantics announce in multi-view', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    const localizations = DefaultWidgetsLocalizations();
+    const viewId = 1;
+
+    await tester.pumpWidget(
+      ViewAnchor(
+        view: View(
+          view: FakeView(tester.view, viewId: viewId),
+          child: MaterialApp(
+            home: Scaffold(
+              body: RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  return kOptions.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      focusNode = fieldFocusNode;
+                      textEditingController = fieldTextEditingController;
+                      return TextField(focusNode: focusNode, controller: textEditingController);
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      lastOptions = options;
+                      return Container(key: optionsKey);
+                    },
+              ),
+            ),
+          ),
+        ),
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byKey(optionsKey), findsNothing);
+
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, kOptions.length);
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.searchResultsFound, viewId: viewId),
+    );
 
     handle.dispose();
   });
@@ -3467,8 +3542,8 @@ void main() {
     'floating menu is displayed when the field is focused and already has a selected value',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/177429.
-      const Key fieldKey = Key('field');
-      const Key optionsKey = Key('options');
+      const fieldKey = Key('field');
+      const optionsKey = Key('options');
       late AutocompleteOnSelected<String> lastOnSelected;
       late FocusNode focusNode;
 
@@ -3529,4 +3604,68 @@ void main() {
       expect(find.byKey(optionsKey), findsOne);
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/170403.
+  testWidgets('does not crash when disposed during async optionsBuilder', (
+    WidgetTester tester,
+  ) async {
+    final optionsCompleter = Completer<List<String>>();
+    late StateSetter setState;
+    var showAutocomplete = true;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter innerSetState) {
+              setState = innerSetState;
+              if (!showAutocomplete) {
+                return const SizedBox.shrink();
+              }
+              return RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  return optionsCompleter.future;
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return TextField(
+                        focusNode: fieldFocusNode,
+                        controller: fieldTextEditingController,
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) {
+                      return Container();
+                    },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Focus the field to trigger optionsBuilder.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Dispose the widget while optionsBuilder is still pending.
+    setState(() {
+      showAutocomplete = false;
+    });
+    await tester.pump();
+
+    optionsCompleter.complete(<String>['option1', 'option2']);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }

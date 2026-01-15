@@ -31,9 +31,9 @@ class _TestStateState extends State<TestState> {
 
 void main() {
   testWidgets('SliverVisibility', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final List<String> log = <String>[];
-    const Key anchor = Key('drag');
+    final semantics = SemanticsTester(tester);
+    final log = <String>[];
+    const anchor = Key('drag');
 
     Widget boilerPlate(Widget sliver) {
       return Localizations(

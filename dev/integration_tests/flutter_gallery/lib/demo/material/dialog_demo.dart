@@ -52,7 +52,7 @@ class DialogDemoState extends State<DialogDemo> {
   @override
   void initState() {
     super.initState();
-    final DateTime now = DateTime.now();
+    final now = DateTime.now();
     _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
