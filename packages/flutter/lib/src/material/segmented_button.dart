@@ -1001,8 +1001,10 @@ class _RenderSegmentedButton<T> extends RenderBox
 
     var childSize = Size(maxWidth, childHeight);
 
-    // When the parent provides a tight width constraint, use that width for
-    // layout so the visual size and the interactive area match. This preserves
+    // When the parent provides a tight width constraint in the vertical
+    // direction, use that width for layout so the visual size and the
+    // interactive area match. This preserves the intrinsic (shrink-wrap)
+    // sizing behavior when the width is unconstrained.
     if (constraints.hasTightWidth && childSize.width < constraints.maxWidth) {
       childSize = Size(constraints.maxWidth, childSize.height);
     }
