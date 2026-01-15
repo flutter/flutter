@@ -5878,7 +5878,7 @@ void main() {
       controller.open();
       await tester.pump();
 
-      const Map<int, double> animatedHeights = <int, double>{
+      const animatedHeights = <int, double>{
         0: 0.0,
         100: 60.5,
         200: 125.5,
@@ -5923,7 +5923,7 @@ void main() {
       controller.close();
       await tester.pump();
 
-      const Map<int, double> animatedHeights = <int, double>{
+      const animatedHeights = <int, double>{
         100: 129,
         110: 120,
         120: 110,
