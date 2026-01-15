@@ -158,6 +158,7 @@ class ResidentWebRunner extends ResidentRunner {
   // Used with the new compiler to generate a bootstrap file containing plugins
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
+  final _mdnsDiscoveries = <MDNSDeviceDiscovery>[];
 
   // Only non-wasm debug builds of the web support the service protocol.
   @override
@@ -919,16 +920,19 @@ class ResidentWebRunner extends ResidentRunner {
           );
 
           // Start mDNS server
+          final discovery = MDNSDeviceDiscovery(
+            device: flutterDevice!.device!,
+            vmService: _vmService.service,
+            debuggingOptions: debuggingOptions,
+            logger: logger,
+            platform: _platform,
+            flutterVersion: globals.flutterVersion,
+            systemClock: _systemClock,
+            botDetector: globals.botDetector,
+          );
+          _mdnsDiscoveries.add(discovery);
           unawaited(
-            MDNSDeviceDiscovery(
-              device: device,
-              vmService: _vmService.service,
-              debuggingOptions: debuggingOptions,
-              logger: globals.logger,
-              platform: globals.platform,
-              flutterVersion: globals.flutterVersion,
-              systemClock: globals.systemClock,
-            ).advertise(
+            discovery.advertise(
               appName: flutterProject.manifest.appName,
               vmServiceUri: _vmService.httpAddress,
             ),

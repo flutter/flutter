@@ -8,6 +8,7 @@ import 'package:logging/logging.dart' as log;
 import 'package:mdns_dart/mdns_dart.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
+import 'base/bot_detector.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
@@ -28,6 +29,7 @@ class MDNSDeviceDiscovery {
     required this.platform,
     required this.flutterVersion,
     required this.systemClock,
+    required this.botDetector,
   });
 
   static const String _kWsUri = 'ws_uri';
@@ -50,6 +52,7 @@ class MDNSDeviceDiscovery {
   final Platform platform;
   final FlutterVersion flutterVersion;
   final SystemClock systemClock;
+  final BotDetector botDetector;
 
   final _servers = <MDNSServer>[];
 
@@ -64,6 +67,12 @@ class MDNSDeviceDiscovery {
         logger.printTrace('VM Service URI not available, not starting mDNS server.');
         return;
       }
+
+      if (await botDetector.isRunningOnBot) {
+        logger.printTrace('Running on CI/Bot, not starting mDNS server.');
+        return;
+      }
+
       // Silence mDNS logs unless verbose logging is enabled.
       // mdns_dart uses the 'mdns_dart' logger.
       log.hierarchicalLoggingEnabled = true;
