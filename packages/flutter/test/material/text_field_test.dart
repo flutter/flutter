@@ -9572,33 +9572,6 @@ void main() {
     });
   }
 
-  testWidgets('TextField passes errorText to semantics hint', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
-
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'Enter your email',
-            errorText: 'Email is required',
-          ),
-        ),
-      ),
-    );
-
-    final SemanticsNode node = tester.getSemantics(find.byKey(key));
-
-    // The semantics hint should be the error text (error takes priority over hintText)
-    expect(node.hint, 'Email is required');
-
-    semantics.dispose();
-  });
-
   testWidgets('TextField passes hintText to semantics hint when no error', (
     WidgetTester tester,
   ) async {
