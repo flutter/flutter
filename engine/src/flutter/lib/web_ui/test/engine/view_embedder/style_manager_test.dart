@@ -15,29 +15,29 @@ void main() {
 
 void doTests() {
   group('StyleManager', () {
-    test(
-      'attachGlobalStyles hides the outline when focused',
-      () {
-        final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
+    test('attachGlobalStyles hides the outline when focused', () {
+      final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
 
-        domDocument.body!.append(flutterViewElement);
-        StyleManager.attachGlobalStyles(
-          node: flutterViewElement,
-          styleId: 'testing',
-          styleNonce: 'testing',
-          cssSelectorPrefix: DomManager.flutterViewTagName,
-        );
-        final expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
-            ? 'rgb(0, 0, 0) 0px'
-            : 'rgb(0, 0, 0) none 0px';
-        final String got = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
+      // Set a tab index so that the element can be focused.
+      flutterViewElement.tabIndex = 0;
 
-        expect(got, expected);
-      },
-      skip: isFirefox
-          ? 'Skip until we fix the flake on Firefox. See: https://github.com/flutter/flutter/issues/180940'
-          : null,
-    );
+      domDocument.body!.append(flutterViewElement);
+      StyleManager.attachGlobalStyles(
+        node: flutterViewElement,
+        styleId: 'testing',
+        styleNonce: 'testing',
+        cssSelectorPrefix: DomManager.flutterViewTagName,
+      );
+      final expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
+          ? 'rgb(0, 0, 0) 0px'
+          : 'rgb(0, 0, 0) none 0px';
+
+      // Focus the element.
+      flutterViewElement.focusWithoutScroll();
+      final String got = domWindow.getComputedStyle(flutterViewElement).outline;
+
+      expect(got, expected);
+    });
 
     test('styleSceneHost', () {
       expect(() => StyleManager.styleSceneHost(createDomHTMLDivElement()), throwsAssertionError);
