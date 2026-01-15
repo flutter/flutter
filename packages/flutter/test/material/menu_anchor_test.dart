@@ -2496,16 +2496,7 @@ void main() {
         'Bohrium 𨨏 Code point U+28A0F': 'Bohrium 𨨏 Code point U+28A0F',
       };
       const expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
-      const expectedHasAccelerator = <bool>[
-        false,
-        true,
-        true,
-        false,
-        true,
-        false,
-        true,
-        false,
-      ];
+      const expectedHasAccelerator = <bool>[false, true, true, false, true, false, true, false];
       var acceleratorIndex = -1;
       var count = 0;
       for (final String key in expected.keys) {
@@ -5812,14 +5803,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 50 ms fade-in animation.
-      const animationOpacities = <int, double>{
-        0: 0.0,
-        10: 0.2,
-        20: 0.4,
-        30: 0.6,
-        40: 0.8,
-        50: 1.0,
-      };
+      const animationOpacities = <int, double>{0: 0.0, 10: 0.2, 20: 0.4, 30: 0.6, 40: 0.8, 50: 1.0};
 
       for (final int ms in animationOpacities.keys) {
         expect(getOpacity(), closeTo(animationOpacities[ms]!, 0.05), reason: 'at t=$ms');
@@ -5860,13 +5844,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 50 ms fade-in animation.
-      const animationOpacities = <int, double>{
-        110: 1.0,
-        120: 0.8,
-        130: 0.6,
-        140: 0.4,
-        150: 0.2,
-      };
+      const animationOpacities = <int, double>{110: 1.0, 120: 0.8, 130: 0.6, 140: 0.4, 150: 0.2};
 
       expect(getOpacity(), closeTo(1.0, 0.05), reason: 'at t=0');
 
