@@ -146,10 +146,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    final Finder panel = find.descendant(
-      of: find.byType(MenuAnchor),
-      matching: find.byType(FocusScope),
-    );
+    final Finder panel = find
+        .descendant(
+          of: find.byType(MenuAnchor),
+          matching: find.byType(FadeTransition),
+        )
+        .first;
 
     final double panelHeight = tester.getSize(panel).height;
     // Height differs based on platform, so use a large range.
