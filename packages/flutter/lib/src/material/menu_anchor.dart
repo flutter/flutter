@@ -49,6 +49,7 @@ import 'theme_data.dart';
 // enum SingingCharacter { lafayette }
 // late SingingCharacter? _character;
 // late StateSetter setState;
+// AnimationStatus animationStatus = AnimationStatus.dismissed;
 
 // Enable if you want verbose logging about menu changes.
 const bool _kDebugMenus = false;
@@ -93,7 +94,20 @@ const Duration _kMenuOpeningDuration = Duration(milliseconds: 500);
 // The default closing animation duration for menus.
 const Duration _kMenuClosingDuration = Duration(milliseconds: 150);
 
-// The default curve used to animate the height of the menu panel when closing.
+/// The default curve used to animate the height of the menu panel while the
+/// menu is opening.
+///
+/// **NOTE**: This animation curve follows the material web implementation of
+/// [Easing.emphasized](https://github.com/material-components/material-web/blob/516cbc02bf770b7c3c5c6b546f1e5d81939b9f23/internal/motion/animation.ts#L18)
+/// instead of the curve recommended by the Material 3 specification,
+/// [Curves.easeInOutCubicEmphasized](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs).
+/// This change was made because the web curve [was more consistent with the
+/// timing of the menu item fade-in
+/// animations](https://github.com/flutter/flutter/pull/176494#discussion_r2545178254).
+const Curve _kMenuPanelHeightForwardCurve = Cubic(.3, 0, 0, 1);
+
+// The default curve used to animate the height of the menu panel while the menu
+// is closing.
 const Curve _kMenuPanelHeightReverseCurve = _TweenCurve(
   0.35,
   1,
@@ -371,12 +385,46 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to false.
   final bool animated;
 
-  /// An optional callback that is invoked when the animation status of the menu
-  /// changes during open and close animations.
+  /// An optional callback that is invoked when the [AnimationStatus] of the
+  /// menu changes during open and close animations.
   ///
   /// If [animated] is false, this callback will only be invoked with
   /// [AnimationStatus.completed] when the menu is opened, and
   /// [AnimationStatus.dismissed] when the menu is closed.
+  ///
+  /// Because the [MenuController.isOpen] property is true while the menu is
+  /// opening, opened, and closing, it cannot be used to determine whether the
+  /// menu is closing or opening. As such, this callback provides a way to
+  /// determine when the menu is opening or closing, and allows anchors to
+  /// toggle between the opening and closing states of the menu.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to use the [onAnimationStatusChanged] callback to
+  /// create a [MenuAnchor] that will toggle between opening and closing.
+  ///
+  /// ```dart
+  /// MenuAnchor(
+  ///   animated: true,
+  ///   onAnimationStatusChanged: (AnimationStatus status) {
+  ///     // Typically, animationStatus would be stored in a State object.
+  ///     animationStatus = status;
+  ///   },
+  ///   menuChildren: <Widget>[MenuItemButton(onPressed: () {}, child: const Text('Menu Item'))],
+  ///   builder: (BuildContext context, MenuController controller, Widget? child) {
+  ///     return IconButton(
+  ///       onPressed: () {
+  ///         if (animationStatus.isForwardOrCompleted) {
+  ///           controller.close();
+  ///         } else {
+  ///           controller.open();
+  ///         }
+  ///       },
+  ///       icon: const Icon(Icons.more_vert),
+  ///     );
+  ///   },
+  /// );
+  /// ```
+  /// {@end-tool}
   ///
   /// Defaults to null.
   final ValueChanged<AnimationStatus>? onAnimationStatusChanged;
@@ -441,7 +489,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   late final AnimationController _animationController = AnimationController(vsync: this);
   late final CurvedAnimation heightAnimation = CurvedAnimation(
     parent: _animationController,
-    curve: Curves.easeInOutCubicEmphasized,
+    curve: _kMenuPanelHeightForwardCurve,
     reverseCurve: _kMenuPanelHeightReverseCurve,
   );
   late final CurvedAnimation opacityAnimation = CurvedAnimation(
@@ -450,10 +498,17 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     reverseCurve: _kMenuPanelOpacityReverseCurve,
   );
   List<Widget> _menuChildren = <Widget>[];
+  List<CurvedAnimation> _cachedAnimations = <CurvedAnimation>[];
   _MenuAnchorState? get _parent => _maybeOf(context);
   bool get isSubmenu => MenuController.maybeOf(context) != null;
-  bool get isClosing => !_animationController.status.isForwardOrCompleted;
-  List<CurvedAnimation> _cachedAnimations = <CurvedAnimation>[];
+  bool get isClosingOrClosed => switch (_animationController.status) {
+    AnimationStatus.dismissed || AnimationStatus.reverse => true,
+    AnimationStatus.forward || AnimationStatus.completed => false,
+  };
+  bool get isClosing => switch (_animationController.status) {
+    AnimationStatus.reverse => true,
+    AnimationStatus.dismissed || AnimationStatus.forward || AnimationStatus.completed => false,
+  };
 
   @override
   void initState() {
@@ -546,17 +601,17 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     }
 
     for (final Widget child in widget.menuChildren) {
-      final Interval forwardCurve = Interval(
+      final forwardCurve = Interval(
         forwardProgress,
         forwardProgress + _kMenuItemRelativeFadeInDuration,
       );
 
-      final Interval reverseCurve = Interval(
+      final reverseCurve = Interval(
         reverseProgress,
         reverseProgress + _kMenuItemRelativeFadeOutDuration,
       );
 
-      final CurvedAnimation animation = CurvedAnimation(
+      final animation = CurvedAnimation(
         parent: _animationController,
         curve: forwardCurve,
         reverseCurve: reverseCurve,
@@ -572,13 +627,20 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   void _handleAnimationStatusChanged(AnimationStatus status) {
-    widget.onAnimationStatusChanged?.call(status);
     setState(() {
-      // Rebuild to update isClosing and notify dependents of AnimationStatus changes.
+      // Rebuild to update isClosedOrClosing and notify dependents of AnimationStatus changes.
     });
+    widget.onAnimationStatusChanged?.call(status);
   }
 
   void _handleMenuOpenRequest(Offset? position, VoidCallback showOverlay) {
+    // If this menu's parent is closing, submenus should not open. This prevents
+    // a submenu calling MenuController.open() after a parent menu has started
+    // closing.
+    if (_parent?.isClosing ?? false) {
+      return;
+    }
+
     showOverlay();
 
     if (_animationController.isForwardOrCompleted) {
@@ -625,18 +687,18 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   }
 
   Widget _buildOverlay(BuildContext context, RawMenuOverlayInfo position) {
-    // ExcludeSemantics and IgnorePointer are used to effectively disable all
-    // interactions with the menu while it is closing.
+    // ExcludeSemantics, ExcludeFocus, and IgnorePointer are used to effectively
+    // disable all interactions with the menu while it is closing.
     //
     // An animated menu should behave the same as a menu without animations.
     // Focus should be able to move to a menu as soon as it starts to open, and
     // a menu should not be interactive as soon as it starts to close.
     return ExcludeSemantics(
-      excluding: isClosing,
+      excluding: isClosingOrClosed,
       child: IgnorePointer(
-        ignoring: isClosing,
+        ignoring: isClosingOrClosed,
         child: ExcludeFocus(
-          excluding: isClosing,
+          excluding: isClosingOrClosed,
           child: _Submenu(
             fadeAnimation: opacityAnimation,
             heightAnimation: heightAnimation,
@@ -1701,6 +1763,7 @@ class SubmenuButton extends StatefulWidget {
     this.useRootOverlay = false,
     this.hoverOpenDelay = Duration.zero,
     this.animated = false,
+    this.onAnimationStatusChanged,
     required this.menuChildren,
     required this.child,
   });
@@ -1784,6 +1847,21 @@ class SubmenuButton extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool useRootOverlay;
+
+  /// An optional callback that is invoked when the [AnimationStatus] of the
+  /// menu changes during open and close animations.
+  ///
+  /// If [animated] is false, this callback will only be invoked with
+  /// [AnimationStatus.completed] when the menu is opened, and
+  /// [AnimationStatus.dismissed] when the menu is closed.
+  ///
+  /// Because the [MenuController.isOpen] property is true while the menu is
+  /// opening, opened, and closing, it cannot be used to determine whether the
+  /// menu is in the process of closing or opening. As such, this callback
+  /// provides a way to determine when the menu is opening or closing.
+  ///
+  /// Defaults to null.
+  final ValueChanged<AnimationStatus>? onAnimationStatusChanged;
 
   /// The list of widgets that appear in the menu when it is opened.
   ///
@@ -2163,11 +2241,11 @@ class _SubmenuButtonState extends State<SubmenuButton> {
     );
   }
 
-  // ignore: use_setters_to_change_properties
   void _handleAnimationStatusChanged(AnimationStatus status) {
     setState(() {
       _animationStatus = status;
     });
+    widget.onAnimationStatusChanged?.call(status);
   }
 
   void _handleClose() {
@@ -3326,7 +3404,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     final Rect overlayRect = Offset.zero & size;
     final double unconstrainedHeight = heightFactor > 0.01 ? childSize.height / heightFactor : 0;
     final double childHeightEstimate = math.min(unconstrainedHeight, size.height);
-    final Size childSizeEstimate = Size(childSize.width, childHeightEstimate);
+    final childSizeEstimate = Size(childSize.width, childHeightEstimate);
     final ui.Offset finalPosition = _positionChild(childSizeEstimate, overlayRect);
     // If the menu sits above the anchor when fully open, grow upward.
     // Keep the bottom (attachment) fixed by shifting the top-left during animation.
@@ -3336,7 +3414,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       return Offset(finalPosition.dx, finalPosition.dy + dy);
     }
 
-    final Offset initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
+    final initialPosition = Offset(finalPosition.dx, anchorRect.bottom);
     return Offset.lerp(initialPosition, finalPosition, heightFactor)!;
   }
 
@@ -3477,6 +3555,7 @@ class _MenuPanel extends StatefulWidget {
     this.clipBehavior = Clip.none,
     required this.orientation,
     this.crossAxisUnconstrained = true,
+    this.heightAnimation,
     required this.children,
   });
 
@@ -3497,6 +3576,9 @@ class _MenuPanel extends StatefulWidget {
 
   /// The layout orientation of this panel.
   final Axis orientation;
+
+  /// The animation that controls the height of the menu panel.
+  final Animation<double>? heightAnimation;
 
   /// The list of widgets to use as children of this menu panel.
   ///
@@ -3602,7 +3684,43 @@ class _MenuPanelState extends State<_MenuPanel> {
       null => false,
     };
 
-    Widget menuPanel = _intrinsicCrossSize(
+    Widget menuPanel = Padding(
+      padding: resolvedPadding,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(
+          context,
+        ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
+        child: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            thumbVisibility: displayScrollbar,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: widget.orientation,
+              child: Flex(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                textDirection: Directionality.of(context),
+                direction: widget.orientation,
+                mainAxisSize: MainAxisSize.min,
+                children: children,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (widget.heightAnimation != null) {
+      // An AnimatedBuilder is used instead of SizeTransition because Material
+      // already introduces its own ClipRRect for the shape.
+      menuPanel = AnimatedBuilder(
+        animation: widget.heightAnimation!,
+        builder: _buildAnimatedHeight,
+        child: menuPanel,
+      );
+    }
+
+    menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
         shape: shape,
@@ -3611,33 +3729,7 @@ class _MenuPanelState extends State<_MenuPanel> {
         surfaceTintColor: surfaceTintColor,
         type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
         clipBehavior: widget.clipBehavior,
-        child: Padding(
-          padding: resolvedPadding,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false,
-              overscroll: false,
-              physics: const ClampingScrollPhysics(),
-            ),
-            child: PrimaryScrollController(
-              controller: scrollController,
-              child: Scrollbar(
-                thumbVisibility: displayScrollbar,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  scrollDirection: widget.orientation,
-                  child: Flex(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    textDirection: Directionality.of(context),
-                    direction: widget.orientation,
-                    mainAxisSize: MainAxisSize.min,
-                    children: children,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: menuPanel,
       ),
     );
 
@@ -3658,6 +3750,15 @@ class _MenuPanelState extends State<_MenuPanel> {
       Axis.horizontal => IntrinsicHeight(child: child),
       Axis.vertical => IntrinsicWidth(child: child),
     };
+  }
+
+  Widget _buildAnimatedHeight(BuildContext context, Widget? child) {
+    return Align(
+      alignment: AlignmentDirectional.topStart,
+      heightFactor: widget.heightAnimation!.value,
+      widthFactor: 1,
+      child: child,
+    );
   }
 }
 
@@ -3759,20 +3860,16 @@ class _Submenu extends StatelessWidget {
             },
             child: Shortcuts(
               shortcuts: _kMenuTraversalShortcuts,
-              child: SizeTransition(
-                sizeFactor: heightAnimation,
-                axisAlignment: -1.0,
-                fixedCrossAxisSizeFactor: 1,
-                child: FadeTransition(
-                  opacity: fadeAnimation,
-                  alwaysIncludeSemantics: true,
-                  child: _MenuPanel(
-                    menuStyle: menuStyle,
-                    clipBehavior: clipBehavior,
-                    orientation: anchor._orientation,
-                    crossAxisUnconstrained: crossAxisUnconstrained,
-                    children: menuChildren,
-                  ),
+              child: FadeTransition(
+                opacity: fadeAnimation,
+                alwaysIncludeSemantics: true,
+                child: _MenuPanel(
+                  menuStyle: menuStyle,
+                  clipBehavior: clipBehavior,
+                  orientation: anchor._orientation,
+                  crossAxisUnconstrained: crossAxisUnconstrained,
+                  heightAnimation: heightAnimation,
+                  children: menuChildren,
                 ),
               ),
             ),

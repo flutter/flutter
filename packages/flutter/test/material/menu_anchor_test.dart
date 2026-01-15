@@ -2496,7 +2496,16 @@ void main() {
         'Bohrium 𨨏 Code point U+28A0F': 'Bohrium 𨨏 Code point U+28A0F',
       };
       const expectedIndices = <int>[-1, 0, 0, -1, 0, -1, 24, -1];
-      const expectedHasAccelerator = <bool>[false, true, true, false, true, false, true, false];
+      const expectedHasAccelerator = <bool>[
+        false,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      ];
       var acceleratorIndex = -1;
       var count = 0;
       for (final String key in expected.keys) {
@@ -4687,7 +4696,7 @@ void main() {
       });
 
       testWidgets('Animated SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
-        final SemanticsTester semantics = SemanticsTester(tester);
+        final semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
@@ -5803,7 +5812,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 50 ms fade-in animation.
-      const Map<int, double> animationOpacities = <int, double>{
+      const animationOpacities = <int, double>{
         0: 0.0,
         10: 0.2,
         20: 0.4,
@@ -5851,7 +5860,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 50 ms fade-in animation.
-      const Map<int, double> animationOpacities = <int, double>{
+      const animationOpacities = <int, double>{
         110: 1.0,
         120: 0.8,
         130: 0.6,
@@ -5889,18 +5898,18 @@ void main() {
       controller.open();
       await tester.pump();
 
-      const Map<int, double> animatedHeights = <int, double>{
+      const animatedHeights = <int, double>{
         0: 0.0,
-        100: 101.5,
-        200: 146,
-        300: 155.7,
-        400: 159.2,
+        100: 60.5,
+        200: 125.5,
+        300: 148,
+        400: 157.5,
         500: 160,
       };
 
       final Finder panel = find.descendant(
         of: find.byType(MenuAnchor),
-        matching: find.byType(SizeTransition),
+        matching: find.byType(FocusScope),
       );
       for (final int key in animatedHeights.keys) {
         final double height = tester.getSize(panel).height;
@@ -5932,7 +5941,7 @@ void main() {
       controller.close();
       await tester.pump();
 
-      const Map<int, double> animatedHeights = <int, double>{
+      const animatedHeights = <int, double>{
         100: 129,
         110: 120,
         120: 110,
@@ -5944,7 +5953,7 @@ void main() {
       double getHeight() {
         final Finder panel = find.descendant(
           of: find.byType(MenuAnchor),
-          matching: find.byType(SizeTransition),
+          matching: find.byType(FocusScope),
         );
         return tester.getSize(panel).height;
       }
@@ -5998,7 +6007,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 500ms opening animation.
-      const Map<int, List<double>> values = <int, List<double>>{
+      const values = <int, List<double>>{
         100: <double>[0.400, 0.0667, 0.00, 0.00],
         200: <double>[0.800, 0.467, 0.133, 0.00],
         300: <double>[1.00, 0.867, 0.533, 0.200],
@@ -6061,7 +6070,7 @@ void main() {
       }
 
       // Opacity values at different millisecond offsets during the 150ms close animation.
-      const Map<int, List<double>> menuItemOpacities = <int, List<double>>{
+      const menuItemOpacities = <int, List<double>>{
         0: <double>[1.00, 1.00, 1.00, 1.00],
         25: <double>[1.00, 1.00, 1.00, 1.00],
         50: <double>[1.00, 1.00, 1.00, 1.00],
@@ -6081,7 +6090,9 @@ void main() {
       }
     });
 
-    testWidgets('Animation status callback is invoked correctly', (WidgetTester tester) async {
+    testWidgets('MenuAnchor calls onAnimationStatusChanged with correct values', (
+      WidgetTester tester,
+    ) async {
       AnimationStatus? animationStatus;
 
       await tester.pumpWidget(
@@ -6134,8 +6145,138 @@ void main() {
       expect(animationStatus, equals(AnimationStatus.dismissed));
     });
 
+    testWidgets(
+      'MenuAnchor without animations calls onAnimationStatusChanged with correct values',
+      (WidgetTester tester) async {
+        AnimationStatus? animationStatus;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: MenuAnchor(
+                controller: controller,
+                onAnimationStatusChanged: (AnimationStatus status) {
+                  animationStatus = status;
+                },
+                menuChildren: <Widget>[
+                  MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        // Open the menu
+        controller.open();
+        await tester.pump();
+
+        expect(animationStatus, equals(AnimationStatus.completed));
+
+        controller.close();
+        await tester.pump();
+
+        expect(animationStatus, equals(AnimationStatus.dismissed));
+
+        controller.open();
+        await tester.pump();
+
+        expect(animationStatus, equals(AnimationStatus.completed));
+      },
+    );
+
+    testWidgets('SubmenuButton onAnimationStatusChanged is invoked with correct values', (
+      WidgetTester tester,
+    ) async {
+      AnimationStatus? animationStatus;
+      final submenuController = MenuController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuAnchor(
+              controller: controller,
+              animated: true,
+              menuChildren: <Widget>[
+                SubmenuButton(
+                  controller: submenuController,
+                  animated: true,
+                  onAnimationStatusChanged: (AnimationStatus status) {
+                    animationStatus = status;
+                  },
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 0')),
+                  ],
+                  child: const Text('Submenu'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu
+      controller.open();
+      await tester.pump();
+      submenuController.open();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      submenuController.close();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      submenuController.open();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.forward));
+
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.completed));
+
+      submenuController.close();
+
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.dismissed));
+
+      submenuController.open();
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.completed));
+
+      controller.close();
+      await tester.pump();
+
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      submenuController.open();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 25));
+
+      // Reopen request should be ignored since the parent menu is closing.
+      expect(animationStatus, equals(AnimationStatus.reverse));
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(animationStatus, equals(AnimationStatus.dismissed));
+    });
+
     testWidgets('Menu items can be pressed during opening animation', (WidgetTester tester) async {
-      int pressCount = 0;
+      var pressCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -6181,7 +6322,7 @@ void main() {
     });
 
     testWidgets('Pointer is blocked while menu is closing', (WidgetTester tester) async {
-      bool itemPressed = false;
+      var itemPressed = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -6220,8 +6361,8 @@ void main() {
     });
 
     testWidgets('Menu items can be focused during opening animation', (WidgetTester tester) async {
-      final FocusNode item0FocusNode = FocusNode();
-      final FocusNode item1FocusNode = FocusNode();
+      final item0FocusNode = FocusNode();
+      final item1FocusNode = FocusNode();
       addTearDown(item0FocusNode.dispose);
       addTearDown(item1FocusNode.dispose);
 
@@ -6265,8 +6406,8 @@ void main() {
     testWidgets('Focus returns to parent scope during closing animation', (
       WidgetTester tester,
     ) async {
-      final FocusNode submenuFocusNode = FocusNode();
-      final FocusNode outsideFocusNode = FocusNode();
+      final submenuFocusNode = FocusNode();
+      final outsideFocusNode = FocusNode();
       addTearDown(submenuFocusNode.dispose);
       addTearDown(outsideFocusNode.dispose);
 
@@ -6542,7 +6683,7 @@ void main() {
     testWidgets('Focus state remains consistent throughout opening animation', (
       WidgetTester tester,
     ) async {
-      final FocusNode itemFocusNode = FocusNode();
+      final itemFocusNode = FocusNode();
       addTearDown(itemFocusNode.dispose);
 
       await tester.pumpWidget(

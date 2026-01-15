@@ -135,4 +135,37 @@ void main() {
       const Offset(0.0, safeAreaPadding),
     );
   });
+
+  testWidgets('MenuAnchor can toggle between opening and closing', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.MenuApp());
+
+    await tester.tap(find.text('OPEN MENU'));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final Finder panel = find.descendant(
+      of: find.byType(MenuAnchor),
+      matching: find.byType(FocusScope),
+    );
+
+    final double panelHeight = tester.getSize(panel).height;
+    expect(panelHeight, closeTo(60, 5));
+
+    await tester.tap(find.text('OPEN MENU'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    final double panelHeightAfterClose = tester.getSize(panel).height;
+    expect(panelHeightAfterClose, closeTo(20, 5));
+
+    await tester.tap(find.text('OPEN MENU'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final double panelHeightAfterReopen = tester.getSize(panel).height;
+    expect(panelHeightAfterReopen, closeTo(160, 5));
+  });
 }
