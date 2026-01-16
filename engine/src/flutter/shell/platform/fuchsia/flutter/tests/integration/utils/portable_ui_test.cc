@@ -107,7 +107,7 @@ void PortableUITest::SetUpRealmBase() {
   realm_builder_.AddRoute(Route{
       .capabilities = {Storage{"tmp"}},
       .source = ParentRef(),
-      .targets = {kFlutterJitRunnerRef});
+      .targets = {kFlutterJitRunnerRef}});
 }
 
 void PortableUITest::ProcessViewGeometryResponse(
