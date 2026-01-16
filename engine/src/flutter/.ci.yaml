@@ -556,6 +556,7 @@ targets:
     drone_dimensions:
       - os=Windows
 
+  # TODO: Remove, once orchestrator runs on Linux: https://github.com/flutter/flutter/pull/176385
   - name: Windows windows_arm_host_engine
     recipe: engine_v2/engine_v2
     timeout: 120
@@ -568,6 +569,17 @@ targets:
       config_name: windows_arm_host_engine
     drone_dimensions:
       - os=Windows
+
+  - name: Linux windows_arm_host_engine
+    recipe: engine_v2/engine_v2
+    timeout: 120
+    bringup: true # Move orchestrator to Linux: https://github.com/flutter/flutter/pull/176385
+    properties:
+      release_build: "false"
+      add_recipes_cq: "true"
+      config_name: windows_arm_host_engine
+    drone_dimensions:
+      - os=Linux
 
   - name: Windows windows_unopt
     recipe: engine_v2/builder
