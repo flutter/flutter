@@ -578,6 +578,7 @@ targets:
     timeout: 120
     bringup: true
     enabled_branches:
+      # Don't run this on release branches
       - master
     properties:
       release_build: "false"
