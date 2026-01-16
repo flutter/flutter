@@ -5,7 +5,6 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/matchers.dart';
 
@@ -28,9 +27,7 @@ void doTests() {
         styleNonce: 'testing',
         cssSelectorPrefix: DomManager.flutterViewTagName,
       );
-      final expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
-          ? 'rgb(0, 0, 0) 0px'
-          : 'rgb(0, 0, 0) none 0px';
+      final expected = isFirefox ? 'rgb(0, 0, 0) 0px' : 'rgb(0, 0, 0) none 0px';
 
       // Focus the element.
       flutterViewElement.focusWithoutScroll();
