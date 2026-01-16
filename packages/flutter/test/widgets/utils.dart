@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// The returned color will be fully opaque,
 /// but the [Color.r], [Color.g], and [Color.b] channels
-/// will each be randomized between `00` and `FF`.
+/// will vary sequentially based on index, cycling every sixth integer.
 Color getTestColor(int index) {
   const colors = [
     Color(0xFFFF0000),
