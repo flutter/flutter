@@ -141,28 +141,23 @@
 }
 
 - (NSSize)minimumViewSize:(FlutterView*)view {
-  return _creationRequest.has_size ? NSZeroSize
-                                   : NSMakeSize(_creationRequest.constraints.min_width,
-                                                _creationRequest.constraints.min_height);
+  return _creationRequest.has_constraints ? NSMakeSize(_creationRequest.constraints.min_width,
+                                                       _creationRequest.constraints.min_height)
+                                          : NSZeroSize;
 }
 
 - (NSSize)maximumViewSize:(FlutterView*)view {
-  // Maximum window server size is limited to 10000
-  // https://developer.apple.com/documentation/appkit/nswindow/setcontentsize(_:)
-  const double maxWindowSize = 10000.0;
-  if (_creationRequest.has_size) {
+  if (!_creationRequest.has_constraints) {
     // Window is not sized to contents.
     return NSZeroSize;
   }
   NSSize screenSize = self.window.screen.visibleFrame.size;
-  double width = maxWindowSize;
-  width = std::min(width, screenSize.width);
+  double width = screenSize.width;
   width = std::min(width, _creationRequest.constraints.max_width);
   if (_positionerSizeConstraints.width > 0) {
     width = std::min(width, _positionerSizeConstraints.width);
   }
-  double height = maxWindowSize;
-  height = std::min(height, screenSize.height);
+  double height = screenSize.height;
   height = std::min(height, _creationRequest.constraints.max_height);
   if (_positionerSizeConstraints.height > 0) {
     height = std::min(height, _positionerSizeConstraints.height);

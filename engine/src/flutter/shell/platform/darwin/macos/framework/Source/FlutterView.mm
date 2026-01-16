@@ -173,11 +173,11 @@
 }
 
 - (NSSize)minimumContentSize {
-  return _sizingDelegate != nil ? [_sizingDelegate minimumViewSize:self] : NSZeroSize;
+  return _sizingDelegate != nil ? [_sizingDelegate minimumViewSize:self] : self.bounds.size;
 }
 
 - (NSSize)maximumContentSize {
-  return _sizingDelegate != nil ? [_sizingDelegate maximumViewSize:self] : NSZeroSize;
+  return _sizingDelegate != nil ? [_sizingDelegate maximumViewSize:self] : self.bounds.size;
 }
 
 - (void)constraintsDidChange {

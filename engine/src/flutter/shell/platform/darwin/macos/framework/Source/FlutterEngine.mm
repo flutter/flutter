@@ -1172,7 +1172,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
            @"The provided view controller is not attached to this engine.");
   FlutterView* view = viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
-  CGSize scaledSize = view.sizedToContents ? NSZeroSize : scaledBounds.size;
+  CGSize scaledSize = scaledBounds.size;
   double pixelRatio = view.layer.contentsScale;
   auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
   FlutterWindowMetricsEvent windowMetricsEvent = {
