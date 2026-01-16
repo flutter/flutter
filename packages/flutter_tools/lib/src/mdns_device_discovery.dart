@@ -68,7 +68,9 @@ class MDNSDeviceDiscovery {
         return;
       }
 
-      if (await botDetector.isRunningOnBot) {
+      if (await botDetector.isRunningOnBot ||
+          platform.environment['BOT'] == 'true' ||
+          platform.environment['CI'] == 'true') {
         logger.printTrace('Running on CI/Bot, not starting mDNS server.');
         return;
       }
