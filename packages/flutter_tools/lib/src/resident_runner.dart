@@ -1342,10 +1342,11 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @mustCallSuper
   Future<void> cleanupAtFinish() async {
-    for (final MDNSDeviceDiscovery discovery in _mdnsDiscoveries) {
+    final discoveries = List<MDNSDeviceDiscovery>.of(_mdnsDiscoveries);
+    _mdnsDiscoveries.clear();
+    for (final discovery in discoveries) {
       await discovery.stop();
     }
-    _mdnsDiscoveries.clear();
   }
 
   @mustCallSuper

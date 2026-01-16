@@ -34,16 +34,29 @@ void main() {
 
       expect(discovery.advertised, isFalse);
     });
+    test('does not advertise when BOT=true even if BotDetector returns false', () async {
+      // Simulate BotDetector saying "False" (e.g. because FLUTTER_ANALYTICS_LOG_FILE is set)
+      final botDetector = FakeBotDetector(false);
+      final fakePlatform = FakePlatform(environment: <String, String>{'BOT': 'true'});
+      final FakeMDNSDeviceDiscovery discovery = createDiscovery(
+        botDetector,
+        platform: fakePlatform,
+      );
+
+      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+
+      expect(discovery.advertised, isFalse);
+    });
   });
 }
 
-FakeMDNSDeviceDiscovery createDiscovery(FakeBotDetector botDetector) {
+FakeMDNSDeviceDiscovery createDiscovery(FakeBotDetector botDetector, {Platform? platform}) {
   return FakeMDNSDeviceDiscovery(
     device: FakeDevice(),
     vmService: FakeVmService(),
     debuggingOptions: DebuggingOptions.enabled(build_info.BuildInfo.debug),
     logger: BufferLogger.test(),
-    platform: FakePlatform(),
+    platform: platform ?? FakePlatform(),
     flutterVersion: FakeFlutterVersion(),
     systemClock: SystemClock.fixed(DateTime(2023)),
     botDetector: botDetector,
