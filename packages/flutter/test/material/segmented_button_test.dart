@@ -1604,25 +1604,12 @@ void main() {
               width: double.infinity,
               child: SegmentedButton<String>(
                 direction: Axis.vertical,
-                showSelectedIcon: false,
-                style: SegmentedButton.styleFrom(
-                  fixedSize: const Size(double.infinity, 300),
-                  minimumSize: const Size(double.infinity, 500),
-                  maximumSize: Size.infinite,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    side: const BorderSide(),
-                  ),
-                ),
                 segments: const [
                   ButtonSegment(value: 'All', label: Text('All')),
                   ButtonSegment(value: 'Top free', label: Text('Top free')),
                   ButtonSegment(value: 'Top paid', label: Text('Top paid')),
                 ],
                 selected: const {'All'},
-                onSelectionChanged: (newSelection) {
-                  // dummy test; nothing needed
-                },
               ),
             ),
           ),
