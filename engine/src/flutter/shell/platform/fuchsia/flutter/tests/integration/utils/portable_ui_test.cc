@@ -27,6 +27,7 @@ using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::RealmRoot;
 using component_testing::Route;
+using component_testing::Storage;
 
 using fuchsia_test_utils::CheckViewExistsInSnapshot;
 
