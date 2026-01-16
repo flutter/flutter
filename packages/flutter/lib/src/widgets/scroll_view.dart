@@ -569,13 +569,7 @@ abstract class ScrollView extends StatelessWidget {
     properties.add(
       FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true),
     );
-    properties.add(
-      EnumProperty<CacheExtentStyle>(
-        'cacheExtentStyle',
-        cacheExtentStyle,
-        defaultValue: cacheExtent == null ? null : CacheExtentStyle.pixel,
-      ),
-    );
+    properties.add(EnumProperty<CacheExtentStyle>('cacheExtentStyle', cacheExtentStyle));
   }
 }
 
