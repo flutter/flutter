@@ -465,7 +465,7 @@ class SizeTransition extends AnimatedWidget {
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
        assert(
          axisAlignment == null || alignment == null,
-         'Cannot provide both axisAlignment and alignment as axisAlignment has been deprecated and superseded by alignment',
+         'Cannot provide both axisAlignment and alignment as axisAlignment has been deprecated and superseded by alignment.',
        ),
        super(listenable: sizeFactor);
 
@@ -496,8 +496,8 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
   ///
   /// This property has been deprecated and superseded by [alignment]. Existing usages can be migrated to [alignment] as follows:
-  /// - If [axis] is [Axis.horizontal], replace with `Alignment(axisAlignment ?? 0.0, -1.0)`
-  /// - If [axis] is [Axis.vertical], replace with `Alignment(-1.0, axisAlignment ?? 0.0)`
+  /// - If [axis] is [Axis.horizontal], replace with `Alignment(axisAlignment ?? 0.0, -1.0)`.
+  /// - If [axis] is [Axis.vertical], replace with `Alignment(-1.0, axisAlignment ?? 0.0)`.
   @Deprecated(
     'Use alignment instead. '
     'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
