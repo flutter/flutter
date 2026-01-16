@@ -79,6 +79,26 @@ void main() async {
         return (converted == expected)
             ? 'success'
             : 'error: conversion of UTF16 string to UTF8 failed, expected "${expected.codeUnits}" but got "${converted.codeUnits}"';
+      } else if (message == 'verifyNullStringConversion') {
+        // Test that Utf8FromUtf16 handles nullptr gracefully by returning empty string.
+        final String converted = await testNullStringConversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: nullptr conversion should return empty string, got "${converted.codeUnits}"';
+      } else if (message == 'verifyEmptyStringConversion') {
+        // Test that Utf8FromUtf16 handles empty string gracefully.
+        final String converted = await testEmptyStringConversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: empty string conversion should return empty string, got "${converted.codeUnits}"';
+      } else if (message == 'verifyInvalidUtf16Conversion') {
+        // Test that Utf8FromUtf16 handles invalid UTF-16 (unpaired surrogate) gracefully.
+        // With WC_ERR_INVALID_CHARS flag, WideCharToMultiByte returns 0 for invalid input,
+        // so Utf8FromUtf16 should return an empty string.
+        final String converted = await testInvalidUtf16Conversion();
+        return converted.isEmpty
+            ? 'success'
+            : 'error: invalid UTF-16 conversion should return empty string, got "${converted.codeUnits}"';
       }
 
       throw 'Unrecognized message: $message';

@@ -122,6 +122,21 @@ bool FlutterWindow::OnCreate() {
         wide_str.push_back((wchar_t)0);
         const std::string string = Utf8FromUtf16(wide_str.data());
         result->Success(string);
+      } else if (method == "convertNullString") {
+        // Test that Utf8FromUtf16 handles nullptr gracefully.
+        const std::string string = Utf8FromUtf16(nullptr);
+        result->Success(string);
+      } else if (method == "convertEmptyString") {
+        // Test that Utf8FromUtf16 handles empty string gracefully.
+        const wchar_t empty[] = L"";
+        const std::string string = Utf8FromUtf16(empty);
+        result->Success(string);
+      } else if (method == "convertInvalidUtf16") {
+        // Test that Utf8FromUtf16 handles invalid UTF-16 (unpaired surrogate).
+        // 0xD800 is a high surrogate without a matching low surrogate.
+        const wchar_t invalid[] = { 0xD800, 0 };
+        const std::string string = Utf8FromUtf16(invalid);
+        result->Success(string);
       } else {
         result->NotImplemented();
       }

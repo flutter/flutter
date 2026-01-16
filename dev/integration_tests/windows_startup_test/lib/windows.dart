@@ -50,3 +50,33 @@ Future<String> testStringConversion(Int32List twoByteCodes) async {
 
   return converted;
 }
+
+/// Test that Utf8FromUtf16 handles nullptr gracefully.
+Future<String> testNullStringConversion() async {
+  final String? converted = await _kMethodChannel.invokeMethod<String?>('convertNullString');
+  if (converted == null) {
+    throw 'Method channel unavailable.';
+  }
+
+  return converted;
+}
+
+/// Test that Utf8FromUtf16 handles empty string gracefully.
+Future<String> testEmptyStringConversion() async {
+  final String? converted = await _kMethodChannel.invokeMethod<String?>('convertEmptyString');
+  if (converted == null) {
+    throw 'Method channel unavailable.';
+  }
+
+  return converted;
+}
+
+/// Test that Utf8FromUtf16 handles invalid UTF-16 (unpaired surrogate) gracefully.
+Future<String> testInvalidUtf16Conversion() async {
+  final String? converted = await _kMethodChannel.invokeMethod<String?>('convertInvalidUtf16');
+  if (converted == null) {
+    throw 'Method channel unavailable.';
+  }
+
+  return converted;
+}
