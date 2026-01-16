@@ -19,4 +19,5 @@
 #define FFI_PLUGIN_EXPORT
 #endif
 
+// A very short-lived native function.
 FFI_PLUGIN_EXPORT intptr_t difference(intptr_t a, intptr_t b);
