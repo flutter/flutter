@@ -12,7 +12,7 @@
   "shareButtonLabel": "هم‌رسانی کردن",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "نتایج جستجو پیدا شد",
+  "noResultsFound": "نتیجه‌ای پیدا نشد",
+  "radioButtonUnselectedLabel": "انتخاب‌نشده"
 }
