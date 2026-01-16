@@ -17191,8 +17191,6 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
     expect(find.byType(EditableText), findsOneWidget);
-    // TODO(Renzo-Olivares): Decide if the below calculation is worthwhile to verify
-    // or does simply verifying that EditableText is on screen suffice.
     // Verify scroll offset.
     final RenderSliverMainAxisGroup groupRenderer = tester.renderObject(
       find.byType(SliverMainAxisGroup),
