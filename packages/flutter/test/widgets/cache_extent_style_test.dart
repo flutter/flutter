@@ -14,7 +14,6 @@ void main() {
         child: CustomScrollView(
           cacheExtent: 1.0,
           cacheExtentStyle: CacheExtentStyle.viewport,
-          slivers: <Widget>[],
         ),
       ),
     );
@@ -30,7 +29,6 @@ void main() {
         child: ListView(
           cacheExtent: 1.0,
           cacheExtentStyle: CacheExtentStyle.viewport,
-          children: const <Widget>[],
         ),
       ),
     );
@@ -98,7 +96,6 @@ void main() {
           cacheExtent: 1.0,
           cacheExtentStyle: CacheExtentStyle.viewport,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-          children: const <Widget>[],
         ),
       ),
     );
@@ -150,7 +147,6 @@ void main() {
           cacheExtent: 1.0,
           cacheExtentStyle: CacheExtentStyle.viewport,
           crossAxisCount: 1,
-          children: const <Widget>[],
         ),
       ),
     );
@@ -167,7 +163,6 @@ void main() {
           cacheExtent: 1.0,
           cacheExtentStyle: CacheExtentStyle.viewport,
           maxCrossAxisExtent: 100,
-          children: const <Widget>[],
         ),
       ),
     );
