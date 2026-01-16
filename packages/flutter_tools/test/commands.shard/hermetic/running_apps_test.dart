@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2026 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,12 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   testUsingContext('running-apps command returns success', () async {
-    final command = RunningAppsCommand(logger: testLogger);
+    final fakeMDnsClient = FakeMDnsClient(
+      <PtrResourceRecord>[],
+      <String, List<SrvResourceRecord>>{},
+      <String, List<TxtResourceRecord>>{},
+    );
+    final command = RunningAppsCommand(mdnsClient: fakeMDnsClient, logger: testLogger);
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
   });

@@ -109,8 +109,7 @@ void main() {
         requests: <VmServiceExpectation>[listViews, listViews],
         httpAddress: Uri.parse('http://localhost:12345'),
       );
-      final futureConnectionInfo =
-          Completer<DebugConnectionInfo>.sync();
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       await residentRunner.attach(
         appStartedCompleter: futureAppStart,
@@ -2270,8 +2269,7 @@ class FakeAssetBundle implements AssetBundle {
   final entries = <String, AssetBundleEntry>{};
 
   @override
-  final deferredComponentsEntries =
-      <String, Map<String, AssetBundleEntry>>{};
+  final deferredComponentsEntries = <String, Map<String, AssetBundleEntry>>{};
 
   @override
   final inputFiles = <File>[];
