@@ -62,6 +62,6 @@ void main() {
 
     expect(find.text(rawTooltipText), findsOneWidget);
 
-    await pointer.removePointer();
+    addTearDown(pointer.removePointer);
   });
 }
