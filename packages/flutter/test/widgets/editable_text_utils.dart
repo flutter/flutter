@@ -156,9 +156,6 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 ///
 /// This widget provides platform defaults based on observed native behavior:
 ///
-///  * [EditableText.cursorOpacityAnimates] is set to true on iOS.
-///  * [EditableText.cursorRadius] is set to `Radius.circular(2.0)` on iOS and macOS.
-///  * [EditableText.backgroundCursorColor] is set to `Color(0xFF999999)` on iOS and macOS.
 ///  * [TextSelectionGestureDetectorBuilderDelegate.forcePressEnabled] is set to true on iOS.
 class TestTextField extends StatefulWidget {
   const TestTextField({
@@ -167,6 +164,7 @@ class TestTextField extends StatefulWidget {
     this.autofocus = false,
     this.contextMenuBuilder,
     this.cursorColor,
+    this.cursorOpacityAnimates = false,
     this.focusNode,
     this.groupId = EditableText,
     this.maxLines = 1,
@@ -181,6 +179,7 @@ class TestTextField extends StatefulWidget {
   final bool autofocus;
   final EditableTextContextMenuBuilder? contextMenuBuilder;
   final Color? cursorColor;
+  final bool cursorOpacityAnimates;
   final FocusNode? focusNode;
   final Object groupId;
   final int? maxLines;
@@ -229,25 +228,10 @@ class _TestTextFieldState extends State<TestTextField>
   }
 
   static const Color _red = Color(0xFFF44336); // Colors.red.
-  static const Color _cupertinoInactiveGrey = Color(
-    0xFF999999,
-  ); // CupertinoColors.inactiveGrey.color
 
   @override
   Widget build(BuildContext context) {
     // Platform defaults.
-    final bool cursorOpacityAnimates = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => true,
-      _ => false,
-    };
-    final Radius? cursorRadius = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS => const Radius.circular(2.0),
-      _ => null,
-    };
-    final Color? backgroundCursorColor = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS => _cupertinoInactiveGrey,
-      _ => null,
-    };
     forcePressEnabled = switch (defaultTargetPlatform) {
       TargetPlatform.iOS => true,
       _ => false,
@@ -259,12 +243,10 @@ class _TestTextFieldState extends State<TestTextField>
         key: editableTextKey,
         autofillHints: widget.autofillHints,
         autofocus: widget.autofocus,
-        backgroundCursorColor:
-            backgroundCursorColor ?? _red, // Colors.red, required by editable text.
+        backgroundCursorColor: _red, // Colors.red, required by editable text.
         contextMenuBuilder: widget.contextMenuBuilder,
         cursorColor: widget.cursorColor ?? _red, // Colors.red, required by editable text.
-        cursorOpacityAnimates: cursorOpacityAnimates,
-        cursorRadius: cursorRadius,
+        cursorOpacityAnimates: widget.cursorOpacityAnimates,
         focusNode: _effectiveFocusNode, // required by editable text.
         groupId: widget.groupId,
         maxLines: widget.maxLines,
