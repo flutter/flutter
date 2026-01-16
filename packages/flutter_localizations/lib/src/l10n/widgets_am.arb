@@ -12,7 +12,7 @@
   "shareButtonLabel": "አጋራ",
   "pasteButtonLabel": "ለጥፍ",
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "የፍለጋ ውጤቶች ተገኝተዋል",
+  "noResultsFound": "ምንም ውጤቶች አልተገኙም",
+  "radioButtonUnselectedLabel": "አልተመረጠም"
 }
