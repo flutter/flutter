@@ -2686,10 +2686,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool hasErrorWidget = decoration.error != null || decoration.errorText != null;
     final String? semanticsHint = hasErrorWidget ? decoration.errorText : decoration.hintText;
 
-    Widget result = decorator;
-    if (semanticsHint != null) {
-      result = Semantics(hint: semanticsHint, child: result);
-    }
+    final Widget result = Semantics(hint: semanticsHint, child: decorator);
 
     final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
