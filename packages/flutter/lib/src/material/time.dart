@@ -269,5 +269,7 @@ enum HourFormat {
 HourFormat hourFormat({required TimeOfDayFormat of}) => switch (of) {
   TimeOfDayFormat.h_colon_mm_space_a || TimeOfDayFormat.a_space_h_colon_mm => HourFormat.h,
   TimeOfDayFormat.H_colon_mm => HourFormat.H,
-  TimeOfDayFormat.HH_dot_mm || TimeOfDayFormat.HH_colon_mm || TimeOfDayFormat.frenchCanadian => HourFormat.HH,
+  TimeOfDayFormat.HH_dot_mm ||
+  TimeOfDayFormat.HH_colon_mm ||
+  TimeOfDayFormat.frenchCanadian => HourFormat.HH,
 };

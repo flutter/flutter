@@ -8,8 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('hourFormat', () {
     test('returns HourFormat.h for 12-hour formats', () {
-      expect(hourFormat(of: TimeOfDayFormat.h_colon_mm_space_a), HourFormat.h);
-      expect(hourFormat(of: TimeOfDayFormat.a_space_h_colon_mm), HourFormat.h);
+      const formats = <TimeOfDayFormat>[
+        TimeOfDayFormat.h_colon_mm_space_a,
+        TimeOfDayFormat.a_space_h_colon_mm,
+      ];
+      for (final format in formats) {
+        expect(hourFormat(of: format), HourFormat.h, reason: 'for $format');
+      }
     });
 
     test('returns HourFormat.H for non-padded 24-hour format', () {
@@ -22,7 +27,6 @@ void main() {
         TimeOfDayFormat.HH_colon_mm,
         TimeOfDayFormat.frenchCanadian,
       ];
-
       for (final format in formats) {
         expect(hourFormat(of: format), HourFormat.HH, reason: 'for $format');
       }
