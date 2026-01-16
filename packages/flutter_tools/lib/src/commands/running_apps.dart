@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
+
 import '../base/logger.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 

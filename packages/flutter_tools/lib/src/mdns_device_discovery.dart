@@ -115,11 +115,22 @@ class MDNSDeviceDiscovery {
           );
 
           final server = MDNSServer(MDNSServerConfig(zone: mdnsService, reusePort: true));
-          await server.start();
-          _servers.add(server);
-          logger.printTrace(
-            'mDNS service started for ${device.name} with appName "$appName" on ${ip.address}',
-          );
+          try {
+            await server.start();
+            _servers.add(server);
+            logger.printTrace(
+              'mDNS service started for ${device.name} with appName "$appName" on ${ip.address}',
+            );
+          } on Exception catch (e) {
+            logger.printError('Error starting mDNS server on ${ip.address}: $e');
+            // Ensure we clean up any resources if start partially succeeded.
+            // mdns_dart server.start might leave sockets open if it throws.
+            try {
+              await server.stop();
+            } on Exception {
+              // Ignore errors during cleanup of failed start.
+            }
+          }
         } on Exception catch (e) {
           logger.printError('Error starting mDNS server on ${ip.address}: $e');
         }
