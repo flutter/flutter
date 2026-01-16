@@ -367,6 +367,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     required this.offset,
     this.paintOrder = SliverPaintOrder.firstIsTop,
     this.clipBehavior = Clip.hardEdge,
+    this.cacheExtent,
+    this.cacheExtentStyle = CacheExtentStyle.pixel,
     List<Widget> slivers = const <Widget>[],
   }) : super(children: slivers);
 
@@ -408,6 +410,16 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
+  final double? cacheExtent;
+
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle cacheExtentStyle;
+
   @override
   RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
     return RenderShrinkWrappingViewport(
@@ -417,6 +429,8 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
       offset: offset,
       paintOrder: paintOrder,
       clipBehavior: clipBehavior,
+      cacheExtent: cacheExtent,
+      cacheExtentStyle: cacheExtentStyle,
     );
   }
 
@@ -428,7 +442,9 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
           crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..offset = offset
       ..paintOrder = paintOrder
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..cacheExtent = cacheExtent
+      ..cacheExtentStyle = cacheExtentStyle;
   }
 
   @override
