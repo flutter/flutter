@@ -482,6 +482,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// treated as a multiplier for the main axis extent of the
   /// viewport. In this case there is no default [cacheExtent]; it
   /// must be explicitly specified.
+  ///
+  /// Defaults to [CacheExtentStyle.pixel].
   /// {@endtemplate}
   ///
   /// Changing the [cacheExtentStyle] without also changing the [cacheExtent]
@@ -1865,6 +1867,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     required super.offset,
     super.paintOrder,
     super.clipBehavior,
+    super.cacheExtent,
+    super.cacheExtentStyle,
     List<RenderSliver>? children,
   }) {
     addAll(children);
@@ -2004,7 +2008,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     _hasVisualOverflow = correctedOffset < 0.0;
     _calculatedCacheExtent = switch (cacheExtentStyle) {
       CacheExtentStyle.pixel => cacheExtent,
-      CacheExtentStyle.viewport => mainAxisExtent * _cacheExtent,
+      // If mainAxisExtent is infinite, it builds everything anyway, so we don't need any extra cache.
+      CacheExtentStyle.viewport => mainAxisExtent.isFinite ? mainAxisExtent * _cacheExtent : 0,
     };
 
     return layoutChildSequence(

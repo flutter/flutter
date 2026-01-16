@@ -116,6 +116,7 @@ abstract class ScrollView extends StatelessWidget {
     this.center,
     this.anchor = 0.0,
     this.cacheExtent,
+    this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.semanticChildCount,
     this.paintOrder = SliverPaintOrder.firstIsTop,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -356,6 +357,9 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   final double? cacheExtent;
 
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  final CacheExtentStyle cacheExtentStyle;
+
   /// The number of children that will contribute semantic information.
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
@@ -470,6 +474,8 @@ abstract class ScrollView extends StatelessWidget {
         slivers: slivers,
         paintOrder: paintOrder,
         clipBehavior: clipBehavior,
+        cacheExtent: cacheExtent,
+        cacheExtentStyle: cacheExtentStyle,
       );
     }
     return Viewport(
@@ -477,6 +483,7 @@ abstract class ScrollView extends StatelessWidget {
       offset: offset,
       slivers: slivers,
       cacheExtent: cacheExtent,
+      cacheExtentStyle: cacheExtentStyle,
       center: center,
       anchor: anchor,
       paintOrder: paintOrder,
@@ -561,6 +568,13 @@ abstract class ScrollView extends StatelessWidget {
     );
     properties.add(
       FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true),
+    );
+    properties.add(
+      EnumProperty<CacheExtentStyle>(
+        'cacheExtentStyle',
+        cacheExtentStyle,
+        defaultValue: cacheExtent == null ? null : CacheExtentStyle.pixel,
+      ),
     );
   }
 }
@@ -709,6 +723,7 @@ class CustomScrollView extends ScrollView {
     super.center,
     super.anchor,
     super.cacheExtent,
+    super.cacheExtentStyle,
     super.paintOrder,
     this.slivers = const <Widget>[],
     super.semanticChildCount,
@@ -851,6 +866,7 @@ abstract class BoxScrollView extends ScrollView {
     super.shrinkWrap,
     this.padding,
     super.cacheExtent,
+    super.cacheExtentStyle,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1291,6 +1307,7 @@ class ListView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -1369,6 +1386,7 @@ class ListView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1484,6 +1502,7 @@ class ListView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -1547,6 +1566,7 @@ class ListView extends BoxScrollView {
     this.itemExtentBuilder,
     required this.childrenDelegate,
     super.cacheExtent,
+    super.cacheExtentStyle,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1932,6 +1952,7 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -1988,6 +2009,7 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -2021,6 +2043,7 @@ class GridView extends BoxScrollView {
     required this.gridDelegate,
     required this.childrenDelegate,
     super.cacheExtent,
+    super.cacheExtentStyle,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -2061,6 +2084,7 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -2115,6 +2139,7 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     super.cacheExtent,
+    super.cacheExtentStyle,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
