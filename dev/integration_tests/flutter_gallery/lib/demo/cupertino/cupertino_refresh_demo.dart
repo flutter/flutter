@@ -27,7 +27,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
   }
 
   void repopulateList() {
-    final Random random = Random();
+    final random = Random();
     randomizedContacts = List<List<String>>.generate(100, (int index) {
       return contacts[random.nextInt(contacts.length)]
         // Randomly adds a telephone icon next to the contact or not.

@@ -90,7 +90,7 @@ class DessertDataSource extends DataTableSource {
   void _sort<T>(Comparable<T> Function(Dessert d) getField, bool ascending) {
     _desserts.sort((Dessert a, Dessert b) {
       if (!ascending) {
-        final Dessert c = a;
+        final c = a;
         a = b;
         b = c;
       }

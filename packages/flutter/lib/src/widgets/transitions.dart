@@ -845,7 +845,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final RelativeRect offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
+    final offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
     return Positioned(
       top: offsets.top,
       right: offsets.right,

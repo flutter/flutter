@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -62,7 +63,10 @@ $fontsSection
     String expectedAssetManifest,
   ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-    await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+    await bundle.build(
+      packageConfigPath: '.dart_tool/package_config.json',
+      targetPlatform: TargetPlatform.tester,
+    );
 
     for (final packageName in packages) {
       for (final packageFont in packageFonts) {
@@ -114,7 +118,10 @@ $fontsSection
         writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(packageConfigPath: '.dart_tool/package_config.json');
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
         expect(
           bundle.entries.keys,
           unorderedEquals(<String>['AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']),

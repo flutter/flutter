@@ -41,7 +41,10 @@ class _EndDrawerExampleState extends State<EndDrawerExample> {
       key: _scaffoldKey,
       appBar: AppBar(title: const Text('Drawer Demo')),
       body: Center(
-        child: ElevatedButton(onPressed: _openEndDrawer, child: const Text('Open End Drawer')),
+        child: ElevatedButton(
+          onPressed: _openEndDrawer,
+          child: const Text('Open End Drawer'),
+        ),
       ),
       endDrawer: Drawer(
         child: Center(
@@ -49,7 +52,10 @@ class _EndDrawerExampleState extends State<EndDrawerExample> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('This is the Drawer'),
-              ElevatedButton(onPressed: _closeEndDrawer, child: const Text('Close Drawer')),
+              ElevatedButton(
+                onPressed: _closeEndDrawer,
+                child: const Text('Close Drawer'),
+              ),
             ],
           ),
         ),

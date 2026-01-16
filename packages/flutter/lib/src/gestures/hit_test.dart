@@ -280,7 +280,7 @@ class HitTestResult {
     Vector4 b, {
     double epsilon = precisionErrorTolerance,
   }) {
-    bool result = true;
+    var result = true;
     assert(() {
       final Vector4 difference = a - b;
       result = difference.storage.every((double component) => component.abs() < epsilon);

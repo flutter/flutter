@@ -130,7 +130,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 
   Widget _buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
-    final EdgeInsets padding = EdgeInsets.only(
+    final padding = EdgeInsets.only(
       top: 8.0,
       left: 8.0 + mediaPadding.left,
       right: 8.0 + mediaPadding.right,

@@ -13,14 +13,14 @@ void main() {
 void doTests() {
   group('Factory', () {
     test('Creates a FullPage instance when hostElement is null', () async {
-      final DimensionsProvider provider = DimensionsProvider.create();
+      final provider = DimensionsProvider.create();
 
       expect(provider, isA<FullPageDimensionsProvider>());
     });
 
     test('Creates a CustomElement instance when hostElement is not null', () async {
       final DomElement element = createDomElement('some-random-element');
-      final DimensionsProvider provider = DimensionsProvider.create(hostElement: element);
+      final provider = DimensionsProvider.create(hostElement: element);
 
       expect(provider, isA<CustomElementDimensionsProvider>());
     });

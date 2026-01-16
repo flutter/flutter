@@ -550,7 +550,10 @@ class _ExpansionTileState extends State<ExpansionTile> {
         _timer?.cancel();
         _timer = null;
       });
-    } else {
+    }
+    // SemanticsService.sendAnnouncement is deprecated on android.
+    // We use live region to achieve the announcement effect instead.
+    else if (defaultTargetPlatform != TargetPlatform.android) {
       SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
     }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
@@ -596,45 +599,48 @@ class _ExpansionTileState extends State<ExpansionTile> {
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansionTileExpandedTapHint
         : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        _tileController.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
-    return Semantics(
-      hint: semanticsHint,
-      onTapHint: onTapHint,
-      child: ListTileTheme.merge(
-        iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
-        textColor: _headerColor.value,
-        child: ListTile(
-          enabled: widget.enabled,
-          onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
-          dense: widget.dense,
-          splashColor: widget.splashColor,
-          visualDensity: widget.visualDensity,
-          enableFeedback: widget.enableFeedback,
-          contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
-          leading: widget.leading ?? _buildLeadingIcon(context, animation),
-          title: widget.title,
-          subtitle: widget.subtitle,
-          trailing: widget.showTrailingIcon
-              ? widget.trailing ?? _buildTrailingIcon(context, animation)
-              : null,
-          minTileHeight: widget.minTileHeight,
-          internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-        ),
+    final Widget child = ListTileTheme.merge(
+      iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
+      textColor: _headerColor.value,
+      child: ListTile(
+        enabled: widget.enabled,
+        onTap: _tileController.isExpanded ? _tileController.collapse : _tileController.expand,
+        dense: widget.dense,
+        splashColor: widget.splashColor,
+        visualDensity: widget.visualDensity,
+        enableFeedback: widget.enableFeedback,
+        contentPadding: widget.tilePadding ?? _expansionTileTheme.tilePadding,
+        leading: widget.leading ?? _buildLeadingIcon(context, animation),
+        title: widget.title,
+        subtitle: widget.subtitle,
+        trailing: widget.showTrailingIcon
+            ? widget.trailing ?? _buildTrailingIcon(context, animation)
+            : null,
+        minTileHeight: widget.minTileHeight,
+        internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
+      );
+    }
+    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {

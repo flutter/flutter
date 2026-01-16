@@ -58,6 +58,10 @@ class System : public fml::RefCountedThreadSafe<System>,
 
   static Dart_Handle VmoMap(fml::RefPtr<Handle> vmo);
 
+  static zx_status_t IobWrite(fml::RefPtr<Handle> iob,
+                              uint32_t region_index,
+                              const tonic::DartByteData& data);
+
   static uint64_t ClockGetMonotonic();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);

@@ -5,12 +5,15 @@
 #include <optional>
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 
 namespace impeller {
 namespace testing {
+
+using ::testing::_;
 
 #define EXPECT_AVAILABLE(proc_ivar) \
   EXPECT_TRUE(mock_gles->GetProcTable().proc_ivar.IsAvailable());
@@ -31,6 +34,17 @@ TEST(ProcTableGLES, ResolvesCorrectClearDepthProcOnDesktopGL) {
 
   FOR_EACH_IMPELLER_DESKTOP_ONLY_PROC(EXPECT_AVAILABLE);
   FOR_EACH_IMPELLER_ES_ONLY_PROC(EXPECT_UNAVAILABLE);
+}
+
+TEST(ProcTableGLES, CheckFrameBufferStatusDebugOnly) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+#ifdef IMPELLER_DEBUG
+  EXPECT_CALL(*mock_gles_impl, CheckFramebufferStatus(_)).Times(1);
+#else
+  EXPECT_CALL(*mock_gles_impl, CheckFramebufferStatus(_)).Times(0);
+#endif
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl));
+  mock_gles->GetProcTable().CheckFramebufferStatusDebug(0);
 }
 
 TEST(GLErrorToString, ReturnsCorrectStringForKnownErrors) {

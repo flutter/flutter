@@ -230,7 +230,7 @@ class FloatingActionButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     required this.onPressed,
-    this.mouseCursor = SystemMouseCursors.click,
+    this.mouseCursor,
     this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
@@ -266,8 +266,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The default foreground color for icons and text within the button.
   ///
-  /// If this property is null, then the [FloatingActionButtonThemeData.foregroundColor]
-  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// If this property is null, then the ambient
+  /// [FloatingActionButtonThemeData.foregroundColor] is used. If that property is also
   /// null, then the [ColorScheme.onPrimaryContainer] color of [ThemeData.colorScheme]
   /// is used. If [ThemeData.useMaterial3] is set to false, then the
   /// [ColorScheme.onSecondary] color of [ThemeData.colorScheme] is used.
@@ -275,8 +275,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The button's background color.
   ///
-  /// If this property is null, then the [FloatingActionButtonThemeData.backgroundColor]
-  /// of [ThemeData.floatingActionButtonTheme] is used. If that property is also
+  /// If this property is null, then the ambient
+  /// [FloatingActionButtonThemeData.backgroundColor] is used. If that property is also
   /// null, then the [ColorScheme.primaryContainer] color of [ThemeData.colorScheme]
   /// is used. If [ThemeData.useMaterial3] is set to false, then the
   /// [ColorScheme.secondary] color of [ThemeData.colorScheme] is used.
@@ -323,7 +323,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If this property is null, [WidgetStateMouseCursor.clickable] will be used.
+  /// If this property is null, [FloatingActionButtonThemeData.mouseCursor] is used.
+  /// If that is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? mouseCursor;
 
   /// The z-coordinate at which to place this button relative to its parent.
@@ -487,7 +488,9 @@ class FloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+    final FloatingActionButtonThemeData floatingActionButtonTheme = FloatingActionButtonTheme.of(
+      context,
+    );
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
         ? _FABDefaultsM3(context, _floatingActionButtonType, child != null)
         : _FABDefaultsM2(context, _floatingActionButtonType, child != null);
@@ -649,7 +652,7 @@ class _EffectiveMouseCursor extends WidgetStateMouseCursor {
   MouseCursor resolve(Set<WidgetState> states) {
     return WidgetStateProperty.resolveAs<MouseCursor?>(widgetCursor, states) ??
         themeCursor?.resolve(states) ??
-        WidgetStateMouseCursor.clickable.resolve(states);
+        WidgetStateMouseCursor.adaptiveClickable.resolve(states);
   }
 
   @override

@@ -20,52 +20,52 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Down/up pair 1: normal tap sequence
-  const PointerDownEvent down1 = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+  const down1 = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
 
-  const PointerUpEvent up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
+  const up1 = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
 
   // Down/up pair 2: normal tap sequence far away from pair 1
-  const PointerDownEvent down2 = PointerDownEvent(pointer: 2, position: Offset(30.0, 30.0));
+  const down2 = PointerDownEvent(pointer: 2, position: Offset(30.0, 30.0));
 
-  const PointerUpEvent up2 = PointerUpEvent(pointer: 2, position: Offset(31.0, 29.0));
+  const up2 = PointerUpEvent(pointer: 2, position: Offset(31.0, 29.0));
 
   // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
-  const PointerDownEvent down3 = PointerDownEvent(pointer: 3, position: Offset(10.0, 10.0));
+  const down3 = PointerDownEvent(pointer: 3, position: Offset(10.0, 10.0));
 
-  const PointerMoveEvent move3 = PointerMoveEvent(pointer: 3, position: Offset(25.0, 25.0));
+  const move3 = PointerMoveEvent(pointer: 3, position: Offset(25.0, 25.0));
 
-  const PointerUpEvent up3 = PointerUpEvent(pointer: 3, position: Offset(25.0, 25.0));
+  const up3 = PointerUpEvent(pointer: 3, position: Offset(25.0, 25.0));
 
   // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
-  const PointerDownEvent down4 = PointerDownEvent(pointer: 4, position: Offset(10.0, 10.0));
+  const down4 = PointerDownEvent(pointer: 4, position: Offset(10.0, 10.0));
 
-  const PointerMoveEvent move4 = PointerMoveEvent(pointer: 4, position: Offset(22.0, 22.0));
+  const move4 = PointerMoveEvent(pointer: 4, position: Offset(22.0, 22.0));
 
-  const PointerUpEvent up4 = PointerUpEvent(pointer: 4, position: Offset(22.0, 22.0));
+  const up4 = PointerUpEvent(pointer: 4, position: Offset(22.0, 22.0));
 
   // Down/up sequence 5: tap sequence with secondary button
-  const PointerDownEvent down5 = PointerDownEvent(
+  const down5 = PointerDownEvent(
     pointer: 5,
     position: Offset(20.0, 20.0),
     buttons: kSecondaryButton,
   );
 
-  const PointerUpEvent up5 = PointerUpEvent(pointer: 5, position: Offset(20.0, 20.0));
+  const up5 = PointerUpEvent(pointer: 5, position: Offset(20.0, 20.0));
 
   // Down/up sequence 6: tap sequence with tertiary button
-  const PointerDownEvent down6 = PointerDownEvent(
+  const down6 = PointerDownEvent(
     pointer: 6,
     position: Offset(20.0, 20.0),
     buttons: kTertiaryButton,
   );
 
-  const PointerUpEvent up6 = PointerUpEvent(pointer: 6, position: Offset(20.0, 20.0));
+  const up6 = PointerUpEvent(pointer: 6, position: Offset(20.0, 20.0));
 
   testGesture('Should recognize tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
     addTearDown(tap.dispose);
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
@@ -85,16 +85,16 @@ void main() {
   });
 
   testGesture('Should recognize tap for supported devices only', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer(
+    final tap = TapGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse, PointerDeviceKind.stylus},
     );
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
-    const PointerDownEvent touchDown = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
-    const PointerUpEvent touchUp = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
+    const touchDown = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    const touchUp = PointerUpEvent(pointer: 1, position: Offset(11.0, 9.0));
 
     tap.addPointer(touchDown);
     tester.closeArena(1);
@@ -107,12 +107,12 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(tapRecognized, isFalse);
 
-    const PointerDownEvent mouseDown = PointerDownEvent(
+    const mouseDown = PointerDownEvent(
       kind: PointerDeviceKind.mouse,
       pointer: 1,
       position: Offset(10.0, 10.0),
     );
-    const PointerUpEvent mouseUp = PointerUpEvent(
+    const mouseUp = PointerUpEvent(
       kind: PointerDeviceKind.mouse,
       pointer: 1,
       position: Offset(11.0, 9.0),
@@ -131,12 +131,12 @@ void main() {
 
     tapRecognized = false;
 
-    const PointerDownEvent stylusDown = PointerDownEvent(
+    const stylusDown = PointerDownEvent(
       kind: PointerDeviceKind.stylus,
       pointer: 1,
       position: Offset(10.0, 10.0),
     );
-    const PointerUpEvent stylusUp = PointerUpEvent(
+    const stylusUp = PointerUpEvent(
       kind: PointerDeviceKind.stylus,
       pointer: 1,
       position: Offset(11.0, 9.0),
@@ -157,7 +157,7 @@ void main() {
   });
 
   testGesture('Details contain the correct device kind', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
     TapDownDetails? lastDownDetails;
     TapUpDetails? lastUpDetails;
@@ -169,8 +169,8 @@ void main() {
       lastUpDetails = details;
     };
 
-    const PointerDownEvent mouseDown = PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
-    const PointerUpEvent mouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const mouseDown = PointerDownEvent(pointer: 1, kind: PointerDeviceKind.mouse);
+    const mouseUp = PointerUpEvent(pointer: 1, kind: PointerDeviceKind.mouse);
 
     tap.addPointer(mouseDown);
     tester.closeArena(1);
@@ -184,9 +184,9 @@ void main() {
   });
 
   testGesture('No duplicate tap events', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    int tapsRecognized = 0;
+    var tapsRecognized = 0;
     tap.onTap = () {
       tapsRecognized++;
     };
@@ -217,9 +217,9 @@ void main() {
   });
 
   testGesture('Should not recognize two overlapping taps (FIFO)', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    int tapsRecognized = 0;
+    var tapsRecognized = 0;
     tap.onTap = () {
       tapsRecognized++;
     };
@@ -250,9 +250,9 @@ void main() {
   });
 
   testGesture('Should not recognize two overlapping taps (FILO)', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    int tapsRecognized = 0;
+    var tapsRecognized = 0;
     tap.onTap = () {
       tapsRecognized++;
     };
@@ -283,13 +283,13 @@ void main() {
   });
 
   testGesture('Distance cancels tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
-    bool tapCanceled = false;
+    var tapCanceled = false;
     tap.onTapCancel = () {
       tapCanceled = true;
     };
@@ -316,13 +316,13 @@ void main() {
   });
 
   testGesture('Short distance does not cancel tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
-    bool tapCanceled = false;
+    var tapCanceled = false;
     tap.onTapCancel = () {
       tapCanceled = true;
     };
@@ -349,9 +349,9 @@ void main() {
   });
 
   testGesture('Timeout does not cancel tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
@@ -373,15 +373,15 @@ void main() {
   });
 
   testGesture('Should yield to other arena members', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
 
     tap.addPointer(down1);
-    final TestGestureArenaMember member = TestGestureArenaMember();
+    final member = TestGestureArenaMember();
     final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
@@ -401,15 +401,15 @@ void main() {
   });
 
   testGesture('Should trigger on release of held arena', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    bool tapRecognized = false;
+    var tapRecognized = false;
     tap.onTap = () {
       tapRecognized = true;
     };
 
     tap.addPointer(down1);
-    final TestGestureArenaMember member = TestGestureArenaMember();
+    final member = TestGestureArenaMember();
     final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
@@ -430,14 +430,14 @@ void main() {
   });
 
   testGesture('Should log exceptions from callbacks', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
     tap.onTap = () {
       throw Exception(test);
     };
 
     final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
-    bool gotError = false;
+    var gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
       gotError = true;
     };
@@ -455,20 +455,20 @@ void main() {
   });
 
   testGesture('onTapCancel should show reason in the proper format', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
     tap.onTapCancel = () {
       throw Exception(test);
     };
 
     final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
-    bool gotError = false;
+    var gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
       expect(details.toString().contains('"spontaneous onTapCancel"'), isTrue);
       gotError = true;
     };
 
-    const int pointer = 1;
+    const pointer = 1;
     tap.addPointer(const PointerDownEvent(pointer: pointer));
     tester.closeArena(pointer);
     tester.async.elapse(const Duration(milliseconds: 500));
@@ -481,10 +481,10 @@ void main() {
   });
 
   testGesture('No duplicate tap events', (GestureTester tester) {
-    final TapGestureRecognizer tapA = TapGestureRecognizer();
-    final TapGestureRecognizer tapB = TapGestureRecognizer();
+    final tapA = TapGestureRecognizer();
+    final tapB = TapGestureRecognizer();
 
-    final List<String> log = <String>[];
+    final log = <String>[];
     tapA.onTapDown = (TapDownDetails details) {
       log.add('tapA onTapDown');
     };
@@ -566,12 +566,12 @@ void main() {
   });
 
   testGesture('PointerCancelEvent cancels tap', (GestureTester tester) {
-    const PointerDownEvent down = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
-    const PointerCancelEvent cancel = PointerCancelEvent(pointer: 5, position: Offset(10.0, 10.0));
+    const down = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
+    const cancel = PointerCancelEvent(pointer: 5, position: Offset(10.0, 10.0));
 
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     tap.onTapDown = (_) {
       recognized.add('down');
     };
@@ -596,15 +596,14 @@ void main() {
   });
 
   testGesture('PointerCancelEvent after exceeding deadline cancels tap', (GestureTester tester) {
-    const PointerDownEvent down = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
-    const PointerCancelEvent cancel = PointerCancelEvent(pointer: 5, position: Offset(10.0, 10.0));
+    const down = PointerDownEvent(pointer: 5, position: Offset(10.0, 10.0));
+    const cancel = PointerCancelEvent(pointer: 5, position: Offset(10.0, 10.0));
 
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
-      ..onStart = (_) {}; // Need a callback to compete
+    final tap = TapGestureRecognizer();
+    final drag = HorizontalDragGestureRecognizer()..onStart = (_) {}; // Need a callback to compete
     addTearDown(drag.dispose);
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     tap.onTapDown = (_) {
       recognized.add('down');
     };
@@ -633,12 +632,12 @@ void main() {
   });
 
   testGesture('losing tap gesture recognizer does not send onTapCancel', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
     addTearDown(tap.dispose);
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final drag = HorizontalDragGestureRecognizer();
     addTearDown(drag.dispose);
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     tap.onTapDown = (_) {
       recognized.add('down');
     };
@@ -668,10 +667,10 @@ void main() {
     // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
     // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
     // after its `_reset`.
-    final TapGestureRecognizer tap = TapGestureRecognizer();
+    final tap = TapGestureRecognizer();
     addTearDown(tap.dispose);
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     tap.onTapDown = (_) {
       recognized.add('down');
     };
@@ -711,18 +710,18 @@ void main() {
 
   group('Enforce consistent-button restriction:', () {
     // Change buttons during down-up sequence 1
-    const PointerMoveEvent move1lr = PointerMoveEvent(
+    const move1lr = PointerMoveEvent(
       pointer: 1,
       position: Offset(10.0, 10.0),
       buttons: kPrimaryMouseButton | kSecondaryMouseButton,
     );
-    const PointerMoveEvent move1r = PointerMoveEvent(
+    const move1r = PointerMoveEvent(
       pointer: 1,
       position: Offset(10.0, 10.0),
       buttons: kSecondaryMouseButton,
     );
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     late TapGestureRecognizer tap;
     setUp(() {
       tap = TapGestureRecognizer()
@@ -833,7 +832,7 @@ void main() {
     // after a timeout. The following tests make sure that tap recognizers
     // listening on different buttons do not form competition.
 
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     late TapGestureRecognizer primary;
     late TapGestureRecognizer primary2;
     late TapGestureRecognizer secondary;
@@ -941,11 +940,11 @@ void main() {
   });
 
   group('Gestures of different buttons trigger correct callbacks:', () {
-    final List<String> recognized = <String>[];
+    final recognized = <String>[];
     late TapGestureRecognizer tap;
-    const PointerCancelEvent cancel1 = PointerCancelEvent(pointer: 1);
-    const PointerCancelEvent cancel5 = PointerCancelEvent(pointer: 5);
-    const PointerCancelEvent cancel6 = PointerCancelEvent(pointer: 6);
+    const cancel1 = PointerCancelEvent(pointer: 1);
+    const cancel5 = PointerCancelEvent(pointer: 5);
+    const cancel6 = PointerCancelEvent(pointer: 6);
 
     setUp(() {
       tap = TapGestureRecognizer()
@@ -1068,20 +1067,19 @@ void main() {
   });
 
   testGesture('A second tap after rejection is ignored', (GestureTester tester) {
-    bool didTap = false;
+    var didTap = false;
 
-    final TapGestureRecognizer tap = TapGestureRecognizer()
+    final tap = TapGestureRecognizer()
       ..onTap = () {
         didTap = true;
       };
     addTearDown(tap.dispose);
 
     // Add drag recognizer for competition
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
-      ..onStart = (_) {};
+    final drag = HorizontalDragGestureRecognizer()..onStart = (_) {};
     addTearDown(drag.dispose);
 
-    final TestPointer pointer1 = TestPointer();
+    final pointer1 = TestPointer();
 
     final PointerDownEvent down = pointer1.down(Offset.zero);
     drag.addPointer(down);
@@ -1094,7 +1092,7 @@ void main() {
     tester.route(pointer1.move(const Offset(50.0, 0)));
 
     // Add another finger
-    final TestPointer pointer2 = TestPointer(2);
+    final pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     drag.addPointer(down2);
     tap.addPointer(down2);
@@ -1106,13 +1104,13 @@ void main() {
 
   testGesture('onTapMove works', (GestureTester tester) {
     TapMoveDetails? tapMoveDetails;
-    final TapGestureRecognizer tap = TapGestureRecognizer(postAcceptSlopTolerance: null)
+    final tap = TapGestureRecognizer(postAcceptSlopTolerance: null)
       ..onTapMove = (TapMoveDetails detail) {
         tapMoveDetails = detail;
       };
     addTearDown(tap.dispose);
 
-    final TestPointer pointer1 = TestPointer();
+    final pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
     tap.addPointer(down);
     tester.closeArena(1);

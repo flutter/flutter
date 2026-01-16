@@ -20,21 +20,21 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat formatter = NumberFormat.simpleCurrency(
+    final formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,
       locale: Localizations.localeOf(context).toString(),
     );
 
     final ThemeData theme = Theme.of(context);
 
-    final Image imageWidget = Image.asset(
+    final imageWidget = Image.asset(
       product!.assetName,
       package: product!.assetPackage,
       fit: BoxFit.cover,
     );
 
     // The fontSize to use for computing the heuristic UI scaling factor.
-    const double defaultFontSize = 14.0;
+    const defaultFontSize = 14.0;
     final double containerScalingFactor =
         MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 

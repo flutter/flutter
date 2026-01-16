@@ -392,7 +392,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.initState();
     _keys = List<GlobalKey>.generate(widget.steps.length, (int i) => GlobalKey());
 
-    for (int i = 0; i < widget.steps.length; i += 1) {
+    for (var i = 0; i < widget.steps.length; i += 1) {
       _oldStates[i] = widget.steps[i].state;
     }
   }
@@ -402,7 +402,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     assert(widget.steps.length == oldWidget.steps.length);
 
-    for (int i = 0; i < oldWidget.steps.length; i += 1) {
+    for (var i = 0; i < oldWidget.steps.length; i += 1) {
       _oldStates[i] = oldWidget.steps[i].state;
     }
   }
@@ -434,12 +434,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   bool _isLabel() {
-    for (final Step step in widget.steps) {
-      if (step.label != null) {
-        return true;
-      }
-    }
-    return false;
+    return widget.steps.any((Step step) => step.label != null);
   }
 
   StepStyle? _stepStyle(int index) {
@@ -448,9 +443,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
   Color _connectorColor(bool isActive) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Set<WidgetState> states = <WidgetState>{
-      if (isActive) WidgetState.selected else WidgetState.disabled,
-    };
+    final states = <WidgetState>{if (isActive) WidgetState.selected else WidgetState.disabled};
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
 
     return resolvedConnectorColor ?? (isActive ? colorScheme.primary : Colors.grey.shade400);
@@ -484,9 +477,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   Color _circleColor(int index) {
     final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Set<WidgetState> states = <WidgetState>{
-      if (isActive) WidgetState.selected else WidgetState.disabled,
-    };
+    final states = <WidgetState>{if (isActive) WidgetState.selected else WidgetState.disabled};
     final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
     if (resolvedConnectorColor != null) {
       return resolvedConnectorColor;
@@ -603,7 +594,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     const OutlinedBorder buttonShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(2)),
     );
-    const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 16.0);
+    const buttonPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
@@ -858,7 +849,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
-    final List<Widget> children = <Widget>[
+    final children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
           onTap: widget.steps[i].state != StepState.disabled
@@ -908,8 +899,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       ],
     ];
 
-    final List<Widget> stepPanels = <Widget>[];
-    for (int i = 0; i < widget.steps.length; i += 1) {
+    final stepPanels = <Widget>[];
+    for (var i = 0; i < widget.steps.length; i += 1) {
       stepPanels.add(
         Visibility(
           maintainState: true,
@@ -992,11 +983,7 @@ class _TrianglePainter extends CustomPainter {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;
-    final List<Offset> points = <Offset>[
-      Offset(0.0, height),
-      Offset(base, height),
-      Offset(halfBase, 0.0),
-    ];
+    final points = <Offset>[Offset(0.0, height), Offset(base, height), Offset(halfBase, 0.0)];
 
     canvas.drawPath(Path()..addPolygon(points, true), Paint()..color = color);
   }
@@ -1156,7 +1143,7 @@ class StepStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final ThemeData theme = ThemeData.fallback();
+    final theme = ThemeData.fallback();
     final TextTheme defaultTextTheme = theme.textTheme;
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: null));

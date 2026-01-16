@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/common.dart' show ToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1002,8 +1003,7 @@ pluginManagement {
         KgpAgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-          // TODO(reidbaker): Replace with templateAndroidGradlePluginVersion
-          agpVersion: '8.7.2',
+          agpVersion: templateAndroidGradlePluginVersion,
         ),
 
         // Kotlin version at the edge of support window.
@@ -1197,6 +1197,44 @@ pluginManagement {
         });
       }
     });
+  });
+
+  testWithoutContext('agp versions validation', () {
+    final Version? parsedTemplateAndroidGradlePluginVersion = Version.parse(
+      templateAndroidGradlePluginVersion,
+    );
+    final Version? parsedMaxKnownAgpVersionWithFullKotlinSupport = Version.parse(
+      maxKnownAgpVersionWithFullKotlinSupport,
+    );
+    final Version? parsedMaxKnownAndSupportedAgpVersion = Version.parse(
+      maxKnownAndSupportedAgpVersion,
+    );
+    final Version? parsedMaxKnownAgpVersion = Version.parse(maxKnownAgpVersion);
+
+    expect(
+      parsedTemplateAndroidGradlePluginVersion! <= parsedMaxKnownAgpVersionWithFullKotlinSupport!,
+      isTrue,
+      reason:
+          'Template AGP version ($parsedTemplateAndroidGradlePluginVersion) '
+          'is higher than maxKnownAgpVersionWithFullKotlinSupport ($parsedMaxKnownAgpVersionWithFullKotlinSupport). '
+          'Please update the maxKnownAgpVersionWithFullKotlinSupport',
+    );
+    expect(
+      parsedMaxKnownAndSupportedAgpVersion! <= parsedMaxKnownAgpVersion!,
+      isTrue,
+      reason:
+          'maxKnownAndSupportedAgpVersion ($parsedMaxKnownAndSupportedAgpVersion) '
+          'is higher than maxKnownAgpVersion ($parsedMaxKnownAgpVersion). '
+          'Please update the maxKnownAgpVersion',
+    );
+    expect(
+      parsedMaxKnownAgpVersionWithFullKotlinSupport < parsedMaxKnownAgpVersion,
+      isTrue,
+      reason:
+          'maxKnownAgpVersionWithFullKotlinSupport ($parsedMaxKnownAgpVersionWithFullKotlinSupport) '
+          'is higher than or equal to maxKnownAgpVersion ($parsedMaxKnownAgpVersion). '
+          'Please update the maxKnownAgpVersion',
+    );
   });
 
   group('getGradleVersionForAndroidPlugin', () {

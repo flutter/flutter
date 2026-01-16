@@ -37,9 +37,9 @@
     ]
   },
   {
-    "url": "https://maven.google.com/androidx/annotation/annotation/1.8.0/annotation-1.8.0.jar",
+    "url": "https://maven.google.com/androidx/annotation/annotation/1.8.1/annotation-1.8.1.jar",
     "out_file_name": "androidx_annotation.jar",
-    "maven_dependency": "androidx.annotation:annotation:1.8.0",
+    "maven_dependency": "androidx.annotation:annotation:1.8.1",
     "provides": [
       "androidx.annotation.CallSuper",
       "androidx.annotation.FloatRange",
@@ -92,5 +92,13 @@
     "out_file_name": "relinker-1.4.5.aar",
     "maven_dependency": "com.getkeepsafe.relinker:relinker:1.4.5",
     "provides": ["com.getkeepsafe.relinker.ReLinker"]
+  },
+  {
+    "url": "https://dl.google.com/android/maven2/androidx/exifinterface/exifinterface/1.4.1/exifinterface-1.4.1.aar",
+    "out_file_name": "exifinterface.aar",
+    "maven_dependency": "androidx.exifinterface:exifinterface:1.4.1",
+    "provides": [
+      "androidx.exifinterface.media.ExifInterface"
+    ]
   }
 ]

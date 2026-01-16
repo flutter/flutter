@@ -18,13 +18,13 @@ final class HeaderFile {
   ///
   /// Throws an [ArgumentError] if the file does not exist.
   factory HeaderFile.parse(String path) {
-    final io.File file = io.File(path);
+    final file = io.File(path);
     if (!file.existsSync()) {
       throw ArgumentError.value(path, 'path', 'File does not exist.');
     }
 
     final String contents = file.readAsStringSync();
-    final SourceFile sourceFile = SourceFile.fromString(contents, url: p.toUri(path));
+    final sourceFile = SourceFile.fromString(contents, url: p.toUri(path));
     return HeaderFile.from(
       path,
       guard: _parseGuard(sourceFile),
@@ -61,7 +61,7 @@ final class HeaderFile {
     SourceSpan? endifSpan;
 
     // Iterate over the lines in the file.
-    for (int i = 0; i < sourceFile.lines; i++) {
+    for (var i = 0; i < sourceFile.lines; i++) {
       final (:int start, :int end, :String line) = _getLine(sourceFile, i);
 
       // Check if the line is a header guard directive.
@@ -99,7 +99,7 @@ final class HeaderFile {
   /// Parses the `#pragma once` directive of the given [sourceFile].
   static SourceSpan? _parsePragmaOnce(SourceFile sourceFile) {
     // Iterate over the lines in the file.
-    for (int i = 0; i < sourceFile.lines; i++) {
+    for (var i = 0; i < sourceFile.lines; i++) {
       final (:int start, :int end, :String line) = _getLine(sourceFile, i);
 
       // Check if the line is a header guard directive.
@@ -159,7 +159,7 @@ final class HeaderFile {
     // append an endif and a newline at the end of the file.
     if (pragmaOnce != null) {
       // Append the endif and newline.
-      String newContents = '$oldContents\n#endif  // $expectedGuard\n';
+      var newContents = '$oldContents\n#endif  // $expectedGuard\n';
 
       // Replace the span with the ifndef/define.
       newContents = newContents.replaceRange(
@@ -206,7 +206,7 @@ final class HeaderFile {
     // If we're missing a guard entirely, add one. The rules are:
     // 1. Add a newline, #endif at the end of the file.
     // 2. Add a newline, #ifndef, #define after the first non-comment line.
-    String newContents = oldContents;
+    var newContents = oldContents;
     newContents += '\n#endif  // $expectedGuard\n';
     newContents = newContents.replaceFirst(
       RegExp(r'^(?!//)', multiLine: true),

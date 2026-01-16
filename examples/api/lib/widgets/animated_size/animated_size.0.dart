@@ -28,7 +28,11 @@ class AnimatedSizeExampleApp extends StatelessWidget {
 }
 
 class AnimatedSizeExample extends StatefulWidget {
-  const AnimatedSizeExample({required this.duration, required this.curve, super.key});
+  const AnimatedSizeExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 

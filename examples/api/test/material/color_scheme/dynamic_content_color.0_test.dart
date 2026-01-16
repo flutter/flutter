@@ -6,7 +6,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.0.dart' as example;
+import 'package:flutter_api_samples/material/color_scheme/dynamic_content_color.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -20,7 +21,10 @@ void main() {
     loadColorSchemeCalls.add((provider, brightness));
     final int index = example.DynamicColorExample.images.indexOf(provider);
     final int seedColor = 0xf * pow(0x10, index).toInt();
-    return ColorScheme.fromSeed(seedColor: Color(seedColor), brightness: brightness);
+    return ColorScheme.fromSeed(
+      seedColor: Color(seedColor),
+      brightness: brightness,
+    );
   }
 
   setUp(() {
@@ -34,10 +38,15 @@ void main() {
   });
 
   testWidgets('The content is visible', (WidgetTester tester) async {
-    await tester.pumpWidget(example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader));
+    await tester.pumpWidget(
+      example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader),
+    );
     await tester.pump();
 
-    expect(find.widgetWithText(AppBar, 'Content Based Dynamic Color'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'Content Based Dynamic Color'),
+      findsOne,
+    );
     expect(find.byType(Switch), findsOne);
     expect(find.byIcon(Icons.light_mode), findsOne);
 
@@ -83,7 +92,9 @@ void main() {
   });
 
   testWidgets('The brightness can be changed', (WidgetTester tester) async {
-    await tester.pumpWidget(example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader));
+    await tester.pumpWidget(
+      example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader),
+    );
     await tester.pump();
 
     expect(loadColorSchemeCalls, hasLength(1));
@@ -126,8 +137,12 @@ void main() {
     expect(themeData.colorScheme.secondary, const Color(0xffc5c4dd));
   });
 
-  testWidgets('Tapping an image loads a new color scheme', (WidgetTester tester) async {
-    await tester.pumpWidget(example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader));
+  testWidgets('Tapping an image loads a new color scheme', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      example.DynamicColorExample(loadColorScheme: fakeColorSchemeLoader),
+    );
     await tester.pump();
 
     await tester.tapAt(tester.getCenter(find.byType(Image).at(3)));

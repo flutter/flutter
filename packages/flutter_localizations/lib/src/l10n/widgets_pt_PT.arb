@@ -1,4 +1,6 @@
 {
+  "searchResultsFound": "Foram encontrados resultados da pesquisa",
+  "noResultsFound": "Não foram encontrados resultados",
   "reorderItemToStart": "Mover para o início",
   "reorderItemToEnd": "Mover para o fim",
   "reorderItemUp": "Mover para cima",
@@ -12,5 +14,5 @@
   "shareButtonLabel": "Partilhar",
   "pasteButtonLabel": "Colar",
   "selectAllButtonLabel": "Selecionar tudo",
-  "radioButtonUnselectedLabel": "Not selected"
+  "radioButtonUnselectedLabel": "Não selecionado"
 }

@@ -72,6 +72,10 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // that should be launched (including a flag for whether it has been
     // launched by the tool or needs launching by the editor).
     'app.webLaunchUrl',
+    // app.warning is used to pass warnings that should be shown more
+    // prominently by clients (for example warning about slow wireless
+    // debugging).
+    'app.warning',
   };
 
   /// Completers for reverse requests from Flutter that may need to be handled by the client.

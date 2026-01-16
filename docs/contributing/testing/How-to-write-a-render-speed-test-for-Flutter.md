@@ -1,8 +1,8 @@
 There are many ways to write a render speed test for Flutter. In this article, we give one example that uses [e2e][] (or [Flutter driver][flutter_driver]), the [dev/benchmarks/macrobenchmarks][macrobenchmarks] app, and the [dev/devicelab][devicelab] to automatically collect metrics for every future Flutter commit and send them to [flutter/cocoon][cocoon].
 
 The instructions below are for contributors who want to expose a Flutter SDK (framework or engine) performance issue, or write pull requests to fix such issues. If one only needs to test the performance of a particular Flutter app, please reference
-- https://flutter.dev/docs/cookbook/testing/integration/introduction.
-- [https://flutter.dev/docs/perf/rendering](https://flutter.dev/docs/perf/rendering)
+- https://docs.flutter.dev/cookbook/testing/integration/introduction.
+- [https://docs.flutter.dev/perf/rendering](https://docs.flutter.dev/perf/rendering)
 
 Since Flutter Web and Flutter Desktop are still in their early stages, the content here is only well tested and supported on mobile platforms (Android/iOS). We'll come up with docs on how to write performance tests for Web/Desktop later.
 

@@ -14,7 +14,7 @@ void testMain() {
   group('$ContextMenu', () {
     test('can disable context menu', () {
       final DomElement rootViewElement = createDomElement('div');
-      final ContextMenu contextMenu = ContextMenu(rootViewElement);
+      final contextMenu = ContextMenu(rootViewElement);
 
       // When the app starts, contextmenu events are not prevented.
       DomEvent event = createDomEvent('Event', 'contextmenu');
@@ -39,7 +39,7 @@ void testMain() {
 
     test('does not disable context menu outside root view element', () {
       final DomElement rootViewElement = createDomElement('div');
-      final ContextMenu contextMenu = ContextMenu(rootViewElement);
+      final contextMenu = ContextMenu(rootViewElement);
 
       contextMenu.disable();
 
@@ -52,7 +52,7 @@ void testMain() {
 
     test('can enable context menu after disabling', () {
       final DomElement rootViewElement = createDomElement('div');
-      final ContextMenu contextMenu = ContextMenu(rootViewElement);
+      final contextMenu = ContextMenu(rootViewElement);
 
       // When the app starts, contextmenu events are not prevented.
       DomEvent event = createDomEvent('Event', 'contextmenu');
@@ -85,7 +85,7 @@ void testMain() {
 
     test('enabling before disabling has no effect', () {
       final DomElement rootViewElement = createDomElement('div');
-      final ContextMenu contextMenu = ContextMenu(rootViewElement);
+      final contextMenu = ContextMenu(rootViewElement);
 
       // When the app starts, contextmenu events are not prevented.
       DomEvent event = createDomEvent('Event', 'contextmenu');

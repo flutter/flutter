@@ -350,7 +350,10 @@ class WebDevices extends PollingDeviceDiscovery {
   bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!_featureFlags.isWebEnabled) {
       return <Device>[];
     }
@@ -379,7 +382,7 @@ class WebServerDevice extends WebDevice {
   WebServerDevice({required super.logger}) : _logger = logger, super('web-server');
 
   static const kWebServerDeviceId = 'web-server';
-  static var showWebServerDevice = false;
+  static bool showWebServerDevice = false;
 
   final Logger _logger;
 

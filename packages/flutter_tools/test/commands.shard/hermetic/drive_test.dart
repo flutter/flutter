@@ -900,7 +900,7 @@ class ScreenshotDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android;
 
   @override
-  var supportsScreenshot = true;
+  bool supportsScreenshot = true;
 
   @override
   bool get isConnected => true;
@@ -1044,7 +1044,7 @@ class FakeIosDevice extends Fake implements IOSDevice {
 }
 
 class FakeSignals extends Fake implements Signals {
-  var addedHandlers = <SignalHandler>[];
+  List<SignalHandler> addedHandlers = <SignalHandler>[];
 
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {

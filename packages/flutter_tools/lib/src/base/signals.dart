@@ -53,7 +53,7 @@ class LocalSignals implements Signals {
   LocalSignals._(this.exitSignals, {ShutdownHooks? shutdownHooks})
     : _shutdownHooks = shutdownHooks ?? globals.shutdownHooks;
 
-  static var instance = LocalSignals._(Signals.defaultExitSignals);
+  static LocalSignals instance = LocalSignals._(Signals.defaultExitSignals);
 
   final List<ProcessSignal> exitSignals;
   final ShutdownHooks _shutdownHooks;

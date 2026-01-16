@@ -87,7 +87,7 @@ const htmlSampleInlineFlutterJsBootstrapOutput = '''
     (build config)
     _flutter.loader.load({
       serviceWorker: {
-        serviceWorkerVersion: "(service worker version)",
+        serviceWorkerVersion: "(service worker version)" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */,
       },
     });
   </script>
@@ -195,10 +195,10 @@ String htmlSample2Replaced({required String baseHref, required String serviceWor
   <div></div>
   <script src="main.dart.js"></script>
   <script>
-    const serviceWorkerVersion = "$serviceWorkerVersion";
+    const serviceWorkerVersion = "$serviceWorkerVersion" /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
   <script>
-    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion');
+    navigator.serviceWorker.register('flutter_service_worker.js?v=$serviceWorkerVersion') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
   </script>
 </body>
 </html>
@@ -395,10 +395,24 @@ void main() {
   test('warns on legacy service worker patterns', () {
     const indexHtml = WebTemplate(htmlSampleLegacyVar);
     final List<WebTemplateWarning> warnings = indexHtml.getWarnings();
-    expect(warnings.length, 2);
+    expect(warnings, hasLength(2));
 
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 13), isNotEmpty);
-    expect(warnings.where((WebTemplateWarning warning) => warning.lineNumber == 16), isNotEmpty);
+    final Iterable<WebTemplateWarning> serviceWorkerWarnings = warnings.where(
+      (WebTemplateWarning warning) => warning.lineNumber == 13 || warning.lineNumber == 16,
+    );
+    expect(serviceWorkerWarnings, hasLength(2));
+    expect(
+      serviceWorkerWarnings,
+      everyElement(
+        isA<WebTemplateWarning>().having(
+          (WebTemplateWarning warning) => warning.warningText,
+          'service worker warning message',
+          contains(
+            "Flutter's service worker is deprecated and will be removed in a future Flutter release.",
+          ),
+        ),
+      ),
+    );
   });
 
   test('warns on legacy FlutterLoader.loadEntrypoint', () {
@@ -407,5 +421,155 @@ void main() {
 
     expect(warnings.length, 1);
     expect(warnings.single.lineNumber, 14);
+  });
+
+  test('applies web-define variable substitutions', () {
+    const htmlWithWebDefines = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      apiUrl: '{{API_URL}}',
+      environment: '{{ENV}}',
+      debugMode: {{DEBUG_MODE}}
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithWebDefines);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{
+        'API_URL': 'https://api.example.com',
+        'ENV': 'production',
+        'DEBUG_MODE': 'false',
+      },
+    );
+
+    expect(result, contains("apiUrl: 'https://api.example.com'"));
+    expect(result, contains("environment: 'production'"));
+    expect(result, contains('debugMode: false'));
+  });
+
+  test('throws ToolExit when web-define variable is missing', () {
+    const htmlWithMissingVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{API_URL}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMissingVar);
+    expect(
+      () => indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        webDefines: <String, String>{}, // Missing API_URL
+      ),
+      throwsToolExit(message: 'Missing web-define variable: API_URL'),
+    );
+  });
+
+  test('throws ToolExit with multiple missing variables', () {
+    const htmlWithMultipleMissingVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      api: '{{API_URL}}',
+      env: '{{ENV}}',
+      version: '{{VERSION}}'
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMultipleMissingVars);
+    expect(
+      () => indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
+      ),
+      throwsToolExit(message: 'Missing web-define variable'),
+    );
+  });
+
+  test('ignores Flutter built-in variables when validating web-define variables', () {
+    const htmlWithBuiltInVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    const customVar = '{{CUSTOM_VAR}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithBuiltInVars);
+    expect(
+      () => indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        buildConfig: 'test config',
+        webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
+      ),
+      throwsToolExit(message: 'Missing web-define variable: CUSTOM_VAR'),
+    );
+  });
+
+  test('allows empty web-define variables', () {
+    const htmlWithEmptyVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const value = '{{EMPTY_VAR}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithEmptyVar);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{'EMPTY_VAR': ''},
+    );
+
+    expect(result, contains("const value = '';"));
   });
 }

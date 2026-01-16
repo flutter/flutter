@@ -126,7 +126,9 @@ G_DECLARE_FINAL_TYPE(FlMethodNotImplementedResponse,
  * fl_method_response_get_result:
  * @response: an #FlMethodResponse.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Gets the result of a method call, or an error if the response wasn't
  * successful.

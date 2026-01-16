@@ -401,7 +401,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   focusColor: Colors.orange.withOpacity(0.3),
+  ///   focusColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.sunny),
   ///   onPressed: () {
   ///     // ...
@@ -421,7 +421,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   hoverColor: Colors.orange.withOpacity(0.3),
+  ///   hoverColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.ac_unit),
   ///   onPressed: () {
   ///     // ...
@@ -474,7 +474,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   highlightColor: Colors.orange.withOpacity(0.3),
+  ///   highlightColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.question_mark),
   ///   onPressed: () {
   ///     // ...
@@ -506,9 +506,8 @@ class IconButton extends StatelessWidget {
 
   /// {@macro flutter.material.RawMaterialButton.mouseCursor}
   ///
-  /// If set to null, will default to
-  /// - [SystemMouseCursors.basic], if [onPressed] is null
-  /// - [SystemMouseCursors.click], otherwise
+  /// If set to null, will default to [SystemMouseCursors.basic] if [onPressed]
+  /// is null, otherwise [WidgetStateMouseCursor.adaptiveClickable].
   final MouseCursor? mouseCursor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -815,7 +814,8 @@ class IconButton extends StatelessWidget {
       onHover: onHover,
       onLongPress: onPressed != null ? onLongPress : null,
       mouseCursor:
-          mouseCursor ?? (onPressed == null ? SystemMouseCursors.basic : SystemMouseCursors.click),
+          mouseCursor ??
+          (onPressed != null ? WidgetStateMouseCursor.adaptiveClickable : SystemMouseCursors.basic),
       enableFeedback: effectiveEnableFeedback,
       focusColor: focusColor ?? theme.focusColor,
       hoverColor: hoverColor ?? theme.hoverColor,
@@ -936,7 +936,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bool toggleable = widget.isSelected != null;
+    final toggleable = widget.isSelected != null;
 
     return _IconButtonM3(
       statesController: statesController,
@@ -1006,9 +1006,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `iconSize` - 24
   /// * `side` - null
   /// * `shape` - StadiumBorder()
-  /// * `mouseCursor`
-  ///   * disabled - SystemMouseCursors.basic
-  ///   * others - SystemMouseCursors.click
+  /// * `mouseCursor` - WidgetStateMouseCursor.adaptiveClickable
   /// * `visualDensity` - VisualDensity.standard
   /// * `tapTargetSize` - theme.materialTapTargetSize
   /// * `animationDuration` - kThemeChangeDuration
@@ -1032,7 +1030,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
-    final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
+    final isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
     final bool isDefaultColor = identical(iconTheme.color, switch (Theme.brightnessOf(context)) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
@@ -1149,13 +1147,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1297,13 +1289,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1445,13 +1431,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;
@@ -1588,13 +1568,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
 
   @override
-  WidgetStateProperty<MouseCursor?>? get mouseCursor =>
-    WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return SystemMouseCursors.basic;
-      }
-      return SystemMouseCursors.click;
-    });
+  WidgetStateProperty<MouseCursor?>? get mouseCursor => WidgetStateMouseCursor.adaptiveClickable;
 
   @override
   VisualDensity? get visualDensity => VisualDensity.standard;

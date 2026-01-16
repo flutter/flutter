@@ -43,6 +43,60 @@ static std::string RuntimeStageBackendToString(
   }
 }
 
+namespace {
+Dart_Handle ConvertUniformDescriptionToMap(
+    const impeller::RuntimeUniformDescription& uniform_description) {
+  constexpr int num_entries = 3;
+  Dart_Handle keys = Dart_NewList(num_entries);
+  FML_DCHECK(!Dart_IsError(keys));
+  Dart_Handle values = Dart_NewList(num_entries);
+  FML_DCHECK(!Dart_IsError(values));
+  {  // 0
+    Dart_Handle name =
+        Dart_NewStringFromCString(uniform_description.name.c_str());
+    FML_DCHECK(!Dart_IsError(name));
+    [[maybe_unused]] Dart_Handle result =
+        Dart_ListSetAt(keys, 0, Dart_NewStringFromCString("name"));
+    FML_DCHECK(!Dart_IsError(result));
+    result = Dart_ListSetAt(values, 0, name);
+    FML_DCHECK(!Dart_IsError(result));
+  }
+  {  // 1
+    Dart_Handle type;
+    switch (uniform_description.type) {
+      case impeller::RuntimeUniformType::kFloat:
+        type = Dart_NewStringFromCString("Float");
+        break;
+      case impeller::RuntimeUniformType::kSampledImage:
+        type = Dart_NewStringFromCString("SampledImage");
+        break;
+      case impeller::RuntimeUniformType::kStruct:
+        type = Dart_NewStringFromCString("Struct");
+        break;
+    }
+    FML_DCHECK(!Dart_IsError(type));
+    [[maybe_unused]] Dart_Handle result =
+        Dart_ListSetAt(keys, 1, Dart_NewStringFromCString("type"));
+    FML_DCHECK(!Dart_IsError(result));
+    result = Dart_ListSetAt(values, 1, type);
+    FML_DCHECK(!Dart_IsError(result));
+  }
+  {  // 2
+    Dart_Handle size = Dart_NewIntegerFromUint64(uniform_description.GetSize());
+    FML_DCHECK(!Dart_IsError(size));
+    [[maybe_unused]] Dart_Handle result =
+        Dart_ListSetAt(keys, 2, Dart_NewStringFromCString("size"));
+    FML_DCHECK(!Dart_IsError(result));
+    result = Dart_ListSetAt(values, 2, size);
+    FML_DCHECK(!Dart_IsError(result));
+  }
+  Dart_Handle map =
+      Dart_NewMap(Dart_TypeString(), keys, Dart_TypeObject(), values);
+
+  return map;
+}
+}  // namespace
+
 std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
                   asset_name);
@@ -58,7 +112,13 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   auto runtime_stages =
       impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
 
-  if (runtime_stages.empty()) {
+  if (!runtime_stages.ok()) {
+    return std::string("Asset '") + asset_name +
+           std::string("' manifest could not be decoded: ") +
+           runtime_stages.status().ToString();
+  }
+
+  if (runtime_stages->empty()) {
     return std::string("Asset '") + asset_name +
            std::string("' does not contain any shader data.");
   }
@@ -66,7 +126,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   impeller::RuntimeStageBackend backend =
       ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
-      runtime_stages[backend];
+      (*runtime_stages)[backend];
   if (!runtime_stage) {
     std::ostringstream stream;
     stream << "Asset '" << asset_name
@@ -74,7 +134,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
               "backend ("
            << RuntimeStageBackendToString(backend) << ")." << std::endl
            << "Found stages: ";
-    for (const auto& kvp : runtime_stages) {
+    for (const auto& kvp : *runtime_stages) {
       if (kvp.second) {
         stream << RuntimeStageBackendToString(kvp.first) << " ";
       }
@@ -84,7 +144,19 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
 
   int sampled_image_count = 0;
   size_t other_uniforms_bytes = 0;
-  for (const auto& uniform_description : runtime_stage->GetUniforms()) {
+  const std::vector<impeller::RuntimeUniformDescription>& uniforms =
+      runtime_stage->GetUniforms();
+  Dart_Handle uniform_info = Dart_NewList(uniforms.size());
+  FML_DCHECK(!Dart_IsError(uniform_info));
+  for (size_t i = 0; i < uniforms.size(); ++i) {
+    const impeller::RuntimeUniformDescription& uniform_description =
+        uniforms[i];
+
+    Dart_Handle map = ConvertUniformDescriptionToMap(uniform_description);
+    [[maybe_unused]] Dart_Handle dart_result =
+        Dart_ListSetAt(uniform_info, i, map);
+    FML_DCHECK(!Dart_IsError(dart_result));
+
     if (uniform_description.type ==
         impeller::RuntimeUniformType::kSampledImage) {
       sampled_image_count++;
@@ -141,6 +213,12 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
                          Dart_NewInteger(float_count));
   if (Dart_IsError(result)) {
     return "Failed to set uniform float count for fragment program.";
+  }
+
+  result = Dart_SetField(ths, tonic::ToDart("_uniformInfo"), uniform_info);
+  if (Dart_IsError(result)) {
+    FML_DLOG(ERROR) << Dart_GetError(result);
+    return "Failed to set uniform info for fragment program.";
   }
 
   return "";

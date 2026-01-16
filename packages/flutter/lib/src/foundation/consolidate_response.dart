@@ -51,9 +51,9 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   bool autoUncompress = true,
   BytesReceivedCallback? onBytesReceived,
 }) {
-  final Completer<Uint8List> completer = Completer<Uint8List>.sync();
+  final completer = Completer<Uint8List>.sync();
 
-  final _OutputBuffer output = _OutputBuffer();
+  final output = _OutputBuffer();
   ByteConversionSink sink = output;
   int? expectedContentLength = response.contentLength;
   if (expectedContentLength == -1) {
@@ -74,7 +74,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
       break;
   }
 
-  int bytesReceived = 0;
+  var bytesReceived = 0;
   late final StreamSubscription<List<int>> subscription;
   subscription = response.listen(
     (List<int> chunk) {
@@ -120,7 +120,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
       return;
     }
     _bytes = Uint8List(_contentLength);
-    int offset = 0;
+    var offset = 0;
     for (final List<int> chunk in _chunks!) {
       _bytes!.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;

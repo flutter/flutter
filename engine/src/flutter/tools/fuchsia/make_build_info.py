@@ -38,9 +38,8 @@ def GetFlutterEngineGitRevision(buildroot):
 
 
 def GetFuchsiaSdkVersion(buildroot):
-  with open(path.join(buildroot, 'fuchsia', 'sdk',
-                      'linux' if sys.platform.startswith('linux') else 'mac', 'meta',
-                      'manifest.json'), 'r') as fuchsia_sdk_manifest:
+  with open(path.join(buildroot, 'third_party', 'fuchsia-sdk', 'sdk', 'meta', 'manifest.json'),
+            'r') as fuchsia_sdk_manifest:
     return json.load(fuchsia_sdk_manifest)['id']
 
 

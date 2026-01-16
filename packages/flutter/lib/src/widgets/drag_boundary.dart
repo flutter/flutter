@@ -105,7 +105,7 @@ class DragBoundary extends InheritedWidget {
     if (element == null) {
       return null;
     }
-    final RenderBox? rb = element.findRenderObject() as RenderBox?;
+    final rb = element.findRenderObject() as RenderBox?;
     assert(rb != null && rb.hasSize, 'DragBoundary is not available');
     final Rect boundary = useGlobalPosition
         ? Rect.fromPoints(

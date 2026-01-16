@@ -142,6 +142,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
               nextAction:(void (^)())next API_AVAILABLE(ios(13.4));
 - (void)discreteScrollEvent:(UIPanGestureRecognizer*)recognizer;
 - (void)updateViewportMetricsIfNeeded;
+- (void)updateAutoResizeConstraints;
+- (void)checkAndUpdateAutoResizeConstraints;
 - (void)onUserSettingsChanged:(NSNotification*)notification;
 - (void)applicationWillTerminate:(NSNotification*)notification;
 - (void)goToApplicationLifecycle:(nonnull NSString*)state;
@@ -174,6 +176,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0));
 - (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches;
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification;
 @end
 
 @interface FlutterViewControllerTest : XCTestCase
@@ -997,6 +1000,44 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockEngine);
 }
 
+- (void)testUpdatedViewportMetricsDoesResizeFlutterViewWhenAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMExpect([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:YES];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
+- (void)testUpdatedViewportMetricsDoesNotResizeFlutterViewWhenNotAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = mockVC;
+
+  OCMReject([mockVC updateAutoResizeConstraints]);
+
+  [mockVC setAutoResizable:NO];
+
+  [mockVC viewDidLayoutSubviews];
+
+  OCMVerifyAll(mockVC);
+}
+
 - (void)testUpdateViewportMetricsIfNeeded_DoesNotInvokeEngineWhenShouldBeIgnoredDuringRotation {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
@@ -1279,6 +1320,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   return mockTraitCollection;
 }
 
+- (void)testTraitCollectionDidChangeCallsResetIntrinsicContentSizeWhenAutoResizable {
+  // Setup test.
+  id mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id partialMockVC = OCMPartialMock(realVC);
+
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  OCMStub([partialMockVC flutterView]).andReturn(mockFlutterView);
+
+  // Ensure isAutoResizable is YES
+  OCMStub([partialMockVC isAutoResizable]).andReturn(YES);
+
+  // Expect resetIntrinsicContentSize to be called on mockFlutterView
+  OCMExpect([mockFlutterView resetIntrinsicContentSize]);
+
+  // Exercise behavior under test.
+  [partialMockVC traitCollectionDidChange:nil];
+
+  // Verify behavior.
+  OCMVerifyAll(mockFlutterView);
+
+  // Clean up mocks
+  [partialMockVC stopMocking];
+  [mockFlutterView stopMocking];
+}
+
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
@@ -1384,32 +1455,36 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [settingsChannel stopMocking];
 }
 
-- (void)testItReportsAccessibilityOnOffSwitchLabelsFlagNotSet {
-  // Setup test.
+- (void)testOnAccessibilityStatusChangedCallsEnableSemanticsWithFlags {
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  id partialMockViewController = OCMPartialMock(viewController);
-  OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(NO);
+  id mockAccessibilityFeatures = OCMClassMock([FlutterAccessibilityFeatures class]);
+  OCMStub([mockAccessibilityFeatures flags]).andReturn(333);
+  id mockViewController = OCMPartialMock(viewController);
+  OCMStub([mockViewController accessibilityFeatures]).andReturn(mockAccessibilityFeatures);
 
-  // Exercise behavior under test.
-  int32_t flags = [partialMockViewController accessibilityFlags];
-
-  // Verify behavior.
-  XCTAssert((flags & (int32_t)flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels) == 0);
+  [mockViewController onAccessibilityStatusChanged:nil];
+  OCMVerify([self.mockEngine enableSemantics:[OCMArg any] withFlags:333]);
 }
 
-- (void)testItReportsAccessibilityOnOffSwitchLabelsFlagSet {
-  // Setup test.
+- (void)testHandleAccessibilityNotifications {
   FlutterViewController* viewController =
       [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
-  id partialMockViewController = OCMPartialMock(viewController);
-  OCMStub([partialMockViewController accessibilityIsOnOffSwitchLabelsEnabled]).andReturn(YES);
+  id mockViewController = OCMPartialMock(viewController);
+  __block NSUInteger callsCount = 0;
+  OCMStub([mockViewController onAccessibilityStatusChanged:[OCMArg isNotNil]])
+      .andDo(^(NSInvocation* invocation) {
+        callsCount++;
+      });
 
-  // Exercise behavior under test.
-  int32_t flags = [partialMockViewController accessibilityFlags];
+  FlutterAccessibilityFeatures* accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+  NSArray<NSString*>* accessibilityNotification = [accessibilityFeatures observedNotificationNames];
 
-  // Verify behavior.
-  XCTAssert((flags & (int32_t)flutter::AccessibilityFeatureFlag::kOnOffSwitchLabels) != 0);
+  for (NSUInteger i = 0; i < [accessibilityNotification count]; i++) {
+    NSString* notificationName = [accessibilityNotification objectAtIndex:i];
+    [[NSNotificationCenter defaultCenter] postNotificationName:notificationName object:nil];
+    XCTAssertEqual(callsCount, i + 1);
+  }
 }
 
 - (void)testAccessibilityPerformEscapePopsRoute {

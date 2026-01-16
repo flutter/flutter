@@ -9,11 +9,11 @@
 #include <memory>
 #include <optional>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/rectangle_packer.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 

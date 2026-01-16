@@ -50,14 +50,18 @@ class DialogExample extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Disable'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
               child: const Text('Enable'),
               onPressed: () {
                 Navigator.of(context).pop();

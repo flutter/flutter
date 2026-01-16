@@ -64,7 +64,7 @@ abstract final class SemanticsService {
       'SemanticsService.announce is incompatible with multiple windows. '
       'Use SemanticsService.sendAnnouncement instead.',
     );
-    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
+    final event = AnnounceSemanticsEvent(
       message,
       textDirection,
       view!.viewId,
@@ -84,7 +84,7 @@ abstract final class SemanticsService {
     TextDirection textDirection, {
     Assertiveness assertiveness = Assertiveness.polite,
   }) async {
-    final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(
+    final event = AnnounceSemanticsEvent(
       message,
       textDirection,
       view.viewId,
@@ -98,7 +98,7 @@ abstract final class SemanticsService {
   /// Currently only honored on Android. The contents of [message] will be
   /// read by TalkBack.
   static Future<void> tooltip(String message) async {
-    final TooltipSemanticsEvent event = TooltipSemanticsEvent(message);
+    final event = TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
   }
 }

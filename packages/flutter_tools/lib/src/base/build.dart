@@ -88,7 +88,6 @@ class GenSnapshot {
 
 class AOTSnapshotter {
   AOTSnapshotter({
-    this.reportTimings = false,
     required Logger logger,
     required FileSystem fileSystem,
     required Xcode xcode,
@@ -107,11 +106,6 @@ class AOTSnapshotter {
   final FileSystem _fileSystem;
   final Xcode _xcode;
   final GenSnapshot _genSnapshot;
-
-  /// If true then AOTSnapshotter would report timings for individual building
-  /// steps (Dart front-end parsing and snapshot generation) in a stable
-  /// machine readable form.
-  final bool reportTimings;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
@@ -360,6 +354,7 @@ class AOTSnapshotter {
       TargetPlatform.darwin,
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
+      TargetPlatform.linux_riscv64,
       TargetPlatform.windows_x64,
       TargetPlatform.windows_arm64,
     ].contains(platform);

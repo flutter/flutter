@@ -14,22 +14,21 @@ void main() {
     'shows custom menu items in system context menu on iOS',
     (WidgetTester tester) async {
       final List<Map<String, dynamic>> itemsReceived = <Map<String, dynamic>>[];
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform,
-        (MethodCall methodCall) async {
-          if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
-            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
-            final List<dynamic> items = arguments['items'] as List<dynamic>;
-            itemsReceived.addAll(items.cast<Map<String, dynamic>>());
-          }
-          return null;
-        },
-      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (
+            MethodCall methodCall,
+          ) async {
+            if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
+              final Map<String, dynamic> arguments =
+                  methodCall.arguments as Map<String, dynamic>;
+              final List<dynamic> items = arguments['items'] as List<dynamic>;
+              itemsReceived.addAll(items.cast<Map<String, dynamic>>());
+            }
+            return null;
+          });
       addTearDown(() {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          null,
-        );
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       await tester.pumpWidget(
@@ -38,7 +37,8 @@ void main() {
             final MediaQueryData mediaQueryData = MediaQuery.of(context);
             return MediaQuery(
               data: mediaQueryData.copyWith(
-                supportsShowingSystemContextMenu: defaultTargetPlatform == TargetPlatform.iOS,
+                supportsShowingSystemContextMenu:
+                    defaultTargetPlatform == TargetPlatform.iOS,
               ),
               child: const example.SystemContextMenuExampleApp(),
             );
@@ -81,7 +81,9 @@ void main() {
           builder: (BuildContext context) {
             final MediaQueryData mediaQueryData = MediaQuery.of(context);
             return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
+              data: mediaQueryData.copyWith(
+                supportsShowingSystemContextMenu: true,
+              ),
               child: const example.SystemContextMenuExampleApp(),
             );
           },
@@ -105,7 +107,9 @@ void main() {
       final List<IOSSystemContextMenuItem> items = contextMenu.items;
       final IOSSystemContextMenuItemCustom clearItem = items
           .whereType<IOSSystemContextMenuItemCustom>()
-          .firstWhere((IOSSystemContextMenuItemCustom item) => item.title == 'Clear Text');
+          .firstWhere(
+            (IOSSystemContextMenuItemCustom item) => item.title == 'Clear Text',
+          );
 
       clearItem.onPressed();
       await tester.pumpAndSettle();
@@ -115,14 +119,11 @@ void main() {
 
       // iOS system menus auto-close after custom actions on real devices.
       // Simulate this by sending the platform dismiss message.
-      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-        'method': 'ContextMenu.onDismissSystemContextMenu',
-      });
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
-        'flutter/platform',
-        messageBytes,
-        (_) {},
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(
+        <String, dynamic>{'method': 'ContextMenu.onDismissSystemContextMenu'},
       );
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage('flutter/platform', messageBytes, (_) {});
       await tester.pump();
 
       expect(find.byType(SystemContextMenu), findsNothing);

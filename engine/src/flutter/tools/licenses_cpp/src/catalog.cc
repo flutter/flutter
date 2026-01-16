@@ -8,7 +8,8 @@
 #include <fstream>
 #include <vector>
 
-#include "flutter/third_party/abseil-cpp/absl/log/log.h"
+#include "third_party/abseil-cpp/absl/log/log.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 

@@ -54,8 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('scroll-button'),
         onPressed: () {
-          const int centerX = 100; //html.window.innerWidth ~/ 2;
-          const int centerY = 100; //html.window.innerHeight ~/ 2;
+          const centerX = 100; //html.window.innerWidth ~/ 2;
+          const centerY = 100; //html.window.innerHeight ~/ 2;
           dispatchMouseWheelEvent(centerX, centerY, DeltaMode.kLine, 0, 1);
           dispatchMouseWheelEvent(centerX, centerY, DeltaMode.kLine, 0, 1);
           dispatchMouseWheelEvent(centerX, centerY, DeltaMode.kLine, 0, 1);

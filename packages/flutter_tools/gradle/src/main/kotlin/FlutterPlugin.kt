@@ -19,11 +19,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
-import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.TaskInstantiationException
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -101,7 +98,6 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            maybeAddAndroidStudioNativeConfiguration(plugins, dependencies)
         }
 
         project.apply {
@@ -170,13 +166,15 @@ class FlutterPlugin : Plugin<Project> {
             //
             // If the user has specified abiFilters in their build.gradle file, those
             // settings will take precedence over these defaults.
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                buildType.ndk.abiFilters.clear()
-                FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
-                    val abiValue: String =
-                        FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
-                            ?: throw GradleException("Invalid platform: $platform")
-                    buildType.ndk.abiFilters.add(abiValue)
+            if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(project)) {
+                FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
+                    buildType.ndk.abiFilters.clear()
+                    FlutterPluginConstants.DEFAULT_PLATFORMS.forEach { platform ->
+                        val abiValue: String =
+                            FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]
+                                ?: throw GradleException("Invalid platform: $platform")
+                        buildType.ndk.abiFilters.add(abiValue)
+                    }
                 }
             }
         }
@@ -267,15 +265,18 @@ class FlutterPlugin : Plugin<Project> {
                     // Enables resource shrinking, which is performed by the Android Gradle plugin.
                     // The resource shrinker can't be used for libraries.
                     isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-                    // Fallback to `android/app/proguard-rules.pro`.
-                    // This way, custom Proguard rules can be configured as needed.
                     proguardFiles(
                         FlutterPluginUtils
                             .getAndroidExtension(project)
                             .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules,
-                        "proguard-rules.pro"
+                        flutterProguardRules
                     )
+
+                    // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
+                    // Starting AGP 9.0 Proguard files must exist to be added to the configuration.
+                    if (File("${project.projectDir}/proguard-rules.pro").exists()) {
+                        proguardFile("proguard-rules.pro")
+                    }
                 }
             }
         }
@@ -329,23 +330,19 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
-        try {
-            rootProject.tasks.register("generateLockfiles") {
-                doLast {
-                    rootProject.subprojects.forEach { subproject ->
-                        val gradlew: String =
-                            getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                        val execOps = rootProject.serviceOf<ExecOperations>()
-                        execOps.exec {
-                            workingDir(rootProject.projectDir)
-                            executable(gradlew)
-                            args(":${subproject.name}:dependencies", "--write-locks")
-                        }
+        rootProject.tasks.register("generateLockfiles") {
+            doLast {
+                rootProject.subprojects.forEach { subproject ->
+                    val gradlew: String =
+                        getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
+                    val execOps = rootProject.serviceOf<ExecOperations>()
+                    execOps.exec {
+                        workingDir(rootProject.projectDir)
+                        executable(gradlew)
+                        args(":${subproject.name}:dependencies", "--write-locks")
                     }
                 }
             }
-        } catch (e: TaskInstantiationException) {
-            // ignored
         }
     }
 
@@ -821,19 +818,4 @@ class FlutterPlugin : Plugin<Project> {
      * This property is set by Android Studio when it invokes a Gradle task.
      */
     private fun isInvokedFromAndroidStudio(): Boolean = project?.hasProperty("android.injected.invoked.from.ide") == true
-
-    private fun shouldAddAndroidStudioNativeConfiguration(plugins: PluginContainer): Boolean =
-        plugins.hasPlugin("com.android.application") && isInvokedFromAndroidStudio()
-
-    private fun maybeAddAndroidStudioNativeConfiguration(
-        plugins: PluginContainer,
-        dependencies: DependencyHandler
-    ) {
-        if (shouldAddAndroidStudioNativeConfiguration(plugins)) {
-            dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
-            dependencies.add("compileOnly", "io.flutter:x86_64_debug:$engineVersion")
-        }
-    }
 }

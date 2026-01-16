@@ -107,6 +107,13 @@ typedef enum {
   kFlutterAccessibilityFeatureOnOffSwitchLabels = 1 << 6,
   /// Indicate the platform does not support announcements.
   kFlutterAccessibilityFeatureNoAnnounce = 1 << 7,
+  /// Indicate the platform disallows auto-playing animated images.
+  kFlutterAccessibilityFeatureNoAutoPlayAnimatedImages = 1 << 8,
+  /// Indicate the platform disallows auto-playing videos.
+  kFlutterAccessibilityFeatureNoAutoPlayVideos = 1 << 9,
+  /// Request to show deterministic (non-blinking) cursor in editable text
+  /// fields.
+  kFlutterAccessibilityFeatureDeterministicCursor = 1 << 10,
 } FlutterAccessibilityFeature;
 
 /// The set of possible actions that can be conveyed to a semantics node.
@@ -352,6 +359,8 @@ typedef struct {
   bool is_slider;
   /// Whether the semantics node represents a keyboard key.
   bool is_keyboard_key;
+  /// Whether to block a11y focus for the semantics node.
+  bool is_accessibility_focus_blocked;
 } FlutterSemanticsFlags;
 
 typedef enum {
@@ -1065,6 +1074,29 @@ typedef struct {
   FlutterEngineDisplayId display_id;
   /// The view that this event is describing.
   int64_t view_id;
+  /// If `true`, the window has size constraints.
+  /// If `false`, the constraint values are ignored.
+  bool has_constraints;
+  /// Minimum physical width of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be less than or equal to
+  /// |max_width_constraint| and |width|.
+  size_t min_width_constraint;
+  /// Minimum physical height of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be less than or equal to
+  /// |max_height_constraint| and |height|.
+  size_t min_height_constraint;
+  /// Maximum physical width of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be greater than or equal to
+  /// |min_width_constraint| and |width|.
+  size_t max_width_constraint;
+  /// Maximum physical height of the window.
+  ///
+  /// If |has_constraints| is `true`, this must be greater than or equal to
+  /// |min_height_constraint| and |height|.
+  size_t max_height_constraint;
 } FlutterWindowMetricsEvent;
 
 typedef struct {
@@ -1705,6 +1737,11 @@ typedef struct {
   /// heading; higher values (1, 2, …) indicate the heading rank, with lower
   /// numbers being higher-level headings.
   int32_t heading_level;
+  /// An identifier for the semantics node in native accessibility hierarchy.
+  /// This value should not be exposed to the users of the app.
+  /// This is usually used for UI testing with tools that work by querying the
+  /// native accessibility, like UI Automator, XCUITest, or Appium.
+  const char* identifier;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
