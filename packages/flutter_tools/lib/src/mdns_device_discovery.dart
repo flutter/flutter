@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors. All rights reserved.
+// Copyright 2026 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -131,13 +131,16 @@ class MDNSDeviceDiscovery {
 
   /// Stops the mDNS advertisement.
   Future<void> stop() async {
-    for (final MDNSServer server in _servers) {
+    // Create a copy of the list to avoid ConcurrentModificationError as the list
+    // is modified during iteration.
+    final serversToStop = List<MDNSServer>.of(_servers);
+    _servers.clear();
+    for (final server in serversToStop) {
       try {
         await server.stop();
       } on Exception catch (e) {
         logger.printTrace('Error stopping mDNS server: $e');
       }
     }
-    _servers.clear();
   }
 }
