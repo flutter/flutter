@@ -18,6 +18,9 @@ void doTests() {
     test('attachGlobalStyles hides the outline when focused', () {
       final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
 
+      // Set a tab index so that the element can be focused.
+      flutterViewElement.tabIndex = 0;
+
       domDocument.body!.append(flutterViewElement);
       StyleManager.attachGlobalStyles(
         node: flutterViewElement,
@@ -28,7 +31,10 @@ void doTests() {
       final expected = ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox
           ? 'rgb(0, 0, 0) 0px'
           : 'rgb(0, 0, 0) none 0px';
-      final String got = domWindow.getComputedStyle(flutterViewElement, 'focus').outline;
+
+      // Focus the element.
+      flutterViewElement.focusWithoutScroll();
+      final String got = domWindow.getComputedStyle(flutterViewElement).outline;
 
       expect(got, expected);
     });
