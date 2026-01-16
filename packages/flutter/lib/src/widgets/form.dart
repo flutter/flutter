@@ -337,8 +337,9 @@ class FormState extends State<Form> {
   /// without resetting their values.
   void clearError() {
     for (final FormFieldState<dynamic> field in _fields) {
-      field.clearError();
+      field._clearErrorInternal();
     }
+    _fieldDidChange();
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
@@ -665,8 +666,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   /// Clears any visible validation error for this field without resetting the field's value.
   ///
-  /// Resets [errorText] to `null` and marks [hasInteractedByUser] as false,
-  /// effectively hiding any validation messages until the next validation or interaction.
+  /// This sets [errorText] to null and [hasInteractedByUser] to false.
+  ///
+  /// If [AutovalidateMode.always] is used, the error may reappear immediately
+  /// because the field will trigger a new validation cycle during the next build.
   void clearError() {
     setState(() {
       _clearErrorInternal();
