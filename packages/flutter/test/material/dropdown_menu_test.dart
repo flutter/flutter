@@ -5344,8 +5344,8 @@ void main() {
       const selectNoneLabel = 'Select none';
       final nullableMenuItems = <DropdownMenuEntry<String?>>[
         const DropdownMenuEntry<String?>(value: null, label: selectNoneLabel),
-        const DropdownMenuEntry<String?>(value: null, label: 'A'),
-        const DropdownMenuEntry<String?>(value: null, label: 'B'),
+        const DropdownMenuEntry<String?>(value: 'a', label: 'A'),
+        const DropdownMenuEntry<String?>(value: 'b', label: 'B'),
       ];
 
       await tester.pumpWidget(
