@@ -59,8 +59,13 @@ void main() {
           const TxtResourceRecord(
             'service.local',
             100,
-            text:
-                'project_name=my_project\ndevice_name=macos\ndevice_id=macos\ntarget_platform=darwin-arm64\nmode=debug\nws_uri=ws://127.0.0.1:1234/ws',
+            text: '''
+project_name=my_project
+device_name=macos
+device_id=macos
+target_platform=darwin-arm64
+mode=debug
+ws_uri=ws://127.0.0.1:1234/ws''',
           ),
         ],
       },
@@ -111,16 +116,28 @@ void main() {
             const TxtResourceRecord(
               'service1.local',
               100,
-              text:
-                  'project_name=app_one\ndevice_name=macos\ndevice_id=macos\ntarget_platform=darwin-arm64\nmode=debug\nws_uri=ws://127.0.0.1:1234/ws\nepoch=1000',
+              text: '''
+project_name=app_one
+device_name=macos
+device_id=macos
+target_platform=darwin-arm64
+mode=debug
+ws_uri=ws://127.0.0.1:1234/ws
+epoch=1000''',
             ),
           ],
           'service2.local': <TxtResourceRecord>[
             const TxtResourceRecord(
               'service2.local',
               100,
-              text:
-                  'project_name=app_two\ndevice_name=chrome\ndevice_id=chrome\ntarget_platform=web-javascript\nmode=release\nws_uri=ws://127.0.0.1:5678/ws\nepoch=0',
+              text: '''
+project_name=app_two
+device_name=chrome
+device_id=chrome
+target_platform=web-javascript
+mode=release
+ws_uri=ws://127.0.0.1:5678/ws
+epoch=0''',
             ),
           ],
         },
@@ -190,7 +207,10 @@ void main() {
             const TxtResourceRecord(
               'service.local',
               100,
-              text: 'project_name=app_one\nws_uri=ws://127.0.0.1:1234/ws\nepoch=1000',
+              text: '''
+project_name=app_one
+ws_uri=ws://127.0.0.1:1234/ws
+epoch=1000''',
             ),
           ],
           'service_dup.local': <TxtResourceRecord>[
@@ -198,7 +218,10 @@ void main() {
             const TxtResourceRecord(
               'service_dup.local',
               100,
-              text: 'project_name=app_one\nws_uri=ws://127.0.0.1:1234/ws\nepoch=1000',
+              text: '''
+project_name=app_one
+ws_uri=ws://127.0.0.1:1234/ws
+epoch=1000''',
             ),
           ],
         },
@@ -208,7 +231,7 @@ void main() {
       await runner.run(<String>['running-apps']);
 
       expect(testLogger.statusText, contains('Found 1 running Flutter app:'));
-      expect(testLogger.statusText.split('app_one').length - 1, 1); // Should appear exactly once
+      expect('app_one'.allMatches(testLogger.statusText), hasLength(1));
     },
     overrides: <Type, Generator>{
       SystemClock: () => SystemClock.fixed(DateTime.fromMillisecondsSinceEpoch(2000)),
@@ -259,7 +282,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
-    Function? onError, // Added onError
+    Function? onError,
   }) async {}
 
   @override
