@@ -2088,7 +2088,7 @@ void main() {
     ),
   );
 
-  final listTile = tester.widget<ListTile>(find.byType(ListTile));
+  final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
   expect(listTile.statesController, controller);
 });
 }
