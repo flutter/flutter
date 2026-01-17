@@ -185,6 +185,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
     assert(_rootTransform != null);
     markNeedsLayout();
+    markNeedsPaint();
   }
 
   /// Whether a [configuration] has been set.

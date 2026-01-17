@@ -671,19 +671,22 @@ mixin RendererBinding
   // When editing the above, also update widgets/binding.dart's copy.
   @protected
   void drawFrame() {
-    rootPipelineOwner.flushLayout();
-    rootPipelineOwner.flushCompositingBits();
-    // Collect views that need compositing before flushPaint clears the dirty flags.
-    final viewsNeedingPaint = <RenderView>[];
+    final viewsNeedingCompositing = <RenderView>[];
     for (final RenderView renderView in renderViews) {
-      if (_forceCompositing || (renderView.owner?.needsPaint ?? false)) {
-        viewsNeedingPaint.add(renderView);
+      final PipelineOwner? owner = renderView.owner;
+      if (_forceCompositing ||
+          (owner?.needsLayout ?? false) ||
+          (owner?.needsPaint ?? false)) {
+        viewsNeedingCompositing.add(renderView);
       }
     }
     _forceCompositing = false;
+
+    rootPipelineOwner.flushLayout();
+    rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      for (final renderView in viewsNeedingPaint) {
+      for (final renderView in viewsNeedingCompositing) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
