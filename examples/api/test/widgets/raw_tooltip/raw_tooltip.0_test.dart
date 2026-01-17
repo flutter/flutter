@@ -22,7 +22,7 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(rawTooltipText), findsOneWidget);
-    // Tap anywhere and wait for the rawTooltip to disappear.
+    // Tap anywhere and wait for the tooltip to disappear.
     await tester.tap(find.byType(Scaffold));
     await tester.pump(const Duration(seconds: 1));
     expect(find.text(rawTooltipText), findsNothing);
