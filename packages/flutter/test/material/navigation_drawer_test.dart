@@ -592,4 +592,5 @@ void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 100
   tester.view.devicePixelRatio = 2;
   final double dpi = tester.view.devicePixelRatio;
   tester.view.physicalSize = Size(viewWidth * dpi, viewHeight * dpi);
+  addTearDown(tester.view.reset);
 }
