@@ -1880,17 +1880,17 @@ void main() {
           ),
         );
 
-        // Show handles
+        // Show handles.
         overlay.handlesVisible = true;
         overlay.showHandles();
         await tester.pump();
         expect(overlay.handlesAreVisible, isTrue);
 
-        // Fast forward to just before the timeout (3.9s)
+        // Fast forward to just before the timeout (3.9s).
         await tester.pump(const Duration(milliseconds: 3900));
         expect(overlay.handlesAreVisible, isTrue);
 
-        // Fast forward to just after the timeout (4.1s total)
+        // Fast forward to just after the timeout (4.1s total).
         await tester.pump(const Duration(milliseconds: 200));
         expect(overlay.handlesAreVisible, isFalse);
 
@@ -2147,11 +2147,6 @@ class FakeRenderEditable extends RenderEditable {
 
   @override
   bool hasFocus = false;
-
-  @override
-  Rect? getRectForComposingRange(TextRange range) {
-    return const Rect.fromLTWH(0, 0, 10, 10);
-  }
 
   @override
   void dispose() {

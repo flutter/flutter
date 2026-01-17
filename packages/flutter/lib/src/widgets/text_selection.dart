@@ -394,7 +394,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
-      cursorWidth: renderObject.cursorWidth,
+      handleAnchorOffset: renderObject.cursorWidth,
     );
   }
 
@@ -413,11 +413,6 @@ class TextSelectionOverlay {
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionControls}
   final TextSelectionControls? selectionControls;
-
-  /// {@macro flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
-  ///
-  /// This value is read directly from [renderObject.cursorWidth].
-  double get cursorWidth => renderObject.cursorWidth;
 
   /// {@macro flutter.widgets.SelectionOverlay.selectionDelegate}
   final TextSelectionDelegate selectionDelegate;
@@ -605,6 +600,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
+      ..handleAnchorOffset = renderObject.cursorWidth
       // Update selection toolbar metrics.
       ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
@@ -1141,11 +1137,12 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    this.cursorWidth,
+    double? handleAnchorOffset,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
+       _handleAnchorOffset = handleAnchorOffset,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
        assert(debugCheckHasOverlay(context)) {
@@ -1313,11 +1310,19 @@ class SelectionOverlay {
   /// Called when the users start dragging the start selection handles.
   final ValueChanged<DragStartDetails>? onStartHandleDragStart;
 
-  /// {@macro flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
+  /// {@macro flutter.widgets.editableText.cursorWidth}
   ///
   /// This value is used for calculating the position of the text selection
   /// handles.
-  final double? cursorWidth;
+  double? get handleAnchorOffset => _handleAnchorOffset;
+  double? _handleAnchorOffset;
+  set handleAnchorOffset(double? value) {
+    if (_handleAnchorOffset == value) {
+      return;
+    }
+    _handleAnchorOffset = value;
+    markNeedsBuild();
+  }
 
   void _handleStartHandleDragStart(DragStartDetails details) {
     assert(!_isDraggingStartHandle);
@@ -1840,7 +1845,7 @@ class SelectionOverlay {
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
         dragStartBehavior: dragStartBehavior,
-        cursorWidth: cursorWidth,
+        handleAnchorOffset: handleAnchorOffset,
       );
     }
     return TapRegion(
@@ -1862,7 +1867,7 @@ class SelectionOverlay {
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
-        cursorWidth: cursorWidth,
+        handleAnchorOffset: handleAnchorOffset,
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
@@ -2053,7 +2058,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.cursorWidth,
+    this.handleAnchorOffset,
   });
 
   final LayerLink handleLayerLink;
@@ -2066,7 +2071,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
-  final double? cursorWidth;
+  final double? handleAnchorOffset;
 
   @override
   State<_SelectionHandleOverlay> createState() => _SelectionHandleOverlayState();
@@ -2139,7 +2144,7 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       widget.type,
       widget.preferredLineHeight,
-      cursorWidth: widget.cursorWidth ?? 2.0,
+      cursorWidth: widget.handleAnchorOffset ?? 2.0,
     );
 
     // Make sure a drag is eagerly accepted. This is used on iOS to match the
