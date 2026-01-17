@@ -375,6 +375,10 @@ mixin RendererBinding
   Iterable<RenderView> get renderViews => _viewIdToRenderView.values;
   final Map<Object, RenderView> _viewIdToRenderView = <Object, RenderView>{};
 
+  // Views that have not yet been composited in a non-warm-up frame.
+  // These views are always composited regardless of dirty state.
+  final Set<RenderView> _viewsNeedingCompositing = <RenderView>{};
+
   /// Adds a [RenderView] to this binding.
   ///
   /// The binding will interact with the [RenderView] in the following ways:
@@ -391,6 +395,8 @@ mixin RendererBinding
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
     view.configuration = createViewConfigurationFor(view);
+    // New views must be composited at least once in a non-warm-up frame.
+    _viewsNeedingCompositing.add(view);
   }
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
@@ -399,6 +405,7 @@ mixin RendererBinding
     final Object viewId = view.flutterView.viewId;
     assert(_viewIdToRenderView[viewId] == view);
     _viewIdToRenderView.remove(viewId);
+    _viewsNeedingCompositing.remove(view);
   }
 
   /// Returns a [ViewConfiguration] configured for the provided [RenderView]
@@ -673,36 +680,44 @@ mixin RendererBinding
   void drawFrame() {
     rootPipelineOwner.flushLayout();
     rootPipelineOwner.flushCompositingBits();
-    // Collect views that need compositing before flushPaint clears the dirty flags.
-    final viewsNeedingPaint = <RenderView>[];
+
+    final viewsToComposite = <RenderView>[];
     for (final RenderView renderView in renderViews) {
-      if (_forceCompositing || (renderView.owner?.needsPaint ?? false)) {
-        viewsNeedingPaint.add(renderView);
+      if (renderView.layer == null) {
+        continue;
+      }
+      final PipelineOwner? owner = renderView.owner;
+      if (_viewsNeedingCompositing.contains(renderView) ||
+          (owner?.needsPaint ?? false)) {
+        viewsToComposite.add(renderView);
       }
     }
-    _forceCompositing = false;
+
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      for (final renderView in viewsNeedingPaint) {
+      for (final RenderView renderView in viewsToComposite) {
         renderView.compositeFrame(); // this sends the bits to the GPU
+      }
+      // Only mark views as successfully composited if this is not a warm-up
+      // frame. During warm-up frames the rendering surface may not be ready,
+      // so the composite might not produce visible output. Keeping views in
+      // the set ensures they are re-composited on the first real frame.
+      if (!isWarmUpFrame) {
+        _viewsNeedingCompositing.removeAll(viewsToComposite);
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
     }
   }
 
-  // Force compositing all views when returning to the foreground.
-  // This ensures views are recomposited after the app was paused/hidden.
-  bool _forceCompositing = false;
-
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     final bool framesEnabledBefore = framesEnabled;
     super.handleAppLifecycleStateChanged(state);
     // When transitioning from a state where frames were disabled to one where
-    // they are enabled, force all views to be composited on the next frame.
+    // they are enabled, mark all views for compositing on the next frame.
     if (!framesEnabledBefore && framesEnabled) {
-      _forceCompositing = true;
+      _viewsNeedingCompositing.addAll(renderViews);
     }
   }
 
