@@ -21,9 +21,7 @@ SkSerialReturnType SerializeTypefaceWithData(SkTypeface* typeface, void* ctx) {
   return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
 }
 
-sk_sp<SkTypeface> DeserializeTypefaceWithoutData(const void* data,
-                                                 size_t length,
-                                                 void* ctx) {
+sk_sp<SkTypeface> DeserializeTypefaceWithoutData(SkStream&, void* ctx) {
   return nullptr;
 }
 
