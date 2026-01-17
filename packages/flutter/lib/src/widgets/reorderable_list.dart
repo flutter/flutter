@@ -146,7 +146,7 @@ class ReorderableList extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after v3.40.0-0.2.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.onReorder,
     this.onReorderItem,
@@ -181,7 +181,8 @@ class ReorderableList extends StatefulWidget {
        assert(
          (onReorderItem != null && onReorder == null) ||
              (onReorderItem == null && onReorder != null),
-         'You must provide either onReorderItem or onReorder, but not both.',
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        );
 
   /// {@template flutter.widgets.reorderable_list.itemBuilder}
@@ -214,11 +215,36 @@ class ReorderableList extends StatefulWidget {
   /// If `oldIndex` is before `newIndex`, removing the item at `oldIndex` from the
   /// list will reduce the list's length by one. Implementations will need to
   /// account for this when inserting before `newIndex`.
+  ///
+  /// This callback has been deprecated in favor of [onReorderItem], which
+  /// simplifies the reordering logic by automatically handling index adjustments.
+  /// To migrate, remove the manual adjustment of `newIndex`
+  /// when items are moved downward in the list.
+  ///
+  /// For example:
+  ///
+  /// ```dart
+  /// onReorder: (int oldIndex, int newIndex) {
+  ///   if (newIndex > oldIndex) {
+  ///     newIndex -= 1;
+  ///   }
+  ///
+  ///   // Handle reordering...
+  /// }
+  /// ```
+  ///
+  /// becomes
+  ///
+  /// ```dart
+  /// onReorderItem: (int oldIndex, int newIndex) {
+  ///   // Handle reordering...
+  /// }
+  /// ```
   /// {@endtemplate}
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-    'This feature was deprecated after v3.40.0-0.2.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final ReorderCallback? onReorder;
 
@@ -531,7 +557,7 @@ class SliverReorderableList extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after v3.40.0-0.2.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.onReorder,
     this.onReorderItem,
@@ -554,7 +580,8 @@ class SliverReorderableList extends StatefulWidget {
        assert(
          (onReorderItem != null && onReorder == null) ||
              (onReorderItem == null && onReorder != null),
-         'You must provide either onReorderItem or onReorder, but not both.',
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        );
 
   // An eyeballed value for a smooth scrolling experience.
@@ -573,7 +600,7 @@ class SliverReorderableList extends StatefulWidget {
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-    'This feature was deprecated after v3.40.0-0.2.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final ReorderCallback? onReorder;
 

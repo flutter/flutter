@@ -81,7 +81,7 @@ class ReorderableListView extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after v3.40.0-0.2.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.onReorder,
     this.onReorderItem,
@@ -123,7 +123,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          (onReorderItem != null && onReorder == null) ||
              (onReorderItem == null && onReorder != null),
-         'You must provide either onReorderItem or onReorder, but not both.',
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length;
@@ -163,7 +164,7 @@ class ReorderableListView extends StatefulWidget {
     @Deprecated(
       'Use the onReorderItem callback instead. '
       'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-      'This feature was deprecated after v3.40.0-0.2.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.onReorder,
     this.onReorderItem,
@@ -202,7 +203,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          (onReorderItem != null && onReorder == null) ||
              (onReorderItem == null && onReorder != null),
-         'You must provide either onReorderItem or onReorder, but not both.',
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        );
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
@@ -215,7 +217,7 @@ class ReorderableListView extends StatefulWidget {
   @Deprecated(
     'Use the onReorderItem callback instead. '
     'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
-    'This feature was deprecated after v3.40.0-0.2.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final ReorderCallback? onReorder;
 
