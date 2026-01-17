@@ -427,6 +427,36 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSwitcher(
+              duration: Duration(microseconds: 500),
+              child: Text(key: Key('x'), 'X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSwitcher(
+              duration: Duration(microseconds: 500),
+              child: Text(key: Key('y'), 'Y'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
   });
 }
 
