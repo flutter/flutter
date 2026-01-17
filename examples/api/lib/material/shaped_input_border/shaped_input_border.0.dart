@@ -42,19 +42,27 @@ class ShapedInputBorderExample extends StatelessWidget {
                   shape: const RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2.0,
+                  ),
                 ),
                 enabledBorder: ShapedInputBorder(
                   shape: const RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 focusedBorder: ShapedInputBorder(
                   shape: const RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.all(Radius.circular(16.0)),
                   ),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2.0,
+                  ),
                 ),
               ),
             ),
@@ -66,7 +74,10 @@ class ShapedInputBorderExample extends StatelessWidget {
                 hintText: 'Pill-shaped border',
                 border: ShapedInputBorder(
                   shape: const StadiumBorder(),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2.0,
+                  ),
                 ),
               ),
             ),
@@ -90,7 +101,9 @@ class ShapedInputBorderExample extends StatelessWidget {
                 labelText: 'Filled with Superellipse',
                 hintText: 'Filled background',
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
                 border: const ShapedInputBorder(
                   shape: RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.all(Radius.circular(12.0)),

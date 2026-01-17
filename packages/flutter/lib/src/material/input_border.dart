@@ -303,6 +303,8 @@ class UnderlineInputBorder extends InputBorder {
 ///
 ///  * [UnderlineInputBorder], the default [InputDecorator] border which
 ///    draws a horizontal line at the bottom of the input decorator's container.
+///  * [ShapedInputBorder], an [InputDecorator] border which draws a custom
+///    [ShapeBorder] around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].
@@ -709,7 +711,7 @@ class ShapedInputBorder extends InputBorder {
   }
 
   @override
-  bool get preferPaintInterior => true;
+  bool get preferPaintInterior => shape.preferPaintInterior;
 
   Path _gapBorderPath(Rect rect, double start, double extent, {TextDirection? textDirection}) {
     // Create a continuous path for the border with a gap in the top edge.
