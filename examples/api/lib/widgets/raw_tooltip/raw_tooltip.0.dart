@@ -59,8 +59,8 @@ class RawTooltipSample extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             alignment: Alignment.center,
             child: const Text(
-              'Hover to always show the tooltip.\n'
-              'Press the FAB to show it manually.',
+              'Hover over this box or\n'
+              'tap on the FAB to show the tooltip',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white),
             ),
