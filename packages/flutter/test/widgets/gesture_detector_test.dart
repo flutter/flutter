@@ -178,7 +178,7 @@ void main() {
       Future<void> pumpWidgetTree(HitTestBehavior? behavior) {
         return tester.pumpWidget(
           TestWidgetsApp(
-            child: Stack(
+            home: Stack(
               children: <Widget>[
                 Listener(
                   onPointerDown: (_) {
@@ -806,7 +806,7 @@ void main() {
       final key = UniqueKey();
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: Center(
+          home: Center(
             child: RawGestureDetector(
               key: key,
               gestures: <Type, GestureRecognizerFactory>{
@@ -852,7 +852,7 @@ void main() {
       final key = UniqueKey();
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: Center(
+          home: Center(
             child: RawGestureDetector(
               key: key,
               gestures: <Type, GestureRecognizerFactory>{
@@ -907,7 +907,7 @@ void main() {
       final key = UniqueKey();
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: Center(
+          home: Center(
             child: RawGestureDetector(
               key: key,
               gestures: <Type, GestureRecognizerFactory>{
@@ -962,7 +962,7 @@ void main() {
       final key = UniqueKey();
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: Center(
+          home: Center(
             child: RawGestureDetector(
               key: key,
               gestures: <Type, GestureRecognizerFactory>{
@@ -1017,7 +1017,7 @@ void main() {
       final key = UniqueKey();
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: Center(
+          home: Center(
             child: RawGestureDetector(
               key: key,
               gestures: <Type, GestureRecognizerFactory>{
@@ -1211,7 +1211,7 @@ void main() {
         final key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
           TestWidgetsApp(
-            child: RawGestureDetector(key: key, child: const Text('Text')),
+            home: RawGestureDetector(key: key, child: const Text('Text')),
           ),
         );
         late FlutterError error;
@@ -1391,7 +1391,7 @@ void main() {
       final log = <String>[];
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: GestureDetector(
+          home: GestureDetector(
             onDoubleTap: () => log.add('double-tap'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
           ),
@@ -1411,7 +1411,7 @@ void main() {
       final log = <String>[];
       await tester.pumpWidget(
         TestWidgetsApp(
-          child: GestureDetector(
+          home: GestureDetector(
             onDoubleTapDown: (_) => log.add('double-tap-down'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
           ),

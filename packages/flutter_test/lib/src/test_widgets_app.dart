@@ -19,7 +19,7 @@ import 'package:flutter/widgets.dart';
 /// testWidgets('my test', (WidgetTester tester) async {
 ///   await tester.pumpWidget(
 ///     TestWidgetsApp(
-///       child: GestureDetector(
+///       home: GestureDetector(
 ///         onTap: () {},
 ///         child: Container(),
 ///       ),
@@ -29,10 +29,10 @@ import 'package:flutter/widgets.dart';
 /// ```
 class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
-  const TestWidgetsApp({super.key, required this.child, this.color = const Color(0xFFFFFFFF)});
+  const TestWidgetsApp({super.key, required this.home, this.color = const Color(0xFFFFFFFF)});
 
   /// The widget to display within the app.
-  final Widget child;
+  final Widget home;
 
   /// The primary color for the application.
   ///
@@ -43,9 +43,7 @@ class TestWidgetsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: color,
-      builder: (BuildContext context, Widget? navigatorChild) {
-        return child;
-      },
+      home: home,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
           pageBuilder:

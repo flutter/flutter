@@ -54,7 +54,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
   @override
   Widget build(BuildContext context) {
     return TestWidgetsApp(
-      child: HoverClient(
+      home: HoverClient(
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
         onExit: widget.onExit,
@@ -99,7 +99,7 @@ void main() {
     var onEnterRegion2 = false;
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Stack(
+        home: Stack(
           children: <Widget>[
             SizedBox(
               width: 50.0,
@@ -138,7 +138,7 @@ void main() {
     var onEnterRegion2 = false;
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Stack(
+        home: Stack(
           children: <Widget>[
             SizedBox(
               width: 50.0,
@@ -796,7 +796,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Center(
+        home: Center(
           child: Transform.scale(
             scale: scaleFactor,
             child: MouseRegion(
@@ -1050,7 +1050,7 @@ void main() {
     var paintCount = 0;
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: MouseRegion(
+        home: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
             painter: _DelegatedPainter(
@@ -1077,7 +1077,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: MouseRegion(
+        home: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
             painter: _DelegatedPainter(
@@ -1295,7 +1295,7 @@ void main() {
       }
 
       return TestWidgetsApp(
-        child: Align(
+        home: Align(
           alignment: Alignment.topLeft,
           child: MouseRegion(
             onEnter: (PointerEnterEvent e) {
@@ -1472,7 +1472,7 @@ void main() {
     var bottomRegionIsHovered = false;
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Stack(
+        home: Stack(
           children: <Widget>[
             Align(
               alignment: Alignment.topLeft,
@@ -2000,7 +2000,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Overlay(
+        home: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
               builder: (BuildContext context) => Center(
@@ -2050,7 +2050,7 @@ void main() {
     var onHover = false;
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: Align(
+        home: Align(
           alignment: Alignment.topLeft,
           child: MouseRegion(
             onEnter: (_) => onEnter = true,
@@ -2097,7 +2097,7 @@ class _Scaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TestWidgetsApp(
-      child: Stack(
+      home: Stack(
         children: <Widget>[
           ?background,
           Align(alignment: Alignment.topLeft, child: topLeft),
@@ -2135,7 +2135,7 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
   @override
   Widget build(BuildContext context) {
     return TestWidgetsApp(
-      child: MouseRegion(
+      home: MouseRegion(
         onEnter: (PointerEnterEvent _) {
           setState(() {
             _hovering = true;
@@ -2161,7 +2161,7 @@ class _ColumnContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TestWidgetsApp(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+      home: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
 }

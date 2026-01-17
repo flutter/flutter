@@ -152,7 +152,7 @@ void main() {
   testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: SingleChildScrollView(
+        home: SingleChildScrollView(
           child: RepaintBoundary(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -195,7 +195,7 @@ void main() {
       RepaintBoundary(
         key: key,
         child: const TestWidgetsApp(
-          child: Stack(
+          home: Stack(
             children: <Widget>[
               Positioned(
                 top: 40,

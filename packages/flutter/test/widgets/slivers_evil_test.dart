@@ -61,7 +61,7 @@ void main() {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: ScrollConfiguration(
+        home: ScrollConfiguration(
           behavior: const TestBehavior(),
           child: RawScrollbar(
             child: Scrollable(
@@ -220,7 +220,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: CustomScrollView(
+        home: CustomScrollView(
           cacheExtent: 0.0,
           slivers: <Widget>[
             SliverFixedExtentList(
@@ -252,7 +252,7 @@ void main() {
     // Stop returning the first 3 items.
     await tester.pumpWidget(
       TestWidgetsApp(
-        child: CustomScrollView(
+        home: CustomScrollView(
           cacheExtent: 0.0,
           slivers: <Widget>[
             SliverFixedExtentList(
