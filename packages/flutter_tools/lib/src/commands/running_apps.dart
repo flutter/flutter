@@ -12,7 +12,7 @@ import '../base/logger.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
+
 import '../runner/flutter_command.dart';
 
 const _noRunningAppsFoundMessage = 'No running Flutter apps found.';
@@ -22,15 +22,15 @@ class RunningAppsCommand extends FlutterCommand {
   RunningAppsCommand({
     this.hidden = false,
     @visibleForTesting MDnsClient? mdnsClient,
-    @visibleForTesting SystemClock? systemClock,
+    required SystemClock systemClock,
     required Logger logger,
-  }) : _mdnsClient = mdnsClient,
-       _systemClock = systemClock ?? globals.systemClock,
+  }) : _mdnsClient = mdnsClient ?? MDnsClient(),
+       _systemClock = systemClock,
        _logger = logger {
     argParser.addFlag('machine', negatable: false, help: 'Print output in JSON format.');
   }
 
-  final MDnsClient? _mdnsClient;
+  final MDnsClient _mdnsClient;
   final SystemClock _systemClock;
   final Logger _logger;
 
@@ -41,6 +41,7 @@ class RunningAppsCommand extends FlutterCommand {
   static const String _kMode = 'mode';
   static const String _kWsUri = 'ws_uri';
   static const String _kEpoch = 'epoch';
+  static const String _kFlutterDevicesService = '_flutter_devices._tcp';
 
   @override
   final name = 'running-apps';
@@ -61,18 +62,17 @@ class RunningAppsCommand extends FlutterCommand {
     // in the mdns_dart package, only discovering a maximum of one service.
 
     _logger.printStatus('Searching for running Flutter apps...');
-    final MDnsClient client = _mdnsClient ?? MDnsClient();
 
     final apps = <Map<String, String>>[];
     final seenUris = <String>{};
     try {
-      await client.start();
+      await _mdnsClient.start();
 
       final pendingLookups = <Future<void>>[];
       // Listen for pointer records (PTR) to find services
       await for (final PtrResourceRecord ptr
-          in client
-              .lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer('_flutter_devices._tcp'))
+          in _mdnsClient
+              .lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(_kFlutterDevicesService))
               .timeout(
                 const Duration(seconds: 5),
                 onTimeout: (EventSink<PtrResourceRecord> sink) => sink.close(),
@@ -81,7 +81,7 @@ class RunningAppsCommand extends FlutterCommand {
           (() async {
             try {
               // For each PTR, look up the TXT records
-              await for (final TxtResourceRecord txt in client.lookup<TxtResourceRecord>(
+              await for (final TxtResourceRecord txt in _mdnsClient.lookup<TxtResourceRecord>(
                 ResourceRecordQuery.text(ptr.domainName),
               )) {
                 final metadata = <String, String>{};
@@ -90,7 +90,10 @@ class RunningAppsCommand extends FlutterCommand {
                 for (final part in parts) {
                   final int equalsIndex = part.indexOf('=');
                   if (equalsIndex != -1) {
-                    metadata[part.substring(0, equalsIndex)] = part.substring(equalsIndex + 1);
+                    // Trim to remove any whitespace that may be around the delimiters.
+                    metadata[part.substring(0, equalsIndex).trim()] = part
+                        .substring(equalsIndex + 1)
+                        .trim();
                   }
                 }
                 if (metadata.isNotEmpty) {
@@ -112,7 +115,7 @@ class RunningAppsCommand extends FlutterCommand {
       }
       await Future.wait(pendingLookups);
     } finally {
-      client.stop();
+      _mdnsClient.stop();
     }
 
     if (boolArg('machine')) {

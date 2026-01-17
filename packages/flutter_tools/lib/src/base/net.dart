@@ -275,9 +275,7 @@ Future<int> findUnusedPort({String hostname = '0.0.0.0'}) async {
     // We bind to the specified hostname (e.g., '0.0.0.0') and let the OS
     // dynamically assign a free port by using port 0.
     socket = await ServerSocket.bind(hostname, 0);
-
-    final int port = socket.port;
-    return port;
+    return socket.port;
   } finally {
     // Crucially, close the socket immediately to free the port for your service.
     await socket?.close();
