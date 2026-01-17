@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/widgets/raw_tooltip/raw_tooltip.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RawTooltip is visible when tapping button', (
+  testWidgets('RawTooltip text is visible when tapping button', (
     WidgetTester tester,
   ) async {
     const String rawTooltipText = 'I am a RawTooltip message';
