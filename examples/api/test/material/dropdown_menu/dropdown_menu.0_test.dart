@@ -105,7 +105,7 @@ void main() {
     // Resize the screen to small screen and make sure no overflowed error appears.
     tester.view.physicalSize = const Size(200, 160);
     tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.reset);
     await tester.pump();
 
     expect(tester.takeException(), isNull);

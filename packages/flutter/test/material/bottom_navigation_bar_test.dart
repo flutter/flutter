@@ -3004,9 +3004,10 @@ void main() {
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow', (
     WidgetTester tester,
   ) async {
-    //Regression test for https://github.com/flutter/flutter/issues/112163
+    // Regression test for https://github.com/flutter/flutter/issues/112163
 
     tester.view.physicalSize = const Size(540, 340);
+    addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3053,8 +3054,6 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('bottom_navigation_bar.label_overflow.png'),
     );
-
-    addTearDown(tester.view.resetPhysicalSize);
   });
 
   testWidgets('BottomNavigationBar keys passed through', (WidgetTester tester) async {
