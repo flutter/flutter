@@ -118,7 +118,7 @@ class LongPressDownDetails with Diagnosticable implements PositionedGestureDetai
   const LongPressDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -131,7 +131,7 @@ class LongPressDownDetails with Diagnosticable implements PositionedGestureDetai
   final Offset localPosition;
 
   /// The kind of the device that initiated the long press.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The buttons that were pressed when the device first contacted the screen.
   ///
@@ -339,7 +339,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
-  PointerDeviceKind? _initialKind;
+  PointerDeviceKind? _kind;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
@@ -722,7 +722,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerDownEvent) {
       // The first touch.
       _longPressOrigin = OffsetPair.fromEventPosition(event);
-      _initialKind = event.kind;
+      _kind = event.kind;
       _initialButtons = event.buttons;
       _checkLongPressDown(event);
     } else if (event is PointerMoveEvent) {
@@ -786,7 +786,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkLongPressStart() {
-    final PointerDeviceKind kind = _initialKind ?? PointerDeviceKind.unknown;
+    final PointerDeviceKind kind = _kind ?? PointerDeviceKind.unknown;
     final int buttons = _initialButtons ?? 0;
 
     switch (_initialButtons) {

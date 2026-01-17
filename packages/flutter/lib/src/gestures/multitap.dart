@@ -727,7 +727,7 @@ class SerialTapUpDetails with Diagnosticable implements PositionedGestureDetails
   SerialTapUpDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.count = 1,
   }) : assert(count > 0),
        localPosition = localPosition ?? globalPosition;
@@ -741,7 +741,7 @@ class SerialTapUpDetails with Diagnosticable implements PositionedGestureDetails
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The number of consecutive taps that this tap represents.
   ///

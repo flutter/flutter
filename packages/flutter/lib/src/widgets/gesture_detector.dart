@@ -1730,7 +1730,13 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     return () {
       final Offset localCenter = _getLocalRectFromRenderObject(renderObject).center;
       final Offset globalCenter = _transformOffsetToGlobal(renderObject, localCenter);
-      tap.onTapDown?.call(TapDownDetails(globalPosition: globalCenter, localPosition: localCenter));
+      tap.onTapDown?.call(
+        TapDownDetails(
+          globalPosition: globalCenter,
+          localPosition: localCenter,
+          kind: PointerDeviceKind.unknown,
+        ),
+      );
       tap.onTapUp?.call(
         TapUpDetails(
           globalPosition: globalCenter,
@@ -1788,7 +1794,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
               DragDownDetails(
                 localPosition: localCenter,
                 globalPosition: globalCenter,
-                kind: details.kind,
+                kind: details.kind ?? PointerDeviceKind.unknown,
                 buttons: details.buttons,
               ),
             );
@@ -1824,7 +1830,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
               DragDownDetails(
                 localPosition: localCenter,
                 globalPosition: globalCenter,
-                kind: details.kind,
+                kind: details.kind ?? PointerDeviceKind.unknown,
                 buttons: details.buttons,
               ),
             );
@@ -1874,7 +1880,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
               DragDownDetails(
                 localPosition: localCenter,
                 globalPosition: globalCenter,
-                kind: details.kind,
+                kind: details.kind ?? PointerDeviceKind.unknown,
                 buttons: details.buttons,
               ),
             );
@@ -1909,7 +1915,7 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
               DragDownDetails(
                 localPosition: localCenter,
                 globalPosition: globalCenter,
-                kind: details.kind,
+                kind: details.kind ?? PointerDeviceKind.unknown,
                 buttons: details.buttons,
               ),
             );

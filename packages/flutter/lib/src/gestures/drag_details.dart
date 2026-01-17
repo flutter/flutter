@@ -83,7 +83,7 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.sourceTimeStamp,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -102,7 +102,7 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   final Duration? sourceTimeStamp;
 
   /// The kind of the device that initiated the drag.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The buttons that were pressed when the device first contacted the screen.
   ///
@@ -153,7 +153,7 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   }) : assert(
          primaryDelta == null ||
@@ -200,7 +200,7 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
   final double? primaryDelta;
 
   /// The kind of the device that initiated the drag.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The buttons that were pressed when the device first contacted the screen.
   ///
@@ -254,7 +254,7 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
     Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   }) : assert(
          primaryVelocity == null ||
@@ -289,7 +289,7 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
   final double? primaryVelocity;
 
   /// The kind of the device that initiated the drag.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The buttons that were pressed when the device first contacted the screen.
   ///

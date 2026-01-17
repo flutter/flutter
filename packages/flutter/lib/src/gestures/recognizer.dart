@@ -207,7 +207,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This method is called for each and all pointers being added. In
   /// most cases, you want to override [addAllowedPointerPanZoom] instead.
   void addPointerPanZoom(PointerPanZoomStartEvent event) {
-    _pointerToEventData[event.pointer] = (kind: event.kind, buttons: event.buttons);
+    _pointerToEventData[event.pointer] = _RecognizerEventData(
+      kind: event.kind,
+      buttons: event.buttons,
+    );
     if (isPointerPanZoomAllowed(event)) {
       addAllowedPointerPanZoom(event);
     } else {
@@ -241,7 +244,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This method is called for each and all pointers being added. In
   /// most cases, you want to override [addAllowedPointer] instead.
   void addPointer(PointerDownEvent event) {
-    _pointerToEventData[event.pointer] = (kind: event.kind, buttons: event.buttons);
+    _pointerToEventData[event.pointer] = _RecognizerEventData(
+      kind: event.kind,
+      buttons: event.buttons,
+    );
     if (isPointerAllowed(event)) {
       addAllowedPointer(event);
     } else {
@@ -853,4 +859,9 @@ class OffsetPair {
   String toString() => '${objectRuntimeType(this, 'OffsetPair')}(local: $local, global: $global)';
 }
 
-typedef _RecognizerEventData = ({PointerDeviceKind kind, int buttons});
+class _RecognizerEventData {
+  _RecognizerEventData({required this.kind, required this.buttons});
+
+  final PointerDeviceKind kind;
+  final int buttons;
+}

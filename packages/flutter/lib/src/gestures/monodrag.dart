@@ -898,6 +898,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       primaryVelocity: 0.0,
       globalPosition: _lastPosition.global,
       localPosition: _lastPosition.local,
+      kind: getKindForPointer(pointer),
       buttons: _initialButtons ?? 0,
     );
 

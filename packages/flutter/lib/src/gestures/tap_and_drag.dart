@@ -86,7 +86,7 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
     required this.globalPosition,
     required this.localPosition,
     required this.consecutiveTapCount,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   });
 
@@ -99,7 +99,7 @@ class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// If this tap is in a series of taps, then this value represents
   /// the number in the series this tap is.
@@ -206,7 +206,7 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
     required this.globalPosition,
     required this.localPosition,
     this.sourceTimeStamp,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     required this.consecutiveTapCount,
     this.buttons = 0,
   });
@@ -226,7 +226,7 @@ class TapDragStartDetails with Diagnosticable implements PositionedGestureDetail
   final Duration? sourceTimeStamp;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// If this tap is in a series of taps, then this value represents
   /// the number in the series this tap is.
@@ -279,7 +279,7 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     required this.offsetFromOrigin,
     required this.localOffsetFromOrigin,
     required this.consecutiveTapCount,
@@ -328,7 +328,7 @@ class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetai
   final double? primaryDelta;
 
   /// The kind of the device that initiated the event.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// A delta offset from the point where the drag initially contacted
   /// the screen to the point where the pointer is currently located in global

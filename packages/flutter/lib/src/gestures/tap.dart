@@ -34,7 +34,7 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   TapDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-    this.kind = PointerDeviceKind.unknown,
+    this.kind,
     this.buttons = 0,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -47,7 +47,7 @@ class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   final Offset localPosition;
 
   /// The kind of the device that initiated the tap.
-  final PointerDeviceKind kind;
+  final PointerDeviceKind? kind;
 
   /// The buttons that were pressed when the device first contacted the screen.
   ///

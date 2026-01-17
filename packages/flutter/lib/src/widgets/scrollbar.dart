@@ -1718,9 +1718,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Handler called when a long press gesture has started.
   ///
   /// Begins the fade out animation and creates the thumb's DragScrollController.
+  /// It receives a copy of [details] that has been enhanced with the computed [DragUpdateDetails.localPosition].
   @protected
   @mustCallSuper
-  void handleThumbPressStart(Offset localPosition, {required DragStartDetails originalDetails}) {
+  void handleThumbPressStart(DragStartDetails details) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1731,30 +1732,24 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     assert(_thumbDrag == null);
     final ScrollPosition position = _cachedController!.position;
-    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final details = DragStartDetails(
-      localPosition: localPosition,
-      globalPosition: renderBox.localToGlobal(localPosition),
-      kind: originalDetails.kind,
-      buttons: originalDetails.buttons,
-    );
     _thumbDrag = position.drag(details, _disposeThumbDrag);
     assert(_thumbDrag != null);
     assert(_thumbHold == null);
 
-    _startDragScrollbarAxisOffset = localPosition;
-    _lastDragUpdateOffset = localPosition;
+    _startDragScrollbarAxisOffset = details.localPosition;
+    _lastDragUpdateOffset = details.localPosition;
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
   }
 
   /// Handler called when a currently active long press gesture moves.
   ///
   /// Updates the position of the child scrollable via the _drag ScrollDragController.
+  /// It receives a copy of [details] that has been enhanced with the computed [DragUpdateDetails.localPosition].
   @protected
   @mustCallSuper
-  void handleThumbPressUpdate(Offset localPosition, {required DragUpdateDetails originalDetails}) {
+  void handleThumbPressUpdate(DragUpdateDetails details) {
     assert(_debugCheckHasValidScrollPosition());
-    if (_lastDragUpdateOffset == localPosition) {
+    if (_lastDragUpdateOffset == details.localPosition) {
       return;
     }
     final ScrollPosition position = _cachedController!.position;
@@ -1771,7 +1766,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    final double? primaryDelta = _getPrimaryDelta(localPosition);
+    final double? primaryDelta = _getPrimaryDelta(details.localPosition);
     if (primaryDelta == null) {
       return;
     }
@@ -1782,28 +1777,27 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     };
     final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
     final scrollDetails = DragUpdateDetails(
-      delta: delta,
+      delta: delta, // adds the computed delta
       primaryDelta: primaryDelta,
-      globalPosition: renderBox.localToGlobal(localPosition),
-      localPosition: localPosition,
-      kind: originalDetails.kind,
-      buttons: originalDetails.buttons,
+      globalPosition: renderBox.localToGlobal(details.localPosition),
+      localPosition: details.localPosition,
+      sourceTimeStamp: details.sourceTimeStamp,
+      kind: details.kind,
+      buttons: details.buttons,
     );
     _thumbDrag!.update(
       scrollDetails,
     ); // Triggers updates to the ScrollPosition and ScrollbarPainter
 
-    _lastDragUpdateOffset = localPosition;
+    _lastDragUpdateOffset = details.localPosition;
   }
 
   /// Handler called when a long press has ended.
+  ///
+  /// It receives a copy of [details] that has been enhanced with the computed [DragUpdateDetails.localPosition].
   @protected
   @mustCallSuper
-  void handleThumbPressEnd(
-    Offset localPosition,
-    Velocity velocity, {
-    DragEndDetails? originalDetails,
-  }) {
+  void handleThumbPressEnd(DragEndDetails details) {
     assert(_debugCheckHasValidScrollPosition());
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -1824,21 +1818,22 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // dragging on the trackpad or with a stylus.
     final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
     final Velocity adjustedVelocity = switch (platform) {
-      TargetPlatform.iOS || TargetPlatform.android => -velocity,
+      TargetPlatform.iOS || TargetPlatform.android => -details.velocity,
       _ => Velocity.zero,
     };
-    final renderBox = _scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
-    final details = DragEndDetails(
-      localPosition: localPosition,
-      globalPosition: renderBox.localToGlobal(localPosition),
+    final detailsWithPrimaryVelocity = DragEndDetails(
+      localPosition: details.localPosition,
+      globalPosition: details.globalPosition,
       velocity: adjustedVelocity,
       primaryVelocity: switch (direction) {
         Axis.horizontal => adjustedVelocity.pixelsPerSecond.dx,
         Axis.vertical => adjustedVelocity.pixelsPerSecond.dy,
       },
+      kind: details.kind,
+      buttons: details.buttons,
     );
 
-    _thumbDrag?.end(details);
+    _thumbDrag?.end(detailsWithPrimaryVelocity);
     assert(_thumbDrag == null);
 
     _startDragScrollbarAxisOffset = null;
@@ -1993,19 +1988,41 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   void _handleThumbDragStart(DragStartDetails details) {
-    handleThumbPressStart(_globalToScrollbar(details.globalPosition), originalDetails: details);
+    /// Copies [details] but adding the computed [DragStartDetails.localPosition].
+    final detailsWithLocalPosition = DragStartDetails(
+      globalPosition: details.globalPosition,
+      localPosition: _globalToScrollbar(details.globalPosition),
+      sourceTimeStamp: details.sourceTimeStamp,
+      kind: details.kind,
+      buttons: details.buttons,
+    );
+    handleThumbPressStart(detailsWithLocalPosition);
   }
 
   void _handleThumbDragUpdate(DragUpdateDetails details) {
-    handleThumbPressUpdate(_globalToScrollbar(details.globalPosition), originalDetails: details);
+    /// Copies [details] but adding the computed [DragUpdateDetails.localPosition].
+    final detailsWithLocalPosition = DragUpdateDetails(
+      globalPosition: details.globalPosition,
+      localPosition: _globalToScrollbar(details.globalPosition),
+      delta: details.delta,
+      primaryDelta: details.primaryDelta,
+      sourceTimeStamp: details.sourceTimeStamp,
+      kind: details.kind,
+      buttons: details.buttons,
+    );
+    handleThumbPressUpdate(detailsWithLocalPosition);
   }
 
   void _handleThumbDragEnd(DragEndDetails details) {
-    handleThumbPressEnd(
-      _globalToScrollbar(details.globalPosition),
-      details.velocity,
-      originalDetails: details,
+    final detailsWithLocalPosition = DragEndDetails(
+      globalPosition: details.globalPosition,
+      localPosition: _globalToScrollbar(details.globalPosition),
+      velocity: details.velocity,
+      primaryVelocity: details.primaryVelocity,
+      kind: details.kind,
+      buttons: details.buttons,
     );
+    handleThumbPressEnd(detailsWithLocalPosition);
   }
 
   void _handleThumbDragCancel() {

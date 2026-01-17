@@ -199,7 +199,6 @@ class TestPointer {
       viewId: view?.viewId ?? WidgetsBinding.instance.platformDispatcher.implicitView!.viewId,
       timeStamp: timeStamp,
       kind: kind,
-      buttons: buttons,
       device: _device,
       pointer: pointer,
       position: location!,
