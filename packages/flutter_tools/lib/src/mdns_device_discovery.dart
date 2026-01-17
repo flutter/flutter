@@ -116,7 +116,9 @@ class MDNSDeviceDiscovery {
             txt: txt,
           );
 
-          final server = MDNSServer(MDNSServerConfig(zone: mdnsService, reusePort: true));
+          final server = MDNSServer(
+            MDNSServerConfig(zone: mdnsService, reusePort: true, logger: logger.printTrace),
+          );
           try {
             await server.start();
             _servers.add(server);
