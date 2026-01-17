@@ -16,7 +16,7 @@ void main() {
 
     await tester.pumpWidget(const example.RawTooltipExampleApp());
 
-    // RawTooltip is not visible before tapping the button.
+    // The tooltip is not visible before tapping the button.
     expect(find.text(rawTooltipText), findsNothing);
     // Tap on the button and wait for the tooltip to appear.
     await tester.tap(find.byType(FloatingActionButton));
