@@ -786,17 +786,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkLongPressStart() {
-    final PointerDeviceKind kind = _kind ?? PointerDeviceKind.unknown;
-    final int buttons = _initialButtons ?? 0;
-
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressStart != null) {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: kind,
-            buttons: buttons,
+            kind: _kind!,
+            buttons: _initialButtons!,
           );
           invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
         }
@@ -808,8 +805,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: kind,
-            buttons: buttons,
+            kind: _kind!,
+            buttons: _initialButtons!,
           );
           invokeCallback<void>(
             'onSecondaryLongPressStart',
@@ -824,8 +821,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: kind,
-            buttons: buttons,
+            kind: _kind!,
+            buttons: _initialButtons!,
           );
           invokeCallback<void>(
             'onTertiaryLongPressStart',

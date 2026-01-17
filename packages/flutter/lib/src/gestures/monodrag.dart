@@ -78,6 +78,9 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 ///  * [HorizontalDragGestureRecognizer], for left and right drags.
 ///  * [VerticalDragGestureRecognizer], for up and down drags.
 ///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
+///
+/// [DragGestureRecognizer] will cancel a gesture if there are any changes
+/// to the buttons pressed during the same drag sequence.
 sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///

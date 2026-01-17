@@ -45,10 +45,6 @@ class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// The buttons that were pressed when the device first contacted the screen.
   ///
   /// For the format of this value, see [PointerEvent.buttons].
-  ///
-  /// Subsequent changes to the buttons pressed during the same drag sequence
-  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
-  /// drag has started ([DragStartDetails]) or not.
   final int buttons;
 
   @override
@@ -107,10 +103,6 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// The buttons that were pressed when the device first contacted the screen.
   ///
   /// For the format of this value, see [PointerEvent.buttons].
-  ///
-  /// Subsequent changes to the buttons pressed during the same drag sequence
-  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
-  /// drag has started ([DragStartDetails]) or not.
   final int buttons;
 
   @override
@@ -205,10 +197,6 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
   /// The buttons that were pressed when the device first contacted the screen.
   ///
   /// For the format of this value, see [PointerEvent.buttons].
-  ///
-  /// Subsequent changes to the buttons pressed during the same drag sequence
-  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
-  /// drag has started ([DragStartDetails]) or not.
   final int buttons;
 
   @override
@@ -294,10 +282,6 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// The buttons that were pressed when the device first contacted the screen.
   ///
   /// For the format of this value, see [PointerEvent.buttons].
-  ///
-  /// Subsequent changes to the buttons pressed during the same drag sequence
-  /// will be reported in [DragUpdateDetails.buttons], regardless of whether the
-  /// drag has started ([DragStartDetails]) or not.
   final int buttons;
 
   @override
