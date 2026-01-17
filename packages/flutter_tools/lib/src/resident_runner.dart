@@ -19,6 +19,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -1064,6 +1065,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.machine = false,
     CommandHelp? commandHelp,
     this.dartBuilder,
+    ShutdownHooks? shutdownHooks,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packageConfigPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1079,10 +1081,12 @@ abstract class ResidentRunner extends ResidentHandlers {
              terminal: globals.terminal,
              platform: globals.platform,
              outputPreferences: globals.outputPreferences,
-           ) {
+           ),
+       shutdownHooks = shutdownHooks ?? globals.shutdownHooks {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    this.shutdownHooks.addShutdownHook(cleanupAtFinish);
   }
 
   @override
@@ -1110,6 +1114,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
+  final ShutdownHooks shutdownHooks;
 
   var _exited = false;
   var _finished = Completer<int>();
@@ -1365,6 +1370,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
+    final String appName = FlutterProject.current().manifest.appName;
     for (final FlutterDevice? device in flutterDevices) {
       await device!.connect(
         debuggingOptions: debuggingOptions,
@@ -1389,9 +1395,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       );
       _mdnsDiscoveries.add(mdnsDeviceDiscovery);
       await mdnsDeviceDiscovery.advertise(
-        appName: FlutterProject.fromDirectory(
-          globals.fs.directory(projectRootPath),
-        ).manifest.appName,
+        appName: appName,
         vmServiceUri: device.vmService!.httpAddress,
       );
 
