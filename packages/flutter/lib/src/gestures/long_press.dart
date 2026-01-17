@@ -339,7 +339,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
   OffsetPair? _longPressOrigin;
-  PointerDeviceKind? _kind;
+  late PointerDeviceKind _kind;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int? _initialButtons;
@@ -792,7 +792,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _kind!,
+            kind: _kind,
             buttons: _initialButtons!,
           );
           invokeCallback<void>('onLongPressStart', () => onLongPressStart!(details));
@@ -805,7 +805,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _kind!,
+            kind: _kind,
             buttons: _initialButtons!,
           );
           invokeCallback<void>(
@@ -821,7 +821,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           final details = LongPressStartDetails(
             globalPosition: _longPressOrigin!.global,
             localPosition: _longPressOrigin!.local,
-            kind: _kind!,
+            kind: _kind,
             buttons: _initialButtons!,
           );
           invokeCallback<void>(
