@@ -244,7 +244,7 @@ class PopupMenuThemeData with Diagnosticable {
         defaultValue: null,
       ),
     );
-    properties.add(EnumProperty<PopupMenuPosition?>('position', position, defaultValue: null));
+    properties.add(EnumProperty<PopupMenuPosition>('position', position, defaultValue: null));
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(DoubleProperty('iconSize', iconSize, defaultValue: null));
   }
