@@ -2075,20 +2075,17 @@ void main() {
   });
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
-  final controller = WidgetStatesController();
+    final controller = WidgetStatesController();
 
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Material(
-        child: ExpansionTile(
-          title: const Text('Tile'),
-          statesController: controller,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(title: const Text('Tile'), statesController: controller),
         ),
       ),
-    ),
-  );
+    );
 
-  final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
-  expect(listTile.statesController, controller);
-});
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, controller);
+  });
 }

@@ -485,7 +485,6 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
-
   /// Controls the [WidgetStates] of the internal [ListTile] used by this
   /// [ExpansionTile].
   ///
@@ -515,8 +514,6 @@ class ExpansionTile extends StatefulWidget {
   /// If null, the backing [ListTile] will create and manage its own
   /// [WidgetStatesController].
   final WidgetStatesController? statesController;
-
-
 
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
