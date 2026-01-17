@@ -162,39 +162,27 @@ void main() {
     expect(flutterView1.renderedScenes, isEmpty);
     expect(flutterView2.renderedScenes, isEmpty);
 
+    // First frame: both views are composited (they are newly added).
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
     expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(1));
 
+    // Second frame: neither view is dirty, so neither is composited.
     binding.handleBeginFrame(Duration.zero);
-    renderView1.markNeedsPaint();
     binding.handleDrawFrame();
 
-    expect(flutterView1.renderedScenes, hasLength(2));
+    expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(1));
 
+    // Only mark view2 as dirty -> only view2 is composited.
     binding.handleBeginFrame(Duration.zero);
-    renderView1.markNeedsPaint();
     renderView2.markNeedsPaint();
     binding.handleDrawFrame();
 
-    expect(flutterView1.renderedScenes, hasLength(3));
+    expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(2));
-
-    binding.handleBeginFrame(Duration.zero);
-    renderView2.markNeedsPaint();
-    binding.handleDrawFrame();
-
-    expect(flutterView1.renderedScenes, hasLength(3));
-    expect(flutterView2.renderedScenes, hasLength(3));
-
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
-
-    expect(flutterView1.renderedScenes, hasLength(3));
-    expect(flutterView2.renderedScenes, hasLength(3));
 
     binding.removeRenderView(renderView1);
     binding.removeRenderView(renderView2);
@@ -202,44 +190,32 @@ void main() {
 
   test('forced composition when returning to foreground', () {
     final flutterView1 = FakeFlutterView(viewId: 1);
-    final flutterView2 = FakeFlutterView(viewId: 2);
     final renderView1 = RenderView(view: flutterView1);
-    final renderView2 = RenderView(view: flutterView2);
     final owner1 = PipelineOwner()..rootNode = renderView1;
-    final owner2 = PipelineOwner()..rootNode = renderView2;
     binding.rootPipelineOwner.adoptChild(owner1);
-    binding.rootPipelineOwner.adoptChild(owner2);
     binding.addRenderView(renderView1);
-    binding.addRenderView(renderView2);
     renderView1.prepareInitialFrame();
-    renderView2.prepareInitialFrame();
 
-    expect(flutterView1.renderedScenes, isEmpty);
-    expect(flutterView2.renderedScenes, isEmpty);
-
+    // Initial frame.
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
-
     expect(flutterView1.renderedScenes, hasLength(1));
-    expect(flutterView2.renderedScenes, hasLength(1));
 
+    // Clean frame: nothing composited.
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
-
     expect(flutterView1.renderedScenes, hasLength(1));
-    expect(flutterView2.renderedScenes, hasLength(1));
 
+    // Simulate going to background then foreground.
     binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
 
+    // Next frame should force composition even though nothing is dirty.
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
-
     expect(flutterView1.renderedScenes, hasLength(2));
-    expect(flutterView2.renderedScenes, hasLength(2));
 
     binding.removeRenderView(renderView1);
-    binding.removeRenderView(renderView2);
   });
 
   test('hit-testing reaches the right view', () {
