@@ -245,7 +245,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         featureFlags: featureFlags,
       ),
       RunCommand(verboseHelp: verboseHelp),
-      RunningAppsCommand(logger: globals.logger),
+      RunningAppsCommand(logger: globals.logger, systemClock: globals.systemClock),
       ScreenshotCommand(fs: globals.fs),
       ShellCompletionCommand(),
       TestCommand(
