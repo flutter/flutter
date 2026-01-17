@@ -1587,6 +1587,52 @@ void main() {
     );
     expect(tester.getSize(find.byType(SegmentedButton<String>)), Size.zero);
   });
+
+  testWidgets('SegmentedButton should expand to fill the full width', (WidgetTester tester) async {
+    tester.view
+      ..physicalSize = const Size(800, 1200)
+      ..devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    const double screenWidth = 800;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                direction: Axis.vertical,
+                segments: const [
+                  ButtonSegment(value: 'All', label: Text('All')),
+                  ButtonSegment(value: 'Top free', label: Text('Top free')),
+                  ButtonSegment(value: 'Top paid', label: Text('Top paid')),
+                ],
+                selected: const {'All'},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderBox segmentedBox = tester.renderObject(find.byType(SegmentedButton<String>));
+
+    expect(segmentedBox.size.width, screenWidth);
+
+    final Finder segmentMaterials = find.descendant(
+      of: find.byType(SegmentedButton<String>),
+      matching: find.byType(Material),
+    );
+
+    for (final Element element in segmentMaterials.evaluate()) {
+      final segmentBox = element.renderObject! as RenderBox;
+
+      expect(segmentBox.size.width, screenWidth);
+    }
+  });
 }
 
 Set<WidgetState> enabled = const <WidgetState>{};
