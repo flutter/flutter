@@ -52,6 +52,224 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  group('FragmentProgram getUniform*', () {
+    late FragmentShader shader;
+
+    setUpAll(() async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+      shader = program.fragmentShader();
+    });
+
+    _runSkiaTest('FragmentProgram uniform info', () async {
+      final List<UniformFloatSlot> slots = [
+        shader.getUniformFloat('iFloatUniform'),
+        shader.getUniformFloat('iVec2Uniform', 0),
+        shader.getUniformFloat('iVec2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 0),
+        shader.getUniformFloat('iMat2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 2),
+        shader.getUniformFloat('iMat2Uniform', 3),
+      ];
+      for (var i = 0; i < slots.length; ++i) {
+        expect(slots[i].shaderIndex, equals(i));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat unknown', () async {
+      expect(
+        () {
+          shader.getUniformFloat('unknown');
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('No uniform named "unknown"'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformFloat offset overflow', () async {
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', 2),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `2` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformFloat offset underflow', () async {
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', -1),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `-1` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec2', () async {
+      final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
+      slot.set(6.0, 7.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec2 wrong size', () async {
+      expect(
+        () => shader.getUniformVec2('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 2.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec2('iFloatUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iFloatUniform` has size 1, not size 2.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec3', () async {
+      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+      slot.set(0.8, 0.1, 0.3);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec3 wrong size', () async {
+      expect(
+        () => shader.getUniformVec3('iVec2Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec2Uniform` has size 2, not size 3.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec3('iVec4Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec4Uniform` has size 4, not size 3.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec4', () async {
+      final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
+      slot.set(11.0, 22.0, 19.0, 96.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformVec4 wrong size', () async {
+      expect(
+        () => shader.getUniformVec4('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 4.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArray float', () async {
+      final UniformArray<UniformFloatSlot> slots = shader.getUniformFloatArray(
+        'iFloatArrayUniform',
+      );
+      expect(slots.length, 10);
+      slots[0].set(1.0);
+      slots[1].set(1.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArray not found', () async {
+      expect(
+        () => shader.getUniformFloatArray('unknown'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('No uniform named "unknown".'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec2', () async {
+      final UniformArray<UniformVec2Slot> slots = shader.getUniformVec2Array('iVec2ArrayUniform');
+      expect(slots.length, 3);
+      slots[0].set(1.0, 1.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec2 wrong type', () async {
+      expect(
+        () => shader.getUniformVec2Array('iVec3ArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec3', () async {
+      final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
+      expect(slots.length, 3);
+      slots[0].set(1.0, 1.0, 1.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec3 wrong type', () async {
+      expect(
+        () => shader.getUniformVec3Array('iFloatArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
+          ),
+        ),
+      );
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec4', () async {
+      final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
+      expect(slots.length, 3);
+      slots[0].set(1.0, 1.0, 1.0, 1.0);
+    });
+
+    _runSkiaTest('FragmentProgram getUniformArrayVec4 wrong type', () async {
+      expect(
+        () => shader.getUniformVec4Array('iFloatArrayUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 4.'),
+          ),
+        ),
+      );
+    });
+  });
+
   test('FragmentProgram getImageSampler', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
