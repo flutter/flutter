@@ -39,7 +39,10 @@ class _DatePickerSampleState extends State<DatePickerSample> {
       firstDate: DateTime(2021),
       lastDate: DateTime(2999, 7, 25),
       initialEntryMode: DatePickerEntryMode.input,
-      calendarDelegate: ConfigurableDateDelegate(formatType: _formatType, separator: _separator),
+      calendarDelegate: ConfigurableDateDelegate(
+        formatType: _formatType,
+        separator: _separator,
+      ),
     );
 
     if (result != null) {
@@ -53,7 +56,10 @@ class _DatePickerSampleState extends State<DatePickerSample> {
   Widget build(BuildContext context) {
     final String label = _selectedDate == null
         ? 'No date selected'
-        : DateInputFormatter(formatType: _formatType, separator: _separator.value).format(_selectedDate!);
+        : DateInputFormatter(
+            formatType: _formatType,
+            separator: _separator.value,
+          ).format(_selectedDate!);
 
     return Scaffold(
       appBar: AppBar(title: const Text('showDatePicker with input delegate')),
@@ -68,7 +74,12 @@ class _DatePickerSampleState extends State<DatePickerSample> {
               initialValue: _formatType,
               decoration: const InputDecoration(labelText: 'Date format'),
               items: DateInputFormat.values
-                  .map((DateInputFormat format) => DropdownMenuItem(value: format, child: Text(format.patternLabel)))
+                  .map(
+                    (DateInputFormat format) => DropdownMenuItem(
+                      value: format,
+                      child: Text(format.patternLabel),
+                    ),
+                  )
                   .toList(),
               onChanged: (DateInputFormat? value) {
                 if (value != null) {
@@ -81,7 +92,10 @@ class _DatePickerSampleState extends State<DatePickerSample> {
               initialValue: _separator,
               decoration: const InputDecoration(labelText: 'Separator'),
               items: DateSeparator.values
-                  .map((DateSeparator sep) => DropdownMenuItem(value: sep, child: Text(sep.value)))
+                  .map(
+                    (DateSeparator sep) =>
+                        DropdownMenuItem(value: sep, child: Text(sep.value)),
+                  )
                   .toList(),
               onChanged: (DateSeparator? value) {
                 if (value != null) {
@@ -92,7 +106,10 @@ class _DatePickerSampleState extends State<DatePickerSample> {
 
             const SizedBox(height: 24),
 
-            OutlinedButton(onPressed: _showPicker, child: const Text('Select date')),
+            OutlinedButton(
+              onPressed: _showPicker,
+              child: const Text('Select date'),
+            ),
           ],
         ),
       ),
@@ -105,7 +122,10 @@ enum DateInputFormat {
   monthDayYear(fieldLengths: [2, 2, 4], patternLabel: 'mm/dd/yyyy'),
   yearMonthDay(fieldLengths: [4, 2, 2], patternLabel: 'yyyy/mm/dd');
 
-  const DateInputFormat({required this.fieldLengths, required this.patternLabel});
+  const DateInputFormat({
+    required this.fieldLengths,
+    required this.patternLabel,
+  });
 
   final List<int> fieldLengths;
   final String patternLabel;
@@ -178,9 +198,15 @@ class DateInputFormatter extends TextInputFormatter {
   }
 
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-    final int maxLength = formatType.fieldLengths.fold<int>(0, (int a, int b) => a + b);
+    final int maxLength = formatType.fieldLengths.fold<int>(
+      0,
+      (int a, int b) => a + b,
+    );
 
     if (digits.length > maxLength) {
       return oldValue;
@@ -197,7 +223,11 @@ class DateInputFormatter extends TextInputFormatter {
     final StringBuffer buffer = StringBuffer();
     int offset = 0;
 
-    for (int i = 0; i < formatType.fieldLengths.length && offset < digits.length; i++) {
+    for (
+      int i = 0;
+      i < formatType.fieldLengths.length && offset < digits.length;
+      i++
+    ) {
       final int len = formatType.fieldLengths[i];
       final int end = (offset + len).clamp(0, digits.length);
       buffer.write(digits.substring(offset, end));
@@ -212,12 +242,16 @@ class DateInputFormatter extends TextInputFormatter {
 }
 
 class ConfigurableDateDelegate extends DateInputCalendarDelegate {
-  const ConfigurableDateDelegate({required this.formatType, this.separator = DateSeparator.slash});
+  const ConfigurableDateDelegate({
+    required this.formatType,
+    this.separator = DateSeparator.slash,
+  });
 
   final DateInputFormat formatType;
   final DateSeparator separator;
 
-  DateInputFormatter get _formatter => DateInputFormatter(formatType: formatType, separator: separator.value);
+  DateInputFormatter get _formatter =>
+      DateInputFormatter(formatType: formatType, separator: separator.value);
 
   @override
   List<TextInputFormatter> get inputFormatters => <TextInputFormatter>[
@@ -226,11 +260,18 @@ class ConfigurableDateDelegate extends DateInputCalendarDelegate {
   ];
 
   @override
-  String dateHelpText(MaterialLocalizations localizations) => _formatter.pattern;
+  String dateHelpText(MaterialLocalizations localizations) =>
+      _formatter.pattern;
 
   @override
-  String formatCompactDate(DateTime date, MaterialLocalizations localizations) => _formatter.format(date);
+  String formatCompactDate(
+    DateTime date,
+    MaterialLocalizations localizations,
+  ) => _formatter.format(date);
 
   @override
-  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) => _formatter.parse(inputString);
+  DateTime? parseCompactDate(
+    String? inputString,
+    MaterialLocalizations localizations,
+  ) => _formatter.parse(inputString);
 }
