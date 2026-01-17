@@ -859,9 +859,16 @@ class OffsetPair {
   String toString() => '${objectRuntimeType(this, 'OffsetPair')}(local: $local, global: $global)';
 }
 
+/// Data associated with a pointer event.
+///
+/// This is stored by [GestureRecognizer]s on a per-pointer basis.
 class _RecognizerEventData {
+  /// Creates a new [_RecognizerEventData].
   _RecognizerEventData({required this.kind, required this.buttons});
 
+  /// The kind of device that generated the event.
   final PointerDeviceKind kind;
+
+  /// The buttons that were pressed for this event.
   final int buttons;
 }
