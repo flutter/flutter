@@ -6,6 +6,7 @@
 /// @docImport 'text_field.dart';
 library;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
@@ -284,7 +285,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         autofocus: widget.autofocus,
         controller: _controller,
         focusNode: widget.focusNode,
+        inputFormatters: [...?_textInputFormatter],
       ),
     );
+  }
+
+  List<TextInputFormatter>? get _textInputFormatter {
+    return switch (widget.calendarDelegate) {
+      DateInputCalendarDelegate(:final List<TextInputFormatter>? inputFormatters) =>
+        inputFormatters,
+      _ => null,
+    };
   }
 }
