@@ -18,7 +18,7 @@ void main() {
 
     // RawTooltip is not visible before tapping the button.
     expect(find.text(rawTooltipText), findsNothing);
-    // Tap on the button and wait for the rawTooltip to appear.
+    // Tap on the button and wait for the tooltip to appear.
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(rawTooltipText), findsOneWidget);
