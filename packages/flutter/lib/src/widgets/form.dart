@@ -36,9 +36,7 @@ enum _FormValidation {
 
   /// Explicit validation via [FormState.validate] or
   /// [FormState.validateGranularly].
-  manual;
-
-  bool get isAuto => this == _FormValidation.auto;
+  manual,
 }
 
 // Examples can assume:
@@ -402,7 +400,9 @@ class FormState extends State<Form> {
     var errorMessage = '';
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (validation.isAuto && !field._shouldValidate && widget.useStrictAutovalidateMode) {
+      if (validation == _FormValidation.auto &&
+          !field._shouldValidate &&
+          widget.useStrictAutovalidateMode) {
         continue;
       }
 
@@ -842,26 +842,26 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       child: widget.builder(this),
     );
 
-    // TODO(Mairramer): Refactor this to use switch case instead.
-    if (_formState?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
-            widget.autovalidateMode != AutovalidateMode.always ||
-        widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      return Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: (bool value) {
-          if (!value) {
-            setState(() {
-              _validate();
-            });
-          }
-        },
-        focusNode: _focusNode,
-        child: child,
-      );
-    }
-
-    return child;
+    return switch (_formState?.widget.autovalidateMode) {
+      AutovalidateMode.onUnfocus
+          when switch (widget.autovalidateMode) {
+            AutovalidateMode.always => false,
+            AutovalidateMode.onUnfocus => true,
+            _ => true,
+          } =>
+        Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onFocusChange: (bool value) {
+            if (!value) {
+              setState(_validate);
+            }
+          },
+          focusNode: _focusNode,
+          child: child,
+        ),
+      _ => child,
+    };
   }
 }
 
