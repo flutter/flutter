@@ -226,6 +226,63 @@ void main() {
     expect(pageTwoYOffset, greaterThan(pageOneOffset.dy));
   });
 
+  testWidgets(
+    'A blur on the page does not go outside the rounded corner',
+    (WidgetTester tester) async {
+      final GlobalKey appKey = GlobalKey();
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          key: appKey,
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            navigationBar: const CupertinoNavigationBar.large(
+              largeTitle: Text('Sheet Example'),
+              backgroundColor: Color(0x85F9F9F9),
+              transitionBetweenRoutes: false,
+              automaticBackgroundVisibility: false,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 500,
+                    color: CupertinoColors.activeOrange,
+                    child: const Center(child: Text('Entry A')),
+                  ),
+                  Container(
+                    height: 500,
+                    color: CupertinoColors.activeGreen,
+                    child: const Center(child: Text('Entry B')),
+                  ),
+                  Container(
+                    height: 500,
+                    color: CupertinoColors.activeBlue,
+                    child: const Center(child: Text('Entry C')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Navigator.of(scaffoldKey.currentContext!).push(
+        CupertinoSheetRoute<void>(
+          builder: (BuildContext context) {
+            return const CupertinoPageScaffold(child: Text('Page 2'));
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('Page 2'), findsOneWidget);
+      await expectLater(find.byKey(appKey), matchesGoldenFile('cupertinoSheetRoute.blur.png'));
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
+
   testWidgets('If a sheet covers another sheet, then the previous sheet moves slightly upwards', (
     WidgetTester tester,
   ) async {

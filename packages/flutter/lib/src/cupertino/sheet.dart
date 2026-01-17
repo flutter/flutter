@@ -336,13 +336,13 @@ class CupertinoSheetTransition extends StatefulWidget {
             alignment: Alignment.topCenter,
             child: AnimatedBuilder(
               animation: radiusAnimation,
-              child: child,
+              child: ClipRect(child: contrastedChild),
               builder: (BuildContext context, Widget? child) {
                 return ClipRSuperellipse(
                   borderRadius: !secondaryAnimation.isDismissed
                       ? radiusAnimation.value
                       : BorderRadius.circular(0),
-                  child: contrastedChild,
+                  child: child,
                 );
               },
             ),
@@ -656,11 +656,13 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: ClipRSuperellipse(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        child: CupertinoUserInterfaceLevel(
-          data: CupertinoUserInterfaceLevelData.elevated,
-          child: _CupertinoSheetScope(child: _sheetWithDragHandle(context)),
+      child: ClipRect(
+        child: ClipRSuperellipse(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: CupertinoUserInterfaceLevel(
+            data: CupertinoUserInterfaceLevelData.elevated,
+            child: _CupertinoSheetScope(child: _sheetWithDragHandle(context)),
+          ),
         ),
       ),
     );
