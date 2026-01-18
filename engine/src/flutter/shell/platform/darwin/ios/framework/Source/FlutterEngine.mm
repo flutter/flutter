@@ -561,30 +561,18 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (currentController == nil && viewController != nil) {
     // From nil to non-nil.
     [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
-  } else if (currentController != nil && viewController == nil) {
-    NSAssert(currentController.viewIdentifier == flutter::kFlutterImplicitViewId,
-             @"The default controller has an unexpected ID %llu", currentController.viewIdentifier);
-    // From non-nil to nil.
-    [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
-  } else {
-    // From non-nil to a different non-nil view controller.
-    if (currentController) {
-      NSString* errorMessage =
-          [NSString stringWithFormat:
-                        @"The supplied FlutterEngine %@ is already used with FlutterViewController "
-                         "instance %@. One instance of the FlutterEngine can only be attached to "
-                         "one FlutterViewController at a time. Set FlutterEngine.viewController to "
-                         "nil before attaching it to another FlutterViewController.",
-                        self.description, currentController.description];
-      [FlutterLogger logError:errorMessage];
+  } else if (currentController != nil) {
+    if (viewController != nil) {
+      // Swap the existing `FlutterViewController` for backward compatibly
+      [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
+    } else {
+      [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
     }
   }
 }
 
 - (void)registerViewController:(FlutterViewController*)controller
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
-           @"The requested view ID is occupied.");
   [_viewControllers setObject:controller forKey:@(viewIdentifier)];
   [controller setupViewIdentifier:viewIdentifier];
    NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
@@ -629,16 +617,19 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if ([_viewControllers count] == 1 ) {
     [self notifyLowMemory];
   }
-  bool removed = NO;
-  dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-
-    self.platformView->RemoveView(viewIdentifier, [&removed, &sem](bool result) {
-        removed = result;
-        dispatch_semaphore_signal(sem);
-    });
-
-  dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
-
+  {
+    if (viewIdentifier != flutter::kFlutterImplicitViewId) {
+      bool removed = NO;
+      dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+      self.platformView->RemoveView(viewIdentifier, [&removed, &sem](bool result) {
+          removed = result;
+          dispatch_semaphore_signal(sem);
+      });
+      dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+      // The callback should be called synchronously from platform thread.
+      FML_DCHECK(removed);
+    }
+  }
   self.platformView->RemoveOwnerViewController(viewIdentifier);
 
   [_viewControllers removeObjectForKey:@(viewIdentifier)];

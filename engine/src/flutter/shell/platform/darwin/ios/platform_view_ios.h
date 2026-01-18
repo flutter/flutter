@@ -189,7 +189,6 @@ class PlatformViewIOS final : public PlatformView {
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
   std::shared_ptr<IOSSurfacesManager> ios_surfaces_manager_;
-  int active_surface_layers_ = 0;
   // It can't use NSDictionary, because the values need to be weak references.
   NSMapTable* viewControllers_;
 
