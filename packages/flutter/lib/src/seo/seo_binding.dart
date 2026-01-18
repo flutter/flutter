@@ -23,7 +23,7 @@ import 'seo_tree.dart';
 /// }
 /// ```
 ///
-/// For most apps, simply use [SeoTreeRoot] at the top of your widget tree.
+/// For most apps, use [SeoTreeRoot] at the top of your widget tree.
 ///
 /// {@category SEO}
 mixin SeoBinding on BindingBase {

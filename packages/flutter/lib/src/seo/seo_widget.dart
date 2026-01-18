@@ -15,7 +15,7 @@ import 'seo_tree.dart';
 /// HTML element in the SEO Shadow Tree. This element is hidden from users
 /// but visible to search engine crawlers.
 ///
-/// On non-web platforms, this widget simply returns its [child] with no
+/// On non-web platforms, this widget returns its [child] with no
 /// additional behavior.
 ///
 /// ## Basic Usage
@@ -251,7 +251,7 @@ class _SeoState extends State<Seo> {
 
   @override
   Widget build(BuildContext context) {
-    // Simply return the child - visual rendering is unchanged
+    // Return the child - visual rendering is unchanged
     return widget.child;
   }
 }
