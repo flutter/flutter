@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'seo_node.dart';
@@ -189,7 +190,7 @@ class _SeoState extends State<Seo> {
 
   void _registerWithSeoTree() {
     // Only register on web platform
-    if (!_isWebPlatform) {
+    if (!kIsWeb) {
       return;
     }
 
@@ -226,7 +227,7 @@ class _SeoState extends State<Seo> {
 
     return SeoNode(
       tag: widget.tag,
-      text: text,
+      textContent: text,
       attributes: widget.attributes,
     );
   }
@@ -248,13 +249,6 @@ class _SeoState extends State<Seo> {
     return true;
   }
 
-  // Platform detection - in real implementation, use proper conditional imports
-  bool get _isWebPlatform {
-    // This would use conditional compilation in production:
-    // import 'seo_stub.dart' if (dart.library.html) 'seo_web.dart';
-    return true; // Placeholder
-  }
-
   @override
   Widget build(BuildContext context) {
     // Simply return the child - visual rendering is unchanged
@@ -262,39 +256,39 @@ class _SeoState extends State<Seo> {
   }
 }
 
-/// Provides semantic text content for SEO without wrapping in an element.
+/// Provides semantic text content for SEO.
 ///
-/// Use this when you need to provide SEO text that doesn't correspond to
-/// a specific HTML element, such as for complex custom widgets.
+/// A convenience widget that wraps text with an SEO tag.
 ///
 /// ```dart
-/// SeoText(
-///   text: 'Important information',
-///   child: MyComplexWidget(),
-/// )
+/// SeoText('Hello World', tag: SeoTag.h1)
 /// ```
 ///
 /// {@category SEO}
 class SeoText extends StatelessWidget {
-  /// Creates an SEO text provider.
-  const SeoText({
+  /// Creates an SEO text widget.
+  const SeoText(
+    this.text, {
     super.key,
-    required this.text,
-    required this.child,
+    this.tag = SeoTag.span,
+    this.style,
   });
 
-  /// The text content for SEO purposes.
+  /// The text content to display and index.
   final String text;
 
-  /// The Flutter widget to render visually.
-  final Widget child;
+  /// The HTML tag to use for SEO.
+  final SeoTag tag;
+
+  /// Optional text style.
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
     return Seo(
-      tag: SeoTag.span,
+      tag: tag,
       text: text,
-      child: child,
+      child: Text(text, style: style),
     );
   }
 }

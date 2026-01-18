@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/widgets.dart';
+
+import 'seo_tree.dart';
 
 /// A widget that injects page-level SEO metadata into the document head.
 ///
@@ -174,30 +174,38 @@ class _SeoHeadState extends State<SeoHead> {
     return widget.title != oldWidget.title ||
         widget.description != oldWidget.description ||
         widget.canonicalUrl != oldWidget.canonicalUrl ||
-        widget.ogImage != oldWidget.ogImage;
-    // Add more comparisons as needed
+        widget.ogTitle != oldWidget.ogTitle ||
+        widget.ogDescription != oldWidget.ogDescription ||
+        widget.ogImage != oldWidget.ogImage ||
+        widget.ogType != oldWidget.ogType ||
+        widget.twitterCard != oldWidget.twitterCard ||
+        widget.robots != oldWidget.robots;
   }
 
   void _updateDocumentHead() {
-    // In web implementation, this would use dart:html to update document.head
-    // For now, this is a placeholder showing the intended structure
-
-    // On non-web platforms, this is a no-op
-    if (!_isWebPlatform) {
+    // Get the SEO tree manager from context
+    final seoTree = SeoTree.maybeOf(context);
+    if (seoTree == null || !seoTree.isSupported) {
       return;
     }
 
-    // The actual web implementation would do:
-    // import 'dart:html' as html;
-    // html.document.title = widget.title;
-    // _setMetaTag('description', widget.description);
-    // _setMetaTag('og:title', widget.ogTitle ?? widget.title);
-    // etc.
-
-    debugPrint('SeoHead: Updating document head with title: ${widget.title}');
+    // Update the document head via the SEO tree manager
+    seoTree.updateHead(
+      title: widget.title,
+      description: widget.description,
+      canonicalUrl: widget.canonicalUrl,
+      ogTitle: widget.ogTitle ?? widget.title,
+      ogDescription: widget.ogDescription ?? widget.description,
+      ogImage: widget.ogImage,
+      ogUrl: widget.canonicalUrl,
+      ogType: widget.ogType,
+      twitterCard: widget.twitterCard.value,
+      twitterTitle: widget.ogTitle ?? widget.title,
+      twitterDescription: widget.ogDescription ?? widget.description,
+      twitterImage: widget.ogImage,
+      robots: widget.robots?.toContentString(),
+    );
   }
-
-  bool get _isWebPlatform => true; // Placeholder
 
   @override
   Widget build(BuildContext context) {

@@ -6,6 +6,8 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 
+import 'seo_tree.dart';
+
 /// A widget that injects JSON-LD structured data for rich search results.
 ///
 /// Structured data helps search engines understand your content and can
@@ -86,6 +88,8 @@ class SeoStructuredData extends StatefulWidget {
 }
 
 class _SeoStructuredDataState extends State<SeoStructuredData> {
+  String? _scriptId;
+
   @override
   void initState() {
     super.initState();
@@ -107,9 +111,18 @@ class _SeoStructuredDataState extends State<SeoStructuredData> {
   }
 
   void _injectStructuredData() {
-    // In web implementation, this would inject a <script type="application/ld+json">
-    // element into the document head
-    debugPrint('SeoStructuredData: Injecting ${widget.data['@type']}');
+    // Get the SEO tree manager from context
+    final seoTree = SeoTree.maybeOf(context);
+    if (seoTree == null || !seoTree.isSupported) {
+      return;
+    }
+
+    // Generate unique ID for this script element
+    _scriptId = 'seo-ld-${widget.hashCode}';
+
+    // Convert data to JSON and inject via the tree manager
+    final jsonString = jsonEncode(widget.data);
+    seoTree.addStructuredData(_scriptId!, jsonString);
   }
 
   void _updateStructuredData() {
@@ -118,7 +131,17 @@ class _SeoStructuredDataState extends State<SeoStructuredData> {
   }
 
   void _removeStructuredData() {
-    // Remove the injected script element
+    if (_scriptId == null) {
+      return;
+    }
+
+    final seoTree = SeoTree.maybeOf(context);
+    if (seoTree == null || !seoTree.isSupported) {
+      return;
+    }
+
+    seoTree.removeStructuredData(_scriptId!);
+    _scriptId = null;
   }
 
   bool _mapEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
