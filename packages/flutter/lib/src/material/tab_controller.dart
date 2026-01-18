@@ -390,11 +390,12 @@ class DefaultTabController extends StatefulWidget {
   const DefaultTabController.controlled({
     super.key,
     required this.length,
-    required this.index,
+    required int this.index,
     this.animationDuration,
     required this.child,
   }) : assert(length >= 0),
-       initialIndex = 0;
+        assert(length == 0 || (index >= 0 && index < length)),
+        initialIndex = 0;
 
   /// The total number of tabs.
   ///
@@ -555,7 +556,7 @@ class _DefaultTabControllerState extends State<DefaultTabController>
     if (oldWidget.index == null || widget.index == null) {
       return;
     }
-    if (oldWidget.index != widget.index) {
+    if (widget.index != null && oldWidget.index != widget.index) {
       if (_controller.index != widget.index) {
         _controller.animateTo(widget.index!);
       }
