@@ -751,7 +751,6 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
       widget.trailingIconFocusNode ?? (_localTrailingIconButtonFocusNode ??= FocusNode());
-  FocusNode get _effectiveTextFieldFocusNode => widget.focusNode ?? _internalFocudeNode;
   T? _lastSelectedValue;
 
   @override
@@ -773,12 +772,16 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
     }
     refreshLeadingPadding();
     _controller = widget.menuController ?? MenuController();
-    _effectiveTextFieldFocusNode.addListener(_handleFocusChange);
+    if (widget.focusNode != null) {
+      widget.focusNode!.addListener(_handleFocusChange);
+    }
   }
 
   @override
   void dispose() {
-    _effectiveTextFieldFocusNode.removeListener(_handleFocusChange);
+    if (widget.focusNode != null) {
+      widget.focusNode!.removeListener(_handleFocusChange);
+    }
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
     _internalFocudeNode.dispose();
@@ -830,11 +833,11 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       _controller = widget.menuController ?? MenuController();
     }
     if (oldWidget.focusNode != widget.focusNode) {
-      final FocusNode oldEffectiveFocusNode = oldWidget.focusNode ?? _internalFocudeNode;
-      final FocusNode newEffectiveFocusNode = widget.focusNode ?? _internalFocudeNode;
-      if (oldEffectiveFocusNode != newEffectiveFocusNode) {
-        oldEffectiveFocusNode.removeListener(_handleFocusChange);
-        newEffectiveFocusNode.addListener(_handleFocusChange);
+      if (oldWidget.focusNode != null) {
+        oldWidget.focusNode!.removeListener(_handleFocusChange);
+      }
+      if (widget.focusNode != null) {
+        widget.focusNode!.addListener(_handleFocusChange);
       }
     }
   }
@@ -1137,11 +1140,11 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   }
 
   void _handleFocusChange() {
-    if (!_effectiveTextFieldFocusNode.hasFocus) {
-      if (widget.clearOnBlur) {
-        final T? restoredValue = _restoreSelectionFromText();
-        widget.onSelected?.call(restoredValue);
-      }
+    // This method is only called when widget.focusNode is not null
+    assert(widget.focusNode != null);
+    if (!widget.focusNode!.hasFocus && widget.clearOnBlur) {
+      final T? restoredValue = _restoreSelectionFromText();
+      widget.onSelected?.call(restoredValue);
       if (!widget.enableSearch) {
         currentHighlight = null;
       }
@@ -1187,6 +1190,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
             text: entry.label,
             selection: TextSelection.collapsed(offset: entry.label.length),
           );
+          _lastSelectedValue = entry.value;
           widget.onSelected?.call(entry.value);
         }
       } else {
@@ -1297,11 +1301,13 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       menuChildren: menu,
       crossAxisUnconstrained: false,
       onClose: () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _effectiveTextFieldFocusNode.hasFocus && !_controller.isOpen) {
-            _effectiveTextFieldFocusNode.unfocus();
-          }
-        });
+        if (widget.clearOnBlur) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && widget.focusNode != null && widget.focusNode!.hasFocus && !_controller.isOpen) {
+              widget.focusNode!.unfocus();
+            }
+          });
+        }
       },
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
@@ -1356,7 +1362,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               key: _anchorKey,
               enabled: widget.enabled,
               mouseCursor: effectiveMouseCursor,
-              focusNode: _effectiveTextFieldFocusNode,
+              focusNode: widget.focusNode,
               canRequestFocus: canRequestFocus(),
               enableInteractiveSelection: !isButton,
               readOnly: isButton,
