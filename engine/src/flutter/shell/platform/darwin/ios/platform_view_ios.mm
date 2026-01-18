@@ -46,16 +46,6 @@ void RemoveSurface(int64_t view_id) {
   ios_surfaces_.erase(view_id);
 }
 
-IOSSurface* GetSurface(int64_t view_id) const {
-  std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
-  auto iter = ios_surfaces_.find(view_id);
-  if (iter != ios_surfaces_.end()) {
-      return iter->second.get();
-  }
-
-  return nullptr;
-}
-
 std::unique_ptr<Surface> CreateGPUSurface() {
   // Create a dump `GPUSurfaceMetalImpeller`
   std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
@@ -67,7 +57,7 @@ std::unique_ptr<Surface> CreateGPUSurface() {
   return nullptr;
 }
 
-int SurfaceCount() const {
+int ActiveRenderingSurfaceCount() const {
   return rendering_surface_.size();
 }
 
@@ -99,20 +89,29 @@ std::unique_ptr<SurfaceFrame> CreateSurfaceFrame(int64_t flutter_view_id, DlISiz
     return nullptr;
 }
 
-  private:
+private:
+  IOSSurface* GetSurface(int64_t view_id) const {
+    std::shared_lock<std::shared_mutex> lock(ios_surface_mutex_);
+    auto iter = ios_surfaces_.find(view_id);
+    if (iter != ios_surfaces_.end()) {
+        return iter->second.get();
+    }
 
-    const std::shared_ptr<impeller::Context> impeller_context_;
-    std::shared_ptr<impeller::AiksContext> aiks_context_;
+    return nullptr;
+  }
 
-    std::unordered_map<int64_t, std::unique_ptr<IOSSurface>> ios_surfaces_;
+  const std::shared_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
 
-    std::unordered_map<int64_t, std::unique_ptr<Surface>> rendering_surface_;
+  std::unordered_map<int64_t, std::unique_ptr<IOSSurface>> ios_surfaces_;
 
-    // Since the `ios_surface_` is created on the platform thread but
-    // used on the raster thread we need to protect it with a mutex.
-    mutable std::shared_mutex ios_surface_mutex_;
+  std::unordered_map<int64_t, std::unique_ptr<Surface>> rendering_surface_;
 
-    FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfacesManager);
+  // Since the `ios_surface_` is created on the platform thread but
+  // used on the raster thread we need to protect it with a mutex.
+  mutable std::shared_mutex ios_surface_mutex_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfacesManager);
 };
 
 PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
@@ -147,19 +146,15 @@ PlatformViewIOS::PlatformViewIOS(
 PlatformViewIOS::~PlatformViewIOS() = default;
 
 void PlatformViewIOS::NotifyCreated(int64_t view_id) {
-  if (active_surface_layers_ == 0) {
+  if (ios_surfaces_manager_->ActiveRenderingSurfaceCount() == 0) {
     PlatformView::NotifyCreated();
   }
-  active_surface_layers_++;
 
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
   fml::ManualResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(), [&latch, surfaces_manager_ptr, view_id]() {
-
         surfaces_manager_ptr->CreateRenderingSurfaceForView(view_id);
-
-
         latch.Signal();
       });
   latch.Wait();
@@ -170,8 +165,7 @@ void PlatformViewIOS::NotifyDestroyed() {
 }
 
 void PlatformViewIOS::NotifyDestroyed(int64_t view_id) {
-  active_surface_layers_--;
-  if (active_surface_layers_ == 0) {
+  if (ios_surfaces_manager_->ActiveRenderingSurfaceCount() == 1) {
     PlatformView::NotifyDestroyed();
   }
   IOSSurfacesManager* surfaces_manager_ptr = ios_surfaces_manager_.get();
@@ -321,10 +315,7 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FlutterViewController* owner_controller =
-      [viewControllers_ objectForKey:@(view_id)];
-  FML_DCHECK(owner_controller);
-
+  FlutterViewController* owner_controller = [viewControllers_ objectForKey:@(view_id)];
   if (owner_controller) {
     auto iter = accessibility_bridges_.find(owner_controller.viewIdentifier);
     if (iter != accessibility_bridges_.end()) {
