@@ -476,6 +476,29 @@ bool Rasterizer::MakeRenderContextCurrent() {
   return snapshot_controller_->MakeRenderContextCurrent();
 }
 
+// |SnapshotDelegate|
+sk_sp<DlImage> Rasterizer::CreateImageFromTexture(int64_t texture_id) {
+  auto texture_registry = GetTextureRegistry();
+  if (!texture_registry) {
+    return nullptr;
+  }
+
+  auto texture = texture_registry->GetTexture(texture_id);
+  if (!texture) {
+    return nullptr;
+  }
+
+#if IMPELLER_SUPPORTS_RENDERING
+  auto aiks_context = GetAiksContext();
+  if (!aiks_context) {
+    return nullptr;
+  }
+  return texture->CreateDlImage(aiks_context.get());
+#else
+  return nullptr;
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
 fml::Milliseconds Rasterizer::GetFrameBudget() const {
   return delegate_.GetFrameBudget();
 };

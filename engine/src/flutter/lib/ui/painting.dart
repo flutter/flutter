@@ -1983,6 +1983,40 @@ class Image {
   /// allows multiple callbacks.
   static ImageEventCallback? onDispose;
 
+  /// Creates an [Image] from a registered texture's current content.
+  ///
+  /// The [textureId] must be a texture previously registered via the
+  /// platform's texture registry (e.g., `FlutterTextureRegistry` on iOS).
+  ///
+  /// This method enables zero-copy image creation from platform-decoded
+  /// content such as hardware-decoded images, video frames, or camera feeds.
+  /// The returned image is a snapshot of the texture content at the time of
+  /// the call - it will not update when the texture changes.
+  ///
+  /// Throws an exception if the texture is not registered or cannot be
+  /// converted to an image.
+  ///
+  /// This method is only supported when using the Impeller rendering backend.
+  static Future<Image> fromTextureId(int textureId) async {
+    final Completer<Image> completer = Completer<Image>();
+    _createImageFromTextureId(textureId, (_Image? image, String? error) {
+      if (image != null) {
+        completer.complete(Image._(image, image.width, image.height));
+      } else {
+        completer.completeError(
+          Exception(error ?? 'Failed to create image from texture $textureId'),
+        );
+      }
+    });
+    return completer.future;
+  }
+
+  @Native<Void Function(Int64, Handle)>(symbol: 'CreateImageFromTextureId')
+  external static void _createImageFromTextureId(
+    int textureId,
+    void Function(_Image?, String?) callback,
+  );
+
   StackTrace? _debugStack;
 
   /// The number of image pixels along the image's horizontal axis.

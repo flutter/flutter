@@ -102,6 +102,23 @@ class SnapshotDelegate {
   ///
   /// Impeller only.
   virtual bool MakeRenderContextCurrent() = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a DlImage from a registered texture's current content.
+  ///
+  ///             This enables zero-copy image creation from platform-decoded
+  ///             content. The returned image is independent of the texture -
+  ///             it captures the current content and will not update when the
+  ///             texture changes.
+  ///
+  ///             Must be called on the raster thread.
+  ///
+  /// @param[in]  texture_id  The ID of a registered texture.
+  ///
+  /// @return     A DlImage snapshot, or nullptr if the texture is not found
+  ///             or cannot be converted.
+  ///
+  virtual sk_sp<DlImage> CreateImageFromTexture(int64_t texture_id) = 0;
 };
 
 }  // namespace flutter
