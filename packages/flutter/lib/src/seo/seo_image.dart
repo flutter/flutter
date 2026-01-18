@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'seo_tag.dart';
 import 'seo_widget.dart';
@@ -121,12 +121,7 @@ class SeoImage extends StatelessWidget {
       height: height,
       loading: loading,
       title: title,
-      child: Image.asset(
-        assetPath,
-        width: width?.toDouble(),
-        height: height?.toDouble(),
-        fit: fit,
-      ),
+      child: Image.asset(assetPath, width: width?.toDouble(), height: height?.toDouble(), fit: fit),
     );
   }
 
@@ -266,11 +261,9 @@ class SeoFigure extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (captionWidget != null && captionPosition == SeoCaptionPosition.top)
-            captionWidget,
+          if (captionWidget != null && captionPosition == SeoCaptionPosition.top) captionWidget,
           child,
-          if (captionWidget != null && captionPosition == SeoCaptionPosition.bottom)
-            captionWidget,
+          if (captionWidget != null && captionPosition == SeoCaptionPosition.bottom) captionWidget,
         ],
       ),
     );

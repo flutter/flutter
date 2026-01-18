@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'seo_head.dart';
-import 'seo_tree.dart';
 
 /// SEO-aware router integration for generating proper URLs and sitemaps.
 ///
@@ -51,10 +50,7 @@ import 'seo_tree.dart';
 /// {@category SEO}
 class SeoRouter {
   /// Creates an SEO router.
-  const SeoRouter({
-    required this.baseUrl,
-    required this.routes,
-  });
+  const SeoRouter({required this.baseUrl, required this.routes});
 
   /// The base URL for the website (e.g., 'https://example.com').
   final String baseUrl;
@@ -66,8 +62,7 @@ class SeoRouter {
   Future<String> generateSitemap() async {
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-    buffer.writeln(
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    buffer.writeln('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
 
     for (final route in routes) {
       final paths = await _getPathsForRoute(route);
@@ -76,12 +71,10 @@ class SeoRouter {
         buffer.writeln('  <url>');
         buffer.writeln('    <loc>$baseUrl$path</loc>');
         if (route.lastModified != null) {
-          buffer.writeln(
-              '    <lastmod>${_formatDate(route.lastModified!)}</lastmod>');
+          buffer.writeln('    <lastmod>${_formatDate(route.lastModified!)}</lastmod>');
         }
         if (route.changeFrequency != null) {
-          buffer.writeln(
-              '    <changefreq>${route.changeFrequency!.value}</changefreq>');
+          buffer.writeln('    <changefreq>${route.changeFrequency!.value}</changefreq>');
         }
         if (route.priority != null) {
           buffer.writeln('    <priority>${route.priority}</priority>');
@@ -153,10 +146,7 @@ class SeoRouter {
 
   bool _matchesPattern(String pattern, String path) {
     // Convert pattern like /products/:id to regex
-    final regexPattern = pattern.replaceAllMapped(
-      RegExp(r':(\w+)'),
-      (match) => r'([^/]+)',
-    );
+    final regexPattern = pattern.replaceAllMapped(RegExp(r':(\w+)'), (match) => r'([^/]+)');
     return RegExp('^$regexPattern\$').hasMatch(path);
   }
 }
@@ -212,10 +202,7 @@ class SeoRoute {
   final bool nofollow;
 
   /// Gets the robots directive for this route.
-  SeoRobots get robots => SeoRobots(
-        index: !noindex,
-        follow: !nofollow,
-      );
+  SeoRobots get robots => SeoRobots(index: !noindex, follow: !nofollow);
 }
 
 /// Sitemap change frequency values.

@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'dart:convert';
 
 import 'seo_node.dart';
+import 'seo_tag.dart';
 
 /// Web implementation of SEO DOM operations.
 ///
@@ -48,9 +49,10 @@ class SeoDomOperations {
     final body = html.document.body;
     if (body != null) {
       // Find the Flutter canvas/glass-pane
-      final flutterRoot = body.querySelector('flt-glass-pane') ??
-                          body.querySelector('flutter-view') ??
-                          body.firstChild;
+      final flutterRoot =
+          body.querySelector('flt-glass-pane') ??
+          body.querySelector('flutter-view') ??
+          body.firstChild;
 
       if (flutterRoot != null && flutterRoot.nextNode != null) {
         body.insertBefore(_rootElement!, flutterRoot.nextNode);

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'seo_tag.dart';
 import 'seo_widget.dart';
@@ -50,20 +50,12 @@ import 'seo_widget.dart';
 /// {@category SEO}
 class SeoList extends StatelessWidget {
   /// Creates an unordered SEO list.
-  const SeoList({
-    super.key,
-    required this.items,
-    this.itemTexts,
-    this.spacing = 8.0,
-  }) : ordered = false;
+  const SeoList({super.key, required this.items, this.itemTexts, this.spacing = 8.0})
+    : ordered = false;
 
   /// Creates an ordered SEO list.
-  const SeoList.ordered({
-    super.key,
-    required this.items,
-    this.itemTexts,
-    this.spacing = 8.0,
-  }) : ordered = true;
+  const SeoList.ordered({super.key, required this.items, this.itemTexts, this.spacing = 8.0})
+    : ordered = true;
 
   /// The list item widgets.
   final List<Widget> items;
@@ -100,17 +92,9 @@ class SeoList extends StatelessWidget {
         result.add(SizedBox(height: spacing));
       }
 
-      final itemText = itemTexts != null && i < itemTexts!.length
-          ? itemTexts![i]
-          : null;
+      final itemText = itemTexts != null && i < itemTexts!.length ? itemTexts![i] : null;
 
-      result.add(
-        Seo(
-          tag: SeoTag.li,
-          text: itemText,
-          child: items[i],
-        ),
-      );
+      result.add(Seo(tag: SeoTag.li, text: itemText, child: items[i]));
     }
 
     return result;
@@ -184,14 +168,9 @@ class SeoListBuilder extends StatelessWidget {
         itemCount: itemCount,
         itemBuilder: (context, index) {
           final text = itemTextExtractor?.call(index);
-          return Seo(
-            tag: SeoTag.li,
-            text: text,
-            child: itemBuilder(context, index),
-          );
+          return Seo(tag: SeoTag.li, text: text, child: itemBuilder(context, index));
         },
-        separatorBuilder: separatorBuilder ??
-            (context, index) => const SizedBox(height: 8),
+        separatorBuilder: separatorBuilder ?? (context, index) => const SizedBox(height: 8),
       ),
     );
   }
@@ -219,11 +198,7 @@ class SeoListBuilder extends StatelessWidget {
 /// {@category SEO}
 class SeoDefinitionList extends StatelessWidget {
   /// Creates an SEO definition list.
-  const SeoDefinitionList({
-    super.key,
-    required this.items,
-    this.spacing = 16.0,
-  });
+  const SeoDefinitionList({super.key, required this.items, this.spacing = 16.0});
 
   /// The definition items.
   final List<SeoDefinitionItem> items;
@@ -255,17 +230,11 @@ class SeoDefinitionList extends StatelessWidget {
           text: item.term,
           child: Text(
             item.term,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 4),
-        Seo(
-          tag: SeoTag.p,
-          text: item.definition,
-          child: Text(item.definition),
-        ),
+        Seo(tag: SeoTag.p, text: item.definition, child: Text(item.definition)),
       ],
     );
   }
@@ -274,10 +243,7 @@ class SeoDefinitionList extends StatelessWidget {
 /// An item in a definition list.
 class SeoDefinitionItem {
   /// Creates a definition item.
-  const SeoDefinitionItem({
-    required this.term,
-    required this.definition,
-  });
+  const SeoDefinitionItem({required this.term, required this.definition});
 
   /// The term being defined.
   final String term;

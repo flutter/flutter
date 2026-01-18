@@ -68,11 +68,7 @@ import 'seo_tree.dart';
 /// {@category SEO}
 class SeoStructuredData extends StatefulWidget {
   /// Creates a structured data widget with raw JSON-LD data.
-  const SeoStructuredData({
-    super.key,
-    required this.data,
-    required this.child,
-  });
+  const SeoStructuredData({super.key, required this.data, required this.child});
 
   /// The JSON-LD structured data.
   ///
@@ -216,20 +212,16 @@ class SeoSchema {
       '@context': 'https://schema.org',
       '@type': 'Article',
       'headline': headline,
-      if (author != null)
-        'author': {'@type': 'Person', 'name': author},
-      if (datePublished != null)
-        'datePublished': datePublished.toIso8601String(),
-      if (dateModified != null)
-        'dateModified': dateModified.toIso8601String(),
+      if (author != null) 'author': {'@type': 'Person', 'name': author},
+      if (datePublished != null) 'datePublished': datePublished.toIso8601String(),
+      if (dateModified != null) 'dateModified': dateModified.toIso8601String(),
       if (image != null) 'image': image,
       if (description != null) 'description': description,
       if (publisher != null)
         'publisher': {
           '@type': 'Organization',
           'name': publisher,
-          if (publisherLogo != null)
-            'logo': {'@type': 'ImageObject', 'url': publisherLogo},
+          if (publisherLogo != null) 'logo': {'@type': 'ImageObject', 'url': publisherLogo},
         },
     };
   }
@@ -237,9 +229,7 @@ class SeoSchema {
   /// Creates a BreadcrumbList schema.
   ///
   /// See: https://schema.org/BreadcrumbList
-  static Map<String, dynamic> breadcrumbList({
-    required List<SeoBreadcrumb> items,
-  }) {
+  static Map<String, dynamic> breadcrumbList({required List<SeoBreadcrumb> items}) {
     return {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
@@ -257,9 +247,7 @@ class SeoSchema {
   /// Creates a FAQPage schema.
   ///
   /// See: https://schema.org/FAQPage
-  static Map<String, dynamic> faqPage({
-    required List<SeoFaqItem> questions,
-  }) {
+  static Map<String, dynamic> faqPage({required List<SeoFaqItem> questions}) {
     return {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -267,10 +255,7 @@ class SeoSchema {
         return {
           '@type': 'Question',
           'name': q.question,
-          'acceptedAnswer': {
-            '@type': 'Answer',
-            'text': q.answer,
-          },
+          'acceptedAnswer': {'@type': 'Answer', 'text': q.answer},
         };
       }).toList(),
     };
@@ -305,8 +290,7 @@ class SeoSchema {
       if (address != null) 'address': address.toJson(),
       if (geo != null) 'geo': geo.toJson(),
       if (openingHours != null)
-        'openingHoursSpecification':
-            openingHours.map((h) => h.toJson()).toList(),
+        'openingHoursSpecification': openingHours.map((h) => h.toJson()).toList(),
       if (rating != null && reviewCount != null)
         'aggregateRating': {
           '@type': 'AggregateRating',
@@ -342,19 +326,13 @@ class SeoSchema {
       if (endDate != null) 'endDate': endDate.toIso8601String(),
       if (description != null) 'description': description,
       if (image != null) 'image': image,
-      if (location != null)
-        'location': {'@type': 'Place', 'name': location},
+      if (location != null) 'location': {'@type': 'Place', 'name': location},
       if (url != null) 'url': url,
       'eventStatus': status.schemaUrl,
       'eventAttendanceMode': attendanceMode.schemaUrl,
-      if (organizerName != null)
-        'organizer': {'@type': 'Organization', 'name': organizerName},
+      if (organizerName != null) 'organizer': {'@type': 'Organization', 'name': organizerName},
       if (price != null)
-        'offers': {
-          '@type': 'Offer',
-          'price': price.toString(),
-          'priceCurrency': currency,
-        },
+        'offers': {'@type': 'Offer', 'price': price.toString(), 'priceCurrency': currency},
     };
   }
 
@@ -409,14 +387,7 @@ class SeoSchema {
 }
 
 /// Product availability for structured data.
-enum SeoAvailability {
-  inStock,
-  outOfStock,
-  preOrder,
-  backOrder,
-  discontinued,
-  limitedAvailability,
-}
+enum SeoAvailability { inStock, outOfStock, preOrder, backOrder, discontinued, limitedAvailability }
 
 extension on SeoAvailability {
   String get schemaUrl {
@@ -438,13 +409,7 @@ extension on SeoAvailability {
 }
 
 /// Event status for structured data.
-enum SeoEventStatus {
-  scheduled,
-  cancelled,
-  movedOnline,
-  postponed,
-  rescheduled,
-}
+enum SeoEventStatus { scheduled, cancelled, movedOnline, postponed, rescheduled }
 
 extension on SeoEventStatus {
   String get schemaUrl {
@@ -464,11 +429,7 @@ extension on SeoEventStatus {
 }
 
 /// Event attendance mode for structured data.
-enum SeoEventAttendanceMode {
-  offline,
-  online,
-  mixed,
-}
+enum SeoEventAttendanceMode { offline, online, mixed }
 
 extension on SeoEventAttendanceMode {
   String get schemaUrl {
@@ -543,11 +504,7 @@ class SeoGeo {
 
 /// Opening hours for structured data.
 class SeoOpeningHours {
-  const SeoOpeningHours({
-    required this.dayOfWeek,
-    required this.opens,
-    required this.closes,
-  });
+  const SeoOpeningHours({required this.dayOfWeek, required this.opens, required this.closes});
 
   final List<String> dayOfWeek;
   final String opens;

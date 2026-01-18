@@ -7,5 +7,4 @@
 ///
 /// On web: Uses dart:html for actual DOM manipulation
 /// On other platforms: Uses a no-op stub implementation
-export 'seo_tree_stub.dart'
-    if (dart.library.html) 'seo_tree_web.dart';
+export 'seo_tree_stub.dart' if (dart.library.html) 'seo_tree_web.dart';

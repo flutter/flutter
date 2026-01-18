@@ -47,16 +47,10 @@ mixin SeoBinding on BindingBase {
   ///
   /// This is called automatically by [SeoTreeRoot], but can be called
   /// manually for custom initialization.
-  static void initializeGlobalManager({
-    bool enabled = true,
-    bool debugVisible = false,
-  }) {
+  static void initializeGlobalManager({bool enabled = true, bool debugVisible = false}) {
     if (!kIsWeb) return;
 
-    _globalManager ??= SeoTreeManager(
-      enabled: enabled,
-      debugVisible: debugVisible,
-    );
+    _globalManager ??= SeoTreeManager(enabled: enabled, debugVisible: debugVisible);
     _globalManager!.initialize();
   }
 
@@ -172,26 +166,20 @@ class SeoConfig {
 /// {@category SEO}
 class SeoConfigProvider extends InheritedWidget {
   /// Creates an SEO config provider.
-  const SeoConfigProvider({
-    super.key,
-    required this.config,
-    required super.child,
-  });
+  const SeoConfigProvider({super.key, required this.config, required super.child});
 
   /// The SEO configuration.
   final SeoConfig config;
 
   /// Gets the [SeoConfig] from the nearest ancestor.
   static SeoConfig of(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<SeoConfigProvider>();
+    final provider = context.dependOnInheritedWidgetOfExactType<SeoConfigProvider>();
     return provider?.config ?? const SeoConfig();
   }
 
   /// Gets the [SeoConfig] from the nearest ancestor, or null if none exists.
   static SeoConfig? maybeOf(BuildContext context) {
-    final provider =
-        context.dependOnInheritedWidgetOfExactType<SeoConfigProvider>();
+    final provider = context.dependOnInheritedWidgetOfExactType<SeoConfigProvider>();
     return provider?.config;
   }
 

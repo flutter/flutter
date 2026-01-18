@@ -34,11 +34,7 @@ import 'seo_tag.dart';
 /// {@category SEO}
 class SeoTree extends InheritedWidget {
   /// Creates an SEO tree provider.
-  const SeoTree({
-    super.key,
-    required this.manager,
-    required super.child,
-  });
+  const SeoTree({super.key, required this.manager, required super.child});
 
   /// The SEO tree manager instance.
   final SeoTreeManager manager;
@@ -56,8 +52,11 @@ class SeoTree extends InheritedWidget {
   /// Throws if no [SeoTree] exists in the widget tree.
   static SeoTreeManager of(BuildContext context) {
     final manager = maybeOf(context);
-    assert(manager != null, 'No SeoTree found in widget tree. '
-        'Wrap your app with SeoTreeRoot to enable SEO functionality.');
+    assert(
+      manager != null,
+      'No SeoTree found in widget tree. '
+      'Wrap your app with SeoTreeRoot to enable SEO functionality.',
+    );
     return manager!;
   }
 
@@ -121,10 +120,7 @@ class _SeoTreeRootState extends State<SeoTreeRoot> {
   @override
   void initState() {
     super.initState();
-    _manager = SeoTreeManager(
-      enabled: widget.enabled,
-      debugVisible: widget.debugShowSeoTree,
-    );
+    _manager = SeoTreeManager(enabled: widget.enabled, debugVisible: widget.debugShowSeoTree);
     _manager.initialize();
   }
 
@@ -133,10 +129,7 @@ class _SeoTreeRootState extends State<SeoTreeRoot> {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled ||
         widget.debugShowSeoTree != oldWidget.debugShowSeoTree) {
-      _manager.updateSettings(
-        enabled: widget.enabled,
-        debugVisible: widget.debugShowSeoTree,
-      );
+      _manager.updateSettings(enabled: widget.enabled, debugVisible: widget.debugShowSeoTree);
     }
   }
 
@@ -148,10 +141,7 @@ class _SeoTreeRootState extends State<SeoTreeRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return SeoTree(
-      manager: _manager,
-      child: widget.child,
-    );
+    return SeoTree(manager: _manager, child: widget.child);
   }
 }
 
@@ -161,10 +151,7 @@ class _SeoTreeRootState extends State<SeoTreeRoot> {
 /// corresponding DOM elements in the SEO Shadow Tree.
 class SeoTreeManager {
   /// Creates an SEO tree manager.
-  SeoTreeManager({
-    this.enabled = true,
-    this.debugVisible = false,
-  }) : _domOps = SeoDomOperations();
+  SeoTreeManager({this.enabled = true, this.debugVisible = false}) : _domOps = SeoDomOperations();
 
   /// Whether SEO processing is enabled.
   bool enabled;
@@ -241,12 +228,7 @@ class SeoTreeManager {
     // Create the DOM element
     final domElement = _domOps.createElement(node);
 
-    final treeNode = SeoTreeNode._(
-      id: id,
-      node: node,
-      manager: this,
-      domElement: domElement,
-    );
+    final treeNode = SeoTreeNode._(id: id, node: node, manager: this, domElement: domElement);
 
     _nodes[id] = treeNode;
 
@@ -419,20 +401,16 @@ class SeoTreeManager {
 ///
 /// This is returned when registering an [SeoNode] with the [SeoTreeManager].
 class SeoTreeNode {
-  SeoTreeNode._({
-    required this.id,
-    required SeoNode node,
-    required this.manager,
-    this.domElement,
-  })  : _node = node,
-        _disabled = false;
+  SeoTreeNode._({required this.id, required SeoNode node, required this.manager, this.domElement})
+    : _node = node,
+      _disabled = false;
 
   SeoTreeNode._disabled()
-      : id = -1,
-        _node = const SeoNode(tag: SeoTag.span),
-        manager = null,
-        domElement = null,
-        _disabled = true;
+    : id = -1,
+      _node = const SeoNode(tag: SeoTag.span),
+      manager = null,
+      domElement = null,
+      _disabled = true;
 
   /// Unique identifier for this tree node.
   final int id;

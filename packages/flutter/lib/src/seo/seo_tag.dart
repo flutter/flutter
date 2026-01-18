@@ -10,7 +10,7 @@
 /// {@category SEO}
 enum SeoTag {
   // Headings
-  /// `<h1>` - Main page heading (use only once per page)
+  /// `<h1>` - Main page heading (use only once per page).
   h1,
 
   /// `<h2>` - Section heading
@@ -114,84 +114,195 @@ enum SeoTag {
   mark,
 
   // Code
-  /// `<code>` - Code fragment
+  /// `<code>` - Code fragment.
   code,
 
-  /// `<pre>` - Preformatted text
+  /// `<pre>` - Preformatted text.
   pre,
 
   // Tables (basic support)
-  /// `<table>` - Table
+  /// `<table>` - Table.
   table,
 
-  /// `<thead>` - Table head
+  /// `<thead>` - Table head.
   thead,
 
-  /// `<tbody>` - Table body
+  /// `<tbody>` - Table body.
   tbody,
 
-  /// `<tr>` - Table row
+  /// `<tr>` - Table row.
   tr,
 
-  /// `<th>` - Table header cell
+  /// `<th>` - Table header cell.
   th,
 
-  /// `<td>` - Table data cell
+  /// `<td>` - Table data cell.
   td,
+
+  // Void elements
+  /// `<br>` - Line break.
+  br,
+
+  /// `<hr>` - Horizontal rule.
+  hr,
 }
 
 /// Extension methods for [SeoTag].
 extension SeoTagExtension on SeoTag {
   /// Returns the HTML tag name as a string.
+  ///
+  /// This is an alias for [tagName] for convenience.
+  String get htmlTag => tagName;
+
+  /// Returns the HTML tag name as a string.
   String get tagName {
     switch (this) {
-      case SeoTag.h1: return 'h1';
-      case SeoTag.h2: return 'h2';
-      case SeoTag.h3: return 'h3';
-      case SeoTag.h4: return 'h4';
-      case SeoTag.h5: return 'h5';
-      case SeoTag.h6: return 'h6';
-      case SeoTag.p: return 'p';
-      case SeoTag.span: return 'span';
-      case SeoTag.div: return 'div';
-      case SeoTag.article: return 'article';
-      case SeoTag.section: return 'section';
-      case SeoTag.aside: return 'aside';
-      case SeoTag.nav: return 'nav';
-      case SeoTag.header: return 'header';
-      case SeoTag.footer: return 'footer';
-      case SeoTag.main: return 'main';
-      case SeoTag.ul: return 'ul';
-      case SeoTag.ol: return 'ol';
-      case SeoTag.li: return 'li';
-      case SeoTag.a: return 'a';
-      case SeoTag.img: return 'img';
-      case SeoTag.figure: return 'figure';
-      case SeoTag.figcaption: return 'figcaption';
-      case SeoTag.blockquote: return 'blockquote';
-      case SeoTag.cite: return 'cite';
-      case SeoTag.q: return 'q';
-      case SeoTag.time: return 'time';
-      case SeoTag.data: return 'data';
-      case SeoTag.address: return 'address';
-      case SeoTag.strong: return 'strong';
-      case SeoTag.em: return 'em';
-      case SeoTag.mark: return 'mark';
-      case SeoTag.code: return 'code';
-      case SeoTag.pre: return 'pre';
-      case SeoTag.table: return 'table';
-      case SeoTag.thead: return 'thead';
-      case SeoTag.tbody: return 'tbody';
-      case SeoTag.tr: return 'tr';
-      case SeoTag.th: return 'th';
-      case SeoTag.td: return 'td';
+      case SeoTag.h1:
+        return 'h1';
+      case SeoTag.h2:
+        return 'h2';
+      case SeoTag.h3:
+        return 'h3';
+      case SeoTag.h4:
+        return 'h4';
+      case SeoTag.h5:
+        return 'h5';
+      case SeoTag.h6:
+        return 'h6';
+      case SeoTag.p:
+        return 'p';
+      case SeoTag.span:
+        return 'span';
+      case SeoTag.div:
+        return 'div';
+      case SeoTag.article:
+        return 'article';
+      case SeoTag.section:
+        return 'section';
+      case SeoTag.aside:
+        return 'aside';
+      case SeoTag.nav:
+        return 'nav';
+      case SeoTag.header:
+        return 'header';
+      case SeoTag.footer:
+        return 'footer';
+      case SeoTag.main:
+        return 'main';
+      case SeoTag.ul:
+        return 'ul';
+      case SeoTag.ol:
+        return 'ol';
+      case SeoTag.li:
+        return 'li';
+      case SeoTag.a:
+        return 'a';
+      case SeoTag.img:
+        return 'img';
+      case SeoTag.figure:
+        return 'figure';
+      case SeoTag.figcaption:
+        return 'figcaption';
+      case SeoTag.blockquote:
+        return 'blockquote';
+      case SeoTag.cite:
+        return 'cite';
+      case SeoTag.q:
+        return 'q';
+      case SeoTag.time:
+        return 'time';
+      case SeoTag.data:
+        return 'data';
+      case SeoTag.address:
+        return 'address';
+      case SeoTag.strong:
+        return 'strong';
+      case SeoTag.em:
+        return 'em';
+      case SeoTag.mark:
+        return 'mark';
+      case SeoTag.code:
+        return 'code';
+      case SeoTag.pre:
+        return 'pre';
+      case SeoTag.table:
+        return 'table';
+      case SeoTag.thead:
+        return 'thead';
+      case SeoTag.tbody:
+        return 'tbody';
+      case SeoTag.tr:
+        return 'tr';
+      case SeoTag.th:
+        return 'th';
+      case SeoTag.td:
+        return 'td';
+      case SeoTag.br:
+        return 'br';
+      case SeoTag.hr:
+        return 'hr';
     }
   }
 
   /// Whether this tag is a void element (self-closing, no children).
+  ///
+  /// This is an alias for [isVoidElement].
+  bool get isVoid => isVoidElement;
+
+  /// Whether this tag is a void element (self-closing, no children).
   bool get isVoidElement {
-    return this == SeoTag.img;
+    switch (this) {
+      case SeoTag.img:
+      case SeoTag.br:
+      case SeoTag.hr:
+        return true;
+      case SeoTag.h1:
+      case SeoTag.h2:
+      case SeoTag.h3:
+      case SeoTag.h4:
+      case SeoTag.h5:
+      case SeoTag.h6:
+      case SeoTag.p:
+      case SeoTag.span:
+      case SeoTag.div:
+      case SeoTag.article:
+      case SeoTag.section:
+      case SeoTag.aside:
+      case SeoTag.nav:
+      case SeoTag.header:
+      case SeoTag.footer:
+      case SeoTag.main:
+      case SeoTag.ul:
+      case SeoTag.ol:
+      case SeoTag.li:
+      case SeoTag.a:
+      case SeoTag.figure:
+      case SeoTag.figcaption:
+      case SeoTag.blockquote:
+      case SeoTag.cite:
+      case SeoTag.q:
+      case SeoTag.time:
+      case SeoTag.data:
+      case SeoTag.address:
+      case SeoTag.strong:
+      case SeoTag.em:
+      case SeoTag.mark:
+      case SeoTag.code:
+      case SeoTag.pre:
+      case SeoTag.table:
+      case SeoTag.thead:
+      case SeoTag.tbody:
+      case SeoTag.tr:
+      case SeoTag.th:
+      case SeoTag.td:
+        return false;
+    }
   }
+
+  /// Whether this tag is a block-level element.
+  ///
+  /// This is an alias for [isBlockElement].
+  bool get isBlock => isBlockElement;
 
   /// Whether this tag is a block-level element.
   bool get isBlockElement {
@@ -222,8 +333,23 @@ extension SeoTagExtension on SeoTag {
       case SeoTag.thead:
       case SeoTag.tbody:
       case SeoTag.tr:
+      case SeoTag.hr:
         return true;
-      default:
+      case SeoTag.span:
+      case SeoTag.a:
+      case SeoTag.img:
+      case SeoTag.figcaption:
+      case SeoTag.cite:
+      case SeoTag.q:
+      case SeoTag.time:
+      case SeoTag.data:
+      case SeoTag.strong:
+      case SeoTag.em:
+      case SeoTag.mark:
+      case SeoTag.code:
+      case SeoTag.th:
+      case SeoTag.td:
+      case SeoTag.br:
         return false;
     }
   }
@@ -238,7 +364,42 @@ extension SeoTagExtension on SeoTag {
       case SeoTag.h5:
       case SeoTag.h6:
         return true;
-      default:
+      case SeoTag.p:
+      case SeoTag.span:
+      case SeoTag.div:
+      case SeoTag.article:
+      case SeoTag.section:
+      case SeoTag.aside:
+      case SeoTag.nav:
+      case SeoTag.header:
+      case SeoTag.footer:
+      case SeoTag.main:
+      case SeoTag.ul:
+      case SeoTag.ol:
+      case SeoTag.li:
+      case SeoTag.a:
+      case SeoTag.img:
+      case SeoTag.figure:
+      case SeoTag.figcaption:
+      case SeoTag.blockquote:
+      case SeoTag.cite:
+      case SeoTag.q:
+      case SeoTag.time:
+      case SeoTag.data:
+      case SeoTag.address:
+      case SeoTag.strong:
+      case SeoTag.em:
+      case SeoTag.mark:
+      case SeoTag.code:
+      case SeoTag.pre:
+      case SeoTag.table:
+      case SeoTag.thead:
+      case SeoTag.tbody:
+      case SeoTag.tr:
+      case SeoTag.th:
+      case SeoTag.td:
+      case SeoTag.br:
+      case SeoTag.hr:
         return false;
     }
   }
@@ -246,13 +407,55 @@ extension SeoTagExtension on SeoTag {
   /// Returns the heading level (1-6) or null if not a heading.
   int? get headingLevel {
     switch (this) {
-      case SeoTag.h1: return 1;
-      case SeoTag.h2: return 2;
-      case SeoTag.h3: return 3;
-      case SeoTag.h4: return 4;
-      case SeoTag.h5: return 5;
-      case SeoTag.h6: return 6;
-      default: return null;
+      case SeoTag.h1:
+        return 1;
+      case SeoTag.h2:
+        return 2;
+      case SeoTag.h3:
+        return 3;
+      case SeoTag.h4:
+        return 4;
+      case SeoTag.h5:
+        return 5;
+      case SeoTag.h6:
+        return 6;
+      case SeoTag.p:
+      case SeoTag.span:
+      case SeoTag.div:
+      case SeoTag.article:
+      case SeoTag.section:
+      case SeoTag.aside:
+      case SeoTag.nav:
+      case SeoTag.header:
+      case SeoTag.footer:
+      case SeoTag.main:
+      case SeoTag.ul:
+      case SeoTag.ol:
+      case SeoTag.li:
+      case SeoTag.a:
+      case SeoTag.img:
+      case SeoTag.figure:
+      case SeoTag.figcaption:
+      case SeoTag.blockquote:
+      case SeoTag.cite:
+      case SeoTag.q:
+      case SeoTag.time:
+      case SeoTag.data:
+      case SeoTag.address:
+      case SeoTag.strong:
+      case SeoTag.em:
+      case SeoTag.mark:
+      case SeoTag.code:
+      case SeoTag.pre:
+      case SeoTag.table:
+      case SeoTag.thead:
+      case SeoTag.tbody:
+      case SeoTag.tr:
+      case SeoTag.th:
+      case SeoTag.td:
+      case SeoTag.br:
+      case SeoTag.hr:
+        return null;
     }
   }
 }

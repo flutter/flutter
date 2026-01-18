@@ -18,12 +18,16 @@ import 'seo_tag.dart';
 @immutable
 class SeoNode {
   /// Creates an SEO node with the given properties.
+  ///
+  /// Either [text] or [textContent] can be used to specify text content.
+  /// If both are provided, [textContent] takes precedence.
   const SeoNode({
     required this.tag,
-    this.text,
+    String? text,
+    String? textContent,
     this.attributes = const <String, String>{},
     this.children = const <SeoNode>[],
-  });
+  }) : text = textContent ?? text;
 
   /// Creates an SEO node for a heading element.
   const SeoNode.heading({
@@ -31,75 +35,65 @@ class SeoNode {
     required String text,
     Map<String, String> attributes = const <String, String>{},
   }) : this(
-          tag: level == 1
-              ? SeoTag.h1
-              : level == 2
-                  ? SeoTag.h2
-                  : level == 3
-                      ? SeoTag.h3
-                      : level == 4
-                          ? SeoTag.h4
-                          : level == 5
-                              ? SeoTag.h5
-                              : SeoTag.h6,
-          text: text,
-          attributes: attributes,
-        );
+         tag: level == 1
+             ? SeoTag.h1
+             : level == 2
+             ? SeoTag.h2
+             : level == 3
+             ? SeoTag.h3
+             : level == 4
+             ? SeoTag.h4
+             : level == 5
+             ? SeoTag.h5
+             : SeoTag.h6,
+         text: text,
+         attributes: attributes,
+       );
 
   /// Creates an SEO node for a link element.
-  const SeoNode.link({
-    required String href,
-    required String text,
-    String? title,
-    String? rel,
-  }) : this(
-          tag: SeoTag.a,
-          text: text,
-          attributes: <String, String>{
-            'href': href,
-            if (title != null) 'title': title,
-            if (rel != null) 'rel': rel,
-          },
-        );
+  factory SeoNode.link({required String href, required String text, String? title, String? rel}) {
+    return SeoNode(
+      tag: SeoTag.a,
+      text: text,
+      attributes: <String, String>{
+        'href': href,
+        if (title != null) 'title': title,
+        if (rel != null) 'rel': rel,
+      },
+    );
+  }
 
   /// Creates an SEO node for an image element.
-  const SeoNode.image({
+  factory SeoNode.image({
     required String src,
     required String alt,
     int? width,
     int? height,
     String loading = 'lazy',
-  }) : this(
-          tag: SeoTag.img,
-          attributes: <String, String>{
-            'src': src,
-            'alt': alt,
-            if (width != null) 'width': width.toString(),
-            if (height != null) 'height': height.toString(),
-            'loading': loading,
-          },
-        );
+  }) {
+    return SeoNode(
+      tag: SeoTag.img,
+      attributes: <String, String>{
+        'src': src,
+        'alt': alt,
+        if (width != null) 'width': width.toString(),
+        if (height != null) 'height': height.toString(),
+        'loading': loading,
+      },
+    );
+  }
 
   /// Creates an SEO node for a paragraph element.
   const SeoNode.paragraph({
     required String text,
     Map<String, String> attributes = const <String, String>{},
-  }) : this(
-          tag: SeoTag.p,
-          text: text,
-          attributes: attributes,
-        );
+  }) : this(tag: SeoTag.p, text: text, attributes: attributes);
 
   /// Creates an SEO node for a list element.
-  factory SeoNode.list({
-    required List<String> items,
-    bool ordered = false,
-  }) {
+  factory SeoNode.list({required List<String> items, bool ordered = false}) {
     return SeoNode(
       tag: ordered ? SeoTag.ol : SeoTag.ul,
-      children: items
-          .map((item) => SeoNode(tag: SeoTag.li, text: item))
-          .toList(),
+      children: items.map((String item) => SeoNode(tag: SeoTag.li, text: item)).toList(),
     );
   }
 
@@ -110,6 +104,9 @@ class SeoNode {
   ///
   /// If null, the node contains only children (no direct text content).
   final String? text;
+
+  /// Alias for [text] for compatibility.
+  String? get textContent => text;
 
   /// HTML attributes for this node.
   ///
@@ -179,10 +176,7 @@ class SeoNode {
 
   /// Escapes HTML special characters in text content.
   static String _escapeHtml(String text) {
-    return text
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
+    return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
   }
 
   /// Escapes special characters in attribute values.
@@ -210,15 +204,12 @@ class SeoNode {
   }
 
   @override
-  int get hashCode => Object.hash(
-        tag,
-        text,
-        Object.hashAllUnordered(attributes.entries),
-        Object.hashAll(children),
-      );
+  int get hashCode =>
+      Object.hash(tag, text, Object.hashAllUnordered(attributes.entries), Object.hashAll(children));
 
   @override
-  String toString() => 'SeoNode(${tag.tagName}, text: $text, '
+  String toString() =>
+      'SeoNode(${tag.tagName}, text: $text, '
       'attributes: $attributes, children: ${children.length})';
 }
 

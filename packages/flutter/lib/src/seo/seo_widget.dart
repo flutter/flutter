@@ -82,18 +82,18 @@ class Seo extends StatefulWidget {
     required this.child,
     this.text,
     this.attributes = const <String, String>{},
-  })  : assert(level >= 1 && level <= 6),
-        tag = level == 1
-            ? SeoTag.h1
-            : level == 2
-                ? SeoTag.h2
-                : level == 3
-                    ? SeoTag.h3
-                    : level == 4
-                        ? SeoTag.h4
-                        : level == 5
-                            ? SeoTag.h5
-                            : SeoTag.h6;
+  }) : assert(level >= 1 && level <= 6),
+       tag = level == 1
+           ? SeoTag.h1
+           : level == 2
+           ? SeoTag.h2
+           : level == 3
+           ? SeoTag.h3
+           : level == 4
+           ? SeoTag.h4
+           : level == 5
+           ? SeoTag.h5
+           : SeoTag.h6;
 
   /// Creates an SEO paragraph widget.
   const Seo.paragraph({
@@ -196,10 +196,7 @@ class _SeoState extends State<Seo> {
 
     final seoTree = SeoTree.maybeOf(context);
     if (seoTree != null) {
-      _seoTreeNode = seoTree.register(
-        _buildSeoNode(),
-        context,
-      );
+      _seoTreeNode = seoTree.register(_buildSeoNode(), context);
     }
   }
 
@@ -225,11 +222,7 @@ class _SeoState extends State<Seo> {
       text = _extractTextFromWidget(widget.child);
     }
 
-    return SeoNode(
-      tag: widget.tag,
-      textContent: text,
-      attributes: widget.attributes,
-    );
+    return SeoNode(tag: widget.tag, textContent: text, attributes: widget.attributes);
   }
 
   /// Attempts to extract text content from a widget.
@@ -267,12 +260,7 @@ class _SeoState extends State<Seo> {
 /// {@category SEO}
 class SeoText extends StatelessWidget {
   /// Creates an SEO text widget.
-  const SeoText(
-    this.text, {
-    super.key,
-    this.tag = SeoTag.span,
-    this.style,
-  });
+  const SeoText(this.text, {super.key, this.tag = SeoTag.span, this.style});
 
   /// The text content to display and index.
   final String text;
@@ -309,10 +297,7 @@ class SeoText extends StatelessWidget {
 /// {@category SEO}
 class SeoExclude extends StatelessWidget {
   /// Creates an SEO exclusion widget.
-  const SeoExclude({
-    super.key,
-    required this.child,
-  });
+  const SeoExclude({super.key, required this.child});
 
   /// The widget subtree to exclude from SEO indexing.
   final Widget child;

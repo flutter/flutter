@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'seo_node.dart';
 import 'seo_tag.dart';
 import 'seo_widget.dart';
 
@@ -126,21 +125,13 @@ class SeoLink extends StatelessWidget {
       linkText = (child as Text).data;
     }
 
-    Widget result = Seo(
-      tag: SeoTag.a,
-      text: linkText,
-      attributes: attributes,
-      child: child,
-    );
+    Widget result = Seo(tag: SeoTag.a, text: linkText, attributes: attributes, child: child);
 
     // Add tap handling if enabled
     if (enabled) {
       result = GestureDetector(
         onTap: onTap ?? () => _defaultOnTap(context),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: result,
-        ),
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: result),
       );
     }
 
@@ -167,12 +158,7 @@ class SeoLink extends StatelessWidget {
 /// {@category SEO}
 class SeoButton extends StatelessWidget {
   /// Creates an SEO-aware button widget.
-  const SeoButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    required this.child,
-  });
+  const SeoButton({super.key, required this.label, required this.onPressed, required this.child});
 
   /// The accessible label for the button.
   final String label;
@@ -188,10 +174,7 @@ class SeoButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: child,
-      ),
+      child: GestureDetector(onTap: onPressed, child: child),
     );
   }
 }
@@ -239,9 +222,7 @@ class SeoNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Seo(
       tag: SeoTag.nav,
-      attributes: {
-        if (label != null) 'aria-label': label!,
-      },
+      attributes: {if (label != null) 'aria-label': label!},
       child: Flex(
         direction: direction,
         mainAxisSize: MainAxisSize.min,
@@ -257,10 +238,12 @@ class SeoNav extends StatelessWidget {
     for (var i = 0; i < widgets.length; i++) {
       result.add(widgets[i]);
       if (i < widgets.length - 1) {
-        result.add(SizedBox(
-          width: direction == Axis.horizontal ? spacing : 0,
-          height: direction == Axis.vertical ? spacing : 0,
-        ));
+        result.add(
+          SizedBox(
+            width: direction == Axis.horizontal ? spacing : 0,
+            height: direction == Axis.vertical ? spacing : 0,
+          ),
+        );
       }
     }
     return result;
@@ -284,11 +267,7 @@ class SeoNav extends StatelessWidget {
 /// {@category SEO}
 class SeoBreadcrumbs extends StatelessWidget {
   /// Creates SEO breadcrumb navigation.
-  const SeoBreadcrumbs({
-    super.key,
-    required this.items,
-    this.separator = ' › ',
-  });
+  const SeoBreadcrumbs({super.key, required this.items, this.separator = ' › '});
 
   /// The breadcrumb items, in order from root to current page.
   final List<SeoBreadcrumbItem> items;
@@ -303,14 +282,8 @@ class SeoBreadcrumbs extends StatelessWidget {
       attributes: const {'aria-label': 'Breadcrumb'},
       child: Seo(
         tag: SeoTag.ol,
-        attributes: const {
-          'itemscope': '',
-          'itemtype': 'https://schema.org/BreadcrumbList',
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: _buildItems(context),
-        ),
+        attributes: const {'itemscope': '', 'itemtype': 'https://schema.org/BreadcrumbList'},
+        child: Row(mainAxisSize: MainAxisSize.min, children: _buildItems(context)),
       ),
     );
   }
@@ -337,10 +310,7 @@ class SeoBreadcrumbs extends StatelessWidget {
                   text: item.label,
                   child: Text(item.label),
                 )
-              : SeoLink(
-                  href: item.href!,
-                  child: Text(item.label),
-                ),
+              : SeoLink(href: item.href!, child: Text(item.label)),
         ),
       );
 
@@ -356,10 +326,7 @@ class SeoBreadcrumbs extends StatelessWidget {
 /// An item in a breadcrumb navigation.
 class SeoBreadcrumbItem {
   /// Creates a breadcrumb item.
-  const SeoBreadcrumbItem({
-    required this.label,
-    this.href,
-  });
+  const SeoBreadcrumbItem({required this.label, this.href});
 
   /// The display label for this breadcrumb.
   final String label;
