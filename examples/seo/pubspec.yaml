@@ -1,12 +1,10 @@
 name: seo_example
 description: Example demonstrating Flutter Web SEO capabilities.
 
-publish_to: 'none'
-
-version: 1.0.0+1
-
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.9.0-0
+
+resolution: workspace
 
 dependencies:
   flutter:
@@ -19,3 +17,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# PUBSPEC CHECKSUM: t3blht
