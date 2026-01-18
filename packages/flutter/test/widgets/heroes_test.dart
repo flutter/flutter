@@ -36,7 +36,6 @@ Future<void> verifyPoppedHeroCurve({
 
   await tester.pumpWidget(
     MaterialApp(
-      key: UniqueKey(),
       navigatorKey: navigator,
       navigatorObservers: <NavigatorObserver>[observer],
       home: Scaffold(
@@ -772,20 +771,17 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Heroes animation curve is customizable', (WidgetTester tester) async {
-    final testCurvesList = <Curve>[
-      Curves.linear,
-      Curves.ease,
-      Curves.linearToEaseOut,
-      Curves.easeInOutCubicEmphasized,
-      Curves.fastOutSlowIn,
-    ];
-
-    for (final curve in testCurvesList) {
+  for (final curve in <Curve>[
+    Curves.linear,
+    Curves.ease,
+    Curves.linearToEaseOut,
+    Curves.easeInOutCubicEmphasized,
+    Curves.fastOutSlowIn,
+  ]) {
+    testWidgets('Heroes animation curve is customizable with curve=$curve', (WidgetTester tester) async {
       final observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
-          key: UniqueKey(),
           navigatorObservers: <NavigatorObserver>[observer],
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => Material(
@@ -876,8 +872,8 @@ Future<void> main() async {
         moreOrLessEquals(curve.transform(1.0) * deltaHeight + initialHeight, epsilon: epsilon),
         reason: 'curve=$curveName t=1.00 duration=$duration',
       );
-    }
-  });
+    });
+  }
 
   testWidgets('Heroes are not interactive', (WidgetTester tester) async {
     final log = <String>[];
@@ -3474,36 +3470,32 @@ Future<void> main() async {
     expect(heroSize, tween.transform(1.0));
   });
 
-  testWidgets('popped hero curve is customizable', (WidgetTester tester) async {
-    final testReverseCurvesList = <Curve>[
-      Curves.linear,
-      Curves.ease,
-      Curves.linearToEaseOut,
-      Curves.easeInOutCubicEmphasized,
-      Curves.fastOutSlowIn,
-    ];
-
-    for (final reverseCurve in testReverseCurvesList) {
+  for (final reverseCurve in <Curve>[
+    Curves.linear,
+    Curves.ease,
+    Curves.linearToEaseOut,
+    Curves.easeInOutCubicEmphasized,
+    Curves.fastOutSlowIn,
+  ]) {
+    testWidgets('popped hero curve is customizable with reverseCurve=$reverseCurve', (WidgetTester tester) async {
       await verifyPoppedHeroCurve(tester: tester, curve: Curves.linear, reverseCurve: reverseCurve);
-    }
-  });
+    });
+  }
 
-  testWidgets(
-    'popped hero curve is the flipped version of [curve] if reverseCurve is not specified',
-    (WidgetTester tester) async {
-      final testCurvesList = <Curve>[
-        Curves.linear,
-        Curves.ease,
-        Curves.linearToEaseOut,
-        Curves.easeInOutCubicEmphasized,
-        Curves.fastOutSlowIn,
-      ];
-
-      for (final curve in testCurvesList) {
+  for (final curve in <Curve>[
+    Curves.linear,
+    Curves.ease,
+    Curves.linearToEaseOut,
+    Curves.easeInOutCubicEmphasized,
+    Curves.fastOutSlowIn,
+  ]) {
+    testWidgets(
+      'popped hero uses flipped curve=$curve when reverseCurve is not specified',
+      (WidgetTester tester) async {
         await verifyPoppedHeroCurve(tester: tester, curve: curve, reverseCurve: null);
-      }
-    },
-  );
+      },
+    );
+  }
 
   testWidgets('Heroes in enabled HeroMode do transition', (WidgetTester tester) async {
     await tester.pumpWidget(
