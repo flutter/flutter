@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'utils.dart';
+
+// TODO(navaronbracke): Remove MaterialApp and material import
+
 void main() {
   Widget boilerplateWidget(
     VoidCallback? onButtonPressed, {
@@ -34,7 +38,7 @@ void main() {
         child: Stack(
           key: stackKey,
           children: <Widget>[
-            TextButton(onPressed: onButtonPressed, child: const Text('TapHere')),
+            TestButton(onPressed: onButtonPressed, child: const Text('TapHere')),
             DraggableScrollableActuator(
               child: DraggableScrollableSheet(
                 controller: controller,
@@ -96,17 +100,13 @@ void main() {
                 );
                 return ScrollConfiguration(
                   behavior: behavior,
-                  child: ListView.separated(
+                  child: ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder: (_, int index) => SizedBox(
                       height: 100,
-                      child: ColoredBox(
-                        color: Colors.primaries[index % Colors.primaries.length],
-                        child: Text('Item $index'),
-                      ),
+                      child: ColoredBox(color: getTestColor(index), child: Text('Item $index')),
                     ),
                   ),
                 );
@@ -411,17 +411,13 @@ void main() {
                 maxChildSize: 0.9,
                 expand: false,
                 builder: (_, ScrollController scrollController) {
-                  return ListView.separated(
+                  return ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder: (_, int index) => SizedBox(
                       height: 100,
-                      child: ColoredBox(
-                        color: Colors.primaries[index % Colors.primaries.length],
-                        child: Text('Item $index'),
-                      ),
+                      child: ColoredBox(color: getTestColor(index), child: Text('Item $index')),
                     ),
                   );
                 },
@@ -803,41 +799,39 @@ void main() {
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                body: DraggableScrollableSheet(
-                  initialChildSize: 0.25,
-                  snap: true,
-                  snapSizes: const <double>[0.25, 0.5, 1.0],
-                  builder: (BuildContext context, ScrollController scrollController) {
-                    return PrimaryScrollController(
-                      controller: scrollController,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        child: s.isEven
-                            ? ListView(
-                                children: <Widget>[
-                                  ElevatedButton(
-                                    onPressed: () => setState(() => ++s),
-                                    child: const Text('Switch to 2'),
-                                  ),
-                                  Container(height: 400, color: Colors.blue),
-                                ],
-                              )
-                            : SingleChildScrollView(
-                                child: Column(
-                                  children: <Widget>[
-                                    ElevatedButton(
-                                      onPressed: () => setState(() => ++s),
-                                      child: const Text('Switch to 1'),
-                                    ),
-                                    Container(height: 400, color: Colors.blue),
-                                  ],
+              return DraggableScrollableSheet(
+                initialChildSize: 0.25,
+                snap: true,
+                snapSizes: const <double>[0.25, 0.5, 1.0],
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return PrimaryScrollController(
+                    controller: scrollController,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: s.isEven
+                          ? ListView(
+                              children: <Widget>[
+                                TestButton(
+                                  onPressed: () => setState(() => ++s),
+                                  child: const Text('Switch to 2'),
                                 ),
+                                Container(height: 400, color: const Color(0xFF0000FF)),
+                              ],
+                            )
+                          : SingleChildScrollView(
+                              child: Column(
+                                children: <Widget>[
+                                  TestButton(
+                                    onPressed: () => setState(() => ++s),
+                                    child: const Text('Switch to 1'),
+                                  ),
+                                  Container(height: 400, color: const Color(0xFF0000FF)),
+                                ],
                               ),
-                      ),
-                    );
-                  },
-                ),
+                            ),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -1635,21 +1629,19 @@ void main() {
     addTearDown(controller.dispose);
     Widget buildFrame(ScrollPhysics? physics) {
       return MaterialApp(
-        home: Scaffold(
-          body: DraggableScrollableSheet(
-            controller: controller,
-            initialChildSize: 0.25,
-            builder: (BuildContext context, ScrollController scrollController) {
-              return ListView(
-                physics: physics,
-                controller: scrollController,
-                children: <Widget>[
-                  const Text('Drag me!'),
-                  Container(height: 10000.0, color: Colors.blue),
-                ],
-              );
-            },
-          ),
+        home: DraggableScrollableSheet(
+          controller: controller,
+          initialChildSize: 0.25,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return ListView(
+              physics: physics,
+              controller: scrollController,
+              children: <Widget>[
+                const Text('Drag me!'),
+                Container(height: 10000.0, color: const Color(0xFF0000FF)),
+              ],
+            );
+          },
         ),
       );
     }
@@ -1681,8 +1673,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) => Scaffold(
-            body: DraggableScrollableSheet(
+          builder: (BuildContext context, StateSetter setState) {
+            return DraggableScrollableSheet(
               initialChildSize: 0.25,
               snap: true,
               snapSizes: const <double>[0.25, 0.5, 1.0],
@@ -1692,13 +1684,13 @@ void main() {
                   controller: scrollController,
                   children: <Widget>[
                     const Text('Drag me!'),
-                    ElevatedButton(onPressed: () => setState(() {}), child: const Text('Rebuild')),
-                    Container(height: 10000, color: Colors.blue),
+                    TestButton(onPressed: () => setState(() {}), child: const Text('Rebuild')),
+                    Container(height: 10000, color: const Color(0xFF0000FF)),
                   ],
                 );
               },
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -1729,8 +1721,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) => Scaffold(
-            body: DraggableScrollableSheet(
+          builder: (BuildContext context, StateSetter setState) {
+            return DraggableScrollableSheet(
               initialChildSize: 0.25,
               snap: true,
               snapSizes: const <double>[0.25, 0.5, 1.0],
@@ -1739,18 +1731,18 @@ void main() {
                 return ListView(
                   controller: scrollController,
                   children: <Widget>[
-                    ElevatedButton(
+                    TestButton(
                       onPressed: () => setState(() {
                         controller = controller2;
                       }),
                       child: const Text('Switch controller'),
                     ),
-                    Container(height: 10000, color: Colors.blue),
+                    Container(height: 10000, color: const Color(0xFF0000FF)),
                   ],
                 );
               },
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -1789,8 +1781,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) => Scaffold(
-            body: DraggableScrollableSheet(
+          builder: (BuildContext context, StateSetter setState) {
+            return DraggableScrollableSheet(
               initialChildSize: 0.25,
               snap: true,
               snapSizes: const <double>[0.25, 0.5, 1.0],
@@ -1799,18 +1791,18 @@ void main() {
                 return ListView(
                   controller: scrollController,
                   children: <Widget>[
-                    ElevatedButton(
+                    TestButton(
                       onPressed: () => setState(() {
                         controller = controller2;
                       }),
                       child: const Text('Switch controller'),
                     ),
-                    Container(height: 10000, color: Colors.blue),
+                    Container(height: 10000, color: const Color(0xFF0000FF)),
                   ],
                 );
               },
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -1918,44 +1910,43 @@ void main() {
       final children = List<Widget>.generate(12, (int index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
-          child: Container(color: Colors.green, height: 100, child: Text('Item $index')),
+          child: Container(color: const Color(0xFF00FF00), height: 100, child: Text('Item $index')),
         );
       });
-      children.insert(0, Container(color: Colors.green, height: 100));
+      children.insert(0, Container(color: const Color(0xFF00FF00), height: 100));
 
       await tester.pumpWidget(
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Scaffold(
-                body: DraggableScrollableSheet(
-                  initialChildSize: 0.25,
-                  snap: true,
-                  snapSizes: const <double>[0.25, 0.5, 1.0],
-                  controller: controller,
-                  builder: (BuildContext context, ScrollController scrollController) {
-                    return NotificationListener<DraggableScrollableNotification>(
-                      onNotification: (DraggableScrollableNotification notification) {
-                        lastExtent = notification.extent;
-                        return false;
-                      },
-                      child: ColoredBox(
-                        color: const Color(0xFFABCDEF),
-                        child: CustomScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          controller: scrollController,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate((_, int index) {
-                                return children[index];
-                              }, childCount: children.length),
+              return DraggableScrollableSheet(
+                initialChildSize: 0.25,
+                snap: true,
+                snapSizes: const <double>[0.25, 0.5, 1.0],
+                controller: controller,
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return NotificationListener<DraggableScrollableNotification>(
+                    onNotification: (DraggableScrollableNotification notification) {
+                      lastExtent = notification.extent;
+                      return false;
+                    },
+                    child: ColoredBox(
+                      color: const Color(0xFFABCDEF),
+                      child: CustomScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        controller: scrollController,
+                        slivers: <Widget>[
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (_, int index) => children[index],
+                              childCount: children.length,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               );
             },
           ),
