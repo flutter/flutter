@@ -1657,7 +1657,7 @@ void main() {
       physicalDoubleTapSlop: 100,
       physicalTouchSlop: 100,
     );
-    addTearDown(() => tester.view.resetGestureSettings());
+    addTearDown(tester.view.resetGestureSettings);
 
     expect(
       MediaQueryData.fromView(tester.view).gestureSettings.touchSlop,

@@ -29,7 +29,6 @@ public class FlutterViewDelegate {
    * this method will return null. Otherwise, this method will return the WindowInsets for the
    * provided activity's window.
    */
-  @RequiresApi(api = Build.API_LEVELS.API_23)
   @VisibleForTesting
   public WindowInsets getWindowInsets(Context context) {
     Activity activity = ViewUtils.getActivity(context);
