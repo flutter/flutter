@@ -37,6 +37,24 @@ void main() {
     imageCache.maximumSize = originalCacheSize;
   });
 
+  testWidgets('Image does not crash at zero area', (WidgetTester tester) async {
+    final provider = _TestImageProvider();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Image(image: provider)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+    final ui.Image testImage = await createTestImage(width: 10, height: 10);
+    addTearDown(testImage.dispose);
+    provider.complete(testImage);
+    await tester.pump();
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+  });
+
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
       () async => createTestImage(width: 100, height: 100),
