@@ -62,22 +62,6 @@ FLUTTER_DARWIN_EXPORT
  * @param textureId The result that was previously returned from `registerTexture:`.
  */
 - (void)unregisterTexture:(int64_t)textureId;
-
-@optional
-/**
- * Creates a `ui.Image` snapshot from a registered texture's current content.
- *
- * The returned image is independent of the texture - it captures the current content
- * and will not update when the texture changes. This enables zero-copy image creation
- * from platform-decoded content.
- *
- * The completion handler is called on the platform thread.
- *
- * @param textureId The texture ID from `registerTexture:`.
- * @param completion Called with success (true) and the image dimensions, or failure (false).
- */
-- (void)createImageFromTexture:(int64_t)textureId
-                    completion:(void (^)(BOOL success, int width, int height))completion;
 @end
 
 NS_ASSUME_NONNULL_END
