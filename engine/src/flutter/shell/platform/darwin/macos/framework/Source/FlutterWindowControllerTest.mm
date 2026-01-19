@@ -202,7 +202,7 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   EXPECT_EQ(window.miniaturized, YES);
 }
 
-TEST_F(FlutterWindowControllerTest, CloseAllWindows) {
+TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
@@ -229,8 +229,8 @@ TEST_F(FlutterWindowControllerTest, CloseAllWindows) {
   EXPECT_NE(viewController2, nil);
   EXPECT_NE(viewController3, nil);
 
-  // Close all windows
-  [engine.windowController closeAllWindows];
+  // Close all windows on engine restart
+  [engine engineCallbackOnPreEngineRestart];
 
   // Verify all windows are closed and view controllers are disposed
   viewController1 = [engine viewControllerForIdentifier:handle1];
