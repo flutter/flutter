@@ -102,15 +102,20 @@ Widget foo() => Text('Hello world!');
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
       expect(initialPreviews.nodesWithPreviews.length, 2);
 
+      late WidgetPreviewProject bazProject;
+      await waitForPackageConfigChangeDetected(
+        changeOperation: () async =>
+            bazProject = await workspace.createWorkspaceProject(name: 'baz'),
+      );
+
       // Add a new project to the workspace with single preview and verify it's detected.
       await waitForChangeDetected(
         onChangeDetected: (PreviewDependencyGraph updated) {
           // The new preview in baz.dart should be included in the preview mapping.
           expect(updated.nodesWithPreviews.length, 3);
         },
-        changeOperation: () async =>
-            (await workspace.createWorkspaceProject(name: 'baz'))
-              ..writeFile((path: 'baz.dart', source: simplePreviewSource)),
+        changeOperation: () =>
+            bazProject.writeFile((path: 'baz.dart', source: simplePreviewSource)),
       );
     });
 

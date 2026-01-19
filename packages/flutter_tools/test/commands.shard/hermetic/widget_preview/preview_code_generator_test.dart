@@ -409,6 +409,7 @@ List<_i1.WidgetPreview> previews() => [];
     testUsingContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
+        await previewDetector.initialize();
         // Check that the generated preview file doesn't exist yet.
         final File generatedDtdConnectionInfoFile = project.widgetPreviewScaffold.childFile(
           PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs),
