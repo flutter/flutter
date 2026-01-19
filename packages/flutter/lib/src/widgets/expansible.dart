@@ -509,19 +509,13 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final String onTapHint = widget.controller.isExpanded
         ? localizations.expansibleExpandedTapHint
         : localizations.expansibleCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = widget.controller.isExpanded
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        widget.controller.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+      _ => widget.controller.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
     final Widget result = Offstage(
       offstage: closed,
@@ -529,6 +523,8 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     );
 
     final Widget semanticsChild = Semantics(
+      hint: semanticsHint,
+      onTapHint: onTapHint,
       expanded: widget.controller.isExpanded,
       onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
       onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,
