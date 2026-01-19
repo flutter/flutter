@@ -777,6 +777,7 @@ void main() {
     handle.dispose();
   });
 
+
   testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (
     WidgetTester tester,
   ) async {
@@ -1820,91 +1821,6 @@ void main() {
     }),
   );
 
-  // Regression test for https://github.com/flutter/flutter/issues/173060
-  group('Semantics tests for non-iOS/macOS/android platforms', () {
-    testWidgets(
-      'Semantics hint is null on non-iOS/macOS platforms',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: Column(
-                children: <Widget>[
-                  ExpansionTile(title: Text('First Expansion Tile')),
-                  ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-                ],
-              ),
-            ),
-          ),
-        );
-
-        // Test collapsed tile - hint should be null.
-        SemanticsNode semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-        );
-        expect(semantics, isNotNull);
-        expect(semantics.hint, isEmpty);
-
-        // Test expanded tile - hint should be null.
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-        );
-        expect(semantics, isNotNull);
-        expect(semantics.hint, isEmpty);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
-    );
-
-    // Semantic hints are only provided on iOS and macOS.
-    // On other platforms, hints are null.
-    testWidgets(
-      'Semantics hint is null on non-iOS/macOS platforms',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
-            ),
-          ),
-        );
-
-        // Semantic hints should be null on non-iOS/macOS platforms.
-        SemanticsNode semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, isEmpty);
-
-        // Tap to expand.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Hint should still be null.
-        semantics = tester.getSemantics(
-          find.ancestor(of: find.byType(ListTile), matching: find.byType(Semantics)).first,
-        );
-        expect(semantics.hint, isEmpty);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
-    );
-  });
   group('Semantics tests for android platform', () {
     testWidgets(
       'Semantics liveregion updates when expansion state changes',
