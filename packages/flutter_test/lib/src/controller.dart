@@ -147,8 +147,8 @@ class SemanticsController {
   ///   expect(
   ///     tester.semantics.simulatedAccessibilityTraversal(),
   ///     containsAllInOrder(<Matcher>[
-  ///       containsSemantics(label: 'My Widget'),
-  ///       containsSemantics(label: 'is awesome!', isChecked: true),
+  ///       isSemantics(label: 'My Widget'),
+  ///       isSemantics(label: 'is awesome!', isChecked: true),
   ///     ]),
   ///   );
   /// });
@@ -156,7 +156,7 @@ class SemanticsController {
   ///
   /// See also:
   ///
-  /// * [containsSemantics] and [matchesSemantics], which can be used to match
+  /// * [isSemantics] and [matchesSemantics], which can be used to match
   ///   against a single node in the traversal.
   /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
   ///   match the order allowing extra nodes before after and between matching
