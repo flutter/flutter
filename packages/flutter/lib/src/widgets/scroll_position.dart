@@ -652,8 +652,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       final ScrollMetrics? currentMetrics = haveDimensions ? copyWith() : null;
       _didChangeViewportDimensionOrReceiveCorrection = false;
       _pendingDimensions = true;
-      if (haveDimensions && !correctForNewDimensions(_lastMetrics!, currentMetrics!)) {
-        return false;
+      if (haveDimensions) {
+        if (!correctForNewDimensions(_lastMetrics!, currentMetrics!)) {
+          return false;
+        }
+      } else if (hasPixels) {
+        final double overscroll = applyBoundaryConditions(pixels);
+        if (overscroll != 0.0) {
+          correctPixels(pixels - overscroll);
+          return false;
+        }
       }
       _haveDimensions = true;
     }
