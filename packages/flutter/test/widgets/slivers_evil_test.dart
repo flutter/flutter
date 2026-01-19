@@ -59,12 +59,16 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       TestWidgetsApp(
         home: ScrollConfiguration(
           behavior: const TestBehavior(),
           child: RawScrollbar(
+            controller: controller,
             child: Scrollable(
+              controller: controller,
               physics: const TestScrollPhysics(),
               viewportBuilder: (BuildContext context, ViewportOffset offset) {
                 return Viewport(
