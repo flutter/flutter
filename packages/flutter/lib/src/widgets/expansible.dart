@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -445,26 +446,20 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final String onTapHint = widget.controller.isExpanded
         ? localizations.expansibleExpandedTapHint
         : localizations.expansibleCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = widget.controller.isExpanded
+    final String semanticsHint = switch (defaultTargetPlatform) {
+      TargetPlatform.iOS || TargetPlatform.macOS =>
+        widget.controller.isExpanded
             ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
+            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}',
+      _ => widget.controller.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
+    };
 
     final Widget result = Offstage(
       offstage: closed,
       child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _animationController)),
     );
 
-    return Semantics(
+    final Widget semanticsChild = Semantics(
       hint: semanticsHint,
       onTapHint: onTapHint,
       expanded: widget.controller.isExpanded,
@@ -490,5 +485,19 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         child: shouldRemoveBody ? null : result,
       ),
     );
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return Semantics(
+        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
+        // without taking focus.
+        // blockNode prevents this node from being part of the focus traversal.
+        label: semanticsHint,
+        liveRegion: true,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: semanticsChild),
+      );
+    }
+
+    return semanticsChild;
   }
 }

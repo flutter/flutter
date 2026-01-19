@@ -8,21 +8,7 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
-
-import 'color_scheme.dart';
-import 'colors.dart';
-import 'expansion_tile_theme.dart';
-import 'icons.dart';
-import 'list_tile.dart';
-import 'list_tile_theme.dart';
-import 'material.dart';
-
-import 'theme.dart';
-import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
@@ -575,7 +561,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final String onTapHint = _tileController.isExpanded
         ? localizations.expansibleExpandedTapHint
