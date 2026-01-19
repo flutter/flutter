@@ -1973,6 +1973,54 @@ flutter:
       },
     ),
   );
+  testUsingContext(
+    'Prints actionable error when VM service connection closes unexpectedly',
+    () => testbed.run(
+      () async {
+        final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
+        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
+
+        // Connect should fail, but we want to verify the user-facing message.
+final Completer<void> done = Completer<void>();
+unawaited(
+  runZonedGuarded(
+    () => flutterDevice
+        .connect(
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        )
+        .then(
+          (_) => done.completeError(
+            StateError('Expected connect to fail'),
+          ),
+        ),
+    (_, __) => done.complete(),
+  ),
+);
+await done.future;
+
+
+        expect(testLogger.errorText, contains('Failed to connect to the Dart VM Service.'));
+        expect(testLogger.errorText, contains('Android device went offline'));
+        expect(testLogger.errorText, contains('"adb devices"'));
+      },
+      overrides: <Type, Generator>{
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              required Logger logger,
+            }) async {
+              throw Exception('Connection closed before full header was received');
+            },
+      },
+    ),
+  );
 
   testUsingContext(
     'Host VM service ipv6 defaults',
