@@ -1981,16 +1981,23 @@ flutter:
         final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
 
         // Connect should fail, but we want to verify the user-facing message.
-        final done = Completer<void>();
-        unawaited(
-          runZonedGuarded(
-            () => flutterDevice
-                .connect(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug))
-                .then((_) => done.complete()),
-            (_, _) => done.complete(),
+final Completer<void> done = Completer<void>();
+unawaited(
+  runZonedGuarded(
+    () => flutterDevice
+        .connect(
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        )
+        .then(
+          (_) => done.completeError(
+            StateError('Expected connect to fail'),
           ),
-        );
-        await done.future;
+        ),
+    (_, __) => done.complete(),
+  ),
+);
+await done.future;
+
 
         expect(testLogger.errorText, contains('Failed to connect to the Dart VM Service.'));
         expect(testLogger.errorText, contains('Android device went offline'));

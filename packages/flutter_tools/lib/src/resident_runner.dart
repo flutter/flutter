@@ -261,21 +261,27 @@ class FlutterDevice {
           const kMaxAttempts = 3;
           for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
             void handleVmServiceCheckException(Exception e) {
-              globals.printTrace(
+              globals.logger.printTrace(
                 'Fail to connect to service protocol: $vmServiceUri: $e',
               );
 
               final String message = e.toString();
-              const String connectionClosedError = 'Connection closed before full header was received';
-              if (message.contains(connectionClosedError)) {
-                globals.logger.printError(
-                  'Failed to connect to the Dart VM Service.\n'
-                  'This can happen if the Android device went offline '
-                  '(common with Wireless debugging or when the device sleeps).\n'
-                  'Try unlocking the device and running "adb devices" '
-                  'to ensure it is connected.',
-                );
-              }
+const String connectionClosedError =
+    'Connection closed before full header was received';
+
+if (message.contains(connectionClosedError)) {
+  if (device?.platformType == PlatformType.android) {
+    globals.logger.printError(
+      'Failed to connect to the Dart VM Service.\n'
+      'This can happen if the Android device went offline '
+      '(common with Wireless debugging or when the device sleeps).\n'
+      'Try unlocking the device and running "adb devices" '
+      'to ensure it is connected.',
+    );
+  }
+}
+
+
 
               if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
                 completer.completeError(
