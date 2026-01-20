@@ -89,8 +89,7 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
   // If the element is not an array, then the runtime stage flatbuffer will
   // represent the unspecified array_elements as the default value of 0.
   std::optional<size_t> array_elements;
-  if (uniform.array_elements.has_value() &&
-      uniform.array_elements.value() > 0) {
+  if (uniform.array_elements.value_or(0) > 0) {
     array_elements = uniform.array_elements;
   }
 
