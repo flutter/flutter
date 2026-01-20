@@ -8,11 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'list_tile_test_utils.dart';
-
-import 'multi_view_testing.dart';
 
 import 'editable_text_utils.dart';
+import 'list_tile_test_utils.dart';
+import 'multi_view_testing.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -2711,10 +2710,7 @@ void main() {
 
       // Shrink the screen further so that the options become smaller than
       // kMinInteractiveDimension and move to overlap the field.
-      const shortWindowSize = Size(
-        1920.0,
-        48.0,
-      );
+      const shortWindowSize = Size(1920.0, 48.0);
       tester.view.physicalSize = shortWindowSize;
       tester.view.devicePixelRatio = 1.0;
       await tester.pumpAndSettle();
