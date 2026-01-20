@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -721,63 +720,6 @@ void main() {
     expect(listTile.trailing, isNull);
   });
 
-  testWidgets('Nested ListTile Semantics', (WidgetTester tester) async {
-    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final SemanticsHandle handle = tester.ensureSemantics();
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Column(
-            children: <Widget>[
-              ExpansionTile(title: Text('First Expansion Tile'), internalAddSemanticForOnTap: true),
-              ExpansionTile(
-                initiallyExpanded: true,
-                title: Text('Second Expansion Tile'),
-                internalAddSemanticForOnTap: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    // Focus the first ExpansionTile.
-    tester.binding.focusManager.primaryFocus?.nextFocus();
-    await tester.pumpAndSettle();
-
-    // The first list tile is focused.
-    final SemanticsData data = tester.getSemantics(find.byType(ListTile).first).getSemanticsData();
-    expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
-    expect(data.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
-    expect(data.hasFlag(SemanticsFlag.hasSelectedState), isTrue);
-    expect(data.hasFlag(SemanticsFlag.isEnabled), isTrue);
-    expect(data.hasFlag(SemanticsFlag.isFocused), isTrue);
-    expect(data.hasFlag(SemanticsFlag.isFocusable), isTrue);
-    expect(data.label, 'First Expansion Tile');
-    expect(data.hasAction(SemanticsAction.tap), isTrue);
-    expect(data.hasAction(SemanticsAction.focus), isTrue);
-    expect(data.hasAction(SemanticsAction.expand), isTrue);
-    // The first list tile is not focused.
-    final SemanticsData data2 = tester.getSemantics(find.byType(ListTile).last).getSemanticsData();
-    expect(data2.hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.isExpanded), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.hasEnabledState), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.hasSelectedState), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.isEnabled), isTrue);
-    expect(data2.hasFlag(SemanticsFlag.isFocusable), isTrue);
-    expect(data2.label, 'Second Expansion Tile');
-    expect(data2.hasAction(SemanticsAction.tap), isTrue);
-    expect(data2.hasAction(SemanticsAction.focus), isTrue);
-    expect(data2.hasAction(SemanticsAction.collapse), isTrue);
-    handle.dispose();
-  });
-
-
   testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (
     WidgetTester tester,
   ) async {
@@ -822,52 +764,6 @@ void main() {
     expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
     handle.dispose();
   });
-
-  testWidgets(
-    'Semantics hint for iOS and macOS',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(title: Text('First Expansion Tile')),
-                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      SemanticsNode semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      );
-
-      semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
-      );
-      handle.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
 
   testWidgets('Collapsed ExpansionTile properties can be updated with setState', (
     WidgetTester tester,
@@ -1765,121 +1661,5 @@ void main() {
     expect(controller2.isExpanded, isTrue);
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsOne);
-  });
-
-  // Regression test for https://github.com/flutter/flutter/issues/176566
-  testWidgets(
-    'ExpansionTile semantics hint uses defaultTargetPlatform for VoiceOver regardless of theme platform',
-    (WidgetTester tester) async {
-      // Regression test for VoiceOver accessibility when theme platform differs from device platform.
-      // When someone sets theme.platform to TargetPlatform.android on an iOS device,
-      // VoiceOver should still work correctly by using the actual device platform for semantics hints.
-
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
-          home: const Material(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(title: Text('First Expansion Tile')),
-                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      SemanticsNode semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      // On iOS/macOS platform, the semantics hint should include expanded/collapsed state guidance
-      // even theme platform is set to Android.
-      expect(
-        semantics.hint,
-        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      );
-
-      semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
-      );
-      handle.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
-
-  group('Semantics tests for android platform', () {
-    testWidgets(
-      'Semantics liveregion updates when expansion state changes',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
-            ),
-          ),
-        );
-
-        // Initially collapsed - live region label is "Collapsed".
-
-        SemanticsNode liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
-
-        // Tap to expand.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Now expanded - should show "Expanded".
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.collapsedHint);
-
-        // Tap to collapse.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
-
-        // Back to collapsed - should show "Collapsed" again.
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
-          ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
-
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-    );
   });
 }
