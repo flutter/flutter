@@ -1504,7 +1504,7 @@ public class FlutterJNI {
       Log.e(
           TAG,
           "getScaledFontSize called with configurationId "
-              + String.valueOf(configurationId)
+              + configurationId
               + ", which can't be found.");
       return -1f;
     }
