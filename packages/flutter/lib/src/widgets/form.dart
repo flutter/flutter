@@ -670,6 +670,9 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///
   /// If [AutovalidateMode.always] is used, the error may reappear immediately
   /// because the field will trigger a new validation cycle during the next build.
+  /// See also:
+  ///
+  ///  * [FormState.clearError], which clears errors across all fields in the form.
   void clearError() {
     setState(() {
       _clearErrorInternal();
