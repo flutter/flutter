@@ -497,13 +497,15 @@ void main() {
     addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Expansible(
-            headerBuilder: (_, _) => const Text('X'),
-            bodyBuilder: (_, _) => const Text('Y'),
-            controller: controller,
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Expansible(
+              headerBuilder: (_, _) => const Text('X'),
+              bodyBuilder: (_, _) => const Text('Y'),
+              controller: controller,
+            ),
           ),
         ),
       ),

@@ -561,25 +561,8 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final String onTapHint = _tileController.isExpanded
-        ? localizations.expansibleExpandedTapHint
-        : localizations.expansibleCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansibleExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansibleCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
 
-    final Widget child = ListTileTheme.merge(
+    return ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
       textColor: _headerColor.value,
       child: ListTile(
@@ -600,21 +583,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return Semantics(
-        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
-        // without taking focus.
-        // blockNode prevents this node from being part of the focus traversal.
-        label: _tileController.isExpanded
-            ? localizations.collapsedHint
-            : localizations.expandedHint,
-        liveRegion: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
-        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
-      );
-    }
-    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
