@@ -684,7 +684,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
   EdgeDraggingAutoScroller? _autoScroller;
 
   late ScrollableState _scrollable;
+
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
+
   bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
   @protected
@@ -860,7 +862,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
       }
 
       // Re-capture the size after layout completes
-      final RenderBox? itemRenderBox = currentItem.context.findRenderObject() as RenderBox?;
+      final itemRenderBox = currentItem.context.findRenderObject() as RenderBox?;
       if (itemRenderBox == null || !itemRenderBox.hasSize) {
         return;
       }
@@ -1216,9 +1218,11 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   AnimationController? _offsetAnimation;
 
   Key get key => widget.key!;
+
   int get index => widget.index;
 
   bool get dragging => _dragging;
+
   set dragging(bool dragging) {
     if (mounted) {
       setState(() {
