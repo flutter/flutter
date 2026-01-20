@@ -804,11 +804,22 @@ class SliverReorderableListState extends State<SliverReorderableList>
   Drag? _dragStart(Offset position) {
     assert(_dragInfo == null);
     final _ReorderableItemState item = _items[_dragIndex!]!;
-    item.dragging = true;
+
+    // Call onReorderStart which may trigger setState to change item sizes
     widget.onReorderStart?.call(_dragIndex!);
+
+    // Rebuild the item to reflect any changes from onReorderStart, but keep dragging=false
+    // so the item remains visible (it hasn't been captured for the drag yet)
     item.rebuild();
 
     _insertIndex = item.index;
+
+    // Set dragging=true BEFORE creating _DragInfo to ensure _dragInfo exists when
+    // the item's build method tries to access _listState._dragInfo
+    item.dragging = true;
+    item.rebuild();
+
+    // Create _DragInfo with potentially old size (before setState layout completes)
     _dragInfo = _DragInfo(
       item: item,
       initialPosition: position,
@@ -822,6 +833,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
     );
     _dragInfo!.startDrag();
 
+    // Insert overlay immediately so existing tests pass
     final OverlayState overlay = Overlay.of(context, debugRequiredFor: widget);
     assert(_overlayEntry == null);
     _overlayEntry = OverlayEntry(builder: _dragInfo!.createProxy);
@@ -833,10 +845,55 @@ class SliverReorderableListState extends State<SliverReorderableList>
       }
       childItem.updateForGap(_insertIndex!, _insertIndex!, _dragInfo!.itemExtent, false, _reverse);
     }
+
+    // Schedule a post-frame callback to re-capture the size after setState layout completes
+    // This fixes the issue on web where setState in onReorderStart doesn't complete before
+    // size capture
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _dragIndex == null || _dragInfo == null) {
+        return;
+      }
+
+      final _ReorderableItemState? currentItem = _items[_dragIndex!];
+      if (currentItem == null || !currentItem.mounted) {
+        return;
+      }
+
+      // Re-capture the size after layout completes
+      final RenderBox? itemRenderBox = currentItem.context.findRenderObject() as RenderBox?;
+      if (itemRenderBox == null || !itemRenderBox.hasSize) {
+        return;
+      }
+
+      final Size newSize = currentItem.context.size!;
+      final double newExtent = _sizeExtent(newSize, _scrollDirection);
+
+      // Only update if size actually changed
+      if (_dragInfo!.itemSize != newSize) {
+        _dragInfo!.itemSize = newSize;
+        _dragInfo!.itemExtent = newExtent;
+
+        // Rebuild the overlay to reflect the new size
+        _overlayEntry?.markNeedsBuild();
+        setState(() {});
+
+        // Update gaps for other items with the new extent
+        for (final _ReorderableItemState childItem in _items.values) {
+          if (childItem == currentItem || !childItem.mounted) {
+            continue;
+          }
+          childItem.updateForGap(_insertIndex!, _insertIndex!, newExtent, false, _reverse);
+        }
+      }
+    }, debugLabel: 'SliverReorderableList.captureDragItemSize');
+
     return _dragInfo;
   }
 
   void _dragUpdate(_DragInfo item, Offset position, Offset delta) {
+    if (_dragInfo == null) {
+      return;
+    }
     setState(() {
       _overlayEntry?.markNeedsBuild();
       _dragUpdateItems();
@@ -845,12 +902,18 @@ class SliverReorderableListState extends State<SliverReorderableList>
   }
 
   void _dragCancel(_DragInfo item) {
+    if (_dragInfo == null) {
+      return;
+    }
     setState(() {
       _dragReset();
     });
   }
 
   void _dragEnd(_DragInfo item) {
+    if (_dragInfo == null) {
+      return;
+    }
     setState(() {
       if (_insertIndex! - item.index == 1) {
         // When returning to original position from below, _insertIndex equals

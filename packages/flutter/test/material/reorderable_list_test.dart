@@ -2032,6 +2032,69 @@ void main() {
     expect(endIndex, equals(0));
   });
 
+  testWidgets(
+    'Drag geometry reflects layout changes triggered by onReorderStart',
+    (WidgetTester tester) async {
+      late StateSetter setStateOuter;
+      var useLargeExtent = true;
+
+      double itemExtent() => useLargeExtent ? 100.0 : 50.0;
+
+      double listExtent() {
+        final RenderSliverList list = tester.renderObject(find.byType(SliverList));
+        return list.geometry!.maxPaintExtent;
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setStateOuter = setState;
+              return Scaffold(
+                body: ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  itemCount: 3,
+                  onReorder: (_, _) {},
+                  onReorderStart: (_) {
+                    setStateOuter(() {
+                      useLargeExtent = false;
+                    });
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                      key: ValueKey<int>(index),
+                      height: itemExtent(),
+                      child: ReorderableDragStartListener(index: index, child: Text('item $index')),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Initial list extent uses large items.
+      final double initialExtent = listExtent();
+
+      final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 20));
+
+      // Allow relayout + drag geometry update.
+      await tester.pump();
+      await tester.pump();
+
+      final double updatedExtent = listExtent();
+
+      expect(updatedExtent, lessThan(initialExtent));
+
+      await drag.up();
+      await tester.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
   testWidgets('ReorderableListView throws an error when key is not passed to its children', (
     WidgetTester tester,
   ) async {
