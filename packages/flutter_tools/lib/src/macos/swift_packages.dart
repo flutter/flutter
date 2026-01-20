@@ -59,14 +59,13 @@ class SwiftPackage {
     required String name,
     required List<SwiftPackageSupportedPlatform> platforms,
     required List<SwiftPackageProduct> products,
-    required List<SwiftPackagePackageDependency> dependencies,
+    required this.dependencies,
     required List<SwiftPackageTarget> targets,
     required TemplateRenderer templateRenderer,
   }) : _manifest = manifest,
        _name = name,
        _platforms = platforms,
        _products = products,
-       _dependencies = dependencies,
        _targets = targets,
        _templateRenderer = templateRenderer;
 
@@ -83,7 +82,7 @@ class SwiftPackage {
   final List<SwiftPackageProduct> _products;
 
   /// The list of package dependencies.
-  final List<SwiftPackagePackageDependency> _dependencies;
+  final List<SwiftPackagePackageDependency> dependencies;
 
   /// The list of targets that are part of this package.
   final List<SwiftPackageTarget> _targets;
@@ -149,10 +148,10 @@ class SwiftPackage {
   }
 
   String _formatDependencies() {
-    if (_dependencies.isEmpty) {
+    if (dependencies.isEmpty) {
       return '';
     }
-    final List<String> packages = _dependencies
+    final List<String> packages = dependencies
         .map((SwiftPackagePackageDependency dependency) => dependency.format())
         .toList();
     return packages.join(',\n$_doubleIndent');
@@ -252,6 +251,32 @@ class SwiftPackagePackageDependency {
   final String name;
   final String path;
 
+  /// Converts [json] to [SwiftPackagePackageDependency].
+  ///
+  /// Only converts local dependencies from a path. Does not include dependencies from a url or registry.
+  ///
+  /// See also:
+  ///   - https://developer.apple.com/documentation/packagedescription/package/dependency#Creating-a-local-dependency
+  ///   - https://developer.apple.com/documentation/packagedescription/package/dependency#Creating-a-package-dependency-from-a-URL
+  ///   - https://developer.apple.com/documentation/packagedescription/package/dependency#Creating-a-package-dependency-from-a-registry
+  static SwiftPackagePackageDependency? fromJson(Map<String, Object?> json) {
+    final fileSystemList = json['fileSystem'] as List<Object?>?;
+    if (fileSystemList == null || fileSystemList.isEmpty) {
+      return null;
+    }
+    for (final Object? item in fileSystemList) {
+      if (item is Map<String, Object?>) {
+        if (item case {
+          'nameForTargetDependencyResolutionOnly': final String name,
+          'path': final String path,
+        }) {
+          return SwiftPackagePackageDependency(name: name, path: path);
+        }
+      }
+    }
+    return null;
+  }
+
   String format() {
     // dependencies: [
     //     .package(name: "image_picker_ios", path: "/path/to/packages/image_picker/image_picker_ios/ios/image_picker_ios"),
@@ -262,15 +287,16 @@ class SwiftPackagePackageDependency {
 
 /// Type of Target constructor.
 ///
-/// See https://developer.apple.com/documentation/packagedescription/target for
+/// See https://developer.apple.com/documentation/packagedescription/target/targettype for
 /// more information.
 enum SwiftPackageTargetType {
-  target(name: '.target'),
-  binaryTarget(name: '.binaryTarget');
+  target(displayName: '.target', jsonName: 'regular'),
+  binaryTarget(displayName: '.binaryTarget', jsonName: 'binary');
 
-  const SwiftPackageTargetType({required this.name});
+  const SwiftPackageTargetType({required this.displayName, required this.jsonName});
 
-  final String name;
+  final String displayName;
+  final String jsonName;
 }
 
 /// A building block of a Swift Package that contains a set of source files
@@ -292,6 +318,38 @@ class SwiftPackageTarget {
   final String? path;
   final List<SwiftPackageTargetDependency>? dependencies;
   final SwiftPackageTargetType targetType;
+
+  /// Converts [json] to [SwiftPackageTarget].
+  ///
+  /// Only converts targets of type [SwiftPackageTargetType.target] and [SwiftPackageTargetType.binaryTarget].
+  ///
+  /// See also: https://developer.apple.com/documentation/packagedescription/target/targettype
+  static SwiftPackageTarget? fromJson(Map<String, Object?> json) {
+    if (json case {
+      'name': final String name,
+      'type': final String targetTypeString,
+      'dependencies': final List<Object?> dependencyItems,
+    }) {
+      final dependencies = <SwiftPackageTargetDependency>[];
+      for (final item in dependencyItems) {
+        if (item is Map<String, Object?>) {
+          final SwiftPackageTargetDependency? dependency = SwiftPackageTargetDependency.fromJson(
+            item,
+          );
+          if (dependency != null) {
+            dependencies.add(dependency);
+          }
+        }
+      }
+      final path = json['path'] as String?;
+      if (targetTypeString == SwiftPackageTargetType.binaryTarget.jsonName && path != null) {
+        return SwiftPackageTarget.binaryTarget(name: name, relativePath: path);
+      } else if (targetTypeString == SwiftPackageTargetType.target.jsonName) {
+        return SwiftPackageTarget.defaultTarget(name: name, dependencies: dependencies);
+      }
+    }
+    return null;
+  }
 
   String format() {
     // targets: [
@@ -333,7 +391,7 @@ $targetDetailsIndent]''';
     }
 
     return '''
-${targetType.name}(
+${targetType.displayName}(
 $targetDetailsIndent${targetDetails.join(",\n$targetDetailsIndent")}
 $targetIndent)''';
   }
@@ -344,12 +402,13 @@ $targetIndent)''';
 /// See https://developer.apple.com/documentation/packagedescription/target/dependency
 /// for more information.
 enum SwiftPackageTargetDependencyType {
-  product(name: '.product'),
-  target(name: '.target');
+  product(displayName: '.product', jsonName: 'product'),
+  target(displayName: '.target', jsonName: 'target');
 
-  const SwiftPackageTargetDependencyType({required this.name});
+  const SwiftPackageTargetDependencyType({required this.displayName, required this.jsonName});
 
-  final String name;
+  final String displayName;
+  final String jsonName;
 }
 
 /// A dependency for the Target on a product from a package dependency or from
@@ -370,14 +429,46 @@ class SwiftPackageTargetDependency {
   final String? package;
   final SwiftPackageTargetDependencyType dependencyType;
 
+  /// Converts [json] to [SwiftPackageTargetDependency].
+  ///
+  /// Only converts target dependencies of type [SwiftPackageTargetDependencyType.product] and
+  /// [SwiftPackageTargetDependencyType.target].
+  ///
+  /// See also: https://developer.apple.com/documentation/packagedescription/target/dependency
+  static SwiftPackageTargetDependency? fromJson(Map<String, Object?> json) {
+    if (json.containsKey(SwiftPackageTargetDependencyType.target.jsonName)) {
+      final targetData = json[SwiftPackageTargetDependencyType.target.jsonName] as List<Object?>?;
+      if (targetData == null || targetData.isEmpty) {
+        return null;
+      }
+      final name = targetData.first as String?;
+      if (name == null) {
+        return null;
+      }
+      return SwiftPackageTargetDependency.target(name: name);
+    } else if (json.containsKey(SwiftPackageTargetDependencyType.product.jsonName)) {
+      final productData = json[SwiftPackageTargetDependencyType.product.jsonName] as List<Object?>?;
+      if (productData == null || productData.length < 2) {
+        return null;
+      }
+      final name = productData.first as String?;
+      final packageName = productData[1] as String?;
+      if (name == null || packageName == null) {
+        return null;
+      }
+      return SwiftPackageTargetDependency.product(name: name, packageName: packageName);
+    }
+    return null;
+  }
+
   String format() {
     //         dependencies: [
     //             .target(name: "Flutter"),
     //             .product(name: "image_picker_ios", package: "image_picker_ios")
     //         ]
     if (dependencyType == SwiftPackageTargetDependencyType.product) {
-      return '$_doubleIndent$_doubleIndent${dependencyType.name}(name: "$name", package: "$package")';
+      return '$_doubleIndent$_doubleIndent${dependencyType.displayName}(name: "$name", package: "$package")';
     }
-    return '$_doubleIndent$_doubleIndent${dependencyType.name}(name: "$name")';
+    return '$_doubleIndent$_doubleIndent${dependencyType.displayName}(name: "$name")';
   }
 }
