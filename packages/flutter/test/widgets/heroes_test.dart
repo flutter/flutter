@@ -778,7 +778,9 @@ Future<void> main() async {
     Curves.easeInOutCubicEmphasized,
     Curves.fastOutSlowIn,
   ]) {
-    testWidgets('Heroes animation curve is customizable with curve=$curve', (WidgetTester tester) async {
+    testWidgets('Heroes animation curve is customizable with curve=$curve', (
+      WidgetTester tester,
+    ) async {
       final observer = TransitionDurationObserver();
       await tester.pumpWidget(
         MaterialApp(
@@ -3477,7 +3479,9 @@ Future<void> main() async {
     Curves.easeInOutCubicEmphasized,
     Curves.fastOutSlowIn,
   ]) {
-    testWidgets('popped hero curve is customizable with reverseCurve=$reverseCurve', (WidgetTester tester) async {
+    testWidgets('popped hero curve is customizable with reverseCurve=$reverseCurve', (
+      WidgetTester tester,
+    ) async {
       await verifyPoppedHeroCurve(tester: tester, curve: Curves.linear, reverseCurve: reverseCurve);
     });
   }
@@ -3489,12 +3493,11 @@ Future<void> main() async {
     Curves.easeInOutCubicEmphasized,
     Curves.fastOutSlowIn,
   ]) {
-    testWidgets(
-      'popped hero uses flipped curve=$curve when reverseCurve is not specified',
-      (WidgetTester tester) async {
-        await verifyPoppedHeroCurve(tester: tester, curve: curve, reverseCurve: null);
-      },
-    );
+    testWidgets('popped hero uses flipped curve=$curve when reverseCurve is not specified', (
+      WidgetTester tester,
+    ) async {
+      await verifyPoppedHeroCurve(tester: tester, curve: curve, reverseCurve: null);
+    });
   }
 
   testWidgets('Heroes in enabled HeroMode do transition', (WidgetTester tester) async {
