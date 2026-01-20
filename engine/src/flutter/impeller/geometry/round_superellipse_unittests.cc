@@ -26,9 +26,13 @@ class SpyPathReceiver : public PathReceiver {
   using CubicSegment =
       std::function<void(const Point&, const Point&, const Point&)>;
 
+  using ConicSegment = std::function<void(const Point&, const Point&, Scalar)>;
+
   void SpyLineTo(LineSegment line_to) { line_to_ = std::move(line_to); }
 
   void SpyCubicTo(CubicSegment cubic_to) { cubic_to_ = std::move(cubic_to); }
+
+  void SpyConicTo(ConicSegment conic_to) { conic_to_ = std::move(conic_to); }
 
   // |PathReceiver|
   void MoveTo(const Point& p2, bool will_be_closed) override {}
@@ -46,12 +50,20 @@ class SpyPathReceiver : public PathReceiver {
       cubic_to_(cp1, cp2, p2);
     }
   }
+  bool ConicTo(const Point& cp, const Point& p2, Scalar weight) override {
+    if (conic_to_) {
+      conic_to_(cp, p2, weight);
+      return true;
+    }
+    return false;
+  }
   // |PathReceiver|
   void Close() override {}
 
  private:
   LineSegment line_to_;
   CubicSegment cubic_to_;
+  ConicSegment conic_to_;
 };
 
 }  // namespace
@@ -773,6 +785,27 @@ TEST(RoundSuperellipseTest,
   receiver.SpyLineTo(
       [&](const Point& p2) { EXPECT_TRUE(bounds.ContainsInclusive(p2)); });
   receiver.SpyCubicTo([&](const Point& cp1, const Point& cp2, const Point& p2) {
+    EXPECT_TRUE(bounds.ContainsInclusive(p2));
+  });
+
+  rr.Dispatch(receiver);
+}
+
+TEST(RoundSuperellipseTest, PathForLongRseShouldBeCorrect) {
+  Rect bounds = Rect::MakeLTRB(0, 0, 300, 100000);
+  // Regression test for https://github.com/flutter/flutter/issues/179875.
+
+  auto rr = RoundSuperellipseParam::MakeBoundsRadius(bounds, 100);
+  SpyPathReceiver receiver;
+  receiver.SpyLineTo(
+      [&](const Point& p2) { EXPECT_TRUE(bounds.ContainsInclusive(p2)); });
+  receiver.SpyCubicTo([&](const Point& cp1, const Point& cp2, const Point& p2) {
+    EXPECT_TRUE(bounds.ContainsInclusive(cp1));
+    EXPECT_TRUE(bounds.ContainsInclusive(cp2));
+    EXPECT_TRUE(bounds.ContainsInclusive(p2));
+  });
+  receiver.SpyConicTo([&](const Point& cp, const Point& p2, Scalar weight) {
+    EXPECT_TRUE(bounds.ContainsInclusive(cp));
     EXPECT_TRUE(bounds.ContainsInclusive(p2));
   });
 
