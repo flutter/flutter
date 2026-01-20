@@ -249,6 +249,12 @@ class _TopClosedClipper extends CustomClipper<Rect> {
 /// Expanding or collapsing panels smoothly pushes or pulls subsequent items
 /// in the scroll sequence.
 ///
+/// {@tool dartpad}
+///  Here is a simple example of how to use [ExpansionPanelList].
+///
+/// ** See code in examples/api/lib/material/sliver_expansion_panel_list/sliver_expansion_panel_list.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ExpansionPanelList], the non-sliver version of this widget.
