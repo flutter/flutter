@@ -115,8 +115,17 @@ abstract class ScrollView extends StatelessWidget {
     this.shrinkWrap = false,
     this.center,
     this.anchor = 0.0,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     this.cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     this.cacheExtentStyle = CacheExtentStyle.pixel,
+    this.scrollCacheExtent,
     this.semanticChildCount,
     this.paintOrder = SliverPaintOrder.firstIsTop,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -355,10 +364,21 @@ abstract class ScrollView extends StatelessWidget {
   final double anchor;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   final CacheExtentStyle cacheExtentStyle;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -467,6 +487,14 @@ abstract class ScrollView extends StatelessWidget {
           return true;
       }
     }());
+    final ScrollCacheExtent? effectiveScrollCacheExtent =
+        scrollCacheExtent ??
+        (cacheExtent != null
+            ? switch (cacheExtentStyle) {
+                CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent!),
+                CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
+              }
+            : null);
     if (shrinkWrap) {
       return ShrinkWrappingViewport(
         axisDirection: axisDirection,
@@ -474,16 +502,14 @@ abstract class ScrollView extends StatelessWidget {
         slivers: slivers,
         paintOrder: paintOrder,
         clipBehavior: clipBehavior,
-        cacheExtent: cacheExtent,
-        cacheExtentStyle: cacheExtentStyle,
+        scrollCacheExtent: effectiveScrollCacheExtent,
       );
     }
     return Viewport(
       axisDirection: axisDirection,
       offset: offset,
       slivers: slivers,
-      cacheExtent: cacheExtent,
-      cacheExtentStyle: cacheExtentStyle,
+      scrollCacheExtent: effectiveScrollCacheExtent,
       center: center,
       anchor: anchor,
       paintOrder: paintOrder,
@@ -569,7 +595,13 @@ abstract class ScrollView extends StatelessWidget {
     properties.add(
       FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true),
     );
-    properties.add(EnumProperty<CacheExtentStyle>('cacheExtentStyle', cacheExtentStyle));
+    properties.add(
+      DiagnosticsProperty<ScrollCacheExtent>(
+        'scrollCacheExtent',
+        scrollCacheExtent,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -718,6 +750,7 @@ class CustomScrollView extends ScrollView {
     super.anchor,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.paintOrder,
     this.slivers = const <Widget>[],
     super.semanticChildCount,
@@ -861,6 +894,7 @@ abstract class BoxScrollView extends ScrollView {
     this.padding,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1302,6 +1336,7 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -1381,6 +1416,7 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1497,6 +1533,7 @@ class ListView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -1561,6 +1598,7 @@ class ListView extends BoxScrollView {
     required this.childrenDelegate,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1947,6 +1985,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -2004,6 +2043,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -2038,6 +2078,7 @@ class GridView extends BoxScrollView {
     required this.childrenDelegate,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -2079,6 +2120,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,
@@ -2134,6 +2176,7 @@ class GridView extends BoxScrollView {
     bool addSemanticIndexes = true,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     List<Widget> children = const <Widget>[],
     int? semanticChildCount,
     super.dragStartBehavior,

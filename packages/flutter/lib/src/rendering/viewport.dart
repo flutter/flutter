@@ -23,6 +23,95 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
+/// The amount of additional content to cache around the viewport.
+///
+/// See also:
+///
+///  * [Viewport.cacheExtent], which uses this class to define the cache area.
+sealed class ScrollCacheExtent {
+  /// Abstract const constructor.
+  const ScrollCacheExtent();
+
+  /// Creates a cache extent in logical pixels.
+  const factory ScrollCacheExtent.pixels(double pixels) = _PixelScrollCacheExtent;
+
+  /// Creates a cache extent as a multiplier of the viewport's main axis extent.
+  const factory ScrollCacheExtent.viewport(double value) = _ViewportScrollCacheExtent;
+
+  /// Returns the cache extent in logical pixels for a given [mainAxisExtent].
+  double calculateCacheOffset(double mainAxisExtent);
+
+  /// Creates a new [ScrollCacheExtent] of the same type with the given value.
+  ScrollCacheExtent withValue(double value);
+
+  /// Returns the style of the cache extent.
+  CacheExtentStyle get style;
+
+  /// Returns the raw value of the cache extent.
+  double get value;
+}
+
+class _PixelScrollCacheExtent extends ScrollCacheExtent {
+  const _PixelScrollCacheExtent(this.pixels);
+
+  final double pixels;
+
+  @override
+  double calculateCacheOffset(double mainAxisExtent) => pixels;
+
+  @override
+  ScrollCacheExtent withValue(double value) => ScrollCacheExtent.pixels(value);
+
+  @override
+  CacheExtentStyle get style => CacheExtentStyle.pixel;
+
+  @override
+  double get value => pixels;
+
+  @override
+  String toString() => 'ScrollCacheExtent.pixels($pixels)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _PixelScrollCacheExtent && other.pixels == pixels;
+  }
+
+  @override
+  int get hashCode => pixels.hashCode;
+}
+
+class _ViewportScrollCacheExtent extends ScrollCacheExtent {
+  const _ViewportScrollCacheExtent(this.value);
+
+  final double value;
+
+  @override
+  double calculateCacheOffset(double mainAxisExtent) => value * mainAxisExtent;
+
+  @override
+  ScrollCacheExtent withValue(double value) => ScrollCacheExtent.viewport(value);
+
+  @override
+  CacheExtentStyle get style => CacheExtentStyle.viewport;
+
+  @override
+  String toString() => 'ScrollCacheExtent.viewport($value)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _ViewportScrollCacheExtent && other.value == value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}
+
 /// The unit of measurement for a [Viewport.cacheExtent].
 enum CacheExtentStyle {
   /// Treat the [Viewport.cacheExtent] as logical pixels.
@@ -304,15 +393,23 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
-  /// The [cacheExtent], if null, defaults to [RenderAbstractViewport.defaultCacheExtent].
-  ///
-  /// The [cacheExtent] must be specified if [cacheExtentStyle] is not [CacheExtentStyle.pixel].
+  /// The [scrollCacheExtent] sets the amount of scrollable content that is
+  /// cached.
   RenderViewportBase({
     AxisDirection axisDirection = AxisDirection.down,
     required AxisDirection crossAxisDirection,
     required ViewportOffset offset,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-22.0.pre.',
+    )
     double? cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-22.0.pre.',
+    )
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
+    ScrollCacheExtent? scrollCacheExtent,
     SliverPaintOrder paintOrder = SliverPaintOrder.firstIsTop,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
@@ -320,8 +417,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
-       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-       _cacheExtentStyle = cacheExtentStyle,
+       _scrollCacheExtent =
+           scrollCacheExtent ??
+           switch (cacheExtentStyle) {
+             CacheExtentStyle.pixel => ScrollCacheExtent.pixels(
+               cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+             ),
+             CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
+           },
        _paintOrder = paintOrder,
        _clipBehavior = clipBehavior;
 
@@ -453,18 +556,62 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// See also:
   ///
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
-  double? get cacheExtent => _cacheExtent;
-  double _cacheExtent;
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  ///
+  /// The getter can never return null, but the field is nullable
+  /// because the setter can be set to null to reset the value to
+  /// [RenderAbstractViewport.defaultCacheExtent] (in which case
+  /// [cacheExtentStyle] must be [CacheExtentStyle.pixel]).
+  ///
+  /// See also:
+  ///
+  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-22.0.pre.',
+  )
+  double? get cacheExtent {
+    return switch (_scrollCacheExtent) {
+      _PixelScrollCacheExtent(pixels: final double pixels) => pixels,
+      _ViewportScrollCacheExtent(value: final double value) => value,
+    };
+  }
+
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-22.0.pre.',
+  )
   set cacheExtent(double? value) {
-    value ??= RenderAbstractViewport.defaultCacheExtent;
-    if (value == _cacheExtent) {
+    if (value == cacheExtent) {
       return;
     }
-    _cacheExtent = value;
+    if (value == null) {
+      _scrollCacheExtent = const ScrollCacheExtent.pixels(
+        RenderAbstractViewport.defaultCacheExtent,
+      );
+    } else {
+      _scrollCacheExtent = switch (_scrollCacheExtent) {
+        _PixelScrollCacheExtent() => ScrollCacheExtent.pixels(value),
+        _ViewportScrollCacheExtent() => ScrollCacheExtent.viewport(value),
+      };
+    }
     markNeedsLayout();
   }
 
-  /// This value is set during layout based on the [CacheExtentStyle].
+  /// The [ScrollCacheExtent] that controls the cache extent of the viewport.
+  ScrollCacheExtent get scrollCacheExtent => _scrollCacheExtent;
+  ScrollCacheExtent _scrollCacheExtent;
+  set scrollCacheExtent(ScrollCacheExtent? value) {
+    final ScrollCacheExtent effectiveValue =
+        value ?? const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent);
+    if (effectiveValue == _scrollCacheExtent) {
+      return;
+    }
+    _scrollCacheExtent = effectiveValue;
+    markNeedsLayout();
+  }
+
+  /// This value is set during layout based on the [scrollCacheExtent].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
   /// of the viewport multiplied by the requested cache extent, which is still
@@ -488,13 +635,33 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// Changing the [cacheExtentStyle] without also changing the [cacheExtent]
   /// is rarely the correct choice.
-  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle;
-  CacheExtentStyle _cacheExtentStyle;
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-22.0.pre.',
+  )
+  CacheExtentStyle get cacheExtentStyle {
+    return switch (_scrollCacheExtent) {
+      _PixelScrollCacheExtent() => CacheExtentStyle.pixel,
+      _ViewportScrollCacheExtent() => CacheExtentStyle.viewport,
+    };
+  }
+
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-22.0.pre.',
+  )
   set cacheExtentStyle(CacheExtentStyle value) {
-    if (value == _cacheExtentStyle) {
+    if (value == cacheExtentStyle) {
       return;
     }
-    _cacheExtentStyle = value;
+    _scrollCacheExtent = switch (value) {
+      CacheExtentStyle.pixel => ScrollCacheExtent.pixels(
+        cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+      ),
+      CacheExtentStyle.viewport => ScrollCacheExtent.viewport(
+        cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
+      ),
+    };
     markNeedsLayout();
   }
 
@@ -1424,6 +1591,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     RenderSliver? center,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     super.paintOrder,
     super.clipBehavior,
   }) : assert(anchor >= 0.0 && anchor <= 1.0),
@@ -1642,10 +1810,11 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       mainAxisExtent,
     );
 
-    _calculatedCacheExtent = switch (cacheExtentStyle) {
-      CacheExtentStyle.pixel => cacheExtent,
-      CacheExtentStyle.viewport => mainAxisExtent * _cacheExtent,
-    };
+    if (mainAxisExtent.isFinite) {
+      _calculatedCacheExtent = _scrollCacheExtent.calculateCacheOffset(mainAxisExtent);
+    } else {
+      _calculatedCacheExtent = 0.0;
+    }
 
     final double fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final double centerCacheOffset = centerOffset + _calculatedCacheExtent!;
@@ -1869,6 +2038,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     super.clipBehavior,
     super.cacheExtent,
     super.cacheExtentStyle,
+    super.scrollCacheExtent,
     List<RenderSliver>? children,
   }) {
     addAll(children);
@@ -2007,10 +2177,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     // the viewport.
     _hasVisualOverflow = correctedOffset < 0.0;
     if (mainAxisExtent.isFinite) {
-      _calculatedCacheExtent = switch (cacheExtentStyle) {
-        CacheExtentStyle.pixel => cacheExtent,
-        CacheExtentStyle.viewport => mainAxisExtent * _cacheExtent,
-      };
+      _calculatedCacheExtent = _scrollCacheExtent.calculateCacheOffset(mainAxisExtent);
     } else {
       // If mainAxisExtent is infinite, it builds everything anyway, so we don't need any extra cache.
       _calculatedCacheExtent = 0.0;

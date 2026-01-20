@@ -151,8 +151,17 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
     required this.horizontalAxisDirection,
     required this.delegate,
     required this.mainAxis,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     this.cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     this.cacheExtentStyle,
+    this.scrollCacheExtent,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -217,10 +226,21 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
   final Axis mainAxis;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   final CacheExtentStyle? cacheExtentStyle;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip clipBehavior;
@@ -526,8 +546,17 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required TwoDimensionalChildDelegate delegate,
     required Axis mainAxis,
     required TwoDimensionalChildManager childManager,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     double? cacheExtent,
+    @Deprecated(
+      'Use scrollCacheExtent instead. '
+      'This feature was deprecated after v3.22.0-XX.0.pre.',
+    )
     CacheExtentStyle? cacheExtentStyle,
+    ScrollCacheExtent? scrollCacheExtent,
     Clip clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
@@ -545,8 +574,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
        _verticalAxisDirection = verticalAxisDirection,
        _delegate = delegate,
        _mainAxis = mainAxis,
-       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-       _cacheExtentStyle = cacheExtentStyle ?? CacheExtentStyle.pixel,
+       _scrollCacheExtent =
+           scrollCacheExtent ??
+           (cacheExtent != null
+               ? switch (cacheExtentStyle) {
+                   CacheExtentStyle.pixel || null => ScrollCacheExtent.pixels(cacheExtent),
+                   CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
+                 }
+               : null),
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
@@ -676,24 +711,62 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
-  double get cacheExtent => _cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
-  double? _cacheExtent;
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
+  double get cacheExtent => _scrollCacheExtent?.value ?? RenderAbstractViewport.defaultCacheExtent;
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   set cacheExtent(double? value) {
-    if (_cacheExtent == value) {
+    if (value == null) {
+      _scrollCacheExtent = const ScrollCacheExtent.pixels(
+        RenderAbstractViewport.defaultCacheExtent,
+      );
       return;
+    } else {
+      switch (cacheExtentStyle) {
+        case CacheExtentStyle.pixel:
+          _scrollCacheExtent = ScrollCacheExtent.pixels(value);
+        case CacheExtentStyle.viewport:
+          _scrollCacheExtent = ScrollCacheExtent.viewport(value);
+      }
     }
-    _cacheExtent = value;
     markNeedsLayout();
   }
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
-  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle ?? CacheExtentStyle.viewport;
-  CacheExtentStyle? _cacheExtentStyle;
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
+  CacheExtentStyle get cacheExtentStyle => _scrollCacheExtent?.style ?? CacheExtentStyle.pixel;
+  @Deprecated(
+    'Use scrollCacheExtent instead. '
+    'This feature was deprecated after v3.22.0-XX.0.pre.',
+  )
   set cacheExtentStyle(CacheExtentStyle? value) {
-    if (value == _cacheExtentStyle) {
+    if (value == null) {
+      _scrollCacheExtent = ScrollCacheExtent.viewport(cacheExtent);
+    } else {
+      _scrollCacheExtent = switch (value) {
+        CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent),
+        CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
+      };
+    }
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  ScrollCacheExtent? get scrollCacheExtent => _scrollCacheExtent;
+  ScrollCacheExtent? _scrollCacheExtent;
+  set scrollCacheExtent(ScrollCacheExtent? value) {
+    if (_scrollCacheExtent == value) {
       return;
     }
-    _cacheExtentStyle = value;
+    _scrollCacheExtent = value;
     markNeedsLayout();
   }
 
