@@ -8,7 +8,17 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import 'color_scheme.dart';
+import 'colors.dart';
+import 'expansion_tile_theme.dart';
+import 'icons.dart';
+import 'list_tile.dart';
+import 'list_tile_theme.dart';
+import 'material.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _kExpand = Duration(milliseconds: 200);
 
