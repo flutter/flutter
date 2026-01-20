@@ -44,7 +44,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 
 @interface FlutterViewController () <FlutterViewResponder>
 
-@property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
@@ -61,6 +60,8 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
+@property(nonatomic, strong) FlutterAccessibilityFeatures* accessibilityFeatures;
+
 - (FlutterRestorationPlugin*)restorationPlugin;
 - (FlutterTextInputPlugin*)textInputPlugin;
 
@@ -70,7 +71,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
               nextAction:(void (^)())nextAction API_AVAILABLE(ios(13.4));
 - (void)addInternalPlugins;
 - (void)deregisterNotifications;
-- (int32_t)accessibilityFlags;
 
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
