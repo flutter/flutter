@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [SliverExpansionPanelList].
+
 void main() => runApp(const SliverExpansionPanelListExampleApp());
 
 class SliverExpansionPanelListExampleApp extends StatelessWidget {
