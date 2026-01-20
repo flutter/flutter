@@ -359,4 +359,23 @@ void main() {
     );
     expect(tester.firstWidget<Container>(find.byType(Container)).clipBehavior, Clip.antiAlias);
   });
+
+  testWidgets('AnimatedContainer does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              child: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedContainer)), Size.zero);
+  });
 }
