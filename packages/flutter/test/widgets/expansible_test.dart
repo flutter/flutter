@@ -545,6 +545,7 @@ void main() {
       'Expansible uses Live Region on Android',
       (WidgetTester tester) async {
         final controller = ExpansibleController();
+        addTearDown(controller.dispose);
         const localizations = DefaultWidgetsLocalizations();
         await tester.pumpWidget(
           MaterialApp(
@@ -635,6 +636,7 @@ void main() {
         final ExpansibleController controller = ExpansibleController();
         addTearDown(controller.dispose);
 
+        addTearDown(controller.dispose);
         const DefaultWidgetsLocalizations localizations = DefaultWidgetsLocalizations();
 
         await tester.pumpWidget(
@@ -679,6 +681,7 @@ void main() {
       'Expansible uses hint semantics on iOS/macOS',
       (WidgetTester tester) async {
         final controller = ExpansibleController();
+        addTearDown(controller.dispose);
         const localizations = DefaultWidgetsLocalizations();
         await tester.pumpWidget(
           MaterialApp(
