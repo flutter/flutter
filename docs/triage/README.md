@@ -77,7 +77,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`.
   - If it's specific to a single platform, also add that platform's fyi label.
   - If it's specific to text fields or text input, also add `a: text input`.
-  - If it's specific to text selection, also add `f: selection`.
+  - If it's specific to text selection or selectable region also add `f: selection`.
 - If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
   - If the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about the Flutter engine, add `team-engine`.
