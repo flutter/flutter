@@ -130,7 +130,7 @@ This list may become outdated, so be sure to change any references to the old SD
 
 1. Reference the new Android API release notes to see the required dependency version minimums.
 
-2. Update the Flutter templates to use the new Android API and new dependency versioning minimums and create a PR. Do not update the template `targetSdk` in this change because additional infra changes may be necessary. 
+2. Update the Flutter templates to use the new Android API and new dependency versioning minimums and create a PR. Do not update the template `targetSdk` in this change because additional infra changes may be necessary.
 
 3. Once the previous change passes post submit checks and is not flaky for 100 commits, please create a new PR to update the `targetSdk`.
 
