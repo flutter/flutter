@@ -341,11 +341,11 @@ class TextFormField extends FormField<String> {
 
 class _TextFormFieldState extends FormFieldState<String> {
   RestorableTextEditingController? _controller;
+  late final String? _initialValue;
 
   TextEditingController get _effectiveController => _textFormField.controller ?? _controller!.value;
 
   TextFormField get _textFormField => super.widget as TextFormField;
-  late final String? _initialValue;
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
