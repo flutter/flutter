@@ -31,6 +31,8 @@ import '../version.dart';
 import 'build.dart';
 
 const String _kPlugins = 'Plugins';
+const String _kFileAnIssue =
+    'Please file an issue at https://github.com/flutter/flutter/issues/new/choose.';
 
 class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
@@ -46,7 +48,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
     required Xcode? xcode,
-    required bool verboseHelp,
+    required super.verboseHelp,
   }) : _analytics = analytics,
        _artifacts = artifacts,
        _cache = cache,
@@ -57,17 +59,7 @@ class BuildSwiftPackage extends BuildSubCommand {
        _fileSystem = fileSystem,
        _flutterVersion = flutterVersion,
        _templateRenderer = templateRenderer,
-       _xcode = xcode,
-       super(verboseHelp: verboseHelp) {
-    usesFlavorOption();
-    addTreeShakeIconsFlag();
-    usesTargetOption();
-    usesPubOption();
-    usesDartDefineOption();
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
+       _xcode = xcode {
     argParser
       ..addOption(
         'output',
@@ -75,22 +67,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         valueHelp: 'path/to/directory/',
         help: 'Location to write the frameworks.',
       )
-      ..addMultiOption(
-        'build-mode',
-        allowed: ['debug', 'profile', 'release'],
-        defaultsTo: ['debug', 'profile', 'release'],
-      )
-      ..addOption('platform', allowed: ['ios', 'macos'], defaultsTo: 'ios')
-      ..addFlag(
-        'static',
-        help:
-            'Build CocoaPods plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
-      )
-      ..addFlag(
-        'cocoapods-as-binary-targets',
-        defaultsTo: true,
-        help: 'Adds CocoaPod-only plugins as binary targets in the generated swift package.',
-      );
+      ..addOption('platform', allowed: ['ios', 'macos'], defaultsTo: 'ios');
   }
 
   @override
@@ -132,8 +109,8 @@ class BuildSwiftPackage extends BuildSubCommand {
       }
     }
     throwToolExit(
-      'The iOS platform is being targeted but the Flutter project does not support iOS. Use '
-      'the "--platform" flag to change the targeted platforms.',
+      'The $platformString platform is being targeted but the Flutter project does not support '
+      '$platformString. Use the "--platform" flag to change the targeted platforms.',
     );
   }
 
@@ -272,7 +249,7 @@ class FlutterPluginDependencies {
         overridePath: pluginDestination.path,
       );
       if (swiftPackagePath == null) {
-        throwToolExit('Failed to copy ${plugin.name}.');
+        throwToolExit("Failed to find copied ${plugin.name}'s Package.swift. $_kFileAnIssue");
       }
 
       await _addFlutterFrameworkDependencyIfNeeded(plugin.name, swiftPackagePath);
@@ -289,7 +266,9 @@ class FlutterPluginDependencies {
       _utils.fileSystem.path.join(copiedPackagePath, 'Package.swift'),
     );
     if (!swiftPackageManifest.existsSync()) {
-      throwToolExit('Failed to find $copiedPackagePath');
+      throwToolExit(
+        "Failed to find copied $pluginName's Package.swift at $copiedPackagePath. $_kFileAnIssue",
+      );
     }
     final String originalManifestContents = swiftPackageManifest.readAsStringSync();
 
@@ -317,9 +296,7 @@ class FlutterPluginDependencies {
       }
     } on Exception catch (e, stackTrace) {
       _utils.logger.printTrace('Failed to parse $copiedPackagePath: $e\n$stackTrace');
-      throwToolExit(
-        'Failed to validate $pluginName. Please file an issue at https://github.com/flutter/flutter/issues/new/choose.',
-      );
+      throwToolExit('Failed to validate $pluginName. $_kFileAnIssue.');
     }
     try {
       // Parse swift package for FlutterFramework dependency
