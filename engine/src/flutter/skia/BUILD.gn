@@ -94,9 +94,6 @@ config("skia_private") {
   }
   libs = []
   lib_dirs = []
-  if (skia_use_vma) {
-    defines += [ "SK_USE_VMA" ]
-  }
 }
 
 # Any code that's linked into Skia-the-library should use this config
@@ -399,9 +396,6 @@ optional("gpu_shared") {
     configs += [ ":our_vulkan_headers" ]
     if (skia_enable_vulkan_debug_layers) {
       public_defines += [ "SK_ENABLE_VK_LAYERS" ]
-    }
-    if (skia_use_vma) {
-      public_deps += [ "$_skia_root/src/gpu/vk/vulkanmemoryallocator" ]
     }
   }
 
