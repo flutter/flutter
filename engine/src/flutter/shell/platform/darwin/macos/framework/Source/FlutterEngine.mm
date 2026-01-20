@@ -1194,6 +1194,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     windowMetricsEvent.min_height_constraint = static_cast<size_t>(minimumContentSize.height);
     windowMetricsEvent.max_width_constraint = static_cast<size_t>(maximumContentSize.width);
     windowMetricsEvent.max_height_constraint = static_cast<size_t>(maximumContentSize.height);
+  } else {
+    windowMetricsEvent.min_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.min_height_constraint = static_cast<size_t>(scaledSize.height);
+    windowMetricsEvent.max_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.max_height_constraint = static_cast<size_t>(scaledSize.height);
   }
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }

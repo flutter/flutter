@@ -809,7 +809,7 @@ class _MacOSPlatformInterface {
   /// Creates a new window and returns the viewId of the created FlutterView.
   static int createTooltipWindow({
     required BoxConstraints preferredConstraints,
-    int? parentViewId,
+    required int parentViewId,
     required Pointer<NativeFunction<Void Function()>> onShouldClose,
     required Pointer<NativeFunction<Void Function()>> onWillClose,
     required Pointer<NativeFunction<Void Function()>> onNotifyListeners,
