@@ -16,6 +16,10 @@
 # https://dart.dev/go/data-driven-fixes.
 
 # * Fixes in this file are for classes exported from the 'dart:ui' library. *
+# This file mirrors the Flutter Engine's 'dart:ui' fixes found at
+# engine/src/flutter/lib/ui/fix_dart_ui.yaml. The Engine's file is the source
+# of truth. Its fixes are duplicated here to ensure they apply to 'dart:ui'
+# classes re-exported by 'package:flutter' libraries.
 
 # Uncomment version & transforms, and follow with fixes.
 version: 1
