@@ -2,7 +2,7 @@
 
 ## Objective
 
-Provides a list of areas to consider and examples of former work for how to update Flutter to support a new version of the Android API. This generally happens every fall and Flutter developers expect to build against the latest versions quickly after they are available.
+Provides a list of areas to consider and examples of former work for how to update Flutter to support a new version of the Android API. This generally happens every fall and spring and Flutter developers expect to build against the latest versions quickly after they are available.
 
 ### Overview
 
@@ -11,15 +11,15 @@ Addressing breaking changes will differentiate every year, while updating the Fl
 
 Below is a guide to ensuring Flutter apps on Android work on the new API. It is recommended that you follow the directions in order. If something is blocked, move on to the next step.
 
-Please update this doc whenever there is a new Android API.
+Please maintain this doc to reflect the latest processes, issues, and PRs.
 
-#### Umbrella Issue for Updating to the new API
+#### Create an Umbrella Issue for Updating to the new API
 
-Updating from API 35 to API 36: <https://github.com/flutter/flutter/issues/163071>
+An example: updating from API 35 to API 36: <https://github.com/flutter/flutter/issues/163071>
 
-#### New Android features
+#### Investigate new Android features
 
-New Android features can cause breaking or behavioral changes to Flutter, and they can require a broad spectrum of work. The Flutter Android team investigates these new Android API features and determines which are no-ops and which require work. We are generally aware of breaking changes and schedule work ahead of time.
+New Android features can cause breaking or behavioral changes to Flutter, and they can require a broad spectrum of work. The Flutter Android team should investigate these new Android API features and determine which are no-ops and which require work. We are generally aware of breaking changes and schedule work ahead of time.
 
 #### Bump compile and target SDK versions in samples
 
@@ -41,7 +41,7 @@ Robolectric is a dependency that allows us to write unit tests that run on a loc
 
 ---
 
-### Updating CI
+### Update CI
 
 To ensure Flutter is properly tested against the new Android API, we must update the Flutter CI accordingly.
 
@@ -60,7 +60,7 @@ Flutter now includes a script to download, package, and upload the Android SDK t
 > Before uploading to CIPD, please double-check that the Android SDK configurations in the text file are correct.
 > Be cautious when uploading new packages to CIPD because it is difficult to undo. If you need to remove an uploaded CIPD tag, follow the documentation [here](http://go/flutter-luci-playbook#remove-duplicated-cipd-tags).
 
-Please do not manually upload a new android api version to cipd. Instead, follow these steps:
+Please do not manually upload a new Android API version to CIPD. Instead, follow these steps:
 
 1. To upload packages to CIPD (either with the script or manually), the  `flutter-cipd-writers` role is required in order to complete this operation. Googlers can apply for access [here](https://grants.corp.google.com/#/grants?request=8h%2Fflutter-cipd-writers). Once this role is granted, `cipd auth-login` must be run in order for cipd to update the user's available roles.
 
@@ -91,8 +91,8 @@ New versions of Android have new dependency version minimums. We must update the
 
 Update the `android_sdk` version in `flutter/flutter` and `flutter/packages` ci.yaml to test against the new android sdk. If Flutter must test against a new version of java, you must also update the ci.yaml.
 
-- Example PRs: <https://github.com/flutter/flutter/pull/166464> (relevant changes are only in the `ci.yaml` file)
-- Example PRs: <https://github.com/flutter/packages/pull/9414> (change only the `android_sdk` version)
+- Example PR where relevant changes are only in the `ci.yaml` file: <https://github.com/flutter/flutter/pull/166464>
+- Example PR where the relevant change is only to the `android_sdk` version in `ci.yaml` file: <https://github.com/flutter/packages/pull/9414>
 
 #### Update Flutter Android Packages Defaults
 - Set examples to build with the new API.
@@ -130,7 +130,9 @@ This list may become outdated, so be sure to change any references to the old SD
 
 1. Reference the new Android API release notes to see the required dependency version minimums.
 
-2. Update the Flutter templates to use the new Android API and new dependency versioning minimums. Note: Do not update the template `targetSdk` in this change because additional infra changes may be necessary. Please update the `targetSdk` in a different PR.
+2. Update the Flutter templates to use the new Android API and new dependency versioning minimums and create a PR. Do not update the template `targetSdk` in this change because additional infra changes may be necessary. 
+
+3. Once the previous change passes post submit checks and is not flaky for 100 commits, please create a new PR to update the `targetSdk`.
 
 Once you update the templates, the new versions should show up in a newly created Flutter app (even with nothing merged). As a sanity check, you should verify that a Flutter app successfully builds to Android with these new updates.
 
