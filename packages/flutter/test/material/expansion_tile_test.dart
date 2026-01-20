@@ -7,8 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1079,52 +1077,6 @@ void main() {
     expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
     handle.dispose();
   });
-
-  testWidgets(
-    'Semantics hint for iOS and macOS',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(title: Text('First Expansion Tile')),
-                ExpansionTile(initiallyExpanded: true, title: Text('Second Expansion Tile')),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      SemanticsNode semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).first, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      );
-
-      semantics = tester.getSemantics(
-        find.ancestor(of: find.byType(ListTile).last, matching: find.byType(Semantics)).first,
-      );
-
-      expect(semantics, isNotNull);
-      expect(
-        semantics.hint,
-        '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
-      );
-      handle.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
 
   testWidgets('Collapsed ExpansionTile properties can be updated with setState', (
     WidgetTester tester,

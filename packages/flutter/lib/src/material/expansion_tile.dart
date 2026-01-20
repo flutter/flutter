@@ -573,25 +573,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = _tileController.isExpanded
-        ? localizations.expansionTileExpandedTapHint
-        : localizations.expansionTileCollapsedTapHint;
-    String? semanticsHint;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        semanticsHint = _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
-
-    final Widget child = ListTileTheme.merge(
+    return ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
       textColor: _headerColor.value,
       child: ListTile(
@@ -610,11 +592,8 @@ class _ExpansionTileState extends State<ExpansionTile> {
             : null,
         minTileHeight: widget.minTileHeight,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
-        statesController: widget.statesController,
       ),
     );
-
-    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {
