@@ -46,6 +46,11 @@ enum class SourceLanguage {
   kHLSL,
 };
 
+struct StructElement {
+  std::string name;
+  size_t byte_size;
+};
+
 struct UniformDescription {
   std::string name;
   size_t location = 0u;
@@ -56,6 +61,7 @@ struct UniformDescription {
   size_t bit_width = 0u;
   std::optional<size_t> array_elements = std::nullopt;
   std::vector<uint8_t> struct_layout = {};
+  std::vector<StructElement> struct_elements = {};
   size_t struct_float_count = 0u;
 };
 

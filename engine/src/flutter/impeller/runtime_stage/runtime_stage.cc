@@ -86,6 +86,14 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
           desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
         }
       }
+      if (i->struct_elements()) {
+        for (const auto& elem : *i->struct_elements()) {
+          StructElement e;
+          e.name = elem->name()->str();
+          e.byte_size = elem->byte_size();
+          desc.struct_elements.push_back(e);
+        }
+      }
       desc.struct_float_count = i->struct_float_count();
       stage.uniforms_.push_back(std::move(desc));
     }
