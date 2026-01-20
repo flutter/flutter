@@ -839,7 +839,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didRequestAppExit'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didRequestAppExit',
+            ),
           ),
         );
       }
@@ -859,7 +861,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeMetrics'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeMetrics',
+            ),
           ),
         );
       }
@@ -878,7 +882,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeTextScaleFactor'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeTextScaleFactor',
+            ),
           ),
         );
       }
@@ -897,7 +903,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
           ),
         );
       }
@@ -916,7 +924,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeAccessibilityFeatures'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAccessibilityFeatures',
+            ),
           ),
         );
       }
@@ -953,7 +963,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeLocales'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeLocales',
+            ),
           ),
         );
       }
@@ -1023,7 +1035,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didPopRoute'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPopRoute',
+            ),
           ),
         );
       }
@@ -1049,7 +1063,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.handleStartBackGesture'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleStartBackGesture',
+            ),
           ),
         );
       }
@@ -1072,7 +1088,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.handleUpdateBackGestureProgress'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleUpdateBackGestureProgress',
+            ),
           ),
         );
       }
@@ -1098,7 +1116,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.handleCommitBackGesture'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCommitBackGesture',
+            ),
           ),
         );
       }
@@ -1115,7 +1135,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.handleCancelBackGesture'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.handleCancelBackGesture',
+            ),
           ),
         );
       }
@@ -1148,7 +1170,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
           ),
         );
       }
@@ -1172,7 +1196,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didPushRouteInformation',
+            ),
           ),
         );
       }
@@ -1216,7 +1242,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeAppLifecycleState'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAppLifecycleState',
+            ),
           ),
         );
       }
@@ -1235,7 +1263,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didChangeViewFocus'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeViewFocus',
+            ),
           ),
         );
       }
@@ -1254,7 +1284,9 @@ mixin WidgetsBinding
             exception: exception,
             stack: stack,
             library: 'widgets library',
-            context: ErrorDescription('while dispatching notifications for WidgetsBindingObserver.didHaveMemoryPressure'),
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didHaveMemoryPressure',
+            ),
           ),
         );
       }

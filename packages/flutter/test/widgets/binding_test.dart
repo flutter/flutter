@@ -691,16 +691,27 @@ void main() {
 
     // Test regular callback (didChangeAppLifecycleState)
     WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    expect(log, contains('didChangeAppLifecycleState'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(
+      log,
+      contains('didChangeAppLifecycleState'),
+      reason: 'Second observer should be notified despite first observer throwing',
+    );
     expect(errors, hasLength(1), reason: 'Error should be reported');
     expect(errors[0].exception.toString(), contains('Intentional test exception'));
-    expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didChangeAppLifecycleState'));
+    expect(
+      errors[0].context.toString(),
+      contains('WidgetsBindingObserver.didChangeAppLifecycleState'),
+    );
 
     // Test method channel handler (didPopRoute)
     log.clear();
     errors.clear();
     await WidgetsBinding.instance.handlePopRoute();
-    expect(log, contains('didPopRoute'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(
+      log,
+      contains('didPopRoute'),
+      reason: 'Second observer should be notified despite first observer throwing',
+    );
     expect(errors, hasLength(1), reason: 'Error should be reported');
     expect(errors[0].exception.toString(), contains('Intentional test exception'));
     expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didPopRoute'));
@@ -709,7 +720,11 @@ void main() {
     log.clear();
     errors.clear();
     WidgetsBinding.instance.handleMetricsChanged();
-    expect(log, contains('didChangeMetrics'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(
+      log,
+      contains('didChangeMetrics'),
+      reason: 'Second observer should be notified despite first observer throwing',
+    );
     expect(errors, hasLength(1), reason: 'Error should be reported');
     expect(errors[0].exception.toString(), contains('Intentional test exception'));
     expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didChangeMetrics'));
