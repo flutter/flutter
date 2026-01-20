@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'list_tile_test_utils.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -1448,7 +1449,7 @@ void main() {
                                 key: ValueKey<String>('item-$index'),
                                 child: ReorderableDragStartListener(
                                   index: index,
-                                  child: ListTile(title: Text('item ${items[index]}')),
+                                  child: TestListTile(title: Text('item ${items[index]}')),
                                 ),
                               );
                             },
@@ -1604,7 +1605,7 @@ void main() {
               return ReorderableDragStartListener(
                 key: Key('$index'),
                 index: index,
-                child: Material(child: ListTile(title: Text(items[index]))),
+                child: Material(child: TestListTile(title: Text(items[index]))),
               );
             },
           ),

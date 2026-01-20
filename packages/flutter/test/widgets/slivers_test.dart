@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'list_tile_test_utils.dart';
 import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, {double anchor = 0.0}) {
@@ -481,7 +482,7 @@ void main() {
     Widget buildItem(BuildContext context, int index) {
       return !skip || index.isEven
           ? Card(
-              child: ListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
+              child: TestListTile(title: Text('item$index', style: const TextStyle(fontSize: 80))),
             )
           : Container();
     }
