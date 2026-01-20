@@ -2006,11 +2006,15 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     // into the potentially infinite mainAxisExtent will overflow the end of
     // the viewport.
     _hasVisualOverflow = correctedOffset < 0.0;
-    _calculatedCacheExtent = switch (cacheExtentStyle) {
-      CacheExtentStyle.pixel => cacheExtent,
+    if (mainAxisExtent.isFinite) {
+      _calculatedCacheExtent = switch (cacheExtentStyle) {
+        CacheExtentStyle.pixel => cacheExtent,
+        CacheExtentStyle.viewport => mainAxisExtent * _cacheExtent,
+      };
+    } else {
       // If mainAxisExtent is infinite, it builds everything anyway, so we don't need any extra cache.
-      CacheExtentStyle.viewport => mainAxisExtent.isFinite ? mainAxisExtent * _cacheExtent : 0,
-    };
+      _calculatedCacheExtent = 0.0;
+    }
 
     return layoutChildSequence(
       child: firstChild,
