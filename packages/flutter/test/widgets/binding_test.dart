@@ -56,6 +56,45 @@ class PushRouteInformationObserver with WidgetsBindingObserver {
   }
 }
 
+class ThrowingObserver with WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  void didChangeMetrics() {
+    throw Exception('Intentional test exception from observer');
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    throw Exception('Intentional test exception from observer');
+  }
+}
+
+class LoggingObserver with WidgetsBindingObserver {
+  LoggingObserver(this.log);
+
+  final List<String> log;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    log.add('didChangeAppLifecycleState');
+  }
+
+  @override
+  void didChangeMetrics() {
+    log.add('didChangeMetrics');
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    log.add('didPopRoute');
+    return false;
+  }
+}
+
 // Implements to make sure all methods get coverage.
 class RentrantObserver implements WidgetsBindingObserver {
   RentrantObserver() {
@@ -631,6 +670,54 @@ void main() {
     const toMatch = '...     Normal element mounting (';
     expect(toMatch.allMatches(errorDetails.toString()).length, 1);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87875
+
+  testWidgets('WidgetsBindingObserver callbacks handle exceptions gracefully', (
+    WidgetTester tester,
+  ) async {
+    final log = <String>[];
+    final errors = <FlutterErrorDetails>[];
+
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errors.add(details);
+    };
+
+    // Create observers: one that throws, one that should still get called
+    final throwingObserver = ThrowingObserver();
+    final loggingObserver = LoggingObserver(log);
+
+    WidgetsBinding.instance.addObserver(throwingObserver);
+    WidgetsBinding.instance.addObserver(loggingObserver);
+
+    // Test regular callback (didChangeAppLifecycleState)
+    WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    expect(log, contains('didChangeAppLifecycleState'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(errors, hasLength(1), reason: 'Error should be reported');
+    expect(errors[0].exception.toString(), contains('Intentional test exception'));
+    expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didChangeAppLifecycleState'));
+
+    // Test method channel handler (didPopRoute)
+    log.clear();
+    errors.clear();
+    await WidgetsBinding.instance.handlePopRoute();
+    expect(log, contains('didPopRoute'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(errors, hasLength(1), reason: 'Error should be reported');
+    expect(errors[0].exception.toString(), contains('Intentional test exception'));
+    expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didPopRoute'));
+
+    // Test another regular callback (didChangeMetrics)
+    log.clear();
+    errors.clear();
+    WidgetsBinding.instance.handleMetricsChanged();
+    expect(log, contains('didChangeMetrics'), reason: 'Second observer should be notified despite first observer throwing');
+    expect(errors, hasLength(1), reason: 'Error should be reported');
+    expect(errors[0].exception.toString(), contains('Intentional test exception'));
+    expect(errors[0].context.toString(), contains('WidgetsBindingObserver.didChangeMetrics'));
+
+    WidgetsBinding.instance.removeObserver(throwingObserver);
+    WidgetsBinding.instance.removeObserver(loggingObserver);
+    FlutterError.onError = oldHandler;
+  });
 }
 
 class TestStatefulWidget extends StatefulWidget {
