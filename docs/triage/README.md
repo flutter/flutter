@@ -74,8 +74,10 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
   - If it's specific to a single platform, also add that platform's fyi label.
 - If it's about Cupertino or Material Design, add `team-design`.
-- If it's about text fields or other user-facing text input issues, add `team-text-input`.
+- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`.
   - If it's specific to a single platform, also add that platform's fyi label.
+  - If it's specific to text fields or text input, also add `a: text input`.
+  - If it's specific to text selection, also add `f: selection`.
 - If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
   - If the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about the Flutter engine, add `team-engine`.
@@ -283,8 +285,8 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 ### Text Input team (`team-text-input`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+sort%3Aupdated-asc+label%3AP0+)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2Cteam-text-input%2Cfyi-text-input+)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22a%3A%20text%20input%22%2C%22f%3A%20selection%22%2Cteam-text-input%2Cfyi-text-input%20sort%3Aupdated-asc%20label%3AP0)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20customer%20response%22)
 
 ### Flutter Tool team (`team-tool`)
