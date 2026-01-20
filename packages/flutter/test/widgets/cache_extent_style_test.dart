@@ -11,10 +11,7 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: CustomScrollView(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
-        ),
+        child: CustomScrollView(cacheExtent: 1.0, cacheExtentStyle: CacheExtentStyle.viewport),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
@@ -26,10 +23,7 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
-        ),
+        child: ListView(cacheExtent: 1.0, cacheExtentStyle: CacheExtentStyle.viewport),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
