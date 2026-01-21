@@ -456,7 +456,7 @@ class SizeTransition extends AnimatedWidget {
     @Deprecated(
       'Use alignment instead. '
       'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
-      'This feature was deprecated after v3.38.0-1.0.pre.',
+      'This feature was deprecated after v3.41.0-1.0.pre.',
     )
     this.axisAlignment,
     this.alignment,
@@ -501,7 +501,7 @@ class SizeTransition extends AnimatedWidget {
   @Deprecated(
     'Use alignment instead. '
     'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
-    'This feature was deprecated after v3.38.0-1.0.pre.',
+    'This feature was deprecated after v3.41.0-1.0.pre.',
   )
   final double? axisAlignment;
 
