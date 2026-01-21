@@ -18,14 +18,14 @@ The easiest way to symbolicate stack traces for Android and older iOS apps is to
 
    To download the symbols for android-arm, download this URL _using your browser_ (replacing the hash again, and noting that this URL is on a different host, "storage", compared to the one above, which uses "console"): `https://storage.cloud.google.com/flutter_infra_release/flutter/cea5ed2b9be42a981eac762af3664e4a17d0a53f/android-arm/symbols.zip`.
 
-   Since df114fbe9b30afc94ee1154393aef8b575ee1612, the artifact at the following url is an unstripped version of `libflutter.so`, not the symbols themselves. To retrieve the symbols, use `llvm-objcopy`. If you have run `gclient sync` you should have a copy at
+   Since flutter#df114fbe9b30afc94ee1154393aef8b575ee1612, the artifact at the following url is an unstripped version of `libflutter.so`, not the symbols themselves. To retrieve the symbols, use `llvm-objcopy`. If you have run `gclient sync` you should have a copy at
    ```
-<FLUTTER_ROOT>/third_party/android_tools/sdk/ndk/<VERSION>/toolchains/llvm/prebuilt/<ARCH>/bin/llvm-objcopy
+   <FLUTTER_ROOT>/third_party/android_tools/sdk/ndk/<VERSION>/toolchains/llvm/prebuilt/<ARCH>/bin/llvm-objcopy
    ```
 
    which you can use to run on the downloaded `libflutter.so`:
    ```
-llvm-objcopy --only-keep-debug <PATH_TO_DOWNLOADED_LIBFLUTTER> <PATH_TO_DOWNLOADED_LIBFLUTTER>.dbg
+   llvm-objcopy --only-keep-debug <PATH_TO_DOWNLOADED_LIBFLUTTER> <PATH_TO_DOWNLOADED_LIBFLUTTER>.dbg
    ```
 
    Please be aware that the type of the symbol must match your Apps release type. In above example, this refers to a android-arm **debug** build. If you work with a **release** or **profile** build, the URLs would look like this:
