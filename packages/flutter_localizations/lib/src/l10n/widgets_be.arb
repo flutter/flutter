@@ -12,7 +12,7 @@
   "shareButtonLabel": "Абагуліць",
   "pasteButtonLabel": "Уставіць",
   "selectAllButtonLabel": "Выбраць усе",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Знойдзены вынікі пошуку",
+  "noResultsFound": "Вынікі не знойдзены",
+  "radioButtonUnselectedLabel": "Не выбрана"
 }
