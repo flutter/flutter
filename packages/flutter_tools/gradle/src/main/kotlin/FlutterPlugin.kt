@@ -21,6 +21,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
@@ -700,9 +701,9 @@ class FlutterPlugin : Plugin<Project> {
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
             val jniLibsDir = project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs")
-            val copyJniLibsTaskProvider: TaskProvider<Copy> = project.tasks.register(
+            val copyJniLibsTaskProvider: TaskProvider<Sync> = project.tasks.register(
                 "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                Copy::class.java
+                Sync::class.java
             ) {
                 dependsOn(flutterCompileTask)
                 into(jniLibsDir)
