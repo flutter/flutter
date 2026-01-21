@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
@@ -504,7 +503,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotDelayDrawingwhenUsingTextureRendering() {
+  public void itDoesNotDelayDrawingWhenUsingTextureRendering() {
     Intent intent = FlutterActivityWithTextureRendering.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithTextureRendering> activityController =
         Robolectric.buildActivity(FlutterActivityWithTextureRendering.class, intent);
@@ -548,7 +547,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotReleaseEnginewhenDetachFromFlutterEngine() {
+  public void itDoesNotReleaseEngineWhenDetachFromFlutterEngine() {
     FlutterActivityAndFragmentDelegate mockDelegate =
         mock(FlutterActivityAndFragmentDelegate.class);
     isDelegateAttached = true;
