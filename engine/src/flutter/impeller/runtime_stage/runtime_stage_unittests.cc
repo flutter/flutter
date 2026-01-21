@@ -298,6 +298,14 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
 
       ASSERT_EQ(uni->struct_elements.size(), expected_uniforms.size());
 
+      for (size_t i = 0; i < expected_uniforms.size(); ++i) {
+        const auto& element = uni->struct_elements[i];
+        const auto& expected = expected_uniforms[i];
+
+        EXPECT_EQ(element.name, expected.first);
+        EXPECT_EQ(element.byte_size, expected.second);
+      }
+
       break;
     }
   }

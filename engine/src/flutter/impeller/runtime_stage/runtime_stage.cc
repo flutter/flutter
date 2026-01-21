@@ -88,10 +88,8 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
       }
       if (i->struct_elements()) {
         for (const auto& elem : *i->struct_elements()) {
-          StructElement e;
-          e.name = elem->name()->str();
-          e.byte_size = elem->byte_size();
-          desc.struct_elements.push_back(e);
+          desc.struct_elements.emplace_back(
+              StructElement{elem->name()->str(), elem->byte_size()});
         }
       }
       desc.struct_float_count = i->struct_float_count();
