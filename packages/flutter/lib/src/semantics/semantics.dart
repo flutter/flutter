@@ -130,7 +130,7 @@ enum AccessibilityFocusBlockType {
   /// may still be focusable.
   blockNode;
 
-  /// The AccessiblityFocusBlockType when two nodes get merged.
+  /// The AccessibilityFocusBlockType when two nodes get merged.
   AccessibilityFocusBlockType _merge(AccessibilityFocusBlockType other) {
     // 1. If either is blockSubtree, the result is blockSubtree.
     if (this == AccessibilityFocusBlockType.blockSubtree ||
