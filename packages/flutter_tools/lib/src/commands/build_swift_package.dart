@@ -31,6 +31,7 @@ import 'build.dart';
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
 const String _kSources = 'Sources';
 
+/// Create a swift package that can be used to embed a Flutter app inside a native iOS or macOS app.
 class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
     required super.logger,
@@ -62,7 +63,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         'output',
         abbr: 'o',
         valueHelp: 'path/to/directory/',
-        help: 'Location to write the frameworks.',
+        help: 'Location to write the swift package.',
       )
       ..addOption('platform', allowed: ['ios', 'macos'], defaultsTo: 'ios')
       ..addMultiOption(
@@ -80,16 +81,6 @@ class BuildSwiftPackage extends BuildSubCommand {
       'Produces Swift packages and scripts for a Flutter project '
       'and its plugins for integration into existing, plain iOS and macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    switch (_targetPlatform) {
-      case FlutterDarwinPlatform.ios:
-        return <DevelopmentArtifact>{DevelopmentArtifact.iOS};
-      case FlutterDarwinPlatform.macos:
-        return <DevelopmentArtifact>{DevelopmentArtifact.macOS};
-    }
-  }
 
   final Platform _platform;
   final BuildSystem _buildSystem;
@@ -120,6 +111,16 @@ class BuildSwiftPackage extends BuildSubCommand {
     );
   }
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    switch (_targetPlatform) {
+      case FlutterDarwinPlatform.ios:
+        return <DevelopmentArtifact>{DevelopmentArtifact.iOS};
+      case FlutterDarwinPlatform.macos:
+        return <DevelopmentArtifact>{DevelopmentArtifact.macOS};
+    }
+  }
+
   Future<List<BuildInfo>> _getBuildInfos() async {
     final List<String> buildModes = stringsArg('build-mode');
     final List<BuildInfo> buildInfos = [];
@@ -143,21 +144,31 @@ class BuildSwiftPackage extends BuildSubCommand {
     _validateXcodeVersion();
   }
 
+  /// Validates the Flutter project supports the [_targetPlatform].
+  ///
+  /// Throws a [ToolExit] if iOS/macOS subproject does not exist.
   void _validateTargetPlatform() {
-    if (_targetPlatform == FlutterDarwinPlatform.ios && !project.ios.existsSync()) {
-      throwToolExit(
-        'The iOS platform is being targeted but the Flutter project does not support iOS. Use '
-        'the "--platform" flag to change the targeted platforms.',
-      );
-    }
-    if (_targetPlatform == FlutterDarwinPlatform.macos && !project.macos.existsSync()) {
-      throwToolExit(
-        'The macOS platform is being targeted but the Flutter project does not support macOS. Use '
-        'the "--platform" flag to change the targeted platforms.',
-      );
+    switch (_targetPlatform) {
+      case FlutterDarwinPlatform.ios:
+        if (!project.ios.existsSync()) {
+          throwToolExit(
+            'The iOS platform is being targeted but the Flutter project does not support iOS. Use '
+            'the "--platform" flag to change the targeted platforms.',
+          );
+        }
+      case FlutterDarwinPlatform.macos:
+        if (!project.macos.existsSync()) {
+          throwToolExit(
+            'The macOS platform is being targeted but the Flutter project does not support macOS. Use '
+            'the "--platform" flag to change the targeted platforms.',
+          );
+        }
     }
   }
 
+  /// Validates the SwiftPM feature flag is enabled.
+  ///
+  /// Throws a [ToolExit] if the flag is disabled.
   void _validateFeatureFlags() {
     if (!_featureFlags.isSwiftPackageManagerEnabled) {
       throwToolExit(
@@ -168,6 +179,9 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
   }
 
+  /// Validates the Xcode version is equal to or greater than 15.
+  ///
+  /// Throws a [ToolExit] if the Xcoder version is less than 15.
   void _validateXcodeVersion() {
     final Version? xcodeVersion = _xcode?.currentVersion;
     if (xcodeVersion == null || xcodeVersion.major < 15) {
@@ -189,11 +203,13 @@ class BuildSwiftPackage extends BuildSubCommand {
     platform: _platform,
     processManager: _processManager,
     project: project,
-    targetPlatform: _targetPlatform,
     templateRenderer: _templateRenderer,
     xcode: _xcode!,
   );
-  late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(utils: utils);
+  late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(
+    targetPlatform: _targetPlatform,
+    utils: utils,
+  );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -255,7 +271,11 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
   }
 
-  /// Create a symlink from the Sources directory to the [defaultBuildMode] directory.
+  /// Creates relative symlinks for Sources and Package.swift using the [defaultBuildMode] so that
+  /// the package may easily be switched to a different build mode by updating the symlink.
+  ///
+  /// Creates a symlink from the Sources directory to the './[defaultBuildMode]' directory.
+  ///
   /// Creates a symlink from Package.swift to "./[defaultBuildMode]/Package.swift"
   @visibleForTesting
   void createSourcesSymlink(Directory pluginRegistrantSwiftPackage, String defaultBuildMode) {
@@ -274,14 +294,18 @@ class BuildSwiftPackage extends BuildSubCommand {
   }
 }
 
+/// Class that encapsulates logic needed to create the FlutterPluginRegistrant swift package.
 @visibleForTesting
 class FlutterPluginRegistrantSwiftPackage {
-  FlutterPluginRegistrantSwiftPackage({required BuildSwiftPackageUtils utils}) : _utils = utils;
+  FlutterPluginRegistrantSwiftPackage({
+    required FlutterDarwinPlatform targetPlatform,
+    required BuildSwiftPackageUtils utils,
+  }) : _targetPlatform = targetPlatform,
+       _utils = utils;
 
+  final FlutterDarwinPlatform _targetPlatform;
   final BuildSwiftPackageUtils _utils;
 
-  // Create FlutterPluginRegistrant Swift Package with dependencies on the
-  // swift pacakge plugins, CocoaPod xcframeworks, and Flutter/App xcframeworks.
   Future<void> generateSwiftPackage({
     required Directory pluginRegistrantSwiftPackage,
     required List<Plugin> plugins,
@@ -325,6 +349,7 @@ class FlutterPluginRegistrantSwiftPackage {
     );
   }
 
+  /// Generates GeneratedPluginRegistrant source files.
   Future<void> _generateSourceFiles({
     required Directory pluginRegistrantSwiftPackage,
     required List<Plugin> plugins,
@@ -348,7 +373,7 @@ class FlutterPluginRegistrantSwiftPackage {
     final File swiftFile = sourcesDirectory
         .childDirectory(kPluginSwiftPackageName)
         .childFile('GeneratedPluginRegistrant.swift');
-    if (_utils.targetPlatform == FlutterDarwinPlatform.ios) {
+    if (_targetPlatform == FlutterDarwinPlatform.ios) {
       await writeIOSPluginRegistrant(
         _utils.project,
         plugins,
@@ -356,7 +381,7 @@ class FlutterPluginRegistrantSwiftPackage {
         pluginRegistrantImplementation: implementationFile,
         templateRenderer: _utils.templateRenderer,
       );
-    } else if (_utils.targetPlatform == FlutterDarwinPlatform.macos) {
+    } else if (_targetPlatform == FlutterDarwinPlatform.macos) {
       await writeMacOSPluginRegistrant(
         _utils.project,
         plugins,
@@ -367,6 +392,7 @@ class FlutterPluginRegistrantSwiftPackage {
   }
 }
 
+/// Helper class that bundles global context variables for easy passing with less boilerplate.
 @visibleForTesting
 class BuildSwiftPackageUtils {
   BuildSwiftPackageUtils({
@@ -380,7 +406,6 @@ class BuildSwiftPackageUtils {
     required this.platform,
     required this.processManager,
     required this.project,
-    required this.targetPlatform,
     required this.templateRenderer,
     required this.xcode,
   });
@@ -395,7 +420,6 @@ class BuildSwiftPackageUtils {
   final Platform platform;
   final ProcessManager processManager;
   final FlutterProject project;
-  final FlutterDarwinPlatform targetPlatform;
   final TemplateRenderer templateRenderer;
   final Xcode xcode;
 }

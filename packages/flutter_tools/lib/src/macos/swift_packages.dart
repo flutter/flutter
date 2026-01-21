@@ -110,8 +110,8 @@ class SwiftPackage {
 
   /// Create a Package.swift using settings from [_templateContext].
   ///
-  /// When [generateEmptySources] is true, it create an empty Swift source file since swift
-  /// packages require at least one source file per non-binary target.
+  /// When [generateEmptySources] is true (the default), it create an empty Swift source file since
+  /// swift packages require at least one source file per non-binary target.
   void createSwiftPackage({bool generateEmptySources = true}) {
     for (final SwiftPackageTarget target in _targets) {
       if (target.targetType == SwiftPackageTargetType.binaryTarget) {
@@ -120,7 +120,8 @@ class SwiftPackage {
       final Directory targetDirectory = _manifest.parent
           .childDirectory('Sources')
           .childDirectory(target.name);
-      if (generateEmptySources && (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
+      if (generateEmptySources &&
+          (!targetDirectory.existsSync() || targetDirectory.listSync().isEmpty)) {
         final File requiredSwiftFile = targetDirectory.childFile('${target.name}.swift');
         requiredSwiftFile.createSync(recursive: true);
         requiredSwiftFile.writeAsStringSync(_swiftPackageSourceTemplate);

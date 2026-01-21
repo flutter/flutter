@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -17,6 +16,7 @@ import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -32,7 +32,8 @@ void main() {
 
   group('BuildSwiftPackage', () {
     // TODO(vashworth): Test args validation for BuildSwiftPackage once command has been added as
-    // a subcommand of BuildCommand. This is required for TestFlutterCommandRunner.
+    // a subcommand of BuildCommand (https://github.com/flutter/flutter/issues/181223). This is
+    // required for TestFlutterCommandRunner.
 
     testUsingContext('createSourcesSymlink', () async {
       final fs = MemoryFileSystem.test();
@@ -83,15 +84,19 @@ void main() {
           platform: FakePlatform(),
           processManager: processManager,
           project: FakeFlutterProject(),
-          targetPlatform: FlutterDarwinPlatform.ios,
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
-        final package = FlutterPluginRegistrantSwiftPackage(utils: testUtils);
+        final package = FlutterPluginRegistrantSwiftPackage(
+          targetPlatform: FlutterDarwinPlatform.ios,
+          utils: testUtils,
+        );
         final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
+        final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: FlutterDarwinPlatform.ios);
+
         await package.generateSwiftPackage(
           pluginRegistrantSwiftPackage: swiftPackageOutput,
-          plugins: [],
+          plugins: [pluginA],
           xcodeBuildConfiguration: 'Debug',
         );
 
@@ -125,28 +130,6 @@ let package = Package(
     ]
 )
 ''');
-        final File generatedSourceImplementation = swiftPackageOutput
-            .childDirectory('Debug')
-            .childDirectory('FlutterPluginRegistrant')
-            .childFile('GeneratedPluginRegistrant.m');
-        expect(generatedSourceImplementation, exists);
-        expect(generatedSourceImplementation.readAsStringSync(), '''
-//
-//  Generated file. Do not edit.
-//
-
-// clang-format off
-
-#import "GeneratedPluginRegistrant.h"
-
-@implementation GeneratedPluginRegistrant
-
-+ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-}
-
-@end
-''');
-
         final File generatedSourceHeader = swiftPackageOutput
             .childDirectory('Debug')
             .childDirectory('FlutterPluginRegistrant')
@@ -174,6 +157,34 @@ NS_ASSUME_NONNULL_BEGIN
 NS_ASSUME_NONNULL_END
 #endif /* GeneratedPluginRegistrant_h */
 ''');
+        final File generatedSourceImplementation = swiftPackageOutput
+            .childDirectory('Debug')
+            .childDirectory('FlutterPluginRegistrant')
+            .childFile('GeneratedPluginRegistrant.m');
+        expect(generatedSourceImplementation, exists);
+        expect(generatedSourceImplementation.readAsStringSync(), '''
+//
+//  Generated file. Do not edit.
+//
+
+// clang-format off
+
+#import "GeneratedPluginRegistrant.h"
+
+#if __has_include(<PluginA/PluginAPlugin.h>)
+#import <PluginA/PluginAPlugin.h>
+#else
+@import PluginA;
+#endif
+
+@implementation GeneratedPluginRegistrant
+
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [PluginAPlugin registerWithRegistrar:[registry registrarForPlugin:@"PluginAPlugin"]];
+}
+
+@end
+''');
       });
     });
   });
@@ -195,15 +206,19 @@ NS_ASSUME_NONNULL_END
           platform: FakePlatform(),
           processManager: processManager,
           project: FakeFlutterProject(),
-          targetPlatform: FlutterDarwinPlatform.macos,
           templateRenderer: const MustacheTemplateRenderer(),
           xcode: FakeXcode(),
         );
-        final package = FlutterPluginRegistrantSwiftPackage(utils: testUtils);
+        final package = FlutterPluginRegistrantSwiftPackage(
+          targetPlatform: FlutterDarwinPlatform.macos,
+          utils: testUtils,
+        );
         final Directory swiftPackageOutput = fs.directory(pluginRegistrantSwiftPackagePath);
+        final pluginA = FakePlugin(name: 'PluginA', darwinPlatform: FlutterDarwinPlatform.macos);
+
         await package.generateSwiftPackage(
           pluginRegistrantSwiftPackage: swiftPackageOutput,
-          plugins: [],
+          plugins: [pluginA],
           xcodeBuildConfiguration: 'Debug',
         );
 
@@ -250,8 +265,10 @@ let package = Package(
 import FlutterMacOS
 import Foundation
 
+import PluginA
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  PluginAPlugin.register(with: registry.registrar(forPlugin: "PluginAPlugin"))
 }
 ''');
       });
@@ -289,8 +306,23 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool get isModule => false;
 }
 
-class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
+class FakePlugin extends Fake implements Plugin {
+  FakePlugin({required this.name, required this.darwinPlatform});
 
-class FakePlugin extends Fake implements Plugin {}
+  @override
+  final String name;
+
+  final FlutterDarwinPlatform darwinPlatform;
+
+  @override
+  String get path => '/path/to/$name';
+
+  @override
+  late final Map<String, PluginPlatform> platforms = {
+    darwinPlatform.name: darwinPlatform == FlutterDarwinPlatform.macos
+        ? MacOSPlugin(name: name, pluginClass: '${name}Plugin')
+        : IOSPlugin(name: name, classPrefix: '', pluginClass: '${name}Plugin'),
+  };
+}
 
 class FakeFeatureFlags extends Fake implements FeatureFlags {}
