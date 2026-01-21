@@ -431,6 +431,13 @@ class CreateCommand extends FlutterCommand with CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
+    // For plugins with Apple platforms, always enable SwiftPackageManager in templates
+    // since we now generate both SwiftPM and CocoaPods support regardless of the feature flag.
+    final bool pluginWithApplePlatforms =
+        generateMethodChannelsPlugin && (includeIos || includeMacos || includeDarwin);
+    final bool withSwiftPackageManager =
+        pluginWithApplePlatforms || featureFlags.isSwiftPackageManagerEnabled;
+
     final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
       projectName: projectName,
@@ -438,7 +445,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
-      withSwiftPackageManager: featureFlags.isSwiftPackageManagerEnabled,
+      withSwiftPackageManager: withSwiftPackageManager,
       withFfiPluginHook: generateFfiPlugin,
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
@@ -738,11 +745,13 @@ Your $application code is in $relativeAppMain.
 
     final templates = <String>['plugin', 'plugin_shared'];
 
-    final bool useSwiftPackageManager =
-        (templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin) &&
-        featureFlags.isSwiftPackageManagerEnabled;
+    final bool includeApplePlatforms =
+        templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin;
 
-    if (useSwiftPackageManager) {
+    // Always generate SwiftPM structure for Apple platforms.
+    // The podspec (also generated) will point to the SwiftPM source location,
+    // allowing both SwiftPM and CocoaPods users to consume the plugin.
+    if (includeApplePlatforms) {
       if (includeDarwin) {
         templates.add('plugin_darwin_spm');
       } else {
@@ -756,12 +765,6 @@ Your $application code is in $relativeAppMain.
           .macos
           .supportedPackagePlatform
           .format();
-    } else {
-      if (includeDarwin) {
-        templates.add('plugin_darwin_cocoapods');
-      } else {
-        templates.add('plugin_cocoapods');
-      }
     }
     generatedCount += await renderMerged(
       templates,
