@@ -304,10 +304,10 @@ FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcode
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
-  var isInstalled = true;
+  bool isInstalled = true;
 
   @override
-  var version = Version(0, 0, 0);
+  Version version = Version(0, 0, 0);
 
   @override
   Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {

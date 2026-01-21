@@ -13,7 +13,9 @@ class SettingsIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _SettingsIconPainter(time: time, context: context));
+    return CustomPaint(
+      painter: _SettingsIconPainter(time: time, context: context),
+    );
   }
 }
 
@@ -52,21 +54,22 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// A rectangle with a fixed location, used to locate gradients.
   Rect get _fixedRect {
-    final Offset topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
-    final Offset bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
+    final topLeft = Offset(-_size(stickLength / 2), -_size(stickWidth / 2));
+    final bottomRight = Offset(_size(stickLength / 2), _size(stickWidth / 2));
     return Rect.fromPoints(topLeft, bottomRight);
   }
 
   /// Black or white paint, depending on brightness.
   Paint get _monoPaint {
-    final Color monoColor =
-        Theme.of(context).colorScheme.brightness == Brightness.light ? Colors.black : Colors.white;
+    final Color monoColor = Theme.of(context).colorScheme.brightness == Brightness.light
+        ? Colors.black
+        : Colors.white;
     return Paint()..color = monoColor;
   }
 
   /// Pink paint with horizontal gradient.
   Paint get _pinkPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
+    const shader = LinearGradient(colors: <Color>[pinkLeft, pinkRight]);
     final Rect shaderRect = _fixedRect.translate(_size(-(stickLength - colorLength(time)) / 2), 0);
 
     return Paint()..shader = shader.createShader(shaderRect);
@@ -74,7 +77,7 @@ class _SettingsIconPainter extends CustomPainter {
 
   /// Teal paint with horizontal gradient.
   Paint get _tealPaint {
-    const LinearGradient shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
+    const shader = LinearGradient(colors: <Color>[tealLeft, tealRight]);
     final Rect shaderRect = _fixedRect.translate(_size((stickLength - colorLength(time)) / 2), 0);
 
     return Paint()..shader = shader.createShader(shaderRect);
@@ -103,9 +106,9 @@ class _SettingsIconPainter extends CustomPainter {
     _canvas.translate(center.dx, center.dy);
     _canvas.rotate(angle);
 
-    final Rect leftOval = Rect.fromCircle(center: Offset(-stretch + radius, 0), radius: radius);
+    final leftOval = Rect.fromCircle(center: Offset(-stretch + radius, 0), radius: radius);
 
-    final Rect rightOval = Rect.fromCircle(center: Offset(stretch - radius, 0), radius: radius);
+    final rightOval = Rect.fromCircle(center: Offset(stretch - radius, 0), radius: radius);
 
     _canvas.drawPath(
       Path()

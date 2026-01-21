@@ -41,7 +41,9 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                   width: 200,
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: TextField(decoration: InputDecoration(border: OutlineInputBorder())),
+                    child: TextField(
+                      decoration: InputDecoration(border: OutlineInputBorder()),
+                    ),
                   ),
                 );
               }),
@@ -49,12 +51,20 @@ class _UnfocusExampleState extends State<UnfocusExample> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (int index) {
+                ...List<Widget>.generate(UnfocusDisposition.values.length, (
+                  int index,
+                ) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Radio<UnfocusDisposition>(
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         groupValue: disposition,
+                        // TODO(loic-sharma): Migrate to RadioGroup.
+                        // https://github.com/flutter/flutter/issues/179088
+                        // ignore: deprecated_member_use
                         onChanged: (UnfocusDisposition? value) {
                           setState(() {
                             if (value != null) {

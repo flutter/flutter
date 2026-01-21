@@ -219,14 +219,14 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
     : super(handle, _registry);
 
   factory SkwasmFragmentProgram.fromBytes(String name, Uint8List bytes) {
-    final ShaderData shaderData = ShaderData.fromBytes(bytes);
+    final shaderData = ShaderData.fromBytes(bytes);
 
     // TODO(jacksongardner): Can we avoid this copy?
     final List<int> sourceData = utf8.encode(shaderData.source);
     final SkStringHandle sourceString = skStringAllocate(sourceData.length);
     final Pointer<Int8> sourceBuffer = skStringGetData(sourceString);
-    int i = 0;
-    for (final int byte in sourceData) {
+    var i = 0;
+    for (final byte in sourceData) {
       sourceBuffer[i] = byte;
       i++;
     }
@@ -250,19 +250,13 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
-  int _getShaderIndex(String name, int index) {
-    int result = 0;
-    for (final uniform in _shaderData.uniforms) {
+  UniformData _getUniformFloatInfo(String name) {
+    for (final UniformData uniform in _shaderData.uniforms) {
       if (uniform.name == name) {
-        if (index < 0 || index >= uniform.floatCount) {
-          throw IndexError.withLength(index, uniform.floatCount);
-        }
-        result += index;
-        break;
+        return uniform;
       }
-      result += uniform.floatCount;
     }
-    return result;
+    throw ArgumentError('No uniform named "$name".');
   }
 }
 
@@ -296,7 +290,7 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
         Pointer<ShaderHandle> childShaders = nullptr;
         if (_childShaders.isNotEmpty) {
           childShaders = s.allocPointerArray(_childShaders.length).cast<ShaderHandle>();
-          for (int i = 0; i < _childShaders.length; i++) {
+          for (var i = 0; i < _childShaders.length; i++) {
             final SkwasmShader? child = _childShaders[i];
             childShaders[i] = child != null ? child.handle : nullptr;
           }
@@ -347,7 +341,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
-  void setImageSampler(int index, ui.Image image) {
+  void setImageSampler(
+    int index,
+    ui.Image image, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.none,
+  }) {
     if (_nativeShader != null) {
       // Invalidate the previous shader so that it is recreated with the new
       // child shaders.
@@ -355,12 +353,12 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
       _nativeShader = null;
     }
 
-    final SkwasmImageShader shader = SkwasmImageShader.imageShader(
+    final shader = SkwasmImageShader.imageShader(
       image as SkwasmImage,
       ui.TileMode.clamp,
       ui.TileMode.clamp,
       null,
-      ui.FilterQuality.none,
+      filterQuality,
     );
     final SkwasmShader? oldShader = _childShaders[index];
     _childShaders[index] = shader;
@@ -374,13 +372,113 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final shaderIndex = _program._getShaderIndex(name, index);
-    return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
+
+    return SkwasmUniformFloatSlot._(this, index, name, info.location + index);
+  }
+
+  @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _SkwasmUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _SkwasmUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<SkwasmUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _SkwasmUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
+    return List<SkwasmUniformFloatSlot>.generate(
+      size,
+      (i) => SkwasmUniformFloatSlot._(this, i, name, info.location + i),
+    );
+  }
+
+  ui.UniformArray<T> _getUniformArray<T extends ui.UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<SkwasmUniformFloatSlot> slots) elementFactory,
+  ) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.floatCount}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.floatCount ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<SkwasmUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => SkwasmUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
+
+    return _SkwasmUniformArray<T>._(elements);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => _SkwasmUniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) =>
+          _SkwasmUniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => _SkwasmUniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
+    );
   }
 }
 
@@ -402,4 +500,57 @@ class SkwasmUniformFloatSlot implements ui.UniformFloatSlot {
 
   @override
   final int shaderIndex;
+}
+
+class _SkwasmUniformVec2Slot implements ui.UniformVec2Slot {
+  _SkwasmUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _SkwasmUniformVec3Slot implements ui.UniformVec3Slot {
+  _SkwasmUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
+  _SkwasmUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _SkwasmUniformArray<T extends ui.UniformType> implements ui.UniformArray<T> {
+  _SkwasmUniformArray._(this._elements);
+
+  @override
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  @override
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }

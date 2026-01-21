@@ -24,8 +24,7 @@ void main() async {
 
   // TODO(matanlurey): Convert to use package:integration_test
   test('verify that engineId is set and works', () async {
-    final Map<String, Object?> response =
-        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+    final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
     expect(
       response['engineId'],
       1,

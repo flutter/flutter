@@ -23,10 +23,10 @@ class PlatformViewAppState extends State<PlatformViewApp> {
     // Test IDs from Admob:
     // https://developers.google.com/admob/ios/test-ads
     // https://developers.google.com/admob/android/test-ads
-    final String bannerId = Platform.isAndroid
+    final bannerId = Platform.isAndroid
         ? 'ca-app-pub-3940256099942544/6300978111'
         : 'ca-app-pub-3940256099942544/2934735716';
-    final BannerAd bannerAd = BannerAd(
+    final bannerAd = BannerAd(
       adUnitId: bannerId,
       request: const AdRequest(),
       size: AdSize.banner,

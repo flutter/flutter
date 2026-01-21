@@ -10,11 +10,11 @@ const int _kNumIterations = 10000;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
 
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     FlutterTimeline.startSync('foo');
     FlutterTimeline.finishSync();
   }
@@ -29,7 +29,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     FlutterTimeline.startSync(
       'foo',
       arguments: <String, dynamic>{

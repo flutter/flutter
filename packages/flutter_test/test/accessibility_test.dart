@@ -116,18 +116,18 @@ void main() {
       handle.dispose();
     });
 
-    const Color surface = Color(0xFFF0F0F0);
+    const surface = Color(0xFFF0F0F0);
 
     /// Shades of blue with contrast ratio of 2.9, 4.4, 4.5 from [surface].
-    const Color blue29 = Color(0xFF7E7EFB);
-    const Color blue44 = Color(0xFF5757FF);
-    const Color blue45 = Color(0xFF5252FF);
-    const List<TextStyle> textStylesMeetingGuideline = <TextStyle>[
+    const blue29 = Color(0xFF7E7EFB);
+    const blue44 = Color(0xFF5757FF);
+    const blue45 = Color(0xFF5252FF);
+    const textStylesMeetingGuideline = <TextStyle>[
       TextStyle(color: blue44, backgroundColor: surface, fontSize: 18),
       TextStyle(color: blue44, backgroundColor: surface, fontSize: 14, fontWeight: FontWeight.bold),
       TextStyle(color: blue45, backgroundColor: surface),
     ];
-    const List<TextStyle> textStylesDoesNotMeetingGuideline = <TextStyle>[
+    const textStylesDoesNotMeetingGuideline = <TextStyle>[
       TextStyle(color: blue44, backgroundColor: surface),
       TextStyle(color: blue29, backgroundColor: surface, fontSize: 18),
     ];
@@ -135,7 +135,7 @@ void main() {
     Widget appWithTextWidget(TextStyle style) =>
         _boilerplate(Text('this is text', style: style.copyWith(height: 30.0)));
 
-    for (final TextStyle style in textStylesMeetingGuideline) {
+    for (final style in textStylesMeetingGuideline) {
       testWidgets('text with style $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
@@ -144,7 +144,7 @@ void main() {
       });
     }
 
-    for (final TextStyle style in textStylesDoesNotMeetingGuideline) {
+    for (final style in textStylesDoesNotMeetingGuideline) {
       testWidgets('text with $style', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
@@ -319,7 +319,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const MinimumTextContrastGuidelineAAA guideline = MinimumTextContrastGuidelineAAA();
+      const guideline = MinimumTextContrastGuidelineAAA();
 
       await tester.pumpWidget(
         _boilerplate(
@@ -356,7 +356,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      const MinimumTextContrastGuidelineAAA guideline = MinimumTextContrastGuidelineAAA();
+      const guideline = MinimumTextContrastGuidelineAAA();
 
       await tester.pumpWidget(
         _boilerplate(
@@ -843,7 +843,7 @@ void main() {
     });
 
     testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

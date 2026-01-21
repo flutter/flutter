@@ -38,9 +38,7 @@ class ViewConfiguration {
 
   /// Creates a view configuration for the provided [ui.FlutterView].
   factory ViewConfiguration.fromView(ui.FlutterView view) {
-    final BoxConstraints physicalConstraints = BoxConstraints.fromViewConstraints(
-      view.physicalConstraints,
-    );
+    final physicalConstraints = BoxConstraints.fromViewConstraints(view.physicalConstraints);
     final double devicePixelRatio = view.devicePixelRatio;
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,
@@ -269,7 +267,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();
-    final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
+    final rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;
@@ -323,7 +321,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
     assert(() {
       final List<DebugPaintCallback> localCallbacks = _debugPaintCallbacks.toList();
-      for (final DebugPaintCallback paintCallback in localCallbacks) {
+      for (final paintCallback in localCallbacks) {
         if (_debugPaintCallbacks.contains(paintCallback)) {
           paintCallback(context, offset, this);
         }
@@ -410,7 +408,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     //    ++++++++++++++++++++++++++ <- bounds.bottom
     final Rect bounds = paintBounds;
     // Center of the status bar
-    final Offset top = Offset(
+    final top = Offset(
       // Horizontal center of the screen
       bounds.center.dx,
       // The vertical center of the system status bar. The system status bar
@@ -418,7 +416,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       _view.padding.top / 2.0,
     );
     // Center of the navigation bar
-    final Offset bottom = Offset(
+    final bottom = Offset(
       // Horizontal center of the screen
       bounds.center.dx,
       // Vertical center of the system navigation bar. The system navigation bar
@@ -452,7 +450,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // style and another widget on the bottom will create an annotated region to set the system
     // navigation bar style.
     if (upperOverlayStyle != null && lowerOverlayStyle != null) {
-      final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
+      final overlayStyle = SystemUiOverlayStyle(
         statusBarBrightness: upperOverlayStyle.statusBarBrightness,
         statusBarIconBrightness: upperOverlayStyle.statusBarIconBrightness,
         statusBarColor: upperOverlayStyle.statusBarColor,
@@ -469,9 +467,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     // This is done for developer convenience as it allows setting both status bar style and
     // navigation bar style using only one annotated region layer (for instance the one
     // automatically created by an [AppBar]).
-    final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final SystemUiOverlayStyle definedOverlayStyle = (upperOverlayStyle ?? lowerOverlayStyle)!;
-    final SystemUiOverlayStyle overlayStyle = SystemUiOverlayStyle(
+    final overlayStyle = SystemUiOverlayStyle(
       statusBarBrightness: definedOverlayStyle.statusBarBrightness,
       statusBarIconBrightness: definedOverlayStyle.statusBarIconBrightness,
       statusBarColor: definedOverlayStyle.statusBarColor,

@@ -46,7 +46,7 @@ final class AndroidNativeDriver implements NativeDriver {
   }) async {
     final Adb adb = await Adb.create(adbPath: adbPath, target: target);
     tempDirectory ??= io.Directory.systemTemp.createTempSync('native_driver.');
-    final AndroidNativeDriver nativeDriver = AndroidNativeDriver.forTesting(
+    final nativeDriver = AndroidNativeDriver.forTesting(
       adb: adb,
       driver: driver,
       tempDirectory: tempDirectory,
@@ -102,7 +102,7 @@ final class AndroidNativeDriver implements NativeDriver {
 
   @override
   Future<Duration> ping() async {
-    final Stopwatch stopwatch = Stopwatch()..start();
+    final stopwatch = Stopwatch()..start();
     await _driver.sendCommand(NativeCommand.ping);
     return stopwatch.elapsed;
   }

@@ -1057,8 +1057,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
 
     // First, determine which semantics actions apply.
-    final Map<CustomSemanticsAction, VoidCallback> semanticsActions =
-        <CustomSemanticsAction, VoidCallback>{};
+    final semanticsActions = <CustomSemanticsAction, VoidCallback>{};
 
     // Create the appropriate semantics actions.
     void moveToStart() => reorder(index, 0);
@@ -1069,7 +1068,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
     void moveAfter() => reorder(index, index + 2);
 
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
-    final bool isHorizontal = _scrollDirection == Axis.horizontal;
+    final isHorizontal = _scrollDirection == Axis.horizontal;
     // If the item can move to before its current position in the list.
     if (index > 0) {
       semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] =
@@ -1108,7 +1107,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    final SliverChildBuilderDelegate childrenDelegate = SliverChildBuilderDelegate(
+    final childrenDelegate = SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: widget.itemCount,
       findChildIndexCallback: widget.findChildIndexCallback,
@@ -1281,7 +1280,7 @@ class _ReorderableItemState extends State<_ReorderableItem> {
   }
 
   Rect targetGeometry() {
-    final RenderBox itemRenderBox = context.findRenderObject()! as RenderBox;
+    final itemRenderBox = context.findRenderObject()! as RenderBox;
     final Offset itemPosition = itemRenderBox.localToGlobal(Offset.zero) + _targetOffset;
     return itemPosition & itemRenderBox.size;
   }
@@ -1411,7 +1410,7 @@ class _DragInfo extends Drag {
     required this.tickerProvider,
   }) {
     assert(debugMaybeDispatchCreated('widgets', '_DragInfo', this));
-    final RenderBox itemRenderBox = item.context.findRenderObject()! as RenderBox;
+    final itemRenderBox = item.context.findRenderObject()! as RenderBox;
     listState = item._listState;
     index = item.index;
     child = item.widget.child;
@@ -1524,7 +1523,7 @@ class _DragInfo extends Drag {
 
 Offset _overlayOrigin(BuildContext context) {
   final OverlayState overlay = Overlay.of(context, debugRequiredFor: context.widget);
-  final RenderBox overlayBox = overlay.context.findRenderObject()! as RenderBox;
+  final overlayBox = overlay.context.findRenderObject()! as RenderBox;
   return overlayBox.localToGlobal(Offset.zero);
 }
 

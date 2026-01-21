@@ -109,7 +109,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     style = null;
     geometry = null;
 
-    for (int i = 0; i < subscriptions.length; i++) {
+    for (var i = 0; i < subscriptions.length; i++) {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
@@ -235,7 +235,7 @@ class SemanticTextField extends SemanticRole {
   }
 
   DomHTMLTextAreaElement _createMultiLineField() {
-    final textArea = createMultilineTextArea();
+    final DomHTMLTextAreaElement textArea = createMultilineTextArea();
 
     if (semanticsObject.flags.isObscured) {
       // -webkit-text-security is not standard, but it's the best we can do.
@@ -354,7 +354,7 @@ class SemanticTextField extends SemanticRole {
       // text area can't be annotated with input type
       return;
     }
-    final DomHTMLInputElement input = editableElement as DomHTMLInputElement;
+    final input = editableElement as DomHTMLInputElement;
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {

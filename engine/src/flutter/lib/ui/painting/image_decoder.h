@@ -40,6 +40,7 @@ class ImageDecoder {
     /// Explicitly declare the target pixel is left for the engine to decide.
     kDontCare,
     kR32G32B32A32Float,
+    kR32Float,
   };
 
   struct Options {

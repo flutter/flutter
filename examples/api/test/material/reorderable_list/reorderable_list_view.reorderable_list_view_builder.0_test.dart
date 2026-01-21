@@ -8,7 +8,11 @@ import 'package:flutter_api_samples/material/reorderable_list/reorderable_list_v
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async {
+  Future<void> longPressDrag(
+    WidgetTester tester,
+    Offset start,
+    Offset end,
+  ) async {
     final TestGesture drag = await tester.startGesture(start);
     await tester.pump(kLongPressTimeout + kPressTimeout);
     await drag.moveTo(end);

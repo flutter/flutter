@@ -31,13 +31,22 @@ void main() {
     expect(find.text('Theme controller? No'), findsOne);
   });
 
-  testWidgets('Theme controller can coordinate progress', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(vsync: tester, value: 0.5);
+  testWidgets('Theme controller can coordinate progress', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller = AnimationController(
+      vsync: tester,
+      value: 0.5,
+    );
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Theme(
-        data: ThemeData(progressIndicatorTheme: ProgressIndicatorThemeData(controller: controller)),
+        data: ThemeData(
+          progressIndicatorTheme: ProgressIndicatorThemeData(
+            controller: controller,
+          ),
+        ),
         child: const example.ManyProgressIndicators(indicatorNum: 4),
       ),
     );

@@ -86,7 +86,7 @@ final class TargetPlatform {
   /// }
   /// ```
   @visibleForTesting
-  static const knownPlatforms = [
+  static const List<TargetPlatform> knownPlatforms = [
     androidUnspecified,
     androidArm,
     androidArm64,
@@ -113,7 +113,7 @@ final class TargetPlatform {
   ///
   /// Returns `null` if the [identifier] is not recognized.
   static TargetPlatform? tryParse(String identifier) {
-    for (final platform in knownPlatforms) {
+    for (final TargetPlatform platform in knownPlatforms) {
       if (platform.identifier == identifier) {
         return platform;
       }
@@ -125,7 +125,7 @@ final class TargetPlatform {
   ///
   /// Throws a [FormatException] if the [identifier] is not recognized.
   static TargetPlatform parse(String identifier) {
-    final platform = tryParse(identifier);
+    final TargetPlatform? platform = tryParse(identifier);
     if (platform == null) {
       throw FormatException(
         'Unrecognized TargetPlatform. It is possible that "$identifier" is '

@@ -18,7 +18,7 @@ void main() {
 
   test('it takes a screenshot', () async {
     // PNG Encoded Bytes.
-    final Uint8List bytes = (await driver.screenshot()) as Uint8List;
+    final bytes = (await driver.screenshot()) as Uint8List;
 
     // Check PNG header.
     expect(bytes.sublist(0, 8), <int>[137, 80, 78, 71, 13, 10, 26, 10]);

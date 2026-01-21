@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group(FrameTimingSummarizer, () {
     test('calculates all fields', () {
-      List<int> vsyncTimes = <int>[for (int i = 0; i < 100; i += 1) 100 * (i + 1)];
-      List<int> buildTimes = <int>[for (int i = 0; i < 100; i += 1) vsyncTimes[i] + 1000 * (i + 1)];
-      List<int> rasterTimes = <int>[for (int i = 0; i < 100; i += 1) 1000 * (i + 1) + 1000];
+      var vsyncTimes = <int>[for (int i = 0; i < 100; i += 1) 100 * (i + 1)];
+      var buildTimes = <int>[for (int i = 0; i < 100; i += 1) vsyncTimes[i] + 1000 * (i + 1)];
+      var rasterTimes = <int>[for (int i = 0; i < 100; i += 1) 1000 * (i + 1) + 1000];
       // reversed to make sure sort is working.
       buildTimes = buildTimes.reversed.toList();
       rasterTimes = rasterTimes.reversed.toList();
       vsyncTimes = vsyncTimes.reversed.toList();
-      final List<FrameTiming> inputData = <FrameTiming>[
+      final inputData = <FrameTiming>[
         for (int i = 0; i < 100; i += 1)
           FrameTiming(
             vsyncStart: 0,
@@ -30,7 +30,7 @@ void main() {
           ),
       ];
 
-      final FrameTimingSummarizer summary = FrameTimingSummarizer(inputData);
+      final summary = FrameTimingSummarizer(inputData);
       expect(summary.averageFrameBuildTime.inMicroseconds, 50500);
       expect(summary.p90FrameBuildTime.inMicroseconds, 90000);
       expect(summary.p99FrameBuildTime.inMicroseconds, 99000);
@@ -52,7 +52,7 @@ void main() {
 
     group('missed budget count', () {
       test('when single element missed budget', () {
-        final FrameTimingSummarizer summary = FrameTimingSummarizer(<FrameTiming>[
+        final summary = FrameTimingSummarizer(<FrameTiming>[
           FrameTiming(
             buildStart: 0,
             buildFinish: (kBuildBudget + const Duration(microseconds: 1)).inMicroseconds,
@@ -66,7 +66,7 @@ void main() {
       });
 
       test('when single element within budget', () {
-        final FrameTimingSummarizer summary = FrameTimingSummarizer(<FrameTiming>[
+        final summary = FrameTimingSummarizer(<FrameTiming>[
           FrameTiming(
             buildStart: 0,
             buildFinish: 0,
@@ -80,7 +80,7 @@ void main() {
       });
 
       test('when single element exactly within budget', () {
-        final FrameTimingSummarizer summary = FrameTimingSummarizer(<FrameTiming>[
+        final summary = FrameTimingSummarizer(<FrameTiming>[
           FrameTiming(
             buildStart: 0,
             buildFinish: kBuildBudget.inMicroseconds,
@@ -94,7 +94,7 @@ void main() {
       });
 
       test('when many missed budget', () {
-        final FrameTimingSummarizer summary = FrameTimingSummarizer(<FrameTiming>[
+        final summary = FrameTimingSummarizer(<FrameTiming>[
           FrameTiming(
             buildStart: 0,
             buildFinish: 0,

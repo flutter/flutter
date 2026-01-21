@@ -166,7 +166,7 @@ bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (int i = 0; i < a.length; i++) {
+  for (var i = 0; i < a.length; i++) {
     if (!_deepEquals(a[i], b[i])) {
       return false;
     }
@@ -178,7 +178,7 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
-  for (final dynamic key in a.keys) {
+  for (final Object? key in a.keys) {
     if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) {
       return false;
     }

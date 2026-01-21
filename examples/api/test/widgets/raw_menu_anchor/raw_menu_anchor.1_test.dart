@@ -5,11 +5,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.1.dart' as example;
+import 'package:flutter_api_samples/widgets/raw_menu_anchor/raw_menu_anchor.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 Future<TestGesture> hoverOver(WidgetTester tester, Offset location) async {
-  final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  final TestGesture gesture = await tester.createGesture(
+    kind: PointerDeviceKind.mouse,
+  );
   addTearDown(gesture.removePointer);
   await gesture.moveTo(location);
   await tester.pumpAndSettle();
@@ -17,20 +20,21 @@ Future<TestGesture> hoverOver(WidgetTester tester, Offset location) async {
 }
 
 void main() {
-  testWidgets('Initializes with correct number of menu items in expected position', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.RawMenuAnchorGroupApp());
-    expect(find.byType(RawMenuAnchorGroup).evaluate().length, 1);
-    for (final example.MenuItem item in example.menuItems) {
-      expect(find.text(item.label), findsOneWidget);
-    }
-    expect(find.byType(RawMenuAnchor).evaluate().length, 4);
-    expect(
-      tester.getRect(find.byType(RawMenuAnchorGroup).first),
-      const Rect.fromLTRB(233.0, 284.0, 567.0, 316.0),
-    );
-  });
+  testWidgets(
+    'Initializes with correct number of menu items in expected position',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.RawMenuAnchorGroupApp());
+      expect(find.byType(RawMenuAnchorGroup).evaluate().length, 1);
+      for (final example.MenuItem item in example.menuItems) {
+        expect(find.text(item.label), findsOneWidget);
+      }
+      expect(find.byType(RawMenuAnchor).evaluate().length, 4);
+      expect(
+        tester.getRect(find.byType(RawMenuAnchorGroup).first),
+        const Rect.fromLTRB(233.0, 284.0, 567.0, 316.0),
+      );
+    },
+  );
   testWidgets('Menu can be traversed', (WidgetTester tester) async {
     await tester.pumpWidget(const example.RawMenuAnchorGroupApp());
 

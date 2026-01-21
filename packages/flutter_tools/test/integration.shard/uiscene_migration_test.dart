@@ -50,7 +50,7 @@ void main() {
         'Uiscene Migration App',
         'uiscene_migration_app',
       );
-      appDelegate.writeAsStringSync(UISceneMigration.originalSwiftAppDelegate);
+      appDelegate.writeAsStringSync(UISceneMigration.originalSwiftAppDelegateTemplates.first);
       infoPlist.writeAsStringSync(oldInfoPlistTemplate);
 
       // Make sure it migrates and builds

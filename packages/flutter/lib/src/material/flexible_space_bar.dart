@@ -228,7 +228,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final FlexibleSpaceBarSettings settings = context
             .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
 
-        final List<Widget> children = <Widget>[];
+        final children = <Widget>[];
 
         final double deltaExtent = settings.maxExtent - settings.minExtent;
 
@@ -243,7 +243,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         // background
         if (widget.background != null) {
           final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
-          const double fadeEnd = 1.0;
+          const fadeEnd = 1.0;
           assert(fadeStart <= fadeEnd);
           // If the min and max extent are the same, the app bar cannot collapse
           // and the content should be visible, so opacity = 1.
@@ -320,7 +320,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 : theme.primaryTextTheme.titleLarge!;
             titleStyle = titleStyle.copyWith(color: titleStyle.color!.withOpacity(opacity));
             final bool effectiveCenterTitle = _getEffectiveCenterTitle(theme);
-            final double leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
+            final leadingPadding = (settings.hasLeading ?? true) ? 72.0 : 0.0;
             final EdgeInsetsGeometry padding =
                 widget.titlePadding ??
                 EdgeInsetsDirectional.only(
@@ -331,7 +331,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               begin: widget.expandedTitleScale,
               end: 1.0,
             ).transform(t);
-            final Matrix4 scaleTransform = Matrix4.identity()
+            final scaleTransform = Matrix4.identity()
               ..scaleByDouble(scaleValue, scaleValue, 1.0, 1);
             final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
             children.add(

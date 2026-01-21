@@ -19,7 +19,7 @@ void doTests() {
   group('initialize', () {
     test('Prepares target environment', () {
       final warnings = <String>[];
-      final oldPrintWarning = printWarning;
+      final void Function(String) oldPrintWarning = printWarning;
       printWarning = (String message) {
         warnings.add(message);
       };
@@ -39,7 +39,7 @@ void doTests() {
       expect(userMeta, isNotNull);
 
       // ignore: unused_local_variable
-      final FullPageEmbeddingStrategy strategy = FullPageEmbeddingStrategy();
+      final strategy = FullPageEmbeddingStrategy();
 
       expect(
         target.getAttribute('flt-embedding'),
@@ -68,7 +68,7 @@ void doTests() {
 
   group('attachViewRoot', () {
     test('Should attach glasspane into embedder target (body)', () async {
-      final FullPageEmbeddingStrategy strategy = FullPageEmbeddingStrategy();
+      final strategy = FullPageEmbeddingStrategy();
 
       final DomElement glassPane = createDomElement('some-tag-for-tests');
       final DomCSSStyleDeclaration style = glassPane.style;

@@ -63,7 +63,7 @@ String indexHtmlFlutterJsLoad = _generateFlutterJsIndexHtml('''
 ''');
 
 /// index_without_flutterjs.html
-var indexHtmlNoFlutterJs = '''
+String indexHtmlNoFlutterJs = '''
 <!DOCTYPE HTML>
 <!-- Copyright 2014 The Flutter Authors. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be

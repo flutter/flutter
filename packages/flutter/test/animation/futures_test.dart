@@ -8,22 +8,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('awaiting animation controllers - using direct future', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     addTearDown(controller1.dispose);
-    final AnimationController controller2 = AnimationController(
+    final controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
     addTearDown(controller2.dispose);
-    final AnimationController controller3 = AnimationController(
+    final controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
     addTearDown(controller3.dispose);
-    final List<String> log = <String>[];
+    final log = <String>[];
     Future<void> runTest() async {
       log.add('a'); // t=0
       await controller1.forward(); // starts at t=0 again
@@ -61,22 +61,22 @@ void main() {
   });
 
   testWidgets('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     addTearDown(controller1.dispose);
-    final AnimationController controller2 = AnimationController(
+    final controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
     addTearDown(controller2.dispose);
-    final AnimationController controller3 = AnimationController(
+    final controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
     addTearDown(controller3.dispose);
-    final List<String> log = <String>[];
+    final log = <String>[];
     Future<void> runTest() async {
       log.add('a'); // t=0
       await controller1.forward().orCancel; // starts at t=0 again
@@ -114,11 +114,11 @@ void main() {
   });
 
   testWidgets('awaiting animation controllers and failing', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final List<String> log = <String>[];
+    final log = <String>[];
     Future<void> runTest() async {
       try {
         log.add('start');
@@ -143,7 +143,7 @@ void main() {
   });
 
   testWidgets('creating orCancel future later', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -157,7 +157,7 @@ void main() {
   });
 
   testWidgets('creating orCancel future later', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -165,7 +165,7 @@ void main() {
     final TickerFuture f = controller1.forward();
     await tester.pump(); // start ticker
     controller1.stop(); // cancel ticker
-    bool ok = false;
+    var ok = false;
     try {
       await f.orCancel; // should create a resolved future
     } on TickerCanceled {
@@ -175,7 +175,7 @@ void main() {
   });
 
   testWidgets('TickerFuture is a Future', (WidgetTester tester) async {
-    final AnimationController controller1 = AnimationController(
+    final controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );

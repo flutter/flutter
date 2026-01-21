@@ -24,7 +24,8 @@ class CupertinoMagnifierExample extends StatefulWidget {
   const CupertinoMagnifierExample({super.key});
 
   @override
-  State<CupertinoMagnifierExample> createState() => _CupertinoMagnifierExampleState();
+  State<CupertinoMagnifierExample> createState() =>
+      _CupertinoMagnifierExampleState();
 }
 
 class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
@@ -34,7 +35,9 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoMagnifier Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoMagnifier Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -61,7 +64,9 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
                     top: dragGesturePosition.dy - magnifierRadius,
                     child: const CupertinoMagnifier(
                       magnificationScale: 1.5,
-                      borderRadius: BorderRadius.all(Radius.circular(magnifierRadius)),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(magnifierRadius),
+                      ),
                       additionalFocalPointOffset: Offset(0, -magnifierRadius),
                     ),
                   ),

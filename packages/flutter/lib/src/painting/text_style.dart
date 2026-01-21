@@ -848,7 +848,7 @@ class TextStyle with Diagnosticable {
   // "packages/$_package/" prefix.
   String? get _fontFamily {
     if (_package != null) {
-      final String fontFamilyPrefix = 'packages/$_package/';
+      final fontFamilyPrefix = 'packages/$_package/';
       assert(fontFamily?.startsWith(fontFamilyPrefix) ?? true);
       return fontFamily?.substring(fontFamilyPrefix.length);
     }
@@ -1219,7 +1219,7 @@ class TextStyle with Diagnosticable {
         return true;
       }
 
-      final List<String> nullFields = <String>[
+      final nullFields = <String>[
         if (a.foreground == null && b.foreground == null && a.color == null && b.color == null)
           'color',
         if (a.background == null &&
@@ -1567,7 +1567,7 @@ class TextStyle with Diagnosticable {
     if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
     }
-    final List<DiagnosticsNode> styles = <DiagnosticsNode>[
+    final styles = <DiagnosticsNode>[
       ColorProperty('${prefix}color', color, defaultValue: null),
       ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null),
       StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false),
@@ -1608,7 +1608,7 @@ class TextStyle with Diagnosticable {
         decorationColor != null ||
         decorationStyle != null ||
         decorationThickness != null) {
-      final List<String> decorationDescription = <String>[];
+      final decorationDescription = <String>[];
       if (decorationStyle != null) {
         decorationDescription.add(decorationStyle!.name);
       }
@@ -1736,10 +1736,10 @@ List<FontVariation>? lerpFontVariations(List<FontVariation>? a, List<FontVariati
     return t < 0.5 ? a : b;
   }
   assert(a.isNotEmpty && b.isNotEmpty);
-  final List<FontVariation> result = <FontVariation>[];
+  final result = <FontVariation>[];
   // First, try the efficient O(N) solution in the event that
   // the lists are compatible.
-  int index = 0;
+  var index = 0;
   final int minLength = a.length < b.length ? a.length : b.length;
   for (; index < minLength; index += 1) {
     if (a[index].axis != b[index].axis) {
@@ -1754,16 +1754,16 @@ List<FontVariation>? lerpFontVariations(List<FontVariation>? a, List<FontVariati
     // use the efficient approach.
     final Set<String> axes = HashSet<String>();
     final Map<String, FontVariation> aVariations = HashMap<String, FontVariation>();
-    for (int indexA = index; indexA < a.length; indexA += 1) {
+    for (var indexA = index; indexA < a.length; indexA += 1) {
       aVariations[a[indexA].axis] = a[indexA];
       axes.add(a[indexA].axis);
     }
     final Map<String, FontVariation> bVariations = HashMap<String, FontVariation>();
-    for (int indexB = index; indexB < b.length; indexB += 1) {
+    for (var indexB = index; indexB < b.length; indexB += 1) {
       bVariations[b[indexB].axis] = b[indexB];
       axes.add(b[indexB].axis);
     }
-    for (final String axis in axes) {
+    for (final axis in axes) {
       final FontVariation? variation = FontVariation.lerp(aVariations[axis], bVariations[axis], t);
       if (variation != null) {
         result.add(variation);

@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/path_utils.h"
 
@@ -73,7 +74,7 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
                    << "; no such file.";
     return UniqueAotDataPtr(nullptr, nullptr);
   }
-  std::string path_string = aot_library_path_.string();
+  std::string path_string = fml::PathToUtf8(aot_library_path_);
   FlutterEngineAOTDataSource source = {};
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();

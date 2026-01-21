@@ -6,6 +6,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -257,7 +258,7 @@ class _BottomSheetState extends State<BottomSheet> {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _childKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.size.height;
   }
 
@@ -296,7 +297,7 @@ class _BottomSheetState extends State<BottomSheet> {
     setState(() {
       dragHandleStates.remove(WidgetState.dragged);
     });
-    bool isClosing = false;
+    var isClosing = false;
     if (details.velocity.pixelsPerSecond.dy > _minFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (widget.animationController!.value > 0.0) {
@@ -638,7 +639,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
     assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
     child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.size;
     childParentData.offset = _getPositionForChild(size, childSize);
 
@@ -1117,9 +1118,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       ),
     );
 
-    final Widget bottomSheet = useSafeArea
+    Widget bottomSheet = useSafeArea
         ? SafeArea(bottom: false, child: content)
         : MediaQuery.removePadding(context: context, removeTop: true, child: content);
+
+    // Prevent clicks inside the bottom sheet from passing through to the barrier
+    bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
 
     return capturedThemes?.wrap(bottomSheet) ?? bottomSheet;
   }

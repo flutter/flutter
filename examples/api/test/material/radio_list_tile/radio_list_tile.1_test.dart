@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/radio_list_tile/radio_list_tile.1.dart' as example;
+import 'package:flutter_api_samples/material/radio_list_tile/radio_list_tile.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,20 +13,32 @@ void main() {
 
     expect(find.byType(RadioListTile<example.Groceries>), findsNWidgets(3));
 
-    Offset tileTopLeft = tester.getTopLeft(find.byType(RadioListTile<example.Groceries>).at(0));
-    Offset radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(0));
+    Offset tileTopLeft = tester.getTopLeft(
+      find.byType(RadioListTile<example.Groceries>).at(0),
+    );
+    Offset radioTopLeft = tester.getTopLeft(
+      find.byType(Radio<example.Groceries>).at(0),
+    );
 
     // The radio is centered vertically with the text.
     expect(radioTopLeft - tileTopLeft, const Offset(16.0, 16.0));
 
-    tileTopLeft = tester.getTopLeft(find.byType(RadioListTile<example.Groceries>).at(1));
-    radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(1));
+    tileTopLeft = tester.getTopLeft(
+      find.byType(RadioListTile<example.Groceries>).at(1),
+    );
+    radioTopLeft = tester.getTopLeft(
+      find.byType(Radio<example.Groceries>).at(1),
+    );
 
     // The radio is centered vertically with the text.
     expect(radioTopLeft - tileTopLeft, const Offset(16.0, 30.0));
 
-    tileTopLeft = tester.getTopLeft(find.byType(RadioListTile<example.Groceries>).at(2));
-    radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(2));
+    tileTopLeft = tester.getTopLeft(
+      find.byType(RadioListTile<example.Groceries>).at(2),
+    );
+    radioTopLeft = tester.getTopLeft(
+      find.byType(Radio<example.Groceries>).at(2),
+    );
 
     // The radio is aligned to the top vertically with the text.
     expect(radioTopLeft - tileTopLeft, const Offset(16.0, 8.0));
@@ -37,9 +50,10 @@ void main() {
     expect(find.byType(RadioListTile<example.Groceries>), findsNWidgets(3));
 
     //  Initially the first radio is checked.
-    RadioGroup<example.Groceries> group = tester.widget<RadioGroup<example.Groceries>>(
-      find.byType(RadioGroup<example.Groceries>),
-    );
+    RadioGroup<example.Groceries> group = tester
+        .widget<RadioGroup<example.Groceries>>(
+          find.byType(RadioGroup<example.Groceries>),
+        );
     expect(group.groupValue, example.Groceries.pickles);
 
     // Tap the second radio.

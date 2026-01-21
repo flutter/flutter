@@ -51,17 +51,17 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
 
   @override
   void onDrawFrame(SceneBuilder sceneBuilder) {
-    final PictureRecorder pictureRecorder = PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
+    final pictureRecorder = PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
     final Size viewSize = view.physicalSize;
 
-    final Size cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
+    final cellSize = Size(viewSize.width / kColumns, viewSize.height / kRows);
     final Size rectSize = cellSize * 0.8;
     final double maxRadius = rectSize.shortestSide / 2;
 
-    for (int row = 0; row < kRows; row++) {
+    for (var row = 0; row < kRows; row++) {
       canvas.save();
-      for (int col = 0; col < kColumns; col++) {
+      for (var col = 0; col < kColumns; col++) {
         final double radius = maxRadius / kColumns * col;
         _draw(
           canvas,

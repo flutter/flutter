@@ -63,7 +63,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
     if (child != null) {
       assert(!child.debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       if (result != null) {
         result += childParentData.offset.dy;
       }
@@ -94,7 +94,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = this.child;
     if (child != null) {
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
   }
@@ -103,7 +103,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final RenderBox? child = this.child;
     if (child != null) {
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       return result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
@@ -260,7 +260,7 @@ class RenderPadding extends RenderShiftedBox {
     }
     final BoxConstraints innerConstraints = constraints.deflate(padding);
     child!.layout(innerConstraints, parentUsesSize: true);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     childParentData.offset = Offset(padding.left, padding.top);
     size = constraints.constrain(
       Size(padding.horizontal + child!.size.width, padding.vertical + child!.size.height),
@@ -372,7 +372,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     assert(!child!.debugNeedsLayout);
     assert(child!.hasSize);
     assert(hasSize);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     childParentData.offset = resolvedAlignment.alongOffset(size - child!.size as Offset);
   }
 
@@ -508,7 +508,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
           ..strokeWidth = 1.0
           ..color = const Color(0xFFFFFF00);
         path = Path();
-        final BoxParentData childParentData = child!.parentData! as BoxParentData;
+        final childParentData = child!.parentData! as BoxParentData;
         if (childParentData.offset.dy > 0.0) {
           // vertical alignment arrows
           final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
@@ -945,7 +945,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox
       child.layout(childConstraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
       alignChild();
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      final childParentData = child.parentData! as BoxParentData;
       _overflowContainerRect = Offset.zero & size;
       _overflowChildRect = childParentData.offset & child.size;
     } else {
@@ -1093,7 +1093,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
     if (result == null) {
       return super.computeDistanceToActualBaseline(baseline);
     }
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     return result + childParentData.offset.dy;
   }
 
@@ -1516,7 +1516,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
       final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      final childParentData = child!.parentData! as BoxParentData;
       childParentData.offset = delegate.getPositionForChild(
         size,
         childConstraints.isTight ? childConstraints.smallest : child!.size,

@@ -16,11 +16,11 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('Paragraph getPositionForOffset 1 Infinity line', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    const String text =
+    const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -51,11 +51,11 @@ Future<void> testMain() async {
   });
 
   test('Paragraph getPositionForOffset multiple lines', () {
-    final WebParagraphStyle paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
 
-    const String text =
+    const text =
         'World domination is such an ugly phrase - I prefer to call it world optimisation. ';
-    final WebParagraphBuilder builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
     builder.addText(text);
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));

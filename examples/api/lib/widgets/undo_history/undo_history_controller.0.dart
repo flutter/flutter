@@ -50,24 +50,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ValueListenableBuilder<UndoHistoryValue>(
               valueListenable: _undoController,
-              builder: (BuildContext context, UndoHistoryValue value, Widget? child) {
-                return Row(
-                  children: <Widget>[
-                    TextButton(
-                      child: Text('Undo', style: value.canUndo ? enabledStyle : disabledStyle),
-                      onPressed: () {
-                        _undoController.undo();
-                      },
-                    ),
-                    TextButton(
-                      child: Text('Redo', style: value.canRedo ? enabledStyle : disabledStyle),
-                      onPressed: () {
-                        _undoController.redo();
-                      },
-                    ),
-                  ],
-                );
-              },
+              builder:
+                  (
+                    BuildContext context,
+                    UndoHistoryValue value,
+                    Widget? child,
+                  ) {
+                    return Row(
+                      children: <Widget>[
+                        TextButton(
+                          child: Text(
+                            'Undo',
+                            style: value.canUndo ? enabledStyle : disabledStyle,
+                          ),
+                          onPressed: () {
+                            _undoController.undo();
+                          },
+                        ),
+                        TextButton(
+                          child: Text(
+                            'Redo',
+                            style: value.canRedo ? enabledStyle : disabledStyle,
+                          ),
+                          onPressed: () {
+                            _undoController.redo();
+                          },
+                        ),
+                      ],
+                    );
+                  },
             ),
           ],
         ),

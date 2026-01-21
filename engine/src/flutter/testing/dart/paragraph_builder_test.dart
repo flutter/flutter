@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Should be able to build and layout a paragraph', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    final builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
@@ -19,7 +19,7 @@ void main() {
   });
 
   test('PushStyle should not segfault after build()', () {
-    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(ParagraphStyle());
+    final paragraphBuilder = ParagraphBuilder(ParagraphStyle());
     paragraphBuilder.build();
     expect(() {
       paragraphBuilder.pushStyle(TextStyle());
@@ -27,7 +27,7 @@ void main() {
   });
 
   test('GetRectsForRange smoke test', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    final builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('LineMetrics smoke test', () {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    final builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);

@@ -13,7 +13,7 @@ void main() {
   });
 
   testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
+    final log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       NotificationListener<MyNotification>(
@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('Notification basics - cancel', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
+    final log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       NotificationListener<MyNotification>(
@@ -69,7 +69,7 @@ void main() {
   });
 
   testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
-    final List<Type> log = <Type>[];
+    final log = <Type>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       NotificationListener<MyNotification>(
@@ -91,7 +91,7 @@ void main() {
 
   testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
-    final ScrollMetricsNotification n1 = ScrollMetricsNotification(
+    final n1 = ScrollMetricsNotification(
       metrics: FixedScrollMetrics(
         minScrollExtent: 1.0,
         maxScrollExtent: 2.0,

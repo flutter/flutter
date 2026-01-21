@@ -33,6 +33,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.highContrast = false,
     this.onOffSwitchLabels = false,
     this.supportsAnnounce = false,
+    this.autoPlayAnimatedImages = false,
+    this.autoPlayVideos = false,
+    this.deterministicCursor = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -45,6 +48,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     highContrast: true,
     onOffSwitchLabels: true,
     supportsAnnounce: true,
+    autoPlayAnimatedImages: true,
+    autoPlayVideos: true,
+    deterministicCursor: true,
   );
 
   @override
@@ -72,6 +78,15 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool supportsAnnounce;
 
   @override
+  final bool autoPlayAnimatedImages;
+
+  @override
+  final bool autoPlayVideos;
+
+  @override
+  final bool deterministicCursor;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -84,7 +99,10 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
-        other.supportsAnnounce == supportsAnnounce;
+        other.supportsAnnounce == supportsAnnounce &&
+        other.autoPlayAnimatedImages == autoPlayAnimatedImages &&
+        other.autoPlayVideos == autoPlayVideos &&
+        other.deterministicCursor == deterministicCursor;
   }
 
   @override
@@ -98,6 +116,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       highContrast,
       onOffSwitchLabels,
       supportsAnnounce,
+      autoPlayAnimatedImages,
+      autoPlayVideos,
+      deterministicCursor,
     );
   }
 
@@ -832,7 +853,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
-    final List<Object> extraDisplayKeys = <Object>[..._testDisplays.keys];
+    final extraDisplayKeys = <Object>[..._testDisplays.keys];
     for (final Display display in _platformDispatcher.displays) {
       extraDisplayKeys.remove(display.id);
       if (!_testDisplays.containsKey(display.id)) {
@@ -841,7 +862,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
     extraDisplayKeys.forEach(_testDisplays.remove);
 
-    final List<Object> extraViewKeys = <Object>[..._testViews.keys];
+    final extraViewKeys = <Object>[..._testViews.keys];
     for (final FlutterView view in _platformDispatcher.views) {
       // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
       late final TestDisplay display;
@@ -872,6 +893,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
 
     extraViewKeys.forEach(_testViews.remove);
+  }
+
+  /// Adds a [TestFlutterView] that wraps the given [view] to the list of views
+  /// managed by this [TestPlatformDispatcher].
+  ///
+  /// The added view will be associated with the first display in the list of
+  /// displays managed by this [TestPlatformDispatcher].
+  void addTestView(FlutterView view) {
+    _testViews[view.viewId] = TestFlutterView(
+      view: view,
+      platformDispatcher: this,
+      display: displays.first,
+    );
+    _updateViewsAndDisplays();
   }
 
   @override

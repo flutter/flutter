@@ -3,18 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.1.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PinnedHeaderSliver iOS Settings example', (WidgetTester tester) async {
+  testWidgets('PinnedHeaderSliver iOS Settings example', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.SettingsAppBarApp());
 
     // Verify that the app contains a header: a SliverPersistentHeader
     // with an AnimatedOpacity widget below it, and a Text('Settings') below that.
     expect(find.byType(PinnedHeaderSliver), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(PinnedHeaderSliver), matching: find.byType(AnimatedOpacity)),
+      find.descendant(
+        of: find.byType(PinnedHeaderSliver),
+        matching: find.byType(AnimatedOpacity),
+      ),
       findsOneWidget,
     );
     expect(find.widgetWithText(AnimatedOpacity, 'Settings'), findsOneWidget);
@@ -23,7 +29,10 @@ void main() {
     // with a Text('Settings') widget below it.
     expect(find.widgetWithText(SliverToBoxAdapter, 'Settings'), findsOneWidget);
 
-    final Finder headerOpacity = find.widgetWithText(AnimatedOpacity, 'Settings');
+    final Finder headerOpacity = find.widgetWithText(
+      AnimatedOpacity,
+      'Settings',
+    );
     expect(tester.widget<AnimatedOpacity>(headerOpacity).opacity, 0);
 
     // Scroll up: the header's opacity goes to 1 and the title disappears.

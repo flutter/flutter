@@ -239,7 +239,7 @@ class StockHomeState extends State<StockHome> {
     if (_searchQuery.text.isEmpty) {
       return stocks;
     }
-    final RegExp regexp = RegExp(_searchQuery.text, caseSensitive: false);
+    final regexp = RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
