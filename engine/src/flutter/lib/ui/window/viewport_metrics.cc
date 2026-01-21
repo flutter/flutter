@@ -48,7 +48,11 @@ ViewportMetrics::ViewportMetrics(
     const std::vector<double>& p_physical_display_features_bounds,
     const std::vector<int>& p_physical_display_features_type,
     const std::vector<int>& p_physical_display_features_state,
-    size_t p_display_id)
+    size_t p_display_id,
+    double p_physical_display_corner_radius_top_left,
+    double p_physical_display_corner_radius_top_right,
+    double p_physical_display_corner_radius_bottom_right,
+    double p_physical_display_corner_radius_bottom_left)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
@@ -74,7 +78,15 @@ ViewportMetrics::ViewportMetrics(
       physical_display_features_bounds(p_physical_display_features_bounds),
       physical_display_features_type(p_physical_display_features_type),
       physical_display_features_state(p_physical_display_features_state),
-      display_id(p_display_id) {}
+      display_id(p_display_id),
+      physical_display_corner_radius_top_left(
+          p_physical_display_corner_radius_top_left),
+      physical_display_corner_radius_top_right(
+          p_physical_display_corner_radius_top_right),
+      physical_display_corner_radius_bottom_right(
+          p_physical_display_corner_radius_bottom_right),
+      physical_display_corner_radius_bottom_left(
+          p_physical_display_corner_radius_bottom_left) {}
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
@@ -106,7 +118,15 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
          a.physical_display_features_type == b.physical_display_features_type &&
          a.physical_display_features_state ==
              b.physical_display_features_state &&
-         a.display_id == b.display_id;
+         a.display_id == b.display_id &&
+         a.physical_display_corner_radius_top_left ==
+             b.physical_display_corner_radius_top_left &&
+         a.physical_display_corner_radius_top_right ==
+             b.physical_display_corner_radius_top_right &&
+         a.physical_display_corner_radius_bottom_right ==
+             b.physical_display_corner_radius_bottom_right &&
+         a.physical_display_corner_radius_bottom_left ==
+             b.physical_display_corner_radius_bottom_left;
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
@@ -126,7 +146,11 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << a.physical_system_gesture_inset_bottom << "B "
      << a.physical_system_gesture_inset_left << "L] "
      << "Display Features: " << a.physical_display_features_type.size() << " "
-     << "Display ID: " << a.display_id;
+     << "Display ID: " << a.display_id << " "
+     << "Corner Radii: [" << a.physical_display_corner_radius_top_left << "TL "
+     << a.physical_display_corner_radius_top_right << "TR "
+     << a.physical_display_corner_radius_bottom_right << "BR "
+     << a.physical_display_corner_radius_bottom_left << "BL]";
   return os;
 }
 

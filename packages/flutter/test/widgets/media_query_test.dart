@@ -159,6 +159,7 @@ void main() {
     expect(data.platformBrightness, Brightness.light);
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
+    expect(data.displayCornerRadii, isNull);
   });
 
   testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
@@ -595,6 +596,7 @@ void main() {
     expect(copied.platformBrightness, data.platformBrightness);
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
+    expect(copied.displayCornerRadii, data.displayCornerRadii);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -657,6 +659,102 @@ void main() {
     expect(copied.navigationMode, NavigationMode.directional);
     expect(copied.gestureSettings, gestureSettings);
     expect(copied.displayFeatures, customDisplayFeatures);
+  });
+
+  testWidgets('MediaQueryData.applyDisplayCornerRadii applies specified display corner radii', (
+    WidgetTester tester,
+  ) async {
+    final data = MediaQueryData(displayCornerRadii: BorderRadius.circular(33));
+
+    late MediaQueryData updatedData;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: data,
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).applyDisplayCornerRadii(BorderRadius.circular(99)),
+              child: Builder(
+                builder: (BuildContext context) {
+                  updatedData = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(updatedData.size, data.size);
+    expect(updatedData.devicePixelRatio, data.devicePixelRatio);
+    expect(updatedData.textScaler, data.textScaler);
+    expect(updatedData.padding, data.padding);
+    expect(updatedData.viewPadding, data.viewPadding);
+    expect(updatedData.viewInsets, data.viewInsets);
+    expect(updatedData.systemGestureInsets, data.systemGestureInsets);
+    expect(updatedData.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
+    expect(updatedData.accessibleNavigation, data.accessibleNavigation);
+    expect(updatedData.invertColors, data.invertColors);
+    expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.boldText, data.boldText);
+    expect(updatedData.highContrast, data.highContrast);
+    expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
+    expect(updatedData.supportsAnnounce, data.supportsAnnounce);
+    expect(updatedData.platformBrightness, data.platformBrightness);
+    expect(updatedData.gestureSettings, data.gestureSettings);
+    expect(updatedData.displayFeatures, data.displayFeatures);
+    expect(updatedData.supportsShowingSystemContextMenu, data.supportsShowingSystemContextMenu);
+    expect(updatedData.lineHeightScaleFactorOverride, data.lineHeightScaleFactorOverride);
+    expect(updatedData.letterSpacingOverride, data.letterSpacingOverride);
+    expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
+    expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
+    expect(updatedData.displayCornerRadii, BorderRadius.circular(99));
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: data,
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery(
+              data: MediaQuery.of(context).applyDisplayCornerRadii(null),
+              child: Builder(
+                builder: (BuildContext context) {
+                  updatedData = MediaQuery.of(context);
+                  return Container();
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(updatedData.size, data.size);
+    expect(updatedData.devicePixelRatio, data.devicePixelRatio);
+    expect(updatedData.textScaler, data.textScaler);
+    expect(updatedData.padding, data.padding);
+    expect(updatedData.viewPadding, data.viewPadding);
+    expect(updatedData.viewInsets, data.viewInsets);
+    expect(updatedData.systemGestureInsets, data.systemGestureInsets);
+    expect(updatedData.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
+    expect(updatedData.accessibleNavigation, data.accessibleNavigation);
+    expect(updatedData.invertColors, data.invertColors);
+    expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.boldText, data.boldText);
+    expect(updatedData.highContrast, data.highContrast);
+    expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
+    expect(updatedData.supportsAnnounce, data.supportsAnnounce);
+    expect(updatedData.platformBrightness, data.platformBrightness);
+    expect(updatedData.gestureSettings, data.gestureSettings);
+    expect(updatedData.displayFeatures, data.displayFeatures);
+    expect(updatedData.supportsShowingSystemContextMenu, data.supportsShowingSystemContextMenu);
+    expect(updatedData.lineHeightScaleFactorOverride, data.lineHeightScaleFactorOverride);
+    expect(updatedData.letterSpacingOverride, data.letterSpacingOverride);
+    expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
+    expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
+    expect(updatedData.displayCornerRadii, isNull);
   });
 
   testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -1867,6 +1965,14 @@ void main() {
               ),
             ],
           ),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.displayCornerRadiiOf,
+          MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33))),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeDisplayCornerRadiiOf,
+          MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33))),
         ),
       ],
     ),

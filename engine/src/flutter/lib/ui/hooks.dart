@@ -31,6 +31,10 @@ void _addView(
   double maxWidth,
   double minHeight,
   double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -57,6 +61,10 @@ void _addView(
     maxWidth,
     minHeight,
     maxHeight,
+    displayCornerRadiusTopLeft,
+    displayCornerRadiusTopRight,
+    displayCornerRadiusBottomRight,
+    displayCornerRadiusBottomLeft,
   );
   PlatformDispatcher.instance._addView(viewId, viewConfiguration);
 }
@@ -138,6 +146,47 @@ List<DisplayFeature> _decodeDisplayFeatures({
   return result;
 }
 
+DisplayCornerRadii? _decodeDisplayCornerRadii({
+  required double displayCornerRadiusTopLeft,
+  required double displayCornerRadiusTopRight,
+  required double displayCornerRadiusBottomRight,
+  required double displayCornerRadiusBottomLeft,
+}) {
+  assert(() {
+    final isTopLeftSet = displayCornerRadiusTopLeft != _kUnsetDisplayCornerRadius;
+    final bool isConsistent =
+        (displayCornerRadiusTopRight != _kUnsetDisplayCornerRadius) == isTopLeftSet &&
+        (displayCornerRadiusBottomRight != _kUnsetDisplayCornerRadius) == isTopLeftSet &&
+        (displayCornerRadiusBottomLeft != _kUnsetDisplayCornerRadius) == isTopLeftSet;
+
+    if (!isConsistent) {
+      throw ArgumentError(
+        'The display corner radii must be either all set or all unset.\n'
+        'Provided values were inconsistent:\n'
+        '  TopLeft: $displayCornerRadiusTopLeft\n'
+        '  TopRight: $displayCornerRadiusTopRight\n'
+        '  BottomRight: $displayCornerRadiusBottomRight\n'
+        '  BottomLeft: $displayCornerRadiusBottomLeft',
+      );
+    }
+    return true;
+  }());
+
+  if (displayCornerRadiusTopLeft == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusTopRight == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusBottomRight == _kUnsetDisplayCornerRadius ||
+      displayCornerRadiusBottomLeft == _kUnsetDisplayCornerRadius) {
+    return null;
+  }
+
+  return DisplayCornerRadii(
+    topLeft: displayCornerRadiusTopLeft,
+    topRight: displayCornerRadiusTopRight,
+    bottomRight: displayCornerRadiusBottomRight,
+    bottomLeft: displayCornerRadiusBottomLeft,
+  );
+}
+
 _ViewConfiguration _buildViewConfiguration(
   double devicePixelRatio,
   double width,
@@ -163,6 +212,10 @@ _ViewConfiguration _buildViewConfiguration(
   double maxWidth,
   double minHeight,
   double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   return _ViewConfiguration(
     devicePixelRatio: devicePixelRatio,
@@ -207,6 +260,12 @@ _ViewConfiguration _buildViewConfiguration(
       minHeight: minHeight,
       maxHeight: maxHeight,
     ),
+    displayCornerRadii: _decodeDisplayCornerRadii(
+      displayCornerRadiusTopLeft: displayCornerRadiusTopLeft,
+      displayCornerRadiusTopRight: displayCornerRadiusTopRight,
+      displayCornerRadiusBottomRight: displayCornerRadiusBottomRight,
+      displayCornerRadiusBottomLeft: displayCornerRadiusBottomLeft,
+    ),
   );
 }
 
@@ -237,6 +296,10 @@ void _updateWindowMetrics(
   double maxWidth,
   double minHeight,
   double maxHeight,
+  double displayCornerRadiusTopLeft,
+  double displayCornerRadiusTopRight,
+  double displayCornerRadiusBottomRight,
+  double displayCornerRadiusBottomLeft,
 ) {
   final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
     devicePixelRatio,
@@ -263,6 +326,10 @@ void _updateWindowMetrics(
     maxWidth,
     minHeight,
     maxHeight,
+    displayCornerRadiusTopLeft,
+    displayCornerRadiusTopRight,
+    displayCornerRadiusBottomRight,
+    displayCornerRadiusBottomLeft,
   );
   PlatformDispatcher.instance._updateWindowMetrics(viewId, viewConfiguration);
 }
