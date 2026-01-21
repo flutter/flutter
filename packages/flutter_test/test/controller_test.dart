@@ -766,24 +766,24 @@ void main() {
 
     group('simulatedTraversal', () {
       final fullTraversalMatchers = <Matcher>[
-        containsSemantics(isHeader: true, label: 'Semantics Test'),
-        containsSemantics(label: 'Text Field'),
-        containsSemantics(isTextField: true),
-        containsSemantics(label: 'Off Switch'),
-        containsSemantics(hasToggledState: true),
-        containsSemantics(label: 'On Switch'),
-        containsSemantics(hasToggledState: true, isToggled: true),
-        containsSemantics(label: "Multiline\nIt's a\nmultiline label!"),
-        containsSemantics(label: 'Slider'),
-        containsSemantics(isSlider: true, value: '50%'),
-        containsSemantics(label: 'Enabled Button'),
-        containsSemantics(isButton: true, label: 'Tap'),
-        containsSemantics(label: 'Disabled Button'),
-        containsSemantics(isButton: true, label: "Don't Tap"),
-        containsSemantics(label: 'Checked Radio'),
-        containsSemantics(hasCheckedState: true, isChecked: true),
-        containsSemantics(label: 'Unchecked Radio'),
-        containsSemantics(hasCheckedState: true, isChecked: false),
+        isSemantics(isHeader: true, label: 'Semantics Test'),
+        isSemantics(label: 'Text Field'),
+        isSemantics(isTextField: true),
+        isSemantics(label: 'Off Switch'),
+        isSemantics(hasToggledState: true),
+        isSemantics(label: 'On Switch'),
+        isSemantics(hasToggledState: true, isToggled: true),
+        isSemantics(label: "Multiline\nIt's a\nmultiline label!"),
+        isSemantics(label: 'Slider'),
+        isSemantics(isSlider: true, value: '50%'),
+        isSemantics(label: 'Enabled Button'),
+        isSemantics(isButton: true, label: 'Tap'),
+        isSemantics(label: 'Disabled Button'),
+        isSemantics(isButton: true, label: "Don't Tap"),
+        isSemantics(label: 'Checked Radio'),
+        isSemantics(hasCheckedState: true, isChecked: true),
+        isSemantics(label: 'Unchecked Radio'),
+        isSemantics(hasCheckedState: true, isChecked: false),
       ];
 
       testWidgets('produces expected traversal', (WidgetTester tester) async {
@@ -1032,7 +1032,7 @@ void main() {
 
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),
-          orderedEquals(<Matcher>[containsSemantics(label: '1\n2\n3')]),
+          orderedEquals(<Matcher>[isSemantics(label: '1\n2\n3')]),
         );
       });
       testWidgets('a node with only a tooltip is important for accessibility', (
@@ -1045,7 +1045,7 @@ void main() {
         );
         expect(
           tester.semantics.simulatedAccessibilityTraversal(),
-          contains(containsSemantics(tooltip: 'My tooltip')),
+          contains(isSemantics(tooltip: 'My tooltip')),
         );
       });
     });
@@ -1109,7 +1109,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
           reason:
               'When not yet scrolled, a scrollview should only be able to support left scrolls.',
         );
@@ -1119,7 +1119,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
           reason:
               'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
@@ -1133,7 +1133,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
           reason: 'When fully scrolled, a scrollview should only support right scrolls.',
         );
 
@@ -1142,7 +1142,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: true),
           reason:
               'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
@@ -1163,7 +1163,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
           reason:
               'When not yet scrolled, a scrollview should only be able to support left scrolls.',
         );
@@ -1173,7 +1173,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
           reason:
               'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
@@ -1187,7 +1187,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
           reason: 'When fully scrolled, a scrollview should only support right scrolls.',
         );
 
@@ -1196,7 +1196,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: true),
           reason:
               'When partially scrolled, a scrollview should be able to support both left and right scrolls.',
         );
@@ -1266,12 +1266,12 @@ void main() {
           ),
         );
 
-        expect(find.semantics.byLabel('Test'), containsSemantics(isHidden: true));
+        expect(find.semantics.byLabel('Test'), isSemantics(isHidden: true));
 
         tester.semantics.showOnScreen(find.semantics.byLabel('Test'));
         await tester.pump();
 
-        expect(tester.semantics.find(find.text('Test')), containsSemantics(isHidden: false));
+        expect(tester.semantics.find(find.text('Test')), isSemantics(isHidden: false));
       });
 
       testWidgets(
