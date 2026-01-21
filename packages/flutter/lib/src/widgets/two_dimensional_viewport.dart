@@ -32,8 +32,7 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 //     required super.delegate,
 //     required super.mainAxis,
 //     required super.childManager,
-//     super.cacheExtent,
-//     super.cacheExtentStyle,
+//     super.scrollCacheExtent,
 //     super.clipBehavior = Clip.hardEdge,
 //   });
 //   @override
@@ -95,8 +94,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///     required super.horizontalAxisDirection,
 ///     required super.delegate,
 ///     required super.mainAxis,
-///     super.cacheExtent,
-///     super.cacheExtentStyle,
+///     super.scrollCacheExtent,
 ///     super.clipBehavior = Clip.hardEdge,
 ///   });
 ///
@@ -110,8 +108,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       mainAxis: mainAxis,
 ///       delegate: delegate,
 ///       childManager: context as TwoDimensionalChildManager,
-///       cacheExtent: cacheExtent,
-///       cacheExtentStyle: cacheExtentStyle,
+///       scrollCacheExtent: scrollCacheExtent,
 ///       clipBehavior: clipBehavior,
 ///     );
 ///   }
@@ -125,8 +122,7 @@ typedef TwoDimensionalIndexedWidgetBuilder =
 ///       ..verticalAxisDirection = verticalAxisDirection
 ///       ..mainAxis = mainAxis
 ///       ..delegate = delegate
-///       ..cacheExtent = cacheExtent
-///       ..cacheExtentStyle = cacheExtentStyle
+///       ..scrollCacheExtent = scrollCacheExtent
 ///       ..clipBehavior = clipBehavior;
 ///   }
 /// }
