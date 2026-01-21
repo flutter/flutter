@@ -364,7 +364,10 @@ class FlutterPlugin : Plugin<Project> {
         val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
-            val jniLibsDir = projectToAddTasksTo.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs")
+            val jniLibsDir =
+                projectToAddTasksTo.layout.buildDirectory.dir(
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
+                )
             sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
         }
 
@@ -699,31 +702,35 @@ class FlutterPlugin : Plugin<Project> {
                     flavor = flavorValue
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-            val jniLibsDir = project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs")
-            val copyJniLibsTaskProvider: TaskProvider<Sync> = project.tasks.register(
-                "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
-                Sync::class.java
-            ) {
-                dependsOn(flutterCompileTask)
-                into(jniLibsDir)
-                targetPlatforms.forEach { targetPlatform ->
-                    val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
-                    from("${flutterCompileTask.intermediateDir}/$abi") {
-                        include("*.so")
-                        rename { filename: String -> "lib$filename" }
-                        into(abi!!)
-                    }
-                    // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                    val buildDir =
-                        "${FlutterPluginUtils.getFlutterSourceDirectory(project)}/build"
-                    val nativeAssetsDir =
-                        "$buildDir/native_assets/android/jniLibs/lib"
-                    from("$nativeAssetsDir/$abi") {
-                        include("*.so")
-                        into(abi!!)
+            val jniLibsDir =
+                project.layout.buildDirectory.dir(
+                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs"
+                )
+            val copyJniLibsTaskProvider: TaskProvider<Sync> =
+                project.tasks.register(
+                    "copyJniLibs${FLUTTER_BUILD_PREFIX}${FlutterPluginUtils.capitalize(variant.name)}",
+                    Sync::class.java
+                ) {
+                    dependsOn(flutterCompileTask)
+                    into(jniLibsDir)
+                    targetPlatforms.forEach { targetPlatform ->
+                        val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
+                        from("${flutterCompileTask.intermediateDir}/$abi") {
+                            include("*.so")
+                            rename { filename: String -> "lib$filename" }
+                            into(abi!!)
+                        }
+                        // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
+                        val buildDir =
+                            "${FlutterPluginUtils.getFlutterSourceDirectory(project)}/build"
+                        val nativeAssetsDir =
+                            "$buildDir/native_assets/android/jniLibs/lib"
+                        from("$nativeAssetsDir/$abi") {
+                            include("*.so")
+                            into(abi!!)
+                        }
                     }
                 }
-            }
             val mergeJniLibsTaskName = "merge${FlutterPluginUtils.capitalize(variant.name)}JniLibFolders"
             project.tasks.configureEach {
                 if (name == mergeJniLibsTaskName) {
