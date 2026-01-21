@@ -277,6 +277,7 @@ class ReorderableList extends StatefulWidget {
   /// {@macro flutter.widgets.scroll_view.anchor}
   final double anchor;
 
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   @Deprecated(
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
