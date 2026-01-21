@@ -17,7 +17,6 @@ typedef SliverExpansionPanelCallback = void Function(int panelIndex, bool isExpa
 /// [SliverExpansionPanel] needs to rebuild.
 typedef SliverExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
-
 /// A component used to construct a [SliverExpansionPanelList].
 ///
 /// This widget is similar to [ExpansionPanel] but is specifically designed
@@ -150,7 +149,7 @@ class SliverExpansionPanelItem {
 /// The [item] parameter provides the data that was at the index before removal,
 /// allowing the "ghost" widget to be rendered correctly during its exit animation
 typedef RemovedItemBuilder<E> =
-Widget Function(E item, BuildContext context, Animation<double> animation);
+    Widget Function(E item, BuildContext context, Animation<double> animation);
 
 /// A wrapper that synchronizes a standard [List] with a [SliverAnimatedListState].
 ///
@@ -201,7 +200,7 @@ class ListModel<T> {
     if (removedItem != null) {
       _animatedList.removeItem(
         index,
-            (BuildContext context, Animation<double> animation) =>
+        (BuildContext context, Animation<double> animation) =>
             removedItemBuilder(removedItem, context, animation),
       );
     }
@@ -242,12 +241,18 @@ class _TopClosedClipper extends CustomClipper<Rect> {
 ///
 /// This widget is a sliver-compatible version of [ExpansionPanelList]. It
 /// allows for the efficient rendering of sliver expansion panels within a
-/// [CustomScrollView]
+/// [CustomScrollView].
 ///
 /// The [SliverExpansionPanelList] manages its children's entry and exit
 /// animations using an internal [SliverAnimatedList].
 /// Expanding or collapsing panels smoothly pushes or pulls subsequent items
 /// in the scroll sequence.
+///
+/// **Ancestors must include a [Material] widget.** This widget uses Material
+/// Design components (such as [ExpandIcon] and [InkWell]) that require a
+/// [Material] ancestor to render effects like ink splashes and shadows correctly.
+/// Usually, this is provided by a [Scaffold] or a [Material] widget at the top
+/// of the page.
 ///
 /// {@tool dartpad}
 ///  Here is a simple example of how to use [ExpansionPanelList].
@@ -312,13 +317,11 @@ class SliverExpansionPanelList extends StatefulWidget {
   final double elevation;
 
   @override
-  State<SliverExpansionPanelList> createState() =>
-      _SliverExpansionPanelListState();
+  State<SliverExpansionPanelList> createState() => _SliverExpansionPanelListState();
 }
 
 class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
-  final GlobalKey<SliverAnimatedListState> _listKey =
-  GlobalKey<SliverAnimatedListState>();
+  final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
 
   late ListModel<SliverExpansionPanelItem> _list;
 
@@ -372,23 +375,17 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     return identifierMap.length == widget.expansionPanels.length;
   }
 
-  void _addItem(
-      List<SliverExpansionPanelItem> newItems,
-      List<SliverExpansionPanelItem> oldItems,
-      ) {
+  void _addItem(List<SliverExpansionPanelItem> newItems, List<SliverExpansionPanelItem> oldItems) {
     for (var i = 0; i < newItems.length; i++) {
       final Key currentKey = newItems[i].key;
       final Key? oldKey = oldItems.elementAtOrNull(i)?.key;
 
       if (oldKey == null || currentKey != oldKey) {
         final SliverExpansionPanelItem headerToAdd = newItems[i];
-        final SliverExpansionPanelItem? bodyToAdd = newItems.elementAtOrNull(
-          i + 1,
-        );
+        final SliverExpansionPanelItem? bodyToAdd = newItems.elementAtOrNull(i + 1);
         // Add Header
         _listKey.currentState?.insertItem(i);
-        if (bodyToAdd != null &&
-            (headerToAdd.panelIndex == bodyToAdd.panelIndex)) {
+        if (bodyToAdd != null && (headerToAdd.panelIndex == bodyToAdd.panelIndex)) {
           // If the next panel has the same panel index, the panel is expanded.
           // Add the body as well.
           _listKey.currentState?.insertItem(i + 1);
@@ -399,32 +396,28 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   void _removeItem(
-      List<SliverExpansionPanelItem> oldItems,
-      List<SliverExpansionPanelItem> newItems,
-      ) {
+    List<SliverExpansionPanelItem> oldItems,
+    List<SliverExpansionPanelItem> newItems,
+  ) {
     for (var i = 0; i < oldItems.length; i++) {
       final Key? currentKey = newItems.elementAtOrNull(i)?.key;
       final Key oldKey = oldItems[i].key;
 
       if (currentKey == null || currentKey != oldKey) {
         final SliverExpansionPanelItem headerToRemove = _list._items[i];
-        final SliverExpansionPanelItem? bodyToRemove = _list._items
-            .elementAtOrNull(i + 1);
+        final SliverExpansionPanelItem? bodyToRemove = _list._items.elementAtOrNull(i + 1);
 
         // Remove the header
         _listKey.currentState?.removeItem(
           i,
-              (BuildContext context, Animation<double> animation) =>
-              const SizedBox.shrink(),
+          (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
         );
-        if ((bodyToRemove != null) &&
-            (headerToRemove.panelIndex == bodyToRemove.panelIndex)) {
+        if ((bodyToRemove != null) && (headerToRemove.panelIndex == bodyToRemove.panelIndex)) {
           // If the next panel has the same panel index, the panel is expanded.
           // Remove the body as well.
           _listKey.currentState?.removeItem(
             i,
-                (BuildContext context, Animation<double> animation) =>
-                const SizedBox.shrink(),
+            (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
           );
         }
         break;
@@ -439,8 +432,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
       initialItemCount: _list.length,
       itemBuilder: (context, index, animation) {
         final SliverExpansionPanelItem item = _list._items[index];
-        final SliverExpansionPanel currentPanel =
-        widget.expansionPanels[item.panelIndex];
+        final SliverExpansionPanel currentPanel = widget.expansionPanels[item.panelIndex];
 
         if (item.isHeader) {
           return _buildHeader(context, index);
@@ -452,10 +444,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
               elevation: widget.elevation,
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4.0)),
               clipBehavior: Clip.antiAlias,
-              child: SizeTransition(
-                sizeFactor: animation,
-                child: _buildBody(currentPanel),
-              ),
+              child: SizeTransition(sizeFactor: animation, child: _buildBody(currentPanel)),
             ),
           );
         }
@@ -508,9 +497,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     );
 
     if (!panel.canTapOnHeader) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(
-        context,
-      );
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       expandIconPadded = Semantics(
         label: panel.isExpanded
             ? localizations.expandedIconTapHint
@@ -526,13 +513,9 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
           child: AnimatedContainer(
             duration: widget.animationDuration,
             curve: Curves.fastOutSlowIn,
-            margin: panel.isExpanded
-                ? widget.expandedHeaderPadding
-                : EdgeInsets.zero,
+            margin: panel.isExpanded ? widget.expandedHeaderPadding : EdgeInsets.zero,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: _kPanelHeaderCollapsedHeight,
-              ),
+              constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
               child: headerWidget,
             ),
           ),
@@ -558,9 +541,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
         AnimatedCrossFade(
           firstChild: Divider(height: 1, color: widget.dividerColor),
           secondChild: const SizedBox(height: 0),
-          crossFadeState: panel.isExpanded
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
+          crossFadeState: panel.isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           duration: widget.animationDuration,
         ),
       ],
@@ -592,10 +573,10 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   Widget _buildRemovedItem(
-      SliverExpansionPanelItem item,
-      BuildContext context,
-      Animation<double> animation,
-      ) {
+    SliverExpansionPanelItem item,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return SizeTransition(
       sizeFactor: animation,
       child: widget.expansionPanels[item.panelIndex].body,
