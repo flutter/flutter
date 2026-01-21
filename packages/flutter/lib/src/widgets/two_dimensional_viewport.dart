@@ -721,18 +721,18 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   set cacheExtent(double? value) {
+    if (value == cacheExtent) {
+      return;
+    }
     if (value == null) {
       _scrollCacheExtent = const ScrollCacheExtent.pixels(
         RenderAbstractViewport.defaultCacheExtent,
       );
-      return;
     } else {
-      switch (cacheExtentStyle) {
-        case CacheExtentStyle.pixel:
-          _scrollCacheExtent = ScrollCacheExtent.pixels(value);
-        case CacheExtentStyle.viewport:
-          _scrollCacheExtent = ScrollCacheExtent.viewport(value);
-      }
+      _scrollCacheExtent = switch (cacheExtentStyle) {
+        CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
+        CacheExtentStyle.viewport => ScrollCacheExtent.viewport(value),
+      };
     }
     markNeedsLayout();
   }
@@ -748,6 +748,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   set cacheExtentStyle(CacheExtentStyle? value) {
+    if (value == cacheExtentStyle) {
+      return;
+    }
     if (value == null) {
       _scrollCacheExtent = ScrollCacheExtent.pixels(cacheExtent);
     } else {
