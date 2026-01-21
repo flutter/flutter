@@ -1417,7 +1417,23 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   bool _debugDoingSemantics = false;
+
+  /// Nodes that need semantics update.
+  ///
+  /// When [_RenderObjectSemantics.markNeedsUpdate] are called, their closest
+  /// semantics boundary ancestor is added to this set.
+  ///
+  /// All nodes in this set are guaranteed to be semantics boundaries.
   final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
+
+  /// Nodes that need semantics geometry update.
+  ///
+  /// Nodes are added when their [_RenderObjectSemantics.markNeedsUpdate] are called.
+  ///
+  /// This is used to track nodes that need their semantics geometry updated.
+  /// This is different from [_nodesNeedingSemantics] because it only tracks
+  /// nodes that need their semantics geometry updated, not nodes that need
+  /// their semantics updated.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
@@ -1498,6 +1514,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
                 (RenderObject object) =>
                     !object._needsLayout &&
                     object.owner == this &&
+                    // This node is blocked by a sibling
+                    // (via SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes)
+                    // or the parent node would have updated this node's parent data and it
+                    // would not be dirty.
                     !object._semantics.parentDataDirty,
               )
               .toList()
@@ -1507,7 +1527,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // Clear geometry for nodes that needs geometry update.
       for (final node in nodesToProcessGeometry) {
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
-          // This is node is already dirty, skip it.
+          // This node is already dirty, skip it.
           continue;
         }
         if (!node._semantics.contributesToSemanticsTree) {
@@ -1537,7 +1557,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         // the geometry of the blocked branch half-heartly will cause a gap of render
         // object with dirty geometry where the future update may never reach.
         //
-        // Either we update entire tree regardless of been blocked or not, or we only update
+        // Either we update entire tree regardless of whether it is blocked or not, or we only update
         // the tree that is not blocked. If we go with the first option, we will waste
         // time updating something that will not be showing up in the final semantics tree.
         //
@@ -1582,6 +1602,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       assert(
         _nodesNeedingSemantics.isEmpty,
         'Child PipelineOwners must not dirty nodes in their parent.',
+      );
+      assert(
+        _nodesNeedingSemanticsGeometryUpdate.isEmpty,
+        "Child PipelineOwners must not dirty nodes' geometry in their parent.",
       );
     } finally {
       assert(() {
