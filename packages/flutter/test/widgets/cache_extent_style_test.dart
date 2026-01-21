@@ -7,54 +7,49 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CustomScrollView respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('CustomScrollView respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: CustomScrollView(cacheExtent: 1.0, cacheExtentStyle: CacheExtentStyle.viewport),
+        child: CustomScrollView(scrollCacheExtent: ScrollCacheExtent.viewport(1.0)),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('ListView respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('ListView respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: ListView(cacheExtent: 1.0, cacheExtentStyle: CacheExtentStyle.viewport),
+        child: ListView(scrollCacheExtent: const ScrollCacheExtent.viewport(1.0)),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('ListView.builder respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('ListView.builder respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           itemBuilder: (BuildContext context, int index) => const Text(''),
           itemCount: 0,
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('ListView.separated respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('ListView.separated respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.separated(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           itemBuilder: (BuildContext context, int index) => const Text(''),
           separatorBuilder: (BuildContext context, int index) => const Text(''),
           itemCount: 0,
@@ -62,49 +57,43 @@ void main() {
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('ListView.custom respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('ListView.custom respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.custom(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           childrenDelegate: SliverChildListDelegate(const <Widget>[]),
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('GridView respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('GridView respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('GridView.builder respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('GridView.builder respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.builder(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
           itemBuilder: (BuildContext context, int index) => const Text(''),
           itemCount: 0,
@@ -112,60 +101,53 @@ void main() {
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('GridView.custom respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('GridView.custom respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.custom(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
           childrenDelegate: SliverChildListDelegate(const <Widget>[]),
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('GridView.count respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('GridView.count respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           crossAxisCount: 1,
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('GridView.extent respects cacheExtentStyle', (WidgetTester tester) async {
+  testWidgets('GridView.extent respects scrollCacheExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.extent(
-          cacheExtent: 1.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+          scrollCacheExtent: const ScrollCacheExtent.viewport(1.0),
           maxCrossAxisExtent: 100,
         ),
       ),
     );
     final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-    expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
-    expect(viewport.cacheExtent, 1.0);
+    expect(viewport.scrollCacheExtent, const ScrollCacheExtent.viewport(1.0));
   });
 
-  testWidgets('shrinkWrap in unbounded context with cacheExtent style viewport', (
+  testWidgets('shrinkWrap in unbounded context with scrollCacheExtent style viewport', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -173,8 +155,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: SingleChildScrollView(
           child: ListView.builder(
-            cacheExtent: 0.5,
-            cacheExtentStyle: CacheExtentStyle.viewport,
+            scrollCacheExtent: const ScrollCacheExtent.viewport(0.5),
             shrinkWrap: true,
             itemCount: 20,
             itemBuilder: (BuildContext context, int index) {

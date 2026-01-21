@@ -153,12 +153,12 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
     required this.mainAxis,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtent,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtentStyle,
     this.scrollCacheExtent,
@@ -228,14 +228,14 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final CacheExtentStyle? cacheExtentStyle;
 
@@ -548,12 +548,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required TwoDimensionalChildManager childManager,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     double? cacheExtent,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     CacheExtentStyle? cacheExtentStyle,
     ScrollCacheExtent? scrollCacheExtent,
@@ -713,12 +713,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   double get cacheExtent => _scrollCacheExtent?.value ?? RenderAbstractViewport.defaultCacheExtent;
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   set cacheExtent(double? value) {
     if (value == null) {
@@ -740,12 +740,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   CacheExtentStyle get cacheExtentStyle => _scrollCacheExtent?.style ?? CacheExtentStyle.pixel;
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   set cacheExtentStyle(CacheExtentStyle? value) {
     if (value == null) {

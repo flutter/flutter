@@ -63,12 +63,12 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
     required this.delegate,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtent,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-XX.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtentStyle,
     this.scrollCacheExtent,
@@ -85,14 +85,14 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final CacheExtentStyle? cacheExtentStyle;
 

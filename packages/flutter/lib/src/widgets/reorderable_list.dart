@@ -168,7 +168,7 @@ class ReorderableList extends StatefulWidget {
     this.anchor = 0.0,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.27.0-0.2.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtent,
     this.scrollCacheExtent,
@@ -279,7 +279,7 @@ class ReorderableList extends StatefulWidget {
 
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.27.0-0.2.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final double? cacheExtent;
 
