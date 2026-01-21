@@ -106,8 +106,8 @@ class BuildSwiftPackage extends BuildSubCommand {
       }
     }
     throwToolExit(
-      'The $platformString platform is being targeted but the Flutter project does not support '
-      '$platformString. Use the "--platform" flag to change the targeted platforms.',
+      'The $platformString platform is being targeted, but is not supported for this command. '
+      'Supported platforms include: ios, macos.',
     );
   }
 
@@ -236,10 +236,14 @@ class BuildSwiftPackage extends BuildSubCommand {
 
     await project.regeneratePlatformSpecificTooling(releaseMode: false);
 
+    final List<BuildInfo> buildInfos = await _getBuildInfos();
+    if (buildInfos.isEmpty) {
+      throwToolExit('--build-mode is required.');
+    }
+
     final List<Plugin> plugins = await findPlugins(project);
     plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
 
-    final List<BuildInfo> buildInfos = await _getBuildInfos();
     for (final buildInfo in buildInfos) {
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       await _generateSwiftPackages(
@@ -279,17 +283,17 @@ class BuildSwiftPackage extends BuildSubCommand {
   /// Creates a symlink from Package.swift to "./[defaultBuildMode]/Package.swift"
   @visibleForTesting
   void createSourcesSymlink(Directory pluginRegistrantSwiftPackage, String defaultBuildMode) {
-    final Link frameworksLink = pluginRegistrantSwiftPackage.childLink(_kSources);
-    if (frameworksLink.existsSync()) {
-      frameworksLink.updateSync('./$defaultBuildMode');
-    } else {
-      frameworksLink.createSync('./$defaultBuildMode');
-    }
+    final Link sourcesLink = pluginRegistrantSwiftPackage.childLink(_kSources);
     final Link manifestLink = pluginRegistrantSwiftPackage.childLink('Package.swift');
-    if (manifestLink.existsSync()) {
-      manifestLink.updateSync('./$defaultBuildMode/Package.swift');
+    _createOrUpdateSymlink(sourcesLink, './$defaultBuildMode');
+    _createOrUpdateSymlink(manifestLink, './$defaultBuildMode/Package.swift');
+  }
+
+  void _createOrUpdateSymlink(Link link, String target) {
+    if (link.existsSync()) {
+      link.updateSync(target);
     } else {
-      manifestLink.createSync('./$defaultBuildMode/Package.swift');
+      link.createSync(target);
     }
   }
 }
@@ -363,17 +367,14 @@ class FlutterPluginRegistrantSwiftPackage {
       recursive: true,
     );
 
-    final File implementationFile = sourcesDirectory
-        .childDirectory(kPluginSwiftPackageName)
-        .childFile('GeneratedPluginRegistrant.m');
-    final File headerFile = sourcesDirectory
-        .childDirectory(kPluginSwiftPackageName)
-        .childDirectory('include')
-        .childFile('GeneratedPluginRegistrant.h');
-    final File swiftFile = sourcesDirectory
-        .childDirectory(kPluginSwiftPackageName)
-        .childFile('GeneratedPluginRegistrant.swift');
     if (_targetPlatform == FlutterDarwinPlatform.ios) {
+      final File implementationFile = sourcesDirectory
+          .childDirectory(kPluginSwiftPackageName)
+          .childFile('GeneratedPluginRegistrant.m');
+      final File headerFile = sourcesDirectory
+          .childDirectory(kPluginSwiftPackageName)
+          .childDirectory('include')
+          .childFile('GeneratedPluginRegistrant.h');
       await writeIOSPluginRegistrant(
         _utils.project,
         plugins,
@@ -382,6 +383,9 @@ class FlutterPluginRegistrantSwiftPackage {
         templateRenderer: _utils.templateRenderer,
       );
     } else if (_targetPlatform == FlutterDarwinPlatform.macos) {
+      final File swiftFile = sourcesDirectory
+          .childDirectory(kPluginSwiftPackageName)
+          .childFile('GeneratedPluginRegistrant.swift');
       await writeMacOSPluginRegistrant(
         _utils.project,
         plugins,
