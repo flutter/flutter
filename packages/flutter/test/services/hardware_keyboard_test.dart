@@ -600,12 +600,12 @@ void main() {
   testWidgets(
     'Stray key events do not trigger assertion before keyboard state is initialized',
     (WidgetTester tester) async {
-      final HardwareKeyboard keyboard = HardwareKeyboard();
+      final keyboard = HardwareKeyboard();
       addTearDown(keyboard.clearState);
 
       // Before syncKeyboardState() is called, stray events should not trigger assertions.
       // Simulate a stray KeyUpEvent for a key that was never pressed.
-      final strayEvent = KeyUpEvent(
+      const strayEvent = KeyUpEvent(
         physicalKey: PhysicalKeyboardKey.keyA,
         logicalKey: LogicalKeyboardKey.keyA,
         timeStamp: Duration.zero,
@@ -618,15 +618,21 @@ void main() {
       // After syncKeyboardState() is called, assertions should be active.
       await keyboard.syncKeyboardState();
 
-      // Now simulate a proper key down event followed by key up.
-      final keyDownEvent = KeyDownEvent(
+      // Verify that stray events now trigger assertions after initialization.
+      expect(
+        () => keyboard.handleKeyEvent(strayEvent),
+        throwsAssertionError,
+      );
+
+      // Verify regular key event sequence still works.
+      const keyDownEvent = KeyDownEvent(
         physicalKey: PhysicalKeyboardKey.keyB,
         logicalKey: LogicalKeyboardKey.keyB,
         timeStamp: Duration.zero,
       );
       keyboard.handleKeyEvent(keyDownEvent);
 
-      final keyUpEvent = KeyUpEvent(
+      const keyUpEvent = KeyUpEvent(
         physicalKey: PhysicalKeyboardKey.keyB,
         logicalKey: LogicalKeyboardKey.keyB,
         timeStamp: Duration.zero,

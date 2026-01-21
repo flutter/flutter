@@ -702,6 +702,16 @@ class HardwareKeyboard {
     _keyboardStateInitialized = false;
     assert(_modifiedHandlers == null);
   }
+
+  /// Marks the keyboard state as initialized for testing purposes.
+  ///
+  /// This allows assertion checks in [_assertEventIsRegular] to work properly
+  /// in tests without needing to call [syncKeyboardState], which requires
+  /// an actual engine connection.
+  @visibleForTesting
+  void markStateInitializedForTesting() {
+    _keyboardStateInitialized = true;
+  }
 }
 
 /// The mode in which information of key messages is delivered.
