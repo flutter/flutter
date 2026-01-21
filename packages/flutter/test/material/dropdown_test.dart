@@ -1460,6 +1460,7 @@ void main() {
                       role: SemanticsRole.menu,
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
                       label: 'Popup menu',
+                      textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
                         TestSemantics(
                           children: <TestSemantics>[

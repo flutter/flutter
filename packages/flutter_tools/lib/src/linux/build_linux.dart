@@ -163,6 +163,8 @@ Future<void> _runCmake(
   final String buildFlag = sentenceCase(buildModeName);
   final bool needCrossBuildOptionsForArm64 =
       needCrossBuild && targetPlatform == TargetPlatform.linux_arm64;
+  final bool needCrossBuildOptionsForRiscv64 =
+      needCrossBuild && targetPlatform == TargetPlatform.linux_riscv64;
   int result;
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
@@ -179,6 +181,9 @@ Future<void> _runCmake(
       if (needCrossBuild) '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
       if (needCrossBuildOptionsForArm64) '-DCMAKE_C_COMPILER_TARGET=aarch64-linux-gnu',
       if (needCrossBuildOptionsForArm64) '-DCMAKE_CXX_COMPILER_TARGET=aarch64-linux-gnu',
+      // Support cross-building for riscv64 targets on x64 hosts.
+      if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
+      if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,

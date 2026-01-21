@@ -104,8 +104,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *       io.flutter.embedding.android.RenderMode#surface} render mode.
  * </ol>
  *
- * See <a>https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a> for more
- * information comparing {@link android.view.SurfaceView} and {@link android.view.TextureView}.
+ * See <a
+ * href="https://source.android.com/devices/graphics/arch-tv#surface_or_texture">https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a>
+ * for more information comparing {@link android.view.SurfaceView} and {@link
+ * android.view.TextureView}.
  */
 public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
@@ -125,10 +127,8 @@ public class FlutterView extends FrameLayout
   @Nullable private FlutterTextureView flutterTextureView;
   @Nullable private FlutterImageView flutterImageView;
 
-  @Nullable @VisibleForTesting /* package */ View flutterEngineView;
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
-  @Nullable private View previousEngineView;
   private final Set<FlutterUiDisplayListener> flutterUiDisplayListeners = new HashSet<>();
   private boolean isFlutterUiDisplayed;
 
@@ -194,7 +194,8 @@ public class FlutterView extends FrameLayout
         @Override
         public void resizeEngineView(int width, int height) {
           boolean changed = false;
-          if (flutterEngineView != null) {
+          if (renderSurface != null) {
+            View flutterEngineView = ((View) renderSurface);
             ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
             if (flutterEngineView.getHeight() != height) {
               changed = true;
@@ -268,11 +269,9 @@ public class FlutterView extends FrameLayout
     if (renderMode == RenderMode.surface) {
       flutterSurfaceView = new FlutterSurfaceView(context);
       renderSurface = flutterSurfaceView;
-      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
-      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -363,11 +362,9 @@ public class FlutterView extends FrameLayout
       flutterSurfaceView =
           new FlutterSurfaceView(context, transparencyMode == TransparencyMode.transparent);
       renderSurface = flutterSurfaceView;
-      flutterEngineView = flutterSurfaceView;
     } else if (renderMode == RenderMode.texture) {
       flutterTextureView = new FlutterTextureView(context);
       renderSurface = flutterTextureView;
-      flutterEngineView = flutterTextureView;
     } else {
       throw new IllegalArgumentException(
           "RenderMode not supported with this constructor: " + renderMode);
@@ -384,7 +381,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterSurfaceView = flutterSurfaceView;
     this.renderSurface = flutterSurfaceView;
-    this.flutterEngineView = flutterSurfaceView;
 
     init();
   }
@@ -397,7 +393,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterTextureView = flutterTextureView;
     this.renderSurface = flutterTextureView;
-    this.flutterEngineView = flutterTextureView;
 
     init();
   }
@@ -410,7 +405,6 @@ public class FlutterView extends FrameLayout
 
     this.flutterImageView = flutterImageView;
     this.renderSurface = flutterImageView;
-    this.flutterEngineView = flutterImageView;
 
     init();
   }
@@ -487,7 +481,7 @@ public class FlutterView extends FrameLayout
     super.onConfigurationChanged(newConfig);
     // We've observed on Android Q that going to the background, changing
     // orientation, and bringing the app back to foreground results in a sequence
-    // of detatch from flutterEngine, onConfigurationChanged, followed by attach
+    // of detached from flutterEngine, onConfigurationChanged, followed by attach
     // to flutterEngine.
     // No-op here so that we avoid NPE; these channels will get notified once
     // the activity or fragment tell the view to attach to the Flutter engine
@@ -620,7 +614,7 @@ public class FlutterView extends FrameLayout
       Log.v(
           TAG,
           "WindowInfoTracker Display Feature reported with bounds = "
-              + displayFeature.getBounds().toString()
+              + displayFeature.getBounds()
               + " and type = "
               + displayFeature.getClass().getSimpleName());
       if (displayFeature instanceof FoldingFeature) {
@@ -691,7 +685,7 @@ public class FlutterView extends FrameLayout
         return ZeroSides.RIGHT;
       } else if (rotation == Surface.ROTATION_270) {
         // In android API >= 23, the nav bar always appears on the "bottom" (USB) side.
-        return Build.VERSION.SDK_INT >= API_LEVELS.API_23 ? ZeroSides.LEFT : ZeroSides.RIGHT;
+        return ZeroSides.LEFT;
       }
       // Ambiguous orientation due to landscape left/right default. Zero both sides.
       else if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
@@ -1062,9 +1056,7 @@ public class FlutterView extends FrameLayout
     findViewByAccessibilityIdTraversalMethod.setAccessible(true);
     try {
       return (View) findViewByAccessibilityIdTraversalMethod.invoke(this, accessibilityId);
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
   }
@@ -1089,9 +1081,7 @@ public class FlutterView extends FrameLayout
       if (getAccessibilityViewIdMethod.invoke(currentView).equals(accessibilityId)) {
         return currentView;
       }
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
     if (currentView instanceof ViewGroup) {
@@ -1120,7 +1110,6 @@ public class FlutterView extends FrameLayout
 
   // -------- Start: Mouse -------
   @Override
-  @RequiresApi(API_LEVELS.API_24)
   @NonNull
   public PointerIcon getSystemPointerIcon(int type) {
     return PointerIcon.getSystemIcon(getContext(), type);
@@ -1158,7 +1147,6 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #detachFromFlutterEngine()} for information on how to detach from a {@link
    * FlutterEngine}.
    */
-  @RequiresApi(API_LEVELS.API_24)
   public void attachToFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     Log.v(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
     if (isAttachedToFlutterEngine()) {
@@ -1286,7 +1274,6 @@ public class FlutterView extends FrameLayout
    * <p>See {@link #attachToFlutterEngine(FlutterEngine)} for information on how to attach a {@link
    * FlutterEngine}.
    */
-  @RequiresApi(API_LEVELS.API_24)
   public void detachFromFlutterEngine() {
     Log.v(TAG, "Detaching from a FlutterEngine: " + flutterEngine);
     if (!isAttachedToFlutterEngine()) {
@@ -1331,22 +1318,19 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
+    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
     // Revert the image view to previous surface
-    if (previousRenderSurface != null
-        && renderSurface == flutterImageView
-        && previousEngineView != null) {
+    if (previousRenderSurface != null && renderSurface == flutterImageView) {
       renderSurface = previousRenderSurface;
-      flutterEngineView = previousEngineView;
     }
     renderSurface.detachFromRenderer();
 
     releaseImageView();
 
     previousRenderSurface = null;
-    previousEngineView = null;
     flutterEngine = null;
   }
 
@@ -1358,7 +1342,6 @@ public class FlutterView extends FrameLayout
       // FlutterActivity/FlutterFragment share one engine.
       removeView(flutterImageView);
       flutterImageView = null;
-      flutterEngineView = null;
     }
   }
 
@@ -1388,10 +1371,8 @@ public class FlutterView extends FrameLayout
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
     }
 
-    previousEngineView = flutterEngineView;
     previousRenderSurface = renderSurface;
     renderSurface = flutterImageView;
-    flutterEngineView = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());
     }
@@ -1413,15 +1394,9 @@ public class FlutterView extends FrameLayout
       Log.v(TAG, "Tried to revert the image view, but no previous surface was used.");
       return;
     }
-    if (previousEngineView == null) {
-      Log.v(TAG, "Tried to revert the image view, but no previous engine view was used.");
-      return;
-    }
 
     renderSurface = previousRenderSurface;
-    flutterEngineView = previousEngineView;
     previousRenderSurface = null;
-    previousEngineView = null;
 
     final FlutterRenderer renderer = flutterEngine.getRenderer();
 

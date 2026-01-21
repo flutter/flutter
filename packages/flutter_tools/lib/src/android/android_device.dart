@@ -228,6 +228,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -551,6 +552,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -1154,6 +1156,11 @@ class AdbLogReader extends DeviceLogReader {
     // Some versions of Android spew this out. It is inactionable to the end user
     // and causes no problems for the application.
     RegExp(r'^E/SurfaceSyncer\(\s*\d+\): Failed to find sync for id=\d+'),
+    // E/FrameEvents(26685): updateAcquireFence: Did not find frame.
+    // This is a HWUI bug that spams the console when using platform views like Google Maps.
+    // It is not an actual error and causes no problems for the application.
+    // See https://github.com/flutter/flutter/issues/104268
+    RegExp(r'^E/FrameEvents\(\s*\d+\): updateAcquireFence: Did not find frame\.$'),
     // See https://github.com/flutter/flutter/issues/160598
     RegExp(r'ViewPostIme pointer'),
     RegExp(r'mali.instrumentation.graph.work'),

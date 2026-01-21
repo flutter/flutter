@@ -212,6 +212,46 @@ void CompilerSkSL::detect_unsupported_resources() {
         FLUTTER_CROSS_THROW("SkSL does not support inputs: '" +
                             get_name(var.self) + "'");
       }
+    } else if (id.get_type() == TypeBlock) {
+      // Array initializers are not supported. Check TypeBlock IDs to detect
+      // this.
+      auto& block = id.get<SPIRBlock>();
+
+      // File and line information for use in the error message.
+      std::string file;
+      uint32_t line = 0;
+
+      for (auto instruction : block.ops) {
+        bool has_array_initializer = false;
+        if (instruction.op == OpLine) {
+          // OpLine information applies to all subsequent instructions until the
+          // next OpLine instruction.
+          file = get<SPIRString>(ir.spirv[instruction.offset]).str;
+          line = ir.spirv[instruction.offset + 1];
+        } else if (instruction.op == OpStore) {
+          // Check for OpStore instructions that store an array constant. This
+          // detects array initializations which use compile-time constants
+          // (e.g. `float[2] nums = float[](1.0, 2.0);`).
+          Variant& store_object_id = ir.ids[ir.spirv[instruction.offset + 1]];
+          if (store_object_id.get_type() == TypeConstant) {
+            auto& c = store_object_id.get<SPIRConstant>();
+            auto& type = get<SPIRType>(c.constant_type);
+            has_array_initializer = !type.array.empty();
+          }
+        } else if (instruction.op == OpCompositeConstruct) {
+          // Check for OpCompositeConstruct instructions with an array result.
+          // This detects array initializations which use variables
+          // (e.g. `float var = 2.0; float[2] nums = float[](1.0, var);`).
+          auto result_type_id = ir.spirv[instruction.offset];
+          auto& type = get<SPIRType>(result_type_id);
+          has_array_initializer = !type.array.empty();
+        }
+
+        if (has_array_initializer) {
+          FLUTTER_CROSS_THROW("SkSL does not support array initializers: " +
+                              file + ":" + std::to_string(line));
+        }
+      }
     }
   }
 }

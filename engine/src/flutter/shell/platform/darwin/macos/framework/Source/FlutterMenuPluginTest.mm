@@ -111,6 +111,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
       @{
         @"id" : [NSNumber numberWithInt:1],
         @"label" : @"APP_NAME",
+        @"tooltip" : @"APP_NAME",
         @"enabled" : @(YES),
         @"children" : @[
           @{
@@ -121,6 +122,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
           @{
             @"id" : [NSNumber numberWithInt:2],
             @"label" : @"APP_NAME Info",
+            @"tooltip" : @"APP_NAME Info Tooltip",
             @"enabled" : @(YES),
             @"shortcutTrigger" : [NSNumber numberWithUnsignedLongLong:0x61],
             @"shortcutModifiers" : [NSNumber numberWithUnsignedInt:0],
@@ -135,6 +137,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
           @{
             @"id" : [NSNumber numberWithInt:5],
             @"label" : @"Help me!",
+            @"tooltip" : @"Help me tooltip!",
             @"enabled" : @(YES),
           },
           @{
@@ -170,6 +173,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
   EXPECT_EQ([NSApp.mainMenu numberOfItems], 2);
   NSMenuItem* firstMenu = [NSApp.mainMenu itemAtIndex:0];
   EXPECT_TRUE([[firstMenu title] isEqualToString:@"flutter_desktop_darwin_unittests"]);
+  EXPECT_TRUE([[firstMenu toolTip] isEqualToString:@"flutter_desktop_darwin_unittests"]);
   EXPECT_EQ([firstMenu tag], 1);
   EXPECT_TRUE([firstMenu isEnabled]);
   EXPECT_FALSE([firstMenu isHidden]);
@@ -178,6 +182,8 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
   EXPECT_EQ([[firstMenu submenu] numberOfItems], 1);
   NSMenuItem* firstItem = [[firstMenu submenu] itemAtIndex:0];
   EXPECT_TRUE([[firstItem title] isEqualToString:@"flutter_desktop_darwin_unittests Info"]);
+  EXPECT_TRUE(
+      [[firstItem toolTip] isEqualToString:@"flutter_desktop_darwin_unittests Info Tooltip"]);
   EXPECT_TRUE([[firstItem keyEquivalent] isEqualToString:@"a"]);
   EXPECT_TRUE([firstItem isEnabled]);
   EXPECT_FALSE([firstItem isHidden]);
@@ -187,6 +193,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
 
   NSMenuItem* secondMenu = [NSApp.mainMenu itemAtIndex:1];
   EXPECT_TRUE([[secondMenu title] isEqualToString:@"Help for flutter_desktop_darwin_unittests"]);
+  EXPECT_EQ([secondMenu toolTip], nil);
   EXPECT_EQ([secondMenu tag], 4);
   EXPECT_TRUE([secondMenu isEnabled]);
   EXPECT_FALSE([secondMenu isHidden]);
@@ -194,6 +201,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
   EXPECT_EQ([[secondMenu submenu] numberOfItems], 3);
   NSMenuItem* secondMenuFirst = [[secondMenu submenu] itemAtIndex:0];
   EXPECT_TRUE([[secondMenuFirst title] isEqualToString:@"Help me!"]);
+  EXPECT_TRUE([[secondMenuFirst toolTip] isEqualToString:@"Help me tooltip!"]);
   EXPECT_TRUE([secondMenuFirst isEnabled]);
   EXPECT_FALSE([secondMenuFirst isHidden]);
   EXPECT_TRUE(
@@ -202,6 +210,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
 
   NSMenuItem* secondMenuDivider = [[secondMenu submenu] itemAtIndex:1];
   EXPECT_TRUE([[secondMenuDivider title] isEqualToString:@""]);
+  EXPECT_EQ([secondMenuDivider toolTip], nil);
   EXPECT_TRUE([[secondMenuDivider keyEquivalent] isEqualToString:@""]);
   EXPECT_FALSE([secondMenuDivider isEnabled]);
   EXPECT_FALSE([secondMenuDivider isHidden]);
@@ -210,6 +219,7 @@ TEST_F(FlutterMenuPluginTest, TestSetMenu) {
 
   NSMenuItem* secondMenuLast = [[secondMenu submenu] itemAtIndex:2];
   EXPECT_TRUE([[secondMenuLast title] isEqualToString:@"Search help"]);
+  EXPECT_EQ([secondMenuLast toolTip], nil);
   EXPECT_FALSE([secondMenuLast isEnabled]);
   EXPECT_FALSE([secondMenuLast isHidden]);
   EXPECT_TRUE(
