@@ -476,10 +476,7 @@ abstract class ScrollView extends StatelessWidget {
       }
     }());
     final ScrollCacheExtent? effectiveScrollCacheExtent =
-        scrollCacheExtent ??
-        (cacheExtent != null
-            ? ScrollCacheExtent.pixels(cacheExtent!)
-            : null);
+        scrollCacheExtent ?? (cacheExtent != null ? ScrollCacheExtent.pixels(cacheExtent!) : null);
     if (shrinkWrap) {
       return ShrinkWrappingViewport(
         axisDirection: axisDirection,
