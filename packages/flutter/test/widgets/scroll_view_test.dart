@@ -7,7 +7,6 @@ import 'dart:math';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
@@ -30,20 +29,7 @@ class _ItemWidgetState extends State<ItemWidget> {
 }
 
 Widget textFieldBoilerplate({required Widget child}) {
-  return WidgetsApp(
-    color: const Color(0xFFFFFFFF),
-    home: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<Object?>>[GlobalWidgetsLocalizations.delegate],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(child: child),
-        ),
-      ),
-    ),
-  );
+  return TestWidgetsApp(home: Center(child: child));
 }
 
 Widget primaryScrollControllerBoilerplate({
