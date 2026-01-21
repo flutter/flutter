@@ -5,8 +5,9 @@
 import 'dart:math';
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'states.dart';
@@ -28,41 +29,17 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 }
 
-class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
-}
-
-class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
-}
-
 Widget textFieldBoilerplate({required Widget child}) {
-  return MaterialApp(
+  return WidgetsApp(
+    color: const Color(0xFFFFFFFF),
     home: Localizations(
       locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        MaterialLocalizationsDelegate(),
-      ],
+      delegates: const <LocalizationsDelegate<Object?>>[GlobalWidgetsLocalizations.delegate],
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(child: Material(child: child)),
+          child: Center(child: child),
         ),
       ),
     ),
