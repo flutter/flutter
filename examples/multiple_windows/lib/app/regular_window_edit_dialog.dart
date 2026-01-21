@@ -47,7 +47,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
 
   bool? nextIsFullscreen;
   bool? nextIsMaximized;
-  bool? nextIsMinized;
+  bool? nextIsMinimized;
 
   void _init() {
     widget.controller.addListener(_onNotification);
@@ -64,7 +64,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     titleController = TextEditingController(text: initialTitle);
     nextIsFullscreen = null;
     nextIsMaximized = null;
-    nextIsMinized = null;
+    nextIsMinimized = null;
   }
 
   @override
@@ -106,7 +106,7 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     if (widget.controller.isMinimized != initialMinimized) {
       setState(() {
         initialMinimized = widget.controller.isMinimized;
-        nextIsMinized = null;
+        nextIsMinimized = null;
       });
     }
   }
@@ -114,6 +114,9 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
   @override
   void dispose() {
     widget.controller.removeListener(_onNotification);
+    widthController.dispose();
+    heightController.dispose();
+    titleController.dispose();
     super.dispose();
   }
 
@@ -135,8 +138,8 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
     if (nextIsMaximized != null && nextIsMaximized != initialMaximized) {
       widget.controller.setMaximized(nextIsMaximized!);
     }
-    if (nextIsMinized != null && nextIsMinized != initialMinimized) {
-      widget.controller.setMinimized(nextIsMinized!);
+    if (nextIsMinimized != null && nextIsMinimized != initialMinimized) {
+      widget.controller.setMinimized(nextIsMinimized!);
     }
 
     widget.onClose();
@@ -183,10 +186,10 @@ class _RegularWindowEditDialogState extends State<_RegularWindowEditDialog> {
           ),
           CheckboxListTile(
             title: const Text('Minimized'),
-            value: nextIsMinized ?? initialMinimized,
+            value: nextIsMinimized ?? initialMinimized,
             onChanged: (bool? value) {
               if (value != null) {
-                setState(() => nextIsMinized = value);
+                setState(() => nextIsMinimized = value);
               }
             },
           ),

@@ -24,7 +24,8 @@ class CupertinoTextFieldExample extends StatefulWidget {
   const CupertinoTextFieldExample({super.key});
 
   @override
-  State<CupertinoTextFieldExample> createState() => _CupertinoTextFieldExampleState();
+  State<CupertinoTextFieldExample> createState() =>
+      _CupertinoTextFieldExampleState();
 }
 
 class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
@@ -45,7 +46,9 @@ class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoTextField Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoTextField Sample'),
+      ),
       child: Center(child: CupertinoTextField(controller: _textController)),
     );
   }

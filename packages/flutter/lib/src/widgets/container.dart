@@ -257,6 +257,7 @@ class Container extends StatelessWidget {
     this.alignment,
     this.padding,
     this.color,
+    this.isAntiAlias = true,
     this.decoration,
     this.foregroundDecoration,
     double? width,
@@ -274,8 +275,9 @@ class Container extends StatelessWidget {
        assert(decoration != null || clipBehavior == Clip.none),
        assert(
          color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'To provide both, use "decoration: BoxDecoration(color: color)".',
+         'Cannot provide both a color and a decoration.\n'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".\n'
+         'To use both a color and other decoration properties, set the color in the BoxDecoration instead.',
        ),
        constraints = (width != null || height != null)
            ? constraints?.tighten(width: width, height: height) ??
@@ -325,6 +327,9 @@ class Container extends StatelessWidget {
   /// color may still be painted by the [decoration] even if this property is
   /// null.
   final Color? color;
+
+  /// {@macro flutter.widgets.ColoredBox.isAntiAlias}
+  final bool isAntiAlias;
 
   /// The decoration to paint behind the [child].
   ///
@@ -398,7 +403,7 @@ class Container extends StatelessWidget {
     }
 
     if (color != null) {
-      current = ColoredBox(color: color!, child: current);
+      current = ColoredBox(color: color!, isAntiAlias: isAntiAlias, child: current);
     }
 
     if (clipBehavior != Clip.none) {

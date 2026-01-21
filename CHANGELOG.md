@@ -30,7 +30,67 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.38 Changes
+
+### [3.38.7](https://github.com/flutter/flutter/releases/tag/3.38.7)
+
+- [flutter/179857](https://github.com/flutter/flutter/issues/179857) - `flutter run -d all` crashes if multiple devices are available.
+
+### [3.38.6](https://github.com/flutter/flutter/releases/tag/3.38.6)
+
+- [flutter/179139](https://github.com/flutter/flutter/issues/179139) - `flutter widget-preview start` creates new cached build artifacts on each run, resulting in increasing disk usage after each run.
+- [flutter/178896](https://github.com/flutter/flutter/issues/178896) - Apps crash during launch on Windows when run from paths containing non-ASCII characters.
+- [flutter/176943](https://github.com/flutter/flutter/issues/176943) - Configuration changes to run tests on macOS 15 or 15.7.2 for Flutter's CI.
+- [flutter/179914](https://github.com/flutter/flutter/issues/179914) - Flutter Android apps that upgrade to AGP 9.0.0 require migration steps.
+- [flutter/175099](https://github.com/flutter/flutter/issues/175099) - When WebViews are scrolled on iOS 26, they become unclickable.
+- [flutter/175074](https://github.com/flutter/flutter/issues/175074) - When the virtual keyboard is closed on Android web, the area behind it remains blank and the app only draws in the area that used to be above the keyboard.
+- [flutter/180381](https://github.com/flutter/flutter/issues/180381) - Apps crash on Android when enabling accessibility, hiding a platform view, and pulling out the top curtain.
+
+### [3.38.5](https://github.com/flutter/flutter/releases/tag/3.38.5)
+
+- [flutter/179700](https://github.com/flutter/flutter/issues/179700) Update dart to 3.10.4.
+
+### [3.38.4](https://github.com/flutter/flutter/releases/tag/3.38.4)
+
+- [flutter/178547](https://github.com/flutter/flutter/issues/178547) Rendering issues in the Linux desktop embedder when using Skia.
+- [flutter/178529](https://github.com/flutter/flutter/issues/178529) AppLocalizations getting deleted when running debug web
+- [flutter/178660](https://github.com/flutter/flutter/issues/178660) `flutter widget-preview start` can crash if `.dart_tool/widget_preview_scaffold/.dart_tool` doesn't exist on subsequent runs.
+- [flutter/175227](https://github.com/flutter/flutter/issues/175227) Flutter Web applications launched in Chrome show a warning related to --no-sandbox.
+- [flutter/179155](https://github.com/flutter/flutter/issues/179155) `flutter widget-preview start` crashes if a file named `pubspec.yaml` is modified outside the root of the previewed project.
+- [flutter/156692](https://github.com/flutter/flutter/issues/156692) `flutter attach` can crash if the target application disconnects unexpectedly.
+- [flutter/179008](https://github.com/flutter/flutter/issues/179008) `flutter pub get` could be spawned multiple times on MacOS when `pubspec.yaml`s outside of the project were modified after a `flutter pub get` in the root project.
+- [flutter/178715](https://github.com/flutter/flutter/issues/178715) Running flutter test on Linux/MacOS for Android projects with build hooks fails without the desktop native tooling installed.
+
+### [3.38.3](https://github.com/flutter/flutter/releases/tag/3.38.3)
+
+- [flutter/178772](https://github.com/flutter/flutter/issues/178772) Flutter engine reports a different version than the framework.
+- [flutter/178804](https://github.com/flutter/flutter/issues/178804) Bump Dart version to [3.10.1](https://github.com/dart-lang/sdk/blob/3.10.1/CHANGELOG.md#3101).
+
+### [3.38.2](https://github.com/flutter/flutter/releases/tag/3.38.2)
+
+- [flutter/178472](https://github.com/flutter/flutter/issues/178472) Widget preview command can crash on exit if in the middle of analyzing changes to a Dart file.
+- [flutter/178452](https://github.com/flutter/flutter/issues/178452) Flutter fails to build on iOS with error message: "Improperly formatted define flag" in add-to-app scenarios.
+- [flutter/178486](https://github.com/flutter/flutter/issues/178486) When running flutter widget-preview start with Flutter Web disabled, an exception is thrown and the widget previewer fails to start.
+- [flutter/178317](https://github.com/flutter/flutter/issues/178317) Running flutter pub get can crash the widget previewer when plugin dependencies are added or updated.
+- [flutter/178318](https://github.com/flutter/flutter/issues/178318) Certain flutter crash scenarios can result in multiple crash reports being submitted for a single process crash.
+- [flutter/176399](https://github.com/flutter/flutter/issues/176399) Visual Studio 2026 is not supported when compiling Windows desktop applications.
+- [flutter/175058](https://github.com/flutter/flutter/issues/175058) The widget previewer fails to start if flutter pub get has not been run in the target project.
+- [flutter/178421](https://github.com/flutter/flutter/issues/178421) When debugging from an IDE with a physical iOS 26 device, IDE installs an app but hangs on a white screen during launching.
+
+### [3.38.1](https://github.com/flutter/flutter/releases/tag/3.38.1)
+
+- [flutter/178400](https://github.com/flutter/flutter/issues/178400) Adds support for Dart 3.10 stable.
+
+### [3.38.0](https://github.com/flutter/flutter/releases/tag/3.38.0)
+
+Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-38-3f7b258f7228), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.38.0) for a detailed list of all the new changes.
+
 ## Flutter 3.35 Changes
+
+### [3.35.7](https://github.com/flutter/flutter/releases/tag/3.35.7)
+
+- [flutter/174082](https://github.com/flutter/flutter/issues/174082) Apps, on all platforms, that extend MenuController class see a compile time failure when building.
+- [flutter/173770](https://github.com/flutter/flutter/issues/173770) Mitigates a memory leak that occurs on Android, when `Activities` are not kept upon exit and an Activity is exited and re-entered.
 
 ### [3.35.6](https://github.com/flutter/flutter/releases/tag/3.35.6)
 

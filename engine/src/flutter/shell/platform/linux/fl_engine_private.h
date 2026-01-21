@@ -15,7 +15,6 @@
 #include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
-#include "flutter/shell/platform/linux/fl_windowing_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
@@ -96,7 +95,9 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
  * fl_engine_start:
  * @engine: an #FlEngine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Starts the Flutter engine.
  *
@@ -166,7 +167,9 @@ FlutterViewId fl_engine_add_view(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_engine_add_view().
  *
@@ -210,7 +213,9 @@ void fl_engine_remove_view(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_engine_remove_view().
  *
@@ -422,7 +427,9 @@ void fl_engine_send_key_event(FlEngine* engine,
  * @result: a #GAsyncResult.
  * @handled: location to write if this event was handled by the engine.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_engine_send_key_event().
  *
@@ -453,7 +460,9 @@ void fl_engine_dispatch_semantics_action(FlEngine* engine,
  * @handle: handle that was provided in #FlEnginePlatformMessageHandler.
  * @response: (allow-none): response to send or %NULL for an empty response.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Responds to a platform message.
  *
@@ -489,7 +498,9 @@ void fl_engine_send_platform_message(FlEngine* engine,
  * @engine: an #FlEngine.
  * @result: a #GAsyncResult.
  * @error: (allow-none): #GError location to store the error occurring, or %NULL
- * to ignore.
+ * to ignore. If `error` is not %NULL, `*error` must be initialized (typically
+ * %NULL, but an error from a previous call using GLib error handling is
+ * explicitly valid).
  *
  * Completes request started with fl_engine_send_platform_message().
  *
@@ -571,16 +582,6 @@ void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
  * Request the application exits.
  */
 void fl_engine_request_app_exit(FlEngine* engine);
-
-/**
- * fl_engine_get_windowing_handler:
- * @engine: an #FlEngine.
- *
- * Gets the windowing handler used by this engine.
- *
- * Returns: an #FlWindowingHandler.
- */
-FlWindowingHandler* fl_engine_get_windowing_handler(FlEngine* engine);
 
 /**
  * fl_engine_get_keyboard_manager:

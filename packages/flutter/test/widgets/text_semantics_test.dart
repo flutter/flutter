@@ -12,12 +12,12 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
     // Regression test for b/151732341.
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer1 = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer1 = TapGestureRecognizer();
     addTearDown(recognizer1.dispose);
-    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
+    final recognizer2 = TapGestureRecognizer();
     addTearDown(recognizer2.dispose);
-    final TapGestureRecognizer recognizer3 = TapGestureRecognizer();
+    final recognizer3 = TapGestureRecognizer();
     addTearDown(recognizer3.dispose);
 
     await tester.pumpWidget(
@@ -37,7 +37,7 @@ void main() {
     );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode node = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final Map<String, int> labelToNodeId = <String, int>{};
+    final labelToNodeId = <String, int>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.id;
       return true;
@@ -53,7 +53,7 @@ void main() {
     await tester.pump();
 
     final SemanticsNode nodeAfterRebuild = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final Map<String, int> labelToNodeIdAfterRebuild = <String, int>{};
+    final labelToNodeIdAfterRebuild = <String, int>{};
     nodeAfterRebuild.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterRebuild[node.label] = node.id;
       return true;
@@ -66,9 +66,9 @@ void main() {
     expect(labelToNodeIdAfterRebuild['!!!'], labelToNodeId['!!!']);
     expect(labelToNodeIdAfterRebuild.length, 3);
 
-    final TapGestureRecognizer recognizer4 = TapGestureRecognizer();
+    final recognizer4 = TapGestureRecognizer();
     addTearDown(recognizer4.dispose);
-    final TapGestureRecognizer recognizer5 = TapGestureRecognizer();
+    final recognizer5 = TapGestureRecognizer();
     addTearDown(recognizer5.dispose);
 
     // Remove one node.
@@ -86,7 +86,7 @@ void main() {
     );
 
     final SemanticsNode nodeAfterRemoval = tester.getSemantics(find.text('Hallo Welt '));
-    final Map<String, int> labelToNodeIdAfterRemoval = <String, int>{};
+    final labelToNodeIdAfterRemoval = <String, int>{};
     nodeAfterRemoval.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterRemoval[node.label] = node.id;
       return true;
@@ -98,11 +98,11 @@ void main() {
     expect(labelToNodeIdAfterRemoval['Welt '], labelToNodeId['Welt ']);
     expect(labelToNodeIdAfterRemoval.length, 2);
 
-    final TapGestureRecognizer recognizer6 = TapGestureRecognizer();
+    final recognizer6 = TapGestureRecognizer();
     addTearDown(recognizer6.dispose);
-    final TapGestureRecognizer recognizer7 = TapGestureRecognizer();
+    final recognizer7 = TapGestureRecognizer();
     addTearDown(recognizer7.dispose);
-    final TapGestureRecognizer recognizer8 = TapGestureRecognizer();
+    final recognizer8 = TapGestureRecognizer();
     addTearDown(recognizer8.dispose);
 
     await tester.pumpWidget(
@@ -122,7 +122,7 @@ void main() {
     );
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode nodeAfterAddition = tester.getSemantics(find.text('Hallo Welt !!!'));
-    final Map<String, int> labelToNodeIdAfterAddition = <String, int>{};
+    final labelToNodeIdAfterAddition = <String, int>{};
     nodeAfterAddition.visitChildren((SemanticsNode node) {
       labelToNodeIdAfterAddition[node.label] = node.id;
       return true;
@@ -162,7 +162,7 @@ void main() {
     final SemanticsNode node = tester.getSemantics(
       find.text('Hello, 1 new semantics node has been created.'),
     );
-    final Map<String, String> labelToNodeId = <String, String>{};
+    final labelToNodeId = <String, String>{};
     node.visitChildren((SemanticsNode node) {
       labelToNodeId[node.label] = node.identifier;
       return true;
@@ -177,7 +177,7 @@ void main() {
   testWidgets('GIVEN a Text widget with a locale '
       'WHEN semantics are built '
       'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
-    const Locale locale = Locale('de', 'DE');
+    const locale = Locale('de', 'DE');
 
     await tester.pumpWidget(
       const Directionality(
@@ -187,8 +187,7 @@ void main() {
     );
 
     final SemanticsNode node = tester.getSemantics(find.byType(Directionality));
-    final LocaleStringAttribute localeStringAttribute =
-        node.attributedLabel.attributes[0] as LocaleStringAttribute;
+    final localeStringAttribute = node.attributedLabel.attributes[0] as LocaleStringAttribute;
 
     expect(node.label, 'Flutter 2050');
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
@@ -197,8 +196,8 @@ void main() {
   testWidgets('GIVEN a Text with a locale is within a SelectionContainer '
       'WHEN semantics are built '
       'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
-    const Locale locale = Locale('de', 'DE');
-    const String text = 'Flutter 2050';
+    const locale = Locale('de', 'DE');
+    const text = 'Flutter 2050';
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectionArea(child: Text(text, locale: locale)),
@@ -207,7 +206,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
-    final List<SemanticsNode> queue = <SemanticsNode>[root];
+    final queue = <SemanticsNode>[root];
     SemanticsNode? targetNode;
     while (queue.isNotEmpty) {
       final SemanticsNode node = queue.removeAt(0);
@@ -217,7 +216,7 @@ void main() {
       }
       queue.addAll(node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder));
     }
-    final LocaleStringAttribute localeStringAttribute =
+    final localeStringAttribute =
         targetNode!.attributedLabel.attributes[0] as LocaleStringAttribute;
 
     expect(targetNode.label, text);

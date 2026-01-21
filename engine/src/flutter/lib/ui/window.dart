@@ -771,7 +771,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// method of the [FlutterActivity](/javadoc/io/flutter/embedding/android/FlutterActivity.html)'s
   /// intent builder.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
   ///
   /// ## iOS
   ///
@@ -779,7 +779,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// [`FlutterViewController.setInitialRoute`](/ios-embedder/interface_flutter_view_controller.html#a7f269c2da73312f856d42611cc12a33f)
   /// initializer.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#route.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/ios/add-flutter-screen#route.
   ///
   /// See also:
   ///
@@ -928,6 +928,9 @@ class AccessibilityFeatures {
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
   static const int _kNoAnnounceIndex = 1 << 7;
+  static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
+  static const int _kNoAutoPlayVideosIndex = 1 << 9;
+  static const int _kDeterministicCursorIndex = 1 << 10;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -966,10 +969,10 @@ class AccessibilityFeatures {
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
   /// Whether the platform supports accessibility  announcement API,
-  /// i.e. [SemanticsService.announce].
+  /// i.e. [SemanticsService.sendAnnouncement].
   ///
   /// Some platforms do not support or discourage the use of
-  /// announcement. Using [SemanticsService.announce] on those platform
+  /// announcement. Using [SemanticsService.sendAnnouncement] on those platform
   /// may be ignored. Consider using other way to convey message to the
   /// user. For example, Android discourages the uses of direct message
   /// announcement, and rather encourages using other semantic
@@ -985,9 +988,33 @@ class AccessibilityFeatures {
   // "announce" than discourage it.
   bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
+  /// Whether the platform allows auto-playing animated images.
+  ///
+  /// Only supported on iOS.
+  ///
+  /// Always returns `true` on other platforms.
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto play.
+  bool get autoPlayAnimatedImages => _kNoAutoPlayAnimatedImagesIndex & _index == 0;
+
+  /// Whether the platform allows auto-playing videos.
+  ///
+  /// Only supported on iOS.
+  ///
+  /// Always returns `true` on other platforms.
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto play.
+  bool get autoPlayVideos => _kNoAutoPlayVideosIndex & _index == 0;
+
+  /// The platform is requesting to show deterministic (non-blinking) cursor in
+  /// editable text fields.
+  ///
+  /// Only supported on iOS.
+  bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
+
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }
@@ -1011,6 +1038,15 @@ class AccessibilityFeatures {
     }
     if (supportsAnnounce) {
       features.add('supportsAnnounce');
+    }
+    if (autoPlayAnimatedImages) {
+      features.add('autoPlayAnimatedImages');
+    }
+    if (autoPlayVideos) {
+      features.add('autoPlayVideos');
+    }
+    if (deterministicCursor) {
+      features.add('deterministicCursor');
     }
     return 'AccessibilityFeatures$features';
   }

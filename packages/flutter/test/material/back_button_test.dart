@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -32,7 +35,7 @@ void main() {
     });
 
     testWidgets('BackButton onPressed overrides default pop behavior', (WidgetTester tester) async {
-      bool customCallbackWasCalled = false;
+      var customCallbackWasCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: const Material(child: Text('Home')),
@@ -313,7 +316,7 @@ void main() {
     testWidgets('CloseButton onPressed overrides default pop behavior', (
       WidgetTester tester,
     ) async {
-      bool customCallbackWasCalled = false;
+      var customCallbackWasCalled = false;
       await tester.pumpWidget(
         MaterialApp(
           home: const Material(child: Text('Home')),
@@ -375,5 +378,97 @@ void main() {
     );
     final Finder backButtonIcon = find.byType(BackButtonIcon);
     expect(tester.getSize(backButtonIcon).isEmpty, isTrue);
+  });
+
+  testWidgets('BackButton has expected default mouse cursor on hover', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: BackButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+    await gesture.moveTo(tester.getCenter(find.byType(BackButton)));
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('CloseButton has expected default mouse cursor on hover', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: CloseButton())));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(1000, 1000));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
+    await gesture.moveTo(tester.getCenter(find.byType(CloseButton)));
+    await tester.pump();
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    );
+  });
+
+  testWidgets('BackButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: BackButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(BackButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
+  });
+
+  testWidgets('CloseButton has expected mouse cursor when explicitly configured', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: CloseButton(
+            style: ButtonStyle(
+              mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.cell),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(CloseButton)));
+    addTearDown(gesture.removePointer);
+
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.cell,
+    );
   });
 }

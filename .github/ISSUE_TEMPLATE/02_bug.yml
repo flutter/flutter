@@ -19,7 +19,7 @@ body:
       value: |
         Before filling the form fields, please consider the following:
         - Ensure that you have searched the [existing issues](https://github.com/flutter/flutter/issues)
-        - Read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        - Read the [guide to filing a bug](https://docs.flutter.dev/resources/bug-reports)
   - type: textarea
     attributes:
       label: Steps to reproduce

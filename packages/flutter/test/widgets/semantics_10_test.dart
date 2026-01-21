@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,7 +12,7 @@ void main() {
   testWidgets(
     'can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
         buildTestWidgets(excludeSemantics: false, label: 'label', isSemanticsBoundary: true),

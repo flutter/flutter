@@ -150,6 +150,10 @@ template("impellerc") {
       args += [ "--require-framebuffer-fetch" ]
     }
 
+    if (defined(invoker.entry_point_prefix)) {
+      args += [ "--entry-point-prefix=${invoker.entry_point_prefix}" ]
+    }
+
     if (json) {
       args += [ "--json" ]
     }

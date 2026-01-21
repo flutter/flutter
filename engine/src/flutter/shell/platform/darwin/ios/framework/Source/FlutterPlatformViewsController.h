@@ -114,6 +114,22 @@ NS_ASSUME_NONNULL_BEGIN
 /// @brief Pushes the view id of a visted platform view to the list of visied platform views.
 - (void)pushVisitedPlatformViewId:(int64_t)viewId;
 
+/// @brief Pushes the outstanding rectangular clips to the mutator stack of each visited platform
+/// view
+- (void)pushClipRectToVisitedPlatformViews:(const flutter::DlRect&)clipRect;
+
+/// @brief Pushes the outstanding rounded rectangular clips to the mutator stack of each visited
+/// platform view
+- (void)pushClipRRectToVisitedPlatformViews:(const flutter::DlRoundRect&)clipRRect;
+
+/// @brief Pushes the outstanding round super elliptical clips to the mutator stack of each visited
+/// platform view
+- (void)pushClipRSuperellipseToVisitedPlatformViews:(const flutter::DlRoundSuperellipse&)clipRse;
+
+/// @brief Pushes the outstanding path clips to the mutator stack of each visited platform
+/// view
+- (void)pushClipPathToVisitedPlatformViews:(const flutter::DlPath&)clipPath;
+
 @end
 
 @interface FlutterPlatformViewsController (Testing)

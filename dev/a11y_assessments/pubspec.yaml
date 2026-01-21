@@ -3,7 +3,7 @@ description: A new Flutter project
 version: 5.0.0+5
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 resolution: workspace
 

@@ -14,7 +14,7 @@ void testMain() {
   group('$MouseCursor', () {
     test('sets correct `cursor` style on root element', () {
       final DomElement rootViewElement = createDomElement('div');
-      final MouseCursor mouseCursor = MouseCursor(rootViewElement);
+      final mouseCursor = MouseCursor(rootViewElement);
 
       // TODO(mdebbar): This should be `rootViewElement`.
       //                https://github.com/flutter/flutter/issues/140226
@@ -38,7 +38,7 @@ void testMain() {
 
     test('handles unknown cursor type', () {
       final DomElement rootViewElement = createDomElement('div');
-      final MouseCursor mouseCursor = MouseCursor(rootViewElement);
+      final mouseCursor = MouseCursor(rootViewElement);
 
       // TODO(mdebbar): This should be `rootViewElement`.
       //                https://github.com/flutter/flutter/issues/140226

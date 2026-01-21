@@ -6,7 +6,7 @@ Most packages are located in `packages`. A few which are derived heavily from th
 
 ## Plugins
 
-Plugins in flutter/packages uses the federated plugin model. If you are not familiar with federated plugins, start with reading [the federated plugin overview](https://flutter.dev/docs/development/packages-and-plugins/developing-packages#federated-plugins) to understand the terms below.
+Plugins in flutter/packages uses the federated plugin model. If you are not familiar with federated plugins, start with reading [the federated plugin overview](https://docs.flutter.dev/development/packages-and-plugins/developing-packages#federated-plugins) to understand the terms below.
 
 All plugins are located in the `packages/` directory. Almost all plugins have the following layout:
 - `some_plugin/` - A directory containing the individual packages of the federated plugin:

@@ -53,7 +53,7 @@ void main() {
   });
 
   test('fetchSpellCheckSuggestions returns null with no misspelled words', () async {
-    const String text = 'Hello, world!';
+    const text = 'Hello, world!';
 
     final List<SuggestionSpan>? spellCheckSuggestionSpans = await defaultSpellCheckService
         .fetchSpellCheckSuggestions(locale, text);
@@ -67,8 +67,8 @@ void main() {
   });
 
   test('fetchSpellCheckSuggestions returns correct ranges with misspelled words', () async {
-    const String text = 'Hlelo, world! Yuou are magnificente';
-    const List<TextRange> misspelledWordRanges = <TextRange>[
+    const text = 'Hlelo, world! Yuou are magnificente';
+    const misspelledWordRanges = <TextRange>[
       TextRange(start: 0, end: 5),
       TextRange(start: 14, end: 18),
       TextRange(start: 23, end: 35),
@@ -80,7 +80,7 @@ void main() {
     expect(spellCheckSuggestionSpans, isNotNull);
     expect(spellCheckSuggestionSpans!.length, equals(misspelledWordRanges.length));
 
-    for (int i = 0; i < misspelledWordRanges.length; i += 1) {
+    for (var i = 0; i < misspelledWordRanges.length; i += 1) {
       expect(spellCheckSuggestionSpans[i].range, equals(misspelledWordRanges[i]));
     }
 
@@ -94,7 +94,7 @@ void main() {
   test(
     'fetchSpellCheckSuggestions does not correct results when Gboard not ignoring composing region',
     () async {
-      const String text = 'Wwow, whaaett a beautiful day it is!';
+      const text = 'Wwow, whaaett a beautiful day it is!';
 
       final List<SuggestionSpan>? spellCheckSpansWithComposingRegion =
           await defaultSpellCheckService.fetchSpellCheckSuggestions(locale, text);
@@ -110,11 +110,11 @@ void main() {
   );
 
   test('fetchSpellCheckSuggestions merges results when Gboard ignoring composing region', () async {
-    const String text = 'Wooahha it is an amazzinng dayyebf!';
+    const text = 'Wooahha it is an amazzinng dayyebf!';
 
     final List<SuggestionSpan>? modifiedSpellCheckSuggestionSpans = await defaultSpellCheckService
         .fetchSpellCheckSuggestions(locale, text);
-    final List<SuggestionSpan> expectedSpellCheckSuggestionSpans = List<SuggestionSpan>.from(
+    final expectedSpellCheckSuggestionSpans = List<SuggestionSpan>.from(
       modifiedSpellCheckSuggestionSpans!,
     );
     expect(modifiedSpellCheckSuggestionSpans, isNotNull);
@@ -138,14 +138,14 @@ void main() {
   testWidgets('EditableText spell checks when text is entered and spell check enabled', (
     WidgetTester tester,
   ) async {
-    const TextStyle style = TextStyle();
+    const style = TextStyle();
     const TextStyle misspelledTextStyle = TextField.materialMisspelledTextStyle;
 
     await tester.pumpWidget(const MyApp());
 
     await tester.enterText(find.byType(EditableText), 'Hey cfabiueq qocnakoef! Hey!');
 
-    const TextSpan expectedTextSpanTree = TextSpan(
+    const expectedTextSpanTree = TextSpan(
       style: style,
       children: <TextSpan>[
         TextSpan(style: style, text: 'Hey '),

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -63,6 +64,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required SystemClock systemClock,
     required Analytics analytics,
     bool machine = false,
+    Map<String, String> webDefines = const <String, String>{},
   }) {
     return ResidentWebRunner(
       device,
@@ -79,6 +81,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       terminal: terminal,
       platform: platform,
       outputPreferences: outputPreferences,
+      webDefines: webDefines,
     );
   }
 }
@@ -88,12 +91,15 @@ const kExitMessage =
     'instance in Chrome.\nThis can happen if the websocket connection used by the '
     'web tooling is unable to correctly establish a connection, for example due to a firewall.';
 
+const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
+
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
     String? target,
     bool stayResident = true,
     bool machine = false,
+    String? projectRootPath,
     required this.flutterProject,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
@@ -104,12 +110,14 @@ class ResidentWebRunner extends ResidentRunner {
     required SystemClock systemClock,
     required Analytics analytics,
     UrlTunneller? urlTunneller,
+    Map<String, String> webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _systemClock = systemClock,
        _analytics = analytics,
        _urlTunneller = urlTunneller,
+       _webDefines = webDefines,
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
@@ -123,6 +131,7 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
+         projectRootPath: projectRootPath,
        );
 
   final FileSystem _fileSystem;
@@ -131,6 +140,7 @@ class ResidentWebRunner extends ResidentRunner {
   final SystemClock _systemClock;
   final Analytics _analytics;
   final UrlTunneller? _urlTunneller;
+  final Map<String, String> _webDefines;
 
   @override
   Logger get logger => _logger;
@@ -309,9 +319,11 @@ class ResidentWebRunner extends ResidentRunner {
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
+          webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
           platform: _platform,
+          webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
         if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
@@ -366,24 +378,32 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on HttpException catch (error, stackTrace) {
       appFailedToStart();
-      _logger.printError('$error', stackTrace: stackTrace);
+      _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on DartDevelopmentServiceException catch (error) {
+      // The application may have started shutting down before DDS was able to finish establishing
+      // its connection to DWDS. Don't treat this as an unhandled exception.
+      appFailedToStart();
+      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
+        throwToolExit(kExitMessage);
+      }
+      rethrow;
     } on Exception {
       appFailedToStart();
       rethrow;
@@ -402,6 +422,13 @@ class ResidentWebRunner extends ResidentRunner {
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
     );
+  }
+
+  /// Handles the no clients available scenario gracefully.
+  OperationResult _handleNoClientsAvailable(Status status) {
+    status.stop();
+    _logger.printStatus(kNoClientConnectedMessage);
+    return OperationResult.ok;
   }
 
   @override
@@ -487,9 +514,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
 
     if (_connectionResult == null) {
-      status.stop();
-      _logger.printStatus('Recompile complete. No client connected..');
-      return OperationResult.ok;
+      return _handleNoClientsAvailable(status);
     }
 
     // Both will be null when not assigned.
@@ -504,13 +529,51 @@ class ResidentWebRunner extends ResidentRunner {
           // it. Otherwise, default to calling "hotRestart" without a namespace.
           final String hotRestartMethod =
               _registeredMethodsForService['hotRestart'] ?? 'hotRestart';
-          await _vmService.service.callMethod(hotRestartMethod);
+
+          try {
+            await _vmService.service.callMethod(hotRestartMethod);
+          } on vmservice.RPCError catch (e) {
+            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
+            // browser clients currently connected during a hot restart operation.
+
+            // TODO(61757): Remove this temporary workaround once vm_service is fixed.
+            // There's a bug in vm_service where it re-encodes RPCErrors as kServerError
+            // instead of preserving the original error code. Until that's fixed, we need
+            // to check for both kIsolateCannotReload and kServerError for this method.
+            if (e.callingMethod == hotRestartMethod &&
+                (e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code ||
+                    e.code == vmservice.RPCErrorKind.kServerError.code)) {
+              return _handleNoClientsAvailable(status);
+            }
+            // Re-throw other RPC errors
+            rethrow;
+          }
         } else {
           final DateTime reloadStart = _systemClock.now();
           final vmservice.VM vm = await _vmService.service.getVM();
-          final vmservice.ReloadReport report = await _vmService.service.reloadSources(
-            vm.isolates!.first.id!,
-          );
+          final String hotReloadMethod =
+              _registeredMethodsForService['reloadSources'] ?? 'reloadSources';
+
+          // Check if there are any isolates available
+          if (vm.isolates == null || vm.isolates!.isEmpty) {
+            _logger.printTrace('No isolates available for hot reload');
+            return _handleNoClientsAvailable(status);
+          }
+
+          vmservice.ReloadReport report;
+          try {
+            report = await _vmService.service.reloadSources(vm.isolates!.first.id!);
+          } on vmservice.RPCError catch (e) {
+            // DWDS throws an RPC error with kIsolateCannotReload code when there are no
+            // browser clients currently connected during a hot reload operation.
+            if (e.callingMethod == hotReloadMethod &&
+                e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
+              return _handleNoClientsAvailable(status);
+            }
+            // Re-throw other RPC errors
+            rethrow;
+          }
+
           reloadDuration = _systemClock.now().difference(reloadStart);
           final contents = ReloadReportContents.fromReloadReport(report);
           final bool success = contents.success ?? false;
@@ -888,8 +951,8 @@ class ResidentWebRunner extends ResidentRunner {
           connectionInfoCompleter?.complete(
             DebugConnectionInfo(
               wsUri: websocketUri,
-              devToolsUri: Uri.tryParse(debugConnection.devToolsUri ?? ''),
-              // TODO(bkonyi): surface DTD URI once it's visible from DWDS
+              devToolsUri: debugConnection.devToolsUri?.toUri(),
+              dtdUri: debugConnection.dtdUri?.toUri(),
             ),
           );
         }),

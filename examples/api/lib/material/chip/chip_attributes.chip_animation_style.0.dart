@@ -23,7 +23,8 @@ class ChipAnimationStyleExample extends StatefulWidget {
   const ChipAnimationStyleExample({super.key});
 
   @override
-  State<ChipAnimationStyleExample> createState() => _ChipAnimationStyleExampleState();
+  State<ChipAnimationStyleExample> createState() =>
+      _ChipAnimationStyleExampleState();
 }
 
 class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
@@ -51,7 +52,7 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                     ),
                   ),
                   onSelected: !enabled ? null : (bool value) {},
-                  disabledColor: Colors.red.withOpacity(0.12),
+                  disabledColor: Colors.red.withValues(alpha: 0.12),
                   backgroundColor: Colors.amber,
                   label: Text(enabled ? 'Enabled' : 'Disabled'),
                 ),
@@ -120,7 +121,9 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                       showCheckmark = !showCheckmark;
                     });
                   },
-                  child: Text(showCheckmark ? 'Hide checkmark' : 'Show checkmark'),
+                  child: Text(
+                    showCheckmark ? 'Hide checkmark' : 'Show checkmark',
+                  ),
                 ),
               ],
             ),
@@ -145,7 +148,9 @@ class _ChipAnimationStyleExampleState extends State<ChipAnimationStyleExample> {
                       showDeleteIcon = !showDeleteIcon;
                     });
                   },
-                  child: Text(showDeleteIcon ? 'Hide delete icon' : 'Show delete icon'),
+                  child: Text(
+                    showDeleteIcon ? 'Hide delete icon' : 'Show delete icon',
+                  ),
                 ),
               ],
             ),

@@ -25,7 +25,7 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  const String goldenPrefix = 'hybrid_composition_pp_platform_view';
+  const goldenPrefix = 'hybrid_composition_pp_platform_view';
 
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
@@ -45,8 +45,7 @@ void main() async {
   });
 
   test('verify that HCPP is supported and enabled', () async {
-    final Map<String, Object?> response =
-        json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+    final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
   }, timeout: Timeout.none);

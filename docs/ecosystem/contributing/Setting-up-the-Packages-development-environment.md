@@ -1,6 +1,6 @@
 ## Things you will need
 
- * A working [Flutter](https://flutter.dev/docs/get-started/install) installation.
+ * A working [Flutter](https://docs.flutter.dev/get-started) installation.
  * git (used for source version control).
  * An ssh client (used to authenticate with GitHub).
 

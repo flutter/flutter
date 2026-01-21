@@ -248,9 +248,9 @@ static void DrawGlyph(SkCanvas* canvas,
   canvas->save();
   Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
   canvas->translate(subpixel_offset.x, subpixel_offset.y);
-  canvas->drawGlyphs(1u,         // count
-                     &glyph_id,  // glyphs
-                     &position,  // positions
+  // Draw a single glyph in the bounds
+  canvas->drawGlyphs({&glyph_id, 1u},  // glyphs
+                     {&position, 1u},  // positions
                      SkPoint::Make(-scaled_bounds.GetLeft(),
                                    -scaled_bounds.GetTop()),  // origin
                      sk_font,                                 // font
@@ -393,6 +393,31 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   }
   return blit_pass->ConvertTextureToShaderRead(texture);
 }
+
+static Rect ComputeGlyphSize(const SkFont& font,
+                             const SubpixelGlyph& glyph,
+                             Scalar scale) {
+  SkRect scaled_bounds;
+  SkPaint glyph_paint;
+  if (glyph.properties.has_value() && glyph.properties->stroke) {
+    glyph_paint.setStroke(true);
+    glyph_paint.setStrokeWidth(glyph.properties->stroke->width * scale);
+    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke->cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke->join));
+    glyph_paint.setStrokeMiter(glyph.properties->stroke->miter_limit);
+  }
+  // Get bounds for a single glyph
+  font.getBounds({&glyph.glyph.index, 1}, {&scaled_bounds, 1}, &glyph_paint);
+
+  // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
+  Scalar adjustment = 0.0;
+  if (glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
+    adjustment = 1.0;
+  }
+  return Rect::MakeLTRB(scaled_bounds.fLeft - adjustment, scaled_bounds.fTop,
+                        scaled_bounds.fRight + adjustment,
+                        scaled_bounds.fBottom);
+};
 
 std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
 TypographerContextSkia::CollectNewGlyphs(

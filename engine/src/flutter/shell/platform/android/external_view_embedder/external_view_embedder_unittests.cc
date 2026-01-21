@@ -1065,6 +1065,24 @@ TEST(AndroidExternalViewEmbedder, Teardown) {
   embedder->Teardown();
 }
 
+TEST(AndroidExternalViewEmbedder, MaybeResizeSurfaceView) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
+  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
+      android_context, jni_mock, nullptr, GetTaskRunnersForFixture());
+
+  fml::Thread rasterizer_thread("rasterizer");
+  auto raster_thread_merger =
+      GetThreadMergerFromPlatformThread(&rasterizer_thread);
+  ASSERT_FALSE(raster_thread_merger->IsMerged());
+
+  EXPECT_CALL(*jni_mock, FlutterViewBeginFrame());
+  embedder->BeginFrame(nullptr, raster_thread_merger);
+
+  EXPECT_CALL(*jni_mock, MaybeResizeSurfaceView(100, 200));
+  embedder->PrepareFlutterView(DlISize(100, 200), 1.0);
+}
+
 TEST(AndroidExternalViewEmbedder, TeardownDoesNotCallJNIMethod) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context =

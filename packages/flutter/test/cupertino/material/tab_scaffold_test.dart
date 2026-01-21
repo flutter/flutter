@@ -19,9 +19,9 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[];
-    for (int i = 0; i < 2; i++) {
-      final FocusNode focusNode = FocusNode();
+    final focusNodes = <FocusNode>[];
+    for (var i = 0; i < 2; i++) {
+      final focusNode = FocusNode();
       focusNodes.add(focusNode);
       addTearDown(focusNode.dispose);
     }
@@ -55,9 +55,9 @@ void main() {
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[];
-    for (int i = 0; i < 4; i++) {
-      final FocusNode focusNode = FocusNode();
+    final focusNodes = <FocusNode>[];
+    for (var i = 0; i < 4; i++) {
+      final focusNode = FocusNode();
       focusNodes.add(focusNode);
       addTearDown(focusNode.dispose);
     }
@@ -119,7 +119,7 @@ void main() {
       ),
     );
 
-    BoxDecoration tabDecoration =
+    var tabDecoration =
         tester
                 .widget<DecoratedBox>(
                   find.descendant(
@@ -176,7 +176,7 @@ void main() {
   });
 
   testWidgets('dark mode background color', (WidgetTester tester) async {
-    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
     );
@@ -195,7 +195,7 @@ void main() {
 
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
-    BoxDecoration tabDecoration =
+    var tabDecoration =
         tester
                 .firstWidget<DecoratedBox>(
                   find.descendant(

@@ -52,7 +52,7 @@ void main() {
       processRunner: ProcessRunner(defaultWorkingDirectory: tempRoot, processManager: failsCanRun),
     );
 
-    final et = _engineTool(
+    final CommandRunner<int> et = _engineTool(
       RunCommand(
         environment: testEnvironment,
         // Intentionally left blank, none of these builds make it far enough.
@@ -102,7 +102,7 @@ void main() {
         targetDir: 'android_debug_arm64',
       );
 
-      final et = _engineTool(
+      final CommandRunner<int> et = _engineTool(
         RunCommand(
           environment: testEnvironment,
           configs: {
@@ -161,7 +161,7 @@ void main() {
           commandsRun.add(entry.command);
           for (final intercept in interceptCommands) {
             if (entry.command.first.endsWith(intercept.$1)) {
-              final result = intercept.$2(entry.command);
+              final FakeProcess? result = intercept.$2(entry.command);
               if (result != null) {
                 return result;
               }

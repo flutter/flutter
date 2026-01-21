@@ -5,13 +5,13 @@
 #include <filesystem>
 #include <fstream>
 
-#include "flutter/third_party/abseil-cpp/absl/flags/flag.h"
-#include "flutter/third_party/abseil-cpp/absl/flags/parse.h"
-#include "flutter/third_party/abseil-cpp/absl/flags/usage.h"
-#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
-#include "flutter/third_party/abseil-cpp/absl/log/initialize.h"
-#include "flutter/third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
+#include "third_party/abseil-cpp/absl/flags/flag.h"
+#include "third_party/abseil-cpp/absl/flags/parse.h"
+#include "third_party/abseil-cpp/absl/flags/usage.h"
+#include "third_party/abseil-cpp/absl/log/globals.h"
+#include "third_party/abseil-cpp/absl/log/initialize.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 
@@ -37,6 +37,10 @@ ABSL_FLAG(bool,
           treat_unmatched_comments_as_errors,
           false,
           "Whether unmatched comments are considered errors.");
+ABSL_FLAG(std::optional<std::string>,
+          root_package,
+          std::nullopt,
+          "Name of the root package.");
 
 namespace {
 int Run(std::string_view working_dir,
@@ -98,6 +102,7 @@ int main(int argc, char** argv) {
     LicenseChecker::Flags flags;
     flags.treat_unmatched_comments_as_errors =
         absl::GetFlag(FLAGS_treat_unmatched_comments_as_errors);
+    flags.root_package_name = absl::GetFlag(FLAGS_root_package);
     if (input.has_value()) {
       if (include_filter.has_value()) {
         std::cerr << "`--input_filter` not supported with `--input`"

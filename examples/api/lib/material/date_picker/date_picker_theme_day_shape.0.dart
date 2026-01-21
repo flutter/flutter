@@ -16,13 +16,19 @@ class DatePickerApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         datePickerTheme: DatePickerThemeData(
-          todayBackgroundColor: const WidgetStatePropertyAll<Color>(Colors.amber),
-          todayForegroundColor: const WidgetStatePropertyAll<Color>(Colors.black),
+          todayBackgroundColor: const WidgetStatePropertyAll<Color>(
+            Colors.amber,
+          ),
+          todayForegroundColor: const WidgetStatePropertyAll<Color>(
+            Colors.black,
+          ),
           todayBorder: const BorderSide(width: 2),
           dayShape: WidgetStatePropertyAll<OutlinedBorder>(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
         ),
       ),
       home: const DatePickerExample(),

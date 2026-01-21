@@ -46,7 +46,7 @@ Future<void> testMain() async {
   setUpUnitTests();
 
   test('color accessors should work', () {
-    const Color foo = Color(0x12345678);
+    const foo = Color(0x12345678);
     expect(foo.alpha, equals(0x12));
     expect(foo.red, equals(0x34));
     expect(foo.green, equals(0x56));
@@ -54,21 +54,21 @@ Future<void> testMain() async {
   });
 
   test('paint set to black', () {
-    const Color c = Color(0x00000000);
-    final Paint p = Paint();
+    const c = Color(0x00000000);
+    final p = Paint();
     p.color = c;
     expect(c.toString(), equals('${const Color(0x00000000)}'));
   });
 
   test('color created with out of bounds value', () {
-    const Color c = Color(0x100 << 24);
-    final Paint p = Paint();
+    const c = Color(0x100 << 24);
+    final p = Paint();
     p.color = c;
   });
 
   test('color created with wildly out of bounds value', () {
-    const Color c = Color(1 << 1000000);
-    final Paint p = Paint();
+    const c = Color(1 << 1000000);
+    final p = Paint();
     p.color = c;
   });
 
@@ -149,14 +149,14 @@ Future<void> testMain() async {
 
   test('compute gray luminance', () {
     // Each color component is at 20%.
-    const Color lightGray = Color(0xFF333333);
+    const lightGray = Color(0xFF333333);
     // Relative luminance's formula is just the linearized color value for gray.
     // ((0.2 + 0.055) / 1.055) ^ 2.4.
     expect(lightGray.computeLuminance(), equals(0.033104766570885055));
   });
 
   test('compute color luminance', () {
-    const Color brightRed = Color(0xFFFF3B30);
+    const brightRed = Color(0xFFFF3B30);
     // 0.2126 * ((1.0 + 0.055) / 1.055) ^ 2.4 +
     // 0.7152 * ((0.23137254902 +0.055) / 1.055) ^ 2.4 +
     // 0.0722 * ((0.18823529411 + 0.055) / 1.055) ^ 2.4
@@ -166,15 +166,15 @@ Future<void> testMain() async {
   // Regression test for https://github.com/flutter/flutter/issues/41257
   // CupertinoDynamicColor was overriding base class and calling super(0).
   test('subclass of Color can override value', () {
-    const DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
+    const color = DynamicColorClass(0xF0E0D0C0);
     expect(color.value, 0xF0E0D0C0);
     // Call base class member, make sure it uses overridden value.
     expect(color.red, 0xE0);
   });
 
   test('Paint converts Color subclasses to plain Color', () {
-    const DynamicColorClass color = DynamicColorClass(0xF0E0D0C0);
-    final Paint paint = Paint()..color = color;
+    const color = DynamicColorClass(0xF0E0D0C0);
+    final paint = Paint()..color = color;
     expect(paint.color.runtimeType, Color);
   });
 }

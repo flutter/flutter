@@ -195,7 +195,7 @@ class BackdropTitle extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
+    final animation = listenable as Animation<double>;
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.titleLarge!,
       softWrap: false,
@@ -262,7 +262,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   double get _backdropHeight {
-    final RenderBox renderBox = _backdropKey.currentContext!.findRenderObject()! as RenderBox;
+    final renderBox = _backdropKey.currentContext!.findRenderObject()! as RenderBox;
     return renderBox.size.height;
   }
 
@@ -298,7 +298,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // we need to know how big the BackdropPanel will be to set up its
   // animation.
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    const double panelTitleHeight = 48.0;
+    const panelTitleHeight = 48.0;
     final Size panelSize = constraints.biggest;
     final double panelTop = panelSize.height - panelTitleHeight;
 
@@ -316,7 +316,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
-      final bool selected = category == _category;
+      final selected = category == _category;
       return Material(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
         color: selected ? Colors.white.withOpacity(0.25) : Colors.transparent,

@@ -16,13 +16,13 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 const FileSystem fs = LocalFileSystem();
 
 Future<void> main(List<String> args) async {
-  final Options options = Options.fromArgs(args);
+  final options = Options.fromArgs(args);
   final String json = options.snapshot.readAsStringSync();
-  final Snapshot snapshot = Snapshot.fromJson(jsonDecode(json) as Map<String, dynamic>);
+  final snapshot = Snapshot.fromJson(jsonDecode(json) as Map<String, dynamic>);
   final ProgramInfo programInfo = toProgramInfo(snapshot);
 
-  final List<String> foundForbiddenTypes = <String>[];
-  bool fail = false;
+  final foundForbiddenTypes = <String>[];
+  var fail = false;
   for (final String forbiddenType in options.forbiddenTypes) {
     final int slash = forbiddenType.indexOf('/');
     final int doubleColons = forbiddenType.indexOf('::');
@@ -39,7 +39,7 @@ Future<void> main(List<String> args) async {
       continue;
     }
 
-    final List<String> lookupPath = <String>[
+    final lookupPath = <String>[
       forbiddenType.substring(0, slash),
       forbiddenType.substring(0, doubleColons),
       forbiddenType.substring(doubleColons + 2),
@@ -86,7 +86,7 @@ Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
   // there is at least one space before and after the type name, which is not
   // strictly required by the language.
   final List<String> contents = packageFile.readAsStringSync().split('\n');
-  for (final String line in contents) {
+  for (final line in contents) {
     // Ignore comments.
     // This will fail for multi- and intra-line comments (i.e. /* */).
     if (line.trim().startsWith('//')) {
@@ -107,7 +107,7 @@ class Options {
   });
 
   factory Options.fromArgs(List<String> args) {
-    final ArgParser argParser = ArgParser();
+    final argParser = ArgParser();
     argParser.addOption(
       'snapshot',
       help: 'The path V8 snapshot file.',

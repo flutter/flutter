@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine/dom.dart';
+import 'package:ui/ui.dart' as ui;
 
 import '../hot_restart_cache_handler.dart' show registerElementForCleanup;
 import 'embedding_strategy.dart';
@@ -26,6 +27,11 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
 
   /// The root element of the Flutter view.
   late final DomElement _rootElement;
+
+  @override
+  void setLocale(ui.Locale locale) {
+    hostElement.setAttribute('lang', locale.toLanguageTag());
+  }
 
   @override
   void attachViewRoot(DomElement rootElement) {

@@ -21,13 +21,16 @@ void setUpRenderingForTests() {
     if (_sceneToRender != null) {
       EnginePlatformDispatcher.instance
           .render(_sceneToRender!)
+          .whenComplete(() {
+            _sceneToRender?.dispose();
+            _sceneToRender = null;
+          })
           .then<void>((_) {
             _sceneCompleter?.complete();
           })
           .catchError((Object error) {
             _sceneCompleter?.completeError(error);
           });
-      _sceneToRender = null;
     }
   };
 }

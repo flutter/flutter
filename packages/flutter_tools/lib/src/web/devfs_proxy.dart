@@ -6,7 +6,8 @@ import 'package:yaml/yaml.dart';
 import '../base/logger.dart';
 
 /// Represents a rule for proxying requests based on a specific pattern.
-/// Subclasses must implement the [matches], [replace], and [getTargetUri] methods.
+///
+/// Subclasses must implement the [matches], [replace], and [targetUri] members.
 sealed class ProxyRule {
   static const _kLogEntryPrefix = '[ProxyRule]';
   static const _kTarget = 'target';
@@ -22,7 +23,7 @@ sealed class ProxyRule {
   String replace(String path);
 
   /// Returns the target URI to which the request should be proxied.
-  Uri getTargetUri();
+  Uri get targetUri;
 
   /// If both or neither 'prefix' and 'regex' are defined, it logs an error and returns null.
   /// Otherwise, it tries to create a [PrefixProxyRule] or [RegexProxyRule] based on the [yaml] keys.
@@ -42,6 +43,17 @@ sealed class ProxyRule {
       return null;
     }
   }
+
+  /// Rewrites [requestUri] for the target URI.
+  ///
+  /// 1. Getting the base target URI from the rule.
+  /// 2. Replacing the request path according to the rule's replacement logic.
+  /// 3. Resolving the final target URL by combining the target URI, the rewritten
+  ///    request path and the request query
+  Uri finalTargetUri(Uri requestUri) {
+    final String rewrittenPath = replace(requestUri.path);
+    return targetUri.resolveUri(Uri(path: rewrittenPath, query: requestUri.query));
+  }
 }
 
 /// A [ProxyRule] implementation that uses regular expressions for matching and
@@ -50,17 +62,19 @@ sealed class ProxyRule {
 /// This rule matches paths against a provided regular expression [_pattern].
 /// If a [_replacement] string is provided, it replaces parts of the matched
 /// path based on regex group capturing.
-class RegexProxyRule implements ProxyRule {
+class RegexProxyRule extends ProxyRule {
   /// Creates a [RegexProxyRule] with the given regular expression [pattern],
   /// [target] URI base, and optional [replacement] string.
   RegexProxyRule({required RegExp pattern, required String target, String? replacement})
-    : _pattern = pattern,
-      _target = target,
+    : targetUri = Uri.parse(target),
+      _pattern = pattern,
       _replacement = replacement;
 
   final RegExp _pattern;
-  final String _target;
   final String? _replacement;
+  @override
+  /// The target URI to which the request should be proxied.
+  final Uri targetUri;
 
   @override
   bool matches(String path) {
@@ -82,14 +96,8 @@ class RegexProxyRule implements ProxyRule {
   }
 
   @override
-  Uri getTargetUri() {
-    final Uri targetBaseUri = Uri.parse(_target);
-    return targetBaseUri;
-  }
-
-  @override
   String toString() {
-    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
@@ -142,7 +150,7 @@ class PrefixProxyRule extends RegexProxyRule {
 
   @override
   String toString() {
-    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $_target, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.

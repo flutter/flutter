@@ -39,11 +39,11 @@ source_set("re2") {
     "$re2_base/util/strutil.cc",
   ]
   deps = [
-    "//flutter/third_party/abseil-cpp/absl/base",
-    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map",
-    "//flutter/third_party/abseil-cpp/absl/container:flat_hash_set",
-    "//flutter/third_party/abseil-cpp/absl/log",
-    "//flutter/third_party/abseil-cpp/absl/log:check",
-    "//flutter/third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/log",
+    "//third_party/abseil-cpp/absl/log:check",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }

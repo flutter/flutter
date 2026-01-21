@@ -21,7 +21,7 @@ class TaskResult {
     this.detailFiles = const <String>[],
     this.message = 'success',
   }) : succeeded = true {
-    const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
+    const prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (final String key in benchmarkScoreKeys!) {
         if (!data!.containsKey(key)) {
@@ -50,7 +50,7 @@ class TaskResult {
 
   /// Constructs a [TaskResult] from JSON.
   factory TaskResult.fromJson(Map<String, dynamic> json) {
-    final bool success = json['success'] as bool;
+    final success = json['success'] as bool;
     if (success) {
       final List<String> benchmarkScoreKeys =
           (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();
@@ -110,7 +110,7 @@ class TaskResult {
   ///       "reason": failure reason string valid only for unsuccessful results
   ///     }
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = <String, dynamic>{'success': succeeded};
+    final json = <String, dynamic>{'success': succeeded};
 
     if (succeeded) {
       json['data'] = data;

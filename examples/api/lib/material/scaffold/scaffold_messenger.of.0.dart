@@ -30,7 +30,9 @@ class OfExample extends StatelessWidget {
     return ElevatedButton(
       child: const Text('SHOW A SNACKBAR'),
       onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Have a snack!')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Have a snack!')));
       },
     );
   }

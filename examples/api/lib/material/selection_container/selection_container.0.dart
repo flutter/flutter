@@ -41,8 +41,10 @@ class SelectionAllOrNoneContainer extends StatefulWidget {
   State<StatefulWidget> createState() => _SelectionAllOrNoneContainerState();
 }
 
-class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContainer> {
-  final SelectAllOrNoneContainerDelegate delegate = SelectAllOrNoneContainerDelegate();
+class _SelectionAllOrNoneContainerState
+    extends State<SelectionAllOrNoneContainer> {
+  final SelectAllOrNoneContainerDelegate delegate =
+      SelectAllOrNoneContainerDelegate();
 
   @override
   void dispose() {
@@ -56,7 +58,8 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
   }
 }
 
-class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+class SelectAllOrNoneContainerDelegate
+    extends MultiSelectableSelectionContainerDelegate {
   Offset? _adjustedStartEdge;
   Offset? _adjustedEndEdge;
   bool _isSelected = false;
@@ -66,7 +69,10 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
   @override
   void ensureChildUpdated(Selectable selectable) {
     if (_isSelected) {
-      dispatchSelectionEventToChild(selectable, const SelectAllSelectionEvent());
+      dispatchSelectionEventToChild(
+        selectable,
+        const SelectAllSelectionEvent(),
+      );
     }
   }
 
@@ -78,10 +84,21 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
-    final Rect containerRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
+    final Rect containerRect = Rect.fromLTWH(
+      0,
+      0,
+      containerSize.width,
+      containerSize.height,
+    );
     final Matrix4 globalToLocal = getTransformTo(null)..invert();
-    final Offset localOffset = MatrixUtils.transformPoint(globalToLocal, event.globalPosition);
-    final Offset adjustOffset = SelectionUtils.adjustDragOffset(containerRect, localOffset);
+    final Offset localOffset = MatrixUtils.transformPoint(
+      globalToLocal,
+      event.globalPosition,
+    );
+    final Offset adjustOffset = SelectionUtils.adjustDragOffset(
+      containerRect,
+      localOffset,
+    );
     if (event.type == SelectionEventType.startEdgeUpdate) {
       _adjustedStartEdge = adjustOffset;
     } else {
@@ -89,7 +106,10 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
     }
     // Select all content if the selection rect intercepts with the rect.
     if (_adjustedStartEdge != null && _adjustedEndEdge != null) {
-      final Rect selectionRect = Rect.fromPoints(_adjustedStartEdge!, _adjustedEndEdge!);
+      final Rect selectionRect = Rect.fromPoints(
+        _adjustedStartEdge!,
+        _adjustedEndEdge!,
+      );
       if (!selectionRect.intersect(containerRect).isEmpty) {
         handleSelectAll(const SelectAllSelectionEvent());
       } else {

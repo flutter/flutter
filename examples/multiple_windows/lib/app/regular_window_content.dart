@@ -11,6 +11,7 @@ import 'models.dart';
 import 'rotated_wire_cube.dart';
 import 'dart:math';
 import 'package:flutter/src/widgets/_window.dart';
+import 'tooltip_button.dart';
 
 class RegularWindowContent extends StatelessWidget {
   RegularWindowContent({super.key, required this.window})
@@ -68,6 +69,28 @@ class RegularWindowContent extends StatelessWidget {
                   },
                   child: const Text('Create Regular Window'),
                 ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    final UniqueKey key = UniqueKey();
+                    windowManager.add(
+                      KeyedWindow(
+                        key: key,
+                        controller: DialogWindowController(
+                          preferredSize: windowSettings.dialogSize,
+                          delegate: CallbackDialogWindowControllerDelegate(
+                            onDestroyed: () => windowManager.remove(key),
+                          ),
+                          parent: window,
+                          title: 'Dialog',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Create Modal Dialog'),
+                ),
+                const SizedBox(height: 20),
+                TooltipButton(parentController: window),
                 const SizedBox(height: 20),
                 Text(
                   'View #${window.rootView.viewId}\n'

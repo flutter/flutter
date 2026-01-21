@@ -15,12 +15,8 @@ void main() {
 
   group('TextSelection', () {
     test('The invalid selection is a singleton', () {
-      const TextSelection invalidSelection1 = TextSelection(
-        baseOffset: -1,
-        extentOffset: 0,
-        isDirectional: true,
-      );
-      const TextSelection invalidSelection2 = TextSelection(
+      const invalidSelection1 = TextSelection(baseOffset: -1, extentOffset: 0, isDirectional: true);
+      const invalidSelection2 = TextSelection(
         baseOffset: 123,
         extentOffset: -1,
         affinity: TextAffinity.upstream,
@@ -30,8 +26,8 @@ void main() {
     });
 
     test('TextAffinity does not affect equivalence when the selection is not collapsed', () {
-      const TextSelection selection1 = TextSelection(baseOffset: 1, extentOffset: 2);
-      const TextSelection selection2 = TextSelection(
+      const selection1 = TextSelection(baseOffset: 1, extentOffset: 2);
+      const selection2 = TextSelection(
         baseOffset: 1,
         extentOffset: 2,
         affinity: TextAffinity.upstream,
@@ -43,10 +39,10 @@ void main() {
 
   group('TextEditingValue', () {
     group('replaced', () {
-      const String testText = 'From a false proposition, anything follows.';
+      const testText = 'From a false proposition, anything follows.';
 
       test('selection deletion', () {
-        const TextSelection selection = TextSelection(baseOffset: 5, extentOffset: 13);
+        const selection = TextSelection(baseOffset: 5, extentOffset: 13);
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
           const TextEditingValue(
@@ -57,7 +53,7 @@ void main() {
       });
 
       test('reversed selection deletion', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, ''),
           const TextEditingValue(
@@ -68,7 +64,7 @@ void main() {
       });
 
       test('insert', () {
-        const TextSelection selection = TextSelection.collapsed(offset: 5);
+        const selection = TextSelection.collapsed(offset: 5);
         expect(
           const TextEditingValue(text: testText, selection: selection).replaced(selection, 'AA'),
           const TextEditingValue(
@@ -80,7 +76,7 @@ void main() {
       });
 
       test('replace before selection', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // Replace the first whitespace with "AA".
@@ -96,7 +92,7 @@ void main() {
       });
 
       test('replace after selection', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // replace the first "p" with "AA".
@@ -112,7 +108,7 @@ void main() {
       });
 
       test('replace inside selection - start boundary', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // replace the first "a" with "AA".
@@ -128,7 +124,7 @@ void main() {
       });
 
       test('replace inside selection - end boundary', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // replace the second whitespace with "AA".
@@ -144,7 +140,7 @@ void main() {
       });
 
       test('delete after selection', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // Delete the first "p".
@@ -160,7 +156,7 @@ void main() {
       });
 
       test('delete inside selection - start boundary', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // Delete the first "a".
@@ -176,7 +172,7 @@ void main() {
       });
 
       test('delete inside selection - end boundary', () {
-        const TextSelection selection = TextSelection(baseOffset: 13, extentOffset: 5);
+        const selection = TextSelection(baseOffset: 13, extentOffset: 5);
         expect(
           // From |a false |proposition, anything follows.
           // Delete the second whitespace.
@@ -207,7 +203,7 @@ void main() {
     });
 
     test('text input client handler responds to reattach with setClient', () async {
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
       TextInput.attach(client, client.configuration);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
         MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
@@ -228,7 +224,7 @@ void main() {
     test(
       'text input client handler responds to reattach with setClient (null TextEditingValue)',
       () async {
-        final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+        final client = FakeTextInputClient(TextEditingValue.empty);
         TextInput.attach(client, client.configuration);
         fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
           MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
@@ -257,13 +253,13 @@ void main() {
     );
 
     test('Invalid TextRange fails loudly when being converted to JSON', () async {
-      final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
+      final record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
       };
 
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
@@ -294,11 +290,11 @@ void main() {
 
     test('FloatingCursor coordinates type-casting', () async {
       // Regression test for https://github.com/flutter/flutter/issues/109632.
-      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final errors = <FlutterErrorDetails>[];
       FlutterError.onError = errors.add;
 
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
@@ -545,7 +541,7 @@ void main() {
     });
 
     test('sets expected defaults', () {
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      const configuration = TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.readOnly, false);
       expect(configuration.obscureText, false);
@@ -557,7 +553,7 @@ void main() {
     });
 
     test('text serializes to JSON', () async {
-      const TextInputConfiguration configuration = TextInputConfiguration(
+      const configuration = TextInputConfiguration(
         readOnly: true,
         obscureText: true,
         autocorrect: false,
@@ -576,7 +572,7 @@ void main() {
     });
 
     test('number serializes to JSON', () async {
-      const TextInputConfiguration configuration = TextInputConfiguration(
+      const configuration = TextInputConfiguration(
         inputType: TextInputType.numberWithOptions(decimal: true),
         obscureText: true,
         autocorrect: false,
@@ -598,13 +594,10 @@ void main() {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
       const TextInputType number2 = TextInputType.number;
-      const TextInputType signed = TextInputType.numberWithOptions(signed: true);
-      const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
-      const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
-      const TextInputType signedDecimal = TextInputType.numberWithOptions(
-        signed: true,
-        decimal: true,
-      );
+      const signed = TextInputType.numberWithOptions(signed: true);
+      const signed2 = TextInputType.numberWithOptions(signed: true);
+      const decimal = TextInputType.numberWithOptions(decimal: true);
+      const signedDecimal = TextInputType.numberWithOptions(signed: true, decimal: true);
 
       expect(
         text.toString(),
@@ -713,8 +706,8 @@ void main() {
 
     test('TextInputClient onConnectionClosed method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(const TextEditingValue(text: 'test3'));
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -734,8 +727,8 @@ void main() {
     });
 
     test('TextInputClient insertContent method is called', () async {
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -761,8 +754,8 @@ void main() {
     });
 
     test('TextInputClient performSelectors method is called', () async {
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.performedSelectors, isEmpty);
@@ -788,8 +781,8 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -813,8 +806,8 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called with float', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -840,8 +833,8 @@ void main() {
       'TextInputClient performPrivateCommand method is called with CharSequence array',
       () async {
         // Assemble a TextInputConnection so we can verify its change in state.
-        final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-        const TextInputConfiguration configuration = TextInputConfiguration();
+        final client = FakeTextInputClient(TextEditingValue.empty);
+        const configuration = TextInputConfiguration();
         TextInput.attach(client, configuration);
 
         expect(client.latestMethodCall, isEmpty);
@@ -866,8 +859,8 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called with CharSequence', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -891,8 +884,8 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called with float array', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -916,8 +909,8 @@ void main() {
 
     test('TextInputClient performPrivateCommand method is called with no data at all', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -942,8 +935,8 @@ void main() {
 
     test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -964,8 +957,8 @@ void main() {
 
     test('TextInputClient showToolbar method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
       expect(client.latestMethodCall, isEmpty);
@@ -992,8 +985,8 @@ void main() {
 
     test('TextInputClient scribbleInteractionBegan and scribbleInteractionFinished', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       final TextInputConnection connection = TextInput.attach(client, configuration);
 
       expect(connection.scribbleInProgress, false);
@@ -1027,13 +1020,13 @@ void main() {
 
     test('TextInputClient focusElement', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
-      final FakeScribbleElement targetElement = FakeScribbleElement(elementIdentifier: 'target');
+      final targetElement = FakeScribbleElement(elementIdentifier: 'target');
       TextInput.registerScribbleElement(targetElement.elementIdentifier, targetElement);
-      final FakeScribbleElement otherElement = FakeScribbleElement(elementIdentifier: 'other');
+      final otherElement = FakeScribbleElement(elementIdentifier: 'other');
       TextInput.registerScribbleElement(otherElement.elementIdentifier, otherElement);
 
       expect(targetElement.latestMethodCall, isEmpty);
@@ -1059,11 +1052,11 @@ void main() {
 
     test('TextInputClient requestElementsInRect', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
-      const TextInputConfiguration configuration = TextInputConfiguration();
+      final client = FakeTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 
-      final List<FakeScribbleElement> targetElements = <FakeScribbleElement>[
+      final targetElements = <FakeScribbleElement>[
         FakeScribbleElement(
           elementIdentifier: 'target1',
           bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
@@ -1073,7 +1066,7 @@ void main() {
           bounds: const Rect.fromLTWH(0.0, 100.0, 100.0, 100.0),
         ),
       ];
-      final List<FakeScribbleElement> otherElements = <FakeScribbleElement>[
+      final otherElements = <FakeScribbleElement>[
         FakeScribbleElement(
           elementIdentifier: 'other1',
           bounds: const Rect.fromLTWH(100.0, 0.0, 100.0, 100.0),
@@ -1188,16 +1181,16 @@ void main() {
     });
 
     test('gets attached and detached', () {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(
         client,
         const TextInputConfiguration(),
       );
 
-      final List<String> expectedMethodCalls = <String>['attach'];
+      final expectedMethodCalls = <String>['attach'];
       expect(control.methodCalls, expectedMethodCalls);
 
       connection.close();
@@ -1206,17 +1199,17 @@ void main() {
     });
 
     test('receives text input state changes', () {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(
         client,
         const TextInputConfiguration(),
       );
       control.methodCalls.clear();
 
-      final List<String> expectedMethodCalls = <String>[];
+      final expectedMethodCalls = <String>[];
 
       connection.updateConfig(const TextInputConfiguration());
       expectedMethodCalls.add('updateConfig');
@@ -1232,10 +1225,10 @@ void main() {
     });
 
     test('does not interfere with platform text input', () {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       TextInput.attach(client, const TextInputConfiguration());
 
       fakeTextChannel.outgoingCalls.clear();
@@ -1253,19 +1246,13 @@ void main() {
     });
 
     test('both input controls receive requests', () async {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      const TextInputConfiguration textConfig = TextInputConfiguration();
-      const TextInputConfiguration numberConfig = TextInputConfiguration(
-        inputType: TextInputType.number,
-      );
-      const TextInputConfiguration multilineConfig = TextInputConfiguration(
-        inputType: TextInputType.multiline,
-      );
-      const TextInputConfiguration noneConfig = TextInputConfiguration(
-        inputType: TextInputType.none,
-      );
+      const textConfig = TextInputConfiguration();
+      const numberConfig = TextInputConfiguration(inputType: TextInputType.number);
+      const multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
+      const noneConfig = TextInputConfiguration(inputType: TextInputType.none);
 
       // Test for https://github.com/flutter/flutter/issues/125875.
       // When there's a custom text input control installed on Web, the platform text
@@ -1273,22 +1260,20 @@ void main() {
       // isMultiline flag is set to true when the input type is multiline.
       // isMultiline flag is set to false when the input type is not multiline.
       final Map<String, dynamic> noneIsMultilineFalseJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType =
-          noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
+      final noneInputType = noneIsMultilineFalseJson['inputType'] as Map<String, dynamic>;
       if (kIsWeb) {
         noneInputType['isMultiline'] = false;
       }
       final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType1 =
-          noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      final noneInputType1 = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
       if (kIsWeb) {
         noneInputType1['isMultiline'] = true;
       }
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(client, textConfig);
 
-      final List<String> expectedMethodCalls = <String>['attach'];
+      final expectedMethodCalls = <String>['attach'];
       expect(control.methodCalls, expectedMethodCalls);
       expect(control.inputType, TextInputType.text);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -1356,8 +1341,7 @@ void main() {
       expect(control.methodCalls, expectedMethodCalls);
       expect(fakeTextChannel.outgoingCalls.length, 8);
       expect(fakeTextChannel.outgoingCalls.last.arguments, const TypeMatcher<List<List<num>>>());
-      final List<List<num>> sentList =
-          fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
+      final sentList = fakeTextChannel.outgoingCalls.last.arguments as List<List<num>>;
       expect(sentList.length, 1);
       expect(sentList[0].length, 6);
       expect(sentList[0][0], 2); // left
@@ -1395,15 +1379,11 @@ void main() {
     });
 
     test('the platform input control receives isMultiline true on attach', () async {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      const TextInputConfiguration multilineConfig = TextInputConfiguration(
-        inputType: TextInputType.multiline,
-      );
-      const TextInputConfiguration noneConfig = TextInputConfiguration(
-        inputType: TextInputType.none,
-      );
+      const multilineConfig = TextInputConfiguration(inputType: TextInputType.multiline);
+      const noneConfig = TextInputConfiguration(inputType: TextInputType.none);
 
       // Test for https://github.com/flutter/flutter/issues/125875.
       // When there's a custom text input control installed, the platform text
@@ -1411,14 +1391,13 @@ void main() {
       // isMultiline flag is set to true when the input type is multiline.
       // isMultiline flag is set to false when the input type is not multiline.
       final Map<String, dynamic> noneIsMultilineTrueJson = noneConfig.toJson();
-      final Map<String, dynamic> noneInputType =
-          noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
+      final noneInputType = noneIsMultilineTrueJson['inputType'] as Map<String, dynamic>;
       noneInputType['isMultiline'] = true;
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       TextInput.attach(client, multilineConfig);
 
-      final List<String> expectedMethodCalls = <String>['attach'];
+      final expectedMethodCalls = <String>['attach'];
       expect(control.methodCalls, expectedMethodCalls);
       expect(control.inputType, TextInputType.multiline);
       fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
@@ -1429,10 +1408,10 @@ void main() {
     }, skip: !kIsWeb); // https://github.com/flutter/flutter/issues/125875
 
     test('notifies changes to the attached client', () async {
-      final FakeTextInputControl control = FakeTextInputControl();
+      final control = FakeTextInputControl();
       TextInput.setInputControl(control);
 
-      final FakeTextInputClient client = FakeTextInputClient(TextEditingValue.empty);
+      final client = FakeTextInputClient(TextEditingValue.empty);
       final TextInputConnection connection = TextInput.attach(
         client,
         const TextInputConfiguration(),
@@ -1447,7 +1426,7 @@ void main() {
   });
 
   test('SystemContextMenuController debugFillProperties', () {
-    final SystemContextMenuController controller = SystemContextMenuController(onSystemHide: () {});
+    final controller = SystemContextMenuController(onSystemHide: () {});
     final List<DiagnosticsNode> diagnosticsNodes = controller.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(4));
     expect(diagnosticsNodes[0].name, 'isVisible');
@@ -1461,10 +1440,8 @@ void main() {
   });
 
   test('IOSSystemContextMenuItemDataLookUp debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemDataLookUp item = IOSSystemContextMenuItemDataLookUp(
-      title: title,
-    );
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemDataLookUp(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -1472,10 +1449,8 @@ void main() {
   });
 
   test('IOSSystemContextMenuItemDataSearchWeb debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemDataSearchWeb item = IOSSystemContextMenuItemDataSearchWeb(
-      title: title,
-    );
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemDataSearchWeb(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');
@@ -1483,8 +1458,8 @@ void main() {
   });
 
   test('IOSSystemContextMenuItemDataShare debugFillProperties', () {
-    const String title = 'my title';
-    const IOSSystemContextMenuItemDataShare item = IOSSystemContextMenuItemDataShare(title: title);
+    const title = 'my title';
+    const item = IOSSystemContextMenuItemDataShare(title: title);
     final List<DiagnosticsNode> diagnosticsNodes = item.toDiagnosticsNode().getProperties();
     expect(diagnosticsNodes, hasLength(1));
     expect(diagnosticsNodes.first.name, 'title');

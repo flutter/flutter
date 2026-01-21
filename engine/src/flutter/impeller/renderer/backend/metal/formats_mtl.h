@@ -107,6 +107,8 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatBGR10_XR();
     case PixelFormat::kB10G10R10A10XR:
       return SafeMTLPixelFormatBGRA10_XR();
+    case PixelFormat::kR32Float:
+      return MTLPixelFormatR32Float;
   }
   return MTLPixelFormatInvalid;
 };

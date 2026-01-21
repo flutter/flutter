@@ -32,7 +32,11 @@ class DeleteIconBoxConstraintsExample extends StatelessWidget {
           onDeleted: () {},
           label: const SizedBox(
             width: 150,
-            child: Text('One line text.', maxLines: 3, overflow: TextOverflow.ellipsis),
+            child: Text(
+              'One line text.',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
         const SizedBox(height: 10),

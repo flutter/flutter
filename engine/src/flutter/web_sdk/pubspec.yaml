@@ -2,7 +2,7 @@ name: web_sdk_tests
 
 # Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 dependencies:
   args: any # see dependency_overrides
