@@ -1096,7 +1096,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// will be used.
   final TabController? controller;
 
-  /// The [ScrollController] for this [TabBar].
+  /// The [TabBarScrollController] for this [TabBar].
   ///
   /// This controller can be used to manipulate the scroll position of the [TabBar].
   final TabBarScrollController? scrollController;
@@ -1558,9 +1558,9 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  TabBarScrollController? get _effectiveScrollController {
+  TabBarScrollController get _effectiveScrollController {
     if (widget.scrollController != null) {
-      return widget.scrollController;
+      return widget.scrollController!;
     }
 
     return _internalScrollController ??= TabBarScrollController();
@@ -1708,7 +1708,7 @@ class _TabBarState extends State<TabBar> {
     _updateTabController();
     _initIndicatorPainter();
 
-    _effectiveScrollController?._tabBarState = this;
+    _effectiveScrollController._tabBarState = this;
   }
 
   @override
@@ -1719,11 +1719,9 @@ class _TabBarState extends State<TabBar> {
       _updateTabController();
       _initIndicatorPainter();
 
-      final TabBarScrollController? scrollController = _effectiveScrollController;
-
       // Adjust scroll position.
-      if (scrollController != null && scrollController.hasClients) {
-        final ScrollPosition position = scrollController.position;
+      if (_effectiveScrollController.hasClients) {
+        final ScrollPosition position = _effectiveScrollController.position;
         if (position is _TabBarScrollPosition) {
           position.markNeedsPixelsCorrection();
         }
@@ -1781,12 +1779,8 @@ class _TabBarState extends State<TabBar> {
     return clampDouble(tabCenter + paddingStart - viewportWidth / 2.0, minExtent, maxExtent);
   }
 
-  double? _tabCenteredScrollOffset(int index) {
-    final ScrollPosition? position = _effectiveScrollController?.position;
-
-    if (position == null) {
-      return null;
-    }
+  double _tabCenteredScrollOffset(int index) {
+    final ScrollPosition position = _effectiveScrollController.position;
 
     return _tabScrollOffset(
       index,
@@ -1801,27 +1795,19 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _scrollToCurrentIndex() {
-    final double? offset = _tabCenteredScrollOffset(_currentIndex!);
+    final double offset = _tabCenteredScrollOffset(_currentIndex!);
 
-    if (offset == null) {
-      return;
-    }
-
-    _effectiveScrollController?.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
+    _effectiveScrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
   }
 
   void _scrollToControllerValue() {
     final double? leadingPosition = _currentIndex! > 0
         ? _tabCenteredScrollOffset(_currentIndex! - 1)
         : null;
-    final double? middlePosition = _tabCenteredScrollOffset(_currentIndex!);
+    final double middlePosition = _tabCenteredScrollOffset(_currentIndex!);
     final double? trailingPosition = _currentIndex! < maxTabIndex
         ? _tabCenteredScrollOffset(_currentIndex! + 1)
         : null;
-
-    if (middlePosition == null) {
-      return;
-    }
 
     final double index = _controller!.index.toDouble();
     final double value = _controller!.animation!.value;
@@ -1839,7 +1825,7 @@ class _TabBarState extends State<TabBar> {
             : lerpDouble(middlePosition, trailingPosition, value - index)!,
     };
 
-    _effectiveScrollController?.jumpTo(offset);
+    _effectiveScrollController.jumpTo(offset);
   }
 
   void _handleTabControllerAnimationTick() {
