@@ -2088,4 +2088,15 @@ void main() {
     final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
     expect(listTile.statesController, controller);
   });
+
+  testWidgets('ExpansionTile forwards null statesController to ListTile', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Tile'))),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, isNull);
+  });
 }
