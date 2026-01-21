@@ -1135,6 +1135,17 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     return _textPainter.size;
   }
+  /// Returns the line metrics for the laid out text.
+  ///
+  /// This exposes [TextPainter.computeLineMetrics].
+  ///
+  /// Valid only after [layout].
+  List<ui.LineMetrics> computeLineMetrics() {
+    assert(!debugNeedsLayout);
+    _layoutTextWithConstraints(constraints);
+    return _textPainter.computeLineMetrics();
+  }
+
 
   /// Whether the text was truncated or ellipsized as laid out.
   ///
