@@ -168,7 +168,7 @@ class CircleAvatar extends StatelessWidget {
   final double? maxRadius;
 
   // The duration for animating theme changes.
-  static const Duration _kThemeChangeDuration = Duration(milliseconds: 200);
+  static const Duration _kTextStyleChangeDuration = Duration(milliseconds: 200);
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +222,7 @@ class CircleAvatar extends StatelessWidget {
       onForegroundImageError: onForegroundImageError,
       child: AnimatedDefaultTextStyle(
         style: textStyle,
-        duration: _kThemeChangeDuration,
+        duration: _kTextStyleChangeDuration,
         child: childContent ?? const SizedBox.shrink(),
       ),
     );
