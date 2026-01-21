@@ -80,7 +80,7 @@ source_set("glfw") {
 
     defines = [
       "_GLFW_X11",
-      "_GLFW_HAS_XF86VM",
+      "_DEFAULT_SOURCE"
     ]
 
     libs = [
