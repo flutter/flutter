@@ -1788,4 +1788,34 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('PageView cacheExtent does not affect ïhasImplicitScrolling semantics flag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          cacheExtent: 2.0,
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    // Pages are pre-built due to cacheExtent.
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 3', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 4', skipOffstage: false), findsNothing);
+
+    // hasImplicitScrolling is controlled by allowImplicitScrolling, not cacheExtent.
+    expect(
+      semantics,
+      isNot(includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling])),
+    );
+
+    semantics.dispose();
+  });
 }
