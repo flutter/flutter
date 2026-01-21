@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'list_tile_test_utils.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
@@ -733,7 +734,10 @@ void main() {
                           });
                         },
                         children: <Widget>[
-                          ListTile(key: const ValueKey<String>('Item 1'), title: Text(items.first)),
+                          TestListTile(
+                            key: const ValueKey<String>('Item 1'),
+                            title: Text(items.first),
+                          ),
                         ],
                       );
                     },
