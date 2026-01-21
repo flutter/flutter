@@ -211,6 +211,13 @@ class ExpansibleController extends ChangeNotifier {
 /// [ExpansibleController.collapse] as needed, most typically when the header
 /// returned in [headerBuilder] is tapped.
 ///
+///{@tool dartpad}
+/// This example demonstrates how to use the [Expansible] widget and how an
+/// [ExpansibleController] can be used to programmatically expand or collapse it.
+///
+/// ** See code in examples/api/lib/material/expansible/expansible.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ExpansionTile], a Material-styled widget that expands and collapses.
