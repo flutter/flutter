@@ -1719,6 +1719,29 @@ class _TabBarState extends State<TabBar> {
       _updateTabController();
       _initIndicatorPainter();
 
+      if (oldWidget.scrollController == null) {
+        // The old controller was null,
+        // meaning the internal scroll controller cannot be null.
+        // Dispose of the internal scroll controller.
+        assert(_internalScrollController != null);
+        assert(widget.scrollController != null);
+
+        _internalScrollController!.detach(_internalScrollController!.position);
+        _internalScrollController!.dispose();
+        _internalScrollController = null;
+      } else {
+        // The old controller was not null, detach.
+        oldWidget.scrollController!.detach(oldWidget.scrollController!.position);
+        if (widget.scrollController == null) {
+          // If the new controller is null,
+          // set up the internal TabBarScrollController.
+          _internalScrollController = TabBarScrollController().._tabBarState = this;
+        }
+      }
+
+      // Attach the updated effective scroll controller.
+      _effectiveScrollController.attach(_effectiveScrollController.position);
+
       // Adjust scroll position.
       if (_effectiveScrollController.hasClients) {
         final ScrollPosition position = _effectiveScrollController.position;
