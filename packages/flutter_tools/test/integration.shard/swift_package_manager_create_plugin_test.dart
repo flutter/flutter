@@ -40,9 +40,11 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
+          // New plugins always use SwiftPM structure, so the example app has SwiftPM integration
+          // in the Xcode project. At runtime, flutter build handles the fallback to CocoaPods.
           expect(
             pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
-            isFalse,
+            isTrue,
           );
 
           final File xcschemeFile = fileSystem
@@ -55,7 +57,7 @@ void main() {
           expect(xcschemeFile.existsSync(), isTrue);
           expect(
             xcschemeFile.readAsStringSync().contains('Run Prepare Flutter Framework Script'),
-            isFalse,
+            isTrue,
           );
 
           final File podspec = fileSystem
@@ -67,6 +69,8 @@ void main() {
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
+          // Even though the plugin uses SwiftPM structure, building with SwiftPM disabled
+          // should fall back to CocoaPods at runtime.
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -74,6 +78,7 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              // Use cocoaPodsPlugin because the plugin is installed via CocoaPods when SwiftPM is disabled.
               cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
