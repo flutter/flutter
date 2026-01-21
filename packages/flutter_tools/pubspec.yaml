@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.1.0
-  dwds: 26.2.4
+  dwds: 26.2.5
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
@@ -26,7 +26,7 @@ dependencies:
   html: 0.15.6
   http: 1.6.0
   intl: 0.20.2
-  meta: 1.17.0
+  meta: 1.18.0
   multicast_dns: 0.3.3
   mustache_template: 2.0.3
   package_config: 2.2.0
@@ -128,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: kcnlrt
+# PUBSPEC CHECKSUM: bt90rn
