@@ -152,6 +152,7 @@ class ExpansionTile extends StatefulWidget {
     this.enabled = true,
     this.expansionAnimationStyle,
     this.internalAddSemanticForOnTap = false,
+    this.statesController,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -484,6 +485,40 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// {@tool snippet}
+  /// This example listens for hover and press states on an [ExpansionTile].
+  ///
+  /// ```dart
+  /// class ExpansionTileStatesExample extends StatelessWidget {
+  ///   ExpansionTileStatesExample({super.key});
+  ///
+  ///   final WidgetStatesController controller = WidgetStatesController();
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     controller.addListener(() {
+  ///       if (controller.value.contains(WidgetState.hovered)) {
+  ///         debugPrint('Tile is hovered');
+  ///       }
+  ///     });
+  ///
+  ///     return MaterialApp(
+  ///       home: Scaffold(
+  ///         body: ExpansionTile(
+  ///           title: const Text('Settings'),
+  ///           statesController: controller,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// If null, the backing [ListTile] will create and manage its own
+  /// [WidgetStatesController].
+  final WidgetStatesController? statesController;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -626,6 +661,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
             : null,
         minTileHeight: widget.minTileHeight,
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
+        statesController: widget.statesController,
       ),
     );
 
