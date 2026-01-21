@@ -1428,17 +1428,15 @@ void main() {
     }
 
     Widget buildFrame(Widget firstSeparator) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            itemBuilder: (BuildContext context, int index) {
-              return Text(listOfValues[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return index == 0 ? firstSeparator : buildDivider();
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          itemBuilder: (BuildContext context, int index) {
+            return Text(listOfValues[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return index == 0 ? firstSeparator : buildDivider();
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1452,17 +1450,15 @@ void main() {
     const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildFrame(bool throwOnFirstItem) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              if (index == 0 && throwOnFirstItem) {
-                throw Exception('itemBuilder fail');
-              }
-              return Text(listOfValues[index]);
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0 && throwOnFirstItem) {
+              throw Exception('itemBuilder fail');
+            }
+            return Text(listOfValues[index]);
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1484,21 +1480,19 @@ void main() {
     const key = Key('list');
 
     Widget buildFrame(bool throwOnFirstSeparator) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            key: key,
-            itemBuilder: (BuildContext context, int index) {
-              return Text(listOfValues[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              if (index == 0 && throwOnFirstSeparator) {
-                throw Exception('separatorBuilder fail');
-              }
-              return const SizedBox();
-            },
-            itemCount: listOfValues.length,
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          key: key,
+          itemBuilder: (BuildContext context, int index) {
+            return Text(listOfValues[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            if (index == 0 && throwOnFirstSeparator) {
+              throw Exception('separatorBuilder fail');
+            }
+            return const SizedBox();
+          },
+          itemCount: listOfValues.length,
         ),
       );
     }
@@ -1597,7 +1591,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: CustomScrollView(
           primary: true,
           slivers: List<Widget>.generate(20, (int index) {
@@ -1654,7 +1648,7 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(home: Row(children: <Widget>[getScrollView(), getScrollView()])),
+      TestWidgetsApp(home: Row(children: <Widget>[getScrollView(), getScrollView()])),
     );
     await tester.pumpAndSettle();
     expect(
@@ -1679,27 +1673,25 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    // children with different heights
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ),
-                  );
-                },
-                itemCount: numbers.length,
-                itemExtent: 30,
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(numbers[index]),
+                  // children with different heights
+                  height: 20 + numbers[index] * 10,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text(numbers[index].toString()),
+                  ),
+                );
+              },
+              itemCount: numbers.length,
+              itemExtent: 30,
+            );
+          },
         ),
       ),
     );
@@ -1719,27 +1711,25 @@ void main() {
     final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    key: ValueKey<int>(numbers[index]),
-                    // children with different heights
-                    height: 20 + numbers[index] * 10,
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child: Text(numbers[index].toString()),
-                    ),
-                  );
-                },
-                itemCount: numbers.length,
-                prototypeItem: const SizedBox(height: 30, child: Text('3')),
-              );
-            },
-          ),
+      TestWidgetsApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  key: ValueKey<int>(numbers[index]),
+                  // children with different heights
+                  height: 20 + numbers[index] * 10,
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: Text(numbers[index].toString()),
+                  ),
+                );
+              },
+              itemCount: numbers.length,
+              prototypeItem: const SizedBox(height: 30, child: Text('3')),
+            );
+          },
         ),
       ),
     );
@@ -1802,19 +1792,17 @@ void main() {
     final items = <String>['A', 'B', 'C'];
 
     Widget buildFrame(List<String> itemList) {
-      return MaterialApp(
-        home: Material(
-          child: ListView.separated(
-            itemCount: itemList.length,
-            findItemIndexCallback: (Key key) {
-              final valueKey = key as ValueKey<String>;
-              return itemList.indexOf(valueKey.value);
-            },
-            itemBuilder: (BuildContext context, int index) {
-              return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
-            },
-            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          ),
+      return TestWidgetsApp(
+        home: ListView.separated(
+          itemCount: itemList.length,
+          findItemIndexCallback: (Key key) {
+            final valueKey = key as ValueKey<String>;
+            return itemList.indexOf(valueKey.value);
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+          },
+          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
         ),
       );
     }
@@ -1849,23 +1837,21 @@ void main() {
     final items = <String>['A', 'B', 'C'];
 
     Widget buildFrame(List<String> itemList) {
-      return MaterialApp(
-        home: Material(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverList.separated(
-                itemCount: itemList.length,
-                findItemIndexCallback: (Key key) {
-                  final valueKey = key as ValueKey<String>;
-                  return itemList.indexOf(valueKey.value);
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
-                },
-                separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-              ),
-            ],
-          ),
+      return TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverList.separated(
+              itemCount: itemList.length,
+              findItemIndexCallback: (Key key) {
+                final valueKey = key as ValueKey<String>;
+                return itemList.indexOf(valueKey.value);
+              },
+              itemBuilder: (BuildContext context, int index) {
+                return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+              },
+              separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            ),
+          ],
         ),
       );
     }
