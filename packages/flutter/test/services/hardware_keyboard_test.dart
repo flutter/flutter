@@ -596,6 +596,44 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  testWidgets(
+    'Stray key events do not trigger assertion before keyboard state is initialized',
+    (WidgetTester tester) async {
+      final HardwareKeyboard keyboard = HardwareKeyboard();
+      addTearDown(keyboard.clearState);
+
+      // Before syncKeyboardState() is called, stray events should not trigger assertions.
+      // Simulate a stray KeyUpEvent for a key that was never pressed.
+      final strayEvent = KeyUpEvent(
+        physicalKey: PhysicalKeyboardKey.keyA,
+        logicalKey: LogicalKeyboardKey.keyA,
+        timeStamp: Duration.zero,
+      );
+
+      // This should not throw an assertion error because the keyboard state
+      // is not yet initialized.
+      keyboard.handleKeyEvent(strayEvent);
+
+      // After syncKeyboardState() is called, assertions should be active.
+      await keyboard.syncKeyboardState();
+
+      // Now simulate a proper key down event followed by key up.
+      final keyDownEvent = KeyDownEvent(
+        physicalKey: PhysicalKeyboardKey.keyB,
+        logicalKey: LogicalKeyboardKey.keyB,
+        timeStamp: Duration.zero,
+      );
+      keyboard.handleKeyEvent(keyDownEvent);
+
+      final keyUpEvent = KeyUpEvent(
+        physicalKey: PhysicalKeyboardKey.keyB,
+        logicalKey: LogicalKeyboardKey.keyB,
+        timeStamp: Duration.zero,
+      );
+      keyboard.handleKeyEvent(keyUpEvent);
+    },
+  );
 }
 
 Future<void> _runWhileOverridingOnError(
