@@ -455,6 +455,7 @@ class ReorderableList extends StatefulWidget {
 /// }
 /// // ...
 /// listKey.currentState!.cancelReorder();
+/// ```
 class ReorderableListState extends State<ReorderableList> {
   final GlobalKey<SliverReorderableListState> _sliverReorderableListKey = GlobalKey();
 
