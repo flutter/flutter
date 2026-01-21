@@ -622,12 +622,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       return;
     }
     _scrollCacheExtent = switch (value) {
-      CacheExtentStyle.pixel => ScrollCacheExtent.pixels(
-        cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-      ),
-      CacheExtentStyle.viewport => ScrollCacheExtent.viewport(
-        cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-      ),
+      CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent!),
+      CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent!),
     };
     markNeedsLayout();
   }

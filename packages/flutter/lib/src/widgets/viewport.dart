@@ -453,11 +453,6 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   /// See also:
   ///
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
-  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
-  ///
-  /// See also:
-  ///
-  ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   @Deprecated(
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
