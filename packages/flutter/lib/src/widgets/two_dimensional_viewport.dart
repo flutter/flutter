@@ -581,7 +581,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
                    CacheExtentStyle.pixel || null => ScrollCacheExtent.pixels(cacheExtent),
                    CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
                  }
-               : null),
+               : const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent)),
        _clipBehavior = clipBehavior {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
@@ -715,7 +715,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
-  double get cacheExtent => _scrollCacheExtent?.value ?? RenderAbstractViewport.defaultCacheExtent;
+  double get cacheExtent => _scrollCacheExtent.value;
   @Deprecated(
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
@@ -742,14 +742,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
-  CacheExtentStyle get cacheExtentStyle => _scrollCacheExtent?.style ?? CacheExtentStyle.pixel;
+  CacheExtentStyle get cacheExtentStyle => _scrollCacheExtent.style;
   @Deprecated(
     'Use scrollCacheExtent instead. '
     'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   set cacheExtentStyle(CacheExtentStyle? value) {
     if (value == null) {
-      _scrollCacheExtent = ScrollCacheExtent.viewport(cacheExtent);
+      _scrollCacheExtent = ScrollCacheExtent.pixels(cacheExtent);
     } else {
       _scrollCacheExtent = switch (value) {
         CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent),
@@ -760,13 +760,19 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
-  ScrollCacheExtent? get scrollCacheExtent => _scrollCacheExtent;
-  ScrollCacheExtent? _scrollCacheExtent;
+  ScrollCacheExtent get scrollCacheExtent => _scrollCacheExtent;
+  ScrollCacheExtent _scrollCacheExtent;
   set scrollCacheExtent(ScrollCacheExtent? value) {
     if (_scrollCacheExtent == value) {
       return;
     }
-    _scrollCacheExtent = value;
+    if (value == null) {
+      _scrollCacheExtent = const ScrollCacheExtent.pixels(
+        RenderAbstractViewport.defaultCacheExtent,
+      );
+    } else {
+      _scrollCacheExtent = value;
+    }
     markNeedsLayout();
   }
 

@@ -54,6 +54,7 @@ sealed class ScrollCacheExtent {
   double get value;
 }
 
+@immutable
 class _PixelScrollCacheExtent extends ScrollCacheExtent {
   const _PixelScrollCacheExtent(this.pixels) : super._();
 
@@ -69,6 +70,11 @@ class _PixelScrollCacheExtent extends ScrollCacheExtent {
   double get value => pixels;
 
   @override
+  String toString() {
+    return 'ScrollCacheExtent.pixels($pixels)';
+  }
+
+  @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -80,9 +86,11 @@ class _PixelScrollCacheExtent extends ScrollCacheExtent {
   int get hashCode => pixels.hashCode;
 }
 
+@immutable
 class _ViewportScrollCacheExtent extends ScrollCacheExtent {
   const _ViewportScrollCacheExtent(this.value) : super._();
 
+  @override
   final double value;
 
   @override
@@ -90,6 +98,11 @@ class _ViewportScrollCacheExtent extends ScrollCacheExtent {
 
   @override
   CacheExtentStyle get style => CacheExtentStyle.viewport;
+
+  @override
+  String toString() {
+    return 'ScrollCacheExtent.viewport($value)';
+  }
 
   @override
   bool operator ==(Object other) {
