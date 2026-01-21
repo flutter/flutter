@@ -431,12 +431,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     // The dart project_name is in snake_case, this variable is the Title Case of the Project Name.
     final String titleCaseProjectName = snakeCaseToTitleCase(projectName);
 
-    // For plugins with Apple platforms, always enable SwiftPackageManager in templates
-    // since we now generate both SwiftPM and CocoaPods support regardless of the feature flag.
-    final bool pluginWithApplePlatforms =
-        generateMethodChannelsPlugin && (includeIos || includeMacos || includeDarwin);
-    final bool withSwiftPackageManager =
-        pluginWithApplePlatforms || featureFlags.isSwiftPackageManagerEnabled;
+    final bool withSwiftPackageManager = featureFlags.isSwiftPackageManagerEnabled;
 
     final Map<String, Object?> templateContext = createTemplateContext(
       organization: organization,
@@ -748,23 +743,50 @@ Your $application code is in $relativeAppMain.
     final bool includeApplePlatforms =
         templateContext['ios'] == true || templateContext['macos'] == true || includeDarwin;
 
-    // Always generate SwiftPM structure for Apple platforms.
-    // The podspec (also generated) will point to the SwiftPM source location,
-    // allowing both SwiftPM and CocoaPods users to consume the plugin.
+    // Check if this is an existing plugin with CocoaPods structure (Classes/ directory).
+    // If so, preserve backward compatibility by using CocoaPods templates.
+    // For new plugins, use SwiftPM structure.
+    final bool hasExistingCocoaPodsStructure =
+        directory.childDirectory('ios').childDirectory('Classes').existsSync() ||
+        directory.childDirectory('macos').childDirectory('Classes').existsSync() ||
+        directory.childDirectory('darwin').childDirectory('Classes').existsSync();
+
+    final bool useSwiftPackageManagerStructure =
+        includeApplePlatforms && !hasExistingCocoaPodsStructure;
+
+    // Update withSwiftPackageManager to match the plugin structure we're generating.
+    // This controls what path the podspec points to (Sources/ vs Classes/).
+    // The example app will also use this value, but flutter run dynamically handles
+    // SwiftPM/CocoaPods based on the current feature flag setting at runtime.
     if (includeApplePlatforms) {
-      if (includeDarwin) {
-        templates.add('plugin_darwin_spm');
+      templateContext['withSwiftPackageManager'] = useSwiftPackageManagerStructure;
+    }
+
+    if (includeApplePlatforms) {
+      if (useSwiftPackageManagerStructure) {
+        // The podspec (also generated) will point to the SwiftPM source location,
+        // allowing both SwiftPM and CocoaPods users to consume the plugin.
+        if (includeDarwin) {
+          templates.add('plugin_darwin_spm');
+        } else {
+          templates.add('plugin_swift_package_manager');
+        }
+        templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
+        templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
+        templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
+            .format();
+        templateContext['macosSupportedPlatform'] = FlutterDarwinPlatform
+            .macos
+            .supportedPackagePlatform
+            .format();
       } else {
-        templates.add('plugin_swift_package_manager');
+        // Existing plugin with CocoaPods structure: preserve backward compatibility.
+        if (includeDarwin) {
+          templates.add('plugin_darwin_cocoapods');
+        } else {
+          templates.add('plugin_cocoapods');
+        }
       }
-      templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
-      templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
-      templateContext['iosSupportedPlatform'] = FlutterDarwinPlatform.ios.supportedPackagePlatform
-          .format();
-      templateContext['macosSupportedPlatform'] = FlutterDarwinPlatform
-          .macos
-          .supportedPackagePlatform
-          .format();
     }
     generatedCount += await renderMerged(
       templates,

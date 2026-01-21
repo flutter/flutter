@@ -63,8 +63,9 @@ void main() {
               .childDirectory(platformName)
               .childFile('${createdCocoaPodsPlugin.pluginName}.podspec');
           expect(podspec.existsSync(), isTrue);
-          expect(podspec.readAsStringSync(), contains('Classes'));
-          expect(podspec.readAsStringSync().contains('Sources'), isFalse);
+          // New plugins always use SwiftPM structure.
+          expect(podspec.readAsStringSync(), contains('Sources'));
+          expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
