@@ -61,6 +61,8 @@ Widget primaryScrollControllerBoilerplate({
 }
 
 void main() {
+  const green = Color(0xFF00FF00);
+
   testWidgets('ListView control test', (WidgetTester tester) async {
     final log = <String>[];
 
@@ -115,7 +117,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -126,14 +128,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
@@ -238,7 +240,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -249,14 +251,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -275,7 +277,7 @@ void main() {
           childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -286,14 +288,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -314,7 +316,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -325,14 +327,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -352,7 +354,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -363,14 +365,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -391,7 +393,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -402,14 +404,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -429,7 +431,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -440,14 +442,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -467,7 +469,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -478,14 +480,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
@@ -505,7 +507,7 @@ void main() {
           childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -516,14 +518,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
@@ -541,7 +543,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -552,14 +554,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
@@ -578,7 +580,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -589,14 +591,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
@@ -614,7 +616,7 @@ void main() {
           childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -625,14 +627,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
@@ -652,7 +654,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -663,14 +665,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
@@ -689,7 +691,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -700,14 +702,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
@@ -727,7 +729,7 @@ void main() {
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -738,14 +740,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
@@ -764,7 +766,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -775,14 +777,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
@@ -801,7 +803,7 @@ void main() {
           children: focusNodes.map((FocusNode focusNode) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -812,14 +814,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
@@ -838,7 +840,7 @@ void main() {
           childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
             return Container(
               height: 50,
-              color: Colors.green,
+              color: green,
               child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -849,14 +851,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
@@ -949,7 +951,7 @@ void main() {
               children: focusNodes.map((FocusNode focusNode) {
                 return Container(
                   height: 50,
-                  color: Colors.green,
+                  color: green,
                   child: TestTextField(
                     focusNode: focusNode,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -962,14 +964,14 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TestTextField).first;
-    final TestTextField textField = tester.widget(finder);
+    final Finder finder = find.byType(EditableText).first;
+    final EditableText textField = tester.widget(finder);
     await tester.showKeyboard(finder);
-    expect(textField.focusNode!.hasFocus, isTrue);
+    expect(textField.focusNode.hasFocus, isTrue);
 
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
-    expect(textField.focusNode!.hasFocus, isFalse);
+    expect(textField.focusNode.hasFocus, isFalse);
   });
 
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
@@ -1781,7 +1783,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(TestTextField).first;
+    final Finder finder = find.byType(EditableText).first;
     await tester.tap(finder);
     expect(tester.testTextInput.isVisible, isTrue);
 
