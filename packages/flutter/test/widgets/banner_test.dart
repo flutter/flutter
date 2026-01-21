@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -276,9 +276,9 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+  testWidgets('Banner widget in WidgetsApp', (WidgetTester tester) async {
     debugDisableShadows = false;
-    await tester.pumpWidget(const MaterialApp(home: Placeholder()));
+    await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
     expect(
       find.byType(CheckedModeBanner),
       paints
