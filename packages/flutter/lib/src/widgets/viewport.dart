@@ -66,12 +66,12 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.center,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-22.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtent,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-22.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.scrollCacheExtent,
@@ -139,14 +139,14 @@ class Viewport extends MultiChildRenderObjectWidget {
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-22.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-22.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final CacheExtentStyle cacheExtentStyle;
 
@@ -398,12 +398,12 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     this.clipBehavior = Clip.hardEdge,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-22.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtent,
     @Deprecated(
       'Use scrollCacheExtent instead. '
-      'This feature was deprecated after v3.22.0-22.0.pre.',
+      'This feature was deprecated after v3.41.0-0.0.pre.',
     )
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.scrollCacheExtent,
@@ -460,14 +460,14 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   ///  * [cacheExtentStyle], which controls the units of the [cacheExtent].
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final double? cacheExtent;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtentStyle}
   @Deprecated(
     'Use scrollCacheExtent instead. '
-    'This feature was deprecated after v3.22.0-XX.0.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   final CacheExtentStyle cacheExtentStyle;
 
