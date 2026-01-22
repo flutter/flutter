@@ -76,12 +76,18 @@ void main() {
             .childFile('Package.swift');
         expect(generatedSwiftPackage, isNot(exists));
 
+        // Create a plugin and convert it to legacy CocoaPods structure to simulate
+        // a plugin created before SwiftPM was introduced.
         final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
             await SwiftPackageManagerUtils.createPlugin(
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
             );
+        SwiftPackageManagerUtils.convertToLegacyCocoaPodsPlugin(
+          createdCocoaPodsPlugin,
+          platform: platformName,
+        );
 
         // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
         // integration_test.
