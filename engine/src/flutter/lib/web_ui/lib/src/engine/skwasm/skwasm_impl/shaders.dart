@@ -250,24 +250,13 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
-  int _getShaderIndex(String name, int index, [int? expectedSize]) {
-    var result = 0;
+  UniformData _getUniformFloatInfo(String name) {
     for (final UniformData uniform in _shaderData.uniforms) {
       if (uniform.name == name) {
-        if (index < 0 || index >= uniform.floatCount) {
-          throw IndexError.withLength(index, uniform.floatCount);
-        }
-        if (expectedSize != null && uniform.floatCount != expectedSize) {
-          throw ArgumentError(
-            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
-          );
-        }
-        result += index;
-        break;
+        return uniform;
       }
-      result += uniform.floatCount;
     }
-    return result;
+    throw ArgumentError('No uniform named "$name".');
   }
 }
 
@@ -383,8 +372,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getShaderIndex(name, index);
-    return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
+
+    return SkwasmUniformFloatSlot._(this, index, name, info.location + index);
   }
 
   @override
@@ -411,10 +403,81 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
-    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
     return List<SkwasmUniformFloatSlot>.generate(
       size,
-      (i) => SkwasmUniformFloatSlot._(this, i, name, baseShaderIndex),
+      (i) => SkwasmUniformFloatSlot._(this, i, name, info.location + i),
+    );
+  }
+
+  ui.UniformArray<T> _getUniformArray<T extends ui.UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<SkwasmUniformFloatSlot> slots) elementFactory,
+  ) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.floatCount}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.floatCount ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<SkwasmUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => SkwasmUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
+
+    return _SkwasmUniformArray<T>._(elements);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => _SkwasmUniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) =>
+          _SkwasmUniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<_SkwasmUniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => _SkwasmUniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
     );
   }
 }
@@ -476,4 +539,18 @@ class _SkwasmUniformVec4Slot implements ui.UniformVec4Slot {
   }
 
   final SkwasmUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _SkwasmUniformArray<T extends ui.UniformType> implements ui.UniformArray<T> {
+  _SkwasmUniformArray._(this._elements);
+
+  @override
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  @override
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }
