@@ -359,6 +359,92 @@ void main() {
       expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
       semanticsHandle.dispose();
     });
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier string in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier('custom-identifier'), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier named "custom-identifier"',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier RegExp in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier matching the pattern "^item-"',
+          ),
+        );
+      },
+    );
+
+    testWidgets('bySemanticsLabel contains given label string in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel('label'), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label named "label"',
+        ),
+      );
+    });
+
+    testWidgets('bySemanticsLabel contains given label RegExp in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel(RegExp(r'^item-')), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label matching the pattern "^item-"',
+        ),
+      );
+    });
   });
 
   group('byTooltip', () {
@@ -369,9 +455,38 @@ void main() {
       expect(find.byTooltip('Tooltip Message'), findsOneWidget);
     });
 
+    testWidgets('finds widgets by tooltip - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
     testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(const Tooltip(message: 'Tooltip Message', child: Text('+'))),
+      );
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
       );
       expect(find.byTooltip('Tooltip'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
@@ -1394,7 +1509,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
         );
       });
 
@@ -1411,7 +1526,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
         );
       });
 
@@ -1429,7 +1544,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
         );
       });
 
@@ -1447,7 +1562,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
         );
       });
 

@@ -290,7 +290,7 @@ void main() {
     }
 
     // A few other points along the edge
-    checkDiagonalPoints(const Offset(-40.0, -49.59));
+    checkDiagonalPoints(const Offset(-40.0, -49.58));
     checkDiagonalPoints(const Offset(-20.0, -45.64));
     checkDiagonalPoints(const Offset(0.0, -37.01));
     checkDiagonalPoints(const Offset(20.0, -21.96));
