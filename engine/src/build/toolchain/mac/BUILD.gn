@@ -54,13 +54,9 @@ tool_versions = exec_script(
             root_build_dir),
         "trim scope")
 
-if (host_cpu == "arm64") {
-  rebased_clang_dir =
-      rebase_path("$buildtools_path/mac-arm64/clang/bin", root_build_dir)
-} else {
-  rebased_clang_dir =
-      rebase_path("$buildtools_path/mac-x64/clang/bin", root_build_dir)
-}
+assert(host_cpu == "arm64")
+rebased_clang_dir = 
+    rebase_path("$buildtools_path/mac-arm64/clang/bin", root_build_dir)
 
 if (use_ccache) {
   # ccache only supports compilation, not linking.
