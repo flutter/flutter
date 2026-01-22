@@ -89,6 +89,19 @@ const double _kSheetScaleFactor = 0.0835;
 
 final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kSheetScaleFactor);
 
+// The signature for a method called on the start of a drag.
+typedef _DragStartCallback = void Function();
+
+// The signature for a method called to trigger a change based on a moving drag gesture.
+typedef _DragUpdateCallback = void Function(double delta);
+
+// The signature for a method called on the end of a drag, passing the velocity at
+// the end of the drag along.
+typedef _DragEndCallback = void Function(double velocity);
+
+// The signature for a method that checks if the sheet is currently dragged downwards.
+typedef _GetSheetDragged = bool Function();
+
 /// Shows a Cupertino-style sheet widget that slides up from the bottom of the
 /// screen and stacks the previous route behind the new sheet.
 ///
@@ -99,7 +112,7 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// the content on the [CupertinoSheetRoute]. If the content of the sheet has a
 /// scrollable view, the [ScrollController] provided by `scrollableBuilder` can be
 /// used to enable the drag-to-dimiss gesture to work with the scrolling of the
-/// content. See [CupertinoSheetRoute] for an example.
+/// content. See [CupertinoSheetRoute.scrollableBuilder] for an example.
 ///
 /// `useNestedNavigation` allows new routes to be pushed inside of a [CupertinoSheetRoute]
 /// by adding a new [Navigator] inside of the [CupertinoSheetRoute].
@@ -226,22 +239,17 @@ Future<T?> showCupertinoSheet<T>({
       );
     }
 
-    final route = effectiveBuilder != null
-        ? CupertinoSheetRoute<T>(
-            builder: (BuildContext context) => nestedNavigationContent(effectiveBuilder),
-            settings: settings,
-            enableDrag: enableDrag,
-            topGap: topGap,
-          )
-        : CupertinoSheetRoute<T>(
-            scrollableBuilder: (BuildContext context, ScrollController controller) =>
-                nestedNavigationContent(
-                  (BuildContext context) => scrollableBuilder!(context, controller),
-                ),
-            settings: settings,
-            enableDrag: enableDrag,
-            topGap: topGap,
-          );
+    final route = CupertinoSheetRoute<T>(
+      scrollableBuilder: (BuildContext context, ScrollController controller) =>
+          nestedNavigationContent(
+            scrollableBuilder != null
+                ? (BuildContext context) => scrollableBuilder(context, controller)
+                : effectiveBuilder!,
+          ),
+      settings: settings,
+      enableDrag: enableDrag,
+      topGap: topGap,
+    );
     return Navigator.of(context, rootNavigator: true).push<T>(route);
   }
 }
@@ -1153,10 +1161,10 @@ class _CupertinoSheetScrollController extends ScrollController {
     required this.sheetIsDraggedDown,
   });
 
-  final void Function() onDragStart;
-  final void Function(double) onDragEnd;
-  final void Function(double) onDragUpdate;
-  final bool Function() sheetIsDraggedDown;
+  final _DragStartCallback onDragStart;
+  final _DragEndCallback onDragUpdate;
+  final _DragUpdateCallback onDragEnd;
+  final _GetSheetDragged sheetIsDraggedDown;
 
   @override
   _CupertinoSheetScrollPosition createScrollPosition(
@@ -1203,11 +1211,11 @@ class _CupertinoSheetScrollPosition extends ScrollPositionWithSingleContext {
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
   bool get listShouldScroll => pixels > 0.0;
 
-  final void Function() onDragStart;
-  final void Function(double) onDragUpdate;
-  final void Function(double) onDragEnd;
+  final _DragStartCallback onDragStart;
+  final _DragEndCallback onDragUpdate;
+  final _DragUpdateCallback onDragEnd;
 
-  final bool Function() sheetIsDraggedDown;
+  final _GetSheetDragged sheetIsDraggedDown;
 
   @override
   void absorb(ScrollPosition other) {
