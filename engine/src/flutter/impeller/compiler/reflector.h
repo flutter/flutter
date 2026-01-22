@@ -121,6 +121,22 @@ struct StructMember {
     FML_UNREACHABLE();
   }
 
+  /// @brief Constructs a new StructMember.
+  ///
+  /// @param p_type The string type name (e.g. "float", "Point", "Matrix").
+  /// @param p_base_type The SPIR-V base type.
+  /// @param p_name The name of the struct member.
+  /// @param p_offset The offset in bytes from the start of the parent struct.
+  /// @param p_size The size in bytes of a single element of this type
+  /// (ignoring padding/stride).
+  /// @param p_byte_length The total size in bytes this member occupies in
+  /// the struct, including all array elements and padding.
+  /// @param p_array_elements The number of array elements. For matrices
+  /// treated as arrays of columns, this includes the column count.
+  /// @param p_element_padding The padding in bytes after each array
+  /// element to satisfy alignment requirements (stride - size).
+  /// @param p_underlying_type The underlying type category, used for
+  /// runtime validation.
   StructMember(std::string p_type,
                spirv_cross::SPIRType::BaseType p_base_type,
                std::string p_name,

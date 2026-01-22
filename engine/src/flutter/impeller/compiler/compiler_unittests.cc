@@ -409,6 +409,45 @@ INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
 INSTANTIATE_SKSL_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 
+TEST_P(CompilerTestRuntime, Mat2Reflection) {
+  ASSERT_TRUE(CanCompileAndReflect(
+      "mat2_test.frag", SourceType::kFragmentShader, SourceLanguage::kGLSL));
+
+  std::unique_ptr<fml::FileMapping> json_fd =
+      GetReflectionJson("mat2_test.frag");
+  ASSERT_TRUE(json_fd);
+  nlohmann::json shader_json = nlohmann::json::parse(json_fd->GetMapping());
+  nlohmann::json::value_type buffers = shader_json["buffers"];
+
+  // uParams should be in buffers.
+  ASSERT_GE(buffers.size(), 1u);
+  nlohmann::json::value_type uParams = buffers[0];
+  EXPECT_EQ(uParams["name"], "Params");
+
+  nlohmann::json::value_type members = uParams["type"]["members"];
+  // We expect 1 member (for the mat2) which is a Point (vec2) with array
+  // size 2.
+  ASSERT_EQ(members.size(), 1u);
+
+  nlohmann::json::value_type mat2Member = members[0];
+
+  // Should be Mat2 (vec2)
+  EXPECT_EQ(mat2Member["type"], "Mat2");
+
+  // Size 8 bytes (vec2)
+  EXPECT_EQ(mat2Member["size"], 8u);
+
+  // Byte length should be total array size (stride * count)
+  // Stride 16 * 2 = 32.
+  EXPECT_EQ(mat2Member["byte_length"], 32u);
+
+  // Array elements should be 2 (columns).
+  EXPECT_EQ(mat2Member["array_elements"], 2u);
+
+  // Offset 0
+  EXPECT_EQ(mat2Member["offset"], 0u);
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller
