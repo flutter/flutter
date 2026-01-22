@@ -110,7 +110,8 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
               glyphs[i]->isColor() ? Glyph::Type::kBitmap : Glyph::Type::kPath;
           uint16_t glyphIndex = glyphs[i]->getGlyphID();
           SkRect scaled_bounds;
-          run.font().getBounds(&glyphIndex, 1, &scaled_bounds, &stroke_paint);
+          run.font().getBounds({&glyphIndex, 1}, {&scaled_bounds, 1},
+                               &stroke_paint);
           positions.emplace_back(TextRun::GlyphPosition{
               Glyph{glyphs[i]->getGlyphID(), type},
               Point{point->x(), point->y()},
