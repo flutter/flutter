@@ -277,7 +277,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/cupertino/date_picker_test.dart',
     'packages/flutter/test/cupertino/switch_test.dart',
     'packages/flutter/test/cupertino/magnifier_test.dart',
-    'packages/flutter/test/cupertino/text_field_restoration_test.dart',
     'packages/flutter/test/cupertino/sheet_test.dart',
     'packages/flutter/test/cupertino/form_row_test.dart',
     'packages/flutter/test/cupertino/colors_test.dart',

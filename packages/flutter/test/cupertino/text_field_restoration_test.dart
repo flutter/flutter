@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String text = 'Hello World! How are you? Life is good!';
@@ -90,15 +89,13 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Align(
-        child: SizedBox(
-          width: 50,
-          child: CupertinoTextField(
-            restorationId: 'text',
-            maxLines: 3,
-            controller: widget.useExternal ? controller.value : null,
-          ),
+    return Align(
+      child: SizedBox(
+        width: 50,
+        child: CupertinoTextField(
+          restorationId: 'text',
+          maxLines: 3,
+          controller: widget.useExternal ? controller.value : null,
         ),
       ),
     );
