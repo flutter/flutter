@@ -118,8 +118,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         'packages/assets_for_android_views/assets/touchEvents',
       );
       final unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
-      final List<Map<String, dynamic>> recordedEvents =
-          unTypedRecordedEvents
+      final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
               .cast<Map<dynamic, dynamic>>()
               .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
               .toList();
@@ -276,8 +275,8 @@ class TouchEventDiff extends StatelessWidget {
       buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords =
-        (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
+    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>)
+        .cast<Map<dynamic, dynamic>>();
     for (var i = 0; i < coords.length; i++) {
       buffer.write(
         'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ',
