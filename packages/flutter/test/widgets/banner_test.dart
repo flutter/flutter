@@ -276,7 +276,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+  testWidgets('Banner widget in WidgetsApp with default parameters', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       WidgetsApp(
