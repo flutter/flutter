@@ -596,7 +596,7 @@ Future<void> main() async {
           width: 800,
           height: 800,
           decoration: const ShapeDecoration(
-            color: Color(0xFFFF6F00),
+            color: Color(0xFFF4A43F),
             shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
           ),
           child: Directionality(
