@@ -673,7 +673,7 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest('FragmentShader with uniforms renders correctly', () async {
+  test('FragmentShader with uniforms renders correctly', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
 
     final FragmentShader shader = program.fragmentShader()
@@ -695,17 +695,39 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest('FragmentShader shader with array uniforms renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test(
+    'FragmentShader shader with array uniforms renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-    final FragmentShader shader = program.fragmentShader();
-    for (var i = 0; i < 20; i++) {
-      shader.setFloat(i, i.toDouble());
-    }
+      final FragmentShader shader = program.fragmentShader();
+      for (var i = 0; i < 20; i++) {
+        shader.setFloat(i, i.toDouble());
+      }
 
-    await _expectShaderRendersGreen(shader);
-    shader.dispose();
-  });
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
+
+  test(
+    'FragmentShader shader with mat2 uniform renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+
+      final FragmentShader shader = program.fragmentShader();
+
+      shader.setFloat(0, 4.0); // m00
+      shader.setFloat(1, 8.0); // m01
+      shader.setFloat(2, 16.0); // m10
+      shader.setFloat(3, 32.0); // m11
+
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
 
   _runImpellerTest(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
@@ -839,7 +861,7 @@ void main() async {
 void _runSkiaTest(String name, Future<void> Function() callback) {
   test(name, () async {
     if (impellerEnabled) {
-      print('skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
+      print('Skipped for Impeller.');
       return;
     }
     await callback();
@@ -849,7 +871,7 @@ void _runSkiaTest(String name, Future<void> Function() callback) {
 void _runImpellerTest(String name, Future<void> Function() callback, {Object? skip}) {
   test(name, () async {
     if (!impellerEnabled) {
-      print('skipped for Skia');
+      print('Skipped for Skia.');
       return;
     }
     await callback();
