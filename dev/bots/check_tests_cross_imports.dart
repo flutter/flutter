@@ -187,7 +187,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/obscured_animated_image_test.dart',
     'packages/flutter/test/widgets/platform_menu_bar_test.dart',
     'packages/flutter/test/widgets/inherited_test.dart',
-    'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/slivers_evil_test.dart',
     'packages/flutter/test/widgets/container_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
