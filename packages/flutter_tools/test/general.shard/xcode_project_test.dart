@@ -62,6 +62,15 @@ void main() {
       );
     });
 
+    testWithoutContext('flutterFrameworkSwiftPackageDirectory', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.flutterFrameworkSwiftPackageDirectory.path,
+        'app_name/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
+      );
+    });
+
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));

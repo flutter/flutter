@@ -230,6 +230,10 @@ final class LibraryPreviewNode {
   void findPreviews({required ResolvedLibraryResult lib}) {
     // Iterate over the compilation unit's AST to find previews.
     final visitor = _PreviewVisitor(lib: lib.element);
+    // Previews can only be defined under the lib/ directory.
+    if (visitor.packageName == null) {
+      return;
+    }
     lib.units.forEach(visitor.findPreviewsInResolvedUnitResult);
     previews
       ..clear()
