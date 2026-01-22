@@ -137,7 +137,7 @@ class ExpansibleController extends ChangeNotifier {
   /// See also:
   ///
   ///  * [expand], which expands the [Expansible].
-  ///  * [collapse], which collapses the expansible widget.
+  ///  * [collapse], which collapses the [Expansible].
   ///  * [isExpanded] to check whether the [Expansible] is expanded.
   void toggle() => isExpanded ? collapse() : expand();
 
