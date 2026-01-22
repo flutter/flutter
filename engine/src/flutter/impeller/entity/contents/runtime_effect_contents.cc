@@ -30,29 +30,39 @@ constexpr char kFloatType = 1;
 }  // namespace
 
 // static
-BufferView RuntimeEffectContents::EmplaceVulkanUniform(
+BufferView RuntimeEffectContents::EmplaceUniform(
     const uint8_t* source_data,
     HostBuffer& data_host_buffer,
-    const RuntimeUniformDescription& uniform,
-    size_t minimum_uniform_alignment) {
-  // TODO(jonahwilliams): rewrite this to emplace directly into
-  // HostBuffer.
-  std::vector<float> uniform_buffer;
-  uniform_buffer.reserve(uniform.struct_layout.size());
-  size_t uniform_byte_index = 0u;
-  for (char byte_type : uniform.struct_layout) {
-    if (byte_type == kPaddingType) {
-      uniform_buffer.push_back(0.f);
-    } else {
-      FML_DCHECK(byte_type == kFloatType);
-      uniform_buffer.push_back(
-          reinterpret_cast<const float*>(source_data)[uniform_byte_index++]);
-    }
+    const RuntimeUniformDescription& uniform) {
+  size_t minimum_uniform_alignment =
+      data_host_buffer.GetMinimumUniformAlignment();
+  size_t alignment = std::max(uniform.bit_width / 8, minimum_uniform_alignment);
+
+  if (uniform.struct_layout.empty()) {
+    return data_host_buffer.Emplace(source_data, uniform.GetSize(), alignment);
   }
 
+  // If the uniform has a struct layout, we need to repack the data.
+  // We can do this by using the EmplaceProc to write directly to the
+  // HostBuffer.
   return data_host_buffer.Emplace(
-      reinterpret_cast<const void*>(uniform_buffer.data()),
-      sizeof(float) * uniform_buffer.size(), minimum_uniform_alignment);
+      uniform.GetSize(), alignment,
+      [&uniform, source_data](uint8_t* destination) {
+        size_t uniform_byte_index = 0u;
+        size_t struct_float_index = 0u;
+        auto* float_destination = reinterpret_cast<float*>(destination);
+        auto* float_source = reinterpret_cast<const float*>(source_data);
+
+        for (char byte_type : uniform.struct_layout) {
+          if (byte_type == kPaddingType) {
+            float_destination[struct_float_index++] = 0.f;
+          } else {
+            FML_DCHECK(byte_type == kFloatType);
+            float_destination[struct_float_index++] =
+                float_source[uniform_byte_index++];
+          }
+        }
+      });
 }
 
 void RuntimeEffectContents::SetRuntimeStage(
@@ -276,19 +286,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               << "Uniform " << uniform.name
               << " had unexpected type kFloat for Vulkan backend.";
 
-          size_t alignment =
-              std::max(uniform.bit_width / 8,
-                       data_host_buffer.GetMinimumUniformAlignment());
-          BufferView buffer_view;
-          if (!uniform.struct_layout.empty()) {
-            buffer_view =
-                EmplaceVulkanUniform(uniform_data_->data() + buffer_offset,
-                                     data_host_buffer, uniform, alignment);
-          } else {
-            buffer_view =
-                data_host_buffer.Emplace(uniform_data_->data() + buffer_offset,
-                                         uniform.GetSize(), alignment);
-          }
+          BufferView buffer_view = EmplaceUniform(
+              uniform_data_->data() + buffer_offset, data_host_buffer, uniform);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
@@ -311,9 +310,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           pass.BindResource(
               ShaderStage::kFragment, DescriptorType::kUniformBuffer,
               uniform_slot, nullptr,
-              EmplaceVulkanUniform(
-                  uniform_data_->data(), data_host_buffer, uniform,
-                  data_host_buffer.GetMinimumUniformAlignment()));
+              EmplaceUniform(uniform_data_->data(), data_host_buffer, uniform));
         }
       }
     }

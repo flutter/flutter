@@ -397,7 +397,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         // But here we just dump 1s and 0s linearly.
         // Col0: 1,1,1,0. Col1: 1,1,1,0. Col2: 1,1,1,0.
         // So we need to interleave?
-        // EmplaceVulkanUniform iterates struct_layout linearly and copies
+        // EmplaceUniform iterates struct_layout linearly and copies
         // floats. If we push 1,1,1,0,1,1,1,0... it works if input is
         // 1,1,1,1,1,1,1,1,1. Yes. But 'padding_floats' logic above was 'total
         // padding'. We should just construct the full layout loop.
