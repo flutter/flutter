@@ -1923,7 +1923,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsDataBuffer(),
+      uniform_data->data(), GetContentContext()->GetTransientsDataBuffer(),
       runtime_stage->GetUniforms()[0],
       GetContentContext()
           ->GetTransientsDataBuffer()

@@ -13,7 +13,9 @@ size_t RuntimeUniformDescription::GetSize() const {
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     size *= array_elements.value();
   }
-  size += sizeof(float) * struct_layout.size();
+  if (type == kStruct) {
+    size += sizeof(float) * struct_layout.size();
+  }
   return size;
 }
 

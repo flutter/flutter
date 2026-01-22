@@ -393,7 +393,8 @@ INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 #define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
   INSTANTIATE_TEST_SUITE_P(                                               \
       suite_name, CompilerTestRuntime,                                    \
-      ::testing::Values(TargetPlatform::kRuntimeStageMetal),              \
+      ::testing::Values(TargetPlatform::kRuntimeStageMetal,               \
+                        TargetPlatform::kRuntimeStageVulkan),             \
       [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
         return TargetPlatformToString(info.param);                        \
       });
@@ -438,8 +439,13 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
   EXPECT_EQ(mat2Member["size"], 8u);
 
   // Byte length should be total array size (stride * count)
-  // Stride 16 * 2 = 32.
-  EXPECT_EQ(mat2Member["byte_length"], 32u);
+  // Metal: Stride 8 * 2 = 16.
+  // Other: Stride 16 * 2 = 32.
+  if (TargetPlatformIsMetal(GetParam())) {
+    EXPECT_EQ(mat2Member["byte_length"], 16u);
+  } else {
+    EXPECT_EQ(mat2Member["byte_length"], 32u);
+  }
 
   // Array elements should be 2 (columns).
   EXPECT_EQ(mat2Member["array_elements"], 2u);

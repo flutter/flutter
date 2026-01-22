@@ -372,6 +372,51 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     uniform_description.columns = spir_type.columns;
     uniform_description.bit_width = spir_type.width;
     uniform_description.array_elements = GetArrayElements(spir_type);
+
+    if (TargetPlatformIsMetal(options_.target_platform) &&
+        uniform_description.type == spirv_cross::SPIRType::BaseType::Float) {
+      // Metal aligns float3 to 16 bytes.
+      // Metal aligns float3x3 COLUMNS to 16 bytes.
+      // However, GetSize() calculates tight packing (12 bytes for float3,
+      // 36 bytes for float3x3).
+      // We must add padding to struct_layout to force GetSize() to match
+      // MSL alignment.
+      //
+      // For float3: Size 12. Padding 4. Stride 16.
+      // For float3x3: Size 36. Padding 12 (4 per col). Stride 48.
+      size_t floats_per_element = 0;
+      size_t padding_floats = 0;
+      if (spir_type.vecsize == 3 && spir_type.columns == 1) {
+        // float3
+        floats_per_element = 3;
+        padding_floats = 1;
+      } else if (spir_type.vecsize == 3 && spir_type.columns == 3) {
+        // float3x3
+        floats_per_element = 9;
+        // 3 columns * 1 pad per column = 3 pads.
+        // But here we just dump 1s and 0s linearly.
+        // Col0: 1,1,1,0. Col1: 1,1,1,0. Col2: 1,1,1,0.
+        // So we need to interleave?
+        // EmplaceVulkanUniform iterates struct_layout linearly and copies
+        // floats. If we push 1,1,1,0,1,1,1,0... it works if input is
+        // 1,1,1,1,1,1,1,1,1. Yes. But 'padding_floats' logic above was 'total
+        // padding'. We should just construct the full layout loop.
+      }
+
+      if (spir_type.vecsize == 3 &&
+          (spir_type.columns == 1 || spir_type.columns == 3)) {
+        size_t count = uniform_description.array_elements.value_or(1);
+        for (size_t i = 0; i < count; i++) {
+          for (size_t c = 0; c < spir_type.columns; c++) {
+            for (size_t v = 0; v < 3; v++) {
+              uniform_description.struct_layout.push_back(1);
+            }
+            uniform_description.struct_layout.push_back(0);
+          }
+        }
+      }
+    }
+
     FML_CHECK(data->backend != RuntimeStageBackend::kVulkan ||
               spir_type.basetype ==
                   spirv_cross::SPIRType::BaseType::SampledImage)
@@ -890,6 +935,11 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       // {val, val, padding, padding, val, val, padding, padding}.
       uint32_t count = array_elements.value_or(1) * 2;
       uint32_t stride = 16;
+      uint32_t element_padding = 8;
+      if (TargetPlatformIsMetal(options_.target_platform)) {
+        stride = 8;
+        element_padding = 0;
+      }
       uint32_t total_length = stride * count;
 
       result.emplace_back(StructMember{
@@ -900,7 +950,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_size=*/sizeof(Point),
           /*p_byte_length=*/total_length,
           /*p_array_elements=*/count,
-          /*p_element_padding=*/8,
+          /*p_element_padding=*/element_padding,
       });
       current_byte_offset += total_length;
       continue;

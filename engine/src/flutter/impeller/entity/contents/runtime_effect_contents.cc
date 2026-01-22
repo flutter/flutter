@@ -31,7 +31,7 @@ constexpr char kFloatType = 1;
 
 // static
 BufferView RuntimeEffectContents::EmplaceVulkanUniform(
-    const std::shared_ptr<const std::vector<uint8_t>>& input_data,
+    const uint8_t* source_data,
     HostBuffer& data_host_buffer,
     const RuntimeUniformDescription& uniform,
     size_t minimum_uniform_alignment) {
@@ -45,8 +45,8 @@ BufferView RuntimeEffectContents::EmplaceVulkanUniform(
       uniform_buffer.push_back(0.f);
     } else {
       FML_DCHECK(byte_type == kFloatType);
-      uniform_buffer.push_back(reinterpret_cast<const float*>(
-          input_data->data())[uniform_byte_index++]);
+      uniform_buffer.push_back(
+          reinterpret_cast<const float*>(source_data)[uniform_byte_index++]);
     }
   }
 
@@ -279,9 +279,16 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           size_t alignment =
               std::max(uniform.bit_width / 8,
                        data_host_buffer.GetMinimumUniformAlignment());
-          BufferView buffer_view =
-              data_host_buffer.Emplace(uniform_data_->data() + buffer_offset,
-                                       uniform.GetSize(), alignment);
+          BufferView buffer_view;
+          if (!uniform.struct_layout.empty()) {
+            buffer_view =
+                EmplaceVulkanUniform(uniform_data_->data() + buffer_offset,
+                                     data_host_buffer, uniform, alignment);
+          } else {
+            buffer_view =
+                data_host_buffer.Emplace(uniform_data_->data() + buffer_offset,
+                                         uniform.GetSize(), alignment);
+          }
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
@@ -301,12 +308,12 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           uniform_slot.binding = uniform.location;
           uniform_slot.name = uniform.name.c_str();
 
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kUniformBuffer, uniform_slot,
-                            nullptr,
-                            EmplaceVulkanUniform(
-                                uniform_data_, data_host_buffer, uniform,
-                                data_host_buffer.GetMinimumUniformAlignment()));
+          pass.BindResource(
+              ShaderStage::kFragment, DescriptorType::kUniformBuffer,
+              uniform_slot, nullptr,
+              EmplaceVulkanUniform(
+                  uniform_data_->data(), data_host_buffer, uniform,
+                  data_host_buffer.GetMinimumUniformAlignment()));
         }
       }
     }
