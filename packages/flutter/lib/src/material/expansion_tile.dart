@@ -8,8 +8,6 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -19,7 +17,6 @@ import 'icons.dart';
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -535,27 +532,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
   }
 
   void _onExpansionChanged() {
-    final TextDirection textDirection = WidgetsLocalizations.of(context).textDirection;
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String stateHint = _tileController.isExpanded
-        ? localizations.collapsedHint
-        : localizations.expandedHint;
-
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
-      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
-      _timer?.cancel();
-      _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
-        _timer?.cancel();
-        _timer = null;
-      });
-    }
-    // SemanticsService.sendAnnouncement is deprecated on android.
-    // We use live region to achieve the announcement effect instead.
-    else if (defaultTargetPlatform != TargetPlatform.android) {
-      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection);
-    }
     widget.onExpansionChanged?.call(_tileController.isExpanded);
   }
 
@@ -595,19 +571,8 @@ class _ExpansionTileState extends State<ExpansionTile> {
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
     _iconColor = animation.drive(_iconColorTween.chain(_easeInTween));
     _headerColor = animation.drive(_headerColorTween.chain(_easeInTween));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String onTapHint = _tileController.isExpanded
-        ? localizations.expansionTileExpandedTapHint
-        : localizations.expansionTileCollapsedTapHint;
-    final String semanticsHint = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        _tileController.isExpanded
-            ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
-            : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
-      _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
-    };
 
-    final Widget child = ListTileTheme.merge(
+    return ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,
       textColor: _headerColor.value,
       child: ListTile(
@@ -628,19 +593,6 @@ class _ExpansionTileState extends State<ExpansionTile> {
         internalAddSemanticForOnTap: widget.internalAddSemanticForOnTap,
       ),
     );
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return Semantics(
-        // Live region used to announce state changes (e.g., "expanded" or "collapsed")
-        // without taking focus.
-        // blockNode prevents this node from being part of the focus traversal.
-        label: semanticsHint,
-        liveRegion: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
-        child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
-      );
-    }
-    return Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child);
   }
 
   Widget _buildBody(BuildContext context, Animation<double> animation) {

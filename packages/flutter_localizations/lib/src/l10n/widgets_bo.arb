@@ -14,5 +14,11 @@
   "shareButtonLabel": "མཉམ་སྤྱོད།",
   "pasteButtonLabel": "འཕོས་པ།",
   "selectAllButtonLabel": "ཚང་འདེམས།",
-  "radioButtonUnselectedLabel": "འདེམ་སྒྲུག·མེད"
+  "radioButtonUnselectedLabel": "འདེམ་སྒྲུག·མེད",
+  "expansibleExpandedHint": "ཕྱོགས་བསྡུའི་ཆེད་ཐེངས་གཉིས་གནོན།",
+  "expansibleCollapsedHint": "ཁྱབ་སྤེལ་ཆེད་ཐེངས་གཉིས་གནོན།",
+  "expansibleExpandedTapHint": "ཕྱོགས་བསྡུ།",
+  "expansibleCollapsedTapHint": "ཞིབ་རྒྱས་ཆེད་ཁྱབ་སྤེལ།",
+  "expandedHint": "ཕྱོགས་བསྡུས།",
+  "collapsedHint": "ཁྱབ་སྤེལ་ཟིན།"
 }
