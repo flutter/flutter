@@ -1851,6 +1851,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [ViewConfiguration]). Such tests might cause the root layer to not be
   /// automatically disposed before the leak check, triggering false negatives.
   ///
+  /// This method also resets view configuration to its default value.
+  ///
   /// See also:
   ///
   ///  * [setSurfaceSize], which often necessitates calling this method during
