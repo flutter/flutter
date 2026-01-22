@@ -119,6 +119,7 @@ void main() {
     });
 
     testWidgets('can reset all values', (WidgetTester tester) async {
+      addTearDown(tester.binding.resetLayers);
       final initial = DisplaySnapshot(tester.view.display);
 
       tester.view.display.devicePixelRatio = 7;
@@ -133,8 +134,6 @@ void main() {
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
-
-      addTearDown(tester.binding.resetLayers);
     });
   });
 }

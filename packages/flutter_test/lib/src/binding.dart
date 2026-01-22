@@ -1841,18 +1841,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }());
   }
 
-  /// Resets the root layers of all managed [renderViews] to their initial state.
+  /// Replaces the root layers of all managed [renderViews] with new, unused
+  /// layers.
   ///
   /// This method is typically used in a test's [addTearDown] to ensure that
   /// resources associated with the root transform layer are properly disposed
-  /// of between tests.
-  ///
-  /// When a test modifies the view configuration (for example, by calling
-  /// [setSurfaceSize] or changing [ViewConfiguration]), the root layer may
-  /// not be automatically disposed, potentially leading to resource leaks or
-  /// interference with subsequent tests. This method forces a layer
-  /// replacement by temporarily toggling the device pixel ratio, which
-  /// triggers a clean disposal of the old layer tree.
+  /// of between tests. It is useful for tests that modify the view
+  /// configuration (for example, by calling [setSurfaceSize] or changing
+  /// [ViewConfiguration]). Such tests might cause the root layer to not be
+  /// automatically disposed before the leak check, triggering false negatives.
   ///
   /// See also:
   ///
@@ -1861,10 +1858,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<void> resetLayers() async {
     await setSurfaceSize(null);
     for (final RenderView renderView in renderViews) {
-      // Trigger a layer replacement by changing the device pixel ratio.
+      // To reliably trigger [RenderView.replaceRootLayer], we assign a new
+      // device pixel ratio that differs from the current one.
       renderView.configuration = ViewConfiguration(
         devicePixelRatio: renderView.flutterView.devicePixelRatio + 1.0,
       );
+      // Reset the device pixel ratio (and other view configurations) to their
+      // default values.
       renderView.configuration = createViewConfigurationFor(renderView);
     }
   }

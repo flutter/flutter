@@ -292,6 +292,8 @@ void main() {
     });
 
     testWidgets('can clear out fake properties all at once', (WidgetTester tester) async {
+      addTearDown(tester.binding.resetLayers);
+
       final initial = FlutterViewSnapshot(tester.view);
 
       tester.view.devicePixelRatio = 7;
@@ -319,8 +321,6 @@ void main() {
 
       expect(initial, isNot(matchesSnapshot(faked)));
       expect(initial, matchesSnapshot(reset));
-
-      addTearDown(tester.binding.resetLayers);
     });
 
     testWidgets('render is passed through to backing FlutterView', (WidgetTester tester) async {

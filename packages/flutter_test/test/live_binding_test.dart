@@ -74,6 +74,7 @@ void main() {
   });
 
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
+    addTearDown(binding.resetLayers);
     await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
     final Size windowCenter = tester.view.physicalSize / tester.view.devicePixelRatio / 2;
@@ -95,7 +96,6 @@ void main() {
     widgetCenter = tester.getRect(find.byType(Text)).center;
     expect(widgetCenter.dx, windowCenterX);
     expect(widgetCenter.dy, windowCenterY);
-    addTearDown(binding.resetLayers);
   });
 
   testWidgets("reassembleApplication doesn't get stuck", (WidgetTester tester) async {
@@ -134,12 +134,16 @@ void main() {
   testWidgets('resetLayers resets configuration and replaces root layer', (
     WidgetTester tester,
   ) async {
+    // Ensure cleanup. This statement is not part of the test.
+    addTearDown(binding.resetLayers);
+
     final ViewConfiguration currentConfig = binding.renderView.configuration;
     await binding.setSurfaceSize(const Size(400, 400));
     binding.renderView.configuration = const ViewConfiguration(devicePixelRatio: 10.0);
     final Layer? currentRootLayer = binding.renderView.debugLayer;
 
-    await binding.resetLayers();
+    await binding.resetLayers(); // This statement is the testee.
+
     // Verify that all properties have been reset
     expect(
       binding.renderView.configuration.logicalConstraints,
@@ -155,7 +159,6 @@ void main() {
     );
     // Verify that root layer has been replaced
     expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
-    addTearDown(binding.resetLayers);
   });
 }
 
