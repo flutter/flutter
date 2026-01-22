@@ -1518,6 +1518,85 @@ mixin DeltaTextInputClient implements TextInputClient {
   void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
 }
 
+/// Text styling information for the current input client.
+///
+/// See also:
+///
+///  * [TextInputConnection.updateStyle], which uses this class to send style
+///    information to the platform.
+///  * [TextInputControl.updateStyle], which receives this style information
+///    in custom text input controls.
+@immutable
+final class TextInputStyle {
+  /// Creates text styling information for the current input client.
+  const TextInputStyle({
+    this.fontFamily,
+    this.fontSize,
+    this.fontWeight,
+    required this.textDirection,
+    required this.textAlign,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.lineHeight,
+  });
+
+
+  final String? fontFamily;
+  final double? fontSize;
+  final FontWeight? fontWeight;
+  final TextDirection textDirection;
+  final TextAlign textAlign;
+  final double? letterSpacing;
+  final double? wordSpacing;
+  final double? lineHeight;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is TextInputStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.fontWeight == fontWeight &&
+        other.textDirection == textDirection &&
+        other.textAlign == textAlign &&
+        other.letterSpacing == letterSpacing &&
+        other.wordSpacing == wordSpacing &&
+        other.lineHeight == lineHeight;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontSize,
+      fontWeight,
+      textDirection,
+      textAlign,
+      letterSpacing,
+      wordSpacing,
+      lineHeight,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'TextInputStyle('
+        'fontFamily: $fontFamily, '
+        'fontSize: $fontSize, '
+        'fontWeight: $fontWeight, '
+        'textDirection: $textDirection, '
+        'textAlign: $textAlign, '
+        'letterSpacing: $letterSpacing, '
+        'wordSpacing: $wordSpacing, '
+        'lineHeight: $lineHeight)';
+  }
+}
+
 /// An interface for interacting with a text input control.
 ///
 /// See also:
@@ -1652,12 +1731,22 @@ class TextInputConnection {
 
   /// Send text styling information.
   ///
+  /// This information is used by the Flutter Engine to change the style of the
+  /// hidden native input's content. Hence, the content size will match to the
+  /// size of the editable widget's content.
+  void updateStyle(TextInputStyle style) {
+    assert(attached);
+    TextInput._instance._updateStyle(style);
+  }
+
+  /// Send text styling information.
+  ///
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
   @Deprecated(
-    'Use setStyleWithMetrics instead. '
-    'This feature was deprecated after v3.40.0-0.2.pre.',
+    'Use updateStyle instead. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   void setStyle({
     required String? fontFamily,
@@ -1666,12 +1755,14 @@ class TextInputConnection {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    setStyleWithMetrics(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
     );
   }
 
@@ -1692,38 +1783,6 @@ class TextInputConnection {
   void connectionClosedReceived() {
     TextInput._instance._currentConnection = null;
     assert(!attached);
-  }
-}
-
-/// Extension to add [setStyleWithMetrics] to [TextInputConnection].
-extension TextInputConnectionExt on TextInputConnection {
-  /// Send text styling information.
-  ///
-  /// This information is used by the Flutter Web Engine to change the style
-  /// of the hidden native input's content. Hence, the content size will match
-  /// to the size of the editable widget's content.
-  void setStyleWithMetrics({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? lineHeight,
-  }) {
-    assert(attached);
-
-    TextInput._instance._setStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      lineHeight: lineHeight,
-    );
   }
 }
 
@@ -2253,27 +2312,9 @@ class TextInput {
     }
   }
 
-  void _setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? lineHeight,
-  }) {
+  void _updateStyle(TextInputStyle style) {
     for (final TextInputControl control in _inputControls) {
-      control.setStyleWithMetrics(
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        textDirection: textDirection,
-        textAlign: textAlign,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        lineHeight: lineHeight,
-      );
+      control.updateStyle(style);
     }
   }
 
@@ -2465,7 +2506,7 @@ mixin TextInputControl {
   /// This method is called on the when the attached input client's text style
   /// changes.
   @Deprecated(
-    'Use setStyleWithMetrics instead. '
+    'Use updateStyle instead. '
     'This feature was deprecated after v3.40.0-0.2.pre.',
   )
   void setStyle({
@@ -2480,24 +2521,7 @@ mixin TextInputControl {
   ///
   /// This method is called on the when the attached input client's text style
   /// changes.
-  void setStyleWithMetrics({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? lineHeight,
-  }) {
-    setStyle(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
-    );
-  }
+  void updateStyle(TextInputStyle style) {}
 
   /// Requests autofill from the text input control.
   ///
@@ -2624,35 +2648,28 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    setStyleWithMetrics(
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      textDirection: textDirection,
-      textAlign: textAlign,
+    updateStyle(
+      TextInputStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        textDirection: textDirection,
+        textAlign: textAlign,
+      ),
     );
   }
 
   @override
-  void setStyleWithMetrics({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
-    double? letterSpacing,
-    double? wordSpacing,
-    double? lineHeight,
-  }) {
+  void updateStyle(TextInputStyle style) {
     _channel.invokeMethod<void>('TextInput.setStyle', <String, dynamic>{
-      'fontFamily': fontFamily,
-      'fontSize': fontSize,
-      'fontWeightIndex': fontWeight?.index,
-      'textAlignIndex': textAlign.index,
-      'textDirectionIndex': textDirection.index,
-      'letterSpacing': letterSpacing,
-      'wordSpacing': wordSpacing,
-      'lineHeight': lineHeight,
+      'fontFamily': style.fontFamily,
+      'fontSize': style.fontSize,
+      'fontWeightIndex': style.fontWeight?.index,
+      'textAlignIndex': style.textAlign.index,
+      'textDirectionIndex': style.textDirection.index,
+      'letterSpacing': style.letterSpacing,
+      'wordSpacing': style.wordSpacing,
+      'lineHeight': style.lineHeight,
     });
   }
 

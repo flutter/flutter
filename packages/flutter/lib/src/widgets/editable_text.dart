@@ -3417,19 +3417,21 @@ class EditableTextState extends State<EditableText>
           }
           final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
           final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
-          _textInputConnection!.setStyleWithMetrics(
-            fontFamily: _style.fontFamily,
-            fontSize: _style.fontSize,
-            fontWeight: _style.fontWeight,
-            textDirection: _textDirection,
-            textAlign: widget.textAlign,
-            letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-            wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-            // preferredLineHeight already includes lineHeightScaleFactor from
-            // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-            lineHeight: renderEditable.preferredLineHeight,
+          _textInputConnection!.updateStyle(
+            TextInputStyle(
+              fontFamily: _style.fontFamily,
+              fontSize: _style.fontSize,
+              fontWeight: _style.fontWeight,
+              textDirection: _textDirection,
+              textAlign: widget.textAlign,
+              letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+              wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+              // preferredLineHeight already includes lineHeightScaleFactor from
+              // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+              lineHeight: renderEditable.preferredLineHeight,
+            ),
           );
-        }, debugLabel: 'EditableText.setStyleWithMetrics');
+        }, debugLabel: 'EditableText.updateStyle');
       }
     }
 
@@ -3975,17 +3977,19 @@ class EditableTextState extends State<EditableText>
       final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
       final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
       _textInputConnection!
-        ..setStyleWithMetrics(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-          letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-          wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-          // preferredLineHeight already includes lineHeightScaleFactor from
-          // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-          lineHeight: renderEditable.preferredLineHeight,
+        ..updateStyle(
+          TextInputStyle(
+            fontFamily: _style.fontFamily,
+            fontSize: _style.fontSize,
+            fontWeight: _style.fontWeight,
+            textDirection: _textDirection,
+            textAlign: widget.textAlign,
+            letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+            wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+            // preferredLineHeight already includes lineHeightScaleFactor from
+            // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+            lineHeight: renderEditable.preferredLineHeight,
+          ),
         )
         ..setEditingState(localValue)
         ..show();
@@ -4052,17 +4056,19 @@ class EditableTextState extends State<EditableText>
     final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
     newConnection
       ..show()
-      ..setStyleWithMetrics(
-        fontFamily: _style.fontFamily,
-        fontSize: _style.fontSize,
-        fontWeight: _style.fontWeight,
-        textDirection: _textDirection,
-        textAlign: widget.textAlign,
-        letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-        wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-        // preferredLineHeight already includes lineHeightScaleFactor from
-        // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-        lineHeight: renderEditable.preferredLineHeight,
+      ..updateStyle(
+        TextInputStyle(
+          fontFamily: _style.fontFamily,
+          fontSize: _style.fontSize,
+          fontWeight: _style.fontWeight,
+          textDirection: _textDirection,
+          textAlign: widget.textAlign,
+          letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+          wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+          // preferredLineHeight already includes lineHeightScaleFactor from
+          // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+          lineHeight: renderEditable.preferredLineHeight,
+        ),
       )
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
