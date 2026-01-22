@@ -10,6 +10,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 /// A description of an icon fulfilled by a font glyph.
 ///
@@ -20,7 +21,7 @@ import 'package:flutter/foundation.dart';
 /// the code points (or instances of [IconData]) which are not referenced from
 /// Dart app code. See the [staticIconProvider] annotation for more details.
 @immutable
-class IconData {
+final class IconData {
   /// Creates icon data.
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
@@ -45,9 +46,12 @@ class IconData {
   /// need to be explicitly opted out at build time). See [staticIconProvider]
   /// for more context.
   const IconData(
-    this.codePoint, {
-    this.fontFamily,
-    this.fontPackage,
+    // ignore: experimental_member_use
+    @mustBeConst this.codePoint, {
+    // ignore: experimental_member_use
+    @mustBeConst this.fontFamily,
+    // ignore: experimental_member_use
+    @mustBeConst this.fontPackage,
     this.matchTextDirection = false,
     this.fontFamilyFallback,
   });
