@@ -38,7 +38,7 @@ BufferView RuntimeEffectContents::EmplaceUniform(
       data_host_buffer.GetMinimumUniformAlignment();
   size_t alignment = std::max(uniform.bit_width / 8, minimum_uniform_alignment);
 
-  if (uniform.struct_layout.empty()) {
+  if (uniform.padding_layout.empty()) {
     return data_host_buffer.Emplace(source_data, uniform.GetSize(), alignment);
   }
 
@@ -53,7 +53,7 @@ BufferView RuntimeEffectContents::EmplaceUniform(
         auto* float_destination = reinterpret_cast<float*>(destination);
         auto* float_source = reinterpret_cast<const float*>(source_data);
 
-        for (char byte_type : uniform.struct_layout) {
+        for (char byte_type : uniform.padding_layout) {
           if (byte_type == kPaddingType) {
             float_destination[struct_float_index++] = 0.f;
           } else {

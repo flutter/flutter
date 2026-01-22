@@ -396,9 +396,9 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         for (size_t i = 0; i < count; i++) {
           for (size_t c = 0; c < spir_type.columns; c++) {
             for (size_t v = 0; v < 3; v++) {
-              uniform_description.struct_layout.push_back(1);
+              uniform_description.padding_layout.push_back(1);
             }
-            uniform_description.struct_layout.push_back(0);
+            uniform_description.padding_layout.push_back(0);
           }
         }
       }
@@ -428,7 +428,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     size_t binding =
         compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
-    std::vector<uint8_t> struct_layout;
+    std::vector<uint8_t> padding_layout;
     size_t float_count = 0;
 
     for (size_t i = 0; i < members.size(); i += 1) {
@@ -439,7 +439,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           size_t padding_count =
               (member.size + sizeof(float) - 1) / sizeof(float);
           while (padding_count > 0) {
-            struct_layout.push_back(0);
+            padding_layout.push_back(0);
             padding_count--;
           }
           break;
@@ -450,18 +450,18 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
             // and 0 layout property per byte of padding
             for (auto i = 0; i < member.array_elements; i++) {
               for (auto j = 0u; j < member.size / sizeof(float); j++) {
-                struct_layout.push_back(1);
+                padding_layout.push_back(1);
               }
               for (auto j = 0u; j < member.element_padding / sizeof(float);
                    j++) {
-                struct_layout.push_back(0);
+                padding_layout.push_back(0);
               }
             }
           } else {
             size_t member_float_count = member.byte_length / sizeof(float);
             float_count += member_float_count;
             while (member_float_count > 0) {
-              struct_layout.push_back(1);
+              padding_layout.push_back(1);
               member_float_count--;
             }
           }
@@ -478,7 +478,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         .location = binding,
         .binding = binding,
         .type = spirv_cross::SPIRType::Struct,
-        .struct_layout = std::move(struct_layout),
+        .padding_layout = std::move(padding_layout),
         .struct_float_count = float_count,
     });
   }

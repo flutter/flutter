@@ -83,7 +83,7 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
       desc.array_elements = i->array_elements();
       if (i->struct_layout()) {
         for (const auto& byte_type : *i->struct_layout()) {
-          desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
+          desc.padding_layout.push_back(static_cast<uint8_t>(byte_type));
         }
       }
       desc.struct_float_count = i->struct_float_count();

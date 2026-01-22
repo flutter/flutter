@@ -39,7 +39,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
   // Visible for testing
   /// Copies the uniform data into the host buffer.
   ///
-  /// If the `uniform` has a `struct_layout`, it is used to repack the data.
+  /// If the `uniform` has a `padding_layout`, it is used to repack the data.
   ///
   /// @param source_data The pointer to the start of the uniform data in the
   ///        source.

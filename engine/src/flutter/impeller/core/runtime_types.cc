@@ -14,7 +14,7 @@ size_t RuntimeUniformDescription::GetSize() const {
     size *= array_elements.value();
   }
   if (type == kStruct) {
-    size += sizeof(float) * struct_layout.size();
+    size += sizeof(float) * padding_layout.size();
   }
   return size;
 }

@@ -241,7 +241,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[7] = 0;
       layout[23] = 0;
 
-      EXPECT_THAT(uni->struct_layout, ::testing::ElementsAreArray(layout));
+      EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
       break;
     }
   }

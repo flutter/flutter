@@ -47,7 +47,7 @@ struct RuntimeUniformDescription {
   RuntimeUniformDimensions dimensions = {};
   size_t bit_width = 0u;
   std::optional<size_t> array_elements;
-  std::vector<uint8_t> struct_layout = {};
+  std::vector<uint8_t> padding_layout = {};
   size_t struct_float_count = 0u;
 
   /// @brief  Computes the total number of bytes that this uniform requires.

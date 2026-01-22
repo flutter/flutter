@@ -55,7 +55,7 @@ struct UniformDescription {
   size_t columns = 0u;
   size_t bit_width = 0u;
   std::optional<size_t> array_elements = std::nullopt;
-  std::vector<uint8_t> struct_layout = {};
+  std::vector<uint8_t> padding_layout = {};
   size_t struct_float_count = 0u;
 };
 
