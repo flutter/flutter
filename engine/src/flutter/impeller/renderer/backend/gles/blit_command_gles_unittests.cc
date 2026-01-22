@@ -69,10 +69,10 @@ TEST(BlitCommandGLESTest, BlitCopyTextureToBufferCommandGLESBindsFramebuffer) {
   DeviceBufferDescriptor dest_buffer_desc;
   dest_buffer_desc.size = 10 * 10 * 4;
   dest_buffer_desc.storage_mode = StorageMode::kHostVisible;
-  auto allocation = std::make_shared<Allocation>();
+  auto allocation = std::make_unique<Allocation>();
   ASSERT_TRUE(allocation->Truncate(Bytes(dest_buffer_desc.size)));
   auto dest_buffer =
-      std::make_shared<DeviceBufferGLES>(dest_buffer_desc, reactor, allocation);
+      std::make_shared<DeviceBufferGLES>(dest_buffer_desc, reactor, std::move(allocation));
 
   ASSERT_TRUE(reactor->React());
 
