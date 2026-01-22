@@ -558,22 +558,22 @@ void main() {
     await tester.pumpWidget(buildWidget(2.0));
     final EditableTextState state = tester.state(find.byType(EditableText));
 
-    // Ensure valid selection and focus
+    // Ensure valid selection and focus.
     controller.selection = const TextSelection.collapsed(offset: 0);
     focusNode.requestFocus();
     await tester.pump();
 
-    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist
+    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist.
     state.toggleToolbar();
     await tester.pump();
 
-    // Verify initial state
+    // Verify initial state.
     expect(state.selectionOverlay, isNotNull);
 
-    // Update cursorWidth
+    // Update cursorWidth.
     await tester.pumpWidget(buildWidget(10.0));
 
-    // Verify selectionOverlay still exists after update
+    // Verify selectionOverlay still exists after update.
     expect(state.selectionOverlay, isNotNull);
   });
 

@@ -600,7 +600,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
-      ..handleAnchorOffset = renderObject.cursorWidth
+      ..updateHandleAnchorOffset(renderObject.cursorWidth)
       // Update selection toolbar metrics.
       ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
@@ -1314,9 +1314,10 @@ class SelectionOverlay {
   ///
   /// This value is used for calculating the position of the text selection
   /// handles.
-  double? get handleAnchorOffset => _handleAnchorOffset;
   double? _handleAnchorOffset;
-  set handleAnchorOffset(double? value) {
+
+  /// Updates the handle anchor offset used for handle positioning.
+  void updateHandleAnchorOffset(double? value) {
     if (_handleAnchorOffset == value) {
       return;
     }
@@ -1845,7 +1846,7 @@ class SelectionOverlay {
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
         dragStartBehavior: dragStartBehavior,
-        handleAnchorOffset: handleAnchorOffset,
+        handleAnchorOffset: _handleAnchorOffset,
       );
     }
     return TapRegion(
@@ -1867,7 +1868,7 @@ class SelectionOverlay {
       handle = const SizedBox.shrink();
     } else {
       handle = _SelectionHandleOverlay(
-        handleAnchorOffset: handleAnchorOffset,
+        handleAnchorOffset: _handleAnchorOffset,
         type: _endHandleType,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,

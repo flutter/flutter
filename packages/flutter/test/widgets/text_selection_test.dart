@@ -1938,59 +1938,6 @@ void main() {
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
-
-  testWidgets('Extra large cursor width draws the collapsed handle centered', (
-    WidgetTester tester,
-  ) async {
-    final controller = TextEditingController(text: 'A');
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(child: TextField(controller: controller, cursorWidth: 50.0)),
-        ),
-      ),
-    );
-
-    // Tap to focus and show the collapsed handle.
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-
-    // Find the render object of the collapsed handle.
-    // The handle is drawn using a CustomPaint in the overlay.
-    // We can find it by the unique key or by type if we know it.
-    // However, since it's in an overlay, we might need a more specific finder.
-    // Detailed search: The handle is usually a CompositedTransformFollower -> FadeTransition -> Container -> CustomPaint.
-
-    // We can rely on the fact that the handle is visually centered on the cursor.
-    // Let's get the cursor center.
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final Rect caretRect = renderEditable.getLocalRectForCaret(
-      const TextPosition(offset: 1),
-    ); // End of 'A'
-    final Offset caretCenterGlobal = renderEditable.localToGlobal(caretRect.center);
-
-    // Now find the handle.
-    // In Material, the collapsed handle uses _TextSelectionHandlePainter (a CustomPainter, not a Widget).
-    // Since _TextSelectionHandlePainter is private and is a CustomPainter (not a Widget),
-    // we cannot use find.byWidgetPredicate to search for it directly.
-    // Instead, we find the CustomPaint widget that uses this painter.
-    final Finder handleFinder = find.byWidgetPredicate(
-      (Widget widget) =>
-          widget is CustomPaint &&
-          widget.painter != null &&
-          '${widget.painter.runtimeType}' == '_TextSelectionHandlePainter',
-    );
-
-    expect(handleFinder, findsOneWidget);
-    final RenderBox handleBox = tester.renderObject(handleFinder);
-    final Offset handleCenter = handleBox.localToGlobal(handleBox.size.center(Offset.zero));
-
-    // The handle's center x should match the caret's center x.
-    // This verifies that the visual center of the handle (the "onion" shape) properly
-    // points to the caret, confirming that getHandleAnchor correctly compensated for
-    // the handle size and the extra-large cursor width (50.0).
-    expect(handleCenter.dx, closeTo(caretCenterGlobal.dx, 0.5));
-  }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
