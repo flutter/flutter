@@ -147,16 +147,13 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 /// [TextSelectionGestureDetector].
 ///
 /// This widget does not provide selection handles or text selection
-/// context menus out of the box.
+/// context menus out of the box. They can be added by providing
+/// [selectionControls] and [contextMenuBuilder].
 ///
 /// This input field manages its own internal [TextEditingController]
 /// and [FocusNode] unless provided one. This field also provides defaults
 /// for required [EditableText] members [EditableText.cursorColor],
 /// [EditableText.backgroundCursorColor], and [EditableText.style].
-///
-/// This widget provides platform defaults based on observed native behavior:
-///
-///  * [TextSelectionGestureDetectorBuilderDelegate.forcePressEnabled] is set to true on iOS.
 class TestTextField extends StatefulWidget {
   const TestTextField({
     super.key,
@@ -170,6 +167,7 @@ class TestTextField extends StatefulWidget {
     this.maxLines = 1,
     this.onChanged,
     this.readOnly = false,
+    this.selectionControls,
     this.showCursor,
     this.style,
     this.controller,
@@ -185,6 +183,7 @@ class TestTextField extends StatefulWidget {
   final int? maxLines;
   final ValueChanged<String>? onChanged;
   final bool readOnly;
+  final TextSelectionControls? selectionControls;
   final bool? showCursor;
   final TextStyle? style;
   final TextEditingController? controller;
@@ -205,7 +204,7 @@ class _TestTextFieldState extends State<TestTextField>
 
   // API for TextSelectionGestureDetectorBuilderDelegate.
   @override
-  late bool forcePressEnabled;
+  bool get forcePressEnabled => false;
 
   @override
   final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -227,16 +226,10 @@ class _TestTextFieldState extends State<TestTextField>
     super.dispose();
   }
 
-  static const Color _red = Color(0xFFF44336); // Colors.red.
+  static const Color _red = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
   @override
   Widget build(BuildContext context) {
-    // Platform defaults.
-    forcePressEnabled = switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => true,
-      _ => false,
-    };
-    // End of platform defaults.
     return _selectionGestureDetectorBuilder.buildGestureDetector(
       behavior: HitTestBehavior.translucent,
       child: EditableText(
@@ -253,7 +246,7 @@ class _TestTextFieldState extends State<TestTextField>
         onChanged: widget.onChanged,
         readOnly: widget.readOnly,
         rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
-        selectionControls: testTextSelectionHandleControls,
+        selectionControls: widget.selectionControls,
         showCursor: widget.showCursor,
         style: widget.style ?? const TextStyle(), // required by editable text.
         controller: _effectiveController, // required by editable text.

@@ -1237,7 +1237,13 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: TestTextField(autofocus: true, controller: controller)),
+          home: Scaffold(
+            body: TestTextField(
+              autofocus: true,
+              selectionControls: testTextSelectionHandleControls, // Needed for handles.
+              controller: controller,
+            ),
+          ),
         ),
       );
 
