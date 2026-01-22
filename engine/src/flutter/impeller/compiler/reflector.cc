@@ -397,7 +397,8 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
     std::vector<uint8_t> struct_layout;
-    std::vector<StructElement> struct_elements;
+    std::vector<StructField> struct_fields;
+    struct_fields.reserve(members.size());
     size_t float_count = 0;
 
     for (size_t i = 0; i < members.size(); i += 1) {
@@ -414,11 +415,11 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           break;
         }
         case StructMember::UnderlyingType::kFloat: {
-          StructElement element_desc{};
-          element_desc.name = member.name;
-          element_desc.byte_size =
+          StructField field_desc;
+          field_desc.name = member.name;
+          field_desc.byte_size =
               member.size * member.array_elements.value_or(1);
-          struct_elements.push_back(element_desc);
+          struct_fields.push_back(field_desc);
           if (member.array_elements > 1) {
             // For each array element member, insert 1 layout property per byte
             // and 0 layout property per byte of padding
@@ -453,7 +454,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         .binding = binding,
         .type = spirv_cross::SPIRType::Struct,
         .struct_layout = std::move(struct_layout),
-        .struct_elements = std::move(struct_elements),
+        .struct_fields = std::move(struct_fields),
         .struct_float_count = float_count,
     });
   }

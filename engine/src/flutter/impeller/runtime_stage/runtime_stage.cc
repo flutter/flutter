@@ -86,10 +86,11 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
           desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
         }
       }
-      if (i->struct_elements()) {
-        for (const auto& elem : *i->struct_elements()) {
-          desc.struct_elements.emplace_back(StructElement{
-              elem->name()->str(), static_cast<size_t>(elem->byte_size())});
+      if (i->struct_fields()) {
+        for (const auto& elem : *i->struct_fields()) {
+          desc.struct_fields.emplace_back(
+              StructField{.name = elem->name()->str(),
+                          .byte_size = static_cast<size_t>(elem->byte_size())});
         }
       }
       desc.struct_float_count = i->struct_float_count();

@@ -34,7 +34,7 @@ enum StructByteType:uint8 {
   kFloat = 1,
 }
 
-table StructElement {
+table StructField {
   name: string;
   byte_size: uint64;
 }
@@ -49,7 +49,7 @@ table UniformDescription {
   columns: uint64;
   array_elements: uint64;
   struct_layout: [StructByteType];
-  struct_elements: [StructElement];
+  struct_fields: [StructField];
   struct_float_count: uint64;
 }
 

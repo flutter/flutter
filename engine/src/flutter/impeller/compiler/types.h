@@ -46,8 +46,9 @@ enum class SourceLanguage {
   kHLSL,
 };
 
-struct StructElement {
+struct StructField {
   std::string name;
+  // The size in bytes of this field, not including padding.
   size_t byte_size;
 };
 
@@ -60,8 +61,12 @@ struct UniformDescription {
   size_t columns = 0u;
   size_t bit_width = 0u;
   std::optional<size_t> array_elements = std::nullopt;
+  // The padding spec of the struct data. 1 represents a byte of data, 0
+  // represents a byte of padding.
   std::vector<uint8_t> struct_layout = {};
-  std::vector<StructElement> struct_elements = {};
+  // The fields of the struct. Necessary on Vulkan, where everything is
+  // packed into a struct.
+  std::vector<StructField> struct_fields = {};
   size_t struct_float_count = 0u;
 };
 

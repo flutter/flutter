@@ -338,11 +338,11 @@ std::unique_ptr<fb::RuntimeStageT> RuntimeStageData::CreateStageFlatbuffer(
     }
     desc->struct_float_count = uniform.struct_float_count;
 
-    for (const auto& element : uniform.struct_elements) {
-      auto elem = std::make_unique<fb::StructElementT>(fb::StructElementT{});
-      elem->name = element.name;
-      elem->byte_size = element.byte_size;
-      desc->struct_elements.emplace_back(std::move(elem));
+    for (const StructField& field : uniform.struct_fields) {
+      auto field_desc = std::make_unique<fb::StructFieldT>(fb::StructFieldT{});
+      field_desc->name = field.name;
+      field_desc->byte_size = field.byte_size;
+      desc->struct_fields.emplace_back(std::move(field_desc));
     }
 
     runtime_stage->uniforms.emplace_back(std::move(desc));

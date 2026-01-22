@@ -5437,7 +5437,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       final entry = entryDynamic! as Map<String, Object>;
       return entry['name'] == name ||
           (entry['type'] == 'Struct' &&
-              (entry['struct_member_names']! as List<dynamic>).contains(name));
+              (entry['struct_field_names']! as List<dynamic>).contains(name));
     });
   }
 
@@ -5475,8 +5475,8 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       }
 
       if (entry['type'] == 'Struct') {
-        final elementNames = entry['struct_member_names']! as List<dynamic>;
-        final elementSizes = entry['struct_member_bytes']! as List<dynamic>;
+        final elementNames = entry['struct_field_names']! as List<dynamic>;
+        final elementSizes = entry['struct_field_bytes']! as List<dynamic>;
 
         for (var i = 0; i < elementNames.length; ++i) {
           final elementName = elementNames[i]! as String;

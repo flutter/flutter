@@ -296,14 +296,14 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
           {"uVec3Array", 24}, {"uVec4Array", 32}, {"uMat2Array", 32},
           {"uMat3Array", 72}, {"uMat4Array", 128}};
 
-      ASSERT_EQ(uni->struct_elements.size(), expected_uniforms.size());
+      ASSERT_EQ(uni->struct_fields.size(), expected_uniforms.size());
 
       for (size_t i = 0; i < expected_uniforms.size(); ++i) {
-        const auto& element = uni->struct_elements[i];
+        const auto& element = uni->struct_fields[i];
         const auto& expected = expected_uniforms[i];
 
-        EXPECT_EQ(element.name, expected.first);
-        EXPECT_EQ(element.byte_size, expected.second);
+        EXPECT_EQ(element.name, expected.first) << "index: " << i;
+        EXPECT_EQ(element.byte_size, expected.second) << "index: " << i;
       }
 
       break;

@@ -46,6 +46,7 @@ static std::string RuntimeStageBackendToString(
 namespace {
 Dart_Handle ConvertUniformDescriptionToMap(
     const impeller::RuntimeUniformDescription& uniform_description) {
+  // The number of KV pairs in the map we send to dart.
   constexpr int num_entries = 5;
   Dart_Handle keys = Dart_NewList(num_entries);
   FML_DCHECK(!Dart_IsError(keys));
@@ -93,14 +94,14 @@ Dart_Handle ConvertUniformDescriptionToMap(
   {
     // 3
     Dart_Handle struct_member_names =
-        Dart_NewList(uniform_description.struct_elements.size());
+        Dart_NewList(uniform_description.struct_fields.size());
     int i = 0;
-    for (const auto& elem : uniform_description.struct_elements) {
+    for (const auto& elem : uniform_description.struct_fields) {
       Dart_ListSetAt(struct_member_names, i++,
                      Dart_NewStringFromCString(elem.name.c_str()));
     }
     [[maybe_unused]] Dart_Handle result = Dart_ListSetAt(
-        keys, 3, Dart_NewStringFromCString("struct_member_names"));
+        keys, 3, Dart_NewStringFromCString("struct_field_names"));
     FML_DCHECK(!Dart_IsError(result));
     result = Dart_ListSetAt(values, 3, struct_member_names);
     FML_DCHECK(!Dart_IsError(result));
@@ -108,13 +109,13 @@ Dart_Handle ConvertUniformDescriptionToMap(
   {
     // 4
     Dart_Handle struct_member_bytes =
-        Dart_NewList(uniform_description.struct_elements.size());
+        Dart_NewList(uniform_description.struct_fields.size());
     int i = 0;
-    for (const auto& elem : uniform_description.struct_elements) {
+    for (const auto& elem : uniform_description.struct_fields) {
       Dart_ListSetAt(struct_member_bytes, i++, Dart_NewInteger(elem.byte_size));
     }
     [[maybe_unused]] Dart_Handle result = Dart_ListSetAt(
-        keys, 4, Dart_NewStringFromCString("struct_member_bytes"));
+        keys, 4, Dart_NewStringFromCString("struct_field_bytes"));
     FML_DCHECK(!Dart_IsError(result));
     result = Dart_ListSetAt(values, 4, struct_member_bytes);
     FML_DCHECK(!Dart_IsError(result));
