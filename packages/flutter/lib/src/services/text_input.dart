@@ -1540,14 +1540,29 @@ final class TextInputStyle {
     this.lineHeight,
   });
 
-
+  /// The name of the font to use when painting the text (e.g., Roboto).
   final String? fontFamily;
+
+  /// The size of fonts (in logical pixels) to use when painting the text.
   final double? fontSize;
+
+  /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight? fontWeight;
+
+  /// The directionality of the text.
   final TextDirection textDirection;
+
+  /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The amount of space (in logical pixels) to add between each letter.
   final double? letterSpacing;
+
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word).
   final double? wordSpacing;
+
+  /// The line height in logical pixels.
   final double? lineHeight;
 
   @override
