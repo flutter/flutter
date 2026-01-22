@@ -119,9 +119,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       );
       final unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
-              .cast<Map<dynamic, dynamic>>()
-              .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
-              .toList();
+          .cast<Map<dynamic, dynamic>>()
+          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
+          .toList();
       await viewChannel!.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
       for (final Map<String, dynamic> event in recordedEvents.reversed) {
