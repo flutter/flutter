@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -276,6 +276,37 @@ void main() {
     debugDisableShadows = true;
   });
 
+  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    await tester.pumpWidget(
+      WidgetsApp(
+        home: const Placeholder(),
+        color: const Color(0xFF2196F3),
+        builder: (context, _) => const SizedBox(),
+      ),
+    );
+    expect(
+      find.byType(CheckedModeBanner),
+      paints
+        ..save()
+        ..translate(x: 800.0, y: 0.0)
+        ..rotate(angle: math.pi / 4.0)
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0x7f000000),
+          hasMaskFilter: true,
+        )
+        ..rect(
+          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
+          color: const Color(0xa0b71c1c),
+          hasMaskFilter: false,
+        )
+        ..paragraph(offset: const Offset(-40.0, 29.0))
+        ..restore(),
+    );
+    debugDisableShadows = true;
+  });
+
   test('BannerPainter dispatches memory events', () async {
     await expectLater(
       await memoryEvents(
@@ -332,5 +363,17 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Banner)), Size.zero);
+  });
+
+  testWidgets('CheckedModeBanner does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: CheckedModeBanner(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CheckedModeBanner)), Size.zero);
   });
 }

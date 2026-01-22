@@ -1221,43 +1221,6 @@ void main() {
     final Finder content = find.text('X');
     expect(tester.getSize(content).isEmpty, isTrue);
   });
-
-  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
-    debugDisableShadows = false;
-    await tester.pumpWidget(const MaterialApp(home: Placeholder()));
-    expect(
-      find.byType(CheckedModeBanner),
-      paints
-        ..save()
-        ..translate(x: 800.0, y: 0.0)
-        ..rotate(angle: 3.141592653589793 / 4.0)
-        ..rect(
-          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
-          color: const Color(0x7f000000),
-          hasMaskFilter: true,
-        )
-        ..rect(
-          rect: const Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0),
-          color: const Color(0xa0b71c1c),
-          hasMaskFilter: false,
-        )
-        ..paragraph(offset: const Offset(-40.0, 29.0))
-        ..restore(),
-    );
-    debugDisableShadows = true;
-  });
-
-  testWidgets('CheckedModeBanner does not crash at zero area', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox.shrink(child: CheckedModeBanner(child: Text('X'))),
-        ),
-      ),
-    );
-    expect(tester.getSize(find.byType(CheckedModeBanner)), Size.zero);
-  });
 }
 
 Material _getMaterialFromBanner(WidgetTester tester) {
