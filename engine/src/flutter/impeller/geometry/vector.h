@@ -175,8 +175,10 @@ struct Vector3 {
     return Vector3(x / scale, y / scale, z / scale);
   }
 
-  constexpr Vector3 Lerp(const Vector3& v, Scalar t) const {
-    return *this + (v - *this) * t;
+  static constexpr Vector3 Lerp(const Vector3& from,
+                                const Vector3& to,
+                                Scalar t) {
+    return from + (to - from) * t;
   }
 
   /**
@@ -311,8 +313,10 @@ struct Vector4 {
     return {std::round(x), std::round(y), std::round(z), std::round(w)};
   }
 
-  constexpr Vector4 Lerp(const Vector4& v, Scalar t) const {
-    return *this + (v - *this) * t;
+  static constexpr Vector4 Lerp(const Vector4& from,
+                                const Vector4& to,
+                                Scalar t) {
+    return from + (to - from) * t;
   }
 
   constexpr Vector2 xy() const { return Vector2(x, y); }

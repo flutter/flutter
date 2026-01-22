@@ -7,8 +7,10 @@
 
 namespace impeller {
 
-Quaternion Quaternion::Slerp(const Quaternion& to, double time) const {
-  double cosine = Dot(to);
+Quaternion Quaternion::Slerp(const Quaternion& from,
+                             const Quaternion& to,
+                             double time) {
+  double cosine = from.Dot(to);
   if (fabs(cosine) < 1.0 - 1e-3 /* epsilon */) {
     /*
      *  Spherical Interpolation.
@@ -18,12 +20,12 @@ Quaternion Quaternion::Slerp(const Quaternion& to, double time) const {
     auto sineInverse = 1.0 / sine;
     auto c0 = sin((1.0 - time) * angle) * sineInverse;
     auto c1 = sin(time * angle) * sineInverse;
-    return *this * c0 + to * c1;
+    return from * c0 + to * c1;
   } else {
     /*
      *  Linear Interpolation.
      */
-    return (*this * (1.0 - time) + to * time).Normalize();
+    return (from * (1.0 - time) + to * time).Normalize();
   }
 }
 

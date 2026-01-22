@@ -224,13 +224,14 @@ struct Color {
    * @brief Return a color that is linearly interpolated between colors a
    *        and b, according to the value of t.
    *
-   * @param a The lower color.
-   * @param b The upper color.
-   * @param t A value between 0.0f and 1.0f, inclusive.
+   * @param from The first color.
+   * @param to The second color.
+   * @param t A value, typically between 0.0f and 1.0f, specifying how far
+   *          to interpolate from the first color to the second color.
    * @return constexpr Color
    */
-  constexpr static Color Lerp(Color a, Color b, Scalar t) {
-    return a + (b - a) * t;
+  constexpr static Color Lerp(const Color& from, const Color& to, Scalar t) {
+    return from + (to - from) * t;
   }
 
   constexpr Color Clamp01() const {

@@ -48,7 +48,9 @@ struct Quaternion {
 
   Quaternion Invert() const { return {-x, -y, -z, w}; }
 
-  Quaternion Slerp(const Quaternion& to, double time) const;
+  static Quaternion Slerp(const Quaternion& from,
+                          const Quaternion& to,
+                          double time);
 
   Quaternion operator*(const Quaternion& o) const {
     return {

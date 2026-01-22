@@ -3193,8 +3193,8 @@ TEST(RectTest, TransformAndClipBounds) {
     // t = (epsilon - -.6) / (.9 - -.6)
     //   = (epsilon + .6) / 1.5
     //   = 0.4000407
-    // RightTop.Lerp(LeftTop, 0.4000407) = (319.9919, 200, epsilon)
-    //                                   = (5242747, 3276800)
+    // Lerp(RightTop, LeftTop, 0.4000407) = (319.9919, 200, epsilon)
+    //                                    = (5242747, 3276800)
     // Cannot interpolate against RightBottom because it also has W<0
 
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
@@ -3207,8 +3207,8 @@ TEST(RectTest, TransformAndClipBounds) {
     // t = (epsilon - -1.2) / (.3 - -1.2)
     //   = (epsilon + 1.2) / 1.5
     //   = 0.8000407
-    // RightTop.Lerp(LeftTop, 0.8000407) = (239.9919, 400, epsilon)
-    //                                   = (3932026.667, 6553600)
+    // Lerp(RightBottom, LeftBottom, 0.8000407) = (239.9919, 400, epsilon)
+    //                                          = (3932026.667, 6553600)
     // Cannot interpolate against RightTop because it also has W<0
 
     // Min/Max X and Y of all the points generated above are:
@@ -3249,8 +3249,8 @@ TEST(RectTest, TransformAndClipBounds) {
     // t = (epsilon - -1.6) / (.4 - -1.6)
     //   = (epsilon + 1.6) / 2
     //   = 0.8000305
-    // RightTop.Lerp(LeftTop, 0.8000305) = (239.9939, 200, epsilon)
-    //                                   = (3932060, 3276800)
+    // Lerp(RightTop, LeftTop, 0.8000305) = (239.9939, 200, epsilon)
+    //                                    = (3932060, 3276800)
     // Cannot interpolate against RightBottom because it also has W<0
 
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
@@ -3259,8 +3259,8 @@ TEST(RectTest, TransformAndClipBounds) {
     // t = (epsilon - -.2) / (.4 - -.2)
     //   = (epsilon + .2) / .6
     //   = 0.333435
-    // LeftBottom.Lerp(LeftTop, .333435) = (200, 333.31299, epsilon)
-    //                                   = (3276800, 5461000)
+    // Lerp(LeftBottom, LeftTop, .333435) = (200, 333.31299, epsilon)
+    //                                    = (3276800, 5461000)
     // Cannot interpolate against RightBottom because it also has W<0
 
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),

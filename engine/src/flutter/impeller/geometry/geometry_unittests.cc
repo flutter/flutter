@@ -39,39 +39,42 @@ TEST(GeometryTest, ScalarNearlyEqual) {
 
 TEST(GeometryTest, GetLerpTValue) {
   // Zero length intervals
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 1.0f, 1.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.0f, 1.0f, 1.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(2.0f, 1.0f, 1.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 10.0f, 10.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(10.0f, 10.0f, 10.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 10.0f, 10.0f), 0.0f));
+  EXPECT_EQ(GetLerpTValue(1.0f, 1.0f, 0.0f), std::nullopt);
+  EXPECT_EQ(GetLerpTValue(1.0f, 1.0f, 1.0f), 0.0f);
+  EXPECT_EQ(GetLerpTValue(1.0f, 1.0f, 2.0f), std::nullopt);
+  EXPECT_EQ(GetLerpTValue(10.0f, 10.0f, 0.0f), std::nullopt);
+  EXPECT_EQ(GetLerpTValue(10.0f, 10.0f, 10.0f), 0.0f);
+  EXPECT_EQ(GetLerpTValue(10.0f, 10.0f, 20.0f), std::nullopt);
 
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(-0.1f, 0.0f, 1.0f), -0.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 0.0f, 1.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.1f, 0.0f, 1.0f), 0.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.2f, 0.0f, 1.0f), 0.2f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.8f, 0.0f, 1.0f), 0.8f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.9f, 0.0f, 1.0f), 0.9f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.0f, 0.0f, 1.0f), 1.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.1f, 0.0f, 1.0f), 1.1f));
+  // Range 0 to 1
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, -0.1f), -0.1f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 0.0f), 0.0f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 0.1f), 0.1f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 0.2f), 0.2f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 0.8f), 0.8f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 0.9f), 0.9f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 1.0f), 1.0f);
+  EXPECT_EQ(GetLerpTValue(0.0f, 1.0f, 1.1f), 1.1f);
 
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(19.0f, 20.0f, 30.0f), -0.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 20.0f, 30.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(21.0f, 20.0f, 30.0f), 0.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(22.0f, 20.0f, 30.0f), 0.2f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(28.0f, 20.0f, 30.0f), 0.8f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(29.0f, 20.0f, 30.0f), 0.9f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(30.0f, 20.0f, 30.0f), 1.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(31.0f, 20.0f, 30.0f), 1.1f));
+  // Range 20 to 30
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 19.0f), -0.1f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 20.0f), 0.0f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 21.0f), 0.1f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 22.0f), 0.2f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 28.0f), 0.8f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 29.0f), 0.9f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 30.0f), 1.0f);
+  EXPECT_EQ(GetLerpTValue(20.0f, 30.0f, 31.0f), 1.1f);
 
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(19.0f, 30.0f, 20.0f), 1.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 30.0f, 20.0f), 1.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(21.0f, 30.0f, 20.0f), 0.9f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(22.0f, 30.0f, 20.0f), 0.8f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(28.0f, 30.0f, 20.0f), 0.2f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(29.0f, 30.0f, 20.0f), 0.1f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(30.0f, 30.0f, 20.0f), 0.0f));
-  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(31.0f, 30.0f, 20.0f), -0.1f));
+  // Backwards range 30 to 20
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 19.0f), 1.1f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 20.0f), 1.0f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 21.0f), 0.9f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 22.0f), 0.8f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 28.0f), 0.2f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 29.0f), 0.1f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 30.0f), 0.0f);
+  EXPECT_EQ(GetLerpTValue(30.0f, 20.0f, 31.0f), -0.1f);
 }
 
 TEST(GeometryTest, MakeColumn) {
@@ -565,7 +568,7 @@ TEST(GeometryTest, QuaternionLerp) {
   auto q1 = Quaternion{{0.0, 0.0, 1.0}, 0.0};
   auto q2 = Quaternion{{0.0, 0.0, 1.0}, kPiOver4};
 
-  auto q3 = q1.Slerp(q2, 0.5);
+  auto q3 = Quaternion::Slerp(q1, q2, 0.5);
 
   auto expected = Quaternion{{0.0, 0.0, 1.0}, kPiOver4 / 2.0};
 
@@ -1191,23 +1194,62 @@ TEST(GeometryTest, Vector4Round) {
 
 TEST(GeometryTest, PointLerp) {
   Point p(1, 2);
-  Point result = p.Lerp({5, 10}, 0.75);
+  Point result = Point::Lerp(p, {5, 10}, 0.75);
   Point expected(4, 8);
   ASSERT_POINT_NEAR(result, expected);
 }
 
+TEST(GeometryTest, LerpToPointFieldValue) {
+  Point a(1.0f, 2.0f);
+  Point b(5.0f, 10.0f);
+  Point expected(4.0f, 8.0f);
+
+  EXPECT_EQ(LerpToFieldValue(a, b, &Point::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Point::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Point::y, 8.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Point::y, 8.0f), expected);
+}
+
 TEST(GeometryTest, Vector3Lerp) {
   Vector3 p(1, 2, 3);
-  Vector3 result = p.Lerp({5, 10, 15}, 0.75);
+  Vector3 result = Vector3::Lerp(p, {5, 10, 15}, 0.75);
   Vector3 expected(4, 8, 12);
   ASSERT_VECTOR3_NEAR(result, expected);
 }
 
+TEST(GeometryTest, LerpToVector3FieldValue) {
+  Vector3 a(1.0f, 2.0f, 3.0f);
+  Vector3 b(5.0f, 10.0f, 15.0f);
+  Vector3 expected(4.0f, 8.0f, 12.0f);
+
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector3::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector3::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector3::y, 8.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector3::y, 8.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector3::z, 12.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector3::z, 12.0f), expected);
+}
+
 TEST(GeometryTest, Vector4Lerp) {
   Vector4 p(1, 2, 3, 4);
-  Vector4 result = p.Lerp({5, 10, 15, 20}, 0.75);
+  Vector4 result = Vector4::Lerp(p, {5, 10, 15, 20}, 0.75);
   Vector4 expected(4, 8, 12, 16);
   ASSERT_VECTOR4_NEAR(result, expected);
+}
+
+TEST(GeometryTest, LerpToVector4FieldValue) {
+  Vector4 a(1.0f, 2.0f, 3.0f, 4.0f);
+  Vector4 b(5.0f, 10.0f, 15.0f, 20.0f);
+  Vector4 expected(4.0f, 8.0f, 12.0f, 16.0f);
+
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector4::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector4::x, 4.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector4::y, 8.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector4::y, 8.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector4::z, 12.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector4::z, 12.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(a, b, &Vector4::w, 16.0f), expected);
+  EXPECT_EQ(LerpToFieldValue(b, a, &Vector4::w, 16.0f), expected);
 }
 
 TEST(GeometryTest, SeparatedVector2NormalizesWithConstructor) {
@@ -1474,6 +1516,75 @@ TEST(GeometryTest, ColorLerp) {
     ASSERT_COLOR_NEAR(Color::Lerp(a, b, 0.0), a);
     ASSERT_COLOR_NEAR(Color::Lerp(a, b, 1.0), b);
     ASSERT_COLOR_NEAR(Color::Lerp(a, b, 0.2), Color(0.24, 0.52, 0.84, 0.46));
+  }
+}
+
+TEST(GeometryTest, LerpToColorFieldValue) {
+  {
+    // Simple interpolation between 2 colors
+    Color a = Color(0.25, 0.75, 0.5, 1.00);
+    Color b = Color::BlackTransparent();
+    Color expected = Color(0.125f, 0.375f, 0.25f, 0.5f);
+
+    // interpolate on alpha
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::alpha, 0.5f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::alpha, 0.5f), expected);
+
+    // interpolate on red
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::red, 0.125f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::red, 0.125f), expected);
+
+    // interpolate on green
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::green, 0.375f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::green, 0.375f), expected);
+
+    // interpolate on blue
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::blue, 0.25f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::blue, 0.25f), expected);
+  }
+
+  {
+    // Interpolation outside the range of the 2 colors
+    Color a = Color(0.25, 0.125, 0.5, 0.25);
+    Color b = Color::BlackTransparent();
+    Color expected = Color(0.5f, 0.25f, 1.0f, 0.5f);
+
+    // interpolate on alpha
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::alpha, 0.5f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::alpha, 0.5f), expected);
+
+    // interpolate on red
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::red, 0.5f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::red, 0.5f), expected);
+
+    // interpolate on green
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::green, 0.25f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::green, 0.25f), expected);
+
+    // interpolate on blue
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::blue, 1.0f), expected);
+    // and with colors reversed
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::blue, 1.0f), expected);
+  }
+
+  {
+    // Interpolation to .25 just to make sure it can calculate other fractions
+    // alpha = .25 is 3/4 of the way from a to b, or 1/4 from b to a
+    Color a = Color(0.25, 0.75, 0.5, 1.00);
+    Color b = Color::BlackTransparent();
+    Color expected = Color(0.0625f, 0.1875f, 0.125f, 0.25f);
+
+    // interpolate on alpha
+    EXPECT_EQ(LerpToFieldValue(a, b, &Color::alpha, 0.25f), expected);
+    // and with colors reversed (same desired alpha value)
+    EXPECT_EQ(LerpToFieldValue(b, a, &Color::alpha, 0.25f), expected);
   }
 }
 
