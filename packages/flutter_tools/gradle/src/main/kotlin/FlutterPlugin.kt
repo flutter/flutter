@@ -445,8 +445,6 @@ class FlutterPlugin : Plugin<Project> {
                     }
                 }
             }
-            // Native assets are now copied by copyJniLibsTask to the jniLibs folder,
-            // which is registered as a source set. We do not need to add the raw directory here.
             getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
