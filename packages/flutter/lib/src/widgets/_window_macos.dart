@@ -120,7 +120,7 @@ class WindowingOwnerMacOS extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    final TooltipWindowControllerMacOS res = TooltipWindowControllerMacOS(
+    final res = TooltipWindowControllerMacOS(
       owner: this,
       delegate: delegate,
       contentSizeConstraints: preferredConstraints,
@@ -829,7 +829,7 @@ class _MacOSPlatformInterface {
       ..ref.onWillClose = onWillClose
       ..ref.onNotifyListeners = onNotifyListeners
       ..ref.onGetWindowPosition = onGetWindowPosition
-      ..ref.parentViewId = parentViewId ?? 0;
+      ..ref.parentViewId = parentViewId;
 
     request.ref
       ..hasConstraints = true
