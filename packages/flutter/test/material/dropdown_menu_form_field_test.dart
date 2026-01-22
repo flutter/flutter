@@ -32,6 +32,14 @@ void main() {
     return find.widgetWithText(MenuItemButton, menuItem.label).last;
   }
 
+  Finder findMenuItemButton(String label) {
+    // For each menu items there are two MenuItemButton widgets.
+    // The last one is the real button item in the menu.
+    // The first one is not visible, it is part of _DropdownMenuBody
+    // which is used to compute the dropdown width.
+    return find.widgetWithText(MenuItemButton, label).last;
+  }
+
   testWidgets('Creates an underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1394,4 +1402,50 @@ void main() {
     );
     expect(tester.getSize(find.byType(DropdownMenuFormField<MenuItem>)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180121.
+  testWidgets(
+    'Allow null entry to clear selection',
+        (WidgetTester tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      const selectNoneLabel = 'Select none';
+      final nullableMenuItems = <DropdownMenuEntry<String?>>[
+        const DropdownMenuEntry<String?>(value: null, label: selectNoneLabel),
+        const DropdownMenuEntry<String?>(value: 'a', label: 'A'),
+        const DropdownMenuEntry<String?>(value: 'b', label: 'B'),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownMenuFormField<String?>(
+                  controller: controller,
+                  requestFocusOnTap: true,
+                  enableFilter: true,
+                  dropdownMenuEntries: nullableMenuItems,
+                  onSelected: (_) {
+                    setState(() {});
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<String?>));
+      await tester.pump();
+
+      // Select the 'None' item.
+      await tester.tap(findMenuItemButton(selectNoneLabel));
+      await tester.pumpAndSettle();
+
+      expect(controller.text, selectNoneLabel);
+    },
+  );
 }

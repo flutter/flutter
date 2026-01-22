@@ -5372,7 +5372,7 @@ void main() {
       await tester.tap(find.byType(DropdownMenu<String?>));
       await tester.pump();
 
-      // Select the 'Menu 1' item.
+      // Select the 'None' item.
       await tester.tap(findMenuItemButton(selectNoneLabel));
       await tester.pumpAndSettle();
 
