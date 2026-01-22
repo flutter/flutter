@@ -50,11 +50,14 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
+/// This widget is backed by [RawAvatar] and uses [ShapeDecoration] internally.
+///
 /// See also:
 ///
 ///  * [Chip], for representing users or concepts in long form.
 ///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with
 ///    some text for a fixed height list entry.
+///  * [RawAvatar], the underlying widget that powers [CircleAvatar].
 ///  * <https://material.io/design/components/chips.html#input-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
