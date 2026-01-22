@@ -32,6 +32,18 @@ class _MockParentScroll {
   }
 }
 
+class _MockParentPostMessage {
+  int callCount = 0;
+  double? lastDeltaX;
+  double? lastDeltaY;
+
+  void call(double deltaX, double deltaY) {
+    callCount++;
+    lastDeltaX = deltaX;
+    lastDeltaY = deltaY;
+  }
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -825,6 +837,44 @@ void testMain() {
     expect(mockParent.callCount, 1);
     expect(mockParent.lastDeltaX, 7);
     expect(mockParent.lastDeltaY, 21);
+  });
+
+  test('wheel event in cross-origin iframe falls back to postMessage', () {
+    final mockPostMessage = _MockParentPostMessage();
+    addTearDown(() {
+      debugParentScrollHandler = null;
+      debugParentPostMessageHandler = null;
+      debugSimulateCrossOrigin = false;
+      debugResetIframeDetectionCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    // Simulate cross-origin iframe - direct scrollBy will fail
+    debugSimulateCrossOrigin = true;
+    debugParentPostMessageHandler = mockPostMessage.call;
+    debugSetIframeEmbeddingForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: true);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 25,
+      clientY: 35,
+      deltaX: 11,
+      deltaY: 33,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+    // postMessage fallback should be called
+    expect(mockPostMessage.callCount, 1);
+    expect(mockPostMessage.lastDeltaX, 11);
+    expect(mockPostMessage.lastDeltaY, 33);
   });
 
   test('does synthesize add or hover or move for scroll', () {

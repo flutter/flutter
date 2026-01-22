@@ -2649,35 +2649,73 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external double get y;
 }
 
-/// Testing hook for parent scroll; when set, scrollParentWindow invokes
-/// this callback instead of calling the parent's `scrollBy`.
+/// Testing hook for parent scroll via direct scrollBy (same-origin).
+/// When set, scrollParentWindow invokes this instead of calling parent.scrollBy().
 @visibleForTesting
 void Function(int deltaX, int deltaY)? debugParentScrollHandler;
 
+/// Testing hook for parent scroll via postMessage (cross-origin fallback).
+/// When set, scrollParentWindow invokes this instead of calling parent.postMessage().
+@visibleForTesting
+void Function(double deltaX, double deltaY)? debugParentPostMessageHandler;
+
+/// When true, simulates cross-origin iframe behavior for testing.
+/// This causes the direct scrollBy to "fail", triggering the postMessage fallback.
+@visibleForTesting
+bool debugSimulateCrossOrigin = false;
+
 /// Scrolls the parent/host window by the given delta.
 ///
-/// Used when Flutter is embedded in a same-origin iframe and needs to scroll
-/// the parent page when all Flutter scrollables are at their boundary.
+/// For same-origin iframes: Works automatically via direct scrollBy().
 ///
-/// For cross-origin iframes, this will silently fail due to browser security
-/// restrictions - there is no workaround for this browser limitation.
+/// For cross-origin iframes: Falls back to postMessage. The host page must
+/// add a message listener to handle 'flutter-scroll' messages:
+///
+/// ```javascript
+/// window.addEventListener('message', function(event) {
+///   if (event.data && event.data.type === 'flutter-scroll') {
+///     window.scrollBy(event.data.deltaX, event.data.deltaY);
+///   }
+/// });
+/// ```
 void scrollParentWindow(double deltaX, double deltaY) {
+  final DomWindow? parent = domWindow.parent;
+  if (parent == null || identical(parent, domWindow)) {
+    return;
+  }
+
+  final int dx = deltaX.toInt();
+  final int dy = deltaY.toInt();
+
+  // Testing hook for same-origin path
+  if (debugParentScrollHandler != null && !debugSimulateCrossOrigin) {
+    debugParentScrollHandler!(dx, dy);
+    return;
+  }
+
   try {
-    final DomWindow? parent = domWindow.parent;
-    if (parent != null && !identical(parent, domWindow)) {
-      final int dx = deltaX.toInt();
-      final int dy = deltaY.toInt();
-      // Testing hook
-      if (debugParentScrollHandler != null) {
-        debugParentScrollHandler!(dx, dy);
-        return;
-      }
-      // Direct scroll - works for same-origin iframes
-      // For cross-origin, this throws SecurityError (caught below)
-      parent.scrollBy(dx, dy);
+    // Simulate cross-origin failure for testing
+    if (debugSimulateCrossOrigin) {
+      throw Exception('Simulated cross-origin security error');
     }
+    // Try direct scroll (same-origin)
+    parent.scrollBy(dx, dy);
   } catch (e) {
-    // Cross-origin iframe - browser security prevents parent access
-    // Silently fail - this is expected behavior
+    // Cross-origin: fall back to postMessage
+    // Testing hook for cross-origin path
+    if (debugParentPostMessageHandler != null) {
+      debugParentPostMessageHandler!(deltaX, deltaY);
+      return;
+    }
+    try {
+      final message = <String, Object>{
+        'type': 'flutter-scroll',
+        'deltaX': deltaX,
+        'deltaY': deltaY,
+      };
+      parent.postMessage(message.jsify()!, '*');
+    } catch (_) {
+      // Silently fail if postMessage also fails
+    }
   }
 }
