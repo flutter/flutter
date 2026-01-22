@@ -1135,6 +1135,7 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     return _textPainter.size;
   }
+  
   /// Returns the line metrics for the laid out text.
   ///
   /// This exposes [TextPainter.computeLineMetrics].
