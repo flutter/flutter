@@ -130,6 +130,12 @@ bool PlatformConfiguration::AddView(int64_t view_id,
           tonic::ToDart(view_metrics.physical_max_width_constraint),
           tonic::ToDart(view_metrics.physical_min_height_constraint),
           tonic::ToDart(view_metrics.physical_max_height_constraint),
+          tonic::ToDart(view_metrics.physical_display_corner_radius_top_left),
+          tonic::ToDart(view_metrics.physical_display_corner_radius_top_right),
+          tonic::ToDart(
+              view_metrics.physical_display_corner_radius_bottom_right),
+          tonic::ToDart(
+              view_metrics.physical_display_corner_radius_bottom_left),
       }));
   return true;
 }
@@ -232,6 +238,12 @@ bool PlatformConfiguration::UpdateViewMetrics(
           tonic::ToDart(view_metrics.physical_max_width_constraint),
           tonic::ToDart(view_metrics.physical_min_height_constraint),
           tonic::ToDart(view_metrics.physical_max_height_constraint),
+          tonic::ToDart(view_metrics.physical_display_corner_radius_top_left),
+          tonic::ToDart(view_metrics.physical_display_corner_radius_top_right),
+          tonic::ToDart(
+              view_metrics.physical_display_corner_radius_bottom_right),
+          tonic::ToDart(
+              view_metrics.physical_display_corner_radius_bottom_left),
       }));
   return true;
 }
