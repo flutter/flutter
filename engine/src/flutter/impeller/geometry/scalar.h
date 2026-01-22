@@ -39,6 +39,20 @@ constexpr inline bool ScalarNearlyEqual(Scalar x,
   return ScalarNearlyZero(x - y, tolerance);
 }
 
+/// @brief   Returns the t value for executing a lerp based on where a
+///          reference Scalar value (v) falls between the 2 relative
+///          values being interploted.
+///
+/// For example, if you want to find the color between 2 other colors
+/// where the alpha value is A, you could compute:
+///
+///    Scalar t = GetLerpTValue(A, color1.alpha, color2.alpha);
+///    Color result = Color::Lerp(color1, color2, t);
+///    FML_DCHECK(ScalarNearlyEqual(A, result.alpha));
+constexpr inline Scalar GetLerpTValue(Scalar v, Scalar min, Scalar max) {
+  return (v - min) / (max - min);
+}
+
 struct Degrees;
 
 struct Radians {

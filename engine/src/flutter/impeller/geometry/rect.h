@@ -775,11 +775,9 @@ struct TRect {
                                             const Vector3& p,
                                             const Vector3& neighbor) {
     if (neighbor.z >= kMinimumHomogenous) {
-      auto t = (kMinimumHomogenous - p.z) / (neighbor.z - p.z);
-      clipped[index++] = {
-          (t * p.x + (1.0f - t) * neighbor.x) / kMinimumHomogenous,
-          (t * p.y + (1.0f - t) * neighbor.y) / kMinimumHomogenous,
-      };
+      Scalar t = GetLerpTValue(kMinimumHomogenous, p.z, neighbor.z);
+      auto lerp = p.Lerp(neighbor, t);
+      clipped[index++] = Point(lerp.x / lerp.z, lerp.y / lerp.z);
     }
     return index;
   }

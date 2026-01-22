@@ -37,6 +37,35 @@ TEST(GeometryTest, ScalarNearlyEqual) {
       1.0f, 1.0f + std::numeric_limits<float>::epsilon() * 4));
 }
 
+TEST(GeometryTest, GetLerpTValue) {
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(-0.1f, 0.0f, 1.0f), -0.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 0.0f, 1.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.1f, 0.0f, 1.0f), 0.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.2f, 0.0f, 1.0f), 0.2f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.8f, 0.0f, 1.0f), 0.8f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.9f, 0.0f, 1.0f), 0.9f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.0f, 0.0f, 1.0f), 1.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.1f, 0.0f, 1.0f), 1.1f));
+
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(19.0f, 20.0f, 30.0f), -0.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 20.0f, 30.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(21.0f, 20.0f, 30.0f), 0.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(22.0f, 20.0f, 30.0f), 0.2f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(28.0f, 20.0f, 30.0f), 0.8f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(29.0f, 20.0f, 30.0f), 0.9f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(30.0f, 20.0f, 30.0f), 1.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(31.0f, 20.0f, 30.0f), 1.1f));
+
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(19.0f, 30.0f, 20.0f), 1.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 30.0f, 20.0f), 1.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(21.0f, 30.0f, 20.0f), 0.9f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(22.0f, 30.0f, 20.0f), 0.8f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(28.0f, 30.0f, 20.0f), 0.2f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(29.0f, 30.0f, 20.0f), 0.1f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(30.0f, 30.0f, 20.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(31.0f, 30.0f, 20.0f), -0.1f));
+}
+
 TEST(GeometryTest, MakeColumn) {
   auto matrix = Matrix::MakeColumn(1, 2, 3, 4,     //
                                    5, 6, 7, 8,     //
