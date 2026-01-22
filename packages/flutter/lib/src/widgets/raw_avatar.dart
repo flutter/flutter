@@ -16,8 +16,6 @@ import 'text.dart';
 /// shape, background/foreground colors, and images. It handles sizing
 /// constraints and builds the appropriate decorations.
 ///
-/// For a Material Design styled avatar, see [CircleAvatar].
-///
 /// {@tool snippet}
 /// This example shows how to create a circular avatar with a background image:
 ///
@@ -42,6 +40,10 @@ import 'text.dart';
 /// )
 /// ```
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [CircleAvatar], a Material Design styled circular avatar.
 class RawAvatar extends StatelessWidget {
   /// Creates a raw avatar widget.
   ///
@@ -60,6 +62,8 @@ class RawAvatar extends StatelessWidget {
     this.onBackgroundImageError,
     this.onForegroundImageError,
     this.shape,
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.center,
     this.size,
     this.minSize,
     this.maxSize,
@@ -105,6 +109,16 @@ class RawAvatar extends StatelessWidget {
   ///
   /// If null, no shape clipping is applied.
   final ShapeBorder? shape;
+
+  /// How the image should be inscribed into the avatar.
+  ///
+  /// This applies to both [backgroundImage] and [foregroundImage].
+  final BoxFit fit;
+
+  /// How to align the image within the avatar.
+  ///
+  /// This applies to both [backgroundImage] and [foregroundImage].
+  final AlignmentGeometry alignment;
 
   /// The size of the avatar (both width and height).
   ///
@@ -163,7 +177,8 @@ class RawAvatar extends StatelessWidget {
                 ? DecorationImage(
                     image: backgroundImage!,
                     onError: onBackgroundImageError,
-                    fit: BoxFit.cover,
+                    fit: fit,
+                    alignment: alignment,
                   )
                 : null,
             shape: shape ?? const Border(),
@@ -175,7 +190,8 @@ class RawAvatar extends StatelessWidget {
             image: DecorationImage(
               image: foregroundImage!,
               onError: onForegroundImageError,
-              fit: BoxFit.cover,
+              fit: fit,
+              alignment: alignment,
             ),
             shape: shape ?? const Border(),
           )
