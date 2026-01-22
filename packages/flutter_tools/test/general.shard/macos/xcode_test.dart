@@ -366,7 +366,7 @@ void main() {
 
         testWithoutContext('version checks pass when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
-          xcodeProjectInterpreter.version = Version(16, 0, 2);
+          xcodeProjectInterpreter.version = Version(15, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
@@ -417,7 +417,7 @@ void main() {
           'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
           () {
             xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(16, null, null);
+            xcodeProjectInterpreter.version = Version(15, null, null);
 
             expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
             expect(fakeProcessManager, hasNoRemainingExpectations);

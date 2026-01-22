@@ -428,7 +428,7 @@ void main() {
       ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-      expect(logger.statusText, contains('Building release-testing IPA'));
+      expect(logger.statusText, contains('Building ad-hoc IPA'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -436,8 +436,7 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -898,7 +897,7 @@ void main() {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>app-store-connect</string>
+        <string>app-store</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -923,8 +922,7 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Artifacts: () => Artifacts.test(),
     },
   );
@@ -960,7 +958,7 @@ void main() {
 <plist version="1.0">
     <dict>
         <key>method</key>
-        <string>release-testing</string>
+        <string>ad-hoc</string>
         <key>uploadBitcode</key>
         <false/>
     </dict>
@@ -973,7 +971,7 @@ void main() {
       expect(actualIpaPlistContents, expectedIpaPlistContents);
 
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-      expect(logger.statusText, contains('Building release-testing IPA'));
+      expect(logger.statusText, contains('Building ad-hoc IPA'));
       expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
       // Don't instruct how to upload to the App Store.
       expect(logger.statusText, isNot(contains('To upload')));
@@ -985,8 +983,7 @@ void main() {
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
       Artifacts: () => Artifacts.test(),
     },
   );
