@@ -61,7 +61,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
-    final ScrollController controller = ScrollController();
+    final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       TestWidgetsApp(

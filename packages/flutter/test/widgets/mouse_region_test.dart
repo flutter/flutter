@@ -1036,7 +1036,11 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     // Move to a position out of MouseRegion
-    await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+    final Finder mouseRegionFinder = find.ancestor(
+      of: find.text('not hovering'),
+      matching: find.byType(MouseRegion),
+    );
+    await gesture.moveTo(tester.getBottomRight(mouseRegionFinder) + const Offset(10, -10));
     await tester.pumpAndSettle();
     expect(find.text('not hovering'), findsOneWidget);
 
@@ -1238,6 +1242,8 @@ void main() {
         },
       ),
     );
+    // Let WidgetsApp settle before checking frame scheduling.
+    await tester.pumpAndSettle();
 
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
