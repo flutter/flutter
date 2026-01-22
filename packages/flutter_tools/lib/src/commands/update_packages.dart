@@ -171,16 +171,15 @@ class UpdatePackagesCommand extends FlutterCommand {
     final FlutterProject toolProject = FlutterProject.fromDirectory(
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
-    // This needs to be special cased, as it is below flutter_tools, so cannot
-    // be in the flutter pub workspace.
+
+    // This package is intentionally not part of the workspace as it's a rehydrated template.
     final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
       rootProject.directory
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
           .childDirectory('widget_preview_scaffold'),
     );
+
     // This package is intentionally not part of the workspace to test
     // user-defines in its local pubspec.
     final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
@@ -215,6 +214,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
+        widgetPreviewScaffoldProject.directory,
         hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
