@@ -16,10 +16,12 @@
 #elif defined(FML_OS_IOS)
 #include <syslog.h>
 #elif defined(OS_FUCHSIA)
-#include <lib/syslog/structured_backend/cpp/fuchsia_syslog.h>
+#include <lib/syslog/cpp/log_message_impl.h>
+#include <lib/syslog/structured_backend/cpp/log_buffer.h>
 #include <lib/syslog/structured_backend/fuchsia_syslog.h>
 #include <zircon/process.h>
-#include "flutter/fml/platform/fuchsia/log_state.h"
+#include <zircon/syscalls.h>
+#include <zircon/syscalls/object.h>
 #endif
 
 namespace fml {
@@ -47,40 +49,18 @@ const char* StripDots(const char* path) {
 
 #if defined(OS_FUCHSIA)
 
-zx_koid_t GetKoid(zx_handle_t handle) {
-  zx_info_handle_basic_t info;
-  zx_status_t status = zx_object_get_info(handle, ZX_INFO_HANDLE_BASIC, &info,
-                                          sizeof(info), nullptr, nullptr);
-  return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
-}
-
-thread_local zx_koid_t tls_thread_koid{ZX_KOID_INVALID};
-
-zx_koid_t GetCurrentThreadKoid() {
-  if (unlikely(tls_thread_koid == ZX_KOID_INVALID)) {
-    tls_thread_koid = GetKoid(zx_thread_self());
-  }
-  ZX_DEBUG_ASSERT(tls_thread_koid != ZX_KOID_INVALID);
-  return tls_thread_koid;
-}
-
-static zx_koid_t pid = GetKoid(zx_process_self());
-
-static thread_local zx_koid_t tid = GetCurrentThreadKoid();
-
-std::string GetProcessName(zx_handle_t handle) {
-  char process_name[ZX_MAX_NAME_LEN];
-  zx_status_t status = zx_object_get_property(
-      handle, ZX_PROP_NAME, &process_name, sizeof(process_name));
-  if (status != ZX_OK) {
-    process_name[0] = '\0';
-  }
+const std::string* GetProcessName() {
+  static const std::string* process_name = []() -> const std::string* {
+    char name[ZX_MAX_NAME_LEN];
+    zx_status_t status = zx_object_get_property(zx_process_self(), ZX_PROP_NAME,
+                                                name, sizeof(name));
+    if (status != ZX_OK) {
+      return nullptr;
+    }
+    return new std::string(name);
+  }();
   return process_name;
 }
-
-static std::string process_name = GetProcessName(zx_process_self());
-
-static const zx::socket& socket = LogState::Default().socket();
 
 #endif
 
@@ -184,19 +164,17 @@ LogMessage::~LogMessage() {
         }
         break;
     }
-    fuchsia_syslog::LogBuffer buffer;
-    buffer.BeginRecord(severity, std::string_view(file_), line_,
-                       std::string_view(stream_.str()), socket.borrow(), 0, pid,
-                       tid);
-    if (!process_name.empty()) {
-      buffer.WriteKeyValue("tag", process_name);
+    fuchsia_logging::LogBuffer buffer =
+        fuchsia_logging::LogBufferBuilder(severity)
+            .WithFile(file_, line_)
+            .WithMsg(stream_.str())
+            .Build();
+    const std::string* process_name = GetProcessName();
+    if (process_name) {
+      buffer.WriteKeyValue("tag", *process_name);
     }
-    if (auto tags_ptr = LogState::Default().tags()) {
-      for (auto& tag : *tags_ptr) {
-        buffer.WriteKeyValue("tag", tag);
-      }
-    }
-    buffer.FlushRecord();
+    [[maybe_unused]] zx::result result =
+        fuchsia_logging::FlushToGlobalLogger(buffer);
 #else
     // Don't use std::cerr here, because it may not be initialized properly yet.
     fprintf(stderr, "%s", stream_.str().c_str());
