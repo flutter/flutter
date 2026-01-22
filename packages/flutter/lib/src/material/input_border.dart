@@ -325,7 +325,7 @@ class OutlineInputBorder extends InputBorder {
   ///
   ///  * [InputDecoration.floatingLabelBehavior], which should be set to
   ///    [FloatingLabelBehavior.never] when the [borderSide] is
-  ///    [BorderSide.none]. If let as [FloatingLabelBehavior.auto], the label
+  ///    [BorderSide.none]. If left as [FloatingLabelBehavior.auto], the label
   ///    will extend beyond the container as if the border were still being
   ///    drawn.
   const OutlineInputBorder({
@@ -599,9 +599,9 @@ class OutlineInputBorder extends InputBorder {
 /// See also:
 ///
 ///  * [OutlineInputBorder], a traditional rounded rectangle border.
-///  * [RoundedSuperellipseBorder], which can be used with this border for iOS-style shapes.
 ///  * [UnderlineInputBorder], the default [InputDecorator] border which
 ///    draws a horizontal line at the bottom of the input decorator's container.
+///  * [RoundedSuperellipseBorder], which can be used with this border for iOS-style shapes.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class ShapedInputBorder extends InputBorder {
   /// Creates a shaped outline border for an [InputDecorator].
@@ -622,7 +622,7 @@ class ShapedInputBorder extends InputBorder {
   ///
   ///  * [InputDecoration.floatingLabelBehavior], which should be set to
   ///    [FloatingLabelBehavior.never] when the [borderSide] is
-  ///    [BorderSide.none]. If let as [FloatingLabelBehavior.auto], the label
+  ///    [BorderSide.none]. If left as [FloatingLabelBehavior.auto], the label
   ///    will extend beyond the container as if the border were still being
   ///    drawn.
   const ShapedInputBorder({
@@ -705,7 +705,7 @@ class ShapedInputBorder extends InputBorder {
     if (shape is OutlinedBorder) {
       (shape as OutlinedBorder).paintInterior(canvas, rect, paint, textDirection: textDirection);
     } else {
-      // Fallback for shapes that don't support paintInterior
+      // Fallback for shapes that don't support paintInterior.
       canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), paint);
     }
   }
@@ -717,25 +717,25 @@ class ShapedInputBorder extends InputBorder {
     // Create a continuous path for the border with a gap in the top edge.
     final Path outerPath = shape.getOuterPath(rect, textDirection: textDirection);
 
-    // If there's no meaningful gap, return the full outline
+    // If there's no meaningful gap, return the full outline.
     if (start <= 0 && extent <= 0) {
       return outerPath;
     }
 
-    // Create a rectangle that represents the gap area
-    // The gap is on the top edge, so we create a rect that covers the gap region
+    // Create a rectangle that represents the gap area.
+    // The gap is on the top edge, so we create a rect that covers the gap region.
     final gapLeft = start;
     final double gapRight = start + extent;
 
-    // Create a path that excludes the gap area by combining with a difference operation
-    // We'll subtract a small rectangle at the top where the gap should be
+    // Create a path that excludes the gap area by combining with a difference operation.
+    // We'll subtract a small rectangle at the top where the gap should be.
     final gapRect = Path()
       ..addRect(
         Rect.fromLTRB(
           clampDouble(gapLeft, rect.left, rect.right),
-          rect.top - 1.0, // Extend slightly beyond to ensure clean cut
+          rect.top - 1.0, // Extend slightly beyond to ensure clean cut.
           clampDouble(gapRight, rect.left, rect.right),
-          rect.top + 1.0, // Small height to only affect top edge
+          rect.top + 1.0, // Small height to only affect top edge.
         ),
       );
 
@@ -765,10 +765,10 @@ class ShapedInputBorder extends InputBorder {
     final Rect deflatedRect = rect.deflate(borderSide.width / 2.0);
 
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
-      // Draw the shape without a gap
+      // Draw the shape without a gap.
       if (shape is OutlinedBorder) {
         final outlinedShape = shape as OutlinedBorder;
-        // Create a copy with our border side
+        // Create a copy with our border side.
         final OutlinedBorder shapedBorder = outlinedShape.copyWith(side: borderSide);
         shapedBorder.paint(canvas, deflatedRect, textDirection: textDirection);
       } else {
