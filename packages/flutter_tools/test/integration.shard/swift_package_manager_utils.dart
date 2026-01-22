@@ -91,7 +91,6 @@ class SwiftPackageManagerUtils {
     allUnexpectedLines.add('-dXcodeBuildScript=embed');
     final unexpectedLinesFound = <String>[];
     final command = <String>[flutterBin, ...getLocalEngineArguments(), 'build', ...options];
-
     final ProcessResult result = await processManager.run(
       command,
       workingDirectory: workingDirectory,
@@ -346,9 +345,14 @@ class SwiftPackageManagerUtils {
       // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
       if (swiftPackageMangerEnabled) {
         expectedLines.addAll(<Pattern>[
-          RegExp(
-            '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
-          ),
+          if (appDirectoryPath.contains('example'))
+            RegExp(
+              '${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.swiftPackagePlatformPath}',
+            )
+          else
+            RegExp(
+              '${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
+            ),
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       } else {
@@ -405,6 +409,7 @@ class SwiftPackageManagerUtils {
         ]);
       } else {
         unexpectedLines.addAll(<String>[
+          '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.swiftPackagePlatformPath}',
           '${swiftPackagePlugin.pluginName}: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/.packages/${swiftPackagePlugin.pluginName} @ local',
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);

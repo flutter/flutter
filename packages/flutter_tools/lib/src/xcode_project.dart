@@ -170,6 +170,15 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         xcodeProjectInfoFile.readAsStringSync().contains(kFlutterGeneratedPluginSwiftPackageName);
   }
 
+  /// Checks if FlutterFramework has been added to the project's build settings by checking the
+  /// contents of the pbxproj.
+  bool get flutterFrameworkSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains(
+          kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        );
+  }
+
   /// True if this project doesn't have Swift Package Manager disabled in the
   /// pubspec, has either an iOS or macOS platform implementation, is not a
   /// module project, Xcode is 15 or greater, and the Swift Package Manager
