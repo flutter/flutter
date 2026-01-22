@@ -683,6 +683,12 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
+  // Documented max is 2.3.0
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.0')) {
+    // Documented max is 8.13.0
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '8.14', inclusiveMax: false);
+  }
+
   // Documented max is 2.2.20
   if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
     // Documented max is 8.11.1
