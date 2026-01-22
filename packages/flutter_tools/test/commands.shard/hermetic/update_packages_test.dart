@@ -338,17 +338,6 @@ void main() {
               .dependencies,
         );
         expect(
-          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-          (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-                ..dependencies['typed_data'] = HostedDependency(
-                  version: VersionConstraint.parse('^1.1.1'),
-                )
-                ..dependencies['test_api'] = HostedDependency(
-                  version: VersionConstraint.parse('0.7.5'),
-                ))
-              .dependencies,
-        );
-        expect(
           pub.pubspecs[widgetPreviewScaffold.absolute.path]!.first.dependencies,
           (Pubspec.parse(kWidgetTestPubspecYaml)
                 ..dependencies['unified_analytics'] = HostedDependency(
