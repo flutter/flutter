@@ -2006,30 +2006,25 @@ void main() {
   testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) => Center(
-                child: DefaultTextStyle(
-                  style: const TextStyle(fontSize: 14),
-                  child: Draggable<int>(
-                    feedback: Container(width: 20, height: 20, color: const Color(0xFF2196F3)),
-                    childWhenDragging: Container(
-                      width: 20,
-                      height: 20,
-                      color: const Color(0xFFFFEB3B),
-                    ),
-                    child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
-                  ),
-                ),
-              ),
-            ),
-          ],
+    final entry = OverlayEntry(
+      builder: (BuildContext context) => Center(
+        child: DefaultTextStyle(
+          style: const TextStyle(fontSize: 14),
+          child: Draggable<int>(
+            feedback: Container(width: 20, height: 20, color: const Color(0xFF2196F3)),
+            childWhenDragging: Container(width: 20, height: 20, color: const Color(0xFFFFEB3B)),
+            child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
+          ),
         ),
       ),
     );
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(TestWidgetsApp(home: Overlay(initialEntries: <OverlayEntry>[entry])));
 
     // Long press the button with mouse.
     final Offset textFieldPos = tester.getCenter(find.byType(Text));
