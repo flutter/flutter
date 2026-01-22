@@ -389,6 +389,17 @@ abstract class Route<T> extends _RoutePlaceholder {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
+  /// Like [popDisposition], but may consider the [context] to determine
+  /// whether the pop should be allowed.
+  ///
+  /// The base implementation ignores [context] and returns [popDisposition].
+  /// Subclasses like [ModalRoute] override this to only respect [PopEntry]
+  /// instances that are ancestors of the caller in the widget tree.
+  ///
+  /// If [context] is null (e.g., for system back gestures), all
+  /// [PopEntry] instances are checked.
+  RoutePopDisposition popDispositionFor(BuildContext? context) => popDisposition;
+
   /// Called after a route pop was handled.
   ///
   /// Even when the pop is canceled, for example by a [PopScope] widget, this
@@ -2724,7 +2735,7 @@ class Navigator extends StatefulWidget {
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   static Future<bool> maybePop<T extends Object?>(BuildContext context, [T? result]) {
-    return Navigator.of(context).maybePop<T>(result);
+    return Navigator.of(context).maybePop<T>(result, context);
   }
 
   /// Pop the top-most route off the navigator that most tightly encloses the
@@ -5520,6 +5531,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   /// {@macro flutter.widgets.navigator.maybePop}
   ///
+  /// If [context] is provided, only [PopEntry] instances (such as [PopScope])
+  /// that are ancestors of [context] in the widget tree will be consulted.
+  /// This allows programmatic pops from widgets outside a [PopScope]'s subtree
+  /// to proceed without being blocked. If [context] is null, all [PopEntry]
+  /// instances are consulted (the default behavior for system back gestures).
+  ///
   /// See also:
   ///
   ///  * [Form], which provides a [Form.canPop] boolean that enables the
@@ -5527,7 +5544,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [ModalRoute], which provides a `scopedOnPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
-  Future<bool> maybePop<T extends Object?>([T? result]) async {
+  Future<bool> maybePop<T extends Object?>([T? result, BuildContext? context]) async {
     final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {
       return false;
@@ -5550,7 +5567,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       return true;
     }
 
-    switch (lastEntry.route.popDisposition) {
+    switch (lastEntry.route.popDispositionFor(
+      context != null && context.mounted ? context : null,
+    )) {
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:

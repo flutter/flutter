@@ -849,6 +849,46 @@ void main() {
     expect(find.text('Home page'), findsOneWidget);
   });
 
+  testWidgets('Cancel button works when PopScope is in body', (WidgetTester tester) async {
+    // Regression test: PopScope in the page body should not block the Cancel
+    // button in the nav bar, because the PopScope is not an ancestor of the
+    // Cancel button.
+    await tester.pumpWidget(
+      const CupertinoApp(home: CupertinoNavigationBar(middle: Text('Home page'))),
+    );
+
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          CupertinoPageRoute<void>(
+            fullscreenDialog: true,
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(middle: Text('Dialog page')),
+                child: PopScope<void>(
+                  canPop: false,
+                  child: Center(child: Text('Protected content')),
+                ),
+              );
+            },
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.widgetWithText(CupertinoButton, 'Cancel'), findsOneWidget);
+    expect(find.text('Protected content'), findsOneWidget);
+
+    // Cancel button should work despite PopScope in body.
+    await tester.tap(find.text('Cancel'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text('Home page'), findsOneWidget);
+    expect(find.text('Protected content'), findsNothing);
+  });
+
   testWidgets('Navigation bars in a CupertinoSheetRoute have no back button', (
     WidgetTester tester,
   ) async {

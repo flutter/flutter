@@ -2006,7 +2006,7 @@ class _NavigationBarStaticComponents {
       leadingContent = CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
-          route.navigator!.maybePop();
+          route.navigator!.maybePop(null, context);
         },
         child: Text(CupertinoLocalizations.of(context).cancelButtonLabel),
       );

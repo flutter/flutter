@@ -985,7 +985,7 @@ class _DismissModalAction extends DismissAction {
 
   @override
   Object invoke(DismissIntent intent) {
-    return Navigator.of(context).maybePop();
+    return Navigator.of(context).maybePop(null, context);
   }
 }
 
@@ -2041,6 +2041,40 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       }
     }
 
+    return super.popDisposition;
+  }
+
+  /// Like [popDisposition], but only considers [PopEntry] instances that are
+  /// ancestors of [context] in the widget tree.
+  ///
+  /// If [context] is null, all [PopEntry] instances are checked (same
+  /// behavior as [popDisposition]). This is used for system back gestures
+  /// where there is no specific caller widget.
+  ///
+  /// This allows programmatic [Navigator.maybePop] calls from widgets outside
+  /// a [PopScope]'s subtree to proceed without being blocked. For example, a
+  /// [BackButton] in an [AppBar] will not be blocked by a [PopScope] in the
+  /// [Scaffold.body], since they are siblings rather than ancestors.
+  @override
+  RoutePopDisposition popDispositionFor(BuildContext? context) {
+    if (context == null) {
+      return popDisposition; // Check all PopEntries (system gesture)
+    }
+
+    final ancestors = <Element>{};
+    context.visitAncestorElements((Element element) {
+      ancestors.add(element);
+      return true;
+    });
+
+    for (final PopEntry<Object?> popEntry in _popEntries) {
+      if (!ancestors.contains((popEntry as State).context)) {
+        continue;
+      }
+      if (!popEntry.canPopNotifier.value) {
+        return RoutePopDisposition.doNotPop;
+      }
+    }
     return super.popDisposition;
   }
 

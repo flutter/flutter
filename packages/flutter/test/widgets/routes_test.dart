@@ -2669,6 +2669,31 @@ void main() {
     expect(find.text('dialog1'), findsOneWidget);
   });
 
+  testWidgets('can be dismissed with escape when PopScope is inside dialog', (
+    WidgetTester tester,
+  ) async {
+    // Regression test: PopScope inside a dialog should not block dismissing
+    // the dialog via escape key, because the PopScope is not an ancestor of
+    // the dismiss action.
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(navigatorKey: navigatorKey, home: const Text('home')));
+
+    showDialog<void>(
+      context: tester.element(find.text('home')),
+      builder: (BuildContext context) =>
+          const PopScope<void>(canPop: false, child: Text('dialog with PopScope')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('dialog with PopScope'), findsOneWidget);
+
+    // Escape should still dismiss the dialog because PopScope is inside the
+    // dialog, not an ancestor of the barrier/dismiss action.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('dialog with PopScope'), findsNothing);
+    expect(find.text('home'), findsOneWidget);
+  });
+
   testWidgets('ModalRoute.of works for void routes', (WidgetTester tester) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(navigatorKey: navigatorKey, home: const Text('home')));

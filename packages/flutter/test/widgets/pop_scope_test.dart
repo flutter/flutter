@@ -425,4 +425,127 @@ void main() {
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('PopScope does not block maybePop from sibling context', (WidgetTester tester) async {
+    // Tests ancestor-aware PopScope behavior: PopScope should only block
+    // maybePop calls from within its subtree, not from sibling widgets.
+    final nav = GlobalKey<NavigatorState>();
+    late BuildContext buttonContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Home'),
+              ),
+            ),
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: Column(
+              children: <Widget>[
+                // Button is a SIBLING to PopScope, not a descendant.
+                Builder(
+                  builder: (BuildContext context) {
+                    buttonContext = context;
+                    return TextButton(
+                      onPressed: () {
+                        // Uses static Navigator.maybePop which passes caller context.
+                        Navigator.maybePop(context);
+                      },
+                      child: const Text('Back'),
+                    );
+                  },
+                ),
+                // PopScope should NOT block pops from sibling buttonContext.
+                const PopScope<Object?>(canPop: false, child: Text('Protected Content')),
+              ],
+            ),
+          ),
+        },
+      ),
+    );
+
+    // Navigate to second route.
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Protected Content'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+
+    // Verify PopScope is registered but shouldn't block sibling.
+    expect(ModalRoute.of(buttonContext)!.popDisposition, RoutePopDisposition.doNotPop);
+
+    // maybePop from sibling context should succeed despite PopScope.
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+
+    // Should have popped back to home.
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Protected Content'), findsNothing);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('PopScope blocks maybePop from descendant context', (WidgetTester tester) async {
+    // Tests that PopScope correctly blocks maybePop calls from widgets
+    // that are descendants of the PopScope.
+    final nav = GlobalKey<NavigatorState>();
+    late BuildContext buttonContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/one');
+                },
+                child: const Text('Home'),
+              ),
+            ),
+          ),
+          '/one': (BuildContext context) => Scaffold(
+            body: PopScope<Object?>(
+              canPop: false,
+              // Button is a DESCENDANT of PopScope.
+              child: Builder(
+                builder: (BuildContext context) {
+                  buttonContext = context;
+                  return TextButton(
+                    onPressed: () {
+                      // Uses static Navigator.maybePop which passes caller context.
+                      Navigator.maybePop(context);
+                    },
+                    child: const Text('Back'),
+                  );
+                },
+              ),
+            ),
+          ),
+        },
+      ),
+    );
+
+    // Navigate to second route.
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Back'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+
+    // Verify PopScope is registered and should block descendant.
+    expect(ModalRoute.of(buttonContext)!.popDisposition, RoutePopDisposition.doNotPop);
+
+    // maybePop from descendant context should be blocked by PopScope.
+    await tester.tap(find.text('Back'));
+    await tester.pumpAndSettle();
+
+    // Should NOT have popped - still on second route.
+    expect(find.text('Back'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+  }, variant: TargetPlatformVariant.all());
 }
