@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'list_tile_test_utils.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
@@ -5085,9 +5086,9 @@ void main() {
             '/one': (BuildContext context) => Scaffold(
               body: Column(
                 children: <Widget>[
-                  const ListTile(title: Text('Title 1')),
-                  const ListTile(title: Text('Title 2')),
-                  const ListTile(title: Text('Title 3')),
+                  const TestListTile(title: Text('Title 1')),
+                  const TestListTile(title: Text('Title 2')),
+                  const TestListTile(title: Text('Title 3')),
                   ElevatedButton(
                     key: openSheetKey,
                     onPressed: () {
