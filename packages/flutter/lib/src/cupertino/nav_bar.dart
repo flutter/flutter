@@ -2674,25 +2674,23 @@ class _NavigationBarTransition extends StatelessWidget {
     );
 
     final children = <Widget>[
-      if (componentsTransition.bottomNavBarBackground != null)
-        componentsTransition.bottomNavBarBackground!,
-      if (componentsTransition.bottomBackChevron != null) componentsTransition.bottomBackChevron!,
-      if (componentsTransition.bottomBackLabel != null) componentsTransition.bottomBackLabel!,
-      if (componentsTransition.bottomLeading != null) componentsTransition.bottomLeading!,
-      if (componentsTransition.bottomMiddle != null) componentsTransition.bottomMiddle!,
-      if (componentsTransition.bottomLargeTitle != null) componentsTransition.bottomLargeTitle!,
-      if (componentsTransition.bottomTrailing != null) componentsTransition.bottomTrailing!,
-      if (componentsTransition.bottomNavBarBottom != null) componentsTransition.bottomNavBarBottom!,
+      ?componentsTransition.bottomNavBarBackground,
+      ?componentsTransition.bottomBackChevron,
+      ?componentsTransition.bottomBackLabel,
+      ?componentsTransition.bottomLeading,
+      ?componentsTransition.bottomMiddle,
+      ?componentsTransition.bottomLargeTitle,
+      ?componentsTransition.bottomTrailing,
+      ?componentsTransition.bottomNavBarBottom,
       // Draw top components on top of the bottom components.
-      if (componentsTransition.topNavBarBackground != null)
-        componentsTransition.topNavBarBackground!,
-      if (componentsTransition.topLeading != null) componentsTransition.topLeading!,
-      if (componentsTransition.topBackChevron != null) componentsTransition.topBackChevron!,
-      if (componentsTransition.topBackLabel != null) componentsTransition.topBackLabel!,
-      if (componentsTransition.topMiddle != null) componentsTransition.topMiddle!,
-      if (componentsTransition.topLargeTitle != null) componentsTransition.topLargeTitle!,
-      if (componentsTransition.topTrailing != null) componentsTransition.topTrailing!,
-      if (componentsTransition.topNavBarBottom != null) componentsTransition.topNavBarBottom!,
+      ?componentsTransition.topNavBarBackground,
+      ?componentsTransition.topLeading,
+      ?componentsTransition.topBackChevron,
+      ?componentsTransition.topBackLabel,
+      ?componentsTransition.topMiddle,
+      ?componentsTransition.topLargeTitle,
+      ?componentsTransition.topTrailing,
+      ?componentsTransition.topNavBarBottom,
     ];
 
     // The text scaling is disabled to avoid odd transitions between pages.
