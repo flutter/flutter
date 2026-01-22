@@ -146,9 +146,13 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 /// This widget provides robust text selection gestures through
 /// [TextSelectionGestureDetector].
 ///
-/// This widget does not provide selection handles or text selection
-/// context menus out of the box. They can be added by providing
-/// [selectionControls] and [contextMenuBuilder].
+/// This widget does not provide text selection context menus out of the box.
+/// They can be added by providing [contextMenuBuilder].
+///
+/// This widget does not provide a concrete implementation of text selection handles
+/// out of the box, and instead uses [testTextSelectionHandleControls] as a default.
+/// A more robust implementation of text selection handles can be provided by
+/// setting [selectionControls].
 ///
 /// This input field manages its own internal [TextEditingController]
 /// and [FocusNode] unless provided one. This field also provides defaults
@@ -246,7 +250,7 @@ class _TestTextFieldState extends State<TestTextField>
         onChanged: widget.onChanged,
         readOnly: widget.readOnly,
         rendererIgnoresPointer: true, // gestures are provided by text selection gesture detector.
-        selectionControls: widget.selectionControls,
+        selectionControls: widget.selectionControls ?? testTextSelectionHandleControls,
         showCursor: widget.showCursor,
         style: widget.style ?? const TextStyle(), // required by editable text.
         controller: _effectiveController, // required by editable text.
