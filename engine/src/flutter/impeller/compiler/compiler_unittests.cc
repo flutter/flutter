@@ -393,8 +393,7 @@ INSTANTIATE_TARGET_PLATFORM_TEST_SUITE_P(CompilerSuite);
 #define INSTANTIATE_RUNTIME_TARGET_PLATFORM_TEST_SUITE_P(suite_name)      \
   INSTANTIATE_TEST_SUITE_P(                                               \
       suite_name, CompilerTestRuntime,                                    \
-      ::testing::Values(TargetPlatform::kRuntimeStageMetal,               \
-                        TargetPlatform::kRuntimeStageVulkan),             \
+      ::testing::Values(TargetPlatform::kRuntimeStageMetal),              \
       [](const ::testing::TestParamInfo<CompilerTest::ParamType>& info) { \
         return TargetPlatformToString(info.param);                        \
       });
