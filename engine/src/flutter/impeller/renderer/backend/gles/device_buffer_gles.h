@@ -21,7 +21,7 @@ class DeviceBufferGLES final
  public:
   DeviceBufferGLES(DeviceBufferDescriptor desc,
                    std::shared_ptr<ReactorGLES> reactor,
-                   std::shared_ptr<Allocation> backing_store);
+                   std::unique_ptr<Allocation> backing_store);
 
   // |DeviceBuffer|
   ~DeviceBufferGLES() override;
@@ -48,7 +48,7 @@ class DeviceBufferGLES final
   std::optional<std::string> label_;
   // Mutable for lazy evaluation.
   mutable std::optional<HandleGLES> handle_;
-  mutable std::shared_ptr<Allocation> backing_store_;
+  mutable std::unique_ptr<Allocation> backing_store_;
   mutable std::optional<Range> dirty_range_ = std::nullopt;
   mutable bool initialized_ = false;
 
