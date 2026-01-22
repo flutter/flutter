@@ -117,11 +117,10 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
                 ),
               ],
             ),
-            if (nestedViewClickCount > 0)
-              Text(
-                'Click count: $nestedViewClickCount',
-                key: const ValueKey<String>('NestedViewClickCount'),
-              ),
+            Text(
+              'Click count: $nestedViewClickCount',
+              key: const ValueKey<String>('NestedViewClickCount'),
+            ),
           ],
         ],
       ),
