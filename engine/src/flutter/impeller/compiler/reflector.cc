@@ -377,11 +377,6 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         uniform_description.type == spirv_cross::SPIRType::BaseType::Float) {
       // Metal aligns float3 to 16 bytes.
       // Metal aligns float3x3 COLUMNS to 16 bytes.
-      // However, GetSize() calculates tight packing (12 bytes for float3,
-      // 36 bytes for float3x3).
-      // We must add padding to struct_layout to force GetSize() to match
-      // MSL alignment.
-      //
       // For float3: Size 12. Padding 4. Stride 16.
       // For float3x3: Size 36. Padding 12 (4 per col). Stride 48.
       size_t floats_per_element = 0;
@@ -393,14 +388,6 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
       } else if (spir_type.vecsize == 3 && spir_type.columns == 3) {
         // float3x3
         floats_per_element = 9;
-        // 3 columns * 1 pad per column = 3 pads.
-        // But here we just dump 1s and 0s linearly.
-        // Col0: 1,1,1,0. Col1: 1,1,1,0. Col2: 1,1,1,0.
-        // So we need to interleave?
-        // EmplaceUniform iterates struct_layout linearly and copies
-        // floats. If we push 1,1,1,0,1,1,1,0... it works if input is
-        // 1,1,1,1,1,1,1,1,1. Yes. But 'padding_floats' logic above was 'total
-        // padding'. We should just construct the full layout loop.
       }
 
       if (spir_type.vecsize == 3 &&
