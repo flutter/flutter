@@ -2507,7 +2507,7 @@ mixin TextInputControl {
   /// changes.
   @Deprecated(
     'Use updateStyle instead. '
-    'This feature was deprecated after v3.40.0-0.2.pre.',
+    'This feature was deprecated after v3.41.0-0.0.pre.',
   )
   void setStyle({
     required String? fontFamily,
