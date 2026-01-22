@@ -922,11 +922,6 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       // {val, val, padding, padding, val, val, padding, padding}.
       uint32_t count = array_elements.value_or(1) * 2;
       uint32_t stride = 16;
-      uint32_t element_padding = 8;
-      if (TargetPlatformIsMetal(options_.target_platform)) {
-        stride = 8;
-        element_padding = 0;
-      }
       uint32_t total_length = stride * count;
 
       result.emplace_back(StructMember{
@@ -937,7 +932,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_size=*/sizeof(Point),
           /*p_byte_length=*/total_length,
           /*p_array_elements=*/count,
-          /*p_element_padding=*/element_padding,
+          /*p_element_padding=*/8,
       });
       current_byte_offset += total_length;
       continue;
