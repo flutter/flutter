@@ -50,7 +50,9 @@ constexpr inline bool ScalarNearlyEqual(Scalar x,
 ///    Color result = Color::Lerp(color1, color2, t);
 ///    FML_DCHECK(ScalarNearlyEqual(A, result.alpha));
 constexpr inline Scalar GetLerpTValue(Scalar v, Scalar min, Scalar max) {
-  return (v - min) / (max - min);
+  Scalar denominator = max - min;
+  // This test redirects empty and NaN intervals to a constant 0 result.
+  return denominator != 0.0f ? (v - min) / denominator : 0.0f;
 }
 
 struct Degrees;

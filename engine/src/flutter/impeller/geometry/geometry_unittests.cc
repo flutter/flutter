@@ -38,6 +38,14 @@ TEST(GeometryTest, ScalarNearlyEqual) {
 }
 
 TEST(GeometryTest, GetLerpTValue) {
+  // Zero length intervals
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 1.0f, 1.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(1.0f, 1.0f, 1.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(2.0f, 1.0f, 1.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 10.0f, 10.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(10.0f, 10.0f, 10.0f), 0.0f));
+  EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(20.0f, 10.0f, 10.0f), 0.0f));
+
   EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(-0.1f, 0.0f, 1.0f), -0.1f));
   EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.0f, 0.0f, 1.0f), 0.0f));
   EXPECT_TRUE(ScalarNearlyEqual(GetLerpTValue(0.1f, 0.0f, 1.0f), 0.1f));
