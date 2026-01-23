@@ -1,4 +1,4 @@
-<a href="https://flutter.dev/">
+https://agri-sphere-98785971.base44.app<a href="https://flutter.dev/">
   <h1 align="center">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
@@ -7,7 +7,106 @@
   </h1>
 </a>
 
-[![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=flutter)](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
+[dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  intl: ^0.19.0import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class WeatherService {
+  static const String apiKey = "YOUR_API_KEY";
+
+  Future<Map<String, dynamic>> fetchWeather(double lat, double lon) async {
+    final url =
+        "https://api.openweathermap.org/data/3.0/onecall?lat=$lat&lon=$lon&units=metric&appid=$apiKey";
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception("Weather fetch failed");
+    }
+  }
+}String farmAlert(double temp, double wind, double rain) {
+  if (temp > 35) return "⚠️ Heat stress risk";
+  if (temp < 2) return "❄️ Frost danger";
+  if (wind > 25) return "🚫 Unsafe to spray";
+  if (rain > 70) return "🌧️ Heavy rain expected";
+  return "✅ Conditions normal";
+}class FarmAI {
+  static String cropAdvice({
+    required String crop,
+    required double temp,
+    required int rain,
+  }) {
+    if (crop == "Maize" && rain < 20) {
+      return "Increase irrigation within 48 hours";
+    }
+    if (crop == "Chillies" && temp > 32) {
+      return "Shade nets recommended";
+    }
+    if (crop == "Sunflower" && rain > 80) {
+      return "Delay harvest – lodging risk";
+    }
+    return "Conditions optimal";
+  }
+
+  static String livestockAdvice(double temp) {
+    if (temp > 34) return "Heat stress: increase water & shade";
+    if (temp < 5) return "Cold stress: wind protection required";
+    return "Livestock comfortable";
+  }
+}import 'package:hive/hive.dart';
+
+class OfflineStore {
+  static Future<void> init() async {
+    await Hive.openBox('farm_data');
+  }
+
+  static void saveCrop(String name, Map data) {
+    Hive.box('farm_data').put(name, data);
+  }
+
+  static Map? getCrop(String name) {
+    return Hive.box('farm_data').get(name);
+  }
+}import 'package:flutter/material.dart';
+
+class DashboardCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  const DashboardCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 10,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(icon, size: 40),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontSize: 18)),
+            Text(subtitle,
+                style: const TextStyle(color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+}![Flutter CI Status](https://flutter-dashboard.appspot.com/api/public/build-status-badge?repo=flutter)](https://flutter-dashboard.appspot.com/#/build?repo=flutter)
 [![Discord badge][]][Discord instructions]
 [![Twitter handle][]][Twitter badge]
 [![BlueSky badge][]][BlueSky handle]
