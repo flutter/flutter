@@ -483,7 +483,7 @@ let package = Package(
         });
 
         group('updateFlutterFrameworkSymlink', () {
-          testWithoutContext('create link if does not exists', () {
+          testWithoutContext('does not create link', () {
             final fs = MemoryFileSystem();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
@@ -495,6 +495,23 @@ let package = Package(
               fileSystem: fs,
               platform: platform,
               project: project,
+            );
+            expect(frameworkSymlink.existsSync(), isFalse);
+          });
+
+          testWithoutContext('creates link when createIfNotFound is true', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
+              '${platform.binaryName}.xcframework',
+            );
+            expect(frameworkSymlink.existsSync(), isFalse);
+            SwiftPackageManager.updateFlutterFrameworkSymlink(
+              buildMode: BuildMode.profile,
+              fileSystem: fs,
+              platform: platform,
+              project: project,
+              createIfNotFound: true,
             );
             expect(frameworkSymlink.targetSync(), './Profile/${platform.binaryName}.xcframework');
           });
