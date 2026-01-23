@@ -524,5 +524,28 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, RuntimeEffectVectorArray) {
+  constexpr float kDimension = 400.0f;
+  struct FragUniforms {
+    Vector2 iResolution;
+    Vector4 iValues;
+  } frag_uniforms = {.iResolution = Vector2(kDimension, kDimension),
+                     .iValues = Vector4(0.25, 0.50, 0.75, 1.0)};
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(FragUniforms));
+  memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+
+  DlPaint paint;
+  auto effect = MakeRuntimeEffect(this, "runtime_stage_vector_array.frag.iplr",
+                                  uniform_data);
+  ABSL_ASSERT_OK(effect);
+  paint.setColorSource(effect.value());
+
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, kDimension, kDimension), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -34,7 +34,7 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
                                              .offset = 0,
                                              .size = sizeof(float),
                                              .byte_length = sizeof(float),
-                                             .array_elements = 0}}};
+                                             .array_elements = std::nullopt}}};
   std::shared_ptr<ReactorGLES> reactor;
   std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
