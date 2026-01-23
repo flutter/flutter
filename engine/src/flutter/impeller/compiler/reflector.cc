@@ -379,16 +379,6 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
       // Metal aligns float3x3 COLUMNS to 16 bytes.
       // For float3: Size 12. Padding 4. Stride 16.
       // For float3x3: Size 36. Padding 12 (4 per col). Stride 48.
-      size_t floats_per_element = 0;
-      size_t padding_floats = 0;
-      if (spir_type.vecsize == 3 && spir_type.columns == 1) {
-        // float3
-        floats_per_element = 3;
-        padding_floats = 1;
-      } else if (spir_type.vecsize == 3 && spir_type.columns == 3) {
-        // float3x3
-        floats_per_element = 9;
-      }
 
       if (spir_type.vecsize == 3 &&
           (spir_type.columns == 1 || spir_type.columns == 3)) {
