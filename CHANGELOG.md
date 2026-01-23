@@ -34,7 +34,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## [3.38.8](https://github.com/flutter/flutter/releases/tag/3.38.8)
 
-- [flutter/178151](https://github.com/flutter/flutter/issues/178151) - `flutter run -d chrome` can crash with a `DartDevelopmentServiceException` if the application shuts down during the startup sequence.
+- [flutter/178151](https://github.com/flutter/flutter/issues/178151) - `flutter run -d chrome` may crash with a `DartDevelopmentServiceException` when the application shuts down during the startup sequence.
 
 ### [3.38.7](https://github.com/flutter/flutter/releases/tag/3.38.7)
 
