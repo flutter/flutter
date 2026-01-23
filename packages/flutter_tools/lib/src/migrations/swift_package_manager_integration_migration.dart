@@ -39,7 +39,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
-  final BuildInfo? _buildInfo;
+  final BuildInfo _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
@@ -53,6 +53,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
   static const _flutterPluginsSwiftPackageProductDependencyIdentifier = '78A3181F2AECB46A00862997';
+
+  /// New identifier for FlutterFramework PBXFileReference.
+  static const _flutterFrameworkLocalOverrideFileIdentifier = '784666492D4C4C64000A1A5F';
+
+  /// New identifier for a plugin in an example app PBXFileReference.
+  static const _flutterPluginLocalOverrideFileIdenitifier = '78DABEA22ED26510000E7860';
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXFileReference.
   static const _flutterPluginsSwiftPackageFileIdentifer = '78E0A7A72DC9AD7400C4905E';
@@ -116,6 +122,17 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     return _platform == FlutterDarwinPlatform.ios ? 'Flutter/ephemeral' : 'ephemeral';
   }
 
+  /// If the app being migrated is an example app for a plugin, this will return
+  /// information about the plugin to be used to create a local package override within
+  /// the example app.
+  ///
+  /// If the app is not an example app or the plugin cannot be found, this will return null.
+  late final ({String name, String path})? _examplePlugin = _loadPluginFromExampleProject(
+    xcodeProject: _xcodeProject,
+    fileSystem: _fileSystem,
+    logger: logger,
+  );
+
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
       logger.printTrace('Restoring project settings from backup file...');
@@ -172,6 +189,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       } else {
         _migrateScheme(schemeInfo);
       }
+
       if (isPbxprojMigrated) {
         logger.printTrace('${_xcodeProjectInfoFile.basename} already migrated. Skipping...');
       } else {
@@ -391,7 +409,17 @@ $newContent
         .contains(
           '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */ = {isa = PBXFileReference',
         );
-    return initialMigrationComplete && rootFlutterGeneratedPluginSwiftPackageMigrationComplete;
+
+    // Third migration added the `FlutterFramework` as a root package (via PBXFileReference)
+    final bool rootFlutterFrameworkSwiftPackageMigrationComplete = xcodeProjectInfoFile
+        .readAsStringSync()
+        .contains(
+          '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */ = {isa = PBXFileReference',
+        );
+
+    return initialMigrationComplete &&
+        rootFlutterGeneratedPluginSwiftPackageMigrationComplete &&
+        rootFlutterFrameworkSwiftPackageMigrationComplete;
   }
 
   /// Checks if all sections have been migrated. If [logErrorIfNotMigrated] is
@@ -400,6 +428,7 @@ $newContent
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
+    // Validate FlutterGeneratedPluginSwiftPackage is added
     final bool buildFilesMigrated = _isBuildFilesMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
@@ -435,6 +464,37 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
+
+    // Validate FlutterFramework is added
+    final bool frameworkFileReferenceMigrated = _isFileReferenceMigrated(
+      projectInfo,
+      logErrorIfNotMigrated: logErrorIfNotMigrated,
+      identifer: _flutterFrameworkLocalOverrideFileIdentifier,
+      name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+    );
+    final bool framworkPackageGroupMigrated = _isGroupMigrated(
+      projectInfo,
+      logErrorIfNotMigrated: logErrorIfNotMigrated,
+      fileReferenceIdentifier: _flutterFrameworkLocalOverrideFileIdentifier,
+    );
+
+    // Validate plugin is added (for example app only)
+    var localPluginFileReferenceMigrated = true;
+    var localPluginGroupMigrated = true;
+    if (_examplePlugin != null) {
+      localPluginFileReferenceMigrated = _isFileReferenceMigrated(
+        projectInfo,
+        logErrorIfNotMigrated: logErrorIfNotMigrated,
+        identifer: _flutterPluginLocalOverrideFileIdenitifier,
+        name: _examplePlugin.name,
+      );
+      localPluginGroupMigrated = _isGroupMigrated(
+        projectInfo,
+        logErrorIfNotMigrated: logErrorIfNotMigrated,
+        fileReferenceIdentifier: _flutterPluginLocalOverrideFileIdenitifier,
+      );
+    }
+
     return buildFilesMigrated &&
         packageFileReferenceMigrated &&
         frameworksBuildPhaseMigrated &&
@@ -442,7 +502,11 @@ $newContent
         nativeTargetsMigrated &&
         projectObjectMigrated &&
         localSwiftPackageMigrated &&
-        swiftPackageMigrated;
+        swiftPackageMigrated &&
+        frameworkFileReferenceMigrated &&
+        framworkPackageGroupMigrated &&
+        localPluginFileReferenceMigrated &&
+        localPluginGroupMigrated;
   }
 
   void _migratePbxproj() {
@@ -453,14 +517,20 @@ $newContent
     // Parse project.pbxproj into JSON
     final ParsedProjectInfo parsedInfo = _parsePbxproj();
 
+    // Add FlutterGeneratedPluginSwiftPackage as a dependency and local package override
     List<String> lines = LineSplitter.split(originalProjectContents).toList();
     lines = _migrateBuildFile(lines, parsedInfo);
     lines = _migrateFileReference(
       lines,
       parsedInfo,
-      _flutterPluginsSwiftPackageFileIdentifer,
-      kFlutterGeneratedPluginSwiftPackageName,
+      identifier: _flutterPluginsSwiftPackageFileIdentifer,
+      name: kFlutterGeneratedPluginSwiftPackageName,
+      path: _xcodeProject.flutterPluginSwiftPackageDirectory.path.replaceAll(
+        _xcodeProject.ephemeralDirectory.path,
+        _relativeEphemeralPath,
+      ),
     );
+
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
     lines = _migrateGroup(
       lines,
@@ -472,6 +542,41 @@ $newContent
     lines = _migrateProjectObject(lines, parsedInfo);
     lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
     lines = _migratePackageProductDependencies(lines, parsedInfo);
+
+    // Add FlutterFramework as a local package override
+    lines = _migrateFileReference(
+      lines,
+      parsedInfo,
+      identifier: _flutterFrameworkLocalOverrideFileIdentifier,
+      name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      path: _xcodeProject.flutterFrameworkSwiftPackageDirectory.path.replaceAll(
+        _xcodeProject.ephemeralDirectory.path,
+        _relativeEphemeralPath,
+      ),
+    );
+    lines = _migrateGroup(
+      lines,
+      parsedInfo,
+      _flutterFrameworkLocalOverrideFileIdentifier,
+      kFlutterGeneratedFrameworkSwiftPackageTargetName,
+    );
+
+    // Add plugin as a local package override (for example app only)
+    if (_examplePlugin != null) {
+      lines = _migrateFileReference(
+        lines,
+        parsedInfo,
+        identifier: _flutterPluginLocalOverrideFileIdenitifier,
+        name: _examplePlugin.name,
+        path: _examplePlugin.path,
+      );
+      lines = _migrateGroup(
+        lines,
+        parsedInfo,
+        _flutterPluginLocalOverrideFileIdenitifier,
+        _examplePlugin.name,
+      );
+    }
 
     final newProjectContents = '${lines.join('\n')}\n';
 
@@ -508,6 +613,21 @@ $newContent
       throw Exception(
         'Duplicate id found for $kFlutterGeneratedPluginSwiftPackageName PBXFileReference.',
       );
+    }
+    if (!originalProjectContents.contains(
+          '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */',
+        ) &&
+        originalProjectContents.contains(_flutterFrameworkLocalOverrideFileIdentifier)) {
+      throw Exception(
+        'Duplicate id found for $kFlutterGeneratedFrameworkSwiftPackageTargetName PBXFileReference.',
+      );
+    }
+    if (_examplePlugin != null &&
+        !originalProjectContents.contains(
+          '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */',
+        ) &&
+        originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
+      throw Exception('Duplicate id found for ${_examplePlugin.name} PBXFileReference.');
     }
   }
 
@@ -551,17 +671,18 @@ $newContent
 
   List<String> _migrateFileReference(
     List<String> lines,
-    ParsedProjectInfo projectInfo,
-    String identifier,
-    String name,
-  ) {
+    ParsedProjectInfo projectInfo, {
+    required String identifier,
+    required String name,
+    required String path,
+  }) {
     if (_isFileReferenceMigrated(projectInfo, identifer: identifier, name: name)) {
-      logger.printTrace('PBXFileReference already migrated. Skipping...');
+      logger.printTrace('PBXFileReference for $identifier already migrated. Skipping...');
       return lines;
     }
 
     final newContent =
-        '		$identifier /* $name */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $name; path = $_relativeEphemeralPath/Packages/$name; sourceTree = "<group>"; };';
+        '		$identifier /* $name */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $name; path = $path; sourceTree = "<group>"; };';
 
     final (int _, int endSectionIndex) = _sectionRange('PBXFileReference', lines);
 
@@ -760,7 +881,7 @@ $newContent
     String fileReferenceName,
   ) {
     if (_isGroupMigrated(projectInfo, fileReferenceIdentifier: fileReferenceIdentifier)) {
-      logger.printTrace('PBXGroup already migrated. Skipping...');
+      logger.printTrace('PBXGroup for $fileReferenceIdentifier already migrated. Skipping...');
       return lines;
     }
 
@@ -784,23 +905,19 @@ $newContent
       throw Exception('Unable to find parsed Flutter PBXGroup.');
     }
 
-    if (parsedGroup.children == null) {
-      // If children is null, the children field is missing and must be added.
-      final newContent =
-          '''
-			children = (
-				$fileReferenceIdentifier /* $fileReferenceName */,
-			);''';
-      lines.insert(flutterGroupStartIndex + 1, newContent);
+    // Find the children field within the Flutter PBXGroup.
+    final int startChildrenIndex = lines.indexWhere(
+      (String line) => line.trim().contains('children = ('),
+      flutterGroupStartIndex,
+    );
+    if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
+      final newContent = [
+        '			children = (',
+        '				$fileReferenceIdentifier /* $fileReferenceName */,',
+        '			);',
+      ];
+      lines.insertAll(flutterGroupStartIndex + 1, newContent);
     } else {
-      // Find the children field within the Flutter PBXGroup.
-      final int startChildrenIndex = lines.indexWhere(
-        (String line) => line.trim().contains('children = ('),
-        flutterGroupStartIndex,
-      );
-      if (startChildrenIndex == -1 || startChildrenIndex > endSectionIndex) {
-        throw Exception('Unable to children for Flutter PBXGroup.');
-      }
       final newContent = '				$fileReferenceIdentifier /* $fileReferenceName */,';
       lines.insert(startChildrenIndex + 1, newContent);
     }
@@ -1018,6 +1135,44 @@ $newContent
       throw Exception('Found the end of $sectionName section before the beginning.');
     }
     return (startSectionIndex, endSectionIndex);
+  }
+
+  /// If the [xcodeProject] is within a plugin's example app, return the plugin's name and its
+  /// path relative to ios/macos directory the [xcodeProject] is in.
+  ///
+  /// If the [xcodeProject] is not within an example app or the plugin can't be found, return null.
+  static ({String name, String path})? _loadPluginFromExampleProject({
+    required XcodeBasedProject xcodeProject,
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
+    try {
+      final FlutterProject flutterProject = xcodeProject.parent;
+      if (flutterProject.directory.path.endsWith('example') &&
+          flutterProject.directory.parent.childFile('pubspec.yaml').existsSync()) {
+        final FlutterProject parentProject = FlutterProject.fromDirectory(
+          flutterProject.directory.parent,
+        );
+        if (parentProject.isPlugin && parentProject.hasExampleApp) {
+          final String pluginName = parentProject.manifest.appName;
+          final Link linkedPlugin = xcodeProject.relativeSwiftPackagesDirectory.childLink(
+            pluginName,
+          );
+          if (linkedPlugin.existsSync()) {
+            final String absolutePath = linkedPlugin.targetSync();
+            final String relativePath = fileSystem.path.relative(
+              absolutePath,
+              from: xcodeProject.hostAppRoot.path,
+            );
+            return (name: pluginName, path: relativePath);
+          }
+        }
+      }
+    } on Exception catch (e) {
+      logger.printTrace('Failed to load project: $e');
+      return null;
+    }
+    return null;
   }
 }
 
