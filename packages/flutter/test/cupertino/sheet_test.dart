@@ -2070,7 +2070,6 @@ void main() {
       CupertinoSheetTransition(
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
-        topGap: 0.08,
         linearTransition: false,
         child: const SizedBox(height: 100, width: 100),
       ),
@@ -2083,7 +2082,6 @@ void main() {
       CupertinoSheetTransition(
         primaryRouteAnimation: newAnimation,
         secondaryRouteAnimation: secondaryAnimation,
-        topGap: 0.08,
         linearTransition: false,
         child: const SizedBox(height: 100, width: 100),
       ),
