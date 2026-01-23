@@ -31,6 +31,7 @@ import 'icon_button_theme.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
+import 'material.dart';
 import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -821,6 +822,7 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(_debugCheckBackgroundIsHidden(context));
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
@@ -1139,6 +1141,54 @@ class ListTile extends StatelessWidget {
         defaultValue: null,
       ),
     );
+  }
+
+  bool _debugCheckBackgroundIsHidden(BuildContext context) {
+    assert(() {
+      final Widget? intermediateWidget = _findIntermediateWidget(context);
+      if (intermediateWidget != null) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('ListTile background color or ink splashes may be invisible.'),
+              ErrorDescription(
+                'The ListTile is wrapped in a ${intermediateWidget.runtimeType} that has a background color. '
+                'Because ListTile paints its background and ink splashes on the nearest Material ancestor, '
+                'this ${intermediateWidget.runtimeType} will hide those effects.',
+              ),
+              ErrorHint(
+                'To fix this, wrap the ListTile in its own Material widget, '
+                'or remove the background color from the intermediate ${intermediateWidget.runtimeType}.',
+              ),
+            ]),
+          ),
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
+  Widget? _findIntermediateWidget(BuildContext context) {
+    Widget? intermediateWidget;
+    (context as Element).visitAncestorElements((Element ancestor) {
+      if (ancestor.widget is Material) {
+        return false;
+      }
+      final Widget widget = ancestor.widget;
+      final Color? color = switch (widget) {
+        ColoredBox(:final Color color) => color,
+        DecoratedBox(decoration: BoxDecoration(:final Color? color)) => color,
+        DecoratedBox(decoration: ShapeDecoration(:final Color? color)) => color,
+        _ => null,
+      };
+      if (color != null && color.a > 0) {
+        intermediateWidget = widget;
+        return false;
+      }
+      return true;
+    });
+    return intermediateWidget;
   }
 }
 

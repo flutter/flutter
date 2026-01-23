@@ -4764,6 +4764,131 @@ void main() {
     );
     expect(tester.getSize(find.byType(ListTile)), Size.zero);
   });
+
+  testWidgets('ListTile shows warning when a Container with color wraps it', (
+    WidgetTester tester,
+  ) async {
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Container(
+              color: Colors.amber,
+              height:
+                  200, // This is to remove the lint on Container. Otherwise, linter suggests to use ColoredBox instead.
+              child: const ListTile(tileColor: Colors.red, title: Text('ListTile')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    expect(errorDetails, isNotEmpty);
+    expect(
+      errorDetails.first.exceptionAsString(),
+      contains('ListTile background color or ink splashes may be invisible'),
+    );
+    expect(errorDetails.first.exceptionAsString(), contains('ColoredBox'));
+  });
+
+  testWidgets('ListTile throw exception when wrapped in ColoredBox with non-transparent color', (
+    WidgetTester tester,
+  ) async {
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ColoredBox(
+              color: Colors.amber,
+              child: ListTile(tileColor: Colors.red, title: Text('ListTile')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    expect(errorDetails, isNotEmpty);
+    expect(
+      errorDetails.first.exceptionAsString(),
+      contains('ListTile background color or ink splashes may be invisible'),
+    );
+    expect(errorDetails.first.exceptionAsString(), contains('ColoredBox'));
+  });
+
+  testWidgets('ListTile throw exception when wrapped in DecoratedBox with non-transparent color', (
+    WidgetTester tester,
+  ) async {
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: Colors.amber),
+              child: ListTile(tileColor: Colors.red, title: Text('ListTile')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    FlutterError.onError = oldHandler;
+
+    expect(errorDetails, isNotEmpty);
+    expect(
+      errorDetails.first.exceptionAsString(),
+      contains('ListTile background color or ink splashes may be invisible'),
+    );
+    expect(errorDetails.first.exceptionAsString(), contains('DecoratedBox'));
+  });
+
+  testWidgets('ListTile does not throw exception when parent has no/transparent color', (
+    WidgetTester tester,
+  ) async {
+    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails.add(details);
+    };
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ColoredBox(
+              color: Colors.transparent,
+              child: ListTile(tileColor: Colors.red, title: Text('Visible ListTile')),
+            ),
+          ),
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(errorDetails, isEmpty);
+>>>>>>> Stashed changes
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
