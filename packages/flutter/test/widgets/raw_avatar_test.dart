@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: const RawAvatar(
-          size: 100.0,
+          constraints: BoxConstraints.tightFor(width: 100.0, height: 100.0),
           shape: CircleBorder(),
           backgroundColor: Color(0xFF0000FF),
           foregroundColor: Color(0xFFFFFFFF),
@@ -35,13 +35,13 @@ void main() {
     expect(paragraph.text.style!.color, equals(const Color(0xFFFFFFFF)));
   });
 
-  testWidgets('RawAvatar with background image', (WidgetTester tester) async {
+  testWidgets('RawAvatar with image', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: RawAvatar(
-          size: 100.0,
+          constraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
-          backgroundImage: MemoryImage(Uint8List.fromList(kTransparentImage)),
+          image: MemoryImage(Uint8List.fromList(kTransparentImage)),
         ),
       ),
     );
@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: RawAvatar(
-          size: 100.0,
+          constraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
           backgroundColor: const Color(0xFF00FF00),
           child: const Center(child: Text('XY')),
@@ -101,14 +101,14 @@ void main() {
     expect(box.size, equals(const Size(40.0, 40.0)));
   });
 
-  testWidgets('RawAvatar with foreground image', (WidgetTester tester) async {
+  testWidgets('RawAvatar with image and backgroundColor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: RawAvatar(
-          size: 100.0,
+          constraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0),
           shape: const CircleBorder(),
           backgroundColor: const Color(0xFF0000FF),
-          foregroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
+          image: MemoryImage(Uint8List.fromList(kBlueRectPng)),
         ),
       ),
     );
@@ -118,21 +118,26 @@ void main() {
     );
     expect(box.size, equals(const Size(100.0, 100.0)));
 
-    // Check foreground decoration is present
+    // Check decoration has both color and image
     final Container container = tester.widget<Container>(find.byType(Container));
-    expect(container.foregroundDecoration, isNotNull);
-    final foregroundDecoration = container.foregroundDecoration! as ShapeDecoration;
-    expect(foregroundDecoration.image!.fit, equals(BoxFit.cover));
-    expect(foregroundDecoration.shape, isA<CircleBorder>());
+    expect(container.decoration, isNotNull);
+    final decoration = container.decoration! as ShapeDecoration;
+    expect(decoration.color, equals(const Color(0xFF0000FF)));
+    expect(decoration.image!.fit, equals(BoxFit.cover));
+    expect(decoration.shape, isA<CircleBorder>());
   });
 
-  testWidgets('RawAvatar respects minSize and maxSize', (WidgetTester tester) async {
+  testWidgets('RawAvatar respects constraints', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: const UnconstrainedBox(
           child: RawAvatar(
-            minSize: 60.0,
-            maxSize: 100.0,
+            constraints: BoxConstraints(
+              minWidth: 60.0,
+              minHeight: 60.0,
+              maxWidth: 100.0,
+              maxHeight: 100.0,
+            ),
             shape: CircleBorder(),
             backgroundColor: Color(0xFF0000FF),
           ),
@@ -143,7 +148,7 @@ void main() {
     final RenderConstrainedBox box = tester.renderObject<RenderConstrainedBox>(
       find.byType(RawAvatar),
     );
-    // With minSize 60, the unconstrained avatar should be at least 60x60
+    // With min constraints of 60, the unconstrained avatar should be at least 60x60
     expect(box.size.width, greaterThanOrEqualTo(60.0));
     expect(box.size.height, greaterThanOrEqualTo(60.0));
   });
@@ -152,7 +157,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: const RawAvatar(
-          size: 80.0,
+          constraints: BoxConstraints.tightFor(width: 80.0, height: 80.0),
           shape: StadiumBorder(),
           backgroundColor: Color(0xFFFF0000),
           child: Center(child: Text('Stadium')),

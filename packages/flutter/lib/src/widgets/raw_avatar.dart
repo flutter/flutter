@@ -13,17 +13,17 @@ import 'text.dart';
 /// A raw avatar widget that represents a user.
 ///
 /// This widget provides the core functionality for avatars with customizable
-/// shape, background/foreground colors, and images. It handles sizing
-/// constraints and builds the appropriate decorations.
+/// shape, background color, and image. It handles sizing constraints and
+/// builds the appropriate decorations.
 ///
 /// {@tool snippet}
-/// This example shows how to create a circular avatar with a background image:
+/// This example shows how to create a circular avatar with an image:
 ///
 /// ```dart
 /// RawAvatar(
-///   size: 100.0,
+///   constraints: BoxConstraints.tight(Size.square(100.0)),
 ///   shape: const CircleBorder(),
-///   backgroundImage: NetworkImage('https://example.com/avatar.png'),
+///   image: NetworkImage('https://example.com/avatar.png'),
 /// )
 /// ```
 /// {@end-tool}
@@ -33,7 +33,7 @@ import 'text.dart';
 ///
 /// ```dart
 /// RawAvatar(
-///   size: 60.0,
+///   constraints: BoxConstraints.tight(Size.square(60.0)),
 ///   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
 ///   backgroundColor: Colors.blue,
 ///   child: Text('AB'),
@@ -47,60 +47,38 @@ import 'text.dart';
 class RawAvatar extends StatelessWidget {
   /// Creates a raw avatar widget.
   ///
-  /// The [size] and [minSize]/[maxSize] parameters are mutually exclusive.
-  ///
-  /// The [onBackgroundImageError] parameter must be null if the [backgroundImage]
-  /// is null. The [onForegroundImageError] parameter must be null if the
-  /// [foregroundImage] is null.
+  /// The [onImageError] parameter must be null if [image] is null.
   const RawAvatar({
     super.key,
     this.child,
     this.backgroundColor,
     this.foregroundColor,
-    this.backgroundImage,
-    this.foregroundImage,
-    this.onBackgroundImageError,
-    this.onForegroundImageError,
+    this.image,
+    this.onImageError,
     this.shape,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
-    this.size,
-    this.minSize,
-    this.maxSize,
-  }) : assert(size == null || (minSize == null && maxSize == null)),
-       assert(backgroundImage != null || onBackgroundImageError == null),
-       assert(foregroundImage != null || onForegroundImageError == null);
+    this.constraints,
+  }) : assert(image != null || onImageError == null);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget containing initials, or an [Icon].
   final Widget? child;
 
-  /// The color with which to fill the avatar.
+  /// The color with which to fill the avatar's background.
   final Color? backgroundColor;
 
   /// The default text color for text in the avatar.
   final Color? foregroundColor;
 
-  /// The background image of the avatar.
-  ///
-  /// Typically used as a fallback image for [foregroundImage].
+  /// The image to display in the avatar.
   ///
   /// If the [RawAvatar] is to have the user's initials, use [child] instead.
-  final ImageProvider? backgroundImage;
+  final ImageProvider? image;
 
-  /// The foreground image of the avatar.
-  ///
-  /// Typically used as profile image. For fallback use [backgroundImage].
-  final ImageProvider? foregroundImage;
-
-  /// An optional error callback for errors emitted when loading
-  /// [backgroundImage].
-  final ImageErrorListener? onBackgroundImageError;
-
-  /// An optional error callback for errors emitted when loading
-  /// [foregroundImage].
-  final ImageErrorListener? onForegroundImageError;
+  /// An optional error callback for errors emitted when loading [image].
+  final ImageErrorListener? onImageError;
 
   /// The shape of the avatar.
   ///
@@ -111,72 +89,31 @@ class RawAvatar extends StatelessWidget {
   final ShapeBorder? shape;
 
   /// How the image should be inscribed into the avatar.
-  ///
-  /// This applies to both [backgroundImage] and [foregroundImage].
   final BoxFit fit;
 
   /// How to align the image within the avatar.
-  ///
-  /// This applies to both [backgroundImage] and [foregroundImage].
   final AlignmentGeometry alignment;
 
-  /// The size of the avatar (both width and height).
+  /// The constraints for the avatar's size.
   ///
-  /// If [size] is specified, then neither [minSize] nor [maxSize] may be
-  /// specified. Specifying [size] is equivalent to specifying a [minSize]
-  /// and [maxSize], both with the value of [size].
-  final double? size;
+  /// If null, defaults to a tight constraint of 40x40 logical pixels.
+  final BoxConstraints? constraints;
 
-  /// The minimum size of the avatar (both width and height).
-  ///
-  /// If [minSize] is specified, then [size] must not also be specified.
-  ///
-  /// Defaults to zero.
-  final double? minSize;
-
-  /// The maximum size of the avatar (both width and height).
-  ///
-  /// If [maxSize] is specified, then [size] must not also be specified.
-  ///
-  /// Defaults to [double.infinity].
-  final double? maxSize;
-
-  // The default size if nothing is specified.
-  static const double _defaultSize = 40.0;
-
-  // The default min if only the max is specified.
-  static const double _defaultMinSize = 0.0;
-
-  // The default max if only the min is specified.
-  static const double _defaultMaxSize = double.infinity;
-
-  double get _minSize {
-    if (size == null && minSize == null && maxSize == null) {
-      return _defaultSize;
-    }
-    return size ?? minSize ?? _defaultMinSize;
-  }
-
-  double get _maxSize {
-    if (size == null && minSize == null && maxSize == null) {
-      return _defaultSize;
-    }
-    return size ?? maxSize ?? _defaultMaxSize;
-  }
+  // The default constraints if nothing is specified.
+  static const BoxConstraints _defaultConstraints = BoxConstraints.tightFor(
+    width: 40.0,
+    height: 40.0,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final double minDimension = _minSize;
-    final double maxDimension = _maxSize;
-
-    final Decoration? decoration =
-        (backgroundColor != null || backgroundImage != null || shape != null)
+    final Decoration? decoration = (backgroundColor != null || image != null || shape != null)
         ? ShapeDecoration(
             color: backgroundColor,
-            image: backgroundImage != null
+            image: image != null
                 ? DecorationImage(
-                    image: backgroundImage!,
-                    onError: onBackgroundImageError,
+                    image: image!,
+                    onError: onImageError,
                     fit: fit,
                     alignment: alignment,
                   )
@@ -185,27 +122,9 @@ class RawAvatar extends StatelessWidget {
           )
         : null;
 
-    final Decoration? foregroundDecoration = foregroundImage != null
-        ? ShapeDecoration(
-            image: DecorationImage(
-              image: foregroundImage!,
-              onError: onForegroundImageError,
-              fit: fit,
-              alignment: alignment,
-            ),
-            shape: shape ?? const Border(),
-          )
-        : null;
-
     return Container(
-      constraints: BoxConstraints(
-        minHeight: minDimension,
-        minWidth: minDimension,
-        maxWidth: maxDimension,
-        maxHeight: maxDimension,
-      ),
+      constraints: constraints ?? _defaultConstraints,
       decoration: decoration,
-      foregroundDecoration: foregroundDecoration,
       child: child != null
           ? DefaultTextStyle.merge(
               style: TextStyle(color: foregroundColor),
