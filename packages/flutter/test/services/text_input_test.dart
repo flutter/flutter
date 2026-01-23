@@ -1353,10 +1353,7 @@ void main() {
       expect(fakeTextChannel.outgoingCalls.last.method, 'TextInput.setSelectionRects');
 
       connection.updateStyle(
-        const TextInputStyle(
-          textDirection: TextDirection.ltr,
-          textAlign: TextAlign.left,
-        ),
+        const TextInputStyle(textDirection: TextDirection.ltr, textAlign: TextAlign.left),
       );
       expectedMethodCalls.add('updateStyle');
       expect(control.methodCalls, expectedMethodCalls);
