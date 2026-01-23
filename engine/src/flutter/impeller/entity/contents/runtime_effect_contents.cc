@@ -42,24 +42,32 @@ BufferView RuntimeEffectContents::EmplaceUniform(
     return data_host_buffer.Emplace(source_data, uniform.GetSize(), alignment);
   }
 
-  // If the uniform has a struct layout, we need to repack the data.
+  // If the uniform has a padding layout, we need to repack the data.
   // We can do this by using the EmplaceProc to write directly to the
   // HostBuffer.
+  size_t count = uniform.array_elements.value_or(1);
+  if (count == 0) {
+    // Make sure to run at least once.
+    count = 1;
+  }
+
   return data_host_buffer.Emplace(
       uniform.GetSize(), alignment,
-      [&uniform, source_data](uint8_t* destination) {
+      [&uniform, source_data, count](uint8_t* destination) {
         size_t uniform_byte_index = 0u;
         size_t struct_float_index = 0u;
         auto* float_destination = reinterpret_cast<float*>(destination);
         auto* float_source = reinterpret_cast<const float*>(source_data);
 
-        for (char byte_type : uniform.padding_layout) {
-          if (byte_type == kPaddingType) {
-            float_destination[struct_float_index++] = 0.f;
-          } else {
-            FML_DCHECK(byte_type == kFloatType);
-            float_destination[struct_float_index++] =
-                float_source[uniform_byte_index++];
+        for (size_t i = 0; i < count; i++) {
+          for (char byte_type : uniform.padding_layout) {
+            if (byte_type == kPaddingType) {
+              float_destination[struct_float_index++] = 0.f;
+            } else {
+              FML_DCHECK(byte_type == kFloatType);
+              float_destination[struct_float_index++] =
+                  float_source[uniform_byte_index++];
+            }
           }
         }
       });

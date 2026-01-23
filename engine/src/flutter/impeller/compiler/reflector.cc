@@ -392,14 +392,11 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
 
       if (spir_type.vecsize == 3 &&
           (spir_type.columns == 1 || spir_type.columns == 3)) {
-        size_t count = uniform_description.array_elements.value_or(1);
-        for (size_t i = 0; i < count; i++) {
-          for (size_t c = 0; c < spir_type.columns; c++) {
-            for (size_t v = 0; v < 3; v++) {
-              uniform_description.padding_layout.push_back(1);
-            }
-            uniform_description.padding_layout.push_back(0);
+        for (size_t c = 0; c < spir_type.columns; c++) {
+          for (size_t v = 0; v < 3; v++) {
+            uniform_description.padding_layout.push_back(1);
           }
+          uniform_description.padding_layout.push_back(0);
         }
       }
     }
