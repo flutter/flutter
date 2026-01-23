@@ -938,13 +938,13 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Container(
-                  width: 100,
-                  height: 100,
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                width: 100,
+                height: 100,
+                child: Material(
                   color: Colors.white,
                   child: ListTile(
                     onTap: enabled ? () {} : null,
@@ -952,9 +952,9 @@ void main() {
                     autofocus: true,
                     focusNode: focusNode,
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
@@ -967,12 +967,12 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect()
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, Radius.zero),
           color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        )
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
     );
 
     // Check when the list tile is disabled.
@@ -982,11 +982,11 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect()
-        ..rect(
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, Radius.zero),
           color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        )
+        ..rect(color: const Color(0x00000000)),
     );
 
     focusNode.dispose();
@@ -996,22 +996,22 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Container(
-                  width: 100,
-                  height: 100,
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SizedBox(
+                width: 100,
+                height: 100,
+                child: Material(
                   color: Colors.white,
                   child: ListTile(
                     onTap: enabled ? () {} : null,
                     hoverColor: Colors.orange[500],
                     autofocus: true,
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
@@ -1024,15 +1024,12 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect()
-        ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, Radius.zero),
           color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        )
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x1f000000), rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
     );
 
     // Start hovering
@@ -1045,16 +1042,13 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect()
-        ..rect(
-          color: const Color(0x1f000000),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
-        ..rect(
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, Radius.zero),
           color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        ),
+        )
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x1f000000), rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0))
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
     );
 
     await tester.pumpWidget(buildApp(enabled: false));
@@ -1063,14 +1057,14 @@ void main() {
     expect(
       find.byType(Material),
       paints
-        ..rect()
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, Radius.zero),
+          color: const Color(0xffffffff),
+        )
+        ..rect(color: const Color(0x00000000))
         ..rect(
           color: Colors.orange[500]!.withAlpha(0),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-        )
-        ..rect(
-          color: const Color(0xffffffff),
-          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0),
         ),
     );
   });
@@ -1109,10 +1103,9 @@ void main() {
           child: Center(
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return Container(
+                return SizedBox(
                   width: 200,
                   height: 100,
-                  color: Colors.white,
                   child: ListTile(
                     key: tileKey,
                     onTap: enabled
