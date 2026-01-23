@@ -113,8 +113,10 @@ source_set("glfw") {
     ]
 
     frameworks = [
-      "CoreVideo.framework",
       "IOKit.framework",
+      "Cocoa.framework",
+      "CoreFoundation.framework",
+      "QuartzCore.framework"
     ]
   }
 
