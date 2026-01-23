@@ -4334,6 +4334,20 @@ abstract class ImageFilter {
 
   /// Creates an image filter from a [FragmentShader].
   ///
+  /// > [!WARNING]
+  /// > This API is only supported when using the Impeller rendering engine.
+  /// > On other backends, an [UnsupportedError] will be thrown.
+  ///
+  /// > To check at runtime whether this API is supported, use [isShaderFilterSupported].
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// if (ui.ImageFilter.isShaderFilterSupported) {
+  ///   // Use the filter...
+  /// }
+  /// ```
+  ///
   /// The fragment shader provided here has additional requirements to be used
   /// by the engine for filtering. The first uniform value must be a vec2, this
   /// will be set by the engine to the size of the bound texture. There must
@@ -4369,10 +4383,6 @@ abstract class ImageFilter {
   /// }
   ///
   /// ```
-  ///
-  /// This API is only supported when using the Impeller rendering engine. On
-  /// other backends a [UnsupportedError] will be thrown. To check at runtime
-  /// whether this API is suppored use [isShaderFilterSupported].
   factory ImageFilter.shader(FragmentShader shader) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
@@ -4390,11 +4400,16 @@ abstract class ImageFilter {
       if (invalidSampler) {
         buffer.write('The shader is missing a sampler uniform.\n');
       }
+      throw StateError(buffer.toString());
     }
     return _FragmentShaderImageFilter(shader);
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
+  ///
+  /// > [!WARNING]
+  /// > This property will only return true when the Impeller rendering engine is enabled.
+  /// > Attempting to create an [ImageFilter.shader] when this property is `false` will throw an [UnsupportedError].
   static bool get isShaderFilterSupported => _impellerEnabled;
 
   // Converts this to a native DlImageFilter. See the comments of this method in
@@ -5309,6 +5324,8 @@ base class ImageShader extends Shader {
   external void _dispose();
 }
 
+typedef _UniformFloatInfo = ({int index, int size});
+
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by
 /// [Paint.shader]).
 ///
@@ -5395,7 +5412,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
-        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        final _UniformFloatInfo info = program._getUniformFloatInfo(slot.name);
+        slot._shaderIndex = info.index + slot.index;
+
         return false;
       });
 
@@ -5439,24 +5458,15 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index, [int? expectedSize]) {
-    if (index < 0) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
-
+  _UniformFloatInfo _getUniformFloatInfo(String name) {
     var offset = 0;
+    var sizeInFloats = 0;
     var found = false;
     const sizeOfFloat = 4;
     for (final Object? entryDynamic in _uniformInfo) {
       final entry = entryDynamic! as Map<String, Object>;
-      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+      sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
       if (entry['name'] == name) {
-        if (index + 1 > sizeInFloats) {
-          throw ArgumentError('Index `$index` out of bounds for `$name`.');
-        }
-        if (expectedSize != null && sizeInFloats != expectedSize) {
-          throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
-        }
         found = true;
         break;
       }
@@ -5467,7 +5477,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
       throw ArgumentError('No uniform named "$name".');
     }
 
-    return offset + index;
+    return (index: offset, size: sizeInFloats);
   }
 
   @pragma('vm:entry-point')
@@ -5494,6 +5504,10 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 }
 
+/// A binding into a uniform defined in a shader. Used now to restrict the types
+/// of UniformArrays that can be created.
+sealed class UniformType {}
+
 /// A binding to a uniform of type float. Calling [set] on this object updates
 /// a float uniform's value.
 ///
@@ -5510,7 +5524,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 /// See also:
 ///   [FragmentShader.getUniformFloat] - How [UniformFloatSlot] instances are acquired.
 ///
-base class UniformFloatSlot {
+base class UniformFloatSlot extends UniformType {
   UniformFloatSlot._(this._shader, this.name, this.index, this._shaderIndex);
 
   /// Set the float value of the bound uniform.
@@ -5548,7 +5562,7 @@ base class UniformFloatSlot {
 /// See also:
 ///   [FragmentShader.getUniformVec2] - How [UniformVec2Slot] instances are acquired.
 ///
-base class UniformVec2Slot {
+base class UniformVec2Slot extends UniformType {
   UniformVec2Slot._(this._xSlot, this._ySlot);
 
   /// Set the float value of the bound uniform.
@@ -5574,7 +5588,7 @@ base class UniformVec2Slot {
 /// See also:
 ///   [FragmentShader.getUniformVec3] - How [UniformVec3Slot] instances are acquired.
 ///
-base class UniformVec3Slot {
+base class UniformVec3Slot extends UniformType {
   UniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
 
   /// Set the float value of the bound uniform.
@@ -5601,7 +5615,7 @@ base class UniformVec3Slot {
 /// See also:
 ///   [FragmentShader.getUniformVec4] - How [UniformVec4Slot] instances are acquired.
 ///
-base class UniformVec4Slot {
+base class UniformVec4Slot extends UniformType {
   UniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
 
   /// Set the float value of the bound uniform.
@@ -5613,6 +5627,34 @@ base class UniformVec4Slot {
   }
 
   final UniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+/// An array of bindings to uniforms of the same type T. Access elements via [] and
+/// set them individually.
+/// Example:
+///
+/// ```dart
+/// void updateShader(ui.FragmentShader shader) {
+///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColorArray');
+///   colors[0].set(1.0, 0.0, 1.0, 0.3);
+/// }
+/// ```
+///
+/// See also:
+///   [FragmentShader.getUniformFloatArray] - How [UniformArray<Float>] instances are acquired.
+///
+class UniformArray<T extends UniformType> {
+  UniformArray._(this._elements);
+
+  /// Access an element of the UniformArray.
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  /// The number of Uniforms in the UniformArray.
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }
 
 /// A binding to a shader's image sampler. Calling [set] on this object updates
@@ -5668,10 +5710,15 @@ base class FragmentShader extends Shader {
   }
 
   List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
-    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0, size);
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    if (info.size != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.size}, not size $size.');
+    }
+
     final slots = List<UniformFloatSlot>.generate(
       size,
-      (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
+      (i) => UniformFloatSlot._(this, name, info.index, i),
     );
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
@@ -5751,8 +5798,12 @@ base class FragmentShader extends Shader {
   /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getUniformFloatIndex(name, index);
-    final result = UniformFloatSlot._(this, name, index, shaderIndex);
+
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.size, message: 'Index `$index` out of bounds for `$name`.');
+
+    final result = UniformFloatSlot._(this, name, index, info.index + index);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;
@@ -5816,6 +5867,126 @@ base class FragmentShader extends Shader {
   UniformVec4Slot getUniformVec4(String name) {
     final List<UniformFloatSlot> slots = _getSlotsForUniform(name, 4);
     return UniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  UniformArray<T> _getUniformArray<T extends UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<UniformFloatSlot> slots) elementFactory,
+  ) {
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    if (info.size % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.size}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.size ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<UniformFloatSlot>.generate(
+        info.size,
+        (j) => UniformFloatSlot._(this, name, j, info.index + i * elementSize + j),
+      );
+      _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
+      return elementFactory(slots);
+    });
+
+    _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
+
+    return UniformArray<T>._(elements);
+  }
+
+  /// Access the binding for a float[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform float[10] uValues;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformFloatSlot> values = shader.getUniformFloatArray('uValues');
+  ///   values[2].set(1.0);
+  /// }
+  /// ```
+  UniformArray<UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  /// Access the binding for a vec2[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec2[10] uPositions;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec2Slot> positions = shader.getUniformVec2Array('uPositions');
+  ///   positions[2].set(6.0, 7.0);
+  /// }
+  /// ```
+  UniformArray<UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<UniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => UniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  /// Access the binding for a vec3[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec3[10] uColors;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec3Slot> colors = shader.getUniformVec3Array('uColors');
+  ///   colors[0].set(1.0, 0.0, 1.0);
+  /// }
+  /// ```
+  UniformArray<UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<UniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) => UniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  /// Access the binding for a vec4[] uniform named [name].
+  ///
+  /// Example:
+  ///
+  /// ```glsl
+  /// uniform vec4[10] uColors;
+  /// ```
+  ///
+  /// ```dart
+  /// void updateShader(ui.FragmentShader shader) {
+  ///   final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array('uColors');
+  ///   colors[0].set(1.0, 0.0, 1.0, 0.5);
+  /// }
+  /// ```
+  UniformArray<UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<UniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => UniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
+    );
   }
 
   /// Access the [ImageSamplerSlot] binding associated with the sampler named

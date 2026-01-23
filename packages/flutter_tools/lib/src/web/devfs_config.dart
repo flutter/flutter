@@ -152,6 +152,10 @@ class WebDevServerConfig {
   }
 
   /// Creates a copy of a [WebDevServerConfig] with optional overrides.
+  ///
+  /// The override parameters (`host`, `port`, `https`, `headers`, `proxy`)
+  /// take precedence over this config's values when provided (non-null).
+  /// This implements the CLI > config file precedence.
   WebDevServerConfig copyWith({
     String? host,
     int? port,
@@ -163,7 +167,7 @@ class WebDevServerConfig {
       host: host ?? this.host,
       port: port ?? this.port,
       https: https ?? this.https,
-      headers: {...?headers, ...this.headers},
+      headers: {...this.headers, ...?headers},
       proxy: proxy ?? this.proxy,
     );
   }

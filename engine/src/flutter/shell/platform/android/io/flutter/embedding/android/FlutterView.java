@@ -26,6 +26,7 @@ import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -104,8 +105,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *       io.flutter.embedding.android.RenderMode#surface} render mode.
  * </ol>
  *
- * See <a>https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a> for more
- * information comparing {@link android.view.SurfaceView} and {@link android.view.TextureView}.
+ * See <a
+ * href="https://source.android.com/devices/graphics/arch-tv#surface_or_texture">https://source.android.com/devices/graphics/arch-tv#surface_or_texture</a>
+ * for more information comparing {@link android.view.SurfaceView} and {@link
+ * android.view.TextureView}.
  */
 public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
@@ -479,7 +482,7 @@ public class FlutterView extends FrameLayout
     super.onConfigurationChanged(newConfig);
     // We've observed on Android Q that going to the background, changing
     // orientation, and bringing the app back to foreground results in a sequence
-    // of detatch from flutterEngine, onConfigurationChanged, followed by attach
+    // of detached from flutterEngine, onConfigurationChanged, followed by attach
     // to flutterEngine.
     // No-op here so that we avoid NPE; these channels will get notified once
     // the activity or fragment tell the view to attach to the Flutter engine
@@ -612,7 +615,7 @@ public class FlutterView extends FrameLayout
       Log.v(
           TAG,
           "WindowInfoTracker Display Feature reported with bounds = "
-              + displayFeature.getBounds().toString()
+              + displayFeature.getBounds()
               + " and type = "
               + displayFeature.getClass().getSimpleName());
       if (displayFeature instanceof FoldingFeature) {
@@ -850,6 +853,20 @@ public class FlutterView extends FrameLayout
       delegate.growViewportMetricsToCaptionBar(getContext(), viewportMetrics);
     }
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      RoundedCorner topLeft = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+      RoundedCorner topRight = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+      RoundedCorner bottomRight = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+      RoundedCorner bottomLeft = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+
+      viewportMetrics.displayCornerRadiusTopLeft = topLeft != null ? topLeft.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusTopRight = topRight != null ? topRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomRight =
+          bottomRight != null ? bottomRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomLeft =
+          bottomLeft != null ? bottomLeft.getRadius() : 0;
+    }
+
     Log.v(
         TAG,
         "Updating window insets (onApplyWindowInsets()):\n"
@@ -1054,9 +1071,7 @@ public class FlutterView extends FrameLayout
     findViewByAccessibilityIdTraversalMethod.setAccessible(true);
     try {
       return (View) findViewByAccessibilityIdTraversalMethod.invoke(this, accessibilityId);
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
   }
@@ -1081,9 +1096,7 @@ public class FlutterView extends FrameLayout
       if (getAccessibilityViewIdMethod.invoke(currentView).equals(accessibilityId)) {
         return currentView;
       }
-    } catch (IllegalAccessException exception) {
-      return null;
-    } catch (InvocationTargetException exception) {
+    } catch (IllegalAccessException | InvocationTargetException ignored) {
       return null;
     }
     if (currentView instanceof ViewGroup) {
