@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -1888,5 +1889,42 @@ void main() {
     expect(tester.getSize(find.byType(TextFormField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
     tester.pump();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180056.
+  testWidgets('TextFormField resets to initial value after setState', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    final controller = TextEditingController(text: 'Initial Value');
+    addTearDown(controller.dispose);
+
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setter) {
+              setState = setter;
+              return Form(
+                key: formKey,
+                child: TextFormField(controller: controller),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'Changed');
+    await tester.pump();
+    expect(controller.text, 'Changed');
+
+    setState(() {});
+    await tester.pump();
+
+    formKey.currentState!.reset();
+    await tester.pump();
+
+    expect(controller.text, 'Initial Value');
   });
 }
