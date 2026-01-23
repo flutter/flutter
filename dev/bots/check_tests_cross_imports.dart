@@ -247,7 +247,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/selection_container_test.dart',
     'packages/flutter/test/widgets/scrollable_semantics_test.dart',
     'packages/flutter/test/widgets/rotated_box_test.dart',
-    'packages/flutter/test/widgets/single_child_scroll_view_test.dart',
     'packages/flutter/test/widgets/pinned_header_sliver_test.dart',
     'packages/flutter/test/widgets/raw_radio_test.dart',
     'packages/flutter/test/widgets/syncing_test.dart',
