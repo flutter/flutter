@@ -3236,6 +3236,8 @@ void main() {
 
       tester.view.devicePixelRatio = 1;
       tester.binding.platformDispatcher.textScaleFactorTestValue = 1;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.binding.platformDispatcher.clearTextScaleFactorTestValue);
       setWindowToPortrait(tester, size: const Size(402, 874));
 
       var count = 0;

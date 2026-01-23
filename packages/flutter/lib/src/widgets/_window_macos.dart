@@ -115,11 +115,24 @@ class WindowingOwnerMacOS extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
     required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
     throw UnimplementedError('Tooltip windows are not yet implemented on MacOS.');
+  }
+
+  @internal
+  @override
+  PopupWindowController createPopupWindowController({
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) {
+    throw UnimplementedError('Popup windows are not yet implemented on MacOS.');
   }
 
   final List<BaseWindowController> _activeControllers = <BaseWindowController>[];

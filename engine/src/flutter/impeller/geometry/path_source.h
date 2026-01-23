@@ -109,6 +109,39 @@ class EllipsePathSource : public PathSource {
   const Rect bounds_;
 };
 
+/// A utility class to receive path segments from a source, transform them
+/// by a matrix, and pass them along to a subsequent receiver.
+class PathTransformer : public impeller::PathReceiver {
+ public:
+  PathTransformer(PathReceiver& receiver [[clang::lifetimebound]],
+                  const impeller::Matrix& matrix [[clang::lifetimebound]])
+      : receiver_(receiver), matrix_(matrix) {}
+
+  void MoveTo(const Point& p2, bool will_be_closed) override {
+    receiver_.MoveTo(matrix_ * p2, will_be_closed);
+  }
+
+  void LineTo(const Point& p2) override { receiver_.LineTo(matrix_ * p2); }
+
+  void QuadTo(const Point& cp, const Point& p2) override {
+    receiver_.QuadTo(matrix_ * cp, matrix_ * p2);
+  }
+
+  bool ConicTo(const Point& cp, const Point& p2, Scalar weight) override {
+    return receiver_.ConicTo(matrix_ * cp, matrix_ * p2, weight);
+  }
+
+  void CubicTo(const Point& cp1, const Point& cp2, const Point& p2) override {
+    receiver_.CubicTo(matrix_ * cp1, matrix_ * cp2, matrix_ * p2);
+  }
+
+  void Close() override { receiver_.Close(); }
+
+ private:
+  PathReceiver& receiver_;
+  const impeller::Matrix& matrix_;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_

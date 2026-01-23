@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/host_window.h"
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 #include "flutter/shell/platform/windows/host_window_regular.h"
+#include "flutter/shell/platform/windows/host_window_tooltip.h"
 
 #include <dwmapi.h>
 
@@ -225,35 +226,41 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
                            parent ? parent : std::optional<HWND>()));
 }
 
+std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
+    WindowManager* window_manager,
+    FlutterWindowsEngine* engine,
+    const WindowConstraints& preferred_constraints,
+    bool is_sized_to_content,
+    GetWindowPositionCallback get_position_callback,
+    HWND parent) {
+  return std::unique_ptr<HostWindowTooltip>(new HostWindowTooltip(
+      window_manager, engine, FromWindowConstraints(preferred_constraints),
+      is_sized_to_content, get_position_callback, parent));
+}
+
 HostWindow::HostWindow(WindowManager* window_manager,
-                       FlutterWindowsEngine* engine,
-                       WindowArchetype archetype,
-                       DWORD window_style,
-                       DWORD extended_window_style,
-                       const BoxConstraints& box_constraints,
-                       Rect const initial_window_rect,
-                       LPCWSTR title,
-                       std::optional<HWND> const& owner_window)
-    : window_manager_(window_manager),
-      engine_(engine),
-      archetype_(archetype),
-      box_constraints_(box_constraints) {
+                       FlutterWindowsEngine* engine)
+    : window_manager_(window_manager), engine_(engine) {}
+
+void HostWindow::InitializeFlutterView(
+    HostWindowInitializationParams const& params) {
   // Set up the view.
   auto view_window = std::make_unique<FlutterWindow>(
-      initial_window_rect.width(), initial_window_rect.height(),
-      engine->display_manager(), engine->windows_proc_table());
+      params.initial_window_rect.width(), params.initial_window_rect.height(),
+      engine_->display_manager(), engine_->windows_proc_table());
 
   std::unique_ptr<FlutterWindowsView> view =
-      engine->CreateView(std::move(view_window));
+      engine_->CreateView(std::move(view_window), params.is_sized_to_content,
+                          params.box_constraints, params.sizing_delegate);
   FML_CHECK(view != nullptr);
 
   view_controller_ =
       std::make_unique<FlutterWindowsViewController>(nullptr, std::move(view));
-  FML_CHECK(engine->running());
+  FML_CHECK(engine_->running());
   // The Windows embedder listens to accessibility updates using the
   // view's HWND. The embedder's accessibility features may be stale if
   // the app was in headless mode.
-  engine->UpdateAccessibilityFeatures();
+  engine_->UpdateAccessibilityFeatures();
 
   // Register the window class.
   if (!IsClassRegistered(kWindowClassName)) {
@@ -276,11 +283,12 @@ HostWindow::HostWindow(WindowManager* window_manager,
 
   // Create the native window.
   window_handle_ = CreateWindowEx(
-      extended_window_style, kWindowClassName, title, window_style,
-      initial_window_rect.left(), initial_window_rect.top(),
-      initial_window_rect.width(), initial_window_rect.height(),
-      owner_window ? *owner_window : nullptr, nullptr, GetModuleHandle(nullptr),
-      engine->windows_proc_table().get());
+      params.extended_window_style, kWindowClassName, params.title,
+      params.window_style, params.initial_window_rect.left(),
+      params.initial_window_rect.top(), params.initial_window_rect.width(),
+      params.initial_window_rect.height(),
+      params.owner_window ? *params.owner_window : nullptr, nullptr,
+      GetModuleHandle(nullptr), engine_->windows_proc_table().get());
   FML_CHECK(window_handle_ != nullptr);
 
   // Adjust the window position so its origin aligns with the top-left corner
@@ -308,7 +316,7 @@ HostWindow::HostWindow(WindowManager* window_manager,
   // window. This doesn't work for multi window apps as the engine cannot have
   // multiple next frame callbacks. If multiple windows are created, only the
   // last one will be shown.
-  ShowWindow(window_handle_, SW_SHOWNORMAL);
+  ShowWindow(window_handle_, params.nCmdShow);
   SetWindowLongPtr(window_handle_, GWLP_USERDATA,
                    reinterpret_cast<LONG_PTR>(this));
 }
@@ -341,6 +349,10 @@ HostWindow* HostWindow::GetThisFromHandle(HWND hwnd) {
 
 HWND HostWindow::GetWindowHandle() const {
   return window_handle_;
+}
+
+HWND HostWindow::GetFlutterViewWindowHandle() const {
+  return view_controller_->view()->GetWindowHandle();
 }
 
 void HostWindow::FocusRootViewOf(HostWindow* window) {

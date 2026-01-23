@@ -28,6 +28,8 @@ import '../update_packages_pins.dart';
 
 const _pubspecName = 'pubspec.yaml';
 
+typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
+
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({required bool verboseHelp}) {
     argParser
@@ -169,16 +171,22 @@ class UpdatePackagesCommand extends FlutterCommand {
     final FlutterProject toolProject = FlutterProject.fromDirectory(
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
     );
-    // This needs to be special cased, as it is below flutter_tools, so cannot
-    // be in the flutter pub workspace.
+
+    // This package is intentionally not part of the workspace as it's a rehydrated template.
     final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
       rootProject.directory
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
           .childDirectory('widget_preview_scaffold'),
     );
+
+    // This package is intentionally not part of the workspace to test
+    // user-defines in its local pubspec.
+    final Directory hooksUserDefineIntegrationTestDirectory = rootDirectory
+        .childDirectory('dev')
+        .childDirectory('integration_tests')
+        .childDirectory('hook_user_defines');
+
     final packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
@@ -186,21 +194,20 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
     if (forceUpgrade || cherryPicks.isNotEmpty) {
       if (!excludeTools) {
-        final ResolvedDependencies toolDeps = await _upgrade(
-          forceUpgrade,
-          cherryPicks,
+        final List<_ProjectDeps> toolDeps = await _upgrade(forceUpgrade, cherryPicks, [
+          // The widget_preview_scaffold project has a path dependency on flutter_tools, so we must
+          // upgrade the projects together.
           toolProject,
-          relaxToAny,
-        );
-        _updatePubspec(toolProject.directory, toolDeps);
+          widgetPreviewScaffoldProject,
+        ], relaxToAny);
+        for (final (:project, :deps) in toolDeps) {
+          _updatePubspec(project.directory, deps);
+        }
       }
 
-      final ResolvedDependencies deps = await _upgrade(
-        forceUpgrade,
-        cherryPicks,
+      final (project: _, :ResolvedDependencies deps) = (await _upgrade(forceUpgrade, cherryPicks, [
         rootProject,
-        relaxToAny,
-      );
+      ], relaxToAny)).single;
 
       for (final package in <Directory>[
         rootDirectory,
@@ -208,6 +215,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         rootDirectory.childDirectory('packages').childDirectory('flutter_test'),
         rootDirectory.childDirectory('packages').childDirectory('flutter_localizations'),
         widgetPreviewScaffoldProject.directory,
+        hooksUserDefineIntegrationTestDirectory,
       ]) {
         _updatePubspec(package, deps);
       }
@@ -220,11 +228,14 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkWithFlutterTools(rootDirectory);
     _checkPins(rootDirectory);
 
+    // Pub get for the workspace.
     await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
 
+    // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
     await _pubGet(widgetPreviewScaffoldProject, false);
+    await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
 
     await _downloadCoverageData();
 
@@ -234,10 +245,10 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<void> _pubGet(FlutterProject project, bool enforceLockfile) async =>
       pub.get(context: PubContext.pubGet, project: project, enforceLockfile: enforceLockfile);
 
-  Future<ResolvedDependencies> _upgrade(
+  Future<List<_ProjectDeps>> _upgrade(
     bool forceUpgrade,
     List<CherryPick> cherryPicks,
-    FlutterProject project,
+    List<FlutterProject> projects,
     bool relaxToAny,
   ) async {
     final Map<String, String> pinnedDeps;
@@ -256,36 +267,43 @@ class UpdatePackagesCommand extends FlutterCommand {
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
       'flutter_upgrade_packages.',
     );
-    final File tempPubspec = tempDir.childFile(_pubspecName)..createSync();
-    globals.printStatus('Writing to temp pubspec at $tempPubspec');
-    final String pubspecContents = project.pubspecFile.readAsStringSync();
-    final yamlEditor = YamlEditor(pubspecContents);
-    final ResolvedDependencies oldDeps = _fetchDeps(yamlEditor);
+    final deps = <_ProjectDeps>[];
+    for (final project in projects) {
+      final Directory projectTempDir = tempDir.childDirectory(
+        globals.fs.path.relative(project.directory.path, from: Cache.flutterRoot),
+      );
+      final File tempPubspec = projectTempDir.childFile(project.pubspecFile.basename)
+        ..createSync(recursive: true);
+      globals.printStatus('Writing to temp pubspec at $tempPubspec');
+      final String pubspecContents = project.pubspecFile.readAsStringSync();
+      final yamlEditor = YamlEditor(pubspecContents);
+      final ResolvedDependencies oldDeps = _fetchDeps(yamlEditor);
+      final workspacePath = <String>['workspace'];
+      if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
+        yamlEditor.remove(workspacePath);
+      }
+      final RelaxMode relaxMode = switch (cherryPicks.isNotEmpty) {
+        true => RelaxMode.strict,
+        false => relaxToAny ? RelaxMode.any : RelaxMode.caret,
+      };
+      _relaxDeps(yamlEditor, relaxMode, pinnedDeps);
+      tempPubspec.writeAsStringSync(yamlEditor.toString());
+      globals.printStatus('Upgrade in $projectTempDir (for project: ${project.manifest.appName})');
+      await pub.interactively(
+        <String>['upgrade', '--tighten', '-C', projectTempDir.path],
+        context: PubContext.updatePackages,
+        project: FlutterProject.fromDirectory(projectTempDir),
+        command: 'update',
+      );
 
-    final workspacePath = <String>['workspace'];
-    if (yamlEditor.parseAt(workspacePath, orElse: () => wrapAsYamlNode(null)).value != null) {
-      yamlEditor.remove(workspacePath);
+      final ResolvedDependencies newDeps = _fetchDeps(YamlEditor(tempPubspec.readAsStringSync()));
+
+      deps.add((
+        project: project,
+        deps: ResolvedDependencies.mergeDeps(oldDeps, newDeps, cherryPicks),
+      ));
     }
 
-    final RelaxMode relaxMode = switch (cherryPicks.isNotEmpty) {
-      true => RelaxMode.strict,
-      false => relaxToAny ? RelaxMode.any : RelaxMode.caret,
-    };
-    _relaxDeps(yamlEditor, relaxMode, pinnedDeps);
-
-    tempPubspec.writeAsStringSync(yamlEditor.toString());
-
-    globals.printStatus('Upgrade in $tempDir');
-    await pub.interactively(
-      <String>['upgrade', '--tighten', '-C', tempDir.path],
-      context: PubContext.updatePackages,
-      project: FlutterProject.fromDirectory(tempDir),
-      command: 'update',
-    );
-
-    final ResolvedDependencies newDeps = _fetchDeps(YamlEditor(tempPubspec.readAsStringSync()));
-
-    final ResolvedDependencies deps = ResolvedDependencies.mergeDeps(oldDeps, newDeps, cherryPicks);
     tempDir.deleteSync(recursive: true);
     return deps;
   }
