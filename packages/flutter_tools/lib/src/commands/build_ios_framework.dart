@@ -258,13 +258,9 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         }
       } else if (frameworkName.endsWith('.framework')) {
         // Create an xcframework from the single framework
-        final Directory xcframeworkOutput = modeDirectory.childDirectory(
-          '$binaryName.xcframework',
-        );
+        final Directory xcframeworkOutput = modeDirectory.childDirectory('$binaryName.xcframework');
         if (!xcframeworkOutput.existsSync()) {
-          globals.logger.printTrace(
-            'Creating xcframework from vendored framework: $frameworkName',
-          );
+          globals.logger.printTrace('Creating xcframework from vendored framework: $frameworkName');
           await BuildFrameworkCommand.produceXCFramework(
             <Directory>[frameworkEntity],
             binaryName,
@@ -833,11 +829,7 @@ end
       }
 
       // Copy vendored frameworks from CocoaPods plugins.
-      await copyVendoredFrameworks(
-        modeDirectory,
-        project.ios.hostAppRoot,
-        globals.plistParser,
-      );
+      await copyVendoredFrameworks(modeDirectory, project.ios.hostAppRoot, globals.plistParser);
     } finally {
       status.stop();
     }
