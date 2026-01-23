@@ -261,6 +261,7 @@ class SwiftPackageManager {
       fileSystem: _fileSystem,
       platform: platform,
       project: project,
+      createIfNotFound: true,
     );
   }
 
@@ -270,6 +271,7 @@ class SwiftPackageManager {
     required FileSystem fileSystem,
     required FlutterDarwinPlatform platform,
     required XcodeBasedProject project,
+    bool createIfNotFound = false,
   }) {
     final String frameworkName = platform.binaryName;
     final Link frameworkLink = fileSystem.link(
@@ -279,7 +281,7 @@ class SwiftPackageManager {
     );
     if (frameworkLink.existsSync()) {
       frameworkLink.updateSync('./${buildMode.uppercaseName}/$frameworkName.xcframework');
-    } else {
+    } else if (createIfNotFound) {
       frameworkLink.createSync(
         './${buildMode.uppercaseName}/$frameworkName.xcframework',
         recursive: true,
