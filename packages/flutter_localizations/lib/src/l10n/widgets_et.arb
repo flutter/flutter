@@ -12,7 +12,7 @@
   "shareButtonLabel": "Jagamine",
   "pasteButtonLabel": "Kleebi",
   "selectAllButtonLabel": "Vali kõik",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Leiti otsingutulemusi",
+  "noResultsFound": "Tulemusi ei leitud",
+  "radioButtonUnselectedLabel": "Pole valitud"
 }

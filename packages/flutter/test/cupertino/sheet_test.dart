@@ -62,6 +62,109 @@ void main() {
     );
   });
 
+  testWidgets('showDragHandle adds a drag handle to the top of the sheet', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        showDragHandle: true,
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+    final Finder dragHandleFinder = find.byWidgetPredicate((Widget widget) {
+      return widget is DecoratedBox &&
+          widget.decoration is ShapeDecoration &&
+          (widget.decoration as ShapeDecoration).color == CupertinoColors.tertiaryLabel;
+    });
+    expect(dragHandleFinder, findsOneWidget);
+  });
+
+  testWidgets('showDragHandle adds a MediaQuery padding so content can render below the handle', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        showDragHandle: true,
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(
+                            child: SafeArea(child: Text('Page 2')),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+    final Finder dragHandleFinder = find.byWidgetPredicate((Widget widget) {
+      return widget is DecoratedBox &&
+          widget.decoration is ShapeDecoration &&
+          (widget.decoration as ShapeDecoration).color == CupertinoColors.tertiaryLabel;
+    });
+
+    final Offset dragHandleOffset = tester.getTopLeft(dragHandleFinder);
+    final Offset sheetContentOffset = tester.getTopLeft(find.text('Page 2'));
+    expect(sheetContentOffset.dy, greaterThan(dragHandleOffset.dy));
+  });
+
   testWidgets('Previous route moves slight downward when sheet route is pushed', (
     WidgetTester tester,
   ) async {
@@ -650,6 +753,58 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Page: /next'), findsOneWidget);
+  });
+
+  testWidgets('sheet with RouteSettings', (WidgetTester tester) async {
+    late RouteSettings currentRouteSetting;
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(
+            onDidChange: (Route<dynamic> newRoute) {
+              currentRouteSetting = newRoute.settings;
+            },
+          ),
+        ],
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      settings: const RouteSettings(name: 'simpleroute'),
+                      context: scaffoldKey.currentContext!,
+                      pageBuilder: (BuildContext context) {
+                        return const CupertinoPageScaffold(child: Text('Hello'));
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(currentRouteSetting.name, '/');
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Hello'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello'), findsOneWidget);
+    expect(currentRouteSetting.name, 'simpleroute');
+
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting.name, '/');
   });
 
   testWidgets('content does not go below the bottom of the screen', (WidgetTester tester) async {
@@ -1905,4 +2060,58 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+  testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
+    WidgetTester tester,
+  ) async {
+    final animation = AnimationController(vsync: const TestVSync());
+    final secondaryAnimation = AnimationController(vsync: const TestVSync());
+
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: secondaryAnimation,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    final newAnimation = AnimationController(vsync: const TestVSync());
+
+    // Should not throw an exception.
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: newAnimation,
+        secondaryRouteAnimation: secondaryAnimation,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    animation.dispose();
+    secondaryAnimation.dispose();
+    newAnimation.dispose();
+  });
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      onDidChange(previousRoute!);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }
