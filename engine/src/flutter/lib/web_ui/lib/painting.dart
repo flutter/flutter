@@ -444,6 +444,9 @@ class ColorFilter implements ImageFilter {
   const factory ColorFilter.linearToSrgbGamma() = engine.EngineColorFilter.linearToSrgbGamma;
   const factory ColorFilter.srgbToLinearGamma() = engine.EngineColorFilter.srgbToLinearGamma;
   factory ColorFilter.saturation(double saturation) = engine.EngineColorFilter.saturation;
+
+  @override
+  String get debugShortDescription => toString();
 }
 
 // These enum values must be kept in sync with SkBlurStyle.
@@ -592,6 +595,8 @@ class ImageFilter {
   }
 
   static bool get isShaderFilterSupported => false;
+
+  String get debugShortDescription => toString();
 }
 
 enum ColorSpace { sRGB, extendedSRGB, displayP3 }
@@ -999,13 +1004,20 @@ class ImageDescriptor {
 
 abstract class FragmentProgram {
   static Future<FragmentProgram> fromAsset(String assetKey) {
-    return engine.renderer.createFragmentProgram(assetKey);
+    // The flutter tool converts all asset keys with spaces into URI
+    // encoded paths (replacing ' ' with '%20', for example). We perform
+    // the same encoding here so that users can load assets with the same
+    // key they have written in the pubspec.
+    final String encodedKey = Uri(path: Uri.encodeFull(assetKey)).path;
+    return engine.renderer.createFragmentProgram(encodedKey);
   }
 
   FragmentShader fragmentShader();
 }
 
-abstract class UniformFloatSlot {
+sealed class UniformType {}
+
+abstract class UniformFloatSlot extends UniformType {
   UniformFloatSlot(this.name, this.index);
 
   void set(double val);
@@ -1015,6 +1027,23 @@ abstract class UniformFloatSlot {
   final String name;
 
   final int index;
+}
+
+abstract class UniformVec2Slot extends UniformType {
+  void set(double x, double y);
+}
+
+abstract class UniformVec3Slot extends UniformType {
+  void set(double x, double y, double z);
+}
+
+abstract class UniformVec4Slot extends UniformType {
+  void set(double x, double y, double z, double w);
+}
+
+abstract class UniformArray<T extends UniformType> {
+  T operator [](int index);
+  int get length;
 }
 
 abstract class ImageSamplerSlot {
@@ -1035,6 +1064,20 @@ abstract class FragmentShader implements Shader {
   bool get debugDisposed;
 
   UniformFloatSlot getUniformFloat(String name, [int? index]);
+
+  UniformVec2Slot getUniformVec2(String name);
+
+  UniformVec3Slot getUniformVec3(String name);
+
+  UniformVec4Slot getUniformVec4(String name);
+
+  UniformArray<UniformFloatSlot> getUniformFloatArray(String name);
+
+  UniformArray<UniformVec2Slot> getUniformVec2Array(String name);
+
+  UniformArray<UniformVec3Slot> getUniformVec3Array(String name);
+
+  UniformArray<UniformVec4Slot> getUniformVec4Array(String name);
 
   ImageSamplerSlot getImageSampler(String name);
 }
