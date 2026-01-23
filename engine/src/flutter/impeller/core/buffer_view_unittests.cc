@@ -9,6 +9,7 @@
 
 namespace impeller::testing {
 
+namespace {
 struct FakeDeviceBuffer : DeviceBuffer {
   FakeDeviceBuffer() : DeviceBuffer(DeviceBufferDescriptor{}) {}
   bool SetLabel(std::string_view label) override { return true; };
@@ -25,6 +26,7 @@ struct FakeDeviceBuffer : DeviceBuffer {
     return true;
   }
 };
+}  // namespace
 
 TEST(BufferViewTest, Empty) {
   BufferView buffer_view;
