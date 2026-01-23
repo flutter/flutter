@@ -12,7 +12,6 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1751,7 +1750,7 @@ void main() {
                     onPressed: () {
                       showCupertinoDialog<void>(
                         context: context,
-                        barrierColor: Colors.red,
+                        barrierColor: const Color(0xFFF44336),
                         builder: (BuildContext context) {
                           return CupertinoAlertDialog(
                             title: const Text('Title'),
@@ -1780,13 +1779,16 @@ void main() {
 
     await tester.tap(find.text('Custom BarrierColor'));
     await tester.pumpAndSettle();
-    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, equals(Colors.red));
+    expect(
+      tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color,
+      equals(const Color(0xFFF44336)),
+    );
 
     await tester.tap(find.text('No'));
     await tester.pumpAndSettle();
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => widget is ModalBarrier && widget.color == Colors.red,
+        (Widget widget) => widget is ModalBarrier && widget.color == const Color(0xFFF44336),
       ),
       findsNothing,
     );
