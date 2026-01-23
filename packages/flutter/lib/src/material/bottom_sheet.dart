@@ -738,7 +738,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue = animationCurve.transform(widget.route.animation!.value);
+        final double animationValue = widget.route.animation!.value;
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -1081,6 +1081,17 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
+  Animation<double> createAnimation() {
+    final Animation<double> parent = super.createAnimation();
+
+    return CurvedAnimation(
+      parent: parent,
+      curve: sheetAnimationStyle?.curve ?? _modalBottomSheetCurve,
+      reverseCurve: sheetAnimationStyle?.reverseCurve ?? _modalBottomSheetCurve,
+    );
+  }
+
+  @override
   Widget buildPage(
     BuildContext context,
     Animation<double> animation,
@@ -1137,9 +1148,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         ColorTween(
           begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
-        ).chain(
-          CurveTween(curve: barrierCurve),
-        ), // changedInternalState is called if barrierCurve updates
+        ),
       );
       return AnimatedModalBarrier(
         color: color,

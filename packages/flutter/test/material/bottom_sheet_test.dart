@@ -3047,6 +3047,47 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('ModalBottomSheet uses AnimationStyle curve and reverseCurve', (
+    WidgetTester tester,
+  ) async {
+    final observer = _TestNavigatorObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: [observer],
+        home: Builder(
+          builder: (context) {
+            return GestureDetector(
+              onTap: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  sheetAnimationStyle: const AnimationStyle(
+                    curve: Curves.easeIn,
+                    reverseCurve: Curves.easeOut,
+                  ),
+                  builder: (_) => const SizedBox(height: 200),
+                );
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    final route = observer.lastRoute! as ModalBottomSheetRoute;
+
+    final proxy = route.animation! as ProxyAnimation;
+
+    final curved = proxy.parent! as CurvedAnimation;
+
+    expect(curved.curve, same(Curves.easeIn));
+    expect(curved.reverseCurve, same(Curves.easeOut));
+  });
 }
 
 class _TestPage extends StatelessWidget {
@@ -3086,4 +3127,13 @@ class _StatusTestAnimationController extends AnimationController with AnimationL
 
   @override
   void didStopListening() {}
+}
+
+class _TestNavigatorObserver extends NavigatorObserver {
+  Route<dynamic>? lastRoute;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    lastRoute = route;
+  }
 }
