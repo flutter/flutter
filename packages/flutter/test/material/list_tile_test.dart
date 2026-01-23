@@ -4768,7 +4768,7 @@ void main() {
   testWidgets('ListTile shows warning when a Container with color wraps it', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final errorDetails = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails.add(details);
@@ -4802,7 +4802,7 @@ void main() {
   testWidgets('ListTile throw exception when wrapped in ColoredBox with non-transparent color', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final errorDetails = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails.add(details);
@@ -4834,7 +4834,7 @@ void main() {
   testWidgets('ListTile throw exception when wrapped in DecoratedBox with non-transparent color', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final errorDetails = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails.add(details);
@@ -4866,7 +4866,7 @@ void main() {
   testWidgets('ListTile does not throw exception when parent has no/transparent color', (
     WidgetTester tester,
   ) async {
-    final List<FlutterErrorDetails> errorDetails = <FlutterErrorDetails>[];
+    final errorDetails = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       errorDetails.add(details);
