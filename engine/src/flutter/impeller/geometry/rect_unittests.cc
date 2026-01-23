@@ -3177,17 +3177,49 @@ TEST(RectTest, TransformAndClipBounds) {
         // clang-format on
     );
     Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // Exactly two of these should have a W<0
+
+    // Exactly two of these homogenous results should have a W<0
+    //
+    // When W<0 we interpolate the point back towards the adjacent points
+    // that have W>0 to a location just greater than the W=0 half-plane.
+    // We interpolate them to W=epsilon where epsilon == 2^-14.
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
                         Vector3(200.0f, 200.0f, 0.9f));
+    // Contributes (200, 200) / 0.9 == (222.2222, 222.2222) to bounds
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
                         Vector3(400.0f, 200.0f, -0.6f));
+    // Interpolates at epsilon against LeftTop to produce:
+    // t = (epsilon - -.6) / (.9 - -.6)
+    //   = (epsilon + .6) / 1.5
+    //   = 0.4000407
+    // Lerp(RightTop, LeftTop, 0.4000407) = (319.9919, 200, epsilon)
+    //                                    = (5242747, 3276800)
+    // Cannot interpolate against RightBottom because it also has W<0
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
                         Vector3(200.0f, 400.0f, 0.3f));
+    // Contributes (200, 400) / 0.3 == (666.6667, 1333.3333) to bounds
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
                         Vector3(400.0f, 400.0f, -1.2f));
+    // Interpolates at epsilon against LeftBottom to produce:
+    // t = (epsilon - -1.2) / (.3 - -1.2)
+    //   = (epsilon + 1.2) / 1.5
+    //   = 0.8000407
+    // Lerp(RightBottom, LeftBottom, 0.8000407) = (239.9919, 400, epsilon)
+    //                                          = (3932026.667, 6553600)
+    // Cannot interpolate against RightTop because it also has W<0
 
-    Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5898373.f, 6553600.f);
+    // Min/Max X and Y of all the points generated above are:
+    // Min X == 222.2222
+    // Min Y == 222.2222
+    // Max X == 5242747
+    // Max Y == 6553600
+
+    Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5242747.f, 6553600.f);
+
     EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
     EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
   }
@@ -3203,17 +3235,50 @@ TEST(RectTest, TransformAndClipBounds) {
         // clang-format on
     );
     Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
-    // Exactly three of these should have a W<0
+
+    // Exactly three of these homogenous results should have a W<0
+    //
+    // When W<0 we interpolate the point back towards the adjacent points
+    // that have W>0 to a location just greater than the W=0 half-plane.
+    // We interpolate them to W=epsilon where epsilon == 2^-14.
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
                         Vector3(200.0f, 200.0f, 0.4f));
+    // Contributes (200, 200) / 0.4 == (500, 500) to bounds
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
                         Vector3(400.0f, 200.0f, -1.6f));
+    // Interpolates at epsilon against LeftTop to produce:
+    // t = (epsilon - -1.6) / (.4 - -1.6)
+    //   = (epsilon + 1.6) / 2
+    //   = 0.8000305
+    // Lerp(RightTop, LeftTop, 0.8000305) = (239.9939, 200, epsilon)
+    //                                    = (3932060, 3276800)
+    // Cannot interpolate against RightBottom because it also has W<0
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
                         Vector3(200.0f, 400.0f, -0.2f));
+    // Interpolates against LeftTop to produce:
+    // t = (epsilon - -.2) / (.4 - -.2)
+    //   = (epsilon + .2) / .6
+    //   = 0.333435
+    // Lerp(LeftBottom, LeftTop, .333435) = (200, 333.31299, epsilon)
+    //                                    = (3276800, 5461000)
+    // Cannot interpolate against RightBottom because it also has W<0
+
     EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
                         Vector3(400.0f, 400.0f, -2.2f));
+    // Cannot interpolate against either RightTop or LeftBottom because
+    // both of those adjacent points transformed to a W<0 homogenous point.
 
-    Rect expect = Rect::MakeLTRB(499.99988f, 499.99988f, 5898340.f, 4369400.f);
+    // Min/Max X and Y of all the points generated above are:
+    // Min X == 500
+    // Min Y == 500
+    // Max X == 3932060
+    // Max Y == 5461000
+
+    Rect expect = Rect::MakeLTRB(500.0f, 500.0f, 3932060.f, 5461000.f);
+
     EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
     EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
   }
