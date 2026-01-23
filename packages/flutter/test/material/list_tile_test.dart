@@ -4887,7 +4887,6 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(errorDetails, isEmpty);
->>>>>>> Stashed changes
   });
 }
 
