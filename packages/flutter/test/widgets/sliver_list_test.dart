@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -384,24 +384,20 @@ void main() {
 }
 
 Widget _buildSliverListRenderWidgetChild(List<String> items, ScrollController controller) {
-  return MaterialApp(
-    home: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: SizedBox(
-          height: 500,
-          child: CustomScrollView(
-            controller: controller,
-            slivers: <Widget>[
-              SliverList.builder(
-                itemCount: items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Chip(key: Key(items[index]), label: Text('Tile ${items[index]}'));
-                },
-              ),
-            ],
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: SizedBox(
+      height: 500,
+      child: CustomScrollView(
+        controller: controller,
+        slivers: <Widget>[
+          SliverList.builder(
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(key: Key(items[index]), child: Text('Tile ${items[index]}'));
+            },
           ),
-        ),
+        ],
       ),
     ),
   );
