@@ -103,9 +103,7 @@ class _DatePickerSampleState extends State<DatePickerSample> {
                 }
               },
             ),
-
             const SizedBox(height: 24),
-
             OutlinedButton(
               onPressed: _showPicker,
               child: const Text('Select date'),
@@ -142,6 +140,23 @@ enum DateSeparator {
   final String value;
 }
 
+/// A [TextInputFormatter] used by the input mode of [showDatePicker] to
+/// format and validate date text according to a specific [DateInputFormat].
+///
+/// This formatter is intended to be used when [DatePickerEntryMode.input]
+/// is enabled, ensuring that the manual date entry matches the same format
+/// expected by the picker.
+///
+/// It:
+/// - Restricts input to digits and automatically inserts the configured
+///   [separator].
+/// - Enforces the field order defined by [DateInputFormat]
+///   (e.g. day–month–year, month–day–year, year–month–day).
+/// - Provides utilities to format a [DateTime] into a string and to parse
+///   user input back into a [DateTime], returning `null` for invalid values.
+///
+/// This formatter is typically wired through a custom calendar delegate,
+/// such as [ConfigurableDateDelegate], rather than being attached directly.
 class DateInputFormatter extends TextInputFormatter {
   const DateInputFormatter({required this.formatType, required this.separator});
 
@@ -155,11 +170,13 @@ class DateInputFormatter extends TextInputFormatter {
     final String month = date.month.toString().padLeft(2, '0');
     final String year = date.year.toString().padLeft(4, '0');
 
-    return switch (formatType) {
-      DateInputFormat.dayMonthYear => '$day$separator$month$separator$year',
-      DateInputFormat.monthDayYear => '$month$separator$day$separator$year',
-      DateInputFormat.yearMonthDay => '$year$separator$month$separator$day',
+    final components = switch (formatType) {
+      DateInputFormat.dayMonthYear => [day, month, year],
+      DateInputFormat.monthDayYear => [month, day, year],
+      DateInputFormat.yearMonthDay => [year, month, day],
     };
+
+    return components.join(separator);
   }
 
   DateTime? parse(String? input) {
