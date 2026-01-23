@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
@@ -229,8 +228,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           //   view hierarchy via callbacks such as ViewParent#onDescendantInvalidated().
           // - The API level is <23, due to TLHC implementation API requirements.
           final boolean supportsTextureLayerMode =
-              Build.VERSION.SDK_INT >= API_LEVELS.API_23
-                  && !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
+              !ViewUtils.hasChildViewOfType(embeddedView, VIEW_TYPES_REQUIRE_NON_TLHC);
 
           // Fall back to Hybrid Composition or Virtual Display when necessary, depending on which
           // fallback mode is requested.
@@ -250,7 +248,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void dispose(int viewId) {
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView == null) {
@@ -313,7 +310,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void offset(int viewId, double top, double left) {
           if (usesVirtualDisplay(viewId)) {
             // Virtual displays don't need an accessibility offset.
@@ -341,7 +337,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void resize(
             @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
             @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
@@ -624,7 +619,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // Configures the view for Texture Layer Hybrid Composition mode, returning the associated
   // texture ID.
-  @RequiresApi(API_LEVELS.API_23)
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   public long configureForTextureLayerComposition(
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {

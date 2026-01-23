@@ -14,18 +14,20 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
                                      LPCWSTR title,
                                      bool decorated)
 
-    : HostWindow(window_manager,
-                 engine,
-                 WindowArchetype::kRegular,
-                 decorated ? WS_OVERLAPPEDWINDOW : 0,
-                 0,
-                 constraints,
-                 GetInitialRect(engine, preferred_size, constraints),
-                 title,
-                 std::nullopt) {
+    : HostWindow(window_manager, engine) {
   // TODO(knopp): Investigate sizing the window to its content with the help of
   // https://github.com/flutter/flutter/pull/173610.
   FML_CHECK(preferred_size.has_preferred_view_size);
+  InitializeFlutterView(HostWindowInitializationParams{
+      .archetype = WindowArchetype::kRegular,
+      .window_style = WS_OVERLAPPEDWINDOW,
+      .extended_window_style = decorated ? WS_OVERLAPPEDWINDOW : 0,
+      .box_constraints = constraints,
+      .initial_window_rect =
+          GetInitialRect(engine, preferred_size, constraints),
+      .title = title,
+      .owner_window = std::optional<HWND>(),
+  });
 }
 
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,

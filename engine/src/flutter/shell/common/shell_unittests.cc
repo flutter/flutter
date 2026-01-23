@@ -142,11 +142,6 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (std::unique_ptr<PointerDataPacket> packet),
               (override));
 
-  MOCK_METHOD(bool,
-              OnPlatformViewEmbeddedNativeViewShouldAcceptTouch,
-              (int64_t view_id, const flutter::PointData touch_began_location),
-              (override));
-
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
               (int64_t view_id,
@@ -5082,7 +5077,11 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
                 {},    // p_physical_display_features_bounds,
                 {},    // p_physical_display_features_type,
                 {},    // p_physical_display_features_state,
-                0      // p_display_id
+                0,     // p_display_id
+                0,     // p_physical_display_corner_radius_top_left
+                0,     // p_physical_display_corner_radius_top_right
+                0,     // p_physical_display_corner_radius_bottom_right
+                0,     // p_physical_display_corner_radius_bottom_left
             });
       });
   PumpOneFrame(shell.get());

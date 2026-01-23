@@ -16,7 +16,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/lib/ui/window/point_data.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
@@ -368,6 +367,10 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
       {},                       // p_physical_display_features_type
       {},                       // p_physical_display_features_state
       0,                        // p_display_id
+      -1.0,                     // p_physical_display_corner_radius_top_left
+      -1.0,                     // p_physical_display_corner_radius_top_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_right
+      -1.0,                     // p_physical_display_corner_radius_bottom_left
   };
   SetViewportMetrics(kFlutterImplicitViewId, metrics);
 
