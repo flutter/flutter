@@ -165,8 +165,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         // TODO(egarciad): Remove the need for this.
         // https://github.com/flutter/flutter/issues/96679
         public void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request) {
-          // API level 19 is required for `android.graphics.ImageReader`.
-          enforceMinimumAndroidApiVersion(19);
           ensureValidRequest(request);
           throwIfHCPPEnabled();
 
@@ -492,15 +490,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       };
 
   /// Throws an exception if the SDK version is below minSdkVersion.
-  private void enforceMinimumAndroidApiVersion(int minSdkVersion) {
-    if (Build.VERSION.SDK_INT < minSdkVersion) {
-      throw new IllegalStateException(
-          "Trying to use platform views with API "
-              + Build.VERSION.SDK_INT
-              + ", required API level is: "
-              + minSdkVersion);
-    }
-  }
 
   private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
     if (!validateDirection(request.direction)) {
@@ -556,7 +545,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Configures the view for Hybrid Composition mode.
   private void configureForHybridComposition(
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
-    enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
   }
@@ -574,9 +562,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     // This mode adds the view to a virtual display, which is wired up to a GL texture that
     // is composed by the Flutter engine.
-
-    // API level 20 is required to use VirtualDisplay#setSurface.
-    enforceMinimumAndroidApiVersion(20);
 
     Log.i(TAG, "Hosting view in a virtual display for platform view: " + request.viewId);
 
@@ -625,10 +610,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     // This mode attaches the view to the Android view hierarchy and record its drawing
     // operations, so they can be forwarded to a GL texture that is composed by the
     // Flutter engine.
-
-    // API level 23 is required to use Surface#lockHardwareCanvas().
-    enforceMinimumAndroidApiVersion(23);
-    Log.i(TAG, "Hosting view in view hierarchy for platform view: " + request.viewId);
 
     final int physicalWidth = toPhysicalPixels(request.logicalWidth);
     final int physicalHeight = toPhysicalPixels(request.logicalHeight);
