@@ -1023,8 +1023,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
+  CurvedAnimation? _animation;
+
   @override
   void dispose() {
+    _animation?.dispose();
     _clipDetailsNotifier.dispose();
     super.dispose();
   }
@@ -1082,13 +1085,14 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Animation<double> createAnimation() {
-    final Animation<double> parent = super.createAnimation();
-
-    return CurvedAnimation(
-      parent: parent,
-      curve: sheetAnimationStyle?.curve ?? _modalBottomSheetCurve,
-      reverseCurve: sheetAnimationStyle?.reverseCurve ?? _modalBottomSheetCurve,
-    );
+    if (sheetAnimationStyle != AnimationStyle.noAnimation) {
+      return _animation ??= CurvedAnimation(
+        parent: super.createAnimation(),
+        curve: sheetAnimationStyle?.curve ?? _modalBottomSheetCurve,
+        reverseCurve: sheetAnimationStyle?.reverseCurve ?? _modalBottomSheetCurve,
+      );
+    }
+    return super.createAnimation();
   }
 
   @override
