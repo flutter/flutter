@@ -201,6 +201,13 @@ copy("copy_dart_ui") {
   outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/ui/{{source_file_part}}" ]
 }
 
+copy("copy_dart_ui_fix_data") {
+  sources = [ dart_ui_fix_data_file ]
+
+  outputs =
+      [ "$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml" ]
+}
+
 web_ui_ui_web_with_output("copy_dart_ui_web") {
   output_dir = "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/"
 }
@@ -294,6 +301,7 @@ action("sky_engine") {
     ":_embedder_yaml",
     ":copy_dart_sdk",
     ":copy_dart_ui",
+    ":copy_dart_ui_fix_data",
     ":copy_dart_ui_web",
   ]
 
