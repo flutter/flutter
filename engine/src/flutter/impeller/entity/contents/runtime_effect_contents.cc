@@ -55,11 +55,11 @@ BufferView RuntimeEffectContents::EmplaceUniform(
         auto* float_source = reinterpret_cast<const float*>(source_data);
 
         for (size_t i = 0; i < count; i++) {
-          for (RuntimeStructByteType byte_type : uniform.padding_layout) {
-            if (byte_type == RuntimeStructByteType::kPadding) {
+          for (RuntimePaddingType byte_type : uniform.padding_layout) {
+            if (byte_type == RuntimePaddingType::kPadding) {
               float_destination[struct_float_index++] = 0.f;
             } else {
-              FML_DCHECK(byte_type == RuntimeStructByteType::kFloat);
+              FML_DCHECK(byte_type == RuntimePaddingType::kFloat);
               float_destination[struct_float_index++] =
                   float_source[uniform_byte_index++];
             }

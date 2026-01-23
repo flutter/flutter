@@ -38,7 +38,7 @@ struct RuntimeUniformDimensions {
   size_t cols = 0;
 };
 
-enum class RuntimeStructByteType : uint8_t {
+enum class RuntimePaddingType : uint8_t {
   kPadding = 0,
   kFloat = 1,
 };
@@ -52,7 +52,7 @@ struct RuntimeUniformDescription {
   RuntimeUniformDimensions dimensions = {};
   size_t bit_width = 0u;
   std::optional<size_t> array_elements;
-  std::vector<RuntimeStructByteType> padding_layout = {};
+  std::vector<RuntimePaddingType> padding_layout = {};
   size_t struct_float_count = 0u;
 
   /// @brief  Computes the total number of bytes that this uniform requires.

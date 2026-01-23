@@ -59,7 +59,8 @@ struct UniformDescription {
   /// The layout of padding bytes in the uniform buffer.
   /// The format matches the values in the flatbuffer
   /// UniformDescription::padding_layout.
-  std::vector<fb::StructByteType> padding_layout = {};
+  /// \see RuntimeEffectContents::EmplaceUniform
+  std::vector<fb::PaddingType> padding_layout = {};
   size_t struct_float_count = 0u;
 };
 
