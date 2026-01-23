@@ -125,6 +125,55 @@ void main() {
       },
     );
 
+    FileSystem createFsWithPubspecInParentDir() {
+      final FileSystem fs = MemoryFileSystem.test();
+      // Create pubspec.yaml in the root directory
+      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+        flutter:
+          config:
+            enable-foo: true
+            enable-bar: false
+      ''');
+      // Create a subdirectory and set it as the current directory
+      final Directory subdir = fs.currentDirectory.childDirectory('lib').childDirectory('src');
+      subdir.createSync(recursive: true);
+      fs.currentDirectory = subdir;
+      return fs;
+    }
+
+    testUsingContext(
+      'FeatureFlags finds pubspec.yaml in parent directory when CWD is a subdirectory',
+      () {
+        // This test verifies that findProjectRoot is used to locate pubspec.yaml
+        // even when the current directory is a subdirectory of the project.
+        final FeatureFlags featureFlagsFromContext = featureFlags;
+
+        expect(
+          featureFlagsFromContext.isEnabled(
+            const Feature(
+              name: 'foo',
+              configSetting: 'enable-foo',
+              master: FeatureChannelSetting(available: true),
+            ),
+          ),
+          isTrue,
+          reason: 'enable-foo: true should be found in pubspec.yaml in parent directory',
+        );
+
+        expect(
+          featureFlagsFromContext.isEnabled(
+            const Feature.fullyEnabled(name: 'bar', configSetting: 'enable-bar'),
+          ),
+          isFalse,
+          reason: 'enable-bar: false should be found in pubspec.yaml in parent directory',
+        );
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: FakeProcessManager.empty,
+        FileSystem: createFsWithPubspecInParentDir,
+      },
+    );
+
     testUsingContext('Test feature flags match feature flags', () {
       final FeatureFlags testFeatureFlags = TestFeatureFlags();
 
