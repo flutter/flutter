@@ -1746,16 +1746,6 @@ class TextInputConnection {
 
   /// Send text styling information.
   ///
-  /// This information is used by the Flutter Engine to change the style of the
-  /// hidden native input's content. Hence, the content size will match to the
-  /// size of the editable widget's content.
-  void updateStyle(TextInputStyle style) {
-    assert(attached);
-    TextInput._instance._updateStyle(style);
-  }
-
-  /// Send text styling information.
-  ///
   /// This information is used by the Flutter Web Engine to change the style
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
@@ -1779,6 +1769,16 @@ class TextInputConnection {
         textAlign: textAlign,
       ),
     );
+  }
+
+  /// Send text styling information.
+  ///
+  /// This information is used by the Flutter Web Engine to change the style
+  /// of the hidden native input's content. Hence, the content size will match
+  /// to the size of the editable widget's content.
+  void updateStyle(TextInputStyle style) {
+    assert(attached);
+    TextInput._instance._updateStyle(style);
   }
 
   /// Stop interacting with the text input control.
