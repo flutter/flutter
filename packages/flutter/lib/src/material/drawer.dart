@@ -681,14 +681,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         return const SizedBox.shrink();
       }
     } else {
-      final bool platformHasBackButton = switch (defaultTargetPlatform) {
-        TargetPlatform.android => true,
-        TargetPlatform.iOS ||
-        TargetPlatform.macOS ||
-        TargetPlatform.fuchsia ||
-        TargetPlatform.linux ||
-        TargetPlatform.windows => false,
-      };
+      final platformHasBackButton = defaultTargetPlatform == TargetPlatform.android;
 
       final Color scrimColor =
           widget.scrimColor ?? DrawerTheme.of(context).scrimColor ?? Colors.black54;

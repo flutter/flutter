@@ -803,13 +803,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool animateColor;
 
   bool _getEffectiveCenterTitle(ThemeData theme, AppBarThemeData appbarTheme) {
-    bool platformCenter() => switch (theme.platform) {
-      TargetPlatform.android ||
-      TargetPlatform.fuchsia ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => false,
-      TargetPlatform.iOS || TargetPlatform.macOS => actions == null || actions!.length < 2,
-    };
+    bool platformCenter() {
+      if (theme.platform == TargetPlatform.iOS || theme.platform == TargetPlatform.macOS) {
+        return actions == null || actions!.length < 2;
+      }
+      return false;
+    }
 
     return centerTitle ?? appbarTheme.centerTitle ?? platformCenter();
   }
