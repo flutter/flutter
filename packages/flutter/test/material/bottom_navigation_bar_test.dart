@@ -3102,6 +3102,30 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets('BottomNavigationBarItem.semanticsLabel overrides Text semantics', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              label: 'A',
+              semanticsLabel: 'Custom A label',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.access_alarm), label: 'B'),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.text('A')), isSemantics(label: 'Custom A label\nTab 1 of 2'));
+
+    expect(tester.getSemantics(find.text('B')), isSemantics(label: 'B\nTab 2 of 2'));
+  });
 }
 
 Widget boilerplate({
