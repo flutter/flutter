@@ -289,8 +289,8 @@ interface class SkiaGoldClient {
       final buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occurred when initializing golden file test with ')
-        ..writeln('goldctl.\n')
-        ..writeln('keys json:\n')
+        ..writeln('goldctl.')
+        ..writeln('keys json:')
         ..writeln(keys.readAsStringSync());
       throw SkiaGoldProcessError(
         command: imgtestInitCommand,
