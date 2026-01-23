@@ -489,8 +489,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
       };
 
-  /// Throws an exception if the SDK version is below minSdkVersion.
-
   private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
     if (!validateDirection(request.direction)) {
       throw new IllegalStateException(
