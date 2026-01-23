@@ -20,9 +20,13 @@ struct BufferView {
  public:
   BufferView();
 
-  BufferView(DeviceBuffer* buffer, Range range);
+  static BufferView CreateFromWeakDeviceBuffer(
+      std::weak_ptr<const DeviceBuffer> buffer,
+      Range range);
 
-  BufferView(std::shared_ptr<const DeviceBuffer> buffer, Range range);
+  static BufferView CreateFromSharedDeviceBuffer(
+      std::shared_ptr<const DeviceBuffer> buffer,
+      Range range);
 
   Range GetRange() const { return range_; }
 
@@ -33,12 +37,15 @@ struct BufferView {
   explicit operator bool() const;
 
  private:
+  BufferView(std::weak_ptr<const DeviceBuffer> buffer, Range range);
+
+  BufferView(std::shared_ptr<const DeviceBuffer> buffer, Range range);
   std::shared_ptr<const DeviceBuffer> buffer_;
   /// This is a non-owned DeviceBuffer. Steps should be taken to make sure this
   /// lives for the duration of the BufferView's life. Usually this is done
   /// automatically by the graphics API or in the case of Vulkan the HostBuffer
   /// or TrackedObjectsVK keeps it alive.
-  const DeviceBuffer* raw_buffer_;
+  std::weak_ptr<const DeviceBuffer> raw_buffer_;
   Range range_;
 };
 

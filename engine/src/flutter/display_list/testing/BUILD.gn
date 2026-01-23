@@ -43,6 +43,7 @@ surface_provider_include_gl = !is_fuchsia && !is_ios && !is_win && !is_mac
 if (impeller_enable_vulkan) {
   surface_provider_include_gl = false
 }
+surface_provider_include_gl = true
 
 surface_provider_include_metal = is_mac || is_ios
 

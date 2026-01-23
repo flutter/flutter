@@ -136,13 +136,14 @@ class HostBuffer {
   TestStateQuery GetStateForTest();
 
  private:
-  [[nodiscard]] std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
-  EmplaceInternal(const void* buffer, size_t length);
+  [[nodiscard]] std::
+      tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
+      EmplaceInternal(const void* buffer, size_t length);
 
-  std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
+  std::tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
   EmplaceInternal(size_t length, size_t align, const EmplaceProc& cb);
 
-  std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
+  std::tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
   EmplaceInternal(const void* buffer, size_t length, size_t align);
 
   size_t GetLength() const { return offset_; }
