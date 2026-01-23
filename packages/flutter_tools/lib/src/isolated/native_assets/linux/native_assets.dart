@@ -16,7 +16,12 @@ import '../../../globals.dart' as globals;
 /// `CMakeCache.txt` file in that directory to ensure we use the same compiler as the main app.
 ///
 /// Flutter also builds code assets for widget tests. Since there is no app build in that context,
-/// [cmakeDirectory] should be set to null for those builds.
+/// [cmakeDirectory] should be set to null for those builds. This method will return `null` in that
+/// case, meaning that hooks are responsible for finding a toolchain if they want to compiler C
+/// code.
+/// Not passing a compiler config for widget tests matches the behavior of ordinary `dart test`
+/// setups, but it also means that code assets are compiled twice if one runs widget tests and a
+/// Linux app build on the same machine.
 Future<CCompilerConfig?> cCompilerConfigLinux({Directory? cmakeDirectory}) async {
   if (cmakeDirectory == null) {
     // No CMake reference (e.g. for a widget test). Hooks can resolve to any
