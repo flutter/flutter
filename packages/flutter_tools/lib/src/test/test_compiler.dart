@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -114,6 +113,8 @@ class TestCompiler {
              getBuildDirectory(),
              'test_cache',
              getDefaultCachedKernelPath(
+               config: globals.config,
+               fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
@@ -179,23 +180,16 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
     final residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      initializeFromDill: testFilePath,
-      dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packageConfigPath,
-      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      buildInfo: buildInfo,
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
-      fileSystemRoots: buildInfo.fileSystemRoots,
-      fileSystemScheme: buildInfo.fileSystemScheme,
       shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: .tester,
     );
     return residentCompiler;
   }
