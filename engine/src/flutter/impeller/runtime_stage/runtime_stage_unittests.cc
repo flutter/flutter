@@ -224,7 +224,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
           stage->GetUniform(RuntimeStage::kVulkanUBOName);
       ASSERT_TRUE(uni);
       EXPECT_EQ(uni->type, RuntimeUniformType::kStruct);
-      EXPECT_EQ(uni->struct_float_count, 39u);
+      EXPECT_EQ(uni->struct_float_count, 35u);
 
       EXPECT_EQ(uni->GetSize(), 640u);
       std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
@@ -232,9 +232,9 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[1] = 0;
       // uVec3 is packed as a vec4 with 1 byte of padding.
       layout[7] = 0;
-      // uMat2 is packed as two vec4s, with the last 4 bytes being all padding
-      layout[16] = 0;
-      layout[17] = 0;
+      // uMat2 is packed as two vec4s, with the last 2 bytes of each being padding.
+      layout[14] = 0;
+      layout[15] = 0;
       layout[18] = 0;
       layout[19] = 0;
       // uMat3 is packed as 3 vec4s, with the last 3 bytes being padding
@@ -259,14 +259,14 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[67] = 0;
       layout[71] = 0;
       // uVec4Array has no padding.
-      // uMat2Array[2] is packed as 4 vec4s, with the second and last being all
+      // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being padding.
       // padding.
-      layout[84] = 0;
-      layout[85] = 0;
+      layout[82] = 0;
+      layout[83] = 0;
       layout[86] = 0;
       layout[87] = 0;
-      layout[92] = 0;
-      layout[93] = 0;
+      layout[90] = 0;
+      layout[91] = 0;
       layout[94] = 0;
       layout[95] = 0;
       // uMat3Array[2] is packed as 6 vec4s, with the last 3 bytes of the 3rd
