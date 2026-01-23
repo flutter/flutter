@@ -43,7 +43,7 @@ table UniformDescription {
   rows: uint64;
   columns: uint64;
   array_elements: uint64;
-  struct_layout: [StructByteType];
+  padding_layout: [StructByteType];
   struct_float_count: uint64;
 }
 

@@ -333,7 +333,8 @@ std::unique_ptr<fb::RuntimeStageT> RuntimeStageData::CreateStageFlatbuffer(
     }
 
     for (const auto& byte_type : uniform.padding_layout) {
-      desc->struct_layout.push_back(static_cast<fb::StructByteType>(byte_type));
+      desc->padding_layout.push_back(
+          static_cast<fb::StructByteType>(byte_type));
     }
     desc->struct_float_count = uniform.struct_float_count;
 

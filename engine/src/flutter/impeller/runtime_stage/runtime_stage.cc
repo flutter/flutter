@@ -81,8 +81,8 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
           static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
       desc.bit_width = i->bit_width();
       desc.array_elements = i->array_elements();
-      if (i->struct_layout()) {
-        for (const auto& byte_type : *i->struct_layout()) {
+      if (i->padding_layout()) {
+        for (const auto& byte_type : *i->padding_layout()) {
           desc.padding_layout.push_back(static_cast<uint8_t>(byte_type));
         }
       }
