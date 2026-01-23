@@ -126,6 +126,21 @@ class ExpansibleController extends ChangeNotifier {
     _setExpansionState(false);
   }
 
+  /// Convenience method for toggling the current [isExpanded] status.
+  ///
+  /// Calling this method may cause the [Expansible] to rebuild, so it may not
+  /// be called from a build method.
+  ///
+  /// Calling this method will notify registered listeners of this controller
+  /// that the expansion state has changed.
+  ///
+  /// See also:
+  ///
+  ///  * [expand], which expands the [Expansible].
+  ///  * [collapse], which collapses the [Expansible].
+  ///  * [isExpanded] to check whether the [Expansible] is expanded.
+  void toggle() => isExpanded ? collapse() : expand();
+
   /// Finds the [ExpansibleController] for the closest [Expansible] instance
   /// that encloses the given context.
   ///
@@ -210,6 +225,13 @@ class ExpansibleController extends ChangeNotifier {
 /// the expansion state, call [ExpansibleController.expand] and
 /// [ExpansibleController.collapse] as needed, most typically when the header
 /// returned in [headerBuilder] is tapped.
+///
+///{@tool dartpad}
+/// This example demonstrates how to use the [Expansible] widget and how an
+/// [ExpansibleController] can be used to programmatically expand or collapse it.
+///
+/// ** See code in examples/api/lib/material/expansible/expansible.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///

@@ -544,6 +544,53 @@ void main() {
     );
     expect(tester.getSize(find.byType(NavigationDrawer)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180233
+  testWidgets(
+    'NavigationDrawer ink effects are bounded within scrollable area when footer is present',
+    (WidgetTester tester) async {
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      widgetSetup(tester, 800, viewHeight: 400);
+
+      await tester.pumpWidget(
+        _buildWidget(
+          scaffoldKey,
+          NavigationDrawer(
+            footer: const Padding(padding: EdgeInsets.all(16.0), child: Text('Footer')),
+            children: <Widget>[
+              for (int i = 0; i < 10; i++)
+                NavigationDrawerDestination(icon: const Icon(Icons.home), label: Text('Item $i')),
+            ],
+          ),
+        ),
+      );
+
+      scaffoldKey.currentState!.openDrawer();
+      await tester.pumpAndSettle();
+
+      final Finder footerFinder = find
+          .ancestor(of: find.text('Footer'), matching: find.byType(Padding))
+          .first;
+      expect(footerFinder, findsOneWidget);
+      final Rect footerRect = tester.getRect(footerFinder);
+
+      final Finder inkWellFinder = find.descendant(
+        of: find.byType(NavigationDrawerDestination).first,
+        matching: find.byType(InkWell),
+      );
+      expect(inkWellFinder, findsOneWidget);
+
+      final inkMaterial = Material.of(tester.element(inkWellFinder)) as RenderBox;
+
+      final Offset inkMaterialTopLeft = inkMaterial.localToGlobal(Offset.zero);
+      final Offset inkMaterialBottomRight = inkMaterial.localToGlobal(
+        Offset(inkMaterial.size.width, inkMaterial.size.height),
+      );
+      final inkMaterialRect = Rect.fromPoints(inkMaterialTopLeft, inkMaterialBottomRight);
+
+      expect(inkMaterialRect.bottom, equals(footerRect.top));
+    },
+  );
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child, {bool? useMaterial3}) {
@@ -592,4 +639,5 @@ void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 100
   tester.view.devicePixelRatio = 2;
   final double dpi = tester.view.devicePixelRatio;
   tester.view.physicalSize = Size(viewWidth * dpi, viewHeight * dpi);
+  addTearDown(tester.view.reset);
 }
