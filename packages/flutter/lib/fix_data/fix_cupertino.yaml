@@ -500,4 +500,56 @@ transforms:
       opacity:
         kind: 'fragment'
         value: 'arguments[0]'
+
+# Changes made in https://github.com/flutter/flutter/pull/177337
+  - title: "Migrate to 'scrollableBuilder'"
+    date: 2026-01-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      function: 'showCupertinoSheet'
+    oneOf:
+      - if: "builder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'scrollableBuilder'
+            style: optional_named
+            argumentValue:
+              expression: "(BuildContext context, ScrollController controller) {\n
+                          \     WidgetBuilder widgetBuilder = {% builder %};\n
+                          \     return widgetBuilder(context);\n
+                          \   }"
+              requiredIf: "builder != ''"
+          - kind: 'removeParameter'
+            name: 'builder'
+    variables:
+      builder:
+        kind: fragment
+        value: 'arguments[builder]'
+
+# Changes made in https://github.com/flutter/flutter/pull/177337
+  - title: "Migrate to 'scrollableBuilder'"
+    date: 2026-01-14
+    element:
+      uris: [ 'cupertino.dart' ]
+      class: 'CupertinoSheetRoute'
+    oneOf:
+      - if: "builder != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 3
+            name: 'scrollableBuilder'
+            style: optional_named
+            argumentValue:
+              expression: "(BuildContext context, ScrollController controller) {\n
+                          \     WidgetBuilder widgetBuilder = {% builder %};\n
+                          \     return widgetBuilder(context);\n
+                          \   }"
+              requiredIf: "builder != ''"
+          - kind: 'removeParameter'
+            name: 'builder'
+    variables:
+      builder:
+        kind: fragment
+        value: 'arguments[builder]'
 # Before adding a new fix: read instructions at the top of this file.
