@@ -26,6 +26,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/runtime_stage/runtime_stage.h"
+#include "runtime_stage_types_flatbuffers.h"
 #include "spirv_common.hpp"
 
 namespace impeller {
@@ -384,9 +385,11 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           (spir_type.columns == 1 || spir_type.columns == 3)) {
         for (size_t c = 0; c < spir_type.columns; c++) {
           for (size_t v = 0; v < 3; v++) {
-            uniform_description.padding_layout.push_back(1);
+            uniform_description.padding_layout.push_back(
+                fb::StructByteType::kFloat);
           }
-          uniform_description.padding_layout.push_back(0);
+          uniform_description.padding_layout.push_back(
+              fb::StructByteType::kPadding);
         }
       }
     }
@@ -415,7 +418,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
     size_t binding =
         compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
-    std::vector<uint8_t> padding_layout;
+    std::vector<fb::StructByteType> padding_layout;
     size_t float_count = 0;
 
     for (size_t i = 0; i < members.size(); i += 1) {
@@ -426,7 +429,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           size_t padding_count =
               (member.size + sizeof(float) - 1) / sizeof(float);
           while (padding_count > 0) {
-            padding_layout.push_back(0);
+            padding_layout.push_back(fb::StructByteType::kPadding);
             padding_count--;
           }
           break;
@@ -437,18 +440,18 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
             // and 0 layout property per byte of padding
             for (auto i = 0; i < member.array_elements; i++) {
               for (auto j = 0u; j < member.size / sizeof(float); j++) {
-                padding_layout.push_back(1);
+                padding_layout.push_back(fb::StructByteType::kFloat);
               }
               for (auto j = 0u; j < member.element_padding / sizeof(float);
                    j++) {
-                padding_layout.push_back(0);
+                padding_layout.push_back(fb::StructByteType::kPadding);
               }
             }
           } else {
             size_t member_float_count = member.byte_length / sizeof(float);
             float_count += member_float_count;
             while (member_float_count > 0) {
-              padding_layout.push_back(1);
+              padding_layout.push_back(fb::StructByteType::kFloat);
               member_float_count--;
             }
           }

@@ -83,7 +83,16 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
       desc.array_elements = i->array_elements();
       if (i->padding_layout()) {
         for (const auto& byte_type : *i->padding_layout()) {
-          desc.padding_layout.push_back(static_cast<uint8_t>(byte_type));
+          impeller::RuntimeStructByteType type;
+          switch (byte_type) {
+            case fb::StructByteType::kPadding:
+              type = impeller::RuntimeStructByteType::kPadding;
+              break;
+            case fb::StructByteType::kFloat:
+              type = impeller::RuntimeStructByteType::kFloat;
+              break;
+          }
+          desc.padding_layout.push_back(type);
         }
       }
       desc.struct_float_count = i->struct_float_count();

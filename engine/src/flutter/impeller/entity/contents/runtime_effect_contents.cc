@@ -24,11 +24,6 @@
 
 namespace impeller {
 
-namespace {
-constexpr char kPaddingType = 0;
-constexpr char kFloatType = 1;
-}  // namespace
-
 // static
 BufferView RuntimeEffectContents::EmplaceUniform(
     const uint8_t* source_data,
@@ -60,11 +55,11 @@ BufferView RuntimeEffectContents::EmplaceUniform(
         auto* float_source = reinterpret_cast<const float*>(source_data);
 
         for (size_t i = 0; i < count; i++) {
-          for (char byte_type : uniform.padding_layout) {
-            if (byte_type == kPaddingType) {
+          for (RuntimeStructByteType byte_type : uniform.padding_layout) {
+            if (byte_type == RuntimeStructByteType::kPadding) {
               float_destination[struct_float_index++] = 0.f;
             } else {
-              FML_DCHECK(byte_type == kFloatType);
+              FML_DCHECK(byte_type == RuntimeStructByteType::kFloat);
               float_destination[struct_float_index++] =
                   float_source[uniform_byte_index++];
             }

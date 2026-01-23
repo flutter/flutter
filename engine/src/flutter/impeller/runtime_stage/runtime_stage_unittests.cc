@@ -235,11 +235,12 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       // This means 36 * 4 = 144 bytes total.
 
       EXPECT_EQ(uni->GetSize(), 144u);
-      std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
-      layout[5] = 0;
-      layout[6] = 0;
-      layout[7] = 0;
-      layout[23] = 0;
+      std::vector<RuntimeStructByteType> layout(uni->GetSize() / sizeof(float),
+                                                RuntimeStructByteType::kFloat);
+      layout[5] = RuntimeStructByteType::kPadding;
+      layout[6] = RuntimeStructByteType::kPadding;
+      layout[7] = RuntimeStructByteType::kPadding;
+      layout[23] = RuntimeStructByteType::kPadding;
 
       EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
       break;
