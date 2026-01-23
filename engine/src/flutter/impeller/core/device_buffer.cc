@@ -17,7 +17,7 @@ void DeviceBuffer::Invalidate(std::optional<Range> range) const {}
 // static
 BufferView DeviceBuffer::AsBufferView(std::shared_ptr<DeviceBuffer> buffer) {
   Range range = {0u, buffer->desc_.size};
-  return BufferView(std::move(buffer), range);
+  return BufferView::CreateFromSharedDeviceBuffer(std::move(buffer), range);
 }
 
 const DeviceBufferDescriptor& DeviceBuffer::GetDeviceBufferDescriptor() const {
