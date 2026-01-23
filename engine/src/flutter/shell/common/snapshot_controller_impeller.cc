@@ -224,8 +224,9 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeTextureImage(
     return nullptr;
   }
 
-  blit_pass->AddCopy(
-      impeller::BufferView{buffer, impeller::Range(0, byte_size)}, texture);
+  blit_pass->AddCopy(impeller::BufferView::CreateFromSharedDeviceBuffer(
+                         buffer, impeller::Range(0, byte_size)),
+                     texture);
   blit_pass->EncodeCommands();
 
   if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {

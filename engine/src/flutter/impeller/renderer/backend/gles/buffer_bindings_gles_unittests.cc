@@ -38,9 +38,11 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
   std::shared_ptr<ReactorGLES> reactor;
   auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
-  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
-                                 reactor, std::move(backing_store));
-  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  auto device_buffer = std::make_shared<DeviceBufferGLES>(
+      DeviceBufferDescriptor{.size = sizeof(float)}, reactor,
+      std::move(backing_store));
+  const auto buffer_view = BufferView::CreateFromWeakDeviceBuffer(
+      device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
@@ -72,10 +74,11 @@ TEST(BufferBindingsGLESTest, BindArrayData) {
   std::shared_ptr<ReactorGLES> reactor;
   auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float) * 4}));
-  DeviceBufferGLES device_buffer(
+  auto device_buffer = std::make_shared<DeviceBufferGLES>(
       DeviceBufferDescriptor{.size = sizeof(float) * 4}, reactor,
       std::move(backing_store));
-  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  const auto buffer_view = BufferView::CreateFromWeakDeviceBuffer(
+      device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
