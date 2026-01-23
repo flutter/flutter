@@ -16,7 +16,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   <tr>
    <td>Flutter contributors
    </td>
-   <td>Anyone contributing to the Flutter organization, regardless of membership in the organization.
+   <td>Anyone contributing to the Flutter organization, regardless of their membership status.
    </td>
   </tr>
   <tr>
