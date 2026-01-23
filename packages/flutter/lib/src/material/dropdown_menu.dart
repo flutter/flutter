@@ -173,7 +173,7 @@ enum DropdownMenuCloseBehavior {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu<T extends Object> extends StatefulWidget {
+class DropdownMenu<T> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -690,7 +690,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
       forward: false,
