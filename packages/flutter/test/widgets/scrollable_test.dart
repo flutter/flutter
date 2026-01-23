@@ -1818,10 +1818,3 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
   }
 }
-
-class TestTickerProvider extends TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick) {
-    return Ticker(onTick);
-  }
-}
