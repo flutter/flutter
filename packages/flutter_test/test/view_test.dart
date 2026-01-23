@@ -292,6 +292,8 @@ void main() {
     });
 
     testWidgets('can clear out fake properties all at once', (WidgetTester tester) async {
+      addTearDown(tester.binding.resetLayers);
+
       final initial = FlutterViewSnapshot(tester.view);
 
       tester.view.devicePixelRatio = 7;
