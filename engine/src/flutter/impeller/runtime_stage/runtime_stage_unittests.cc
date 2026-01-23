@@ -232,7 +232,8 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[1] = 0;
       // uVec3 is packed as a vec4 with 1 byte of padding.
       layout[7] = 0;
-      // uMat2 is packed as two vec4s, with the last 2 bytes of each being padding.
+      // uMat2 is packed as two vec4s, with the last 2 bytes of each being
+      // padding.
       layout[14] = 0;
       layout[15] = 0;
       layout[18] = 0;
@@ -259,8 +260,8 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       layout[67] = 0;
       layout[71] = 0;
       // uVec4Array has no padding.
-      // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being padding.
-      // padding.
+      // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being
+      // padding. padding.
       layout[82] = 0;
       layout[83] = 0;
       layout[86] = 0;
