@@ -51,6 +51,8 @@ TEST(BufferViewTest, BufferIsInvalidIfDeviceBufferGoesOutOfScope) {
   EXPECT_FALSE(buffer_view);
 }
 
+#if defined(FML_OS_POSIX) && !defined(NDEBUG)
+
 TEST(BufferViewDeathTest, GetRawFromInvalidBufferAborts) {
   auto device_buffer = std::make_shared<FakeDeviceBuffer>();
   auto buffer_view =
@@ -59,5 +61,7 @@ TEST(BufferViewDeathTest, GetRawFromInvalidBufferAborts) {
   EXPECT_EXIT(buffer_view.GetBuffer(), ::testing::KilledBySignal(SIGABRT),
               "Buffer view no longer holds valid data");
 }
+
+#endif
 
 }  // namespace impeller::testing
