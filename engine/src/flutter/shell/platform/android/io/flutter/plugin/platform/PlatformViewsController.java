@@ -609,7 +609,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     // operations, so they can be forwarded to a GL texture that is composed by the
     // Flutter engine.
     Log.i(TAG, "Hosting view in view hierarchy for platform view: " + request.viewId);
-    
+
     final int physicalWidth = toPhysicalPixels(request.logicalWidth);
     final int physicalHeight = toPhysicalPixels(request.logicalHeight);
     PlatformViewWrapper viewWrapper;
