@@ -123,10 +123,10 @@ constexpr inline std::optional<Scalar> GetLerpTValue(Scalar val1,
 /// @return   The instance of T which exists on a linear space defined by
 ///           a and b, but whose indicated field contains the desired_value.
 template <typename T>
-std::optional<T> LerpToFieldValue(const T& a,
-                                  const T& b,
-                                  Scalar T::* fieldPtr,
-                                  Scalar desired_value) {
+constexpr std::optional<T> LerpToFieldValue(const T& a,
+                                            const T& b,
+                                            Scalar T::* fieldPtr,
+                                            Scalar desired_value) {
   std::optional<Scalar> t =
       GetLerpTValue(a.*fieldPtr, b.*fieldPtr, desired_value);
   if (t.has_value()) {
