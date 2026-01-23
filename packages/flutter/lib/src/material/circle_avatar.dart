@@ -59,7 +59,7 @@ import 'theme.dart';
 ///    some text for a fixed height list entry.
 ///  * [RawAvatar], the underlying widget that powers [CircleAvatar].
 ///  * <https://material.io/design/components/chips.html#input-chips>
-class CircleAvatar extends StatelessWidget {
+class CircleAvatar extends StatefulWidget {
   /// Creates a circle that represents a user.
   const CircleAvatar({
     super.key,
@@ -170,59 +170,102 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double? maxRadius;
 
+  @override
+  State<CircleAvatar> createState() => _CircleAvatarState();
+}
+
+class _CircleAvatarState extends State<CircleAvatar> {
   // The duration for animating theme changes.
   static const Duration _kTextStyleChangeDuration = Duration(milliseconds: 200);
+
+  // Whether the foreground image has failed to load.
+  bool _foregroundImageFailed = false;
+
+  @override
+  void didUpdateWidget(CircleAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset the failed state if the foreground image changes.
+    if (widget.foregroundImage != oldWidget.foregroundImage) {
+      _foregroundImageFailed = false;
+    }
+  }
+
+  void _handleForegroundImageError(Object exception, StackTrace? stackTrace) {
+    setState(() {
+      _foregroundImageFailed = true;
+    });
+    widget.onForegroundImageError?.call(exception, stackTrace);
+  }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
     final Color? effectiveForegroundColor =
-        foregroundColor ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
+        widget.foregroundColor ??
+        (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
     final TextStyle effectiveTextStyle = theme.useMaterial3
         ? theme.textTheme.titleMedium!
         : theme.primaryTextTheme.titleMedium!;
     TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
     Color? effectiveBackgroundColor =
-        backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
+        widget.backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
       effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         Brightness.dark => theme.primaryColorLight,
         Brightness.light => theme.primaryColorDark,
       };
     } else if (effectiveForegroundColor == null) {
-      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
+      textStyle = switch (ThemeData.estimateBrightnessForColor(widget.backgroundColor!)) {
         Brightness.dark => textStyle.copyWith(color: theme.primaryColorLight),
         Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
       };
     }
 
-    final Widget? childContent = child == null
+    final Widget? childContent = widget.child == null
         ? null
         : Center(
             child: MediaQuery.withNoTextScaling(
               child: IconTheme(
                 data: theme.iconTheme.copyWith(color: textStyle.color),
-                child: DefaultTextStyle(style: textStyle, child: child!),
+                child: DefaultTextStyle(style: textStyle, child: widget.child!),
               ),
             ),
           );
 
-    // Convert radius to size (diameter = radius * 2)
-    final double? size = radius != null ? radius! * 2.0 : null;
-    final double? minSize = minRadius != null ? minRadius! * 2.0 : null;
-    final double? maxSize = maxRadius != null ? maxRadius! * 2.0 : null;
+    // Convert radius to constraints (diameter = radius * 2)
+    final BoxConstraints? constraints;
+    if (widget.radius != null) {
+      final double diameter = widget.radius! * 2.0;
+      constraints = BoxConstraints.tightFor(width: diameter, height: diameter);
+    } else if (widget.minRadius != null || widget.maxRadius != null) {
+      constraints = BoxConstraints(
+        minWidth: widget.minRadius != null ? widget.minRadius! * 2.0 : 0.0,
+        minHeight: widget.minRadius != null ? widget.minRadius! * 2.0 : 0.0,
+        maxWidth: widget.maxRadius != null ? widget.maxRadius! * 2.0 : double.infinity,
+        maxHeight: widget.maxRadius != null ? widget.maxRadius! * 2.0 : double.infinity,
+      );
+    } else {
+      constraints = null;
+    }
+
+    // Determine which image to show: foregroundImage (if not failed) or backgroundImage as fallback.
+    final ImageProvider? effectiveImage;
+    final ImageErrorListener? effectiveOnImageError;
+    if (widget.foregroundImage != null && !_foregroundImageFailed) {
+      effectiveImage = widget.foregroundImage;
+      effectiveOnImageError = _handleForegroundImageError;
+    } else {
+      effectiveImage = widget.backgroundImage;
+      effectiveOnImageError = widget.onBackgroundImageError;
+    }
 
     return RawAvatar(
-      size: size,
-      minSize: minSize,
-      maxSize: maxSize,
+      constraints: constraints,
       shape: const CircleBorder(),
       backgroundColor: effectiveBackgroundColor,
-      backgroundImage: backgroundImage,
-      onBackgroundImageError: onBackgroundImageError,
-      foregroundImage: foregroundImage,
-      onForegroundImageError: onForegroundImageError,
+      image: effectiveImage,
+      onImageError: effectiveOnImageError,
       child: AnimatedDefaultTextStyle(
         style: textStyle,
         duration: _kTextStyleChangeDuration,
