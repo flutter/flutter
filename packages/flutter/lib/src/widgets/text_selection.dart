@@ -600,7 +600,7 @@ class TextSelectionOverlay {
         TextSelectionHandleType.left,
       )
       ..lineHeightAtEnd = _getEndGlyphHeight()
-      ..updateHandleAnchorOffset(renderObject.cursorWidth)
+      ..handleAnchorOffset = renderObject.cursorWidth
       // Update selection toolbar metrics.
       ..selectionEndpoints = renderObject.getEndpointsForSelection(_selection)
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
@@ -1314,10 +1314,11 @@ class SelectionOverlay {
   ///
   /// This value is used for calculating the position of the text selection
   /// handles.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  double? get handleAnchorOffset => _handleAnchorOffset;
   double? _handleAnchorOffset;
-
-  /// Updates the handle anchor offset used for handle positioning.
-  void updateHandleAnchorOffset(double? value) {
+  set handleAnchorOffset(double? value) {
     if (_handleAnchorOffset == value) {
       return;
     }
