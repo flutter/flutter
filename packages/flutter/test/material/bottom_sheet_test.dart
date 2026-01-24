@@ -3051,11 +3051,13 @@ void main() {
   testWidgets('ModalBottomSheet uses AnimationStyle curve and reverseCurve', (
     WidgetTester tester,
   ) async {
+    const height = 200.0;
+    const duration = Duration(milliseconds: 300);
     final observer = _TestNavigatorObserver();
 
     await tester.pumpWidget(
       MaterialApp(
-        navigatorObservers: [observer],
+        navigatorObservers: <NavigatorObserver>[observer],
         home: Builder(
           builder: (context) {
             return GestureDetector(
@@ -3065,8 +3067,9 @@ void main() {
                   sheetAnimationStyle: const AnimationStyle(
                     curve: Curves.easeIn,
                     reverseCurve: Curves.easeOut,
+                    duration: duration,
                   ),
-                  builder: (_) => const SizedBox(height: 200),
+                  builder: (_) => const SizedBox(height: height, child: Text('Content')),
                 );
               },
               child: const Text('X'),
@@ -3079,14 +3082,16 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump();
 
-    final route = observer.lastRoute! as ModalBottomSheetRoute;
-
-    final proxy = route.animation! as ProxyAnimation;
-
-    final curved = proxy.parent! as CurvedAnimation;
-
-    expect(curved.curve, same(Curves.easeIn));
-    expect(curved.reverseCurve, same(Curves.easeOut));
+    expect(
+      observer.lastTransitionRoute?.animation,
+      isA<ProxyAnimation>().having(
+        (ProxyAnimation a) => a.parent,
+        'parent',
+        isA<CurvedAnimation>()
+            .having((CurvedAnimation c) => c.curve, 'curve', Curves.easeIn)
+            .having((CurvedAnimation c) => c.reverseCurve, 'reverseCurve', Curves.easeOut),
+      ),
+    );
   });
 }
 
@@ -3130,10 +3135,12 @@ class _StatusTestAnimationController extends AnimationController with AnimationL
 }
 
 class _TestNavigatorObserver extends NavigatorObserver {
-  Route<dynamic>? lastRoute;
+  TransitionRoute<dynamic>? lastTransitionRoute;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    lastRoute = route;
+    if (route is TransitionRoute<dynamic>) {
+      lastTransitionRoute = route;
+    }
   }
 }
