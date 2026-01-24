@@ -107,7 +107,6 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/basic_test.dart',
     'packages/flutter/test/widgets/text_test.dart',
     'packages/flutter/test/widgets/reorderable_list_test.dart',
     'packages/flutter/test/widgets/semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart',
