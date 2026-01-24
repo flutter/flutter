@@ -813,7 +813,7 @@ void main() {
               },
               child: Container(
                 key: key,
-                color: const Color(0xFF2196F3),
+                color: const Color(0xFF0000FF),
                 height: localHeight,
                 width: localWidth,
                 child: const Text('Hi'),
@@ -2011,8 +2011,8 @@ void main() {
         child: DefaultTextStyle(
           style: const TextStyle(fontSize: 14),
           child: Draggable<int>(
-            feedback: Container(width: 20, height: 20, color: const Color(0xFF2196F3)),
-            childWhenDragging: Container(width: 20, height: 20, color: const Color(0xFFFFEB3B)),
+            feedback: Container(width: 20, height: 20, color: const Color(0xFF0000FF)),
+            childWhenDragging: Container(width: 20, height: 20, color: const Color(0xFFFFFF00)),
             child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
           ),
         ),

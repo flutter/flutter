@@ -162,7 +162,7 @@ void main() {
                   opacity: 0.5,
                   child: Padding(
                     padding: EdgeInsets.all(5.0),
-                    child: ColoredBox(color: Color(0xFF2196F3), child: SizedBox(height: 50)),
+                    child: ColoredBox(color: Color(0xFF0000FF), child: SizedBox(height: 50)),
                   ),
                 );
               }),
@@ -204,7 +204,7 @@ void main() {
                 child: Opacity(
                   opacity: .5,
                   child: ColoredBox(
-                    color: Color(0xFFF44336),
+                    color: Color(0xFFFF0000),
                     child: SizedBox(height: 100, width: 100),
                   ),
                 ),
