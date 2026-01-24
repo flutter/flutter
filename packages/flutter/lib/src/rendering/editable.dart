@@ -1748,15 +1748,45 @@ class RenderEditable extends RenderBox
       final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[TextSelectionPoint(start, null)];
     } else {
+      final int startOffset = selection.start;
+      final int endOffset = selection.end;
+      final int textLength = plainText.length;
+
+      final int startBoxOffset = math.min(startOffset + 1, textLength);
+      final int endBoxOffset = math.max(endOffset - 1, 0);
+
+      final List<ui.TextBox> startBoxes = _textPainter.getBoxesForSelection(
+        TextSelection(baseOffset: startOffset, extentOffset: startBoxOffset),
+        boxHeightStyle: selectionHeightStyle,
+        boxWidthStyle: selectionWidthStyle,
+      );
+      final List<ui.TextBox> endBoxes = _textPainter.getBoxesForSelection(
+        TextSelection(baseOffset: endBoxOffset, extentOffset: endOffset),
+        boxHeightStyle: selectionHeightStyle,
+        boxWidthStyle: selectionWidthStyle,
+      );
+
+      if (startBoxes.isEmpty || endBoxes.isEmpty) {
+        final Offset caretOffset = _textPainter.getOffsetForCaret(
+          selection.extent,
+          _caretPrototype,
+        );
+        final Offset start = Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
+        return <TextSelectionPoint>[TextSelectionPoint(start, null)];
+      }
+
+      final ui.TextBox startBox = startBoxes.first;
+      final ui.TextBox endBox = endBoxes.last;
+
       final Offset start =
-          Offset(clampDouble(boxes.first.start, 0, _textPainter.size.width), boxes.first.bottom) +
+          Offset(clampDouble(startBox.start, 0, _textPainter.size.width), startBox.bottom) +
           paintOffset;
       final Offset end =
-          Offset(clampDouble(boxes.last.end, 0, _textPainter.size.width), boxes.last.bottom) +
-          paintOffset;
+          Offset(clampDouble(endBox.end, 0, _textPainter.size.width), endBox.bottom) + paintOffset;
+
       return <TextSelectionPoint>[
-        TextSelectionPoint(start, boxes.first.direction),
-        TextSelectionPoint(end, boxes.last.direction),
+        TextSelectionPoint(start, startBox.direction),
+        TextSelectionPoint(end, endBox.direction),
       ];
     }
   }

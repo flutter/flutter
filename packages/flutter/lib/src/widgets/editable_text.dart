@@ -2104,6 +2104,9 @@ class EditableText extends StatefulWidget {
       }
       return ui.BoxWidthStyle.tight;
     }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return ui.BoxWidthStyle.tight;
+    }
     return ui.BoxWidthStyle.max;
   }
 
@@ -5812,6 +5815,26 @@ class EditableTextState extends State<EditableText>
     EditableTextTapUpOutsideIntent: _makeOverridable(_EditableTextTapUpOutsideAction()),
   };
 
+  /// Returns the [ui.BoxWidthStyle] to use for painting the selection.
+  ///
+  /// On Android, this returns [ui.BoxWidthStyle.max] when all text is selected,
+  /// matching native behavior where the selection highlights the full width of
+  /// the line (including whitespace). Otherwise, it returns [widget.selectionWidthStyle].
+  ///
+  /// This also resolves an issue with single-word selection for Arabic text when
+  /// using [ui.BoxWidthStyle.tight].
+  ui.BoxWidthStyle _getEffectiveSelectionWidthStyle() {
+    final ui.BoxWidthStyle style = widget.selectionWidthStyle;
+    if (defaultTargetPlatform == TargetPlatform.android &&
+        _value.selection.isValid &&
+        _value.selection.baseOffset == 0 &&
+        _value.selection.extentOffset == _value.text.length &&
+        !_value.selection.isCollapsed) {
+      return ui.BoxWidthStyle.max;
+    }
+    return style;
+  }
+
   @protected
   @override
   Widget build(BuildContext context) {
@@ -5994,7 +6017,7 @@ class EditableTextState extends State<EditableText>
                                     cursorRadius: widget.cursorRadius,
                                     cursorOffset: widget.cursorOffset ?? Offset.zero,
                                     selectionHeightStyle: widget.selectionHeightStyle,
-                                    selectionWidthStyle: widget.selectionWidthStyle,
+                                    selectionWidthStyle: _getEffectiveSelectionWidthStyle(),
                                     paintCursorAboveText: widget.paintCursorAboveText,
                                     enableInteractiveSelection: widget._userSelectionEnabled,
                                     textSelectionDelegate: this,
