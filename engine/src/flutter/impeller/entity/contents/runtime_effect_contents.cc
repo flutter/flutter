@@ -34,14 +34,15 @@ BufferView RuntimeEffectContents::EmplaceUniform(
   size_t alignment = std::max(uniform.bit_width / 8, minimum_uniform_alignment);
 
   if (uniform.padding_layout.empty()) {
-    return data_host_buffer.Emplace(source_data, uniform.GetSize(), alignment);
+    return data_host_buffer.Emplace(source_data, uniform.GetGPUSize(),
+                                    alignment);
   }
 
   // If the uniform has a padding layout, we need to repack the data.
   // We can do this by using the EmplaceProc to write directly to the
   // HostBuffer.
   return data_host_buffer.Emplace(
-      uniform.GetSize(), alignment,
+      uniform.GetGPUSize(), alignment,
       [&uniform, source_data](uint8_t* destination) {
         size_t count = uniform.array_elements.value_or(1);
         if (count == 0) {
@@ -298,7 +299,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    DescriptorType::kUniformBuffer, uniform_slot,
                                    std::move(metadata), std::move(buffer_view));
           buffer_index++;
-          buffer_offset += uniform.GetSize();
+          buffer_offset += uniform.GetDartSize();
           buffer_location++;
           break;
         }

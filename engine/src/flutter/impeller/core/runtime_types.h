@@ -55,8 +55,13 @@ struct RuntimeUniformDescription {
   std::vector<RuntimePaddingType> padding_layout = {};
   size_t struct_float_count = 0u;
 
-  /// @brief  Computes the total number of bytes that this uniform requires.
-  size_t GetSize() const;
+  /// @brief  Computes the total number of bytes that this uniform requires for
+  /// representation in the Dart float buffer.
+  size_t GetDartSize() const;
+
+  /// @brief  Computes the total number of bytes that this uniform requires for
+  /// representation in the GPU.
+  size_t GetGPUSize() const;
 };
 
 }  // namespace impeller
