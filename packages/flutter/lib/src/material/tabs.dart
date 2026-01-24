@@ -1669,13 +1669,15 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  void _updateScrollController() {
+  void _updateScrollController({TabBarScrollController? oldScrollController}) {
     if (widget.scrollController != null) {
+      _internalScrollController?._tabBarState = null;
       widget.scrollController?._tabBarState = this;
 
       return;
     }
 
+    oldScrollController?._tabBarState = null;
     _internalScrollController ??= TabBarScrollController();
     _internalScrollController?._tabBarState = this;
   }
@@ -1732,7 +1734,7 @@ class _TabBarState extends State<TabBar> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.scrollController != oldWidget.scrollController) {
-      _updateScrollController();
+      _updateScrollController(oldScrollController: oldWidget.scrollController);
       _updateTabController();
       _initIndicatorPainter();
 
