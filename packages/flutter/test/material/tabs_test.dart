@@ -2769,6 +2769,96 @@ void main() {
     expect(scrollableState.position.pixels, 50);
   });
 
+  testWidgets('TabBar attaches state to internal TabBarScrollController in didUpdateWidget', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    // Attach to the external controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    final double oldPixels = tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+
+    // Trigger didUpdateWidget for the change to the internal controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(isScrollable: true, controller: tabBarController, tabs: tabs),
+      ),
+    );
+
+    // Creating the new scroll position should not throw.
+    expect(tester.takeException(), isNull);
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    // The pixels of the new position should be the same as before the update.
+    expect(scrollableState.position.pixels, oldPixels);
+    expect(tabScrollController.debugHasTabBarState, isFalse);
+  });
+
+  testWidgets('TabBar attaches state to external TabBarScrollController in didUpdateWidget', (
+    WidgetTester tester,
+  ) async {
+    final tabs = List<Tab>.generate(6, (int index) {
+      return Tab(text: 'TAB #$index');
+    });
+
+    final TabController tabBarController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+    final tabScrollController = TabBarScrollController();
+    addTearDown(tabScrollController.dispose);
+
+    // Attach to the internal controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(isScrollable: true, controller: tabBarController, tabs: tabs),
+      ),
+    );
+
+    final double oldPixels = tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+
+    // Trigger didUpdateWidget for the change to the external controller.
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: tabBarController,
+          scrollController: tabScrollController,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    // Creating the new scroll position should not throw.
+    expect(tester.takeException(), isNull);
+    final ScrollableState scrollableState = tester.state<ScrollableState>(find.byType(Scrollable));
+
+    // The pixels of the new position should be the same as before the update.
+    expect(scrollableState.position.pixels, oldPixels);
+    expect(tabScrollController.debugHasTabBarState, isTrue);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/124608
   testWidgets('TabBar can be wrapped with RawScrollbar', (WidgetTester tester) async {
     final tabs = List<Tab>.generate(6, (int index) {
