@@ -793,59 +793,75 @@ void main() {
     // Invalid: negative margin (runtime check)
     const invalidMarginContainer = Container(margin: EdgeInsets.all(-10));
 
-    await tester.pumpWidget(
-      const Directionality(textDirection: TextDirection.ltr, child: invalidMarginContainer),
-    );
-
-    expect(tester.takeException(), isAssertionError);
-  });
-
-  testWidgets('Container constrained by width/height in build', (WidgetTester tester) async {
-    // ignore: sized_box_for_whitespace
-    const container = Container(width: 50, height: 50);
-
-    await tester.pumpWidget(const Center(child: container));
-
-    expect(find.byType(Container), findsOneWidget);
-    // Use getSize to verify the render object size directly
-    final Size size = tester.getSize(find.byType(Container));
-    expect(size, const Size(50, 50));
-  });
-
-  testWidgets('DecoratedBox debugFillProperties coverage', (WidgetTester tester) async {
-    const Decoration decoration = BoxDecoration(color: Color(0xFF00FF00));
-    const box = DecoratedBox(decoration: decoration, position: DecorationPosition.foreground);
-
-    expect(box, hasOneLineDescription);
-    final String description = box.toStringDeep(minLevel: DiagnosticLevel.hidden);
-    expect(description, contains('fg: BoxDecoration'));
-    expect(description, contains('position: foreground'));
-  });
-
-  testWidgets('Container with both padding and decoration padding', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Center(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(border: Border.all(width: 5)),
-          child: const SizedBox(width: 20, height: 20),
+    testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox.shrink(
+              child: Container(decoration: BoxDecoration(), child: Text('X')),
+            ),
+          ),
         ),
-      ),
-    );
+      );
+      expect(tester.getSize(find.byType(Container)), Size.zero);
+    });
 
-    // Padding widget should have 10 (padding) + 5 (border) = 15
-    final RenderPadding renderPadding = tester.renderObject(find.byType(Padding).last);
-    expect(renderPadding.padding, const EdgeInsets.all(15));
-  });
+    testWidgets('DecoratedBox does not crash at zero area', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(textDirection: TextDirection.ltr, child: invalidMarginContainer),
+      );
 
-  testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
-    // ignore: sized_box_for_whitespace
-    const container = Container(width: 0, height: 0);
-    await tester.pumpWidget(const Center(child: container));
+      expect(tester.takeException(), isAssertionError);
+    });
 
-    expect(find.byType(Container), findsOneWidget);
-    final Size size = tester.getSize(find.byType(Container));
-    expect(size, Size.zero);
+    testWidgets('Container constrained by width/height in build', (WidgetTester tester) async {
+      // ignore: sized_box_for_whitespace
+      const container = Container(width: 50, height: 50);
+
+      await tester.pumpWidget(const Center(child: container));
+
+      expect(find.byType(Container), findsOneWidget);
+      // Use getSize to verify the render object size directly
+      final Size size = tester.getSize(find.byType(Container));
+      expect(size, const Size(50, 50));
+    });
+
+    testWidgets('DecoratedBox debugFillProperties coverage', (WidgetTester tester) async {
+      const Decoration decoration = BoxDecoration(color: Color(0xFF00FF00));
+      const box = DecoratedBox(decoration: decoration, position: DecorationPosition.foreground);
+
+      expect(box, hasOneLineDescription);
+      final String description = box.toStringDeep(minLevel: DiagnosticLevel.hidden);
+      expect(description, contains('fg: BoxDecoration'));
+      expect(description, contains('position: foreground'));
+    });
+
+    testWidgets('Container with both padding and decoration padding', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(border: Border.all(width: 5)),
+            child: const SizedBox(width: 20, height: 20),
+          ),
+        ),
+      );
+
+      // Padding widget should have 10 (padding) + 5 (border) = 15
+      final RenderPadding renderPadding = tester.renderObject(find.byType(Padding).last);
+      expect(renderPadding.padding, const EdgeInsets.all(15));
+    });
+
+    testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
+      // ignore: sized_box_for_whitespace
+      const container = Container(width: 0, height: 0);
+      await tester.pumpWidget(const Center(child: container));
+
+      expect(find.byType(Container), findsOneWidget);
+      final Size size = tester.getSize(find.byType(Container));
+      expect(size, Size.zero);
+    });
   });
 }
 

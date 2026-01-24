@@ -132,20 +132,28 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 }
 
-/// Accessibility announcement data passed to [SemanticsService.announce] captured in a test.
+/// Accessibility announcement data passed to [SemanticsService.sendAnnouncement] captured in a test.
 ///
 /// This class is intended to be used by the testing API to store the announcements
 /// in a structured form so that tests can verify announcement details. The fields
-/// of this class correspond to parameters of the [SemanticsService.announce] method.
+/// of this class correspond to parameters of the [SemanticsService.sendAnnouncement] method.
 ///
 /// See also:
 ///
 ///  * [WidgetTester.takeAnnouncements], which is the test API that uses this class.
 class CapturedAccessibilityAnnouncement {
-  const CapturedAccessibilityAnnouncement._(this.message, this.textDirection, this.assertiveness);
+  const CapturedAccessibilityAnnouncement._(
+    this.message,
+    this.viewId,
+    this.textDirection,
+    this.assertiveness,
+  );
 
   /// The accessibility message announced by the framework.
   final String message;
+
+  /// The ID of the view that the announcement was sent to.
+  final int viewId;
 
   /// The direction in which the text of the [message] flows.
   final TextDirection textDirection;
@@ -201,6 +209,9 @@ class _TestFlutterView implements FlutterView {
 
   @override
   ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
+
+  @override
+  ui.DisplayCornerRadii? get displayCornerRadii => null;
 
   @override
   void render(ui.Scene scene, {ui.Size? size}) {}
@@ -725,7 +736,8 @@ class _TestWindowingOwner extends WindowingOwner {
   TooltipWindowController createTooltipWindowController({
     required TooltipWindowControllerDelegate delegate,
     required BoxConstraints preferredConstraints,
-    required ui.Rect anchorRect,
+    required bool isSizedToContent,
+    required Rect anchorRect,
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
@@ -1470,6 +1482,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _announcements.add(
         CapturedAccessibilityAnnouncement._(
           data['message'].toString(),
+          data['viewId']! as int,
           TextDirection.values[data['textDirection']! as int],
           Assertiveness.values[(data['assertiveness'] ?? 0) as int],
         ),
@@ -1826,6 +1839,36 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
       return true;
     }());
+  }
+
+  /// Replaces the root layers of all managed [renderViews] with new, unused
+  /// layers.
+  ///
+  /// This method is typically used in a test's [addTearDown] to ensure that
+  /// resources associated with the root transform layer are properly disposed
+  /// of between tests. It is useful for tests that modify the view
+  /// configuration (for example, by calling [setSurfaceSize] or changing
+  /// [ViewConfiguration]). Such tests might cause the root layer to not be
+  /// automatically disposed before the leak check, triggering false negatives.
+  ///
+  /// This method also resets view configuration to its default value.
+  ///
+  /// See also:
+  ///
+  ///  * [setSurfaceSize], which often necessitates calling this method during
+  ///    tear down.
+  Future<void> resetLayers() async {
+    await setSurfaceSize(null);
+    for (final RenderView renderView in renderViews) {
+      // To reliably trigger [RenderView.replaceRootLayer], we assign a new
+      // device pixel ratio that differs from the current one.
+      renderView.configuration = ViewConfiguration(
+        devicePixelRatio: renderView.flutterView.devicePixelRatio + 1.0,
+      );
+      // Reset the device pixel ratio (and other view configurations) to their
+      // default values.
+      renderView.configuration = createViewConfigurationFor(renderView);
+    }
   }
 
   /// Called by the [testWidgets] function after a test is executed.

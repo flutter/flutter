@@ -569,6 +569,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/133955.
     final events = <RawKeyEvent>[];
     final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       RawKeyboardListener(focusNode: focusNode, onKey: events.add, child: Container()),
