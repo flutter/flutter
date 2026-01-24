@@ -884,7 +884,7 @@ final class TabBarScrollController extends ScrollController {
   /// Is null if this controller is not attached to a [TabBar].
   _TabBarState? _tabBar;
 
-  set _tabBarState(_TabBarState tabBarState) {
+  set _tabBarState(_TabBarState? tabBarState) {
     _tabBar = tabBarState;
   }
 
@@ -906,6 +906,12 @@ final class TabBarScrollController extends ScrollController {
       oldPosition: oldPosition,
       tabBar: _tabBarState,
     );
+  }
+
+  @override
+  void dispose() {
+    _tabBarState = null;
+    super.dispose();
   }
 }
 
