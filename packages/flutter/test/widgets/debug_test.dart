@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -272,36 +272,45 @@ void main() {
 
   testWidgets('debugCreator of layers should not be null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: Material(
-            child: Stack(
-              children: <Widget>[
-                const ColorFiltered(
-                  colorFilter: ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
-                  child: Placeholder(),
-                ),
-                const Opacity(opacity: 0.9, child: Placeholder()),
-                ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                  child: const Placeholder(),
-                ),
-                BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                  child: const Placeholder(),
-                ),
-                ShaderMask(
-                  shaderCallback: (Rect bounds) => const RadialGradient(
-                    radius: 0.05,
-                    colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
-                    tileMode: TileMode.mirror,
-                  ).createShader(bounds),
-                  child: const Placeholder(),
-                ),
-                CompositedTransformFollower(link: LayerLink()),
-              ],
-            ),
+          child: Stack(
+            children: <Widget>[
+              const ColorFiltered(
+                colorFilter: ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
+                child: Placeholder(),
+              ),
+              const Opacity(opacity: 0.9, child: Placeholder()),
+              ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: const Placeholder(),
+              ),
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: const Placeholder(),
+              ),
+              ShaderMask(
+                shaderCallback: (Rect bounds) => const RadialGradient(
+                  radius: 0.05,
+                  colors: <Color>[Color(0xFFFF0000), Color(0xFF00FF00)],
+                  tileMode: TileMode.mirror,
+                ).createShader(bounds),
+                child: const Placeholder(),
+              ),
+              CompositedTransformFollower(link: LayerLink()),
+            ],
           ),
         ),
       ),
