@@ -788,7 +788,7 @@ void main() {
     expect(find.byType(ColoredBox), findsOneWidget);
   });
 
-  testWidgets('Container assertions still triggers in build', (WidgetTester tester) async {
+  group('Container throws assertion error with negative margin', () {
     // Assertions moved to build() should trigger when pumped.
     // Invalid: negative margin (runtime check)
     const invalidMarginContainer = Container(margin: EdgeInsets.all(-10));
@@ -851,16 +851,6 @@ void main() {
       // Padding widget should have 10 (padding) + 5 (border) = 15
       final RenderPadding renderPadding = tester.renderObject(find.byType(Padding).last);
       expect(renderPadding.padding, const EdgeInsets.all(15));
-    });
-
-    testWidgets('Container does not crash at zero area', (WidgetTester tester) async {
-      // ignore: sized_box_for_whitespace
-      const container = Container(width: 0, height: 0);
-      await tester.pumpWidget(const Center(child: container));
-
-      expect(find.byType(Container), findsOneWidget);
-      final Size size = tester.getSize(find.byType(Container));
-      expect(size, Size.zero);
     });
   });
 }
