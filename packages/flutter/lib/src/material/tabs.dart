@@ -894,6 +894,10 @@ final class TabBarScrollController extends ScrollController {
     return _tabBar!;
   }
 
+  /// Whether this controller is currently attached to a [TabBar]'s [State].
+  @visibleForTesting
+  bool get debugHasTabBarState => _tabBar != null;
+
   @override
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,
