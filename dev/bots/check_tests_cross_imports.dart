@@ -228,7 +228,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/reassemble_test.dart',
     'packages/flutter/test/widgets/html_element_view_test.dart',
     'packages/flutter/test/widgets/navigator_test.dart',
-    'packages/flutter/test/widgets/text_semantics_test.dart',
     'packages/flutter/test/widgets/safe_area_test.dart',
     'packages/flutter/test/widgets/page_view_test.dart',
     'packages/flutter/test/widgets/undo_history_test.dart',

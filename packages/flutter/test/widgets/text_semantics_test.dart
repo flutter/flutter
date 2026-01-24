@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -198,9 +198,21 @@ void main() {
       'THEN the SemanticsNode contains the correct language tag', (WidgetTester tester) async {
     const locale = Locale('de', 'DE');
     const text = 'Flutter 2050';
+
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SelectionArea(child: Text(text, locale: locale)),
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        home: const _DummySelectionContainer(child: Text(text, locale: locale)),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
       ),
     );
     await tester.pumpAndSettle();
@@ -222,4 +234,36 @@ void main() {
     expect(targetNode.label, text);
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
   });
+}
+
+// Taken from the selection container API example.
+class _DummySelectionContainer extends StatefulWidget {
+  const _DummySelectionContainer({required this.child});
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _DummySelectionContainerState();
+}
+
+class _DummySelectionContainerState extends State<_DummySelectionContainer> {
+  final _DummySelectionDelegate delegate = _DummySelectionDelegate();
+
+  @override
+  void dispose() {
+    delegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(delegate: delegate, child: widget.child);
+  }
+}
+
+class _DummySelectionDelegate extends MultiSelectableSelectionContainerDelegate {
+  _DummySelectionDelegate();
+
+  @override
+  void ensureChildUpdated(Selectable selectable) {}
 }
