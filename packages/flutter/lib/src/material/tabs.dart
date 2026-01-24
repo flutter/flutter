@@ -1663,6 +1663,17 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
+  void _updateScrollController() {
+    if (widget.scrollController != null) {
+      widget.scrollController?._tabBarState = this;
+
+      return;
+    }
+
+    _internalScrollController ??= TabBarScrollController();
+    _internalScrollController?._tabBarState = this;
+  }
+
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
     final TabBarThemeData tabBarTheme = TabBarTheme.of(context);
@@ -1705,10 +1716,9 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _updateScrollController();
     _updateTabController();
     _initIndicatorPainter();
-
-    _effectiveScrollController._tabBarState = this;
   }
 
   @override
@@ -1716,31 +1726,9 @@ class _TabBarState extends State<TabBar> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.scrollController != oldWidget.scrollController) {
+      _updateScrollController();
       _updateTabController();
       _initIndicatorPainter();
-
-      if (oldWidget.scrollController == null) {
-        // The old controller was null,
-        // meaning the internal scroll controller cannot be null.
-        // Dispose of the internal scroll controller.
-        assert(_internalScrollController != null);
-        assert(widget.scrollController != null);
-
-        _internalScrollController!.detach(_internalScrollController!.position);
-        _internalScrollController!.dispose();
-        _internalScrollController = null;
-      } else {
-        // The old controller was not null, detach.
-        oldWidget.scrollController!.detach(oldWidget.scrollController!.position);
-        if (widget.scrollController == null) {
-          // If the new controller is null,
-          // set up the internal TabBarScrollController.
-          _internalScrollController = TabBarScrollController().._tabBarState = this;
-        }
-      }
-
-      // Attach the updated effective scroll controller.
-      _effectiveScrollController.attach(_effectiveScrollController.position);
 
       // Adjust scroll position.
       if (_effectiveScrollController.hasClients) {
