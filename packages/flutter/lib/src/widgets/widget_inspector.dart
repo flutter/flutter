@@ -3831,8 +3831,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   @override
   Widget build(BuildContext context) {
-    final double bottomPadding =
-        _kExitWidgetSelectionButtonMargin + MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     final Widget selectionModeButtons = Column(
       children: <Widget>[?_tapBehaviorButton, _exitWidgetSelectionButton],
