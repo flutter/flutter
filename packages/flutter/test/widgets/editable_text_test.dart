@@ -17847,6 +17847,205 @@ void main() {
     controller.selection = const TextSelection.collapsed(offset: 0);
     await tester.pump();
   });
+
+  testWidgets(
+    'default selection width style uses tight on Android',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'selection width style dynamically switches to max on Android when select all',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+      // Select All
+      controller.text =
+          'السلام عليكم كيف حالك اليوم يا فتي وكيف حالك يا بطل؟السلام عليكم كيف حالك اليوم يا فتي وكيف حالك يا بطل؟السلام عليكم كيف حالك اليوم يا فتي وكيف حالك يا بطل؟السلام عليكم كيف حالك اليوم يا فتي وكيف حالك يا بطل؟السلام عليكم كيف حالك اليوم يا فتي وكيف حالك يا بطل؟';
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      await tester.pump();
+
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+
+      // Partial selection
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+      await tester.pump();
+
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'selection width style overrides explicit tight on Android when select all',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              selectionWidthStyle: BoxWidthStyle.tight,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      // Initially empty or whatever, effectively tight
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+      // Select All
+      controller.text = 'Hello World';
+      controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+      await tester.pump();
+
+      // Should be max despite widget param being tight
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+
+      // Partial selection
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+      await tester.pump();
+
+      // Should revert to explicit tight
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'default selection width style uses max on iOS',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'selection width style returns tight for partial selection in Arabic multi-word text on Android',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+      // Multi-word Arabic text
+      controller.text = 'مرحبا بكم في فلاتر';
+      // Select only "مرحبا" (first word)
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+      await tester.pump();
+
+      // Should be tight because it's not the full text
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'selection width style returns tight for partial selection in English multi-word text on Android',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+      // Multi-word English text
+      controller.text = 'Hello World';
+      // Select only "Hello" (first word)
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+      await tester.pump();
+
+      // Should be tight because it's not the full text
+      expect(state.renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 }
 
 class UnsettableController extends TextEditingController {

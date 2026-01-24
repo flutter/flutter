@@ -1398,6 +1398,42 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('propagates textDirection to handles', (WidgetTester tester) async {
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.left
+        ..endHandleType = TextSelectionHandleType.right
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), null),
+          TextSelectionPoint(Offset(20, 20), null),
+        ]
+        ..textDirection = TextDirection.ltr;
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      Directionality directionality = tester.widget(
+        find
+            .ancestor(of: find.byKey(spy.leftHandleKey), matching: find.byType(Directionality))
+            .first,
+      );
+      expect(directionality.textDirection, TextDirection.ltr);
+
+      selectionOverlay.textDirection = TextDirection.rtl;
+      await tester.pump();
+
+      directionality = tester.widget(
+        find
+            .ancestor(of: find.byKey(spy.leftHandleKey), matching: find.byType(Directionality))
+            .first,
+      );
+      expect(directionality.textDirection, TextDirection.rtl);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('can change handle parameter', (WidgetTester tester) async {
       final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);

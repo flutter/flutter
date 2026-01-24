@@ -884,6 +884,37 @@ void main() {
     expect(endpoints[0].point.dx, 0);
   });
 
+  test('getEndpointsForSelection returns correct endpoints for multi-line text', () {
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    const text = 'Line1أنا أتحدث اللغة العربية\nLine2English is my language';
+    final editable = RenderEditable(
+      maxLines: 5,
+      text: const TextSpan(
+        text: text,
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      ),
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+    );
+
+    editable.layout(BoxConstraints.loose(const Size(200, 100)));
+
+    // Select "Line1" (LTR) and "Line2" (LTR) across the newline.
+    // "Line1" (5 chars) + "\n" (1 char) + "Line2"
+    // Start at 0 ("L").
+    // End at 11 (after "Line2").
+    final List<TextSelectionPoint> endpoints = editable.getEndpointsForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: text.length),
+    );
+
+    expect(endpoints.length, 2);
+    expect(endpoints[0].direction, TextDirection.ltr);
+    expect(endpoints[1].direction, TextDirection.ltr);
+  });
+
   test('TextSelectionPoint can compare', () {
     // ignore: prefer_const_constructors
     final first = TextSelectionPoint(Offset(1, 2), TextDirection.ltr);

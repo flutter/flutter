@@ -29,7 +29,6 @@ import 'inherited_theme.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
-import 'selectable_region.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -381,6 +380,7 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+      textDirection: renderObject.textDirection,
     );
   }
 
@@ -541,51 +541,50 @@ class TextSelectionOverlay {
 
   void _updateSelectionOverlay() {
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    TextSelectionHandleType startHandleType = TextSelectionHandleType.collapsed;
-    TextSelectionHandleType endHandleType = TextSelectionHandleType.collapsed;
+    assert(endpoints.isNotEmpty);
 
-    if (!_selection.isCollapsed) {
-      if (endpoints.length == 2) {
-        final TextDirection startDirection = endpoints[0].direction ?? renderObject.textDirection;
-        final TextDirection endDirection = endpoints[1].direction ?? renderObject.textDirection;
+    final TextDirection startHandleDirection = endpoints[0].direction ?? renderObject.textDirection;
+    final TextSelectionPoint? endPoint = endpoints.length > 1 ? endpoints[1] : null;
+    final TextDirection endHandleDirection =
+        (endPoint?.direction ?? endpoints[0].direction) ?? renderObject.textDirection;
 
-        switch (startDirection) {
-          case TextDirection.ltr:
-            startHandleType = TextSelectionHandleType.left;
-          case TextDirection.rtl:
-            startHandleType = TextSelectionHandleType.right;
-        }
-
-        switch (endDirection) {
-          case TextDirection.ltr:
-            endHandleType = TextSelectionHandleType.right;
-          case TextDirection.rtl:
-            endHandleType = TextSelectionHandleType.left;
-        }
-      } else {
-        // Fallback for single endpoint (shouldn't happen for non-collapsed selection).
-        startHandleType = _chooseType(
-          renderObject.textDirection,
-          TextSelectionHandleType.left,
-          TextSelectionHandleType.right,
-        );
-        endHandleType = _chooseType(
-          renderObject.textDirection,
-          TextSelectionHandleType.right,
-          TextSelectionHandleType.left,
-        );
-      }
+    final TextSelectionHandleType startHandleType;
+    final TextSelectionHandleType endHandleType;
+    if (_selection.isCollapsed) {
+      startHandleType = TextSelectionHandleType.collapsed;
+      endHandleType = TextSelectionHandleType.collapsed;
+    } else {
+      // Robust Role + Direction mapping.
+      // - Start + LTR: handle is attached to the left edge and points inward/right
+      //   (TextSelectionHandleType.left).
+      // - Start + RTL: handle is attached to the right edge and points inward/left
+      //   (TextSelectionHandleType.right).
+      // - End + LTR: handle is attached to the right edge and points inward/left
+      //   (TextSelectionHandleType.right).
+      // - End + RTL: handle is attached to the left edge and points inward/right
+      //   (TextSelectionHandleType.left).
+      // This ensures inward-pointing brackets ( SELECTION ) that are stable
+      // across line breaks, matching native Android behavior.
+      startHandleType = (startHandleDirection == TextDirection.rtl)
+          ? TextSelectionHandleType.right
+          : TextSelectionHandleType.left;
+      endHandleType = (endHandleDirection == TextDirection.rtl)
+          ? TextSelectionHandleType.left
+          : TextSelectionHandleType.right;
     }
 
     _selectionOverlay
       // Update selection handle metrics.
       ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
+      ..startHandleDirection = startHandleDirection
       ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
+      ..endHandleDirection = endHandleDirection
       // Update selection toolbar metrics.
       ..selectionEndpoints = endpoints
-      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
+      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition
+      ..textDirection = renderObject.textDirection;
   }
 
   /// Causes the overlay to update its rendering.
@@ -608,8 +607,24 @@ class TextSelectionOverlay {
   /// See also:
   ///
   ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
-  ///     specifically is visible.
+  ///     is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
+
+  /// The text direction of the text being selected.
+  ///
+  /// This is used to determine the direction of the selection handles.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    _selectionOverlay.textDirection = value; // Propagate to the internal SelectionOverlay
+    _selectionOverlay.markNeedsBuild();
+  }
 
   /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}
   bool get magnifierIsVisible => _selectionOverlay.magnifierIsVisible;
@@ -1052,21 +1067,6 @@ class TextSelectionOverlay {
       SelectionChangedCause.drag,
     );
   }
-
-  TextSelectionHandleType _chooseType(
-    TextDirection textDirection,
-    TextSelectionHandleType ltrType,
-    TextSelectionHandleType rtlType,
-  ) {
-    if (_selection.isCollapsed) {
-      return TextSelectionHandleType.collapsed;
-    }
-
-    return switch (textDirection) {
-      TextDirection.ltr => ltrType,
-      TextDirection.rtl => rtlType,
-    };
-  }
 }
 
 /// An object that manages a pair of selection handles and a toolbar.
@@ -1112,12 +1112,14 @@ class SelectionOverlay {
     )
     Offset? toolbarLocation,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    TextDirection? textDirection,
   }) : _startHandleType = startHandleType,
        _lineHeightAtStart = lineHeightAtStart,
        _endHandleType = endHandleType,
        _lineHeightAtEnd = lineHeightAtEnd,
        _selectionEndpoints = selectionEndpoints,
        _toolbarLocation = toolbarLocation,
+       _textDirection = textDirection,
        assert(debugCheckHasOverlay(context)) {
     assert(debugMaybeDispatchCreated('widgets', 'SelectionOverlay', this));
   }
@@ -1152,6 +1154,43 @@ class SelectionOverlay {
     return selectionControls is TextSelectionHandleControls
         ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
         : _toolbar != null || _spellCheckToolbarController.isShown;
+  }
+
+  /// The text direction of the text being selected.
+  ///
+  /// This is used to determine the direction of the selection handles.
+  ///
+  /// Changing the value while the handles are visible causes them to rebuild.
+  TextDirection? get textDirection => _textDirection;
+  TextDirection? _textDirection;
+  set textDirection(TextDirection? value) {
+    if (_textDirection == value) {
+      return;
+    }
+    _textDirection = value;
+    markNeedsBuild();
+  }
+
+  /// The text direction of the start selection handle.
+  TextDirection? get startHandleDirection => _startHandleDirection;
+  TextDirection? _startHandleDirection;
+  set startHandleDirection(TextDirection? value) {
+    if (_startHandleDirection == value) {
+      return;
+    }
+    _startHandleDirection = value;
+    markNeedsBuild();
+  }
+
+  /// The text direction of the end selection handle.
+  TextDirection? get endHandleDirection => _endHandleDirection;
+  TextDirection? _endHandleDirection;
+  set endHandleDirection(TextDirection? value) {
+    if (_endHandleDirection == value) {
+      return;
+    }
+    _endHandleDirection = value;
+    markNeedsBuild();
   }
 
   /// {@template flutter.widgets.SelectionOverlay.magnifierIsVisible}
@@ -1784,7 +1823,22 @@ class SelectionOverlay {
     _magnifierInfo.dispose();
   }
 
+  TextDirection _resolveTextDirection(
+    BuildContext context,
+    TextDirection? handleDirection,
+    int endpointIndex,
+  ) {
+    return handleDirection ??
+        (_selectionEndpoints.length > endpointIndex
+            ? _selectionEndpoints[endpointIndex].direction
+            : null) ??
+        _textDirection ??
+        Directionality.maybeOf(context) ??
+        TextDirection.ltr;
+  }
+
   Widget _buildStartHandle(BuildContext context) {
+    final TextDirection direction = _resolveTextDirection(context, startHandleDirection, 0);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1795,6 +1849,7 @@ class SelectionOverlay {
     } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
+        textDirection: direction,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
@@ -1806,13 +1861,16 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+    return TextFieldTapRegion(
+      child: Directionality(
+        textDirection: direction,
+        child: ExcludeSemantics(child: handle),
+      ),
     );
   }
 
   Widget _buildEndHandle(BuildContext context) {
+    final TextDirection direction = _resolveTextDirection(context, endHandleDirection, 1);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1826,6 +1884,7 @@ class SelectionOverlay {
     } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
+        textDirection: direction,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
@@ -1837,9 +1896,11 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
+    return TextFieldTapRegion(
+      child: Directionality(
+        textDirection: direction,
+        child: ExcludeSemantics(child: handle),
+      ),
     );
   }
 
@@ -1981,19 +2042,16 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(
-        child: Directionality(
-          textDirection: Directionality.of(this.context),
-          child: FadeTransition(
-            opacity: _opacity,
-            child: CompositedTransformFollower(
-              link: widget.layerLink,
-              showWhenUnlinked: false,
-              offset: widget.offset,
-              child: widget.child,
-            ),
+    return TextFieldTapRegion(
+      child: Directionality(
+        textDirection: Directionality.of(this.context),
+        child: FadeTransition(
+          opacity: _opacity,
+          child: CompositedTransformFollower(
+            link: widget.layerLink,
+            showWhenUnlinked: false,
+            offset: widget.offset,
+            child: widget.child,
           ),
         ),
       ),
@@ -2006,6 +2064,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
   const _SelectionHandleOverlay({
     required this.type,
+    this.textDirection,
     required this.handleLayerLink,
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
@@ -2026,6 +2085,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final ValueListenable<bool>? visibility;
   final double preferredLineHeight;
   final TextSelectionHandleType type;
+  final TextDirection? textDirection;
   final DragStartBehavior dragStartBehavior;
 
   @override
