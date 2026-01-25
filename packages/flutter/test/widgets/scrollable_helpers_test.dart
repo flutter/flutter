@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
@@ -104,9 +104,9 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             controller: controller,
             physics: const NeverScrollableScrollPhysics(),
             slivers: List<Widget>.generate(20, (int index) {
@@ -169,8 +169,8 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: CustomScrollView(
             controller: controller,
             slivers: List<Widget>.generate(20, (int index) {
@@ -182,6 +182,16 @@ void main() {
               );
             }),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -239,8 +249,8 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -253,6 +263,16 @@ void main() {
               );
             }),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -298,8 +318,8 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
@@ -315,6 +335,16 @@ void main() {
               }),
             ),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -362,8 +392,8 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: CustomScrollView(
             controller: controller,
             reverse: true,
@@ -376,6 +406,16 @@ void main() {
               );
             }),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -436,8 +476,8 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -451,6 +491,16 @@ void main() {
               );
             }),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -494,8 +544,8 @@ void main() {
       addTearDown(controller.dispose);
       final items = List<String>.generate(20, (int index) => 'Item $index');
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        WidgetsApp(
+          color: const Color(0xFFFFFFFF),
           home: CustomScrollView(
             controller: controller,
             center: const ValueKey<String>('Center'),
@@ -514,6 +564,16 @@ void main() {
               );
             }).toList(),
           ),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+            );
+          },
         ),
       );
 
@@ -563,7 +623,8 @@ void main() {
 
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
         home: ListView(
           children: const <Widget>[
             SizedBox(height: 600.0, child: Text('The cow as white as milk')),
@@ -571,6 +632,16 @@ void main() {
             SizedBox(height: 600.0, child: Text('The hair as yellow as corn')),
           ],
         ),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            pageBuilder:
+                (
+                  BuildContext context,
+                  Animation<double> animation,
+                  Animation<double> secondaryAnimation,
+                ) => builder(context),
+          );
+        },
       ),
     );
     expect(find.text('The cow as white as milk'), findsOneWidget);
@@ -612,9 +683,9 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: PrimaryScrollController(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PrimaryScrollController(
             controller: controller,
             child: Focus(
               autofocus: true,
@@ -675,21 +746,20 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Transform.scale(
-              scale: 0.5,
-              child: SizedBox(
-                width: 400,
-                height: 400,
-                child: ListView.builder(
-                  controller: controller,
-                  itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 100, child: Center(child: Text('Item $index')));
-                  },
-                ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100, child: Center(child: Text('Item $index')));
+                },
               ),
             ),
           ),
