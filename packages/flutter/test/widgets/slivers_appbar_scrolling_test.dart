@@ -303,26 +303,3 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => false;
 }
-
-class RenderBigSliver extends RenderSliver {
-  static const double height = 550.0;
-  double get paintExtent =>
-      (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
-
-  @override
-  void performLayout() {
-    geometry = SliverGeometry(
-      scrollExtent: height,
-      paintExtent: paintExtent,
-      maxPaintExtent: height,
-    );
-  }
-}
-
-class BigSliver extends LeafRenderObjectWidget {
-  const BigSliver({super.key});
-  @override
-  RenderBigSliver createRenderObject(BuildContext context) {
-    return RenderBigSliver();
-  }
-}
