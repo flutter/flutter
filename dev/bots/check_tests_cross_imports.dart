@@ -175,7 +175,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/dual_transition_builder_test.dart',
     'packages/flutter/test/widgets/icon_test.dart',
     'packages/flutter/test/widgets/scrollable_helpers_test.dart',
-    'packages/flutter/test/widgets/slivers_appbar_stretch_test.dart',
     'packages/flutter/test/widgets/sliver_cross_axis_group_test.dart',
     'packages/flutter/test/widgets/list_wheel_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_dispose_test.dart',
