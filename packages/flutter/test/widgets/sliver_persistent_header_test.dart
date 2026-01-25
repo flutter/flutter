@@ -1100,7 +1100,7 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 
   @override
   final OverScrollHeaderStretchConfiguration? stretchConfiguration;
@@ -1123,7 +1123,7 @@ class TestDelegate2 extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class TestDelegate3 extends SliverPersistentHeaderDelegate {
@@ -1139,7 +1139,7 @@ class TestDelegate3 extends SliverPersistentHeaderDelegate {
   double get minExtent => 56;
 
   @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
