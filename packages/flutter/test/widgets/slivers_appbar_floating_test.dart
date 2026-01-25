@@ -27,17 +27,6 @@ void main() {
       );
     }
 
-    void verifyGeometry({
-      required GlobalKey key,
-      required bool visible,
-      required double paintExtent,
-    }) {
-      final target = key.currentContext!.findRenderObject()! as RenderSliver;
-      final SliverGeometry geometry = target.geometry!;
-      expect(geometry.visible, visible);
-      expect(geometry.paintExtent, paintExtent);
-    }
-
     testWidgets('SliverAppBar', (WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(
