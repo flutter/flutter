@@ -11,14 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'sliver_test_utils.dart';
 
 void main() {
-  void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
+  void verifyPaintPosition(GlobalKey key, Offset ideal, [bool? visible]) {
     final target = key.currentContext!.findRenderObject()! as RenderSliver;
     expect(target.parent, isA<RenderViewport>());
     final parentData = target.parentData! as SliverPhysicalParentData;
     final Offset actual = parentData.paintOffset;
     expect(actual, ideal);
-    final SliverGeometry geometry = target.geometry!;
-    expect(geometry.visible, visible);
+
+    if (visible != null) {
+      final SliverGeometry geometry = target.geometry!;
+      expect(geometry.visible, visible);
+    }
   }
 
   void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
