@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'semantics_tester.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Sliver appBars - floating and pinned - correct elevation', (
+  testWidgets('SliverAppBar - floating and pinned - correct elevation', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -48,7 +48,7 @@ void main() {
     expect(renderObject.elevation, 0.0);
   });
 
-  testWidgets('Sliver appbars - floating and pinned - correct semantics', (
+  testWidgets('SliverAppBar - floating and pinned - correct semantics', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -224,7 +224,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (
+  testWidgets('SliverAppBar - floating and pinned - second app bar stacks below', (
     WidgetTester tester,
   ) async {
     final controller = ScrollController();
@@ -294,50 +294,51 @@ void main() {
     );
   });
 
-  testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (
-    WidgetTester tester,
-  ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/21887.
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-    const availableHeight = 50.0;
+  testWidgets(
+    'SliverAppBar does not crash when there is less than minExtent remainingPaintExtent',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/21887.
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const availableHeight = 50.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: Container(
-            height: availableHeight,
-            color: Colors.green,
-            child: CustomScrollView(
-              controller: controller,
-              slivers: <Widget>[
-                const SliverAppBar(pinned: true, floating: true, expandedHeight: 120.0),
-                SliverList.builder(
-                  itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 100.0, child: Text('Tile $index'));
-                  },
-                ),
-              ],
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Container(
+              height: availableHeight,
+              color: Colors.green,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  const SliverAppBar(pinned: true, floating: true, expandedHeight: 120.0),
+                  SliverList.builder(
+                    itemCount: 20,
+                    itemBuilder: (BuildContext context, int index) {
+                      return SizedBox(height: 100.0, child: Text('Tile $index'));
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-    final RenderSliverFloatingPinnedPersistentHeader render = tester.renderObject(
-      find.byType(SliverAppBar),
-    );
-    expect(render.minExtent, greaterThan(availableHeight)); // Precondition
-    expect(render.geometry!.scrollExtent, 120.0);
-    expect(render.geometry!.paintExtent, availableHeight);
-    expect(render.geometry!.layoutExtent, availableHeight);
+      );
+      final RenderSliverFloatingPinnedPersistentHeader render = tester.renderObject(
+        find.byType(SliverAppBar),
+      );
+      expect(render.minExtent, greaterThan(availableHeight)); // Precondition
+      expect(render.geometry!.scrollExtent, 120.0);
+      expect(render.geometry!.paintExtent, availableHeight);
+      expect(render.geometry!.layoutExtent, availableHeight);
 
-    controller.jumpTo(200.0);
-    await tester.pumpAndSettle();
-    expect(render.geometry!.scrollExtent, 120.0);
-    expect(render.geometry!.paintExtent, availableHeight);
-    expect(render.geometry!.layoutExtent, 0.0);
-  });
+      controller.jumpTo(200.0);
+      await tester.pumpAndSettle();
+      expect(render.geometry!.scrollExtent, 120.0);
+      expect(render.geometry!.paintExtent, availableHeight);
+      expect(render.geometry!.layoutExtent, 0.0);
+    },
+  );
 
   testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (
     WidgetTester tester,
