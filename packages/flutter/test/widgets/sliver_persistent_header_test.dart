@@ -808,7 +808,7 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(height: maxExtent);
+    return SizedBox(height: maxExtent, child: const Text('Sliver Persistent Header'));
   }
 
   @override

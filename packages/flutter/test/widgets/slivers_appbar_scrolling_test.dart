@@ -287,19 +287,3 @@ void main() {
     });
   });
 }
-
-class TestDelegate extends SliverPersistentHeaderDelegate {
-  @override
-  double get maxExtent => 200.0;
-
-  @override
-  double get minExtent => 200.0;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox(height: maxExtent, child: const Text('Sliver App Bar'));
-  }
-
-  @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
-}
