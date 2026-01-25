@@ -103,16 +103,16 @@ void main() {
       final GlobalKey containerKey2 = GlobalKey();
       const kHeroTag = 'hero';
       final routes = <String, WidgetBuilder>{
-        '/': (_) => Scaffold(
+        '/': (_) => SizedBox(
           key: containerKey1,
-          body: const ColoredBox(
+          child: const ColoredBox(
             color: Color(0xff00ffff),
             child: Hero(tag: kHeroTag, child: Text('Home')),
           ),
         ),
-        '/settings': (_) => Scaffold(
+        '/settings': (_) => SizedBox(
           key: containerKey2,
-          body: Container(
+          child: Container(
             padding: const EdgeInsets.all(100.0),
             color: const Color(0xffff00ff),
             child: const Hero(tag: kHeroTag, child: Text('Settings')),
@@ -172,8 +172,8 @@ void main() {
       final GlobalKey containerKey1 = GlobalKey();
       final GlobalKey containerKey2 = GlobalKey();
       final routes = <String, WidgetBuilder>{
-        '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
-        '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
+        '/': (_) => SizedBox(key: containerKey1, child: const Text('Home')),
+        '/settings': (_) => SizedBox(key: containerKey2, child: const Text('Settings')),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -224,9 +224,14 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(routes: routes));
 
-    final PageRoute<void> route = MaterialPageRoute<void>(
+    final PageRoute<void> route = PageRouteBuilder<void>(
       settings: const RouteSettings(name: '/page'),
-      builder: (BuildContext context) => const Center(child: Text('page')),
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Center(child: Text('page')),
     );
 
     var popCount = 0;
