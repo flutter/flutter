@@ -116,9 +116,9 @@ class SliverExpansionPanel {
 ///
 /// This class acts as the bridge between the user's [SliverExpansionPanel]
 /// objects and the internal indices of the [SliverAnimatedList].
-class SliverExpansionPanelItem {
+class _SliverExpansionPanelItem {
   /// Creates an item for the flattened list.
-  const SliverExpansionPanelItem({
+  const _SliverExpansionPanelItem({
     required this.panelIndex,
     required this.isHeader,
     required this.key,
@@ -145,7 +145,7 @@ class SliverExpansionPanelItem {
 }
 
 /// Signature for a function that builds a widget to represent an item
-/// that has been removed from a [ListModel].
+/// that has been removed from a [_ListModel].
 ///
 /// This is used by [SliverAnimatedList] to animate the exit of an item
 /// after it has already been removed from the underlying data source.
@@ -164,12 +164,12 @@ typedef RemovedItemBuilder<E> =
 /// This is a critical utility for [SliverExpansionPanelList] because it manages
 /// the complex transition between "flattened" indices while keeping the
 /// [SliverAnimatedList] in sync with the current UI state.
-class ListModel<T> {
-  /// Creates a [ListModel] that manages animations via the provided [listKey].
+class _ListModel<T> {
+  /// Creates a [_ListModel] that manages animations via the provided [listKey].
   ///
   /// The [removedItemBuilder] is used to generate the "ghost" widget that
   /// remains visible while an item is animating out of the list.
-  ListModel({
+  _ListModel({
     required this.listKey,
     required this.removedItemBuilder,
     required Iterable<T>? initialItems,
@@ -327,14 +327,14 @@ class SliverExpansionPanelList extends StatefulWidget {
 class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
 
-  late ListModel<SliverExpansionPanelItem> _list;
+  late _ListModel<_SliverExpansionPanelItem> _list;
 
   @override
   void initState() {
     super.initState();
     assert(_allKeysUnique(), 'All SliverExpansionPanel keys values must be unique.');
-    final List<SliverExpansionPanelItem> items = _flattenExpansionPanels();
-    _list = ListModel(
+    final List<_SliverExpansionPanelItem> items = _flattenExpansionPanels();
+    _list = _ListModel(
       listKey: _listKey,
       removedItemBuilder: _buildRemovedItem,
       initialItems: items,
@@ -351,8 +351,8 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     // Expanding or collapsing an existing panel does not change the number of
     // [SliverExpansionPanel] objects in the list, so it will not trigger this logic.
     if (oldWidget.expansionPanels.length != widget.expansionPanels.length) {
-      final List<SliverExpansionPanelItem> newItems = _flattenExpansionPanels();
-      final List<SliverExpansionPanelItem> oldItems = _list._items;
+      final List<_SliverExpansionPanelItem> newItems = _flattenExpansionPanels();
+      final List<_SliverExpansionPanelItem> oldItems = _list._items;
 
       // Compare the length of items and decide whether an item has been added or removed
       final bool isItemRemoved = newItems.length < oldItems.length;
@@ -363,7 +363,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
         _addItem(newItems, oldItems);
       }
       // Sync data
-      _list = ListModel(
+      _list = _ListModel(
         listKey: _listKey,
         removedItemBuilder: _buildRemovedItem,
         initialItems: newItems,
@@ -379,14 +379,14 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     return identifierMap.length == widget.expansionPanels.length;
   }
 
-  void _addItem(List<SliverExpansionPanelItem> newItems, List<SliverExpansionPanelItem> oldItems) {
+  void _addItem(List<_SliverExpansionPanelItem> newItems, List<_SliverExpansionPanelItem> oldItems) {
     for (var i = 0; i < newItems.length; i++) {
       final Key currentKey = newItems[i].key;
       final Key? oldKey = oldItems.elementAtOrNull(i)?.key;
 
       if (oldKey == null || currentKey != oldKey) {
-        final SliverExpansionPanelItem headerToAdd = newItems[i];
-        final SliverExpansionPanelItem? bodyToAdd = newItems.elementAtOrNull(i + 1);
+        final _SliverExpansionPanelItem headerToAdd = newItems[i];
+        final _SliverExpansionPanelItem? bodyToAdd = newItems.elementAtOrNull(i + 1);
         // Add Header
         _listKey.currentState?.insertItem(i);
         if (bodyToAdd != null && (headerToAdd.panelIndex == bodyToAdd.panelIndex)) {
@@ -400,16 +400,16 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   void _removeItem(
-    List<SliverExpansionPanelItem> oldItems,
-    List<SliverExpansionPanelItem> newItems,
+    List<_SliverExpansionPanelItem> oldItems,
+    List<_SliverExpansionPanelItem> newItems,
   ) {
     for (var i = 0; i < oldItems.length; i++) {
       final Key? currentKey = newItems.elementAtOrNull(i)?.key;
       final Key oldKey = oldItems[i].key;
 
       if (currentKey == null || currentKey != oldKey) {
-        final SliverExpansionPanelItem headerToRemove = _list._items[i];
-        final SliverExpansionPanelItem? bodyToRemove = _list._items.elementAtOrNull(i + 1);
+        final _SliverExpansionPanelItem headerToRemove = _list._items[i];
+        final _SliverExpansionPanelItem? bodyToRemove = _list._items.elementAtOrNull(i + 1);
 
         // Remove the header
         _listKey.currentState?.removeItem(
@@ -435,7 +435,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
       key: _listKey,
       initialItemCount: _list.length,
       itemBuilder: (context, index, animation) {
-        final SliverExpansionPanelItem item = _list._items[index];
+        final _SliverExpansionPanelItem item = _list._items[index];
         final SliverExpansionPanel currentPanel = widget.expansionPanels[item.panelIndex];
 
         if (item.isHeader) {
@@ -456,10 +456,10 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     );
   }
 
-  List<SliverExpansionPanelItem> _flattenExpansionPanels() {
-    final result = <SliverExpansionPanelItem>[];
+  List<_SliverExpansionPanelItem> _flattenExpansionPanels() {
+    final result = <_SliverExpansionPanelItem>[];
     for (var i = 0; i < widget.expansionPanels.length; i++) {
-      final headerPanel = SliverExpansionPanelItem(
+      final headerPanel = _SliverExpansionPanelItem(
         panelIndex: i,
         isHeader: true,
         key: widget.expansionPanels[i].key,
@@ -467,7 +467,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
       result.add(headerPanel);
 
       if (widget.expansionPanels[i].isExpanded) {
-        final bodyPanel = SliverExpansionPanelItem(
+        final bodyPanel = _SliverExpansionPanelItem(
           panelIndex: i,
           isHeader: false,
           key: widget.expansionPanels[i].key,
@@ -479,7 +479,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   Widget _buildHeader(BuildContext context, int index) {
-    final SliverExpansionPanelItem item = _list._items[index];
+    final _SliverExpansionPanelItem item = _list._items[index];
     final int panelIndex = item.panelIndex;
     final SliverExpansionPanel panel = widget.expansionPanels[panelIndex];
 
@@ -553,7 +553,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   void _handlePressed(int index) {
-    final SliverExpansionPanelItem item = _list._items[index];
+    final _SliverExpansionPanelItem item = _list._items[index];
     final int panelIndex = item.panelIndex;
     final SliverExpansionPanel panel = widget.expansionPanels[panelIndex];
 
@@ -561,7 +561,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
     if (panel.isExpanded) {
       _list.removeAt(index + 1);
     } else {
-      final itemToAdd = SliverExpansionPanelItem(
+      final itemToAdd = _SliverExpansionPanelItem(
         key: widget.expansionPanels[panelIndex].key,
         panelIndex: panelIndex,
         isHeader: false,
@@ -577,7 +577,7 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   }
 
   Widget _buildRemovedItem(
-    SliverExpansionPanelItem item,
+    _SliverExpansionPanelItem item,
     BuildContext context,
     Animation<double> animation,
   ) {
