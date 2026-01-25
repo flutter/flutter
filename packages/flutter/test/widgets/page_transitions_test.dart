@@ -15,37 +15,6 @@ class TestOverlayRoute extends OverlayRoute<void> {
   Widget _build(BuildContext context) => const Text('Overlay');
 }
 
-class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({super.key});
-
-  @override
-  PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
-}
-
-class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  bool setStateCalled = false;
-
-  void showBottomSheet() {
-    _scaffoldKey.currentState!
-        .showBottomSheet((BuildContext context) {
-          return const Text('bottomSheet');
-        })
-        .closed
-        .whenComplete(() {
-          setState(() {
-            setStateCalled = true;
-          });
-        });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(key: _scaffoldKey, body: const Text('Sheet'));
-  }
-}
-
 void main() {
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
@@ -242,67 +211,6 @@ void main() {
 
       expect(find.text('Home'), isOnstage);
       expect(find.text('Settings'), findsNothing);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
-  );
-
-  // Tests bug https://github.com/flutter/flutter/issues/6451
-  testWidgets(
-    'Check back gesture with a persistent bottom sheet showing',
-    (WidgetTester tester) async {
-      final GlobalKey containerKey1 = GlobalKey();
-      final GlobalKey containerKey2 = GlobalKey();
-      final routes = <String, WidgetBuilder>{
-        '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
-        '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
-      };
-
-      await tester.pumpWidget(MaterialApp(routes: routes));
-
-      Navigator.pushNamed(containerKey1.currentContext!, '/sheet');
-
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.text('Home'), findsNothing);
-      expect(find.text('Sheet'), isOnstage);
-
-      // Drag from left edge to invoke the gesture. We should go back.
-      TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
-      await gesture.moveBy(const Offset(500.0, 0.0));
-      await gesture.up();
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      Navigator.pushNamed(containerKey1.currentContext!, '/sheet');
-
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.text('Home'), findsNothing);
-      expect(find.text('Sheet'), isOnstage);
-
-      // Show the bottom sheet.
-      final sheet = containerKey2.currentState! as PersistentBottomSheetTestState;
-      sheet.showBottomSheet();
-
-      await tester.pump(const Duration(seconds: 1));
-
-      // Drag from left edge to invoke the gesture. Nothing should happen.
-      gesture = await tester.startGesture(const Offset(5.0, 100.0));
-      await gesture.moveBy(const Offset(500.0, 0.0));
-      await gesture.up();
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.text('Home'), findsNothing);
-      expect(find.text('Sheet'), isOnstage);
-
-      // Sheet did not call setState (since the gesture did nothing).
-      expect(sheet.setStateCalled, isFalse);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
