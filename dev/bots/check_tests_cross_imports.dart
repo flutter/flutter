@@ -159,7 +159,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/autocomplete_test.dart',
     'packages/flutter/test/widgets/expansible_test.dart',
     'packages/flutter/test/widgets/decorated_sliver_test.dart',
-    'packages/flutter/test/widgets/shape_decoration_test.dart',
     'packages/flutter/test/widgets/run_app_test.dart',
     'packages/flutter/test/widgets/shadow_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
