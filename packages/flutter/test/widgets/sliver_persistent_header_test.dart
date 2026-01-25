@@ -798,6 +798,281 @@ void main() {
     expect(find.text('Item 5'), findsOneWidget);
     verifySliverGeometry(key: headerKey, paintExtent: 56.0, visible: true);
   });
+
+  testWidgets('SliverPersistentHeader - scrolling', (WidgetTester tester) async {
+    const bigHeight = 550.0;
+    GlobalKey key1, key2, key3, key4, key5;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            BigSliver(key: key1 = GlobalKey(), height: bigHeight),
+            SliverPersistentHeader(key: key2 = GlobalKey(), delegate: TestDelegate()),
+            SliverPersistentHeader(key: key3 = GlobalKey(), delegate: TestDelegate()),
+            BigSliver(key: key4 = GlobalKey(), height: bigHeight),
+            BigSliver(key: key5 = GlobalKey(), height: bigHeight),
+          ],
+        ),
+      ),
+    );
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final double max =
+        bigHeight * 3.0 +
+        TestDelegate().maxExtent * 2.0 -
+        600.0; // 600 is the height of the test viewport
+    assert(max < 10000.0);
+    expect(max, 1450.0);
+    expect(position.pixels, 0.0);
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, max);
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
+    expect(position.pixels, max);
+    expect(position.minScrollExtent, 0.0);
+    expect(position.maxScrollExtent, max);
+    verifyPaintPosition(key1, Offset.zero);
+    verifyPaintPosition(key2, Offset.zero);
+    verifyPaintPosition(key3, Offset.zero);
+    verifyPaintPosition(key4, Offset.zero);
+    verifyPaintPosition(key5, const Offset(0.0, 50.0));
+  });
+
+  testWidgets('SliverPersistentHeader - scrolling off screen', (WidgetTester tester) async {
+    const bigHeight = 550.0;
+    final GlobalKey key = GlobalKey();
+    final delegate = TestDelegate();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            const BigSliver(height: bigHeight),
+            SliverPersistentHeader(key: key, delegate: delegate),
+            const BigSliver(height: bigHeight),
+            const BigSliver(height: bigHeight),
+          ],
+        ),
+      ),
+    );
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.animateTo(
+      bigHeight + delegate.maxExtent - 5.0,
+      curve: Curves.linear,
+      duration: const Duration(minutes: 1),
+    );
+    await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+    final RenderBox box = tester.renderObject<RenderBox>(find.text('Sliver Persistent Header'));
+    final rect = Rect.fromPoints(
+      box.localToGlobal(Offset.zero),
+      box.localToGlobal(box.size.bottomRight(Offset.zero)),
+    );
+    expect(rect, equals(const Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
+  });
+
+  testWidgets('SliverPersistentHeader - scrolling - overscroll gap is below header', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: <Widget>[
+            SliverPersistentHeader(delegate: TestDelegate()),
+            SliverList.list(children: const <Widget>[SizedBox(height: 300.0, child: Text('X'))]),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('Sliver Persistent Header')), Offset.zero);
+    expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 200.0));
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(-50.0);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Sliver Persistent Header')), Offset.zero);
+    expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
+  });
+
+  testWidgets(
+    'Sliver SliverPersistentHeader const child delegate - scrolling - overscroll gap is below header',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              SliverPersistentHeader(delegate: TestDelegate()),
+              const SliverList(
+                delegate: SliverChildListDelegate.fixed(<Widget>[
+                  SizedBox(height: 300.0, child: Text('X')),
+                ]),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.getTopLeft(find.text('Sliver Persistent Header')), Offset.zero);
+      expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 200.0));
+
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      position.jumpTo(-50.0);
+      await tester.pump();
+
+      expect(tester.getTopLeft(find.text('Sliver Persistent Header')), Offset.zero);
+      expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
+    },
+  );
+
+  group('has correct semantics when', () {
+    testWidgets('within viewport', (WidgetTester tester) async {
+      const double cacheExtent = 250;
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            cacheExtent: cacheExtent,
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              SliverPersistentHeader(delegate: TestDelegate()),
+              const SliverList(
+                delegate: SliverChildListDelegate.fixed(<Widget>[
+                  SizedBox(height: 300.0, child: Text('X')),
+                ]),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final SemanticsFinder sliver = find.semantics.byLabel('Sliver Persistent Header');
+
+      expect(sliver, findsOne);
+      expect(sliver, isSemantics(isHidden: false));
+      handle.dispose();
+    });
+
+    testWidgets('partially scrolling off screen', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final delegate = TestDelegate();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const double cacheExtent = 250;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            cacheExtent: cacheExtent,
+            slivers: <Widget>[
+              SliverPersistentHeader(key: key, delegate: delegate),
+              const BigSliver(height: 550.0),
+              const BigSliver(height: 550.0),
+            ],
+          ),
+        ),
+      );
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      position.animateTo(
+        delegate.maxExtent - 20.0,
+        curve: Curves.linear,
+        duration: const Duration(minutes: 1),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+      final RenderBox box = tester.renderObject<RenderBox>(find.text('Sliver Persistent Header'));
+      final rect = Rect.fromPoints(
+        box.localToGlobal(Offset.zero),
+        box.localToGlobal(box.size.bottomRight(Offset.zero)),
+      );
+      expect(rect, equals(const Rect.fromLTWH(0.0, -180.0, 800.0, 200.0)));
+
+      final SemanticsFinder sliver = find.semantics.byLabel('Sliver Persistent Header');
+
+      expect(sliver, findsOne);
+      expect(sliver, isSemantics(isHidden: false));
+      handle.dispose();
+    });
+
+    testWidgets('completely scrolling off screen but within cache extent', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key = GlobalKey();
+      final delegate = TestDelegate();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const double cacheExtent = 250;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            cacheExtent: cacheExtent,
+            slivers: <Widget>[
+              SliverPersistentHeader(key: key, delegate: delegate),
+              const BigSliver(height: 550.0),
+              const BigSliver(height: 550.0),
+            ],
+          ),
+        ),
+      );
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      position.animateTo(
+        delegate.maxExtent + 20.0,
+        curve: Curves.linear,
+        duration: const Duration(minutes: 1),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+
+      final SemanticsFinder sliver = find.semantics.byLabel('Sliver Persistent Header');
+
+      expect(sliver, findsOne);
+      expect(sliver, isSemantics(isHidden: true));
+      handle.dispose();
+    });
+
+    testWidgets('completely scrolling off screen and not within cache extent', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey key = GlobalKey();
+      final delegate = TestDelegate();
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const double cacheExtent = 250;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            cacheExtent: cacheExtent,
+            slivers: <Widget>[
+              SliverPersistentHeader(key: key, delegate: delegate),
+              const BigSliver(height: 550.0),
+              const BigSliver(height: 550.0),
+            ],
+          ),
+        ),
+      );
+      final ScrollPosition position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      position.animateTo(
+        delegate.maxExtent + 300.0,
+        curve: Curves.linear,
+        duration: const Duration(minutes: 1),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 1000));
+
+      expect(find.semantics.byLabel('Sliver Persistent Header'), findsNothing);
+      handle.dispose();
+    });
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
