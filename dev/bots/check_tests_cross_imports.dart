@@ -111,7 +111,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/text_test.dart',
     'packages/flutter/test/widgets/reorderable_list_test.dart',
     'packages/flutter/test/widgets/semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart',
-    'packages/flutter/test/widgets/slivers_appbar_floating_pinned_test.dart',
     'packages/flutter/test/widgets/scrollable_restoration_test.dart',
     'packages/flutter/test/widgets/text_golden_test.dart',
     'packages/flutter/test/widgets/two_dimensional_viewport_test.dart',
