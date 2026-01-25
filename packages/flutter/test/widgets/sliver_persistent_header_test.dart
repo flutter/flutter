@@ -413,14 +413,24 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
+    expect(
+      tester.getTopLeft(
+        find.ancestor(of: find.text('Sliver Persistent Header'), matching: find.byType(SizedBox)),
+      ),
+      Offset.zero,
+    );
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 200.0));
 
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(-50.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
+    expect(
+      tester.getTopLeft(
+        find.ancestor(of: find.text('Sliver Persistent Header'), matching: find.byType(SizedBox)),
+      ),
+      Offset.zero,
+    );
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
 
