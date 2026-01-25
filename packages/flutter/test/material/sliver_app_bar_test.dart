@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
+import '../widgets/sliver_test_utils.dart';
 
 void main() {
   testWidgets('SliverAppBar - floating and pinned - correct elevation', (
@@ -446,5 +449,138 @@ void main() {
     await tester.pump();
 
     expect(render.geometry!.paintOrigin, -scrollDistance);
+  });
+
+  testWidgets('Pointer scrolled floating and SliverAppBar', (WidgetTester tester) async {
+    final GlobalKey appBarKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(key: appBarKey, floating: true, title: const Text('Test Title')),
+            SliverFixedExtentList(
+              itemExtent: 50.0,
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => Text('Item $index'),
+                childCount: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, visible: true, paintExtent: 56.0);
+
+    // Pointer scroll the app bar away, we will scroll back less to validate the
+    // app bar floats back in.
+    final Offset point1 = tester.getCenter(find.text('Item 5'));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    testPointer.hover(point1);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    verifySliverGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+
+    // Scroll back to float in appbar
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -50.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, paintExtent: 50.0, visible: true);
+
+    // Float the rest of the way in.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -250.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+  });
+
+  testWidgets('Pointer scrolled floating and snapping SliverAppBar', (WidgetTester tester) async {
+    final GlobalKey appBarKey = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              key: appBarKey,
+              floating: true,
+              snap: true,
+              title: const Text('Test Title'),
+            ),
+            SliverFixedExtentList(
+              itemExtent: 50.0,
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => Text('Item $index'),
+                childCount: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, visible: true, paintExtent: 56.0);
+
+    // Pointer scroll the app bar away, we will scroll back less to validate the
+    // app bar floats back in and then snaps to full size.
+    final Offset point1 = tester.getCenter(find.text('Item 5'));
+    final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    testPointer.hover(point1);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 300.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    verifySliverGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
+
+    // Scroll back to float in appbar
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, paintExtent: 30.0, visible: true);
+    await tester.pumpAndSettle();
+    // The snap animation should have completed and the app bar should be
+    // fully expanded.
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
+
+    // Float back out a bit and trigger snap close animation.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 50.0)));
+    await tester.pump();
+    expect(find.text('Test Title'), findsOneWidget);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 56.0);
+    verifySliverGeometry(key: appBarKey, paintExtent: 6.0, visible: true);
+    await tester.pumpAndSettle();
+    // The snap animation should have completed and the app bar should no
+    // longer be visible.
+    expect(find.text('Test Title'), findsNothing);
+    expect(find.text('Item 1'), findsNothing);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(find.byType(AppBar), findsNothing);
+    verifySliverGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
   });
 }
