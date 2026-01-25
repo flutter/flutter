@@ -8,9 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({super.settings});
   @override
-  Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield OverlayEntry(builder: _build);
-  }
+  Iterable<OverlayEntry> createOverlayEntries() => [OverlayEntry(builder: _build)];
 
   Widget _build(BuildContext context) => const Text('Overlay');
 }
