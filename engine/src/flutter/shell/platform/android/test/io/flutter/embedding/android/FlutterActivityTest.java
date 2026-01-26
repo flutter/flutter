@@ -250,6 +250,7 @@ public class FlutterActivityTest {
     assertNull(flutterActivity.getDartEntrypointLibraryUri());
     assertNull(flutterActivity.getDartEntrypointArgs());
     assertEquals("/", flutterActivity.getInitialRoute());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -302,6 +303,7 @@ public class FlutterActivityTest {
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
     assertArrayEquals(
         new String[] {"foo", "bar"}, flutterActivity.getDartEntrypointArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -326,6 +328,7 @@ public class FlutterActivityTest {
     assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
     assertNull(flutterActivity.getCachedEngineId());
@@ -390,6 +393,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertFalse(flutterActivity.shouldDestroyEngineWithHost());
@@ -405,6 +409,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
