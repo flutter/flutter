@@ -14,7 +14,7 @@ import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
-import '../macos/swift_package_manager.dart';
+import '../macos/swift_packages.dart';
 import '../project.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
+import 'dart:io' as io show IOSink, ProcessSignal, SocketException, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -885,7 +886,7 @@ class FakeLogger implements Logger {
 class ClosedStdinController extends Fake implements StreamSink<List<int>> {
   @override
   Future<Object?> addStream(Stream<List<int>> stream) async =>
-      throw const SocketException('Bad pipe');
+      throw const io.SocketException('Bad pipe');
 
   @override
   Future<Object?> close() async {

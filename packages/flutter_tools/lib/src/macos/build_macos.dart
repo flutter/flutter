@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
 import '../ios/xcode_build_settings.dart';
@@ -24,6 +25,7 @@ import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
+import '../plugins.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'cocoapod_utils.dart';
@@ -154,20 +156,19 @@ Future<void> buildMacOS({
   );
 
   if (flutterProject.macos.usesSwiftPackageManager) {
-    SwiftPackageManager.updateFlutterFrameworkSymlink(
-      buildMode: buildInfo.mode,
+    final List<Plugin> plugins = await findPlugins(flutterProject);
+    final swiftPackageManager = SwiftPackageManager(
+      artifacts: globals.artifacts!,
       fileSystem: globals.fs,
-      platform: FlutterDarwinPlatform.macos,
-      project: flutterProject.macos,
+      templateRenderer: globals.templateRenderer,
     );
-    final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
-    if (macOSDeploymentTarget != null) {
-      SwiftPackageManager.updateMinimumDeployment(
-        platform: FlutterDarwinPlatform.macos,
-        project: flutterProject.macos,
-        deploymentTarget: macOSDeploymentTarget,
-      );
-    }
+    await swiftPackageManager.ensurePluginsAreGenerated(
+      project: flutterProject.macos,
+      platform: FlutterDarwinPlatform.macos,
+      buildInfo: buildInfo,
+      buildSettings: buildSettings,
+      plugins: plugins,
+    );
   }
 
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);

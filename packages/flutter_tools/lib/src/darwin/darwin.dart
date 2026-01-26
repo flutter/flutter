@@ -105,8 +105,19 @@ enum FlutterDarwinPlatform {
   /// e.g. (`Flutter.xcframework`, `FlutterMacOS.xcframework`).
   String get xcframeworkName => '$binaryName.xcframework';
 
+  /// The name of the project build setting for the minimum supported deployment target.
+  String get deploymentTargetBuildSetting {
+    switch (this) {
+      case FlutterDarwinPlatform.ios:
+        return 'IPHONEOS_DEPLOYMENT_TARGET';
+      case FlutterDarwinPlatform.macos:
+        return 'MACOSX_DEPLOYMENT_TARGET';
+    }
+  }
+
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
+
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
       if (targetPlatform == darwinPlatform.targetPlatform) {
         return darwinPlatform;

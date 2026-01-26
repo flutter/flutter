@@ -337,22 +337,22 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  if (app.project.usesSwiftPackageManager) {
-    SwiftPackageManager.updateFlutterFrameworkSymlink(
-      buildMode: buildInfo.mode,
-      fileSystem: globals.fs,
-      platform: FlutterDarwinPlatform.ios,
-      project: app.project,
-    );
-    final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
-    if (iosDeploymentTarget != null) {
-      SwiftPackageManager.updateMinimumDeployment(
+    if (app.project.usesSwiftPackageManager) {
+      final swiftPackageManager = SwiftPackageManager(
+        artifacts: globals.artifacts!,
+        fileSystem: globals.fs,
+        templateRenderer: globals.templateRenderer,
+      );
+      final List<Plugin> plugins = await findPlugins(project);
+      await swiftPackageManager.ensurePluginsAreGenerated(
+        project: app.project,
         platform: FlutterDarwinPlatform.ios,
-        project: project.ios,
-        deploymentTarget: iosDeploymentTarget,
+        buildInfo: buildInfo,
+        buildSettings: buildSettings,
+        plugins: plugins,
       );
     }
-  }
+
   await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
   if (configOnly) {
     return XcodeBuildResult(success: true);
@@ -1000,6 +1000,24 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
         missingModule: missingModule,
       );
     }
+  } else if (message.contains('requires minimum platform version')) {
+    final String? missingPlatform = _parseMissingPlatform(message);
+    if (missingPlatform != null) {
+      return _XCResultIssueHandlingResult(
+        requiresProvisioningProfile: false,
+        hasProvisioningProfileIssue: false,
+        missingPlatform: missingPlatform,
+      );
+    }
+    // Fallback if parsing fails, but generally we want to detect the version mismatch.
+    // The message format is: "The package product 'Foo' requires minimum platform version 15.0 for the iOS platform, but this target supports 12.0"
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      minimumPlatformVersionMismatch: true,
+      errorMessage: message,
+      minimumPlatformVersion: _parseMinimumPlatformVersion(message),
+    );
   } else if (message.toLowerCase().contains('has been modified since')) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
@@ -1050,6 +1068,17 @@ Future<bool> _handleIssues(
       }
       if (handlingResult.missingModule != null) {
         missingModules.add(handlingResult.missingModule!);
+      }
+
+      if (handlingResult.minimumPlatformVersionMismatch) {
+        if (handlingResult.errorMessage != null) {
+           logger.printError(handlingResult.errorMessage!);
+        }
+        final String minimumVersion = handlingResult.minimumPlatformVersion ?? '15.0';
+        logger.printError(
+          'To fix this, update the "Minimum Deployments" in your Xcode project to at least $minimumVersion.',
+          emphasis: true,
+        );
       }
       modifiedPrecompiledSource = handlingResult.modifiedPrecompiledSource;
       issueDetected = true;
@@ -1258,6 +1287,16 @@ String? _parseMissingModule(String message) {
   return null;
 }
 
+String? _parseMinimumPlatformVersion(String message) {
+  // Example: "The package product 'Foo' requires minimum platform version 16.0 for the iOS platform, but this target supports 12.0"
+  final pattern = RegExp(r'requires minimum platform version (.*?) for the iOS platform');
+  final RegExpMatch? match = pattern.firstMatch(message);
+  if (match != null && match.groupCount > 0) {
+    return match.group(1);
+  }
+  return null;
+}
+
 // The result of [_handleXCResultIssue].
 class _XCResultIssueHandlingResult {
   _XCResultIssueHandlingResult({
@@ -1267,6 +1306,9 @@ class _XCResultIssueHandlingResult {
     this.duplicateModule,
     this.missingModule,
     this.modifiedPrecompiledSource = false,
+    this.minimumPlatformVersionMismatch = false,
+    this.errorMessage,
+    this.minimumPlatformVersion,
   });
 
   /// An issue indicates that user didn't provide the provisioning profile.
@@ -1288,6 +1330,10 @@ class _XCResultIssueHandlingResult {
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
   /// changed since last built. This requires "flutter clean" to resolve.
   final bool modifiedPrecompiledSource;
+
+  final bool minimumPlatformVersionMismatch;
+  final String? errorMessage;
+  final String? minimumPlatformVersion;
 }
 
 const _kResultBundlePath = 'temporary_xcresult_bundle';
