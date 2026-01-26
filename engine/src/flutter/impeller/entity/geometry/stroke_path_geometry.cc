@@ -220,8 +220,19 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
       // curve as well.
       HandlePreviousJoin(start_perpendicular);
 
-      Scalar count =
-          std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
+      // The scale used for SubdivisionCount is the device scale of the
+      // transform. In this case we are also stroking on top of the
+      // transform scale which means that the outer edge of a stroked
+      // curve will be tracing an arc larger than the scale would suggest.
+      // So we need stroke_scale to be at least scale_, and we don't
+      // simply want to scale our half_stroke_width by that value because
+      // at large scales half_stroke_width_ might be very tiny to compensate.
+      // Using (1 + half_stroke_width_) chooses a device scale that is
+      // at least scale_, but larger than that by the scaled half stroke
+      // width (half_stroke_width_ is in path space, so we need to scale
+      // it by scale_ as well).
+      Scalar stroke_scale = scale_ * (1 + half_stroke_width_);
+      Scalar count = std::ceilf(curve.SubdivisionCount(stroke_scale));
 
       Point prev = curve.p1;
       SeparatedVector2 prev_perpendicular = start_perpendicular;

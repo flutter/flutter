@@ -752,6 +752,68 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, ZoomedStrokedPathRendersCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint fill_paint;
+  fill_paint.setColor(DlColor::kBlue());
+
+  DlPaint stroke_paint;
+  stroke_paint.setColor(DlColor::kGreen());
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  stroke_paint.setStrokeWidth(0.05f);
+
+  DlPathBuilder path_builder;
+  const Scalar radius = 2.0f;
+  // Circle as 4 cubic bezier segments (standard circle approximation)
+  // Using kappa = 0.5522847498 for circular arc approximation
+  const Scalar k = 0.5522847498f;
+  const Scalar scale = 80.0f;
+
+  path_builder.MoveTo(DlPoint(0.0f, -radius));  // Top
+  // Top to Right
+  path_builder.CubicCurveTo(DlPoint(radius * k, -radius),  //
+                            DlPoint(radius, -radius * k),  //
+                            DlPoint(radius, 0.0f));
+  // Right to Bottom
+  path_builder.CubicCurveTo(DlPoint(radius, radius * k),  //
+                            DlPoint(radius * k, radius),  //
+                            DlPoint(0.0f, radius));
+  // Bottom to Left
+  path_builder.CubicCurveTo(DlPoint(-radius * k, radius),  //
+                            DlPoint(-radius, radius * k),  //
+                            DlPoint(-radius, 0.0f));
+  // Left to Top
+  path_builder.CubicCurveTo(DlPoint(-radius, -radius * k),  //
+                            DlPoint(-radius * k, -radius),  //
+                            DlPoint(0.0f, -radius));
+  path_builder.Close();
+  DlPath path = path_builder.TakePath();
+
+  builder.Save();
+  builder.Translate(300.0f, 200.0f);
+  builder.Scale(scale, scale);
+  builder.DrawPath(path, fill_paint);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(680.0f, 200.0f);
+  builder.Scale(scale, scale);
+  builder.DrawPath(path, fill_paint);
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(300.0f, 580.0f);
+  builder.Scale(scale, scale);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
