@@ -12,7 +12,7 @@
   "shareButtonLabel": "Бөлісу",
   "pasteButtonLabel": "Қою",
   "selectAllButtonLabel": "Барлығын таңдау",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Табылған нәтижелер",
+  "noResultsFound": "Ешбір нәтиже табылмады",
+  "radioButtonUnselectedLabel": "Таңдалмады"
 }
