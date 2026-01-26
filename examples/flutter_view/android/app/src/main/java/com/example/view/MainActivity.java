@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     // will be ignored and point to alternative methods for setting engine flags.
     private void warnIfEngineFlagsSetViaIntent(Intent intent) {
         List<String> previouslySupportedFlagsViaIntent = Arrays.asList(
-            "trace-startup", "start-paused", "enable-dart-profiling");
+            "--trace-startup", "--start-paused", "--enable-dart-profiling");
         for (String flag : previouslySupportedFlagsViaIntent) {
             if (intent.hasExtra(flag)) {
                 Log.w("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");

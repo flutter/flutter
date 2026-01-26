@@ -348,9 +348,10 @@ import java.util.Set;
     isFlutterEngineFromHost = false;
   }
 
-  // Soon, engine flags will no longer be settable via Intent extras, so warn
+  // As part of https://github.com/flutter/flutter/issues/180686, the ability
+  // to set engine flags via Intent extras is planned to be removed, so warn
   // developers that engine shell arguments set that way will be ignored.
-  private void warnIfEngineFlagsSetViaIntent(Intent intent) {
+  private void warnIfEngineFlagsSetViaIntent(@NonNull Intent intent) {
     if (intent.getExtras() == null) {
       return;
     }
