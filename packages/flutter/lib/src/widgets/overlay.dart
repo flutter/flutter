@@ -1337,7 +1337,8 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size = constraints.isTight
+    final Size size =
+        (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite))
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
@@ -1362,7 +1363,7 @@ class _RenderTheater extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (constraints.isTight) {
+    if (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite)) {
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1412,7 +1413,7 @@ class _RenderTheater extends RenderBox
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
-    if (constraints.isTight) {
+    if (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite)) {
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
@@ -1429,6 +1430,19 @@ class _RenderTheater extends RenderBox
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
+  }
+
+  bool _hasSizeDeterminingChild() {
+    RenderBox? child = _lastOnstageChild;
+    while (child != null) {
+      final childParentData = child.parentData! as _TheaterParentData;
+      if ((childParentData.overlayEntry?.canSizeOverlay ?? false) &&
+          !childParentData.isPositioned) {
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 
   RenderBox _findSizeDeterminingChild() {
@@ -2668,7 +2682,9 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
       final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.isTight ? theaterConstraints.biggest : theater.size;
+      final Size boxSize = theaterConstraints.biggest.isFinite
+          ? theaterConstraints.biggest
+          : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
     }
   }
