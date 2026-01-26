@@ -27,10 +27,10 @@ class SummaryReporter {
   final Stdout stdout;
   final Logger _logger;
 
-  final Map<int, _TestInfo> _tests = <int, _TestInfo>{};
-  final Map<int, String> _suites = <int, String>{};
-  final List<_FailedTest> _failedTests = <_FailedTest>[];
-  final Stopwatch _stopwatch = Stopwatch();
+  final _tests = <int, _TestInfo>{};
+  final _suites = <int, String>{};
+  final _failedTests = <_FailedTest>[];
+  final _stopwatch = Stopwatch();
 
   int _passed = 0;
   int _skipped = 0;
