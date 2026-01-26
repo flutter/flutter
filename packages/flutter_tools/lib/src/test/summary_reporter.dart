@@ -45,8 +45,8 @@ class SummaryReporter {
     }
 
     try {
-      final dynamic event = json.decode(line);
-      if (event is! Map<String, dynamic>) {
+      final Object? event = json.decode(line);
+      if (event is! Map<String, Object?>) {
         _printLine(line);
         return;
       }
@@ -56,7 +56,7 @@ class SummaryReporter {
     }
   }
 
-  void _handleEvent(Map<String, dynamic> event) {
+  void _handleEvent(Map<String, Object?> event) {
     final type = event['type'] as String?;
 
     switch (type) {
@@ -77,9 +77,9 @@ class SummaryReporter {
     }
   }
 
-  void _handleSuite(Map<String, dynamic> event) {
-    final dynamic suite = event['suite'];
-    if (suite is! Map<String, dynamic>) {
+  void _handleSuite(Map<String, Object?> event) {
+    final Object? suite = event['suite'];
+    if (suite is! Map<String, Object?>) {
       return;
     }
 
@@ -91,9 +91,9 @@ class SummaryReporter {
     }
   }
 
-  void _handleTestStart(Map<String, dynamic> event) {
-    final dynamic test = event['test'];
-    if (test is! Map<String, dynamic>) {
+  void _handleTestStart(Map<String, Object?> event) {
+    final Object? test = event['test'];
+    if (test is! Map<String, Object?>) {
       return;
     }
 
@@ -108,7 +108,7 @@ class SummaryReporter {
     }
   }
 
-  void _handleTestDone(Map<String, dynamic> event) {
+  void _handleTestDone(Map<String, Object?> event) {
     final testId = event['testID'] as int?;
     final result = event['result'] as String?;
     final bool skipped = event['skipped'] as bool? ?? false;
@@ -141,7 +141,7 @@ class SummaryReporter {
     _printProgress();
   }
 
-  void _handleError(Map<String, dynamic> event) {
+  void _handleError(Map<String, Object?> event) {
     final error = event['error'] as String?;
     final stackTrace = event['stackTrace'] as String?;
 
@@ -158,7 +158,7 @@ class SummaryReporter {
     }
   }
 
-  void _handlePrint(Map<String, dynamic> event) {
+  void _handlePrint(Map<String, Object?> event) {
     final message = event['message'] as String?;
     if (message != null) {
       if (_lastLineWasProgress) {
@@ -169,7 +169,7 @@ class SummaryReporter {
     }
   }
 
-  void _handleDone(Map<String, dynamic> event) {
+  void _handleDone(Map<String, Object?> event) {
     _stopwatch.stop();
 
     final bool success = event['success'] as bool? ?? false;
