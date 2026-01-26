@@ -1337,7 +1337,7 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size = constraints.biggest.isFinite
+    final Size size = constraints.isTight
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
@@ -1362,7 +1362,7 @@ class _RenderTheater extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (constraints.biggest.isFinite) {
+    if (constraints.isTight) {
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1412,7 +1412,7 @@ class _RenderTheater extends RenderBox
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
-    if (constraints.biggest.isFinite) {
+    if (constraints.isTight) {
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
@@ -2668,7 +2668,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
       final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.biggest.isFinite
+      final Size boxSize = theaterConstraints.isTight
           ? theaterConstraints.biggest
           : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
