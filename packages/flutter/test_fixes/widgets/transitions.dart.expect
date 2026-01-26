@@ -1,0 +1,12 @@
+import 'package:flutter/widgets.dart';
+
+void main() {
+  // Change made in https://github.com/flutter/flutter/pull/177895
+  SizeTransition();
+  SizeTransition(alignment: AlignmentDirectional(-1.0, 1.0));
+  SizeTransition(axis: Axis.vertical, alignment: AlignmentDirectional(-1.0, 1.0));
+  SizeTransition(
+    axis: Axis.vertical, alignment: AlignmentDirectional(-1.0, position.dx < 0 ? 1.0 : -1.0),
+  );
+  SizeTransition(axis: Axis.horizontal, alignment: AlignmentDirectional(1.0, -1.0));
+}

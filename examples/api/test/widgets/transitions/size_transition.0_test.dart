@@ -30,9 +30,9 @@ void main() {
             Axis.horizontal,
           )
           .having(
-            (SizeTransition transition) => transition.axisAlignment,
-            'axis alignment',
-            -1,
+            (SizeTransition transition) => transition.alignment,
+            'alignment',
+            Alignment.topLeft,
           )
           .having(
             (SizeTransition transition) => transition.sizeFactor,

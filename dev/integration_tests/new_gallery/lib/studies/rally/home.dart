@@ -297,7 +297,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
           FadeTransition(
             opacity: _titleFadeAnimation,
             child: SizeTransition(
-              axisAlignment: -1,
+              alignment: Alignment.topLeft,
               sizeFactor: _titleSizeAnimation,
               child: Center(child: ExcludeSemantics(child: widget.titleText)),
             ),
@@ -327,7 +327,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
             opacity: _titleFadeAnimation,
             child: SizeTransition(
               axis: Axis.horizontal,
-              axisAlignment: -1,
+              alignment: Alignment.topLeft,
               sizeFactor: _titleSizeAnimation,
               child: SizedBox(
                 width: unitWidth * expandedTitleWidthMultiplier,
