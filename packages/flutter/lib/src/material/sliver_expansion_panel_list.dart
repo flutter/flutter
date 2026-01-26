@@ -164,7 +164,7 @@ typedef RemovedItemBuilder<E> =
 /// This is a critical utility for [SliverExpansionPanelList] because it manages
 /// the complex transition between "flattened" indices while keeping the
 /// [SliverAnimatedList] in sync with the current UI state.
-class _ListModel<T> {
+class _ListModel {
   /// Creates a [_ListModel] that manages animations via the provided [listKey].
   ///
   /// The [removedItemBuilder] is used to generate the "ghost" widget that
@@ -172,24 +172,24 @@ class _ListModel<T> {
   _ListModel({
     required this.listKey,
     required this.removedItemBuilder,
-    required Iterable<T>? initialItems,
-  }) : _items = List<T>.from(initialItems ?? <T>[]);
+    required Iterable<_SliverExpansionPanelItem>? initialItems,
+  }) : _items = List<_SliverExpansionPanelItem>.from(initialItems ?? <_SliverExpansionPanelItem>[]);
 
   /// The [GlobalKey] used to access the [SliverAnimatedListState].
   final GlobalKey<SliverAnimatedListState> listKey;
 
   /// The builder used to provide a widget for items that are being removed.
-  final RemovedItemBuilder<T> removedItemBuilder;
+  final RemovedItemBuilder<_SliverExpansionPanelItem> removedItemBuilder;
 
   /// The internal data source.
-  final List<T> _items;
+  final List<_SliverExpansionPanelItem> _items;
 
   /// Helper to access the [SliverAnimatedListState] from the [listKey].
   SliverAnimatedListState get _animatedList => listKey.currentState!;
 
   /// Inserts an item into the list at the specified [index] and triggers
   /// the entrance animation in the [SliverAnimatedList].
-  void insert(int index, T item) {
+  void insert(int index, _SliverExpansionPanelItem item) {
     _items.insert(index, item);
     _animatedList.insertItem(index);
   }
@@ -199,26 +199,37 @@ class _ListModel<T> {
   ///
   /// Returns the removed item. The [removedItemBuilder] is used internally
   /// to build the widget that animates out.
-  T removeAt(int index) {
-    final T removedItem = _items.removeAt(index);
-    if (removedItem != null) {
-      _animatedList.removeItem(
-        index,
-        (BuildContext context, Animation<double> animation) =>
-            removedItemBuilder(removedItem, context, animation),
-      );
-    }
+  _SliverExpansionPanelItem removeAt(int index, {bool playAnimation = true}) {
+    final _SliverExpansionPanelItem removedItem = _items.removeAt(index);
+
+    _animatedList.removeItem(
+      index,
+      (BuildContext context, Animation<double> animation) => playAnimation
+          ? removedItemBuilder(removedItem, context, animation)
+          : const SizedBox.shrink(),
+    );
+
     return removedItem;
+  }
+
+  /// Helper to find the index of an item by Key, starting search from [start].
+  int indexOfKey(Key key, {int start = 0}) {
+    for (var i = start; i < _items.length; i++) {
+      if (_items[i].key == key) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   /// The number of items currently in the model.
   int get length => _items.length;
 
   /// Returns the item at the given [index].
-  T operator [](int index) => _items[index];
+  _SliverExpansionPanelItem operator [](int index) => _items[index];
 
   /// Returns the first index of [item] in the list.
-  int indexOf(T item) => _items.indexOf(item);
+  int indexOf(_SliverExpansionPanelItem item) => _items.indexOf(item);
 }
 
 /// A clipper used to prevent shadow bleeding at the top of a body.
@@ -259,7 +270,7 @@ class _TopClosedClipper extends CustomClipper<Rect> {
 /// of the page.
 ///
 /// {@tool dartpad}
-///  Here is a simple example of how to use [ExpansionPanelList].
+///  Here is a simple example of how to use [SliverExpansionPanelList].
 ///
 /// ** See code in examples/api/lib/material/sliver_expansion_panel_list/sliver_expansion_panel_list.0.dart **
 /// {@end-tool}
@@ -267,7 +278,6 @@ class _TopClosedClipper extends CustomClipper<Rect> {
 /// See also:
 ///
 ///  * [ExpansionPanelList], the non-sliver version of this widget.
-///  * [SliverExpansionPanel], the data model used for children of this list.
 ///  * <https://material.io/archive/guidelines/components/expansion-panels.html>
 class SliverExpansionPanelList extends StatefulWidget {
   /// Creates a [SliverExpansionPanelList].
@@ -327,7 +337,7 @@ class SliverExpansionPanelList extends StatefulWidget {
 class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
 
-  late _ListModel<_SliverExpansionPanelItem> _list;
+  late _ListModel _list;
 
   @override
   void initState() {
@@ -345,30 +355,82 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
   void didUpdateWidget(covariant SliverExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // This block is only triggered when a [SliverExpansionPanel] is added to or
-    // removed from the [expansionPanels] list.
-    //
-    // Expanding or collapsing an existing panel does not change the number of
-    // [SliverExpansionPanel] objects in the list, so it will not trigger this logic.
-    if (oldWidget.expansionPanels.length != widget.expansionPanels.length) {
-      final List<_SliverExpansionPanelItem> newItems = _flattenExpansionPanels();
-      final List<_SliverExpansionPanelItem> oldItems = _list._items;
+    final List<_SliverExpansionPanelItem> newFlattenedItems = _flattenExpansionPanels();
 
-      // Compare the length of items and decide whether an item has been added or removed
-      final bool isItemRemoved = newItems.length < oldItems.length;
-
-      if (isItemRemoved) {
-        _removeItem(oldItems, newItems);
-      } else {
-        _addItem(newItems, oldItems);
-      }
-      // Sync data
-      _list = _ListModel(
-        listKey: _listKey,
-        removedItemBuilder: _buildRemovedItem,
-        initialItems: newItems,
-      );
+    // If lists are identical do nothing.
+    if (_itemsAreIdentical(_list._items, newFlattenedItems)) {
+      return;
     }
+
+    // Identify and remove items that are no longer in the new list.
+    // This also includes collapsing items programmatically.
+    for (int i = _list.length - 1; i >= 0; i--) {
+      final _SliverExpansionPanelItem currentItem = _list[i];
+
+      final bool existsInNew = newFlattenedItems.any(
+        (item) => item.key == currentItem.key && item.isHeader == currentItem.isHeader,
+      );
+      if (!existsInNew) {
+        _list.removeAt(i, playAnimation: false);
+      }
+    }
+
+    // Insert new items or re-order items.
+    for (var i = 0; i < newFlattenedItems.length; i++) {
+      final _SliverExpansionPanelItem expectedItem = newFlattenedItems[i];
+
+      // Reached the end of the old list but there are still items to add.
+      // Add the new item.
+      if (i >= _list.length) {
+        _list.insert(i, expectedItem);
+        continue;
+      }
+
+      final _SliverExpansionPanelItem actualItem = _list[i];
+
+      // Items match. Continue to next iteration.
+      if (expectedItem.key == actualItem.key) {
+        continue;
+      }
+
+      // Items don't match. Need to check if a new item is added or items are reordered.
+      final int existingIndex = _list.indexOfKey(expectedItem.key, start: i + 1);
+
+      if (existingIndex != -1) {
+        // Items are reordered. Remove at existing index and insert at the new index.
+        final _SliverExpansionPanelItem movedItem = _list.removeAt(
+          existingIndex,
+          playAnimation: false,
+        );
+        _list.insert(i, movedItem);
+      } else {
+        // New item. Add the new item at the index.
+        // This includes expanding items programmatically.
+        _list.insert(i, expectedItem);
+      }
+    }
+
+    // Sync the items.
+    _list = _ListModel(
+      listKey: _listKey,
+      removedItemBuilder: _buildRemovedItem,
+      initialItems: newFlattenedItems,
+    );
+  }
+
+  bool _itemsAreIdentical(
+    List<_SliverExpansionPanelItem> oldList,
+    List<_SliverExpansionPanelItem> newList,
+  ) {
+    if (oldList.length != newList.length) {
+      return false;
+    }
+    for (var i = 0; i < oldList.length; i++) {
+      if (oldList[i].key != newList[i].key) {
+        return false;
+      }
+    }
+    return true;
   }
 
   bool _allKeysUnique() {
@@ -377,56 +439,6 @@ class _SliverExpansionPanelListState extends State<SliverExpansionPanelList> {
       identifierMap[child.key] = true;
     }
     return identifierMap.length == widget.expansionPanels.length;
-  }
-
-  void _addItem(List<_SliverExpansionPanelItem> newItems, List<_SliverExpansionPanelItem> oldItems) {
-    for (var i = 0; i < newItems.length; i++) {
-      final Key currentKey = newItems[i].key;
-      final Key? oldKey = oldItems.elementAtOrNull(i)?.key;
-
-      if (oldKey == null || currentKey != oldKey) {
-        final _SliverExpansionPanelItem headerToAdd = newItems[i];
-        final _SliverExpansionPanelItem? bodyToAdd = newItems.elementAtOrNull(i + 1);
-        // Add Header
-        _listKey.currentState?.insertItem(i);
-        if (bodyToAdd != null && (headerToAdd.panelIndex == bodyToAdd.panelIndex)) {
-          // If the next panel has the same panel index, the panel is expanded.
-          // Add the body as well.
-          _listKey.currentState?.insertItem(i + 1);
-        }
-        break;
-      }
-    }
-  }
-
-  void _removeItem(
-    List<_SliverExpansionPanelItem> oldItems,
-    List<_SliverExpansionPanelItem> newItems,
-  ) {
-    for (var i = 0; i < oldItems.length; i++) {
-      final Key? currentKey = newItems.elementAtOrNull(i)?.key;
-      final Key oldKey = oldItems[i].key;
-
-      if (currentKey == null || currentKey != oldKey) {
-        final _SliverExpansionPanelItem headerToRemove = _list._items[i];
-        final _SliverExpansionPanelItem? bodyToRemove = _list._items.elementAtOrNull(i + 1);
-
-        // Remove the header
-        _listKey.currentState?.removeItem(
-          i,
-          (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
-        );
-        if ((bodyToRemove != null) && (headerToRemove.panelIndex == bodyToRemove.panelIndex)) {
-          // If the next panel has the same panel index, the panel is expanded.
-          // Remove the body as well.
-          _listKey.currentState?.removeItem(
-            i,
-            (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
-          );
-        }
-        break;
-      }
-    }
   }
 
   @override

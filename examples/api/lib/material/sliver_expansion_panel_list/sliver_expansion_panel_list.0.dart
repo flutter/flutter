@@ -82,7 +82,7 @@ class _SliverExpansionPanelListExampleState
             SliverExpansionPanelList(
               expansionPanels: items.map<SliverExpansionPanel>((Item item) {
                 return SliverExpansionPanel(
-                  key: ValueKey("${item.headerValue} - ${item.expandedValue}"),
+                  key: ValueKey("${item.hashCode}"),
                   headerBuilder: (BuildContext context, bool isExpanded) {
                     return ListTile(title: Text(item.headerValue));
                   },
