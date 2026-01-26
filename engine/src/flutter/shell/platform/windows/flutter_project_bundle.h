@@ -110,7 +110,7 @@ class FlutterProjectBundle {
   // Thread policy for running the UI isolate.
   FlutterUIThreadPolicy ui_thread_policy_;
 
-  // Whether IAccessibleEx support is enabled.
+  // The current accessibility mode.
   FlutterAccessibilityMode accessibility_mode_;
 };
 
