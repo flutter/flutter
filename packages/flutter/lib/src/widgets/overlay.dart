@@ -2668,9 +2668,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
       final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.isTight
-          ? theaterConstraints.biggest
-          : theater.size;
+      final Size boxSize = theaterConstraints.isTight ? theaterConstraints.biggest : theater.size;
       deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
     }
   }
