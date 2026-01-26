@@ -250,8 +250,8 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       // introduced.
       // This means 36 * 4 = 144 bytes total.
 
-      EXPECT_EQ(uni->GetDartSize(), 144u);
-      std::vector<RuntimePaddingType> layout(uni->GetDartSize() / sizeof(float),
+      EXPECT_EQ(uni->GetGPUSize(), 144u);
+      std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
                                              RuntimePaddingType::kFloat);
       layout[5] = RuntimePaddingType::kPadding;
       layout[6] = RuntimePaddingType::kPadding;
