@@ -25,31 +25,18 @@ void main() {
       final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       // Simulate JSON reporter output
-      reporter.handleLine(
+      final jsonLines = <String>[
         '{"protocolVersion":"0.1.1","runnerVersion":"1.24.9","type":"start","time":0}',
-      );
-      reporter.handleLine(
         '{"suite":{"id":0,"path":"test/example_test.dart"},"type":"suite","time":5}',
-      );
-      reporter.handleLine(
         '{"test":{"id":1,"name":"passing test","suiteID":0,"groupIDs":[]},"type":"testStart","time":10}',
-      );
-      reporter.handleLine(
         '{"testID":1,"result":"success","hidden":false,"skipped":false,"type":"testDone","time":20}',
-      );
-      reporter.handleLine(
         '{"test":{"id":2,"name":"failing test A","suiteID":0,"groupIDs":[]},"type":"testStart","time":30}',
-      );
-      reporter.handleLine(
         '{"testID":2,"result":"failure","hidden":false,"skipped":false,"type":"testDone","time":40}',
-      );
-      reporter.handleLine(
         '{"test":{"id":3,"name":"failing test B","suiteID":0,"groupIDs":[]},"type":"testStart","time":50}',
-      );
-      reporter.handleLine(
         '{"testID":3,"result":"error","hidden":false,"skipped":false,"type":"testDone","time":60}',
-      );
-      reporter.handleLine('{"success":false,"type":"done","time":70}');
+        '{"success":false,"type":"done","time":70}',
+      ];
+      jsonLines.forEach(reporter.handleLine);
 
       expect(logger.statusText, contains('Failing tests:'));
       expect(logger.statusText, contains('failing test A'));
