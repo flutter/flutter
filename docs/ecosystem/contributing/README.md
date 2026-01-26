@@ -8,7 +8,7 @@ In most cases, the easiest way to create them is to use [the `update-release-inf
 
 ### Version
 
-Any change that needs to be published in order to take effect must update the version in `pubspec.yaml`. There are very few exceptions:
+Any change that needs to be published in order to take effect must update the version in `pubspec.yaml` or through files in `unreleased` folder in batch release strategy. There are very few exceptions:
 - PRs that only affect tests.
 - PRs that only affect unpublished parts of example apps.
 - PRs that only affect local development of the package (e.g., changes to ignored lints).
@@ -18,8 +18,6 @@ Any change that needs to be published in order to take effect must update the ve
     - Updating the minimum OS version of plugins to match changes to [Flutter support](https://docs.flutter.dev/reference/supported-platforms) (on `stable`).
 
   (Unless you are a member of the Flutter team, you are likely not making changes that fall under this exemption.)
-
-This is because the packages in flutter/packages use a continuous release model rather than a set release cadence. This model gets improvements to the community faster, makes regressions easier to pinpoint, and simplifies the release process.
 
 (The `override: no versioning needed` label can be added to skip this check if it fails, but only if the criteria above are met, or team members agree there is a compelling reason for a new exemption. Team members: please leave a comment when adding the `override` label explaining the reason for the override.)
 
@@ -33,6 +31,18 @@ All version changes must have an accompanying CHANGELOG update. Even version-exe
 
 ## 1.0.2
 ...
+```
+
+or a new file in `unreleased/` folder for package that use batch release strategy:
+```
+unreleased/
+  my_change.yaml
+```
+with content:
+```
+veriosn: <one of major/minor/patch/skip>
+changelog:
+  - Description of the change.
 ```
 
 This policy exists because some changes (e.g., certain updates to examples) that do not need to be published may still be of interest to clients of a package.
