@@ -16,11 +16,13 @@ const List<Widget> fooBarTexts = <Text>[
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(_boilerplate(Image(image: FileImage(File('test')))));
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
       await tester.pumpWidget(
         _boilerplate(ElevatedButton(onPressed: null, child: Image(image: FileImage(File('test'))))),
       );
@@ -166,13 +168,11 @@ void main() {
     });
 
     testWidgets('finds EditableText widgets', (WidgetTester tester) async {
+      final controller = TextEditingController()..text = 'this is test';
+      addTearDown(controller.dispose);
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: _boilerplate(
-              TextField(controller: TextEditingController()..text = 'this is test'),
-            ),
-          ),
+          home: Scaffold(body: _boilerplate(TextField(controller: controller))),
         ),
       );
 
@@ -359,6 +359,92 @@ void main() {
       expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
       semanticsHandle.dispose();
     });
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier string in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier('custom-identifier'), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier named "custom-identifier"',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier RegExp in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier matching the pattern "^item-"',
+          ),
+        );
+      },
+    );
+
+    testWidgets('bySemanticsLabel contains given label string in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel('label'), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label named "label"',
+        ),
+      );
+    });
+
+    testWidgets('bySemanticsLabel contains given label RegExp in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel(RegExp(r'^item-')), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label matching the pattern "^item-"',
+        ),
+      );
+    });
   });
 
   group('byTooltip', () {
@@ -369,9 +455,38 @@ void main() {
       expect(find.byTooltip('Tooltip Message'), findsOneWidget);
     });
 
+    testWidgets('finds widgets by tooltip - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
+      );
+      expect(find.byTooltip('Tooltip Message'), findsOneWidget);
+    });
+
     testWidgets('finds widgets with tooltip by RegExp', (WidgetTester tester) async {
       await tester.pumpWidget(
         _boilerplate(const Tooltip(message: 'Tooltip Message', child: Text('+'))),
+      );
+      expect(find.byTooltip('Tooltip'), findsNothing);
+      expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
+    });
+
+    testWidgets('finds widgets with tooltip by RegExp - RawTooltip', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(
+          RawTooltip(
+            semanticsTooltip: 'Tooltip Message',
+            tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Tooltip Message'),
+            child: const Text('+'),
+          ),
+        ),
       );
       expect(find.byTooltip('Tooltip'), findsNothing);
       expect(find.byTooltip(RegExp(r'^Tooltip')), findsOneWidget);
@@ -665,11 +780,16 @@ void main() {
     });
 
     testWidgets('finds only static text for now', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final controller = TextEditingController(text: 'text');
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _boilerplate(
           EditableText(
-            controller: TextEditingController(text: 'text'),
-            focusNode: FocusNode(),
+            controller: controller,
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: const Color(0x00000000),
             backgroundCursorColor: const Color(0x00000000),
@@ -711,6 +831,7 @@ void main() {
   });
 
   testWidgets('finds multiple subtypes', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     await tester.pumpWidget(
       _boilerplate(
         Row(
@@ -1383,6 +1504,7 @@ void main() {
     group('scrollable', () {
       testWidgets('can find node that can scroll up', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1394,12 +1516,13 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
+          isSemantics(hasScrollUpAction: true, hasScrollDownAction: false),
         );
       });
 
       testWidgets('can find node that can scroll down', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 400);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1411,12 +1534,13 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
+          isSemantics(hasScrollUpAction: false, hasScrollDownAction: true),
         );
       });
 
       testWidgets('can find node that can scroll left', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1429,12 +1553,13 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
+          isSemantics(hasScrollLeftAction: true, hasScrollRightAction: false),
         );
       });
 
       testWidgets('can find node that can scroll right', (WidgetTester tester) async {
         final controller = ScrollController(initialScrollOffset: 200);
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: SingleChildScrollView(
@@ -1447,7 +1572,7 @@ void main() {
 
         expect(
           find.semantics.scrollable(),
-          containsSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
+          isSemantics(hasScrollLeftAction: false, hasScrollRightAction: true),
         );
       });
 

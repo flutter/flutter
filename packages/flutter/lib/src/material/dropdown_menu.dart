@@ -173,7 +173,7 @@ enum DropdownMenuCloseBehavior {
 ///   The [DropdownMenu] uses a [TextField] as the "anchor".
 /// * [TextField], which is a text input widget that uses an [InputDecoration].
 /// * [DropdownMenuEntry], which is used to build the [MenuItemButton] in the [DropdownMenu] list.
-class DropdownMenu<T extends Object> extends StatefulWidget {
+class DropdownMenu<T> extends StatefulWidget {
   /// Creates a const [DropdownMenu].
   ///
   /// The leading and trailing icons in the text field can be customized by using
@@ -690,7 +690,7 @@ class DropdownMenu<T extends Object> extends StatefulWidget {
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
 
-class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
+class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   static const Map<ShortcutActivator, Intent> _editableShortcuts = <ShortcutActivator, Intent>{
     SingleActivator(LogicalKeyboardKey.arrowLeft): ExtendSelectionByCharacterIntent(
       forward: false,
@@ -726,7 +726,8 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   TextEditingController? _localTextEditingController;
   TextEditingController get _effectiveTextEditingController =>
       widget.controller ?? (_localTextEditingController ??= TextEditingController());
-  final FocusNode _internalFocudeNode = FocusNode();
+  final FocusNode _internalFocusNode = FocusNode();
+  WidgetStatesController? _highlightedItemStatesController;
 
   FocusNode? _localTrailingIconButtonFocusNode;
   FocusNode get _trailingIconButtonFocusNode =>
@@ -756,9 +757,10 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
   void dispose() {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
-    _internalFocudeNode.dispose();
+    _internalFocusNode.dispose();
     _localTrailingIconButtonFocusNode?.dispose();
     _localTrailingIconButtonFocusNode = null;
+    _highlightedItemStatesController?.dispose();
     super.dispose();
   }
 
@@ -931,7 +933,13 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       // Simulate the focused state because the text field should always be focused
       // during traversal. Include potential MenuItemButton theme in the focus
       // simulation for all colors in the theme.
-      if (entry.enabled && i == focusedIndex) {
+      final bool entryIsSelected = entry.enabled && i == focusedIndex;
+      if (entryIsSelected) {
+        _highlightedItemStatesController?.dispose();
+        _highlightedItemStatesController = WidgetStatesController(<WidgetState>{
+          WidgetState.focused,
+        });
+
         // Query the Material 3 default style.
         // TODO(bleroux): replace once a standard way for accessing defaults will be defined.
         // See: https://github.com/flutter/flutter/issues/130135.
@@ -986,6 +994,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
           excluding: excludeSemantics,
           child: MenuItemButton(
             key: enableScrollToHighlight ? buttonItemKeys[i] : null,
+            statesController: entryIsSelected ? _highlightedItemStatesController : null,
             style: effectiveStyle,
             leadingIcon: entry.leadingIcon,
             trailingIcon: entry.trailingIcon,
@@ -1094,7 +1103,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       }
       controller.open();
       if (focusForKeyboard) {
-        _internalFocudeNode.requestFocus();
+        _internalFocusNode.requestFocus();
       }
     }
     setState(() {});
@@ -1396,7 +1405,7 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
               SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
             },
             child: Focus(
-              focusNode: _internalFocudeNode,
+              focusNode: _internalFocusNode,
               skipTraversal: true,
               child: const SizedBox.shrink(),
             ),

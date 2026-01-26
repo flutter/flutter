@@ -154,37 +154,11 @@ class AOTSnapshotter {
       }
     }
 
-    String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
-    String? frameworkPath;
+    final String assembly = _fileSystem.path.join(outputDir.path, 'snapshot_assembly.S');
     if (targetingApplePlatform) {
-      // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic
-      // library that the end-developer can link into their app.
-      const frameworkName = 'App.framework';
-      if (!quiet) {
-        final String targetArch = darwinArch!.name;
-        _logger.printStatus('Building $frameworkName for $targetArch...');
-      }
-      frameworkPath = _fileSystem.path.join(outputPath, frameworkName);
-      _fileSystem.directory(frameworkPath).createSync(recursive: true);
-
-      const frameworkSnapshotName = 'App';
-      aotSharedLibrary = _fileSystem.path.join(frameworkPath, frameworkSnapshotName);
-      final String relocatableObject = _fileSystem.path.join(outputPath, 'app.o');
-      // When the minimum version is updated, remember to update
-      // template MinimumOSVersion.
-      // https://github.com/flutter/flutter/pull/62902
-      final minOSVersion = platform == TargetPlatform.ios
-          ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
-          : FlutterDarwinPlatform.macos.deploymentTarget().toString();
-      genSnapshotArgs.addAll(<String>[
-        '--snapshot_kind=app-aot-macho-dylib',
-        '--macho=$aotSharedLibrary',
-        '--macho-object=$relocatableObject',
-        '--macho-min-os-version=$minOSVersion',
-        '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
-        '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
-      ]);
+      genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-assembly', '--assembly=$assembly']);
     } else {
+      final String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
     }
 
@@ -246,38 +220,123 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
+    // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic library that the
+    // end-developer can link into their app.
     if (targetingApplePlatform) {
-      if (extractAppleDebugSymbols) {
-        final RunResult dsymResult = await _xcode.dsymutil(<String>[
-          '-o',
-          '$frameworkPath.dSYM',
-          aotSharedLibrary,
-        ]);
-        if (dsymResult.exitCode != 0) {
-          _logger.printError(
-            'Failed to generate dSYM - dsymutil terminated with exit code ${dsymResult.exitCode}',
-          );
-          return dsymResult.exitCode;
-        }
+      return _buildFramework(
+        appleArch: darwinArch!,
+        isIOS: platform == TargetPlatform.ios,
+        sdkRoot: sdkRoot,
+        assemblyPath: assembly,
+        outputPath: outputDir.path,
+        quiet: quiet,
+        stripAfterBuild: stripAfterBuild,
+        extractAppleDebugSymbols: extractAppleDebugSymbols,
+      );
+    } else {
+      return 0;
+    }
+  }
 
-        if (stripAfterBuild) {
-          // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-          final RunResult stripResult = await _xcode.strip(<String>[
-            '-x',
-            aotSharedLibrary,
-            '-o',
-            aotSharedLibrary,
-          ]);
-          if (stripResult.exitCode != 0) {
-            _logger.printError(
-              'Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}',
-            );
-            return stripResult.exitCode;
-          }
-        }
-      } else {
-        assert(!stripAfterBuild);
+  /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
+  /// source at [assemblyPath].
+  Future<int> _buildFramework({
+    required DarwinArch appleArch,
+    required bool isIOS,
+    String? sdkRoot,
+    required String assemblyPath,
+    required String outputPath,
+    required bool quiet,
+    required bool stripAfterBuild,
+    required bool extractAppleDebugSymbols,
+  }) async {
+    final String targetArch = appleArch.name;
+    if (!quiet) {
+      _logger.printStatus('Building App.framework for $targetArch...');
+    }
+
+    final commonBuildOptions = <String>[
+      '-arch',
+      targetArch,
+      if (isIOS)
+        // When the minimum version is updated, remember to update
+        // template MinimumOSVersion.
+        // https://github.com/flutter/flutter/pull/62902
+        '-miphoneos-version-min=${FlutterDarwinPlatform.ios.deploymentTarget()}',
+      if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
+    ];
+
+    final String assemblyO = _fileSystem.path.join(outputPath, 'snapshot_assembly.o');
+
+    final RunResult compileResult = await _xcode.cc(<String>[
+      ...commonBuildOptions,
+      '-c',
+      assemblyPath,
+      '-o',
+      assemblyO,
+    ]);
+    if (compileResult.exitCode != 0) {
+      _logger.printError(
+        'Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}',
+      );
+      return compileResult.exitCode;
+    }
+
+    final String frameworkDir = _fileSystem.path.join(outputPath, 'App.framework');
+    _fileSystem.directory(frameworkDir).createSync(recursive: true);
+    final String appLib = _fileSystem.path.join(frameworkDir, 'App');
+    final linkArgs = <String>[
+      ...commonBuildOptions,
+      '-dynamiclib',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@executable_path/Frameworks',
+      '-Xlinker',
+      '-rpath',
+      '-Xlinker',
+      '@loader_path/Frameworks',
+      '-fapplication-extension',
+      '-install_name',
+      '@rpath/App.framework/App',
+      '-o',
+      appLib,
+      assemblyO,
+    ];
+
+    final RunResult linkResult = await _xcode.clang(linkArgs);
+    if (linkResult.exitCode != 0) {
+      _logger.printError(
+        'Failed to link AOT snapshot. Linker terminated with exit code ${linkResult.exitCode}',
+      );
+      return linkResult.exitCode;
+    }
+
+    if (extractAppleDebugSymbols) {
+      final RunResult dsymResult = await _xcode.dsymutil(<String>[
+        '-o',
+        '$frameworkDir.dSYM',
+        appLib,
+      ]);
+      if (dsymResult.exitCode != 0) {
+        _logger.printError(
+          'Failed to generate dSYM - dsymutil terminated with exit code ${dsymResult.exitCode}',
+        );
+        return dsymResult.exitCode;
       }
+
+      if (stripAfterBuild) {
+        // See https://www.unix.com/man-page/osx/1/strip/ for arguments
+        final RunResult stripResult = await _xcode.strip(<String>['-x', appLib, '-o', appLib]);
+        if (stripResult.exitCode != 0) {
+          _logger.printError(
+            'Failed to strip debugging symbols from the generated AOT snapshot - strip terminated with exit code ${stripResult.exitCode}',
+          );
+          return stripResult.exitCode;
+        }
+      }
+    } else {
+      assert(!stripAfterBuild);
     }
 
     return 0;
@@ -295,6 +354,7 @@ class AOTSnapshotter {
       TargetPlatform.darwin,
       TargetPlatform.linux_x64,
       TargetPlatform.linux_arm64,
+      TargetPlatform.linux_riscv64,
       TargetPlatform.windows_x64,
       TargetPlatform.windows_arm64,
     ].contains(platform);
