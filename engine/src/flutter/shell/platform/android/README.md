@@ -209,7 +209,7 @@ Android Studio:
      Distribution of `Local Installation` with:
 
      ```txt
-     $ENGINE/src/third_party/gradle
+     $ENGINE/src/flutter/third_party/gradle
      ```
 
      Gradle SDK using Android Studio (path depends on your machine):
