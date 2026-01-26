@@ -1801,7 +1801,15 @@ extension type DomMediaQueryList._(JSObject _) implements DomEventTarget {
 
 @JS('MediaQueryListEvent')
 extension type DomMediaQueryListEvent._(JSObject _) implements DomEvent {
+  /// https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryListEvent/MediaQueryListEvent
+  @visibleForTesting
+  external DomMediaQueryListEvent(String type, [JSAny initDict]);
   external bool? get matches;
+}
+
+@visibleForTesting
+DomMediaQueryListEvent createDomMediaQueryListEvent(String type, Map<dynamic, dynamic> init) {
+  return DomMediaQueryListEvent(type, init.toJSAnyDeep);
 }
 
 @JS('Path2D')
