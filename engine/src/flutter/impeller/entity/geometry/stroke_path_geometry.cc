@@ -231,7 +231,7 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
       // at least scale_, but larger than that by the scaled half stroke
       // width (half_stroke_width_ is in path space, so we need to scale
       // it by scale_ as well).
-      Scalar stroke_scale = scale_ * (1 + half_stroke_width_);
+      Scalar stroke_scale = scale_ * (1.0f + half_stroke_width_);
       Scalar count = std::ceilf(curve.SubdivisionCount(stroke_scale));
 
       Point prev = curve.p1;
