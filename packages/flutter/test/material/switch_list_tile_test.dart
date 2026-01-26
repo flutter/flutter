@@ -695,16 +695,18 @@ void main() {
         child: Center(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Container(
+              return SizedBox(
                 width: 500,
                 height: 100,
-                color: Colors.white,
-                child: SwitchListTile(
-                  value: false,
-                  key: key,
-                  hoverColor: Colors.orange[500],
-                  title: const Text('A'),
-                  onChanged: (bool? value) {},
+                child: Material(
+                  color: Colors.white,
+                  child: SwitchListTile(
+                    value: false,
+                    key: key,
+                    hoverColor: Colors.orange[500],
+                    title: const Text('A'),
+                    onChanged: (bool? value) {},
+                  ),
                 ),
               );
             },
@@ -723,7 +725,7 @@ void main() {
       Material.of(tester.element(find.byKey(key))),
       paints
         ..rect()
-        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(150.0, 250.0, 650.0, 350.0)),
+        ..rect(color: Colors.orange[500], rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 100.0)),
     );
   });
 
