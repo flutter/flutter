@@ -78,30 +78,13 @@ class SummaryReporter {
   }
 
   void _handleSuite(Map<String, Object?> event) {
-    final Object? suite = event['suite'];
-    if (suite is! Map<String, Object?>) {
-      return;
-    }
-
-    final id = suite['id'] as int?;
-    final path = suite['path'] as String?;
-
-    if (id != null && path != null) {
+    if (event case {'suite': {'id': final int id, 'path': final String path}}) {
       _suites[id] = path;
     }
   }
 
   void _handleTestStart(Map<String, Object?> event) {
-    final Object? test = event['test'];
-    if (test is! Map<String, Object?>) {
-      return;
-    }
-
-    final id = test['id'] as int?;
-    final name = test['name'] as String?;
-    final suiteId = test['suiteID'] as int?;
-
-    if (id != null && name != null) {
+    if (event case {'test': {'id': final int id, 'name': final String name, 'suiteID': final int? suiteId}}) {
       _tests[id] = _TestInfo(name: name, suiteId: suiteId);
       _currentTestName = name;
       _printProgress();
@@ -159,8 +142,7 @@ class SummaryReporter {
   }
 
   void _handlePrint(Map<String, Object?> event) {
-    final message = event['message'] as String?;
-    if (message != null) {
+    if (event case {'message': final String message}) {
       if (_lastLineWasProgress) {
         _clearLine();
       }
