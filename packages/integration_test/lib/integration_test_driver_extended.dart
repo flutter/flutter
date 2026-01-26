@@ -9,7 +9,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 
@@ -75,7 +74,6 @@ Future<void> writeResponseData(
 /// `writeResponseOnFailure` determines whether the `responseDataCallback`
 /// function will be called to process the [Response.data] when a test fails.
 /// The default value is `false`.
-@awaitNotRequired
 Future<void> integrationDriver({
   FlutterDriver? driver,
   ScreenshotCallback? onScreenshot,
