@@ -716,7 +716,7 @@ class FlutterPlugin : Plugin<Project> {
                         from("${flutterCompileTask.intermediateDir}/$abi") {
                             include("*.so")
                             rename { filename: String -> "lib$filename" }
-                            into(abi!!)
+                            into(abi ?: "null")
                         }
                         // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
                         val buildDir =
@@ -725,7 +725,7 @@ class FlutterPlugin : Plugin<Project> {
                             "$buildDir/native_assets/android/jniLibs/lib"
                         from("$nativeAssetsDir/$abi") {
                             include("*.so")
-                            into(abi!!)
+                            into(abi ?: "null")
                         }
                     }
                 }
