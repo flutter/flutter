@@ -4,6 +4,7 @@
 
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../convert.dart';
 
 /// A test reporter that displays compact progress and prints a summary of
@@ -272,10 +273,10 @@ class SummaryReporter {
     }
   }
 
-  String get _green => supportsColor ? '\x1B[32m' : '';
-  String get _red => supportsColor ? '\x1B[31m' : '';
-  String get _yellow => supportsColor ? '\x1B[33m' : '';
-  String get _reset => supportsColor ? '\x1B[0m' : '';
+  String get _green => supportsColor ? AnsiTerminal.green : '';
+  String get _red => supportsColor ? AnsiTerminal.red : '';
+  String get _yellow => supportsColor ? AnsiTerminal.yellow : '';
+  String get _reset => supportsColor ? AnsiTerminal.resetColor : '';
 }
 
 class _TestInfo {
