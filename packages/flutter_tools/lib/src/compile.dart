@@ -564,9 +564,10 @@ abstract interface class ResidentCompiler {
           ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
         ],
       );
-    } else if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
-      targetModel = .flutterRunner;
     } else {
+      if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
+        targetModel = .flutterRunner;
+      }
       buildInfo = buildInfo.copyWith(
         extraFrontEndOptions: [
           ...buildInfo.extraFrontEndOptions,
