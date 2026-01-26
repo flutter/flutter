@@ -517,6 +517,23 @@ void main() {
       expect(invokedAction, isNull);
       expect(invokedDispatcher, isNull);
     });
+
+    testWidgets('DoNothingAction can binds to any Intent', (WidgetTester tester) async {
+      final GlobalKey globalKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Actions(
+            actions: <Type, Action<Intent>>{DeleteCharacterIntent: DoNothingAction()},
+            child: Focus(autofocus: true, child: SizedBox.expand(key: globalKey)),
+          ),
+        ),
+      );
+      await tester.pump();
+      final BuildContext context = globalKey.currentContext!;
+      Actions.invoke(context, const DeleteCharacterIntent(forward: true));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Listening', () {

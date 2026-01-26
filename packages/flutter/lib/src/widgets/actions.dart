@@ -919,6 +919,9 @@ class Actions extends StatefulWidget {
   // `_ActionsScope`, and verify it has the right type parameter.
   static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, {T? intent}) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
+    if (mappedAction is FlexibleAction && mappedAction._canHandleIntent<T>(intent)) {
+      return mappedAction.cast<T>();
+    }
     if (mappedAction is Action<T>?) {
       return mappedAction;
     } else {
@@ -1472,7 +1475,7 @@ class DoNothingAndStopPropagationIntent extends Intent {
 ///  - [DoNothingAndStopPropagationIntent], which is an intent that can be bound
 ///    to a [KeySet] in a [Shortcuts] widget to do nothing and also stop key event
 ///    propagation to other key handlers in the focus chain.
-class DoNothingAction extends Action<Intent> {
+class DoNothingAction extends Action<Intent> with FlexibleAction<Intent> {
   /// Creates a [DoNothingAction].
   ///
   /// The optional [consumesKey] argument defaults to true.
@@ -1609,6 +1612,24 @@ class PrioritizedAction extends ContextAction<PrioritizedIntents> {
   @override
   void invoke(PrioritizedIntents intent, [BuildContext? context]) {
     _selectedAction._invoke(_selectedIntent, context);
+  }
+}
+
+/// Action that can be bound to Intent of Type T or subclass of T
+mixin FlexibleAction<T extends Intent> on Action<T> {
+  // If intent with mathing type failed this test, it could throw assertion,
+  // so this method is private.
+  bool _canHandleIntent<IntentType>(Intent? intent) {
+    if (intent != null) {
+      return intent is IntentType;
+    } else {
+      return <IntentType>[] is List<T>;
+    }
+  }
+
+  /// Override this method if the Action is need the actual subclass is needed.
+  Action<IntentType> cast<IntentType extends T>() {
+    return _WarppedAction<IntentType, T>(action: this);
   }
 }
 
@@ -1859,4 +1880,65 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
 
   @override
   Object? invoke(T intent) => action.invoke(intent, invokeContext);
+}
+
+class _WarppedAction<T extends BaseIntent, BaseIntent extends Intent> extends Action<T> {
+  _WarppedAction({required this.action});
+
+  final Action<BaseIntent> action;
+
+  // _WarppedAction is never overridable, so this is always null.
+  @override
+  Action<T>? get callingAction => null;
+
+  @override
+  bool isEnabled(T intent) => action.isEnabled(intent);
+
+  @override
+  bool get isActionEnabled => action.isActionEnabled;
+
+  @override
+  bool consumesKey(T intent) => action.consumesKey(intent);
+
+  @override
+  void addActionListener(ActionListenerCallback listener) {
+    super.addActionListener(listener);
+    action.addActionListener(listener);
+  }
+
+  @override
+  void removeActionListener(ActionListenerCallback listener) {
+    super.removeActionListener(listener);
+    action.removeActionListener(listener);
+  }
+
+  @override
+  @protected
+  void notifyActionListeners() => action.notifyActionListeners();
+
+  @override
+  Object? invoke(T intent) => action.invoke(intent);
+
+  @override
+  Object? _invoke(T intent, BuildContext? context) {
+    return action._invoke(intent, context);
+  }
+
+  @override
+  bool _isEnabled(T intent, BuildContext? context) {
+    return action._isEnabled(intent, context);
+  }
+
+  @override
+  ObserverList<ActionListenerCallback> get _listeners => action._listeners;
+
+  @override
+  Action<T> _makeOverridableAction(BuildContext context) {
+    return _OverridableAction<T>(defaultAction: this, lookupContext: context);
+  }
+
+  @override
+  KeyEventResult toKeyEventResult(T intent, covariant Object? invokeResult) {
+    return action.toKeyEventResult(intent, invokeResult);
+  }
 }
