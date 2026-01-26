@@ -157,6 +157,7 @@ interface class FlutterTestRunner {
         final summaryReporter = SummaryReporter(
           supportsColor: globals.terminal.supportsColor,
           stdout: globals.stdio.stdout,
+          logger: globals.logger,
         );
         await testWrapper.mainWithOutputCapture(testArgs, onOutputLine: summaryReporter.handleLine);
       } else {
@@ -205,6 +206,7 @@ interface class FlutterTestRunner {
         final summaryReporter = SummaryReporter(
           supportsColor: globals.terminal.supportsColor,
           stdout: globals.stdio.stdout,
+          logger: globals.logger,
         );
         await testWrapper.mainWithOutputCapture(testArgs, onOutputLine: summaryReporter.handleLine);
       } else {

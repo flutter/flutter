@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 
 /// A test reporter that displays compact progress and prints a summary of
 /// failed tests at the end.
@@ -16,10 +16,15 @@ import '../globals.dart' as globals;
 /// Usage:
 ///   flutter test --reporter=summary
 class SummaryReporter {
-  SummaryReporter({required this.supportsColor, required this.stdout});
+  SummaryReporter({
+    required this.supportsColor,
+    required this.stdout,
+    required Logger logger,
+  }) : _logger = logger;
 
   final bool supportsColor;
   final Stdout stdout;
+  final Logger _logger;
 
   final Map<int, _TestInfo> _tests = <int, _TestInfo>{};
   final Map<int, String> _suites = <int, String>{};
@@ -251,7 +256,7 @@ class SummaryReporter {
   }
 
   void _printLine(String message) {
-    globals.printStatus(message);
+    _logger.printStatus(message);
     _lastLineWasProgress = false;
   }
 

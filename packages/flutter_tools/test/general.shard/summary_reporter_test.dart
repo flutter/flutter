@@ -22,7 +22,7 @@ void main() {
     });
 
     testUsingContext('tracks failed tests from JSON output', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       // Simulate JSON reporter output
       reporter.handleLine(
@@ -57,7 +57,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('does not print summary when all tests pass', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
@@ -73,7 +73,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('handles malformed JSON gracefully', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       // This should not throw
       reporter.handleLine('not valid json');
@@ -84,7 +84,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('ignores hidden tests', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
@@ -100,7 +100,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('includes suite path in failure summary', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
@@ -118,7 +118,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('handles skipped tests', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
@@ -134,7 +134,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('outputs error messages', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
@@ -153,7 +153,7 @@ void main() {
     }, overrides: <Type, Generator>{Logger: () => logger});
 
     testUsingContext('outputs print messages', () async {
-      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout);
+      final reporter = SummaryReporter(supportsColor: false, stdout: fakeStdout, logger: logger);
 
       reporter.handleLine('{"type":"start","time":0}');
       reporter.handleLine(
