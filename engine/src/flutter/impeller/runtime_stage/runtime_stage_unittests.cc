@@ -97,6 +97,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 0u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uVec2
@@ -106,6 +107,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 1u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uVec3
@@ -115,6 +117,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uVec4
@@ -124,6 +127,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 3u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat2
@@ -133,6 +137,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 4u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat3
@@ -151,6 +156,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 4u);
         EXPECT_EQ(uni->location, 6u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uFloatArray
@@ -160,16 +166,16 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 7u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        // Note: Assuming 'array_size' is not part of the reflection struct
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        // uVec2Array
         auto uni = stage->GetUniform("uVec2Array");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 2u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 9u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uVec3Array
@@ -180,6 +186,16 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
       }
+
+      {
+        auto uni = stage->GetUniform("u_circle1");
+        ASSERT_NE(uni, nullptr);
+        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->location, 11u);
+        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
+      }
       {
         // uVec4Array
         auto uni = stage->GetUniform("uVec4Array");
@@ -188,6 +204,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 13u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat2Array
@@ -197,6 +214,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 15u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat3Array
@@ -206,6 +224,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 3u);
         EXPECT_EQ(uni->location, 17u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat4Array
@@ -215,6 +234,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 4u);
         EXPECT_EQ(uni->location, 19u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       break;
     }
@@ -227,68 +247,68 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       EXPECT_EQ(uni->struct_float_count, 35u);
 
       EXPECT_EQ(uni->GetSize(), 640u);
-      std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
+      std::vector<uint8_t> layout(uni->GetGPUSize() / sizeof(float), RuntimePaddingType::kFloat);
       // uFloat and uVec2 are packed into a vec4 with 1 byte of padding between.
-      layout[1] = 0;
+      layout[1] = RuntimePaddingType::kPadding;
       // uVec3 is packed as a vec4 with 1 byte of padding.
-      layout[7] = 0;
+      layout[7] = RuntimePaddingType::kPadding;
       // uMat2 is packed as two vec4s, with the last 2 bytes of each being
       // padding.
-      layout[14] = 0;
-      layout[15] = 0;
-      layout[18] = 0;
-      layout[19] = 0;
+      layout[14] = RuntimePaddingType::kPadding;
+      layout[15] = RuntimePaddingType::kPadding;
+      layout[18] = RuntimePaddingType::kPadding;
+      layout[19] = RuntimePaddingType::kPadding;
       // uMat3 is packed as 3 vec4s, with the last 3 bytes being padding
-      layout[29] = 0;
-      layout[30] = 0;
-      layout[31] = 0;
+      layout[29] = RuntimePaddingType::kPadding;
+      layout[30] = RuntimePaddingType::kPadding;
+      layout[31] = RuntimePaddingType::kPadding;
       // uFloatArray is packed as 2 vec4s, with the last 3 bytes of each
       // being padding.
-      layout[49] = 0;
-      layout[50] = 0;
-      layout[51] = 0;
-      layout[53] = 0;
-      layout[54] = 0;
-      layout[55] = 0;
+      layout[49] = RuntimePaddingType::kPadding;
+      layout[50] = RuntimePaddingType::kPadding;
+      layout[51] = RuntimePaddingType::kPadding;
+      layout[53] = RuntimePaddingType::kPadding;
+      layout[54] = RuntimePaddingType::kPadding;
+      layout[55] = RuntimePaddingType::kPadding;
       // uVec2Array is packed as 2 vec4s, with 2 bytes of padding at the end of
       // each.
-      layout[58] = 0;
-      layout[59] = 0;
-      layout[62] = 0;
-      layout[63] = 0;
+      layout[58] = RuntimePaddingType::kPadding;
+      layout[59] = RuntimePaddingType::kPadding;
+      layout[62] = RuntimePaddingType::kPadding;
+      layout[63] = RuntimePaddingType::kPadding;
       // uVec3Array is packed as 2 vec4s, with the last byte of each as padding.
-      layout[67] = 0;
-      layout[71] = 0;
+      layout[67] = RuntimePaddingType::kPadding;
+      layout[71] = RuntimePaddingType::kPadding;
       // uVec4Array has no padding.
       // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being
       // padding. padding.
-      layout[82] = 0;
-      layout[83] = 0;
-      layout[86] = 0;
-      layout[87] = 0;
-      layout[90] = 0;
-      layout[91] = 0;
-      layout[94] = 0;
-      layout[95] = 0;
+      layout[82] = RuntimePaddingType::kPadding;
+      layout[83] = RuntimePaddingType::kPadding;
+      layout[86] = RuntimePaddingType::kPadding;
+      layout[87] = RuntimePaddingType::kPadding;
+      layout[90] = RuntimePaddingType::kPadding;
+      layout[91] = RuntimePaddingType::kPadding;
+      layout[94] = RuntimePaddingType::kPadding;
+      layout[95] = RuntimePaddingType::kPadding;
       // uMat3Array[2] is packed as 6 vec4s, with the last 3 bytes of the 3rd
       // and 6th being padding.
-      layout[105] = 0;
-      layout[106] = 0;
-      layout[107] = 0;
-      layout[117] = 0;
-      layout[118] = 0;
-      layout[119] = 0;
+      layout[105] = RuntimePaddingType::kPadding;
+      layout[106] = RuntimePaddingType::kPadding;
+      layout[107] = RuntimePaddingType::kPadding;
+      layout[117] = RuntimePaddingType::kPadding;
+      layout[118] = RuntimePaddingType::kPadding;
+      layout[119] = RuntimePaddingType::kPadding;
       // uMat4Array[2] is packed as 8 vec4s with no padding.
-      layout[152] = 0;
-      layout[153] = 0;
-      layout[154] = 0;
-      layout[155] = 0;
-      layout[156] = 0;
-      layout[157] = 0;
-      layout[158] = 0;
-      layout[159] = 0;
+      layout[152] = RuntimePaddingType::kPadding;
+      layout[153] = RuntimePaddingType::kPadding;
+      layout[154] = RuntimePaddingType::kPadding;
+      layout[155] = RuntimePaddingType::kPadding;
+      layout[156] = RuntimePaddingType::kPadding;
+      layout[157] = RuntimePaddingType::kPadding;
+      layout[158] = RuntimePaddingType::kPadding;
+      layout[159] = RuntimePaddingType::kPadding;
 
-      EXPECT_THAT(uni->struct_layout, ::testing::ElementsAreArray(layout));
+      EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
 
       std::vector<std::pair<std::string, unsigned int>> expected_uniforms = {
           {"uFloat", 4},      {"uVec2", 8},       {"uVec3", 12},
@@ -306,7 +326,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(element.name, expected.first) << "index: " << i;
         EXPECT_EQ(element.byte_size, expected.second) << "index: " << i;
       }
-
       break;
     }
   }

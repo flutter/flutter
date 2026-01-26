@@ -311,7 +311,10 @@ void main() {
   // https://github.com/flutter/flutter/pull/170625
   showCupertinoSheet(
     context: context,
-    builder: (BuildContext context) => Container(),
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
   );
 
   // https://github.com/flutter/flutter/pull/171160
@@ -322,4 +325,22 @@ void main() {
   dynamicColor.a;
   dynamicColor.toARGB32();
   dynamicColor = dynamicColor.withValues(alpha: 0.55);
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  showCupertinoSheet(
+    context: context,
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  CupertinoSheetRoute<void>(
+    context: context,
+    scrollableBuilder: (BuildContext context, ScrollController controller) {
+      WidgetBuilder widgetBuilder = (BuildContext context) => Container();
+      return widgetBuilder(context);
+    },
+  );
 }
