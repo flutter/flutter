@@ -163,16 +163,22 @@ class CapturedAccessibilityAnnouncement {
 }
 
 class _TestFlutterView implements FlutterView {
-  _TestFlutterView({required this.controller, required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher,
-      _viewId = _nextViewId++ {
+  _TestFlutterView({
+    required this.controller,
+    required TestPlatformDispatcher platformDispatcher,
+    this.constraints,
+    this.onRender,
+  }) : _platformDispatcher = platformDispatcher,
+       _viewId = _nextViewId++ {
     platformDispatcher.addTestView(this);
   }
 
   static int _nextViewId = 1;
   final BaseWindowController controller;
   final TestPlatformDispatcher _platformDispatcher;
+  final BoxConstraints? constraints;
   final int _viewId;
+  final void Function(Size? size)? onRender;
 
   @override
   double get devicePixelRatio => display.devicePixelRatio;
@@ -190,7 +196,14 @@ class _TestFlutterView implements FlutterView {
   ui.ViewPadding get padding => ui.ViewPadding.zero;
 
   @override
-  ui.ViewConstraints get physicalConstraints => ui.ViewConstraints.tight(physicalSize);
+  ui.ViewConstraints get physicalConstraints => constraints != null
+      ? ui.ViewConstraints(
+          minWidth: constraints!.minWidth,
+          maxWidth: constraints!.maxWidth,
+          minHeight: constraints!.minHeight,
+          maxHeight: constraints!.maxHeight,
+        )
+      : ui.ViewConstraints.tight(physicalSize);
 
   @override
   ui.Size get physicalSize => controller.contentSize * devicePixelRatio;
@@ -214,7 +227,9 @@ class _TestFlutterView implements FlutterView {
   ui.DisplayCornerRadii? get displayCornerRadii => null;
 
   @override
-  void render(ui.Scene scene, {ui.Size? size}) {}
+  void render(ui.Scene scene, {ui.Size? size}) {
+    onRender?.call(size);
+  }
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {}
@@ -281,6 +296,9 @@ mixin _ChildWindowHierarchyMixin {
 
     return activateable;
   }
+
+  /// The rectangle of this window in global coordinates.
+  Rect get rect;
 }
 
 class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
@@ -297,7 +315,11 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
 
     // Automatically activate the window when created.
     activate();
@@ -329,6 +351,19 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
 
   @override
   bool get isFullscreen => _isFullscreen;
+
+  @override
+  Rect get rect {
+    // Regular windows are centered in the display.
+    final ui.Display display = rootView.display;
+    final Size size = contentSize;
+    return Rect.fromLTWH(
+      display.size.width / 2 - size.width / 2,
+      display.size.height / 2 - size.height / 2,
+      size.width,
+      size.height,
+    );
+  }
 
   @override
   void setSize(Size size) {
@@ -445,7 +480,11 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -474,6 +513,19 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
   @override
   bool get isMinimized => _isMinimized;
+
+  @override
+  Rect get rect {
+    // Dialog windows are centered in the display.
+    final ui.Display display = rootView.display;
+    final Size size = contentSize;
+    return Rect.fromLTWH(
+      display.size.width / 2 - size.width / 2,
+      display.size.height / 2 - size.height / 2,
+      size.width,
+      size.height,
+    );
+  }
 
   @override
   void setSize(Size size) {
@@ -529,6 +581,111 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
   }
 }
 
+class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
+  _TestTooltipWindowController({
+    required TooltipWindowControllerDelegate delegate,
+    required TestPlatformDispatcher platformDispatcher,
+    required this.windowingOwner,
+    required BoxConstraints preferredConstraints,
+    required bool isSizedToContent,
+    required ui.Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _delegate = delegate,
+       _constraints = preferredConstraints,
+       _isSizedToContent = isSizedToContent,
+       _anchorRect = anchorRect,
+       _positioner = positioner,
+       _parent = parent,
+       super.empty() {
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+      onRender: (size) {
+        if (_isSizedToContent && _lastRenderedSize != size) {
+          // Trigger a re-render with the correct size.
+          _lastRenderedSize = size;
+          platformDispatcher.scheduleFrame();
+          scheduleMicrotask(() {
+            notifyListeners();
+          });
+        }
+      },
+    );
+    _addChildToParent(parent, this);
+  }
+
+  final TooltipWindowControllerDelegate _delegate;
+  final _TestWindowingOwner windowingOwner;
+  BoxConstraints _constraints;
+  ui.Rect _anchorRect;
+  WindowPositioner _positioner;
+  final BaseWindowController _parent;
+  // ignore: unused_field
+  final bool _isSizedToContent;
+  Size? _lastRenderedSize;
+  Rect? _currentRect;
+
+  @override
+  Size get contentSize => _isSizedToContent ? _placeTooltipWindow() : _constraints.smallest;
+
+  @override
+  BaseWindowController get parent => _parent;
+
+  @override
+  void setConstraints(BoxConstraints constraints) {
+    _constraints = constraints;
+    notifyListeners();
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    _anchorRect = anchorRect ?? _anchorRect;
+    _positioner = positioner ?? _positioner;
+  }
+
+  @override
+  void destroy() {
+    _delegate.onWindowDestroyed();
+    removeAllChildren();
+    windowingOwner.deactivateWindowController(this);
+    _removeChildFromParent(parent, this);
+  }
+
+  Size _placeTooltipWindow() {
+    if (_lastRenderedSize == null) {
+      return _constraints.smallest;
+    }
+
+    final childWindowMixin = parent as _ChildWindowHierarchyMixin;
+    final double scale = rootView.devicePixelRatio;
+    final scaledAnchorRect = Rect.fromLTWH(
+      _anchorRect.left * scale,
+      _anchorRect.top * scale,
+      _anchorRect.width * scale,
+      _anchorRect.height * scale,
+    );
+    final Offset scaledOffset = _positioner.offset * scale;
+    final WindowPositioner scaledPositioner = _positioner.copyWith(offset: scaledOffset);
+
+    /// Center the parent window in the display.
+    final ui.Display display = rootView.display;
+    _currentRect = scaledPositioner.placeWindow(
+      childSize: _lastRenderedSize!,
+      anchorRect: scaledAnchorRect.translate(childWindowMixin.rect.left, childWindowMixin.rect.top),
+      parentRect: childWindowMixin.rect,
+      displayRect: Rect.fromLTWH(0, 0, display.size.width, display.size.height),
+    );
+    return _currentRect!.size;
+  }
+
+  @override
+  Rect get rect {
+    return _currentRect ?? Rect.zero;
+  }
+}
+
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
     required PopupWindowControllerDelegate delegate,
@@ -544,7 +701,11 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(controller: this, platformDispatcher: platformDispatcher);
+    rootView = _TestFlutterView(
+      controller: this,
+      platformDispatcher: platformDispatcher,
+      constraints: _constraints,
+    );
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -568,6 +729,12 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   bool get isActivated => windowingOwner.isWindowControllerActive(this);
+
+  @override
+  Rect get rect {
+    // TODO: Implement proper popup positioning logic.
+    return Rect.zero;
+  }
 
   @override
   void activate() {
@@ -741,8 +908,16 @@ class _TestWindowingOwner extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    // TODO(mattkae): implement createTooltipWindowController
-    throw UnimplementedError();
+    return _TestTooltipWindowController(
+      delegate: delegate,
+      platformDispatcher: _platformDispatcher,
+      windowingOwner: this,
+      preferredConstraints: preferredConstraints,
+      isSizedToContent: isSizedToContent,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
   }
 
   @override

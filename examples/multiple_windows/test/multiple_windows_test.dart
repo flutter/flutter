@@ -112,4 +112,18 @@ See: https://github.com/flutter/flutter/issues/30701.
 
     expect(find.widgetWithText(AppBar, 'Dialog'), findsNothing);
   });
+
+  testWidgets('Can create a tooltip window', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump(); // triggers a frame
+
+    final toTap = find.widgetWithText(OutlinedButton, 'Show Tooltip');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.widgetWithText(Text, 'Tooltip Window'), findsOneWidget);
+  });
 }
