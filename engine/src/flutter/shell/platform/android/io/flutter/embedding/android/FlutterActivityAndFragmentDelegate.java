@@ -344,6 +344,30 @@ import java.util.List;
     isFlutterEngineFromHost = false;
   }
 
+  // As part of https://github.com/flutter/flutter/issues/180686, the ability
+  // to set engine flags via Intent extras is planned to be removed, so warn
+  // developers that engine shell arguments set that way will be ignored.
+  private void warnIfEngineFlagsSetViaIntent(@NonNull Intent intent) {
+    if (intent.getExtras() == null) {
+      return;
+    }
+
+    Bundle extras = intent.getExtras();
+    Set<String> extrasKeys = extras.keySet();
+
+    for (String extrasKey : extrasKeys) {
+      FlutterShellArgs.Flag flag = FlutterShellArgs.getFlagFromIntentKey(extrasKey);
+      if (flag != null) {
+        Log.w(
+            TAG,
+            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/180686 for more information on this breaking change. To migrate, set "
+                + flag.commandLineArgument
+                + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+        break;
+      }
+    }
+  }
+
   /**
    * Invoke this method from {@code Activity#onCreate(Bundle)} to create the content {@code View},
    * or from {@code Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle)}.

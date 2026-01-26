@@ -31,13 +31,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String PING = "ping";
     private BasicMessageChannel<String> messageChannel;
 
-    private String[] getArgsFromIntent(Intent intent) {
-        // Before adding more entries to this list, consider that arbitrary
-        // Android applications can generate intents with extra data and that
-        // there are many security-sensitive args in the binary.
-        ArrayList<String> args = new ArrayList<>();
-        if (intent.getBooleanExtra("trace-startup", false)) {
-            args.add("--trace-startup");
+    // Previously, this example checked for certain flags set via Intent. Engine
+    // flags can no longer be set via Intent, so warn developers that Intent extras
+    // will be ignored and point to alternative methods for setting engine flags.
+    private void warnIfEngineFlagsSetViaIntent(Intent intent) {
+        List<String> previouslySupportedFlagsViaIntent = Arrays.asList(
+            "--trace-startup", "--start-paused", "--enable-dart-profiling");
+        for (String flag : previouslySupportedFlagsViaIntent) {
+            if (intent.hasExtra(flag)) {
+                Log.w("MainActivity", "Engine flags can no longer be set via Intent on Android. If you wish to set " + flag + ", see https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for alternative methods.");
+                break;
+            }
         }
         if (intent.getBooleanExtra("start-paused", false)) {
             args.add("--start-paused");

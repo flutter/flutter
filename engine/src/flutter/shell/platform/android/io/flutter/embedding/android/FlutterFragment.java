@@ -454,9 +454,8 @@ public class FlutterFragment extends Fragment
           dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
-      if (null != shellArgs) {
-        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
-      }
+      args.putStringArray(
+          ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs == null ? new String[0] : shellArgs);
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
@@ -1295,8 +1294,7 @@ public class FlutterFragment extends Fragment
   @NonNull
   public FlutterShellArgs getFlutterShellArgs() {
     String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
-    return new FlutterShellArgs(
-        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+    return flutterShellArgsArray == null ? new String[0] : flutterShellArgsArray;
   }
 
   /**
