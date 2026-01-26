@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 
@@ -22,9 +23,10 @@ class TextRun {
   struct GlyphPosition {
     Glyph glyph;
     Point position;
+    Rect bounds;
 
-    GlyphPosition(Glyph p_glyph, Point p_position)
-        : glyph(p_glyph), position(p_position) {}
+    GlyphPosition(Glyph p_glyph, Point p_position, Rect p_bounds)
+        : glyph(p_glyph), position(p_position), bounds(p_bounds) {}
   };
 
   //----------------------------------------------------------------------------
@@ -48,7 +50,7 @@ class TextRun {
   ///
   /// @return     If the glyph could be added to the run.
   ///
-  bool AddGlyph(Glyph glyph, Point position);
+  bool AddGlyph(Glyph glyph, Point position, Rect bounds);
 
   //----------------------------------------------------------------------------
   /// @brief      Get the number of glyphs in the run.

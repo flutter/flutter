@@ -83,7 +83,7 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   }
 
   // Create the Impeller text frame and draw it at the designated baseline.
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   DlPaint text_paint;
   text_paint.setColor(options.color);
@@ -478,7 +478,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
     {
       auto blob = SkTextBlob::MakeFromString(t.text, sk_font);
       ASSERT_NE(blob, nullptr);
-      auto frame = MakeTextFrameFromTextBlobSkia(blob);
+      auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
       builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
     }
     builder.Restore();
@@ -623,7 +623,7 @@ TEST_P(AiksTest, TextForegroundShaderWithTransform) {
 
   auto blob = SkTextBlob::MakeFromString("Hello", sk_font);
   ASSERT_NE(blob, nullptr);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
   builder.DrawText(DlTextImpeller::Make(frame), 0, 0, text_paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -725,7 +725,7 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
   auto blob = SkTextBlob::MakeFromString("Hello World", sk_font);
   ASSERT_TRUE(blob);
 
-  auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto text_frame = MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   // Simulate recording the text frame during preroll.
   Matrix preroll_matrix =

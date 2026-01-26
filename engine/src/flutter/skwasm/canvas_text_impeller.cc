@@ -8,8 +8,12 @@
 #include "flutter/impeller/display_list/dl_text_impeller.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
+#include <optional>
+
 namespace flutter {
-std::shared_ptr<DlText> TextFromBlob(const sk_sp<SkTextBlob>& blob) {
-  return DlTextImpeller::MakeFromBlob(blob);
+std::shared_ptr<DlText> TextFromBlob(
+    const sk_sp<SkTextBlob>& blob,
+    const std::optional<impeller::StrokeParameters> strokeParameters) {
+  return DlTextImpeller::MakeFromBlob(blob, strokeParameters);
 }
 }  // namespace flutter

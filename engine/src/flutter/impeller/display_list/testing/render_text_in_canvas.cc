@@ -31,7 +31,7 @@ bool RenderTextInCanvasSkia(DlCanvas* canvas,
     return false;
   }
 
-  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob, std::nullopt);
 
   DlPaint text_paint;
   text_paint.setColor(options.color);

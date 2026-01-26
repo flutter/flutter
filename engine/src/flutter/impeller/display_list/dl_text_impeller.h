@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_TEXT_IMPELLER_H_
 
+#include <optional>
+
 #include "flutter/display_list/dl_text.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
@@ -16,7 +18,8 @@ class DlTextImpeller : public DlText {
   static std::shared_ptr<DlTextImpeller> Make(
       const std::shared_ptr<impeller::TextFrame>& frame);
   static std::shared_ptr<DlTextImpeller> MakeFromBlob(
-      const sk_sp<SkTextBlob>& blob);
+      const sk_sp<SkTextBlob>& blob,
+      const std::optional<impeller::StrokeParameters> strokeParameters);
 
   ~DlTextImpeller() = default;
 

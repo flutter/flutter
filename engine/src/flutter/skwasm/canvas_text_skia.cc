@@ -8,7 +8,9 @@
 #include "flutter/display_list/dl_text_skia.h"
 
 namespace flutter {
-std::shared_ptr<DlText> TextFromBlob(const sk_sp<SkTextBlob>& blob) {
+std::shared_ptr<DlText> TextFromBlob(
+    const sk_sp<SkTextBlob>& blob,
+    const std::optional<impeller::StrokeParameters> strokeParameters) {
   return DlTextSkia::Make(blob);
 }
 }  // namespace flutter

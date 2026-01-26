@@ -55,7 +55,8 @@ void VisualizeStopWatch(DlCanvas* canvas,
 #ifdef IMPELLER_SUPPORTS_RENDERING
     if (impeller_enabled) {
       canvas->DrawText(
-          DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(text)),
+          DlTextImpeller::Make(
+              impeller::MakeTextFrameFromTextBlobSkia(text, std::nullopt)),
           x + label_x, y + height + label_y, paint);
       return;
     }

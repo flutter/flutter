@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_TEXT_FRAME_SKIA_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_TEXT_FRAME_SKIA_H_
 
+#include <optional>
+
 #include "impeller/typographer/text_frame.h"
 
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -12,7 +14,8 @@
 namespace impeller {
 
 std::shared_ptr<impeller::TextFrame> MakeTextFrameFromTextBlobSkia(
-    const sk_sp<SkTextBlob>& blob);
+    const sk_sp<SkTextBlob>& blob,
+    const std::optional<StrokeParameters> strokeParameters);
 
 }  // namespace impeller
 

@@ -479,8 +479,14 @@ TypographerContextSkia::CollectNewGlyphs(
 
         if (!font_glyph_bounds.has_value()) {
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
-          auto glyph_bounds = ComputeGlyphSize(
-              sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
+
+          auto glyph_bounds = glyph_position.bounds;
+          // Expand the bounds of glyphs at subpixel offsets by 2 in the x
+          // direction.
+          if (subpixel_glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
+            glyph_bounds = glyph_bounds.Expand(1.0f, 0.0f, 1.0f, 0.0f);
+          }
+
           glyph_sizes.push_back(glyph_bounds);
 
           auto frame_bounds = FrameBounds{

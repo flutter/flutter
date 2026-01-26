@@ -14,8 +14,10 @@ std::shared_ptr<DlTextImpeller> DlTextImpeller::Make(
 }
 
 std::shared_ptr<DlTextImpeller> DlTextImpeller::MakeFromBlob(
-    const sk_sp<SkTextBlob>& blob) {
-  return DlTextImpeller::Make(impeller::MakeTextFrameFromTextBlobSkia(blob));
+    const sk_sp<SkTextBlob>& blob,
+    const std::optional<impeller::StrokeParameters> strokeParameters) {
+  return DlTextImpeller::Make(
+      impeller::MakeTextFrameFromTextBlobSkia(blob, strokeParameters));
 }
 
 DlTextImpeller::DlTextImpeller(
