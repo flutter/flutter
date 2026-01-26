@@ -1191,61 +1191,66 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
         canPop: widget.route.canPop, // _routeSetState is called if this updates
         opaque: widget.route.opaque, // _routeSetState is called if this updates
         impliesAppBarDismissal: widget.route.impliesAppBarDismissal,
-        child: Offstage(
-          offstage: widget.route.offstage, // _routeSetState is called if this updates
-          child: PageStorage(
-            bucket: widget.route._storageBucket, // immutable
-            child: Builder(
-              builder: (BuildContext context) {
-                return Actions(
-                  actions: <Type, Action<Intent>>{DismissIntent: _DismissModalAction(context)},
-                  child: PrimaryScrollController(
-                    controller: primaryScrollController,
-                    child: FocusScope.withExternalFocusNode(
-                      focusScopeNode: focusScopeNode, // immutable
-                      child: RepaintBoundary(
-                        child: ListenableBuilder(
-                          listenable: _listenable, // immutable
-                          builder: (BuildContext context, Widget? child) {
-                            return widget.route._buildFlexibleTransitions(
-                              context,
-                              widget.route.animation!,
-                              widget.route.secondaryAnimation!,
-                              // This additional ListenableBuilder is include because if the
-                              // value of the userGestureInProgressNotifier changes, it's
-                              // only necessary to rebuild the IgnorePointer widget and set
-                              // the focus node's ability to focus.
-                              ListenableBuilder(
-                                listenable:
-                                    widget.route.navigator?.userGestureInProgressNotifier ??
-                                    ValueNotifier<bool>(false),
-                                builder: (BuildContext context, Widget? child) {
-                                  final bool ignoreEvents = _shouldIgnoreFocusRequest;
-                                  focusScopeNode.canRequestFocus = !ignoreEvents;
-                                  return IgnorePointer(ignoring: ignoreEvents, child: child);
+        child: Semantics(
+          accessibilityFocusBlockType: widget.route.isCurrent
+              ? AccessibilityFocusBlockType.none
+              : AccessibilityFocusBlockType.blockSubtree,
+          child: Offstage(
+            offstage: widget.route.offstage, // _routeSetState is called if this updates
+            child: PageStorage(
+              bucket: widget.route._storageBucket, // immutable
+              child: Builder(
+                builder: (BuildContext context) {
+                  return Actions(
+                    actions: <Type, Action<Intent>>{DismissIntent: _DismissModalAction(context)},
+                    child: PrimaryScrollController(
+                      controller: primaryScrollController,
+                      child: FocusScope.withExternalFocusNode(
+                        focusScopeNode: focusScopeNode, // immutable
+                        child: RepaintBoundary(
+                          child: ListenableBuilder(
+                            listenable: _listenable, // immutable
+                            builder: (BuildContext context, Widget? child) {
+                              return widget.route._buildFlexibleTransitions(
+                                context,
+                                widget.route.animation!,
+                                widget.route.secondaryAnimation!,
+                                // This additional ListenableBuilder is include because if the
+                                // value of the userGestureInProgressNotifier changes, it's
+                                // only necessary to rebuild the IgnorePointer widget and set
+                                // the focus node's ability to focus.
+                                ListenableBuilder(
+                                  listenable:
+                                      widget.route.navigator?.userGestureInProgressNotifier ??
+                                      ValueNotifier<bool>(false),
+                                  builder: (BuildContext context, Widget? child) {
+                                    final bool ignoreEvents = _shouldIgnoreFocusRequest;
+                                    focusScopeNode.canRequestFocus = !ignoreEvents;
+                                    return IgnorePointer(ignoring: ignoreEvents, child: child);
+                                  },
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _page ??= RepaintBoundary(
+                              key: widget.route._subtreeKey, // immutable
+                              child: Builder(
+                                builder: (BuildContext context) {
+                                  return widget.route.buildPage(
+                                    context,
+                                    widget.route.animation!,
+                                    widget.route.secondaryAnimation!,
+                                  );
                                 },
-                                child: child,
                               ),
-                            );
-                          },
-                          child: _page ??= RepaintBoundary(
-                            key: widget.route._subtreeKey, // immutable
-                            child: Builder(
-                              builder: (BuildContext context) {
-                                return widget.route.buildPage(
-                                  context,
-                                  widget.route.animation!,
-                                  widget.route.secondaryAnimation!,
-                                );
-                              },
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
