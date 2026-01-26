@@ -17,11 +17,8 @@ import '../convert.dart';
 /// Usage:
 ///   flutter test --reporter=summary
 class SummaryReporter {
-  SummaryReporter({
-    required this.supportsColor,
-    required this.stdout,
-    required Logger logger,
-  }) : _logger = logger;
+  SummaryReporter({required this.supportsColor, required this.stdout, required Logger logger})
+    : _logger = logger;
 
   final bool supportsColor;
   final Stdout stdout;
@@ -84,7 +81,9 @@ class SummaryReporter {
   }
 
   void _handleTestStart(Map<String, Object?> event) {
-    if (event case {'test': {'id': final int id, 'name': final String name, 'suiteID': final int? suiteId}}) {
+    if (event case {
+      'test': {'id': final int id, 'name': final String name, 'suiteID': final int? suiteId},
+    }) {
       _tests[id] = _TestInfo(name: name, suiteId: suiteId);
       _currentTestName = name;
       _printProgress();
