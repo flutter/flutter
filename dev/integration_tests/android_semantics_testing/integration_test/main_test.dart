@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:android_semantics_testing/main.dart' as app;
 import 'package:android_semantics_testing/test_constants.dart';
+import 'package:flutter/foundation.dart' show awaitNotRequired;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -26,6 +27,7 @@ const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
 Future<void> setClipboard(String message) async {
   final completer = Completer<void>();
+  @awaitNotRequired
   Future<void> completeSetClipboard([Object? _]) async {
     await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
       'message': message,
@@ -44,6 +46,7 @@ Future<void> setClipboard(String message) async {
 Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
   final int id = tester.getSemantics(finder).id;
   final completer = Completer<String>();
+  @awaitNotRequired
   Future<void> completeSemantics([Object? _]) async {
     final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>(
       'getSemanticsNode',

@@ -4381,6 +4381,7 @@ void main() {
   });
 }
 
+@awaitNotRequired
 Future<void> checkSearchBarDefaults(
   WidgetTester tester,
   ColorScheme colorScheme,

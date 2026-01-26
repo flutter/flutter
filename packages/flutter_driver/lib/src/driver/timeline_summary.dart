@@ -6,6 +6,7 @@ import 'dart:convert' show JsonEncoder, json;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
+import 'package:meta/meta.dart' show awaitNotRequired;
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
@@ -390,6 +391,7 @@ class TimelineSummary {
   /// See also:
   ///
   /// * [Timeline.fromJson], which explains detail about the timeline data.
+  @awaitNotRequired
   Future<void> writeTimelineToFile(
     String traceName, {
     String? destinationDirectory,

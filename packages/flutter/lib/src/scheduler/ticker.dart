@@ -181,6 +181,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
+  @awaitNotRequired
   TickerFuture start() {
     assert(() {
       if (isActive) {

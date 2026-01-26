@@ -821,6 +821,7 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     };
   }
 
+  @awaitNotRequired
   Future<void> _rebuild([void value]) {
     setState(() {
       /* routerDelegate is ready to rebuild */

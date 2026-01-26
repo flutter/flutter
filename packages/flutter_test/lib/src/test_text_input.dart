@@ -228,6 +228,7 @@ class TestTextInput {
   /// If this is used to inject an action when there is a real IME connection,
   /// for example when using the [integration_test] library, there is a risk
   /// that the real IME will become confused as to the current state of input.
+  @awaitNotRequired
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final completer = Completer<void>();

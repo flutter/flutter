@@ -1286,6 +1286,7 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
+  @awaitNotRequired
   Future<void> pasteText(SelectionChangedCause cause);
 
   /// Set the current selection to contain the entire text value.
@@ -2758,6 +2759,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
+  @awaitNotRequired
   Future<void> showWithItems(Rect targetRect, List<IOSSystemContextMenuItemData> items) {
     assert(!_isDisposed);
     assert(items.isNotEmpty);
@@ -2825,6 +2827,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   ///  * [show], which shows the menu hidden by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    the system context menu is supported on the current platform.
+  @awaitNotRequired
   Future<void> hide() async {
     assert(!_isDisposed);
     // This check prevents the instance from accidentally hiding some other

@@ -7,8 +7,9 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 
 export 'dart:typed_data' show ByteData;
 export 'dart:ui' show PlatformMessageResponseCallback;
@@ -56,6 +57,7 @@ abstract class BinaryMessenger {
     'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
     'This feature was deprecated after v3.9.0-19.0.pre.',
   )
+  @awaitNotRequired
   Future<void> handlePlatformMessage(
     String channel,
     ByteData? data,

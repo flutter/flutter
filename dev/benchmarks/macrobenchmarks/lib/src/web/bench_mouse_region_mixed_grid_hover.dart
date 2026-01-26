@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show awaitNotRequired;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -181,7 +182,8 @@ class _Tester {
     onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
-
+  
+  @awaitNotRequired
   Future<void> start() async {
     await Future<void>.delayed(Duration.zero);
     while (!_stopped) {

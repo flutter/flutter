@@ -500,6 +500,7 @@ mixin CommandHandlerFactory {
   }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
+  @awaitNotRequired
   Future<Finder> waitForElement(Finder finder) async {
     if (_frameSync) {
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);

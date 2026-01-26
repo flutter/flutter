@@ -4,6 +4,8 @@
 
 import 'dart:io';
 
+import 'package:meta/meta.dart' show awaitNotRequired;
+
 import 'token_logger.dart';
 
 /// Base class for code generation templates.
@@ -72,6 +74,7 @@ abstract class TokenTemplate {
   /// If the file already contains a generated text block matching the
   /// [blockName], it will be replaced by the [generate] output. Otherwise
   /// the content will just be appended to the end of the file.
+  @awaitNotRequired
   Future<void> updateFile() async {
     final String contents = File(fileName).readAsStringSync();
     final beginComment = '$beginGeneratedComment - $blockName\n';

@@ -51,6 +51,7 @@ class BrowserContextMenu {
   ///
   /// See also:
   ///  * [enableContextMenu], which performs the opposite operation.
+  @awaitNotRequired
   static Future<void> disableContextMenu() {
     assert(kIsWeb, 'This has no effect on platforms other than web.');
     return _instance._channel.invokeMethod<void>('disableContextMenu').then((_) {
@@ -70,6 +71,7 @@ class BrowserContextMenu {
   ///
   /// See also:
   ///  * [disableContextMenu], which performs the opposite operation.
+  @awaitNotRequired
   static Future<void> enableContextMenu() {
     assert(kIsWeb, 'This has no effect on platforms other than web.');
     return _instance._channel.invokeMethod<void>('enableContextMenu').then((_) {

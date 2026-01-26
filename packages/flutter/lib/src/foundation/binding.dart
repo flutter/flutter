@@ -715,6 +715,7 @@ abstract class BindingBase {
   ///
   /// Subclasses (binding classes) should override [performReassemble] to react
   /// to this method being called. This method itself should not be overridden.
+  @awaitNotRequired
   Future<void> reassembleApplication() {
     return lockEvents(performReassemble);
   }
