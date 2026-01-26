@@ -169,32 +169,18 @@ class SummaryReporter {
   }
 
   void _printProgress() {
-    final buffer = StringBuffer();
-    final Duration elapsed = _stopwatch.elapsed;
-    final String minutes = elapsed.inMinutes.toString().padLeft(2, '0');
-    final String seconds = (elapsed.inSeconds % 60).toString().padLeft(2, '0');
-
-    buffer.write('$minutes:$seconds ');
-    buffer.write('$_green+$_passed$_reset');
-
-    if (_skipped > 0) {
-      buffer.write(' $_yellow~$_skipped$_reset');
-    }
-
-    if (_failed > 0) {
-      buffer.write(' $_red-$_failed$_reset');
-    }
-
-    buffer.write(': ');
-    buffer.write(_currentTestName);
-
-    final line = buffer.toString();
+    final line = '${_buildStatusPrefix()}: $_currentTestName';
     final String paddedLine = line.padRight(_terminalWidth);
     stdout.write('\r$paddedLine');
     _lastLineWasProgress = true;
   }
 
   void _printFinalStatus(String message, {bool isFailure = false}) {
+    final suffix = isFailure ? '$_red$message$_reset' : message;
+    _printLine('${_buildStatusPrefix()}: $suffix');
+  }
+
+  String _buildStatusPrefix() {
     final buffer = StringBuffer();
     final Duration elapsed = _stopwatch.elapsed;
     final String minutes = elapsed.inMinutes.toString().padLeft(2, '0');
@@ -211,15 +197,7 @@ class SummaryReporter {
       buffer.write(' $_red-$_failed$_reset');
     }
 
-    buffer.write(': ');
-
-    if (isFailure) {
-      buffer.write('$_red$message$_reset');
-    } else {
-      buffer.write(message);
-    }
-
-    _printLine(buffer.toString());
+    return buffer.toString();
   }
 
   void _printFailureSummary() {
