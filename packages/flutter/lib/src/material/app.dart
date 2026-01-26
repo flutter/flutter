@@ -63,7 +63,16 @@ enum ThemeMode {
   light,
 
   /// Always use the dark mode (if available) regardless of system preference.
-  dark,
+  dark;
+
+  /// Whether this theme mode follows the system setting.
+  bool get isSystem => this == ThemeMode.system;
+
+  /// Whether this theme mode forces light mode.
+  bool get isLight => this == ThemeMode.light;
+
+  /// Whether this theme mode forces dark mode.
+  bool get isDark => this == ThemeMode.dark;
 }
 
 /// An application that uses Material Design.
