@@ -822,7 +822,13 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    assert(_debugCheckBackgroundIsHidden(context));
+    if (onTap != null ||
+        onLongPress != null ||
+        selected ||
+        tileColor != null ||
+        selectedTileColor != null) {
+      assert(_debugCheckBackgroundIsHidden(context));
+    }
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
