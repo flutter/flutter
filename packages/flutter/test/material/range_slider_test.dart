@@ -536,6 +536,92 @@ void main() {
     expect(values.start, equals(0));
   });
 
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (ltr)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (rtl)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
@@ -1532,7 +1618,7 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildApp(divisions: 3));
+      await tester.pumpWidget(buildApp(divisions: 5));
 
       final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
@@ -2416,52 +2502,52 @@ void main() {
   });
 
   testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
-    var values = const RangeValues(50, 70);
-    const MouseCursor disabledCursor = SystemMouseCursors.basic;
-    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+    var values = const RangeValues(20, 75);
+    const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
+    const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
 
     Widget buildFrame({required bool enabled}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Center(
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.forbidden,
-                    child: RangeSlider(
-                      mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
-                        Set<WidgetState> states,
-                      ) {
-                        if (states.contains(WidgetState.disabled)) {
-                          return disabledCursor;
-                        }
-                        if (states.contains(WidgetState.dragged)) {
-                          return draggedCursor;
-                        }
-                        if (states.contains(WidgetState.hovered)) {
-                          return hoveredCursor;
-                        }
-
-                        return SystemMouseCursors.none;
-                      }),
-                      values: values,
-                      max: 100.0,
-                      onChanged: enabled
-                          ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                          : null,
-                      onChangeStart: enabled ? (RangeValues newValues) {} : null,
-                      onChangeEnd: enabled ? (RangeValues newValues) {} : null,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return RangeSlider(
+                        mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return disabledCursor;
+                          }
+                          if (states.contains(WidgetState.dragged)) {
+                            return draggedCursor;
+                          }
+                          if (states.contains(WidgetState.hovered)) {
+                            return hoveredCursor;
+                          }
+                          return SystemMouseCursors.click;
+                        }),
+                        values: values,
+                        max: 100.0,
+                        onChanged: enabled
+                            ? (RangeValues newValues) {
+                                setState(() {
+                                  values = newValues;
+                                });
+                              }
+                            : null,
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
@@ -2472,22 +2558,38 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
 
+    // System default.
+    await gesture.addPointer(location: Offset.zero);
     await tester.pumpWidget(buildFrame(enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
+
+    // Disabled.
+    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider)));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
+    // Hovered.
     await tester.pumpWidget(buildFrame(enabled: true));
-    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
-    await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
 
-    await tester.timedDrag(
-      find.byType(RangeSlider),
-      const Offset(20.0, 0.0),
-      const Duration(milliseconds: 100),
-    );
+    // Dragged.
+    await gesture.down(tester.getCenter(find.byType(RangeSlider)));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
+
+    // Hovered.
+    await gesture.up();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    // System default.
+    await gesture.moveTo(Offset.zero);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
   });
 
   testWidgets('RangeSlider can be hovered and has correct hover color', (

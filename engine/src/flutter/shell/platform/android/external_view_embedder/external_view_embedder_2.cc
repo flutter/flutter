@@ -83,7 +83,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
             jni_facade->hidePlatformView2(view_id);
           }
 
-          jni_facade->applyTransaction();
+          jni_facade->swapTransaction();
+          jni_facade->onEndFrame2();
         }));
     views_visible_last_frame_.clear();
     return;
@@ -170,13 +171,12 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
-        jni_facade->swapTransaction();
-
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
         } else {
           HideOverlayLayerIfNeeded();
         }
+        jni_facade->swapTransaction();
 
         for (int64_t view_id : composition_order) {
           DlRect view_rect = GetViewRect(view_id, view_params);

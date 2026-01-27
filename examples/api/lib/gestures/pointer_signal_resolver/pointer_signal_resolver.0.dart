@@ -71,10 +71,7 @@ class _ColorChangerState extends State<ColorChanger> {
         },
         child: Stack(
           fit: StackFit.expand,
-          children: <Widget>[
-            const AbsorbPointer(),
-            if (widget.child != null) widget.child!,
-          ],
+          children: <Widget>[const AbsorbPointer(), ?widget.child],
         ),
       ),
     );
