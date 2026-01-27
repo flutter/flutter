@@ -930,7 +930,7 @@ def gather_dart_tests(
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
   impeller_backends = ['', 'vulkan']
-  if is_macos():
+  if is_mac():
     impeller_backends.append('metal')
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
