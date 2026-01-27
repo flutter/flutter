@@ -343,10 +343,8 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final File dylibFile = versionADir.childFile(frameworkName);
   expect(dylibFile, exists);
   final stripped = buildMode != 'debug';
-  if (platform.isMacOS) {
-    expectDylibIsStripped(dylibFile, stripped: stripped);
-    expectDsymIsCreated(dylibFile, created: stripped);
-  }
+  expectDylibIsStripped(dylibFile, stripped: stripped);
+  expectDsymIsCreated(dylibFile, created: stripped);
   final Link currentLink = versionsDir.childLink('Current');
   expect(currentLink, exists);
   expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
@@ -397,10 +395,8 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childFile(frameworkName);
   expect(dylib, exists);
   final stripped = buildMode != 'debug';
-  if (platform.isMacOS) {
-    expectDylibIsStripped(dylib, stripped: stripped);
-    expectDsymIsCreated(dylib, created: stripped);
-  }
+  expectDylibIsStripped(dylib, stripped: stripped);
+  expectDsymIsCreated(dylib, created: stripped);
   final String infoPlist = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile('Info.plist')
@@ -573,7 +569,8 @@ void expectDylibIsStripped(File dylib, {required bool stripped}) {
   int? nlocalsym;
   for (var i = 0; i < lines.length; i++) {
     if (lines[i].contains('LC_DYSYMTAB')) {
-      for (int j = i + 1; j < i + 20 && j < lines.length; j++) {
+      const kMaxDsymtabSearchLines = 20;
+      for (int j = i + 1; j < i + kMaxDsymtabSearchLines && j < lines.length; j++) {
         if (lines[j].contains('nlocalsym')) {
           final RegExpMatch? match = RegExp(r'nlocalsym\s+(\d+)').firstMatch(lines[j]);
           if (match != null) {
