@@ -94,7 +94,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 0u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_alpha");
@@ -103,7 +102,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 1u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_sparkle_color");
@@ -112,7 +110,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_sparkle_alpha");
@@ -121,7 +118,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 3u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_blur");
@@ -130,7 +126,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 4u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_radius_scale");
@@ -139,7 +134,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 6u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_max_radius");
@@ -148,7 +142,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 7u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_resolution_scale");
@@ -157,7 +150,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 8u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_noise_scale");
@@ -166,7 +158,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 9u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_noise_phase");
@@ -175,7 +166,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 10u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
 
       {
@@ -185,7 +175,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_circle2");
@@ -194,7 +183,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 12u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_circle3");
@@ -203,7 +191,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 13u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation1");
@@ -212,7 +199,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 14u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation2");
@@ -221,7 +207,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 15u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation3");
@@ -230,7 +215,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 16u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       break;
     }
@@ -250,15 +234,14 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       // introduced.
       // This means 36 * 4 = 144 bytes total.
 
-      EXPECT_EQ(uni->GetGPUSize(), 144u);
-      std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
-                                             RuntimePaddingType::kFloat);
-      layout[5] = RuntimePaddingType::kPadding;
-      layout[6] = RuntimePaddingType::kPadding;
-      layout[7] = RuntimePaddingType::kPadding;
-      layout[23] = RuntimePaddingType::kPadding;
+      EXPECT_EQ(uni->GetSize(), 144u);
+      std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
+      layout[5] = 0;
+      layout[6] = 0;
+      layout[7] = 0;
+      layout[23] = 0;
 
-      EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
+      EXPECT_THAT(uni->struct_layout, ::testing::ElementsAreArray(layout));
       break;
     }
   }
