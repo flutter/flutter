@@ -194,24 +194,35 @@ public class FlutterView extends FrameLayout
       new FlutterUiResizeListener() {
         @Override
         public void resizeEngineView(int width, int height) {
-          boolean changed = false;
-          if (renderSurface != null) {
-            View flutterEngineView = ((View) renderSurface);
-            ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
-            if (flutterEngineView.getHeight() != height) {
-              changed = true;
-              surfaceParams.height = height;
-            }
-            if (flutterEngineView.getWidth() != width) {
-              changed = true;
-              surfaceParams.width = width;
-            }
-            if (changed) {
-              shouldSendViewportMetrics.set(false);
-              flutterEngineView.setLayoutParams(surfaceParams);
-            }
-          } else {
-            Log.e(TAG, "Flutter engine view not set.");
+          // This is called from the raster thread.  Ensure UI thread
+          // is used.
+          Activity activity = ViewUtils.getActivity(getContext());
+          if (activity != null) {
+            activity.runOnUiThread(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    boolean changed = false;
+                    if (renderSurface != null) {
+                      View flutterEngineView = ((View) renderSurface);
+                      ViewGroup.LayoutParams surfaceParams = flutterEngineView.getLayoutParams();
+                      if (flutterEngineView.getHeight() != height) {
+                        changed = true;
+                        surfaceParams.height = height;
+                      }
+                      if (flutterEngineView.getWidth() != width) {
+                        changed = true;
+                        surfaceParams.width = width;
+                      }
+                      if (changed) {
+                        shouldSendViewportMetrics.set(false);
+                        flutterEngineView.setLayoutParams(surfaceParams);
+                      }
+                    } else {
+                      Log.e(TAG, "Flutter engine view not set.");
+                    }
+                  }
+                });
           }
         }
       };

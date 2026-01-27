@@ -1376,16 +1376,26 @@ public class FlutterViewTest {
 
   @Test
   public void resizeEngineView_resizesTheSurfaceView() {
-    FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
-    FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
-    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
-    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
-    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
-    flutterView.attachToFlutterEngine(flutterEngine);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            Activity spyActivity = spy(activity);
+            FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(spyActivity));
+            FlutterView flutterView = new FlutterView(spyActivity, flutterSurfaceView);
+            FlutterEngine flutterEngine =
+                spy(new FlutterEngine(spyActivity, mockFlutterLoader, mockFlutterJni));
+            FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+            when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+            flutterView.attachToFlutterEngine(flutterEngine);
 
-    clearInvocations(flutterSurfaceView);
-    flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
-    verify(flutterSurfaceView, times(1)).setLayoutParams(any());
+            ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+            flutterView.flutterUiResizeListener.resizeEngineView(100, 200);
+            verify(spyActivity).runOnUiThread(runnableCaptor.capture());
+            clearInvocations(flutterSurfaceView);
+            runnableCaptor.getValue().run();
+            verify(flutterSurfaceView, times(1)).setLayoutParams(any());
+          });
+    }
   }
 
   @SuppressWarnings("deprecation")
