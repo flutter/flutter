@@ -121,7 +121,14 @@ constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
     }};
 }  // namespace
 
+// Pixel 10 device ID from ANGLE/Chromium source code.
+// https://chromium.googlesource.com/chromium/src/+/main/testing/buildbot/buildbot_json_magic_substitutions.py#51
+// https://source.chromium.org/chromium/chromium/src/+/main:content/test/gpu/gpu_tests/gpu_integration_test.py;l=1396;drc=6cce000efb9f288a9d51d42c7ab38b38beb5d77c
 const uint32_t kPixel10DeviceID = 0x71061212;
+// PowerVR 25.1@6794074 - the device_driver_version_ is a packed version number
+// which is vendor specific. This appears to be the PowerVR DDK build number.
+// https://www.khronos.org/conformance/adopters/conformant-products/opencl#submission_466
+// https://vulkan.gpuinfo.org/listreports.php?devicename=Google+Pixel+10&platform=android
 const uint32_t kPixel10MinDriverVersion = 6794074;  // Corresponds to 25.1
 
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
