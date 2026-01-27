@@ -745,4 +745,28 @@ void main() {
     box = key.currentContext!.findRenderObject()! as RenderBox;
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 150.0)));
   });
+
+  testWidgets('AnimatedPositionedDirectional does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Stack(
+              children: <Widget>[
+                AnimatedPositionedDirectional(
+                  duration: Duration(milliseconds: 300),
+                  child: Text('X'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPositionedDirectional)), Size.zero);
+  });
 }
