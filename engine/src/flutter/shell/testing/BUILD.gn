@@ -64,6 +64,7 @@ executable("testing") {
       "//flutter/third_party/angle:libGLESv2_static",
       "//flutter/third_party/swiftshader",
       "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
+      "//flutter/vulkan/procs",
     ]
     configs += [ "//flutter/third_party/swiftshader:swiftshader_config" ]
     sources += [

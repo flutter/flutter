@@ -6,12 +6,11 @@
 
 #include "flutter/shell/testing/tester_context_vk_factory.h"
 
-#include <vulkan/vulkan.h>
-
 #include <vector>
 
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
+#include "flutter/vulkan/swiftshader_path.h"
 #include "impeller/base/validation.h"
 #include "impeller/entity/vk/entity_shaders_vk.h"
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"
@@ -49,8 +48,14 @@ class TesterContextVK : public TesterContext {
   }
 
   bool Initialize(bool enable_validation) {
+    InitializeVulkanProcTable();
+    if (!proc_table_) {
+      VALIDATION_LOG << "Could not initialize Vulkan proc table.";
+      return false;
+    }
+
     impeller::ContextVK::Settings context_settings;
-    context_settings.proc_address_callback = &vkGetInstanceProcAddr;
+    context_settings.proc_address_callback = proc_table_->GetInstanceProcAddr;
     context_settings.shader_libraries_data = ShaderLibraryMappings();
     context_settings.cache_directory = fml::paths::GetCachesDirectory();
     context_settings.enable_validation = enable_validation;
@@ -99,8 +104,28 @@ class TesterContextVK : public TesterContext {
   }
 
  private:
+  fml::RefPtr<vulkan::VulkanProcTable> proc_table_;
   std::shared_ptr<impeller::ContextVK> context_;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_;
+
+  void InitializeVulkanProcTable() {
+    const auto executable_directory_path =
+        fml::paths::GetExecutableDirectoryPath();
+    FML_CHECK(executable_directory_path.first);
+    auto icd_directory = executable_directory_path.second;
+    if (icd_directory.ends_with("exe.unstripped")) {
+      icd_directory = fml::paths::GetDirectoryName(icd_directory);
+    }
+    std::string icd_path =
+        fml::paths::JoinPaths({icd_directory, VULKAN_SO_PATH});
+
+    proc_table_ =
+        fml::MakeRefCounted<vulkan::VulkanProcTable>(icd_path.c_str());
+
+    if (!proc_table_->HasAcquiredMandatoryProcAddresses()) {
+      proc_table_ = nullptr;
+    }
+  }
 };
 
 }  // namespace
