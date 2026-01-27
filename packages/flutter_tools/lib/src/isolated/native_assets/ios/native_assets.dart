@@ -118,6 +118,11 @@ Future<void> copyNativeCodeAssetsIOS(
     }
     await lipoDylibs(dylibFile, sources);
 
+    if (buildMode != BuildMode.debug) {
+      await dsymutilDylib(dylibFile);
+      await stripDylib(dylibFile);
+    }
+
     final String dylibFileName = dylibFile.basename;
     final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);

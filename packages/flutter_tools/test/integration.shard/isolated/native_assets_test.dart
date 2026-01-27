@@ -342,6 +342,11 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   expect(resourcesDir, exists);
   final File dylibFile = versionADir.childFile(frameworkName);
   expect(dylibFile, exists);
+  final stripped = buildMode != 'debug';
+  if (platform.isMacOS) {
+    expectDylibIsStripped(dylibFile, stripped: stripped);
+    expectDsymIsCreated(dylibFile, created: stripped);
+  }
   final Link currentLink = versionsDir.childLink('Current');
   expect(currentLink, exists);
   expect(currentLink.resolveSymbolicLinksSync(), versionADir.path);
@@ -391,6 +396,11 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
   expect(dylib, exists);
+  final stripped = buildMode != 'debug';
+  if (platform.isMacOS) {
+    expectDylibIsStripped(dylib, stripped: stripped);
+    expectDsymIsCreated(dylib, created: stripped);
+  }
   final String infoPlist = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile('Info.plist')
@@ -530,6 +540,71 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
     }
     expect(config.code.cCompiler?.compiler, isNot(isNull));
   }
+}
+
+/// Check whether a dylib is stripped with `otool`.
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 0              0 or 1 means stripped
+/// iextdefsym 0
+/// nextdefsym 2
+/// iundefsym 2
+/// nundefsym 1
+/// ```
+///
+/// ```text
+///       cmd LC_DYSYMTAB
+///   cmdsize 80
+/// ilocalsym 0
+/// nlocalsym 8              >0 means unstripped, note: unstripped can be 0!
+/// iextdefsym 8
+/// nextdefsym 2
+/// ```
+void expectDylibIsStripped(File dylib, {required bool stripped}) {
+  final ProcessResult result = processManager.runSync(<String>['otool', '-l', dylib.path]);
+  expect(result.exitCode, 0);
+  final stdout = result.stdout.toString();
+
+  // Find LC_DYSYMTAB section and check nlocalsym.
+  final List<String> lines = stdout.split('\n');
+  int? nlocalsym;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].contains('LC_DYSYMTAB')) {
+      for (int j = i + 1; j < i + 20 && j < lines.length; j++) {
+        if (lines[j].contains('nlocalsym')) {
+          final RegExpMatch? match = RegExp(r'nlocalsym\s+(\d+)').firstMatch(lines[j]);
+          if (match != null) {
+            nlocalsym = int.parse(match.group(1)!);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  if (nlocalsym == null) {
+    throw Exception('nlocalsym not found in LC_DYSYMTAB section of ${dylib.path}\n$stdout');
+  }
+
+  if (stripped) {
+    expect(
+      nlocalsym,
+      lessThanOrEqualTo(1),
+      reason: 'Expected stripped binary to have nlocalsym 0 in ${dylib.path}',
+    );
+  } else {
+    // Unstripped can be 0 if compiled with a modern XCode, so nothing to check
+    // here.
+  }
+}
+
+void expectDsymIsCreated(File dylib, {required bool created}) {
+  final Directory dsymDir = fileSystem.directory('${dylib.path}.dSYM');
+  expect(dsymDir.existsSync(), created, reason: '.dSYM missing for ${dylib.path}');
 }
 
 extension on String {
