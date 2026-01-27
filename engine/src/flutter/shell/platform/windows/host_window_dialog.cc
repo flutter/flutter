@@ -37,15 +37,16 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const WindowSizeRequest& preferred_size,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
+                                   bool decorated,
                                    std::optional<HWND> const& owner_window)
     : HostWindow(window_manager, engine) {
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kDialog,
-      .window_style = GetWindowStyleForDialog(owner_window),
+      .window_style = decorated ? GetWindowStyleForDialog(owner_window) : 0,
       .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
       .box_constraints = constraints,
-      .initial_window_rect =
-          GetInitialRect(engine, preferred_size, constraints, owner_window),
+      .initial_window_rect = GetInitialRect(engine, preferred_size, constraints,
+                                            owner_window, decorated),
       .title = title,
       .owner_window = owner_window,
   });
@@ -64,8 +65,10 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
-                                      std::optional<HWND> const& owner_window) {
-  auto const window_style = GetWindowStyleForDialog(owner_window);
+                                      std::optional<HWND> const& owner_window,
+                                      bool decorated) {
+  auto const window_style =
+      decorated ? GetWindowStyleForDialog(owner_window) : 0;
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
   std::optional<Size> const window_size =

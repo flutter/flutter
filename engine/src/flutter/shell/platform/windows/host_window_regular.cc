@@ -11,7 +11,8 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
                                      FlutterWindowsEngine* engine,
                                      const WindowSizeRequest& preferred_size,
                                      const BoxConstraints& constraints,
-                                     LPCWSTR title)
+                                     LPCWSTR title,
+                                     bool decorated)
 
     : HostWindow(window_manager, engine) {
   // TODO(knopp): Investigate sizing the window to its content with the help of
@@ -20,7 +21,7 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
   InitializeFlutterView(HostWindowInitializationParams{
       .archetype = WindowArchetype::kRegular,
       .window_style = WS_OVERLAPPEDWINDOW,
-      .extended_window_style = 0,
+      .extended_window_style = decorated ? WS_OVERLAPPEDWINDOW : 0,
       .box_constraints = constraints,
       .initial_window_rect =
           GetInitialRect(engine, preferred_size, constraints),

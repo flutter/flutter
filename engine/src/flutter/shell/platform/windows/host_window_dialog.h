@@ -19,6 +19,7 @@ class HostWindowDialog : public HostWindow {
                    const WindowSizeRequest& preferred_size,
                    const BoxConstraints& constraints,
                    LPCWSTR title,
+                   bool decorated,
                    std::optional<HWND> const& owner_window);
 
   void SetFullscreen(bool fullscreen,
@@ -39,7 +40,8 @@ class HostWindowDialog : public HostWindow {
   static Rect GetInitialRect(FlutterWindowsEngine* engine,
                              const WindowSizeRequest& preferred_size,
                              const BoxConstraints& constraints,
-                             std::optional<HWND> const& owner_window);
+                             std::optional<HWND> const& owner_window,
+                             bool decorated);
 };
 }  // namespace flutter
 

@@ -73,6 +73,8 @@ class WindowSettings {
       parentAnchor: WindowPositionerAnchor.right,
       childAnchor: WindowPositionerAnchor.left,
     ),
+    this.regularDecorated = true,
+    this.dialogDecorated = true,
   });
 
   /// The initial size for newly created regular windows.
@@ -83,6 +85,12 @@ class WindowSettings {
 
   /// The positioner used to determine where new tooltips and popups are placed.
   WindowPositioner positioner;
+
+  /// True if regular windows are decorated.
+  bool regularDecorated;
+
+  /// True if dialog windows are decorated.
+  bool dialogDecorated;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.
