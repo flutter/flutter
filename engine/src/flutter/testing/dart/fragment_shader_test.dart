@@ -121,56 +121,68 @@ void main() async {
       slot.set(6.0, 7.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec2 wrong size', () async {
-      expect(
-        () => shader.getUniformVec2('iVec3Uniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('`iVec3Uniform` has size 3, not size 2.'),
+    test(
+      'FragmentProgram getUniformVec2 wrong size',
+      () async {
+        expect(
+          () => shader.getUniformVec2('iVec3Uniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('`iVec3Uniform` has size 3, not size 2.'),
+            ),
           ),
-        ),
-      );
-      expect(
-        () => shader.getUniformVec2('iFloatUniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('`iFloatUniform` has size 1, not size 2.'),
+        );
+        expect(
+          () => shader.getUniformVec2('iFloatUniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('`iFloatUniform` has size 1, not size 2.'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
-    _runSkiaTest('FragmentProgram getUniformVec3', () async {
-      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
-      slot.set(0.8, 0.1, 0.3);
-    });
+    test(
+      'FragmentProgram getUniformVec3',
+      () async {
+        final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+        slot.set(0.8, 0.1, 0.3);
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
-    _runSkiaTest('FragmentProgram getUniformVec3 wrong size', () async {
-      expect(
-        () => shader.getUniformVec3('iVec2Uniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('`iVec2Uniform` has size 2, not size 3.'),
+    test(
+      'FragmentProgram getUniformVec3 wrong size',
+      () async {
+        expect(
+          () => shader.getUniformVec3('iVec2Uniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('`iVec2Uniform` has size 2, not size 3.'),
+            ),
           ),
-        ),
-      );
-      expect(
-        () => shader.getUniformVec3('iVec4Uniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('`iVec4Uniform` has size 4, not size 3.'),
+        );
+        expect(
+          () => shader.getUniformVec3('iVec4Uniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('`iVec4Uniform` has size 4, not size 3.'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
     _runSkiaTest('FragmentProgram getUniformVec4', () async {
       final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
@@ -218,37 +230,49 @@ void main() async {
       slots[0].set(1.0, 1.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec2 wrong type', () async {
-      expect(
-        () => shader.getUniformVec2Array('iVec3ArrayUniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
+    test(
+      'FragmentProgram getUniformArrayVec2 wrong type',
+      () async {
+        expect(
+          () => shader.getUniformVec2Array('iVec3ArrayUniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('Uniform size (9) for "iVec3ArrayUniform" is not a multiple of 2.'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec3', () async {
-      final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
-      expect(slots.length, 3);
-      slots[0].set(1.0, 1.0, 1.0);
-    });
+    test(
+      'FragmentProgram getUniformArrayVec3',
+      () async {
+        final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
+        expect(slots.length, 3);
+        slots[0].set(1.0, 1.0, 1.0);
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec3 wrong type', () async {
-      expect(
-        () => shader.getUniformVec3Array('iFloatArrayUniform'),
-        throwsA(
-          isA<ArgumentError>().having(
-            (e) => e.message,
-            'message',
-            contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
+    test(
+      'FragmentProgram getUniformArrayVec3 wrong type',
+      () async {
+        expect(
+          () => shader.getUniformVec3Array('iFloatArrayUniform'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              contains('Uniform size (10) for "iFloatArrayUniform" is not a multiple of 3.'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+      skip: Platform.executableArguments.contains('--impeller-backend=vulkan'),
+    );
 
     _runSkiaTest('FragmentProgram getUniformArrayVec4', () async {
       final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
