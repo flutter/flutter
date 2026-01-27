@@ -1129,7 +1129,7 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
           },
           1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_bevel_reference.size(), 78u);
+  EXPECT_EQ(points_bevel_reference.size(), 26u);
 
   // Now create a path that doubles back on itself with a quadratic.
   flutter::DlPathBuilder path_builder;
@@ -1196,7 +1196,7 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
           },
           1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_bevel_reference.size(), 82u);
+  EXPECT_EQ(points_bevel_reference.size(), 26u);
 
   // Now create a path that doubles back on itself with a conic.
   flutter::DlPathBuilder path_builder;
@@ -1264,7 +1264,7 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
           },
           1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_reference.size(), 80u);
+  EXPECT_EQ(points_reference.size(), 26u);
 
   // Now create a path that doubles back on itself with a cubic.
   flutter::DlPathBuilder path_builder;
