@@ -17,7 +17,6 @@ class TooltipWindowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(controller.contentSize);
     return RepeatingAnimationBuilder(
       animatable: TweenSequence<double>([
         TweenSequenceItem(
