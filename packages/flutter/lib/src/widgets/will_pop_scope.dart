@@ -12,8 +12,76 @@ import 'routes.dart';
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
 ///
+/// {@tool snippet}
+/// **Migration example:**
+///
+/// Instead of:
+/// ```dart
+/// WillPopScope(
+///   onWillPop: () async {
+///     if (hasUnsavedChanges) {
+///       return await showDialog<bool>(
+///         context: context,
+///         builder: (context) => AlertDialog(
+///           title: const Text('Discard changes?'),
+///           actions: [
+///             TextButton(
+///               onPressed: () => Navigator.pop(context, false),
+///               child: const Text('Cancel'),
+///             ),
+///             TextButton(
+///               onPressed: () => Navigator.pop(context, true),
+///               child: const Text('Discard'),
+///             ),
+///           ],
+///         ),
+///       ) ?? false;
+///     }
+///     return true;
+///   },
+///   child: child,
+/// )
+/// ```
+///
+/// Use:
+/// ```dart
+/// PopScope(
+///   canPop: !hasUnsavedChanges,
+///   onPopInvokedWithResult: (bool didPop, dynamic result) async {
+///     if (!didPop && hasUnsavedChanges) {
+///       final bool? shouldPop = await showDialog<bool>(
+///         context: context,
+///         builder: (context) => AlertDialog(
+///           title: const Text('Discard changes?'),
+///           actions: [
+///             TextButton(
+///               onPressed: () => Navigator.pop(context, false),
+///               child: const Text('Cancel'),
+///             ),
+///             TextButton(
+///               onPressed: () => Navigator.pop(context, true),
+///               child: const Text('Discard'),
+///             ),
+///           ],
+///         ),
+///       );
+///       if (shouldPop == true && context.mounted) {
+///         Navigator.of(context).pop();
+///       }
+///     }
+///   },
+///   child: child,
+/// )
+/// ```
+///
+/// Note: [PopScope] uses [canPop] to prevent the pop in advance, and
+/// [onPopInvokedWithResult] is called after the pop attempt. If [canPop] is
+/// false, the pop is prevented and `didPop` will be false in the callback.
+/// {@end-tool}
+///
 /// See also:
 ///
+///  * [PopScope], the replacement widget that supports Android predictive back.
 ///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
 ///    which this widget uses to register and unregister [onWillPop].
 ///  * [Form], which provides an `onWillPop` callback that enables the form
