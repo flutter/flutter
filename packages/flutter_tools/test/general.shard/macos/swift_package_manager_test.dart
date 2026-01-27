@@ -300,6 +300,16 @@ $_doubleIndent
     ]
 )
 ''');
+            final File soureFile = project.flutterFrameworkSwiftPackageDirectory
+                .childDirectory('Sources')
+                .childDirectory('FlutterFramework')
+                .childFile('FlutterFramework.swift');
+            expect(soureFile.existsSync(), isTrue);
+            expect(soureFile.readAsStringSync(), '''
+//
+//  Generated file. Do not edit.
+//
+''');
           });
         });
 
