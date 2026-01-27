@@ -2823,6 +2823,363 @@ void main() {
     );
   });
 
+  testWidgets(
+    'RangeSlider can be incremented and decremented by keyboard shortcuts - LTR',
+    (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      var startValues = const RangeValues(0.0, 0.0);
+      var currentValues = const RangeValues(0.3, 0.7);
+      var endValues = const RangeValues(0.0, 0.0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return RangeSlider(
+                    values: currentValues,
+                    onChangeStart: (RangeValues newValues) {
+                      setState(() {
+                        startValues = newValues;
+                      });
+                    },
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        currentValues = newValues;
+                      });
+                    },
+                    onChangeEnd: (RangeValues newValues) {
+                      setState(() {
+                        endValues = newValues;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Focus on the start thumb
+      final startFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+      startFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Test start thumb - right arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.3);
+      expect(currentValues.start, 0.35);
+      expect(endValues.start, 0.35);
+      expect(currentValues.end, 0.7);
+
+      // Test start thumb - left arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.35);
+      expect(currentValues.start, 0.3);
+      expect(endValues.start, 0.3);
+      expect(currentValues.end, 0.7);
+
+      // Test start thumb - up arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.3);
+      expect(currentValues.start, 0.35);
+      expect(endValues.start, 0.35);
+
+      // Test start thumb - down arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.35);
+      expect(currentValues.start, 0.3);
+      expect(endValues.start, 0.3);
+
+      // Focus on the end thumb
+      final endFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+      endFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Test end thumb - right arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.7);
+      expect(currentValues.end, 0.75);
+      expect(endValues.end, 0.75);
+      expect(currentValues.start, 0.3);
+
+      // Test end thumb - left arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.75);
+      expect(currentValues.end, 0.7);
+      expect(endValues.end, 0.7);
+
+      // Test end thumb - up arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.7);
+      expect(currentValues.end, 0.75);
+      expect(endValues.end, 0.75);
+
+      // Test end thumb - down arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.75);
+      expect(currentValues.end, 0.7);
+      expect(endValues.end, 0.7);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets(
+    'RangeSlider can be incremented and decremented by keyboard shortcuts - RTL',
+    (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      var startValues = const RangeValues(0.0, 0.0);
+      var currentValues = const RangeValues(0.3, 0.7);
+      var endValues = const RangeValues(0.0, 0.0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: RangeSlider(
+                      values: currentValues,
+                      onChangeStart: (RangeValues newValues) {
+                        setState(() {
+                          startValues = newValues;
+                        });
+                      },
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          currentValues = newValues;
+                        });
+                      },
+                      onChangeEnd: (RangeValues newValues) {
+                        setState(() {
+                          endValues = newValues;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Focus on the start thumb
+      final startFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+      startFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Test start thumb - right arrow (decrease in RTL)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.3);
+      expect(currentValues.start, 0.25);
+      expect(endValues.start, 0.25);
+      expect(currentValues.end, 0.7);
+
+      // Test start thumb - left arrow (increase in RTL)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.25);
+      expect(currentValues.start, 0.3);
+      expect(endValues.start, 0.3);
+
+      // Test start thumb - up arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.3);
+      expect(currentValues.start, 0.35);
+      expect(endValues.start, 0.35);
+
+      // Test start thumb - down arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(startValues.start, 0.35);
+      expect(currentValues.start, 0.3);
+      expect(endValues.start, 0.3);
+
+      // Focus on the end thumb
+      final endFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+      endFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Test end thumb - right arrow (decrease in RTL)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.7);
+      expect(currentValues.end, 0.65);
+      expect(endValues.end, 0.65);
+      expect(currentValues.start, 0.3);
+
+      // Test end thumb - left arrow (increase in RTL)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.65);
+      expect(currentValues.end, 0.7);
+      expect(endValues.end, 0.7);
+
+      // Test end thumb - up arrow (increase)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.7);
+      expect(currentValues.end, 0.75);
+      expect(endValues.end, 0.75);
+
+      // Test end thumb - down arrow (decrease)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(startValues.end, 0.75);
+      expect(currentValues.end, 0.7);
+      expect(endValues.end, 0.7);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
+  testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
+    var values = const RangeValues(0.2, 0.8);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focus on the start thumb
+    final Finder rangeSliderFinder = find.byType(RangeSlider);
+    expect(rangeSliderFinder, findsOneWidget);
+    final startFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    final endFocusNode =
+        (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+
+    startFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, startFocusNode);
+
+    // Tab to focus on the end thumb
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus, endFocusNode);
+  });
+
+  testWidgets(
+    'RangeSlider with divisions respects keyboard input',
+    (WidgetTester tester) async {
+      var values = const RangeValues(20, 80);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return RangeSlider(
+                    values: values,
+                    max: 100,
+                    divisions: 10,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Focus on the start thumb
+      final startFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+      startFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Increase start thumb by one division (10)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(values.start, 30);
+
+      // Decrease start thumb by one division (10)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(values.start, 20);
+
+      // Focus on the end thumb
+      final endFocusNode =
+          (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+      endFocusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Increase end thumb by one division (10)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      expect(values.end, 90);
+
+      // Decrease end thumb by one division (10)
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      expect(values.end, 80);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
+
   testWidgets('RangeSlider is draggable and has correct dragged color', (
     WidgetTester tester,
   ) async {
