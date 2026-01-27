@@ -7,6 +7,9 @@
 #
 # bin/cache/engine.stamp <-- SHA of the commit that engine artifacts were built
 # bin/cache/engine.realm <-- optional; whether the SHA is from presubmit builds or staging (bringup: true).
+#
+# *DOES NOT* update engine.version. To update engine.version run
+# `bin/internal/last_engine_commit.sh > bin/internal/engine.version`
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
