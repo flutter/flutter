@@ -33,13 +33,16 @@ static void FindSwiftShaderICDAtKnownPaths() {
   const auto executable_directory_path =
       fml::paths::GetExecutableDirectoryPath();
   FML_CHECK(executable_directory_path.first);
-  const auto executable_directory =
-      fml::OpenDirectory(executable_directory_path.second.c_str(), false,
-                         fml::FilePermission::kRead);
-  FML_CHECK(executable_directory.is_valid());
-  if (fml::FileExists(executable_directory, kSwiftShaderICDJSON)) {
-    const auto icd_path = fml::paths::JoinPaths(
-        {executable_directory_path.second, kSwiftShaderICDJSON});
+  auto icd_directory = executable_directory_path.second;
+  if (icd_directory.ends_with("exe.unstripped")) {
+    icd_directory = fml::paths::GetDirectoryName(icd_directory);
+  }
+  const auto icd_directory_fd = fml::OpenDirectory(icd_directory.c_str(), false,
+                                                   fml::FilePermission::kRead);
+  FML_CHECK(icd_directory_fd.is_valid());
+  if (fml::FileExists(icd_directory_fd, kSwiftShaderICDJSON)) {
+    const auto icd_path =
+        fml::paths::JoinPaths({icd_directory, kSwiftShaderICDJSON});
 #if FML_OS_WIN
     const auto success =
         ::SetEnvironmentVariableA(kVulkanICDFileNamesEnvVariableKey,  //
