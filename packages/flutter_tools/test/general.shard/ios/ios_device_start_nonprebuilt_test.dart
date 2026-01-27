@@ -40,8 +40,16 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
-List<String> _xattrArgs(FlutterProject flutterProject) {
-  return <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path];
+// Helper to generate xattr commands for removing specific extended attributes
+List<FakeCommand> xattrCommands(FlutterProject flutterProject) {
+  return <FakeCommand>[
+    FakeCommand(
+      command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', flutterProject.directory.path],
+    ),
+    FakeCommand(
+      command: <String>['xattr', '-r', '-d', 'com.apple.provenance', flutterProject.directory.path],
+    ),
+  ];
 }
 
 const kRunReleaseArgs = <String>[
@@ -136,7 +144,7 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
 
         final LaunchResult launchResult = await iosDevice.startApp(
@@ -243,7 +251,7 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
         processManager.addCommand(
           const FakeCommand(
@@ -330,7 +338,7 @@ void main() {
             .directory('build/ios/Release-iphoneos/My Super Awesome App.app')
             .createSync(recursive: true);
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -467,7 +475,7 @@ void main() {
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
           processManager.addCommands([
-            FakeCommand(command: _xattrArgs(flutterProject)),
+            ...xattrCommands(flutterProject),
             FakeCommand(
               command: const <String>[
                 'xcrun',
@@ -572,7 +580,7 @@ void main() {
               .childFile('FlutterPlugin.h')
               .createSync(recursive: true);
           processManager.addCommands([
-            FakeCommand(command: _xattrArgs(flutterProject)),
+            ...xattrCommands(flutterProject),
             const FakeCommand(
               command: <String>[
                 'xcrun',
@@ -647,7 +655,7 @@ void main() {
           'My Super Awesome App',
         );
 
-        processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+        processManager.addCommands(xattrCommands(flutterProject));
         // The first xcrun call should fail with a
         // concurrent build exception.
         processManager.addCommand(

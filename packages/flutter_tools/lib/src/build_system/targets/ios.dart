@@ -927,7 +927,7 @@ Future<void> _createStubAppFramework(
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
-  await removeFinderExtendedAttributes(
+  await removeExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),
     environment.logger,
