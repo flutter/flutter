@@ -55,8 +55,9 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 
   @override
   Widget build(BuildContext context) {
-    return TestWidgetsApp(
-      home: HoverClient(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: HoverClient(
         onHover: (bool hovering) => setState(() => _hovering = hovering),
         onEnter: widget.onEnter,
         onExit: widget.onExit,
@@ -100,8 +101,9 @@ void main() {
     var onEnterRegion1 = false;
     var onEnterRegion2 = false;
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Stack(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
           children: <Widget>[
             SizedBox(
               width: 50.0,
@@ -139,8 +141,9 @@ void main() {
     var onEnterRegion1 = false;
     var onEnterRegion2 = false;
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Stack(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
           children: <Widget>[
             SizedBox(
               width: 50.0,
@@ -1055,8 +1058,9 @@ void main() {
   ) async {
     var paintCount = 0;
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: MouseRegion(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
             painter: _DelegatedPainter(
@@ -1082,8 +1086,9 @@ void main() {
     await gesture.addPointer();
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: MouseRegion(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: CustomPaint(
             painter: _DelegatedPainter(
@@ -1479,8 +1484,9 @@ void main() {
   testWidgets('an empty opaque MouseRegion is effective', (WidgetTester tester) async {
     var bottomRegionIsHovered = false;
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Stack(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
           children: <Widget>[
             Align(
               alignment: Alignment.topLeft,
@@ -2099,8 +2105,9 @@ class _Scaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TestWidgetsApp(
-      home: Stack(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
         children: <Widget>[
           ?background,
           Align(alignment: Alignment.topLeft, child: topLeft),
@@ -2137,8 +2144,9 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 
   @override
   Widget build(BuildContext context) {
-    return TestWidgetsApp(
-      home: MouseRegion(
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MouseRegion(
         onEnter: (PointerEnterEvent _) {
           setState(() {
             _hovering = true;
@@ -2163,8 +2171,9 @@ class _ColumnContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TestWidgetsApp(
-      home: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
     );
   }
 }

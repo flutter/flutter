@@ -195,8 +195,9 @@ void main() {
     await tester.pumpWidget(
       RepaintBoundary(
         key: key,
-        child: const TestWidgetsApp(
-          home: Stack(
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
             children: <Widget>[
               Positioned(
                 top: 40,

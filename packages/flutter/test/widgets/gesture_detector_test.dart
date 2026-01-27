@@ -179,8 +179,9 @@ void main() {
 
       Future<void> pumpWidgetTree(HitTestBehavior? behavior) {
         return tester.pumpWidget(
-          TestWidgetsApp(
-            home: Stack(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
               children: <Widget>[
                 Listener(
                   onPointerDown: (_) {
@@ -1212,8 +1213,9 @@ void main() {
       testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
         final key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
-          TestWidgetsApp(
-            home: RawGestureDetector(key: key, child: const Text('Text')),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: RawGestureDetector(key: key, child: const Text('Text')),
           ),
         );
         late FlutterError error;
@@ -1392,8 +1394,9 @@ void main() {
     ) async {
       final log = <String>[];
       await tester.pumpWidget(
-        TestWidgetsApp(
-          home: GestureDetector(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
             onDoubleTap: () => log.add('double-tap'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
           ),
@@ -1412,8 +1415,9 @@ void main() {
     ) async {
       final log = <String>[];
       await tester.pumpWidget(
-        TestWidgetsApp(
-          home: GestureDetector(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
             onDoubleTapDown: (_) => log.add('double-tap-down'),
             child: Container(width: 100.0, height: 100.0, color: const Color(0xFF00FF00)),
           ),
