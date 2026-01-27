@@ -12,7 +12,6 @@
 #include <optional>
 #include <string>
 
-#include "runtime_stage_types_flatbuffers.h"
 #include "shaderc/shaderc.hpp"
 #include "spirv_cross.hpp"
 #include "spirv_msl.hpp"
@@ -56,11 +55,7 @@ struct UniformDescription {
   size_t columns = 0u;
   size_t bit_width = 0u;
   std::optional<size_t> array_elements = std::nullopt;
-  /// The layout of padding bytes in the uniform buffer.
-  /// The format matches the values in the flatbuffer
-  /// UniformDescription::padding_layout.
-  /// \see RuntimeEffectContents::EmplaceUniform
-  std::vector<fb::PaddingType> padding_layout = {};
+  std::vector<uint8_t> struct_layout = {};
   size_t struct_float_count = 0u;
 };
 

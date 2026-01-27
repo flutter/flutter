@@ -82,8 +82,7 @@ Dart_Handle ConvertUniformDescriptionToMap(
     FML_DCHECK(!Dart_IsError(result));
   }
   {  // 2
-    Dart_Handle size =
-        Dart_NewIntegerFromUint64(uniform_description.GetGPUSize());
+    Dart_Handle size = Dart_NewIntegerFromUint64(uniform_description.GetSize());
     FML_DCHECK(!Dart_IsError(size));
     [[maybe_unused]] Dart_Handle result =
         Dart_ListSetAt(keys, 2, Dart_NewStringFromCString("size"));
@@ -162,7 +161,7 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
         impeller::RuntimeUniformType::kSampledImage) {
       sampled_image_count++;
     } else {
-      other_uniforms_bytes += uniform_description.GetGPUSize();
+      other_uniforms_bytes += uniform_description.GetSize();
     }
   }
 

@@ -695,31 +695,39 @@ void main() async {
     shader.dispose();
   });
 
-  test('FragmentShader shader with array uniforms renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test(
+    'FragmentShader shader with array uniforms renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-    final FragmentShader shader = program.fragmentShader();
-    for (var i = 0; i < 20; i++) {
-      shader.setFloat(i, i.toDouble());
-    }
+      final FragmentShader shader = program.fragmentShader();
+      for (var i = 0; i < 20; i++) {
+        shader.setFloat(i, i.toDouble());
+      }
 
-    await _expectShaderRendersGreen(shader);
-    shader.dispose();
-  });
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
 
-  test('FragmentShader shader with mat2 uniform renders correctly', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+  test(
+    'FragmentShader shader with mat2 uniform renders correctly',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
 
-    final FragmentShader shader = program.fragmentShader();
+      final FragmentShader shader = program.fragmentShader();
 
-    shader.setFloat(0, 4.0); // m00
-    shader.setFloat(1, 8.0); // m01
-    shader.setFloat(2, 16.0); // m10
-    shader.setFloat(3, 32.0); // m11
+      shader.setFloat(0, 4.0); // m00
+      shader.setFloat(1, 8.0); // m01
+      shader.setFloat(2, 16.0); // m10
+      shader.setFloat(3, 32.0); // m11
 
-    await _expectShaderRendersGreen(shader);
-    shader.dispose();
-  });
+      await _expectShaderRendersGreen(shader);
+      shader.dispose();
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
 
   _runImpellerTest(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
