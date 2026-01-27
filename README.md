@@ -38,9 +38,7 @@ The Flutter tool may occasionally download resources from Google servers. By
 downloading or using the Flutter SDK, you agree to the Google Terms of Service:
 https://policies.google.com/terms
 
-For example, when Flutter is installed from GitHub (as opposed to a prepackaged archive), the Flutter tool will download the Dart SDK from Google servers the first time it is run, because the SDK is required to execute the flutter tool itself.
-
-This also happens when Flutter is upgraded (for example, by running the flutter upgrade command).
+For example, when Flutter is installed from GitHub (as opposed to a prepackaged archive), the Flutter tool will download the Dart SDK from Google servers the first time it is run, because the SDK is required to execute the flutter tool itself. This also happens when Flutter is upgraded (for example, by running the flutter upgrade command).
 
 ## About Flutter
 
