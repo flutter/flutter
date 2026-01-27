@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'test_widgets_app.dart';
+import 'widgets_app_tester.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
