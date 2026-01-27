@@ -3051,30 +3051,43 @@ void main() {
   testWidgets('ModalBottomSheet uses AnimationStyle curve and reverseCurve', (
     WidgetTester tester,
   ) async {
-    const height = 200.0;
-    const duration = Duration(milliseconds: 300);
-    final observer = _TestNavigatorObserver();
+    final Key sheetKey = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
-        navigatorObservers: <NavigatorObserver>[observer],
-        home: Builder(
-          builder: (context) {
-            return GestureDetector(
-              onTap: () {
-                showModalBottomSheet<void>(
-                  context: context,
-                  sheetAnimationStyle: const AnimationStyle(
-                    curve: Curves.easeIn,
-                    reverseCurve: Curves.easeOut,
-                    duration: duration,
-                  ),
-                  builder: (_) => const SizedBox(height: height, child: Text('Content')),
-                );
-              },
-              child: const Text('X'),
-            );
-          },
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: const AnimationStyle(
+                      curve: Curves.easeIn,
+                      reverseCurve: Curves.easeOut,
+                      duration: Duration(milliseconds: 300),
+                      reverseDuration: Duration(milliseconds: 300),
+                    ),
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        child: ColoredBox(
+                          key: sheetKey,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -3082,16 +3095,25 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump();
 
-    expect(
-      observer.lastTransitionRoute?.animation,
-      isA<ProxyAnimation>().having(
-        (ProxyAnimation a) => a.parent,
-        'parent',
-        isA<CurvedAnimation>()
-            .having((CurvedAnimation c) => c.curve, 'curve', Curves.easeIn)
-            .having((CurvedAnimation c) => c.reverseCurve, 'reverseCurve', Curves.easeOut),
-      ),
-    );
+    // Advance the animation by 1/3 of the duration.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(547.3, 0.1));
+
+    // Advance the animation to the end.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(262.5));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+
+    // Advance the animation by 1/4 of the duration.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(427.3, 0.1));
+
+    // Advance the animation to the end.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(600.0));
   });
 }
 
@@ -3132,15 +3154,4 @@ class _StatusTestAnimationController extends AnimationController with AnimationL
 
   @override
   void didStopListening() {}
-}
-
-class _TestNavigatorObserver extends NavigatorObserver {
-  TransitionRoute<dynamic>? lastTransitionRoute;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (route is TransitionRoute<dynamic>) {
-      lastTransitionRoute = route;
-    }
-  }
 }
