@@ -18,6 +18,11 @@ typedef _KeyDataResponseCallback = void Function(bool handled);
 const StandardMethodCodec standardCodec = StandardMethodCodec();
 const JSONMethodCodec jsonCodec = JSONMethodCodec();
 
+// An object to listen to values coming from media queries in the browser, like
+// prefers-color-scheme or prefers-reduced-motion
+@visibleForTesting
+final MediaQueryManager mediaQueries = MediaQueryManager();
+
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -26,8 +31,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Private constructor, since only dart:ui is supposed to create one of
   /// these.
   EnginePlatformDispatcher() {
-    _addBrightnessMediaQueryListener();
-    HighContrastSupport.instance.addListener(_updateHighContrast);
+    _registerMediaQueryListeners();
     _addTypographySettingsObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
@@ -71,17 +75,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
     final builder = EngineAccessibilityFeaturesBuilder(0);
-    if (HighContrastSupport.instance.isHighContrastEnabled) {
+    if (_isHighContrastEnabled) {
       builder.highContrast = true;
     }
     return builder.build();
   }
 
   void dispose() {
-    _removeBrightnessMediaQueryListener();
+    mediaQueries.detachAll();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
-    HighContrastSupport.instance.removeListener(_updateHighContrast);
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
     accessibilityPlaceholder.remove();
@@ -1219,9 +1222,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Updates [_platformBrightness] and invokes [onPlatformBrightnessChanged]
   /// callback if [_platformBrightness] changed.
-  void _updatePlatformBrightness(ui.Brightness value) {
-    if (configuration.platformBrightness != value) {
-      configuration = configuration.copyWith(platformBrightness: value);
+  void _updatePlatformBrightness(bool prefersDark) {
+    final ui.Brightness brightness = prefersDark ? ui.Brightness.dark : ui.Brightness.light;
+    if (configuration.platformBrightness != brightness) {
+      configuration = configuration.copyWith(platformBrightness: brightness);
       invokeOnPlatformConfigurationChanged();
       invokeOnPlatformBrightnessChanged();
     }
@@ -1231,45 +1235,52 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   String? get systemFontFamily => configuration.systemFontFamily;
 
+  /// Whether high contrast mode is enabled by the platform.
+  ///
+  /// Used statically by [computeAccessibilityFeatures] to create the initial
+  /// [configuration] object.
+  static bool _isHighContrastEnabled = false;
+
   /// Updates [_highContrast] and invokes [onHighContrastModeChanged]
   /// callback if [_highContrast] changed.
-  void _updateHighContrast(bool value) {
-    if (configuration.accessibilityFeatures.highContrast != value) {
+  void _updateHighContrast(bool enabled) {
+    _isHighContrastEnabled = enabled;
+    if (configuration.accessibilityFeatures.highContrast != enabled) {
       final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
       configuration = configuration.copyWith(
-        accessibilityFeatures: original.copyWith(highContrast: value),
+        accessibilityFeatures: original.copyWith(highContrast: enabled),
       );
       invokeOnPlatformConfigurationChanged();
+      invokeOnAccessibilityFeaturesChanged();
     }
   }
 
-  /// Reference to css media query that indicates the user theme preference on the web.
-  final DomMediaQueryList _brightnessMediaQuery = domWindow.matchMedia(
-    '(prefers-color-scheme: dark)',
-  );
-
-  /// A callback that is invoked whenever [_brightnessMediaQuery] changes value.
+  /// Updates [AccessibilityFeatures] `reduceMotion` and `disableAnimations` to
+  /// [reduced], and notifies the framework of the change.
   ///
-  /// Updates the [_platformBrightness] with the new user preference.
-  DomEventListener? _brightnessMediaQueryListener;
-
-  /// Set the callback function for listening changes in [_brightnessMediaQuery] value.
-  void _addBrightnessMediaQueryListener() {
-    _updatePlatformBrightness(
-      _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
-    );
-
-    _brightnessMediaQueryListener = (DomEvent event) {
-      final mqEvent = event as DomMediaQueryListEvent;
-      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    }.toJS;
-    _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
+  /// The web doesn't seem to distinguish between "reduced motion" and "disable
+  /// animations", so we set both at the same time in this update.
+  void _updateReducedMotion(bool reduced) {
+    if (configuration.accessibilityFeatures.reduceMotion != reduced) {
+      final original = configuration.accessibilityFeatures as EngineAccessibilityFeatures;
+      configuration = configuration.copyWith(
+        accessibilityFeatures: original.copyWith(
+          // There's no distinction on the web between "reduceMotion" and
+          // "disableAnimations", so we set both at the same time.
+          reduceMotion: reduced,
+          disableAnimations: reduced,
+        ),
+      );
+      invokeOnPlatformConfigurationChanged();
+      invokeOnAccessibilityFeaturesChanged();
+    }
   }
 
-  /// Remove the callback function for listening changes in [_brightnessMediaQuery] value.
-  void _removeBrightnessMediaQueryListener() {
-    _brightnessMediaQuery.removeListener(_brightnessMediaQueryListener);
-    _brightnessMediaQueryListener = null;
+  // Configures the [_mediaQueries] object.
+  void _registerMediaQueryListeners() {
+    mediaQueries.addListener(MediaQueryManager.DARK_MODE, onMatch: _updatePlatformBrightness);
+    mediaQueries.addListener(MediaQueryManager.REDUCED_MOTION, onMatch: _updateReducedMotion);
+    mediaQueries.addListener(MediaQueryManager.FORCED_COLORS, onMatch: _updateHighContrast);
   }
 
   /// A callback that is invoked whenever [platformBrightness] changes value.
@@ -1773,6 +1784,7 @@ class ViewConfiguration {
     this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
+    this.displayCornerRadii,
   });
 
   ViewConfiguration copyWith({
@@ -1785,6 +1797,7 @@ class ViewConfiguration {
     ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
+    ui.DisplayCornerRadii? displayCornerRadii,
   }) {
     return ViewConfiguration(
       view: view ?? this.view,
@@ -1796,6 +1809,7 @@ class ViewConfiguration {
       padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
+      displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
     );
   }
 
@@ -1808,6 +1822,7 @@ class ViewConfiguration {
   final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
+  final ui.DisplayCornerRadii? displayCornerRadii;
 
   @override
   String toString() {

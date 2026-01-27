@@ -27,6 +27,7 @@ using component_testing::ParentRef;
 using component_testing::Protocol;
 using component_testing::RealmRoot;
 using component_testing::Route;
+using component_testing::Storage;
 
 using fuchsia_test_utils::CheckViewExistsInSnapshot;
 
@@ -101,6 +102,11 @@ void PortableUITest::SetUpRealmBase() {
                        Protocol{kPointerInjectorRegistryName}},
       .source = kTestUIStackRef,
       .targets = {ParentRef(), kFlutterJitRunnerRef}});
+
+  // Route "tmp" to Flutter runner
+  realm_builder_.AddRoute(Route{.capabilities = {Storage{"tmp"}},
+                                .source = ParentRef(),
+                                .targets = {kFlutterJitRunnerRef}});
 }
 
 void PortableUITest::ProcessViewGeometryResponse(
