@@ -779,86 +779,56 @@ DlPath ManuallyConstructCirclePath(Scalar radius) {
   path_builder.Close();
   return path_builder.TakePath();
 }
+
+void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
+                                         Scalar path_scale,
+                                         Scalar radius,
+                                         Scalar stroke_width) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint fill_paint;
+  fill_paint.setColor(DlColor::kBlue());
+
+  DlPaint stroke_paint;
+  stroke_paint.setColor(DlColor::kGreen());
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  stroke_paint.setStrokeWidth(stroke_width);
+
+  DlPath path = ManuallyConstructCirclePath(radius);
+
+  builder.Save();
+  builder.Translate(300.0f, 200.0f);
+  builder.Scale(path_scale, path_scale);
+  builder.DrawPath(path, fill_paint);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(680.0f, 200.0f);
+  builder.Scale(path_scale, path_scale);
+  builder.DrawPath(path, fill_paint);
+  builder.Restore();
+
+  builder.Save();
+  builder.Translate(300.0f, 580.0f);
+  builder.Scale(path_scale, path_scale);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
 }  // namespace
 
 TEST_P(AiksTest, ZoomedStrokedPathRendersCorrectly) {
-  DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
-  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
-
-  DlPaint fill_paint;
-  fill_paint.setColor(DlColor::kBlue());
-
-  DlPaint stroke_paint;
-  stroke_paint.setColor(DlColor::kGreen());
-  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
-  stroke_paint.setStrokeWidth(0.05f);
-
-  const Scalar radius = 2.0f;
-  const Scalar scale = 80.0f;
-
-  DlPath path = ManuallyConstructCirclePath(radius);
-
-  builder.Save();
-  builder.Translate(300.0f, 200.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, fill_paint);
-  builder.DrawPath(path, stroke_paint);
-  builder.Restore();
-
-  builder.Save();
-  builder.Translate(680.0f, 200.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, fill_paint);
-  builder.Restore();
-
-  builder.Save();
-  builder.Translate(300.0f, 580.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, stroke_paint);
-  builder.Restore();
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  DrawStrokedAndFilledCirclesWithZoom(this, /*path_scale=*/80.0f,
+                                      /*radius=*/2.0f, /*stroke_width=*/0.05f);
 }
 
 TEST_P(AiksTest, StrokedPathWithLargeStrokeWidthRendersCorrectly) {
-  DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
-  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
-
-  DlPaint fill_paint;
-  fill_paint.setColor(DlColor::kBlue());
-
-  DlPaint stroke_paint;
-  stroke_paint.setColor(DlColor::kGreen());
-  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
-  stroke_paint.setStrokeWidth(360.0f);
-
-  const Scalar radius = 1.0f;
-  const Scalar scale = 1.0f;
-
-  DlPath path = ManuallyConstructCirclePath(radius);
-
-  builder.Save();
-  builder.Translate(300.0f, 200.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, fill_paint);
-  builder.DrawPath(path, stroke_paint);
-  builder.Restore();
-
-  builder.Save();
-  builder.Translate(680.0f, 200.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, fill_paint);
-  builder.Restore();
-
-  builder.Save();
-  builder.Translate(300.0f, 580.0f);
-  builder.Scale(scale, scale);
-  builder.DrawPath(path, stroke_paint);
-  builder.Restore();
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  DrawStrokedAndFilledCirclesWithZoom(this, /*path_scale=*/1.0f,
+                                      /*radius=*/1.0f, /*stroke_width=*/360.0f);
 }
 
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
