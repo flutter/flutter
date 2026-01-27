@@ -12,7 +12,7 @@
   "shareButtonLabel": "اشتراک کریں",
   "pasteButtonLabel": "پیسٹ کریں",
   "selectAllButtonLabel": "سبھی کو منتخب کریں",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "تلاش کے نتائج مل گئے",
+  "noResultsFound": "کوئی نتائج نہیں ملے",
+  "radioButtonUnselectedLabel": "غیر منتخب کردہ"
 }

@@ -12,7 +12,7 @@
   "shareButtonLabel": "မျှဝေရန်",
   "pasteButtonLabel": "ကူးထည့်ရန်",
   "selectAllButtonLabel": "အားလုံး ရွေးရန်",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "ရှာဖွေမှုရလဒ်များ တွေ့ထားသည်",
+  "noResultsFound": "ရလဒ်မတွေ့ပါ",
+  "radioButtonUnselectedLabel": "ရွေးမထားပါ"
 }
