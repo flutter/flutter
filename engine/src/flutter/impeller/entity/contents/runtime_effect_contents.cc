@@ -85,13 +85,21 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
     const RuntimeUniformDescription& uniform) {
   std::unique_ptr<ShaderMetadata> metadata = std::make_unique<ShaderMetadata>();
   metadata->name = uniform.name;
+
+  // If the element is not an array, then the runtime stage flatbuffer will
+  // represent the unspecified array_elements as the default value of 0.
+  std::optional<size_t> array_elements;
+  if (uniform.array_elements.value_or(0) > 0) {
+    array_elements = uniform.array_elements;
+  }
+
+  size_t member_size = uniform.dimensions.rows * uniform.dimensions.cols *
+                       (uniform.bit_width / 8u);
   metadata->members.emplace_back(ShaderStructMemberMetadata{
-      .type = GetShaderType(uniform.type),  //
-      .size = uniform.dimensions.rows * uniform.dimensions.cols *
-              (uniform.bit_width / 8u),  //
-      .byte_length =
-          (uniform.bit_width / 8u) * uniform.array_elements.value_or(1),  //
-      .array_elements = uniform.array_elements                            //
+      .type = GetShaderType(uniform.type),                      //
+      .size = member_size,                                      //
+      .byte_length = member_size * array_elements.value_or(1),  //
+      .array_elements = array_elements                          //
   });
 
   return metadata;
