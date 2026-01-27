@@ -64,6 +64,8 @@ void main() {
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
+          buildCodeAssets: true,
+          buildDataAssets: true,
         ),
         throwsToolExit(
           message: 'Enable data assets using `flutter config --enable-dart-data-assets`',
@@ -99,6 +101,8 @@ void main() {
             environmentDefines: <String, String>{kBuildMode: buildMode.cliName},
             targetPlatform: TargetPlatform.linux_x64,
             projectUri: projectUri,
+            buildCodeAssets: true,
+            buildDataAssets: true,
             fileSystem: fileSystem,
             buildRunner: FakeFlutterNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <String>['bar'],
