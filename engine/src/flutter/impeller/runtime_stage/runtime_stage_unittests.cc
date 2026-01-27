@@ -117,7 +117,16 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
+        auto padding = uni->padding_layout;
+        if (GetBackend() == PlaygroundBackend::kMetal) {
+          EXPECT_EQ(padding.size(), 4u);
+          EXPECT_EQ(padding[0], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[1], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[2], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[3], RuntimePaddingType::kPadding);
+        } else {
+          EXPECT_TRUE(padding.empty());
+        }
       }
       {
         // uVec4
@@ -186,16 +195,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
       }
-
-      {
-        auto uni = stage->GetUniform("u_circle1");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 11u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
-      }
       {
         // uVec4Array
         auto uni = stage->GetUniform("uVec4Array");
@@ -224,7 +223,6 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 3u);
         EXPECT_EQ(uni->location, 17u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         // uMat4Array
@@ -246,8 +244,9 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       EXPECT_EQ(uni->type, RuntimeUniformType::kStruct);
       EXPECT_EQ(uni->struct_float_count, 35u);
 
-      EXPECT_EQ(uni->GetSize(), 640u);
-      std::vector<uint8_t> layout(uni->GetGPUSize() / sizeof(float), RuntimePaddingType::kFloat);
+      EXPECT_EQ(uni->GetGPUSize(), 640u);
+      std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
+                                             RuntimePaddingType::kFloat);
       // uFloat and uVec2 are packed into a vec4 with 1 byte of padding between.
       layout[1] = RuntimePaddingType::kPadding;
       // uVec3 is packed as a vec4 with 1 byte of padding.
