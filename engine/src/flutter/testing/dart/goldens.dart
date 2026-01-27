@@ -35,7 +35,7 @@ class ImageComparer {
     )..createSync();
     final dimensions = <String, String>{
       'impeller_enabled': impellerEnabled.toString(),
-      'impeller_backend': impellerBackend ?? '',
+      'impeller_backend': impellerBackend ?? 'none',
     };
     final SkiaGoldClient client = SkiaGoldClient.isAvailable() && _useSkiaGold
         ? SkiaGoldClient(workDirectory, dimensions: dimensions, verbose: verbose)
