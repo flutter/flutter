@@ -519,32 +519,27 @@ void main() {
 
   testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: RepaintBoundary(
-            child: Material(
-              child: Container(
-                width: 400.0,
-                height: 200.0,
-                decoration: const BoxDecoration(color: Color(0xff00ff00)),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                  child: const Text.rich(
-                    TextSpan(
-                      text: 'My name is: ',
-                      style: TextStyle(fontSize: 20),
-                      children: <InlineSpan>[
-                        WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
-                        TextSpan(
-                          text: ', and my favorite city is: ',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
-                      ],
-                    ),
-                    textDirection: TextDirection.ltr,
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: RepaintBoundary(
+          child: Material(
+            child: Container(
+              width: 400.0,
+              height: 200.0,
+              decoration: const BoxDecoration(color: Color(0xff00ff00)),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'My name is: ',
+                    style: TextStyle(fontSize: 20),
+                    children: <InlineSpan>[
+                      WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
+                      TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
+                      WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
+                    ],
                   ),
+                  textDirection: TextDirection.ltr,
                 ),
               ),
             ),
@@ -561,104 +556,102 @@ void main() {
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
   testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: RepaintBoundary(
-            child: Material(
-              child: Container(
-                width: 400.0,
-                height: 200.0,
-                decoration: const BoxDecoration(color: Color(0xff00ff00)),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
-                  child: const Text.rich(
-                    TextSpan(
-                      text: 'outer',
-                      style: TextStyle(fontSize: 20),
-                      children: <InlineSpan>[
-                        WidgetSpan(
-                          child: Text.rich(
-                            TextSpan(
-                              text: 'inner',
-                              style: TextStyle(color: Color(0xf402f4ff)),
-                              children: <InlineSpan>[
-                                WidgetSpan(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      text: 'inner2',
-                                      style: TextStyle(color: Color(0xf003ffff)),
-                                      children: <InlineSpan>[
-                                        WidgetSpan(
-                                          child: SizedBox(
-                                            width: 50.0,
-                                            height: 55.0,
-                                            child: DecoratedBox(
-                                              decoration: BoxDecoration(color: Color(0xffffff30)),
-                                              child: Center(
-                                                child: SizedBox(
-                                                  width: 10.0,
-                                                  height: 15.0,
-                                                  child: DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: Color(0xff5f00f0),
-                                                    ),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: RepaintBoundary(
+          child: Material(
+            child: Container(
+              width: 400.0,
+              height: 200.0,
+              decoration: const BoxDecoration(color: Color(0xff00ff00)),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'outer',
+                    style: TextStyle(fontSize: 20),
+                    children: <InlineSpan>[
+                      WidgetSpan(
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'inner',
+                            style: TextStyle(color: Color(0xf402f4ff)),
+                            children: <InlineSpan>[
+                              WidgetSpan(
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: 'inner2',
+                                    style: TextStyle(color: Color(0xf003ffff)),
+                                    children: <InlineSpan>[
+                                      WidgetSpan(
+                                        child: SizedBox(
+                                          width: 50.0,
+                                          height: 55.0,
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(color: Color(0xffffff30)),
+                                            child: Center(
+                                              child: SizedBox(
+                                                width: 10.0,
+                                                height: 15.0,
+                                                child: DecoratedBox(
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xff5f00f0),
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                WidgetSpan(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 55.0,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(color: Color(0xff5fff00)),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 10.0,
-                                          height: 15.0,
-                                          child: DecoratedBox(
-                                            decoration: BoxDecoration(color: Color(0xff5f0000)),
-                                          ),
+                              ),
+                              WidgetSpan(
+                                child: SizedBox(
+                                  width: 50.0,
+                                  height: 55.0,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(color: Color(0xff5fff00)),
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 10.0,
+                                        height: 15.0,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(color: Color(0xff5f0000)),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
-                        WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
-                        WidgetSpan(
-                          child: SizedBox(
-                            width: 50.0,
-                            height: 55.0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(color: Color(0xffff00ff)),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 10.0,
-                                  height: 15.0,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(color: Color(0xff0000ff)),
-                                  ),
+                      ),
+                      TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
+                      WidgetSpan(child: SizedBox(width: 70, height: 25, child: TextField())),
+                      WidgetSpan(
+                        child: SizedBox(
+                          width: 50.0,
+                          height: 55.0,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(color: Color(0xffff00ff)),
+                            child: Center(
+                              child: SizedBox(
+                                width: 10.0,
+                                height: 15.0,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(color: Color(0xff0000ff)),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    textDirection: TextDirection.ltr,
+                      ),
+                    ],
                   ),
+                  textDirection: TextDirection.ltr,
                 ),
               ),
             ),
