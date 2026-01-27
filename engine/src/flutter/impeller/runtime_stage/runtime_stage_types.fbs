@@ -8,7 +8,7 @@ namespace impeller.fb;
 // incremented any time there is a change to this file which changes the
 // resulting flat buffer format.
 enum RuntimeStagesFormatVersion:uint32 {
-  kVersion = 1
+  kVersion = 2
 }
 
 enum Stage:byte {
