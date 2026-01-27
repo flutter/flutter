@@ -2187,9 +2187,27 @@ class _HighlightModeManager {
     }
   }
 
+  static const int _kAndroidSoftKeyboardFlag = 0x00000002; // KeyEvent.FLAG_SOFT_KEYBOARD
+  static const int _kAndroidVirtualKeyboardDeviceId = -1; // KeyCharacterMap.VIRTUAL_KEYBOARD
+
+  bool _isKeyMessageFromAndroidIME(KeyMessage message) {
+    final RawKeyEvent? rawEvent = message.rawEvent;
+    if (rawEvent == null) {
+      return false;
+    }
+    final RawKeyEventData data = rawEvent.data;
+    if (data is! RawKeyEventDataAndroid) {
+      return false;
+    }
+    return (data.flags & _kAndroidSoftKeyboardFlag) != 0 ||
+        data.deviceId == _kAndroidVirtualKeyboardDeviceId;
+  }
+
   bool handleKeyMessage(KeyMessage message) {
+    final bool isFromVirtualKeyboard = _isKeyMessageFromAndroidIME(message);
+
     // ignore: use_if_null_to_convert_nulls_to_bools
-    if (_lastInteractionRequiresTraditionalHighlights != false) {
+    if (!isFromVirtualKeyboard && _lastInteractionRequiresTraditionalHighlights != false) {
       // Update highlightMode first, since things responding to the keys might
       // look at the highlight mode, and it should be accurate.
       _lastInteractionRequiresTraditionalHighlights = false;
