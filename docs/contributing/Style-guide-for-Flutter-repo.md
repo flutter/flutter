@@ -1028,30 +1028,15 @@ to actually desugar the generator into something that uses an iterator class.
 Embrace code duplication in tests. It makes it easier to make new tests by copying and pasting them and
 tweaking a few things.
 
-Avoid using `setUp`, `tearDown`, and similar features, as well as test-global variables or other state
-shared between tests. They make writing tests easier but make maintaining them, debugging them, and
-refactoring code much harder. (These are commonly used in Flutter's codebase today, but that is almost
-always a mistake. When you are editing a file that uses those features, aim to reduce the number of
-tests using them while you're there.)
+Avoid using test-global variables or other state shared between tests. They make writing tests easier
+but make maintaining them, debugging them, and refactoring code much harder. (These are commonly used
+in Flutter's codebase today, but that is almost always a mistake. When you are editing a file that
+uses those features, aim to reduce the number of tests using them while you're there.)
 
 Specifically, we are trying to avoid shared state, which could persist across tests, and non-local
 side-effects, which would prevent being able to move a test to another file without breaking the test.
 (It's fine to factor out code into functions that are called by tests, so long as the functions don't
 have side-effects that might change how other tests run.)
-
-
-### Prefer more test files, avoid long test files
-
-Avoid adding tests to files that already have more than one or two hundred lines of code. It's easier
-to understand a test file when it has only a few related tests, rather than when it has an entire test
-suite. (It also makes developing the tests faster because you can run the test file faster.)
-
-
-### Avoid using `pumpAndSettle`
-
-As per the API docs for [pumpAndSettle](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pumpAndSettle.html), prefer using explicit [`pump`](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pump.html) calls rather than `pumpAndSettle`.
-
-Using `pumpAndSettle`, especially without checking its return value, makes it very easy for bugs to sneak in where we trigger animations across multiple frames instead of immediately. It is almost always the case that a call to `pumpAndSettle` is more strictly correctly written as two `pump` calls, one to trigger the animations and one (with a duration) to jump to the point after the animations.
 
 
 ## Naming
@@ -1073,17 +1058,6 @@ However, where possible avoid global constants. Rather than `kDefaultButtonColor
 Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbreviations
 when selecting a name for an identifier. In general, avoid one-character names unless one character is idiomatic
 (for example, prefer `index` over `i`, but prefer `x` over `horizontalPosition`).
-
-
-### Avoid anonymous parameter names
-
-Provide full type information and names even for parameters that are otherwise unused. This makes it easier for
-people reading the code to tell what is actually going on (e.g. what is being ignored). For example:
-
-```dart
-  onTapDown: (TapDownDetails details) { print('hello!'); }, // GOOD
-  onTapUp: (_) { print('good bye'); }, // BAD
-```
 
 
 ### Naming rules for typedefs and function variables
@@ -1312,118 +1286,7 @@ Line length for code is automatically handled by `dart format`, which is configu
 line length of 100.
 
 
-### Consider using `=>` for short functions and methods
-
-But only use `=>` when everything, including the function declaration, fits
-on a single line.
-
-Example:
-
-```dart
-// BAD:
-String capitalize(String s) =>
-  '${s[0].toUpperCase()}${s.substring(1)}';
-
-// GOOD:
-String capitalize(String s) => '${s[0].toUpperCase()}${s.substring(1)}';
-
-String capitalize(String s) {
-  return '${s[0].toUpperCase()}${s.substring(1)}';
-}
-```
-
-### Use `=>` for getters and callbacks that just return literals or switch expressions
-
-```dart
-// GOOD:
-List<Color> get favorites => <Color>[
-  const Color(0xFF80FFFF),
-  const Color(0xFF00FFF0),
-  const Color(0xFF4000FF),
-  _mysteryColor(),
-];
-
-// GOOD:
-bool get isForwardOrCompleted => switch (status) {
-  AnimationStatus.forward || AnimationStatus.completed => true,
-  AnimationStatus.reverse || AnimationStatus.dismissed => false,
-};
-```
-
-It's important to use discretion, since there are cases where a function body
-is easier to visually parse:
-
-```dart
-// OKAY, but the code is more dense than it could be:
-String? get validated => switch(input[_inputIndex]?.trim()) {
-  final String value when value.isNotEmpty => value,
-  _ => null,
-}
-
-// BETTER (more verbose, but also more readable):
-String? get validated {
-  final String? value = input[_inputIndex]?.trim();
-
-  if (value != null && value.isNotEmpty) {
-    return value;
-  }
-  return null;
-}
-```
-
-If your code is passing an inline closure containing only a `return` statement,
-you can instead use the `=>` form.\
-When doing this, the closing `]`, `}`, or `)` bracket will have the same
-indentation as the line where the callback starts.
-
-For example:
-
-```dart
-    // GOOD, but slightly more verbose than necessary since it doesn't use =>
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) {
-          return <PopupMenuItem<String>>[
-            PopupMenuItem<String>(
-              value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-            ),
-            PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-            ),
-          ];
-        }
-      );
-    }
-
-    // GOOD, does use =>, slightly briefer
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-          PopupMenuItem<String>(
-            value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-          ),
-          PopupMenuItem<String>(
-            value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-          ),
-        ]
-      );
-    }
-```
-
-The important part is that the closing punctuation lines up with the start
-of the line that has the opening punctuation, so that you can easily determine
-what's going on by just scanning the indentation on the left edge.
-
-
-### Use braces for long functions and methods
+### Use braces for long functions and methods instead of `=>`
 
 Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
 
