@@ -332,14 +332,29 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final Iterable<Directory> frameworkDirectoriesSimulator = nativeAssetSimulatorDirectory
           .listSync()
           .whereType<Directory>();
+      final Iterable<Directory> frameworkDirectoriesDevice = nativeAssetDeviceDirectory
+          .listSync()
+          .whereType<Directory>();
+      if (frameworkDirectoriesDevice.length != frameworkDirectoriesSimulator.length) {
+        throwToolExit(
+          'Did not find the same frameworks for device and simulator.\n'
+          '$frameworkDirectoriesDevice $frameworkDirectoriesSimulator',
+        );
+      }
       for (final frameworkDirectorySimulator in frameworkDirectoriesSimulator) {
         final Directory frameworkDirectoryDevice = nativeAssetDeviceDirectory.childDirectory(
           frameworkDirectorySimulator.basename,
         );
+        if (!frameworkDirectoryDevice.existsSync()) {
+          throwToolExit(
+            'Did not find the same frameworks for device and simulator.\n'
+            '$frameworkDirectoriesDevice $frameworkDirectoriesSimulator',
+          );
+        }
         final frameworks = [frameworkDirectoryDevice, frameworkDirectorySimulator];
         await BuildFrameworkCommand.produceXCFramework(
           frameworks,
-          frameworkDirectoryDevice.basename.replaceAll('.framework', ''),
+          frameworkDirectorySimulator.basename.replaceAll('.framework', ''),
           modeDirectory,
           globals.processManager,
         );

@@ -67,10 +67,10 @@ class DartBuildEnvironment extends Target {
     final String content = json.encode(defines);
     final File outputFile = environment.buildDir.childFile(filename);
 
-    if (outputFile.existsSync() && outputFile.readAsStringSync() == content) {
+    if (outputFile.existsSync() && await outputFile.readAsString() == content) {
       return;
     }
-    outputFile.writeAsStringSync(content);
+    await outputFile.writeAsString(content);
   }
 }
 
