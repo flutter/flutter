@@ -10,7 +10,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -109,7 +109,7 @@ Future<void> main() async {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          color: Colors.teal[600],
+          color: const Color(0xFF00897B),
         ),
       ),
     );
@@ -582,7 +582,7 @@ Future<void> main() async {
             height: 250,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(75),
-              color: Colors.black,
+              color: const Color(0xFF000000),
               border: Border.all(color: color, width: 50),
             ),
           ),
@@ -596,7 +596,7 @@ Future<void> main() async {
           width: 800,
           height: 800,
           decoration: const ShapeDecoration(
-            color: Colors.orangeAccent,
+            color: Color(0xFFFFAB40),
             shape: CircleBorder(side: BorderSide(strokeAlign: BorderSide.strokeAlignOutside)),
           ),
           child: Directionality(
