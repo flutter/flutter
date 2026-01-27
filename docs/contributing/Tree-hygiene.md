@@ -483,7 +483,7 @@ In other words:
 @Deprecated(
   '[description of how to migrate] '
   '[brief motivation for why we are breaking the API] '
-  'This feature was deprecated after [beta version at time of deprecation].'
+  'This feature was deprecated after v[beta version at time of deprecation].'
 )
 ```
 
