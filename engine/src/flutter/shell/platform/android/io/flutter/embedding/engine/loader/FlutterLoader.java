@@ -339,6 +339,7 @@ public class FlutterLoader {
             // TODO(camsim99): Use logic addded in https://github.com/flutter/flutter/pull/177127 to
             // filter
             // unknown flags.
+            Log.e("CAMILLE", "arg being processed: " + arg);
 
             // Perform security check for path containing application's compiled Dart code and
             // potentially user-provided compiled native code.
