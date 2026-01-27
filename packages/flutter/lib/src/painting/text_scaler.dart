@@ -135,7 +135,7 @@ final class _ClampedTextScaler implements TextScaler {
     final double newMinScale = max(minScale, minScaleFactor);
     final double newMaxScale = min(maxScale, maxScaleFactor);
     return newMinScale == newMaxScale
-        ? _LinearTextScaler(minScaleFactor)
+        ? _LinearTextScaler(newMinScale)
         : _ClampedTextScaler(scaler, newMinScale, newMaxScale);
   }
 
