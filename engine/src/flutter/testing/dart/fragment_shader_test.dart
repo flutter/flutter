@@ -88,7 +88,7 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformFloat offset overflow', () async {
       expect(
