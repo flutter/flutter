@@ -848,24 +848,25 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
           children: <Widget>[
             Shortcuts(
               shortcuts: shortcutMap,
-              child: Actions(
-                actions: _startActionMap,
-                child: Focus(
-                  focusNode: startFocusNode,
-                  includeSemantics: false,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ),
-            Shortcuts(
-              shortcuts: shortcutMap,
-              child: Actions(
-                actions: _endActionMap,
-                child: Focus(
-                  focusNode: endFocusNode,
-                  includeSemantics: false,
-                  child: const SizedBox.shrink(),
-                ),
+              child: Row(
+                children: <Widget>[
+                  Actions(
+                    actions: _startActionMap,
+                    child: Focus(
+                      focusNode: startFocusNode,
+                      includeSemantics: false,
+                      child: const SizedBox.shrink(),
+                    ),
+                  ),
+                  Actions(
+                    actions: _endActionMap,
+                    child: Focus(
+                      focusNode: endFocusNode,
+                      includeSemantics: false,
+                      child: const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
