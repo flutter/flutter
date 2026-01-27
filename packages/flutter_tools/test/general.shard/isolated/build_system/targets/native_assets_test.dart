@@ -159,12 +159,7 @@ void main() {
           ],
         ),
         const FakeCommand(
-          command: <Pattern>[
-            'strip',
-            '-x',
-            '-S',
-            '/build/native_assets/ios/foo.framework/foo',
-          ],
+          command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/foo.framework/foo'],
         ),
         // Lookup the original install names of the dylib.
         // There can be different install names for different architectures.

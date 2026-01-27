@@ -72,12 +72,7 @@ void main() {
               ],
             ),
             const FakeCommand(
-              command: <Pattern>[
-                'strip',
-                '-x',
-                '-S',
-                '/build/native_assets/ios/bar.framework/bar',
-              ],
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/bar.framework/bar'],
             ),
           ],
           FakeCommand(
@@ -109,12 +104,7 @@ void main() {
               ],
             ),
             const FakeCommand(
-              command: <Pattern>[
-                'strip',
-                '-x',
-                '-S',
-                '/build/native_assets/ios/buz.framework/buz',
-              ],
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/buz.framework/buz'],
             ),
           ],
           FakeCommand(
