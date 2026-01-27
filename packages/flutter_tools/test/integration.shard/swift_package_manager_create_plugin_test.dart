@@ -141,6 +141,21 @@ void main() {
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
 
+          // Verify that a plugin having a dependency on the FlutterFramework package
+          // builds successfully.
+          final File manifest = fileSystem
+              .directory(createdSwiftPackagePlugin.swiftPackagePlatformPath)
+              .childFile('Package.swift');
+          expect(manifest.existsSync(), isTrue);
+          final String manifestContent = manifest.readAsStringSync().replaceFirst(
+            'dependencies: [],',
+            'dependencies: [.package(name: "FlutterFramework", path: "../FlutterFramework")],',
+          ).replaceFirst(
+            'dependencies: [],',
+            'dependencies: [.product(name: "FlutterFramework", package: "FlutterFramework")],',
+          );
+          manifest.writeAsStringSync(manifestContent);
+
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,

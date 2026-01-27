@@ -251,6 +251,56 @@ let package = Package(
 )
 ''');
           });
+
+          testWithoutContext('generates FlutterFramework', () async {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            project.xcodeProjectInfoFile.createSync(recursive: true);
+            project.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+
+            final spm = SwiftPackageManager(
+              fileSystem: fs,
+              templateRenderer: const MustacheTemplateRenderer(),
+            );
+            await spm.generatePluginsSwiftPackage(<Plugin>[], platform, project);
+
+            final supportedPlatform = platform == FlutterDarwinPlatform.ios
+                ? '.iOS("13.0")'
+                : '.macOS("10.15")';
+            final File manifest = project.flutterFrameworkSwiftPackageDirectory.childFile(
+              'Package.swift',
+            );
+            expect(manifest.existsSync(), isTrue);
+            expect(manifest.readAsStringSync(), '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+        .target(
+            name: "FlutterFramework"
+        )
+    ]
+)
+''');
+          });
         });
 
         group('updateMinimumDeployment', () {
@@ -372,6 +422,10 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      relativeSwiftPackagesDirectory.childDirectory('FlutterFramework');
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
