@@ -56,7 +56,8 @@ struct RuntimeUniformDescription {
   size_t struct_float_count = 0u;
 
   /// @brief  Computes the total number of bytes that this uniform requires for
-  /// representation in the Dart float buffer.
+  /// representation in the Dart float buffer. This is the size of the uniform
+  /// in floats without taking padding into account.
   size_t GetDartSize() const;
 
   /// @brief  Computes the total number of bytes that this uniform requires for
