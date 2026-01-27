@@ -17,5 +17,5 @@ ignore_patterns:
   - DEPS
   - "bin/internal/*.version"
   - "engine/src/flutter/ci/licenses_golden/**"
-  # Avoid code reviews on all third_party files.
+  # Avoid code reviews on all third_party filesk.
   - "**/third_party/**"
