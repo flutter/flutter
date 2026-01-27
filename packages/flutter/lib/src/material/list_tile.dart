@@ -822,13 +822,6 @@ class ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    if (onTap != null ||
-        onLongPress != null ||
-        selected ||
-        tileColor != null ||
-        selectedTileColor != null) {
-      assert(_debugCheckBackgroundIsHidden(context));
-    }
     final ThemeData theme = Theme.of(context);
     final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
@@ -837,6 +830,10 @@ class ListTile extends StatelessWidget {
     final ListTileThemeData defaults = theme.useMaterial3
         ? _LisTileDefaultsM3(context)
         : _LisTileDefaultsM2(context, listTileStyle);
+    final Color tileBackgroundColor = _tileBackgroundColor(theme, tileTheme, defaults);
+    if (onTap != null || onLongPress != null || tileBackgroundColor.alpha > 0) {
+      assert(_debugCheckBackgroundIsHidden(context));
+    }
     final states = <WidgetState>{
       if (!enabled) WidgetState.disabled,
       if (selected) WidgetState.selected,
@@ -1004,7 +1001,7 @@ class ListTile extends StatelessWidget {
         child: Ink(
           decoration: ShapeDecoration(
             shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme, defaults),
+            color: tileBackgroundColor,
           ),
           child: SafeArea(
             top: false,
