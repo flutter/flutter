@@ -10,9 +10,10 @@ String? get impellerBackend {
   if (!impellerEnabled) {
     return null;
   }
+  const String backendFlag = '--impeller-backend=';
   for (final String arg in Platform.executableArguments) {
-    if (arg.startsWith('--impeller-backend=')) {
-      return arg.substring('--impeller-backend='.length);
+    if (arg.startsWith(backendFlag)) {
+      return arg.substring(backendFlag.length);
     }
   }
   if (Platform.isMacOS || Platform.isIOS) {
