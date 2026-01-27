@@ -2137,6 +2137,9 @@ class RenderEditable extends RenderBox
     _setSelection(newSelection, cause);
   }
 
+  /// {@macro flutter.painting.TextPainter.glyphBoundaries}
+  GlyphBoundary get glyphBoundaries => _textPainter.glyphBoundaries;
+
   /// {@macro flutter.painting.TextPainter.wordBoundaries}
   WordBoundary get wordBoundaries => _textPainter.wordBoundaries;
 
