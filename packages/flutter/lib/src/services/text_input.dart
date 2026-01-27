@@ -1598,6 +1598,20 @@ final class TextInputStyle {
     );
   }
 
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'fontFamily': fontFamily,
+      'fontSize': fontSize,
+      'fontWeightIndex': fontWeight?.index,
+      'textAlignIndex': textAlign.index,
+      'textDirectionIndex': textDirection.index,
+      'letterSpacing': letterSpacing,
+      'wordSpacing': wordSpacing,
+      'lineHeight': lineHeight,
+    };
+  }
+
   @override
   String toString() {
     return 'TextInputStyle('
@@ -2676,16 +2690,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void updateStyle(TextInputStyle style) {
-    _channel.invokeMethod<void>('TextInput.setStyle', <String, dynamic>{
-      'fontFamily': style.fontFamily,
-      'fontSize': style.fontSize,
-      'fontWeightIndex': style.fontWeight?.index,
-      'textAlignIndex': style.textAlign.index,
-      'textDirectionIndex': style.textDirection.index,
-      'letterSpacing': style.letterSpacing,
-      'wordSpacing': style.wordSpacing,
-      'lineHeight': style.lineHeight,
-    });
+    _channel.invokeMethod<void>('TextInput.setStyle', style.toJson());
   }
 
   @override
