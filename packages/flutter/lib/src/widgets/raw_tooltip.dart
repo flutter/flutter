@@ -56,6 +56,19 @@ typedef TooltipPositionDelegate = Offset Function(TooltipPositionContext context
 /// This immutable data class contains all the necessary information for computing
 /// the position of a tooltip relative to its target widget.
 ///
+/// When implementing a custom [TooltipPositionDelegate], you can use the properties
+/// of this context to calculate where the tooltip should be placed. For example:
+///
+/// ```dart
+/// positionDelegate: (TooltipPositionContext context) {
+///   // Position tooltip to the right of the target, vertically centered
+///   return Offset(
+///     context.target.dx + context.targetSize.width / 2 + 8.0, // 8px spacing
+///     context.target.dy - context.tooltipSize.height / 2,
+///   );
+/// }
+/// ```
+///
 /// See also:
 ///
 ///  * [TooltipPositionDelegate], which uses this context to compute tooltip positions.
@@ -74,21 +87,45 @@ class TooltipPositionContext {
   });
 
   /// The center point of the target widget in the global coordinate system.
+  ///
+  /// This is the point around which the tooltip should be positioned. The
+  /// [TooltipPositionDelegate] can use this to calculate the tooltip's position
+  /// relative to the target widget.
   final Offset target;
 
   /// The size of the target widget that triggers the tooltip.
+  ///
+  /// This can be used to position the tooltip relative to the target's bounds,
+  /// for example, to align the tooltip with a specific edge of the target.
   final Size targetSize;
 
   /// The size of the tooltip itself.
+  ///
+  /// This is useful for calculating the tooltip's position to ensure it fits
+  /// within the [overlaySize] and doesn't overflow the screen boundaries.
   final Size tooltipSize;
 
-  /// The configured vertical offset.
+  /// The configured vertical offset from the target.
+  ///
+  /// This represents the desired spacing between the target widget and the
+  /// tooltip. A positive value typically means spacing below the target, while
+  /// a negative value means spacing above.
   final double verticalOffset;
 
   /// Whether the tooltip prefers to be positioned below the target.
+  ///
+  /// When `true`, the tooltip should be positioned below the target widget
+  /// if there's enough space. When `false`, it should be positioned above.
+  /// This is a preference that can be overridden by custom positioning logic
+  /// if there isn't enough space in the preferred direction.
   final bool preferBelow;
 
   /// The size of the overlay within which the tooltip is displayed.
+  ///
+  /// This represents the available space for positioning the tooltip. The
+  /// tooltip should be positioned within these bounds to avoid being clipped
+  /// or going off-screen. Typically, this is the size of the screen or the
+  /// containing overlay.
   final Size overlaySize;
 
   @override
