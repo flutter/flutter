@@ -141,6 +141,10 @@ Context::BackendType ContextVK::GetBackendType() const {
   return Context::BackendType::kVulkan;
 }
 
+/* version 2.0.0 */
+static constexpr uint32_t kImpellerEngineVersion =
+    VK_MAKE_API_VERSION(0, 2, 0, 0);
+
 void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 
@@ -217,8 +221,7 @@ void ContextVK::Setup(Settings settings) {
   // variant, major, minor, patch
   application_info.setApplicationVersion(VK_API_VERSION_1_0);
   application_info.setApiVersion(VK_API_VERSION_1_1);
-  application_info.setEngineVersion(
-      VK_MAKE_API_VERSION(0, 2, 0, 0) /*version 2.0.0*/);
+  application_info.setEngineVersion(kImpellerEngineVersion);
   application_info.setPEngineName("Impeller");
   application_info.setPApplicationName("Impeller");
 

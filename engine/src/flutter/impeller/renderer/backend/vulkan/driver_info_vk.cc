@@ -11,6 +11,10 @@
 
 #include "flutter/fml/build_config.h"
 
+#ifdef FML_OS_ANDROID
+#include <sys/system_properties.h>
+#endif  // FML_OS_ANDROID
+
 namespace impeller {
 
 namespace {
@@ -116,6 +120,9 @@ constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
         {"DXT", PowerVRGPU::kDXT},
     }};
 }  // namespace
+
+const uint32_t kPixel10DeviceID = 0x71061212;
+const uint32_t kPixel10MinDriverVersion = 6794074;  // Corresponds to 25.1
 
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
   /// The format that Adreno names follow is "Adreno (TM) VERSION".
@@ -269,6 +276,8 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
   api_version_ = Version{VK_API_VERSION_MAJOR(props.apiVersion),
                          VK_API_VERSION_MINOR(props.apiVersion),
                          VK_API_VERSION_PATCH(props.apiVersion)};
+  driver_version_ = props.driverVersion;
+  device_id_ = props.deviceID;
   vendor_ = IdentifyVendor(props.vendorID);
   if (vendor_ == VendorVK::kUnknown) {
     FML_LOG(WARNING) << "Unknown GPU Driver Vendor: " << props.vendorID
@@ -316,6 +325,7 @@ void DriverInfoVK::DumpToLog() const {
   std::vector<std::pair<std::string, std::string>> items;
   items.emplace_back("Name", driver_name_);
   items.emplace_back("API Version", api_version_.ToString());
+  items.emplace_back("Driver Version", std::to_string(driver_version_));
   items.emplace_back("Vendor", VendorToString(vendor_));
   items.emplace_back("Device Type", DeviceTypeToString(type_));
   items.emplace_back("Is Emulator", std::to_string(IsEmulator()));
@@ -358,6 +368,19 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
+#if FML_OS_ANDROID
+  // Pixel 10 is identified by the PowerVR vendor and device ID 0x71061212.
+  // The driver version 25.1 or greater is required - which is device specific
+  // to 6794074 or greater.
+  if (vendor_ == VendorVK::kPowerVR && device_id_ == kPixel10DeviceID &&
+      driver_version_ < kPixel10MinDriverVersion) {
+    FML_LOG(WARNING) << "Pixel 10 driver version "
+                     << std::to_string(driver_version_)
+                     << " is less than 25.1. Blocking Vulkan initialization.";
+    return true;
+  }
+#endif  // FML_OS_ANDROID
+
   // Fall back to OpenGL ES on older Adreno devices that require additional
   // workarounds in the Impeller Vulkan back end such as disabling framebuffer
   // fetch.
