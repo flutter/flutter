@@ -95,15 +95,19 @@ EGLDisplay CreateSwangleDisplay() {
 
   // We expect EGL_EXT_platform_base for Swangle.
   if (!HasExtension(extensions, "EGL_EXT_platform_base")) {
+    FML_LOG(ERROR) << "EGL_EXT_platform_base extension not available";
     return EGL_NO_DISPLAY;
   }
 
   if (!HasExtension(extensions, "EGL_ANGLE_platform_angle_vulkan")) {
+    FML_LOG(ERROR) << "EGL_ANGLE_platform_angle_vulkan extension not available";
     return EGL_NO_DISPLAY;
   }
 
   if (!HasExtension(extensions,
                     "EGL_ANGLE_platform_angle_device_type_swiftshader")) {
+    FML_LOG(ERROR) << "EGL_ANGLE_platform_angle_device_type_swiftshader "
+                      "extension not available";
     return EGL_NO_DISPLAY;
   }
 
@@ -147,6 +151,7 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
   TesterGLESDelegate() {
     display_ = CreateSwangleDisplay();
     if (display_ == EGL_NO_DISPLAY) {
+      FML_LOG(ERROR) << "Could not create EGL display.";
       // This will fail but it isn't necessary for the dart tests anyways.
       return;
     }
@@ -333,6 +338,7 @@ std::unique_ptr<TesterContext> TesterContextGLESFactory::Create() {
   SetupSwiftshaderOnce(true);
   auto context = std::make_unique<TesterContextGLES>();
   if (!context->Initialize()) {
+    FML_LOG(ERROR) << "Unable to create TesterContextGLESFactory";
     return nullptr;
   }
   return context;
