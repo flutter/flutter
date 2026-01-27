@@ -317,7 +317,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // an offset to the wrapper view.
           // This ensures that the accessibility highlights are drawn in the expected position on
           // screen.
-          // This offset doesn't affect the position of the embeded view by itself since the GL
+          // This offset doesn't affect the position of the embedded view by itself since the GL
           // texture is positioned by the Flutter engine, which knows where to position different
           // types of layers.
           final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
@@ -691,7 +691,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @VisibleForTesting
   public MotionEvent toMotionEvent(
-      float density, PlatformViewTouch touch, boolean usingVirtualDiplay) {
+      float density, PlatformViewTouch touch, boolean usingVirtualDisplay) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
@@ -712,7 +712,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
 
-    if (!usingVirtualDiplay && trackedEvent != null) {
+    if (!usingVirtualDisplay && trackedEvent != null) {
       // We have the original event. Check if pointer counts and actions match.
       if (trackedEvent.getPointerCount() == touch.pointerCount
           && trackedEvent.getAction() == touch.action) {
@@ -963,11 +963,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   public void onPreEngineRestart() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   @Override
@@ -1097,7 +1097,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return toLogicalPixels(physicalPixels, getDisplayDensity());
   }
 
-  private void diposeAllViews() {
+  private void disposeAllViews() {
     while (platformViews.size() > 0) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
@@ -1261,9 +1261,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       flutterView.addView(overlayView);
     }
 
-    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) width, (int) height);
-    layoutParams.leftMargin = (int) x;
-    layoutParams.topMargin = (int) y;
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+    layoutParams.leftMargin = x;
+    layoutParams.topMargin = y;
     overlayView.setLayoutParams(layoutParams);
     overlayView.setVisibility(View.VISIBLE);
     overlayView.bringToFront();

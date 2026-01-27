@@ -695,39 +695,31 @@ void main() async {
     shader.dispose();
   });
 
-  test(
-    'FragmentShader shader with array uniforms renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test('FragmentShader shader with array uniforms renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
-      for (var i = 0; i < 20; i++) {
-        shader.setFloat(i, i.toDouble());
-      }
+    final FragmentShader shader = program.fragmentShader();
+    for (var i = 0; i < 20; i++) {
+      shader.setFloat(i, i.toDouble());
+    }
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
-  test(
-    'FragmentShader shader with mat2 uniform renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+  test('FragmentShader shader with mat2 uniform renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
+    final FragmentShader shader = program.fragmentShader();
 
-      shader.setFloat(0, 4.0); // m00
-      shader.setFloat(1, 8.0); // m01
-      shader.setFloat(2, 16.0); // m10
-      shader.setFloat(3, 32.0); // m11
+    shader.setFloat(0, 4.0); // m00
+    shader.setFloat(1, 8.0); // m01
+    shader.setFloat(2, 16.0); // m10
+    shader.setFloat(3, 32.0); // m11
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
   _runImpellerTest(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
@@ -760,24 +752,22 @@ void main() async {
     },
   );
 
-  _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
+  _runImpellerTest(
+    'Shader Compiler appropriately pads vec3 uniform arrays',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
+      final FragmentShader shader = program.fragmentShader();
 
-    // ignore: dead_code
-    final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
+      // Set the last vec3 in the uniform array to green. The shader will read this
+      // value, and if the uniforms were padded correctly will render green.
+      shader.setFloat(9, 0); // color_array[3].x
+      shader.setFloat(10, 1.0); // color_array[3].y
+      shader.setFloat(11, 0); // color_array[3].z
 
-    // Set the last vec3 in the uniform array to green. The shader will read this
-    // value, and if the uniforms were padded correctly will render green.
-    shader.setFloat(12, 0);
-    shader.setFloat(13, 1.0);
-    shader.setFloat(14, 0);
-
-    await _expectShaderRendersGreen(shader);
-  });
+      await _expectShaderRendersGreen(shader);
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
@@ -870,14 +860,14 @@ void _runSkiaTest(String name, Future<void> Function() callback) {
   });
 }
 
-void _runImpellerTest(String name, Future<void> Function() callback) {
+void _runImpellerTest(String name, Future<void> Function() callback, {Object? skip}) {
   test(name, () async {
     if (!impellerEnabled) {
       print('Skipped for Skia.');
       return;
     }
     await callback();
-  });
+  }, skip: skip);
 }
 
 // Expect that all of the shaders in this folder render green.
@@ -902,8 +892,17 @@ Future<void> _expectShaderRendersColor(Shader shader, Color color) async {
     shader: shader,
     imageDimension: _shaderImageDimension,
   ))!;
-  for (final int c in renderedBytes.buffer.asUint32List()) {
-    expect(toHexString(c), toHexString(color.value));
+
+  expect(renderedBytes.lengthInBytes % 4, 0);
+  for (var byteOffset = 0; byteOffset < renderedBytes.lengthInBytes; byteOffset += 4) {
+    final pixelColor = Color.fromARGB(
+      renderedBytes.getUint8(byteOffset + 3),
+      renderedBytes.getUint8(byteOffset),
+      renderedBytes.getUint8(byteOffset + 1),
+      renderedBytes.getUint8(byteOffset + 2),
+    );
+
+    expect(pixelColor, color);
   }
 }
 
@@ -966,8 +965,6 @@ const double epsilon = 0.5 / 255.0;
 
 // Maps an int value from 0-255 to a double value of 0.0 to 1.0.
 double toFloat(int v) => v.toDouble() / 255.0;
-
-String toHexString(int color) => '#${color.toRadixString(16)}';
 
 // 10x10 image where the left half is blue and the right half is
 // green.
