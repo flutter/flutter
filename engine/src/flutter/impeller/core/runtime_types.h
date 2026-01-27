@@ -38,11 +38,6 @@ struct RuntimeUniformDimensions {
   size_t cols = 0;
 };
 
-enum class RuntimePaddingType : uint8_t {
-  kPadding = 0,
-  kFloat = 1,
-};
-
 struct RuntimeUniformDescription {
   std::string name;
   size_t location = 0u;
@@ -52,16 +47,11 @@ struct RuntimeUniformDescription {
   RuntimeUniformDimensions dimensions = {};
   size_t bit_width = 0u;
   std::optional<size_t> array_elements;
-  std::vector<RuntimePaddingType> padding_layout = {};
+  std::vector<uint8_t> struct_layout = {};
   size_t struct_float_count = 0u;
 
-  /// @brief  Computes the total number of bytes that this uniform requires for
-  /// representation in the Dart float buffer.
-  size_t GetDartSize() const;
-
-  /// @brief  Computes the total number of bytes that this uniform requires for
-  /// representation in the GPU.
-  size_t GetGPUSize() const;
+  /// @brief  Computes the total number of bytes that this uniform requires.
+  size_t GetSize() const;
 };
 
 }  // namespace impeller
