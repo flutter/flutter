@@ -132,9 +132,11 @@ final class _ClampedTextScaler implements TextScaler {
 
   @override
   TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) {
-    return minScaleFactor == maxScaleFactor
+    final double newMinScale = max(minScale, minScaleFactor);
+    final double newMaxScale = min(maxScale, maxScaleFactor);
+    return newMinScale == newMaxScale
         ? _LinearTextScaler(minScaleFactor)
-        : _ClampedTextScaler(scaler, max(minScaleFactor, minScale), min(maxScaleFactor, maxScale));
+        : _ClampedTextScaler(scaler, newMinScale, newMaxScale);
   }
 
   @override
