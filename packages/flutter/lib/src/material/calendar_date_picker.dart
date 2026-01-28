@@ -1213,14 +1213,17 @@ class _DayState extends State<_Day> {
       (DatePickerThemeData? theme) => theme?.dayShape,
       states,
     )!;
+    final bool hasCustomBorderColor =
+        datePickerTheme.todayBorder != null && datePickerTheme.todayBorder!.color.opacity != 0.0;
+    final BorderSide todayBorderSide = hasCustomBorderColor
+        ? datePickerTheme.todayBorder!
+        : (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
+            color: dayForegroundColor,
+          );
     final decoration = widget.isToday
         ? ShapeDecoration(
             color: dayBackgroundColor,
-            shape: dayShape.copyWith(
-              side: (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
-                color: dayForegroundColor,
-              ),
-            ),
+            shape: dayShape.copyWith(side: todayBorderSide),
           )
         : ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
