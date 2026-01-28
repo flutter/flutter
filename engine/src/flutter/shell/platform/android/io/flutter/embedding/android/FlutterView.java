@@ -114,6 +114,8 @@ public class FlutterView extends FrameLayout
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
+  private static final boolean DISABLE_CONTENT_SIZING = true;
+
   // Boolean that gates if view port metrics should be sent.  When the
   // engine informs the embedder of a resize, it is not necessary to send
   // the viewport metrics back to the engine.
@@ -520,7 +522,7 @@ public class FlutterView extends FrameLayout
     viewportMetrics.width = width;
     viewportMetrics.height = height;
 
-    if (heightMode == MeasureSpec.UNSPECIFIED) {
+    if (!DISABLE_CONTENT_SIZING && heightMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minHeight = 0;
       viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
@@ -528,7 +530,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.minHeight = viewportMetrics.height;
       viewportMetrics.maxHeight = viewportMetrics.height;
     }
-    if (widthMode == MeasureSpec.UNSPECIFIED) {
+    if (!DISABLE_CONTENT_SIZING && widthMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minWidth = 0;
       viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
@@ -537,7 +539,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.maxWidth = viewportMetrics.width;
     }
 
-    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
+    if (!DISABLE_CONTENT_SIZING && shouldSendViewportMetrics.compareAndSet(false, true)) {
       Log.d(
           TAG,
           "Resize was in response to the engine resizing the view. Not sending viewport metrics.");

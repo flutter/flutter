@@ -118,10 +118,10 @@ public class FlutterTextureView extends TextureView implements RenderSurface {
     setSurfaceTextureListener(surfaceTextureListener);
   }
 
-  @Override
+  /*@Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
-  }
+  }*/
 
   @Nullable
   @Override
