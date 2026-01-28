@@ -519,31 +519,11 @@ public class FlutterView extends FrameLayout
             + height);
     viewportMetrics.width = width;
     viewportMetrics.height = height;
-
-    if (heightMode == MeasureSpec.UNSPECIFIED) {
-      Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
-      viewportMetrics.minHeight = 0;
-      viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
-    } else {
-      viewportMetrics.minHeight = viewportMetrics.height;
-      viewportMetrics.maxHeight = viewportMetrics.height;
-    }
-    if (widthMode == MeasureSpec.UNSPECIFIED) {
-      Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
-      viewportMetrics.minWidth = 0;
-      viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
-    } else {
-      viewportMetrics.minWidth = viewportMetrics.width;
-      viewportMetrics.maxWidth = viewportMetrics.width;
-    }
-
-    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
-      Log.d(
-          TAG,
-          "Resize was in response to the engine resizing the view. Not sending viewport metrics.");
-    } else {
-      sendViewportMetricsToFlutter();
-    }
+    viewportMetrics.minHeight = viewportMetrics.height;
+    viewportMetrics.maxHeight = viewportMetrics.height;
+    viewportMetrics.minWidth = viewportMetrics.width;
+    viewportMetrics.maxWidth = viewportMetrics.width;
+    sendViewportMetricsToFlutter();
   }
 
   @VisibleForTesting()
