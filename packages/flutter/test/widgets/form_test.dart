@@ -1842,6 +1842,152 @@ void main() {
     );
     expect(tester.getSize(find.byType(FormField<String>)), Size.zero);
   });
+
+  testWidgets('exposes all registered FormFieldStates with their values', (
+    WidgetTester tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(initialValue: 'A'),
+                TextFormField(initialValue: 'B'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final FormState formState = formKey.currentState!;
+
+    expect(formState.fields.length, equals(2));
+    expect(formState.fields.map((field) => field.value), containsAll(<String>['A', 'B']));
+  });
+
+  testWidgets('reports all fields as invalid after validation errors', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(initialValue: 'foo', validator: errorText),
+                TextFormField(initialValue: 'bar', validator: errorText),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    formKey.currentState?.validate();
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
+
+    final List<FormFieldState<dynamic>> fields = formKey.currentState!.fields.toList();
+
+    expect(fields.every((field) => field.isValid), isFalse);
+  });
+
+  testWidgets('isValid evaluates validity without updating error UI', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: TextFormField(initialValue: 'foo', validator: errorText),
+          ),
+        ),
+      ),
+    );
+
+    final FormFieldState<dynamic> field = formKey.currentState!.fields.single;
+
+    expect(field.isValid, isFalse);
+
+    // No error UI should be shown.
+    expect(find.text(errorText('foo')), findsNothing);
+    expect(field.hasError, isFalse);
+  });
+
+  testWidgets('allows collecting and updating values from all field types', (
+    WidgetTester tester,
+  ) async {
+    final formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(key: const ValueKey('name'), initialValue: 'Name'),
+                TextFormField(key: const ValueKey('email'), initialValue: 'Email'),
+                FormField<int>(
+                  key: const ValueKey('age'),
+                  initialValue: 18,
+                  builder: (field) => const SizedBox.shrink(),
+                ),
+                DropdownButtonFormField<String>(
+                  key: const ValueKey('animal'),
+                  initialValue: 'cat',
+                  items: const [
+                    DropdownMenuItem(value: 'dog', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'cat', child: SizedBox.shrink()),
+                    DropdownMenuItem(value: 'bird', child: SizedBox.shrink()),
+                  ],
+                  onChanged: (_) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Map<String, dynamic> collectData() {
+      return {
+        for (final field in formKey.currentState!.fields)
+          if (field.widget.key case ValueKey<String>(:final value)) value: field.value,
+      };
+    }
+
+    expect(collectData(), {'name': 'Name', 'email': 'Email', 'age': 18, 'animal': 'cat'});
+
+    FormFieldState<T> field<T>(String key) => formKey.currentState!.fields
+        .whereType<FormFieldState<T>>()
+        .singleWhere((f) => f.widget.key == ValueKey(key));
+
+    field<String>('name').didChange('New Name');
+    field<String>('email').didChange('new@email.com');
+    field<int>('age').didChange(30);
+    field<String>('animal').didChange('dog');
+
+    await tester.pump();
+
+    expect(collectData(), {
+      'name': 'New Name',
+      'email': 'new@email.com',
+      'age': 30,
+      'animal': 'dog',
+    });
+  });
 }
 
 class _PlatformAnnounceScenario {
