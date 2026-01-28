@@ -2912,9 +2912,11 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
+
   testUsingContext(
     'plugin includes only setting.gradle.kts',
     () async {
+      // Regression test for https://github.com/flutter/flutter/issues/181565.
       final command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
