@@ -3,15 +3,20 @@
 # found in the LICENSE file.
 
 import("//build/toolchain/custom/custom.gni")
+import("//build/toolchain/ccache.gni")
 
 toolchain("custom") {
   toolchain_bin = "${custom_toolchain}/bin"
+  compiler_prefix = ""
+  if (use_ccache) {
+    compiler_prefix = "ccache "
+  }
 
   # We can't do string interpolation ($ in strings) on things with dots in
   # them. To allow us to use $cc below, for example, we create copies of
   # these values in our scope.
-  cc = "${toolchain_bin}/clang"
-  cxx = "${toolchain_bin}/clang++"
+  cc = "${compiler_prefix}${toolchain_bin}/clang"
+  cxx = "${compiler_prefix}${toolchain_bin}/clang++"
   ar = "${toolchain_bin}/${custom_target_triple}-ar"
   ld = "${toolchain_bin}/clang++"
   readelf = "${toolchain_bin}/${custom_target_triple}-readelf"
