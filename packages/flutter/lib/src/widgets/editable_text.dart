@@ -3299,6 +3299,12 @@ class EditableTextState extends State<EditableText>
       if (newViewId != _viewId) {
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
+      // The style may have changed due to dependency changes
+      // (e.g. MediaQuery.boldTextOf, MediaQuery.textScalerOf, etc.).
+      SchedulerBinding.instance.addPostFrameCallback(
+        (_) => _updateRemoteStyle(),
+        debugLabel: 'EditableText.didChangeDependencies.updateStyle',
+      );
     }
 
     if (defaultTargetPlatform != TargetPlatform.iOS &&
@@ -3411,27 +3417,10 @@ class EditableTextState extends State<EditableText>
       if (_hasInputConnection) {
         // Schedule the style update after layout to ensure preferredLineHeight
         // is computed with the new style.
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || !_hasInputConnection) {
-            return;
-          }
-          final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
-          final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
-          _textInputConnection!.updateStyle(
-            TextInputStyle(
-              fontFamily: _style.fontFamily,
-              fontSize: _style.fontSize,
-              fontWeight: _style.fontWeight,
-              textDirection: _textDirection,
-              textAlign: widget.textAlign,
-              letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-              wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-              // preferredLineHeight already includes lineHeightScaleFactor from
-              // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-              lineHeight: renderEditable.preferredLineHeight,
-            ),
-          );
-        }, debugLabel: 'EditableText.updateStyle');
+        SchedulerBinding.instance.addPostFrameCallback(
+          (_) => _updateRemoteStyle(),
+          debugLabel: 'EditableText.updateStyle',
+        );
       }
     }
 
@@ -3452,6 +3441,28 @@ class EditableTextState extends State<EditableText>
       _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
       _scrollNotificationObserver = null;
     }
+  }
+
+  void _updateRemoteStyle() {
+    if (!mounted || !_hasInputConnection) {
+      return;
+    }
+    final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
+    final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+    _textInputConnection!.updateStyle(
+      TextInputStyle(
+        fontFamily: _style.fontFamily,
+        fontSize: _style.fontSize,
+        fontWeight: _style.fontWeight,
+        textDirection: _textDirection,
+        textAlign: widget.textAlign,
+        letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
+        wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
+        // preferredLineHeight already includes lineHeightScaleFactor from
+        // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
+        lineHeight: renderEditable.preferredLineHeight,
+      ),
+    );
   }
 
   @protected
@@ -3974,23 +3985,8 @@ class EditableTextState extends State<EditableText>
           : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
-      final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
-      final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+      _updateRemoteStyle();
       _textInputConnection!
-        ..updateStyle(
-          TextInputStyle(
-            fontFamily: _style.fontFamily,
-            fontSize: _style.fontSize,
-            fontWeight: _style.fontWeight,
-            textDirection: _textDirection,
-            textAlign: widget.textAlign,
-            letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-            wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-            // preferredLineHeight already includes lineHeightScaleFactor from
-            // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-            lineHeight: renderEditable.preferredLineHeight,
-          ),
-        )
         ..setEditingState(localValue)
         ..show();
       if (_needsAutofill) {
@@ -4052,24 +4048,9 @@ class EditableTextState extends State<EditableText>
         TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
 
-    final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
-    final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
+    _updateRemoteStyle();
     newConnection
       ..show()
-      ..updateStyle(
-        TextInputStyle(
-          fontFamily: _style.fontFamily,
-          fontSize: _style.fontSize,
-          fontWeight: _style.fontWeight,
-          textDirection: _textDirection,
-          textAlign: widget.textAlign,
-          letterSpacing: letterSpacingOverride ?? _style.letterSpacing,
-          wordSpacing: wordSpacingOverride ?? _style.wordSpacing,
-          // preferredLineHeight already includes lineHeightScaleFactor from
-          // _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides.
-          lineHeight: renderEditable.preferredLineHeight,
-        ),
-      )
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
   }
