@@ -10,7 +10,6 @@
 vars = {
   'android_git': 'https://android.googlesource.com',
   'chromium_git': 'https://chromium.googlesource.com',
-  'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
@@ -227,7 +226,6 @@ allowed_hosts = [
   'flutter.googlesource.com',
   'llvm.googlesource.com',
   'skia.googlesource.com',
-  'swiftshader.googlesource.com',
 ]
 
 deps = {
@@ -522,7 +520,7 @@ deps = {
    Var('flutter_git') + '/third_party/pyyaml.git' + '@' + '03c67afd452cdff45b41bfe65e19a2fb5b80a0e8',
 
   'engine/src/flutter/third_party/swiftshader':
-  Var('swiftshader_git') + '/SwiftShader.git' + '@' + '794b0cfce1d828d187637e6d932bae484fbe0976',
+  Var('flutter_git') + '/third_party/swiftshader.git' + '@' + 'c0a3cdc81f0e2cd664571643d9a608e9caa6fa6b',
 
   'engine/src/flutter/third_party/angle':
   Var('flutter_git') + '/third_party/angle' + '@' + '6950c6c99fa1a2d653922871ede6679d74840289',
