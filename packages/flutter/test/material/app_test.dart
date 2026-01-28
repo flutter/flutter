@@ -29,6 +29,26 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 void main() {
+  group('ThemeMode getters', () {
+    test('ThemeMode.system', () {
+      expect(ThemeMode.system.isSystem, isTrue);
+      expect(ThemeMode.system.isLight, isFalse);
+      expect(ThemeMode.system.isDark, isFalse);
+    });
+
+    test('ThemeMode.light', () {
+      expect(ThemeMode.light.isSystem, isFalse);
+      expect(ThemeMode.light.isLight, isTrue);
+      expect(ThemeMode.light.isDark, isFalse);
+    });
+
+    test('ThemeMode.dark', () {
+      expect(ThemeMode.dark.isSystem, isFalse);
+      expect(ThemeMode.dark.isLight, isFalse);
+      expect(ThemeMode.dark.isDark, isTrue);
+    });
+  });
+
   testWidgets('Can nest apps', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: MaterialApp(home: Text('Home sweet home'))));
 
