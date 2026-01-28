@@ -136,6 +136,6 @@ See: https://github.com/flutter/flutter/issues/30701.
     await tester.tap(toTap);
     await tester.pump();
 
-    expect(find.widgetWithText(Text, 'Tooltip Window'), findsOneWidget);
+    expect(find.text('Tooltip Window'), findsOneWidget);
   });
 }
