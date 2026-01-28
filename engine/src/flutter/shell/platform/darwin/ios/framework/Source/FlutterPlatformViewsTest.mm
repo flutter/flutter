@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/thread.h"
@@ -2936,7 +2937,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   // Set flutter view controller allows events to be dispatched.
   NSSet* touches2 = [[NSSet alloc] init];
   id event2 = OCMClassMock([UIEvent class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController;
+  [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
   [forwardGectureRecognizer touchesBegan:touches2 withEvent:event2];
   OCMVerify([flutterViewController touchesBegan:touches2 withEvent:event2]);
 }
@@ -2994,17 +2995,17 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewController = OCMClassMock([FlutterViewController class]);
+  FlutterViewController* flutterViewController = OCMClassMock([FlutterViewController class]);
   {
     // ***** Sequence 1, finishing touch event with touchEnded ***** //
-    flutterPlatformViewsController.flutterViewController = flutterViewController;
+    [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
 
     NSSet* touches1 = [[NSSet alloc] init];
     id event1 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
     OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
-    flutterPlatformViewsController.flutterViewController = nil;
+    [flutterPlatformViewsController detachFromFlutterViewController:flutterViewController.viewIdentifier];
 
     // Allow the touch events to finish
     NSSet* touches2 = [[NSSet alloc] init];
@@ -3031,14 +3032,14 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   {
     // ***** Sequence 2, finishing touch event with touchCancelled ***** //
-    flutterPlatformViewsController.flutterViewController = flutterViewController;
+    [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
 
     NSSet* touches1 = [[NSSet alloc] init];
     id event1 = OCMClassMock([UIEvent class]);
     [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
     OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
-    flutterPlatformViewsController.flutterViewController = nil;
+    [flutterPlatformViewsController detachFromFlutterViewController:flutterViewController.viewIdentifier];
 
     // Allow the touch events to finish
     NSSet* touches2 = [[NSSet alloc] init];
@@ -3120,8 +3121,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       break;
     }
   }
-  id flutterViewController = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController;
+  FlutterViewController* flutterViewController = OCMClassMock([FlutterViewController class]);
+  [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
 
   // The touches in this sequence requires 1 touch object, we always create the NSSet with one item.
   NSSet* touches1 = [NSSet setWithObject:@1];
@@ -3130,7 +3131,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   OCMVerify([flutterViewController touchesBegan:touches1 withEvent:event1]);
 
   FlutterViewController* flutterViewController2 = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController2;
+  [flutterPlatformViewsController detachFromFlutterViewController:flutterViewController.viewIdentifier];
+  [flutterPlatformViewsController attachToFlutterViewController:flutterViewController2];
 
   // Touch events should still send to the old FlutterViewController if FlutterViewController
   // is updated in between.
@@ -3236,7 +3238,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     }
   }
   id flutterViewController = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController;
+  [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
 
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
@@ -3310,7 +3312,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
     }
   }
   id flutterViewController = OCMClassMock([FlutterViewController class]);
-  flutterPlatformViewsController.flutterViewController = flutterViewController;
+  [flutterPlatformViewsController attachToFlutterViewController:flutterViewController];
 
   NSSet* touches1 = [NSSet setWithObject:@1];
   id event1 = OCMClassMock([UIEvent class]);
@@ -4116,7 +4118,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600));
   XCTAssertFalse([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
@@ -4133,7 +4136,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600));
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface_submit_true)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 }
 
 - (void)
@@ -4332,7 +4336,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -4361,7 +4366,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4439,7 +4445,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -4468,7 +4475,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   XCTAssertTrue([flutterPlatformViewsController
          submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+      withIosContext:std::make_shared<flutter::IOSContextNoop>()
+   withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4932,7 +4940,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()
+     withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -4959,7 +4968,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
         /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
     XCTAssertTrue([flutterPlatformViewsController
            submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+        withIosContext:std::make_shared<flutter::IOSContextNoop>()
+     withFlutterViewId:flutter::kFlutterImplicitViewId]);
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
@@ -5027,7 +5037,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
+                            withFlutterViewId:flutter::kFlutterImplicitViewId];
 
   UIView* someView = [[UIView alloc] init];
   [flutterView addSubview:someView];
@@ -5097,7 +5108,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
+                            withFlutterViewId:flutter::kFlutterImplicitViewId];
 
   // The above code should result in previousCompositionOrder having one viewId in it
   XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.size(), 1ul);
@@ -5170,7 +5182,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
       [](const flutter::SurfaceFrame& surface_frame) { return true; },
       /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
+                            withFlutterViewId:flutter::kFlutterImplicitViewId];
 
   XCTAssertEqual(flutterView.subviews.count, 1u);
 }
@@ -5284,7 +5297,8 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<flutter::IOSContextNoop>()
+                            withFlutterViewId:flutter::kFlutterImplicitViewId];
 
   XCTAssertTrue(submit_info.has_value());
   XCTAssertEqual(*submit_info->frame_damage, flutter::DlIRect::MakeWH(800, 600));
