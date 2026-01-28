@@ -7,10 +7,10 @@ library;
 
 import 'package:meta/meta.dart';
 
-import '_error_dumper_io.dart' if (dart.library.js_interop) '_error_dumper_web.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
+import 'error_dumper.dart';
 import 'stack_frame.dart';
 
 export 'basic_types.dart' show IterableFilter;
