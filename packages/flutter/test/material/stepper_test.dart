@@ -1251,6 +1251,34 @@ void main() {
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/40601
+  testWidgets('Horizontal stepper does not overflow with long step titles', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400.0,
+            height: 600.0,
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: List<Step>.generate(
+                10,
+                (i) => Step(
+                  title: Text('Step ${i + 1}'),
+                  content: const SizedBox(width: 100.0, height: 100.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Stepper Connector Style', (WidgetTester tester) async {
     const Color selectedColor = Colors.black;
     const Color disabledColor = Colors.white;
