@@ -23,6 +23,8 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
   const _MyGlobalObjectKey(super.value);
 }
 
+const Color _kTestColor = Color(0xFF00FF00);
+
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -996,7 +998,7 @@ void main() {
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
         ColoredBox(
-          color: Color(0xFF00FF00),
+          color: _kTestColor,
           child: SizedBox(key: key),
         ),
       ],
@@ -1322,7 +1324,7 @@ void main() {
         children: <Widget>[
           Container(),
           Container(key: GlobalKey()),
-          ColoredBox(color: Color(0xFF00FF00), child: Container()),
+          ColoredBox(color: _kTestColor, child: Container()),
           Container(key: GlobalKey()),
           Container(),
         ],
