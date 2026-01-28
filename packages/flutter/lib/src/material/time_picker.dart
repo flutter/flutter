@@ -469,19 +469,14 @@ class _TimeSelectorSeparator extends StatelessWidget {
 
   final TimeOfDayFormat timeOfDayFormat;
 
-  String _timeSelectorSeparatorValue(TimeOfDayFormat timeOfDayFormat) {
-    switch (timeOfDayFormat) {
-      case TimeOfDayFormat.h_colon_mm_space_a:
-      case TimeOfDayFormat.a_space_h_colon_mm:
-      case TimeOfDayFormat.H_colon_mm:
-      case TimeOfDayFormat.HH_colon_mm:
-        return ':';
-      case TimeOfDayFormat.HH_dot_mm:
-        return '.';
-      case TimeOfDayFormat.frenchCanadian:
-        return 'h';
-    }
-  }
+  String _timeSelectorSeparatorValue(TimeOfDayFormat timeOfDayFormat) => switch (timeOfDayFormat) {
+    TimeOfDayFormat.h_colon_mm_space_a ||
+    TimeOfDayFormat.a_space_h_colon_mm ||
+    TimeOfDayFormat.H_colon_mm ||
+    TimeOfDayFormat.HH_colon_mm => ':',
+    TimeOfDayFormat.HH_dot_mm => '.',
+    TimeOfDayFormat.frenchCanadian => 'h',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -507,15 +502,12 @@ class _TimeSelectorSeparator extends StatelessWidget {
       states,
     ).copyWith(color: effectiveTextColor, height: 1.0);
 
-    final double height;
-    switch (_TimePickerModel.entryModeOf(context)) {
-      case TimePickerEntryMode.dial:
-      case TimePickerEntryMode.dialOnly:
-        height = defaultTheme.hourMinuteSize.height;
-      case TimePickerEntryMode.input:
-      case TimePickerEntryMode.inputOnly:
-        height = defaultTheme.hourMinuteInputSize.height;
-    }
+    final double height = switch (_TimePickerModel.entryModeOf(context)) {
+      TimePickerEntryMode.dial ||
+      TimePickerEntryMode.dialOnly => defaultTheme.hourMinuteSize.height,
+      TimePickerEntryMode.input ||
+      TimePickerEntryMode.inputOnly => defaultTheme.hourMinuteInputSize.height,
+    };
 
     return ExcludeSemantics(
       child: SizedBox(
