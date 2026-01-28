@@ -2059,7 +2059,7 @@ void main() {
             )
           : BorderSide.none;
 
-      ShapeBorder getExpectedActionHaloBorder({required bool hasFocus}) => RoundedRectangleBorder(
+      ShapeBorder getExpectedActionHaloBorder({required bool hasFocus}) => RoundedSuperellipseBorder(
         side: getExpectedBorderSide(hasFocus: hasFocus),
         borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!.copyWith(
           topLeft: Radius.zero,
@@ -2067,9 +2067,9 @@ void main() {
         ),
       );
 
-      ShapeBorder getExpectedCancelHaloBorder({required bool hasFocus}) => RoundedRectangleBorder(
+      ShapeBorder getExpectedCancelHaloBorder({required bool hasFocus}) => RoundedSuperellipseBorder(
         side: getExpectedBorderSide(hasFocus: hasFocus),
-        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!,
+        borderRadius: kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large],
       );
 
       expect(actionsDecoratedBoxFinder, findsOneWidget);

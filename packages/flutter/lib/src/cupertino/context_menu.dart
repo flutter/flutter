@@ -11,10 +11,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'cupertino_focus_halo.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
 
@@ -83,6 +85,10 @@ Rect _getRect(GlobalKey globalKey) {
 // [CupertinoContextMenu] opens.
 enum _ContextMenuLocation { center, left, right }
 
+class _ContextMenuIntent extends Intent {
+  const _ContextMenuIntent();
+}
+
 /// A full-screen modal route that opens when the [child] is long-pressed.
 ///
 /// When open, the [CupertinoContextMenu] shows the child in a large full-screen
@@ -122,6 +128,8 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required Widget this.child,
     this.enableHapticFeedback = false,
+    this.focusNode,
+    this.focusBorderRadius = BorderRadius.zero,
   }) : assert(actions.isNotEmpty),
        builder = ((BuildContext context, Animation<double> animation) => child);
 
@@ -136,6 +144,8 @@ class CupertinoContextMenu extends StatefulWidget {
     required this.actions,
     required this.builder,
     this.enableHapticFeedback = false,
+    this.focusNode,
+    this.focusBorderRadius = BorderRadius.zero,
   }) : assert(actions.isNotEmpty),
        child = null;
 
@@ -359,6 +369,12 @@ class CupertinoContextMenu extends StatefulWidget {
   /// Defaults to false.
   final bool enableHapticFeedback;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The radius of the focus halo rendered around this widget when focused.
+  final BorderRadiusGeometry focusBorderRadius;
+
   @override
   State<CupertinoContextMenu> createState() => _CupertinoContextMenuState();
 }
@@ -366,6 +382,7 @@ class CupertinoContextMenu extends StatefulWidget {
 class _CupertinoContextMenuState extends State<CupertinoContextMenu> with TickerProviderStateMixin {
   final GlobalKey _childGlobalKey = GlobalKey();
   bool _childHidden = false;
+  KeyEvent? _lastKeyEvent;
   // Animates the child while it's opening.
   late AnimationController _openController;
   Rect? _decoyChildEndRect;
@@ -390,6 +407,12 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       ..onTapUp = _onTapUp
       ..onTap = _onTap;
   }
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    _ContextMenuIntent: CallbackAction<_ContextMenuIntent>(
+      onInvoke: (_) => _performOpenMenu(fromTap: false),
+    ),
+  };
 
   void _listenerCallback() {
     if (_openController.status != AnimationStatus.reverse && _openController.value >= _midpoint) {
@@ -564,7 +587,10 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     _onTapCompleted();
   }
 
-  void _onTapDown(TapDownDetails details) {
+  void _onTapDown(TapDownDetails details) => _performOpenMenu(fromTap: true);
+
+  void _performOpenMenu({required bool fromTap}) {
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     _openController.addListener(_listenerCallback);
     setState(() {
       _childHidden = true;
@@ -602,7 +628,32 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       },
     );
     Overlay.of(context, rootOverlay: true, debugRequiredFor: widget).insert(_lastOverlayEntry!);
-    _openController.forward();
+    _openController.forward(from: !fromTap ? 1.0 : null);
+  }
+
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() {
+      _lastKeyEvent = null;
+    });
+  }
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
+      _lastKeyEvent = event;
+      return KeyEventResult.handled;
+    }
+
+    if (event case KeyUpEvent(logicalKey: LogicalKeyboardKey.tab)) {
+      if (_lastKeyEvent case KeyDownEvent(logicalKey: LogicalKeyboardKey.tab)) {
+        FocusScope.of(context).nextFocus();
+      }
+      _lastKeyEvent = event;
+      return KeyEventResult.handled;
+    }
+
+    _lastKeyEvent = event;
+
+    return KeyEventResult.ignored;
   }
 
   @override
@@ -616,7 +667,23 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           child: Visibility.maintain(
             key: _childGlobalKey,
             visible: !_childHidden,
-            child: widget.builder(context, _openController),
+            child: Shortcuts(
+              shortcuts: <ShortcutActivator, Intent>{
+                LogicalKeySet(LogicalKeyboardKey.tab, LogicalKeyboardKey.keyM):
+                    const _ContextMenuIntent(),
+              },
+              child: CupertinoFocusHalo.withRoundedSuperellipse(
+                borderRadius: widget.focusBorderRadius,
+                child: FocusableActionDetector(
+                  actions: _actionMap,
+                  focusNode: widget.focusNode,
+                  enabled: !_childHidden,
+                  onShowFocusHighlight: _onShowFocusHighlight,
+                  onKeyEvent: _onKeyEvent,
+                  child: Semantics(button: true, child: widget.builder(context, _openController)),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1350,6 +1417,8 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
   // Eyeballed on a context menu on an iOS 15 simulator running iOS 17.5.
   static const double _kScrollbarMainAxisMargin = 13.0;
 
+  static const _borderRadius = BorderRadius.all(Radius.circular(13.0));
+
   @override
   void initState() {
     super.initState();
@@ -1371,34 +1440,37 @@ class _ContextMenuSheetState extends State<_ContextMenuSheet> {
       width: _kMenuWidth,
       child: IntrinsicHeight(
         child: ClipRSuperellipse(
-          borderRadius: const BorderRadius.all(Radius.circular(13.0)),
-          child: ColoredBox(
-            color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: CupertinoScrollbar(
-                mainAxisMargin: _kScrollbarMainAxisMargin,
-                controller: _controller,
-                child: SingleChildScrollView(
+          borderRadius: _borderRadius,
+          child: CupertinoFocusHalo.withRoundedSuperellipse(
+            borderRadius: _borderRadius,
+            child: ColoredBox(
+              color: CupertinoDynamicColor.resolve(CupertinoContextMenu.kBackgroundColor, context),
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: CupertinoScrollbar(
+                  mainAxisMargin: _kScrollbarMainAxisMargin,
                   controller: _controller,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      widget.actions.first,
-                      for (final Widget action in widget.actions.skip(1))
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: CupertinoDynamicColor.resolve(_borderColor, context),
-                                width: 0.4,
+                  child: SingleChildScrollView(
+                    controller: _controller,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        widget.actions.first,
+                        for (final Widget action in widget.actions.skip(1))
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: CupertinoDynamicColor.resolve(_borderColor, context),
+                                  width: 0.4,
+                                ),
                               ),
                             ),
+                            position: DecorationPosition.foreground,
+                            child: action,
                           ),
-                          position: DecorationPosition.foreground,
-                          child: action,
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
