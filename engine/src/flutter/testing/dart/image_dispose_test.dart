@@ -40,10 +40,10 @@ void main() {
     expect(frame.image.height, 2);
     final Image handle1 = frame.image.clone();
 
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
 
-    const Rect rect = Rect.fromLTRB(0, 0, 2, 2);
+    const rect = Rect.fromLTRB(0, 0, 2, 2);
     canvas.drawImage(handle1, Offset.zero, Paint());
     canvas.drawImageRect(handle1, rect, rect, Paint());
     canvas.drawImageNine(handle1, rect, rect, Paint());
@@ -135,6 +135,6 @@ void main() {
 }
 
 Future<Uint8List> _readFile(String fileName) async {
-  final File file = File(path.join('flutter', 'testing', 'resources', fileName));
+  final file = File(path.join('flutter', 'testing', 'resources', fileName));
   return file.readAsBytes();
 }

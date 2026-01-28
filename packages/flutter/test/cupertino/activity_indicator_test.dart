@@ -132,7 +132,7 @@ void main() {
 
   testWidgets('Can specify color', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    const Color color = Color(0xFF5D3FD3);
+    const color = Color(0xFF5D3FD3);
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -212,6 +212,30 @@ void main() {
           ),
       );
     });
+  });
+
+  testWidgets('CupertinoActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoActivityIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoActivityIndicator)), Size.zero);
+  });
+
+  testWidgets('CupertinoLinearActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoLinearActivityIndicator(progress: 0.5)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoLinearActivityIndicator)), Size.zero);
   });
 }
 

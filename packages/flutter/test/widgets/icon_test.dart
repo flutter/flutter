@@ -236,7 +236,7 @@ void main() {
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -251,7 +251,7 @@ void main() {
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -410,6 +410,16 @@ void main() {
     expect(() => Icon(Icons.abc, weight: 0.0), throwsAssertionError);
     expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
+  });
+
+  testWidgets('Icon does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: Icon(Icons.save))),
+      ),
+    );
+    expect(tester.getSize(find.byType(Icon)), Size.zero);
   });
 }
 

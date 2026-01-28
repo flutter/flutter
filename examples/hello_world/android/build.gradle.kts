@@ -31,7 +31,8 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add("io.flutter:*")
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty("local-engine-repo")) {
+        var ignoreFile = file("${rootProject.projectDir}/.ignore-locking.md")
+        if (!ignoreFile.exists() && !project.hasProperty("local-engine-repo")) {
             lockAllConfigurations()
         }
     }

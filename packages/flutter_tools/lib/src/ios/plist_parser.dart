@@ -103,6 +103,26 @@ class PlistParser {
     return true;
   }
 
+  bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
+    }
+    try {
+      _processUtils.runSync([
+        _plutilExecutable,
+        '-insert',
+        key,
+        '-json',
+        json,
+        plistFilePath,
+      ], throwOnError: true);
+    } on ProcessException catch (error) {
+      _logger.printTrace('$error');
+      return false;
+    }
+    return true;
+  }
+
   /// Parses the plist file located at [plistFilePath] and returns the
   /// associated map of key/value property list pairs.
   ///

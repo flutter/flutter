@@ -26,7 +26,11 @@ class AnimatedAlignExampleApp extends StatelessWidget {
 }
 
 class AnimatedAlignExample extends StatefulWidget {
-  const AnimatedAlignExample({required this.duration, required this.curve, super.key});
+  const AnimatedAlignExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 

@@ -176,7 +176,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get helpTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       final TextStyle textStyle = ${textStyle('$tokenGroup.headline')}!;
       return textStyle.copyWith(color: ${componentColor('$tokenGroup.headline')});
     });
@@ -195,10 +195,10 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.selected.pressed.state-layer')};
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
+          const hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.hover.state-layer')}.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          const focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.selected.container')});
@@ -207,10 +207,10 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(WidgetState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.pressed.state-layer')};
         } else if (states.contains(WidgetState.hovered)) {
-          const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
+          const hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.hover.state-layer')}.withOpacity(hoverOpacity);
         } else if (states.contains(WidgetState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          const focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.unselected.container')});
@@ -285,7 +285,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
 
   @override
   TextStyle get hourMinuteTextStyle {
-    return MaterialStateTextStyle.resolveWith((Set<WidgetState> states) {
+    return WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
       // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215

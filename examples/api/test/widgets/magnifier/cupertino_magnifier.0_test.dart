@@ -3,18 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_api_samples/widgets/magnifier/cupertino_magnifier.0.dart' as example;
+import 'package:flutter_api_samples/widgets/magnifier/cupertino_magnifier.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoMagnifier must be visible', (WidgetTester tester) async {
+  testWidgets('CupertinoMagnifier must be visible', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
 
     final Finder cupertinoMagnifierWidget = find.byType(CupertinoMagnifier);
     expect(cupertinoMagnifierWidget, findsOneWidget);
   });
 
-  testWidgets('CupertinoMagnifier is not using the default value', (WidgetTester tester) async {
+  testWidgets('CupertinoMagnifier is not using the default value', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
     expect(
       tester.widget(find.byType(CupertinoMagnifier)),
@@ -26,7 +31,9 @@ void main() {
     );
   });
 
-  testWidgets('should update CupertinoMagnifier position on drag', (WidgetTester tester) async {
+  testWidgets('should update CupertinoMagnifier position on drag', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoMagnifierApp());
 
     Matcher isPositionedAt(Offset at) {
@@ -40,7 +47,8 @@ void main() {
     // Make sure magnifier is present.
     final Finder positionedWidget = find.byType(Positioned);
     final Widget positionedWidgetInTree = tester.widget(positionedWidget.first);
-    final Positioned oldConcretePositioned = positionedWidgetInTree as Positioned;
+    final Positioned oldConcretePositioned =
+        positionedWidgetInTree as Positioned;
     final Offset centerOfPositioned = tester.getCenter(positionedWidget.first);
 
     // Drag the magnifier and confirm its new position is expected.

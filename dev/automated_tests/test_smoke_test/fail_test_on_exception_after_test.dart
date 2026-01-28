@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 // See //flutter/dev/bots/test.dart
 
 void main() {
-  final Completer<void> complete = Completer<void>();
+  final complete = Completer<void>();
 
   testWidgets('test smoke test -- this test SHOULD FAIL', (WidgetTester tester) async {
     tester.runAsync(() async {

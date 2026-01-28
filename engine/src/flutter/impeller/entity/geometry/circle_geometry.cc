@@ -37,6 +37,18 @@ Scalar CircleGeometry::ComputeAlphaCoverage(const Matrix& transform) const {
   return Geometry::ComputeStrokeAlphaCoverage(transform, stroke_width_);
 }
 
+Point CircleGeometry::GetCenter() const {
+  return center_;
+}
+
+Scalar CircleGeometry::GetRadius() const {
+  return radius_;
+}
+
+Scalar CircleGeometry::GetStrokeWidth() const {
+  return stroke_width_;
+}
+
 GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                  const Entity& entity,
                                                  RenderPass& pass) const {

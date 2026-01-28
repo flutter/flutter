@@ -68,7 +68,7 @@ class HotReloadProject extends Project {
   }
 
   /// Whether the template is currently stateful.
-  var stateful = false;
+  bool stateful = false;
 
   void toggleState() {
     stateful = !stateful;

@@ -29,7 +29,7 @@ source_set("image_generator") {
 
   deps = [
     "//flutter/fml",
-    "//flutter/lib/ui:ui",
+    "//flutter/lib/ui",
     "//flutter/skia",
   ]
 
@@ -230,6 +230,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterFragment.java",
   "io/flutter/embedding/android/FlutterFragmentActivity.java",
   "io/flutter/embedding/android/FlutterImageView.java",
+  "io/flutter/embedding/android/FlutterMeasureSpec.java",
   "io/flutter/embedding/android/FlutterPlayStoreSplitApplication.java",
   "io/flutter/embedding/android/FlutterSurfaceView.java",
   "io/flutter/embedding/android/FlutterTextureView.java",
@@ -259,6 +260,15 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
+  "io/flutter/embedding/engine/image/ExifMetadataReader.java",
+  "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
+  "io/flutter/embedding/engine/image/ImageDecoderDefaultImpl.java",
+  "io/flutter/embedding/engine/image/ImageDecoderHeifApi36Impl.java",
+  "io/flutter/embedding/engine/image/ImageDecoderHeifPre36Impl.java",
+  "io/flutter/embedding/engine/image/ImageUtils.java",
+  "io/flutter/embedding/engine/image/MediaMetadataReader.java",
+  "io/flutter/embedding/engine/image/Metadata.java",
   "io/flutter/embedding/engine/loader/ApplicationInfoLoader.java",
   "io/flutter/embedding/engine/loader/FlutterApplicationInfo.java",
   "io/flutter/embedding/engine/loader/FlutterLoader.java",
@@ -283,6 +293,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/plugins/util/GeneratedPluginRegister.java",
   "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
   "io/flutter/embedding/engine/renderer/FlutterUiDisplayListener.java",
+  "io/flutter/embedding/engine/renderer/FlutterUiResizeListener.java",
   "io/flutter/embedding/engine/renderer/RenderSurface.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureSurfaceProducer.java",
   "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java",
@@ -308,7 +319,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/SpellCheckChannel.java",
   "io/flutter/embedding/engine/systemchannels/SystemChannel.java",
   "io/flutter/embedding/engine/systemchannels/TextInputChannel.java",
-  "io/flutter/plugin/common/ActivityLifecycleListener.java",
   "io/flutter/plugin/common/BasicMessageChannel.java",
   "io/flutter/plugin/common/BinaryCodec.java",
   "io/flutter/plugin/common/BinaryMessenger.java",
@@ -362,7 +372,6 @@ android_java_sources = [
   "io/flutter/util/HandlerCompat.java",
   "io/flutter/util/PathUtils.java",
   "io/flutter/util/Preconditions.java",
-  "io/flutter/util/Predicate.java",
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
@@ -376,7 +385,7 @@ android_java_sources = [
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",
-  "//flutter/third_party/android_embedding_dependencies/lib/annotation-jvm-1.8.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/annotation-jvm-1.8.1.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/annotation-experimental-1.4.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/annotations-23.0.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/collection-1.1.0.jar",
@@ -385,6 +394,7 @@ embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/core-common-2.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/core-runtime-2.2.0.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/customview-1.0.0.jar",
+  "//flutter/third_party/android_embedding_dependencies/lib/exifinterface-1.4.1.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/fragment-1.7.1.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/kotlin-stdlib-1.8.22.jar",
   "//flutter/third_party/android_embedding_dependencies/lib/kotlin-stdlib-common-1.8.22.jar",
@@ -749,51 +759,49 @@ generated_file("android_entitlement_config") {
   deps = []
 }
 
-if (target_cpu != "x86") {
-  zip_bundle("gen_snapshot") {
-    gen_snapshot_out_dir =
-        get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
-                       "root_out_dir")
+zip_bundle("gen_snapshot") {
+  gen_snapshot_out_dir =
+      get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
+                     "root_out_dir")
 
-    # The source gen_snapshot binary from the build outputs.
-    gen_snapshot_src = rebase_path("$gen_snapshot_out_dir/gen_snapshot")
+  # The source gen_snapshot binary from the build outputs.
+  gen_snapshot_src = rebase_path("$gen_snapshot_out_dir/gen_snapshot")
 
-    # The output gen_snapshot binary name in the archive.
-    gen_snapshot_dest = "gen_snapshot"
+  # The output gen_snapshot binary name in the archive.
+  gen_snapshot_dest = "gen_snapshot"
 
-    if (host_os == "mac") {
-      gen_snapshot_src = rebase_path("$root_out_dir/universal/gen_snapshot")
-    } else if (host_os == "win") {
-      gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
-      gen_snapshot_dest = "gen_snapshot.exe"
-    }
+  if (host_os == "mac") {
+    gen_snapshot_src = rebase_path("$root_out_dir/universal/gen_snapshot")
+  } else if (host_os == "win") {
+    gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
+    gen_snapshot_dest = "gen_snapshot.exe"
+  }
 
-    if (host_os == "linux") {
-      output = "$android_zip_archive_dir/linux-x64.zip"
-    } else if (host_os == "mac") {
-      output = "$android_zip_archive_dir/darwin-x64.zip"
-    } else if (host_os == "win") {
-      output = "$android_zip_archive_dir/windows-x64.zip"
-    }
+  if (host_os == "linux") {
+    output = "$android_zip_archive_dir/linux-x64.zip"
+  } else if (host_os == "mac") {
+    output = "$android_zip_archive_dir/darwin-x64.zip"
+  } else if (host_os == "win") {
+    output = "$android_zip_archive_dir/windows-x64.zip"
+  }
 
-    files = [
+  files = [
+    {
+      source = gen_snapshot_src
+      destination = gen_snapshot_dest
+    },
+  ]
+
+  deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
+
+  if (host_os == "mac") {
+    deps += [ ":android_entitlement_config" ]
+    files += [
       {
-        source = gen_snapshot_src
-        destination = gen_snapshot_dest
+        source = "$target_gen_dir/android_entitlements.txt"
+        destination = "entitlements.txt"
       },
     ]
-
-    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
-
-    if (host_os == "mac") {
-      deps += [ ":android_entitlement_config" ]
-      files += [
-        {
-          source = "$target_gen_dir/android_entitlements.txt"
-          destination = "entitlements.txt"
-        },
-      ]
-    }
   }
 }
 
@@ -834,10 +842,8 @@ group("android") {
     ":android_javadoc",
     ":android_symbols",
     ":flutter_jar_zip",
+    ":gen_snapshot",
   ]
-  if (target_cpu != "x86") {
-    deps += [ ":gen_snapshot" ]
-  }
 }
 
 # Renames embedding android artifacts and places them in the final

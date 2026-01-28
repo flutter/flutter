@@ -21,6 +21,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
@@ -30,6 +31,7 @@ import 'navigator.dart';
 import 'notification_listener.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'raw_tooltip.dart';
 import 'restoration.dart';
 import 'router.dart';
 import 'scrollable_helpers.dart';
@@ -156,7 +158,7 @@ Locale basicLocaleListResolution(
   final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
   final Map<String, Locale> languageLocales = HashMap<String, Locale>();
   final Map<String?, Locale> countryLocales = HashMap<String?, Locale>();
-  for (final Locale locale in supportedLocales) {
+  for (final locale in supportedLocales) {
     allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??=
         locale;
     languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
@@ -173,7 +175,7 @@ Locale basicLocaleListResolution(
   Locale? matchesLanguageCode;
   Locale? matchesCountryCode;
   // Loop over user's preferred locales
-  for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
+  for (var localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
     final Locale userLocale = preferredLocales[localeIndex];
     // Look for perfect match.
     if (allSupportedLocales.containsKey(
@@ -1657,14 +1659,24 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     supportedLocales: widget.supportedLocales,
   );
 
-  void _updateLocalizations({WidgetsApp? oldWidget}) {
-    _localizationsResolver.update(
-      locale: widget.locale,
-      localeListResolutionCallback: widget.localeListResolutionCallback,
-      localeResolutionCallback: widget.localeResolutionCallback,
-      supportedLocales: widget.supportedLocales,
-      localizationsDelegates: widget.localizationsDelegates,
-    );
+  bool _shouldUpdateLocalizations(WidgetsApp oldWidget) {
+    return widget.locale != oldWidget.locale ||
+        widget.localeListResolutionCallback != oldWidget.localeListResolutionCallback ||
+        widget.localeResolutionCallback != oldWidget.localeResolutionCallback ||
+        widget.supportedLocales != oldWidget.supportedLocales ||
+        widget.localizationsDelegates != oldWidget.localizationsDelegates;
+  }
+
+  void _updateLocalizations({required WidgetsApp oldWidget}) {
+    if (_shouldUpdateLocalizations(oldWidget)) {
+      _localizationsResolver.update(
+        locale: widget.locale,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localizationsDelegates: widget.localizationsDelegates,
+        supportedLocales: widget.supportedLocales,
+      );
+    }
   }
 
   // BUILDER
@@ -1763,6 +1775,21 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       return true;
     }());
+
+    // TODO(victorsanni): https://github.com/flutter/flutter/issues/180319
+    // Use actions and shortcuts to dismiss tooltips when esc is pressed instead
+    // of using a Focus widget.
+    result = Focus(
+      canRequestFocus: false,
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
+            event.logicalKey != LogicalKeyboardKey.escape) {
+          return KeyEventResult.ignored;
+        }
+        return RawTooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+      },
+      child: result,
+    );
 
     final Widget? title;
     if (widget.onGenerateTitle != null) {

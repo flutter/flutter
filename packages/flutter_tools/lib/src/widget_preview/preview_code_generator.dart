@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart' as analyzer;
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart' as analyzer;
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
@@ -32,7 +32,9 @@ class PreviewCodeGenerator {
   static const _kBuildMultiWidgetPreview = 'buildMultiWidgetPreview';
   static const _kBuildWidgetPreview = 'buildWidgetPreview';
   static const _kBuildWidgetPreviewError = 'buildWidgetPreviewError';
+  static const _kColumn = 'column';
   static const _kDependencyHasErrors = 'dependencyHasErrors';
+  static const _kLine = 'line';
   static const _kListType = 'List';
   static const _kPackageName = 'packageName';
   static const _kPackageUri = 'packageUri';
@@ -49,6 +51,53 @@ class PreviewCodeGenerator {
 
   static String getGeneratedPreviewFilePath(FileSystem fs) =>
       fs.path.join('lib', 'src', 'generated_preview.dart');
+
+  static String getGeneratedDtdConnectionInfoFilePath(FileSystem fs) =>
+      fs.path.join('lib', 'src', 'dtd', 'dtd_connection_info.dart');
+
+  void populateDtdConnectionInfo({
+    required Uri dtdUri,
+    required String widgetPreviewServiceName,
+    required String widgetPreviewScaffoldStreamName,
+  }) {
+    final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
+    final lib = cb.Library(
+      (cb.LibraryBuilder b) => b
+        ..ignoreForFile.add('implementation_imports')
+        ..body.addAll(<cb.Spec>[
+          cb.Field((b) {
+            b
+              ..name = 'kWidgetPreviewDtdUri'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(dtdUri.toString()).code;
+          }),
+          cb.Field((b) {
+            b
+              ..name = 'kWidgetPreviewService'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(widgetPreviewServiceName).code;
+          }),
+          cb.Field((b) {
+            b
+              ..name = 'kWidgetPreviewScaffoldStream'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(widgetPreviewScaffoldStreamName).code;
+          }),
+        ]),
+    );
+    final File generatedDtdConnectionInfoFile = fs.file(
+      widgetPreviewScaffoldProject.directory.uri.resolve(getGeneratedDtdConnectionInfoFilePath(fs)),
+    );
+    generatedDtdConnectionInfoFile.writeAsStringSync(
+      // Format the generated file for readability, particularly during feature development.
+      // Note: we don't really care _how_ this is formatted, just that it's formatted, so we don't
+      // specify a language version.
+      DartFormatter(languageVersion: Version.none).format(lib.accept(emitter).toString()),
+    );
+  }
 
   // TODO(bkonyi): update generated example now that we're computing constants
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
@@ -164,6 +213,8 @@ class PreviewCodeGenerator {
     final args = <String, cb.Expression>{
       _kPackageName: cb.literalString(preview.packageName!),
       _kScriptUri: cb.literalString(preview.scriptUri.toString()),
+      _kLine: cb.literalNum(preview.line),
+      _kColumn: cb.literalNum(preview.column),
     };
     // TODO(bkonyi): improve the error related code.
     if (libraryDetails.hasErrors || libraryDetails.dependencyHasErrors) {
@@ -206,7 +257,7 @@ extension on DartObject {
       DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
       DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
       DartType(isDartCoreNull: true) => cb.literalNull,
-      InterfaceType(element3: EnumElement()) => _createEnumInstance(this),
+      InterfaceType(element: EnumElement()) => _createEnumInstance(this),
       InterfaceType() => _createInstance(type, this),
       FunctionType() => _createTearoff(toFunctionValue()!),
       _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
@@ -238,10 +289,10 @@ extension on DartObject {
     final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
     final ConstructorElement constructor = constructorInvocation.constructor;
     final cb.Expression type = cb.refer(
-      dartType.element3.name3!,
-      _elementToLibraryIdentifier(dartType.element3),
+      dartType.element.name!,
+      _elementToLibraryIdentifier(dartType.element),
     );
-    final String? name = constructor.name3 == 'new' ? null : constructor.name3;
+    final String? name = constructor.name == 'new' ? null : constructor.name;
 
     final List<cb.Expression> positionalArguments = constructorInvocation.positionalArguments
         .map((e) => e.toExpression())

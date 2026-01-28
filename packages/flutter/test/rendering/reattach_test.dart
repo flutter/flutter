@@ -91,7 +91,7 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('objects can be detached and re-attached: layout', () {
-    final TestTree testTree = TestTree();
+    final testTree = TestTree();
     // Lay out
     layout(testTree.root);
     expect(testTree.child.size, equals(const Size(20.0, 20.0)));
@@ -105,7 +105,7 @@ void main() {
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));
   });
   test('objects can be detached and re-attached: compositingBits', () {
-    final TestCompositingBitsTree testTree = TestCompositingBitsTree();
+    final testTree = TestCompositingBitsTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -121,7 +121,7 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: paint', () {
-    final TestTree testTree = TestTree();
+    final testTree = TestTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -136,8 +136,8 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: semantics (no change)', () {
-    final TestTree testTree = TestTree();
-    int semanticsUpdateCount = 0;
+    final testTree = TestTree();
+    var semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
     TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
       ++semanticsUpdateCount;
@@ -158,8 +158,8 @@ void main() {
     semanticsHandle.dispose();
   });
   test('objects can be detached and re-attached: semantics (with change)', () {
-    final TestTree testTree = TestTree();
-    int semanticsUpdateCount = 0;
+    final testTree = TestTree();
+    var semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
     TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
       ++semanticsUpdateCount;

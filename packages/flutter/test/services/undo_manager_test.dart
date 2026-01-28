@@ -11,7 +11,7 @@ void main() {
   group('Undo Interactions', () {
     test('UndoManagerClient handleUndo', () async {
       // Assemble an UndoManagerClient so we can verify its change in state.
-      final _FakeUndoManagerClient client = _FakeUndoManagerClient();
+      final client = _FakeUndoManagerClient();
       UndoManager.client = client;
 
       expect(client.latestMethodCall, isEmpty);

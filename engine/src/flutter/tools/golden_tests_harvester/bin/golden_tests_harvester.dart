@@ -35,8 +35,8 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  final io.Directory workDirectory = io.Directory(rest.single);
-  final bool isDryRun = results['dry-run'] as bool;
+  final workDirectory = io.Directory(rest.single);
+  final isDryRun = results['dry-run'] as bool;
   final Harvester harvester;
   if (isDryRun) {
     io.stderr.writeln('=== DRY RUN. Results not submitted to Skia Gold. ===');

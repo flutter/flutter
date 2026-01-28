@@ -27,7 +27,7 @@ class SnippetConfiguration {
   /// Gets the skeleton file to use for the given [SampleType] and DartPad
   /// preference.
   File getHtmlSkeletonFile(String type) {
-    final String filename = type == 'dartpad' ? 'dartpad-sample.html' : '$type.html';
+    final filename = type == 'dartpad' ? 'dartpad-sample.html' : '$type.html';
     return filesystem.file(path.join(skeletonsDirectory.path, filename));
   }
 }

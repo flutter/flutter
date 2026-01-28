@@ -17,9 +17,14 @@ REPO_PATH=$(dirname "$(readlink -f "$0")")
 PROFILE_PATH="$REPO_PATH/engine/src/out/host_profile"
 GN="$REPO_PATH/engine/src/flutter/tools/gn"
 LICENSE_CPP="$REPO_PATH/engine/src/out/host_profile/licenses_cpp"
-WORKING_DIR="$REPO_PATH/engine/src/flutter"
+WORKING_DIR="$REPO_PATH/engine/src"
 LICENSES_PATH="$REPO_PATH/engine/src/flutter/sky/packages/sky_engine/LICENSE"
 DATA_PATH="$REPO_PATH/engine/src/flutter/tools/licenses_cpp/data"
+
+cd "$REPO_PATH/engine/src"
+./tools/dart/create_updated_flutter_deps.py
+cd "$REPO_PATH"
+gclient sync -D
 
 # This calls `gn gen`.
 "$GN" --runtime-mode profile --no-goma --no-rbe --enable-minimal-linux
@@ -28,4 +33,5 @@ ninja -C "$PROFILE_PATH" licenses_cpp
   --working_dir="$WORKING_DIR" \
   --licenses_path="$LICENSES_PATH" \
   --data_dir="$DATA_PATH" \
+  --root_package="flutter" \
   --v=1

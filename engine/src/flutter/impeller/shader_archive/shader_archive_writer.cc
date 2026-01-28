@@ -17,6 +17,10 @@ ShaderArchiveWriter::ShaderArchiveWriter() = default;
 
 ShaderArchiveWriter::~ShaderArchiveWriter() = default;
 
+void ShaderArchiveWriter::SetEntryPointPrefix(std::string prefix) {
+  prefix_ = std::move(prefix);
+}
+
 std::optional<ArchiveShaderType> InferShaderTypefromFileExtension(
     const std::filesystem::path& path) {
 #if FML_OS_QNX
@@ -64,7 +68,7 @@ bool ShaderArchiveWriter::AddShaderAtPath(const std::string& std_path) {
   // Get rid of the shader type extension (.vert, .frag, etc..).
   path = path.replace_extension();
 
-  const auto shader_name = path.stem().string();
+  const auto shader_name = prefix_ + path.stem().string();
   if (shader_name.empty()) {
     FML_LOG(ERROR) << "Shader name was empty.";
     return false;
@@ -106,6 +110,8 @@ constexpr fb::Stage ToStage(ArchiveShaderType type) {
 
 std::shared_ptr<fml::Mapping> ShaderArchiveWriter::CreateMapping() const {
   fb::ShaderArchiveT shader_archive;
+  shader_archive.format_version =
+      static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion);
   for (const auto& shader_description : shader_descriptions_) {
     auto mapping = shader_description.mapping;
     if (!mapping) {

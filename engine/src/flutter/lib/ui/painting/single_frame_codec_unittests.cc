@@ -13,6 +13,11 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+// CREATE_NATIVE_ENTRY is leaky by design
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
+#pragma GCC diagnostic ignored "-Wunreachable-code"
+
 namespace flutter {
 namespace testing {
 
@@ -55,5 +60,66 @@ TEST_F(ShellTest, SingleFrameCodecAccuratelyReportsSize) {
   DestroyShell(std::move(shell), task_runners);
 }
 
+TEST_F(ShellTest, SingleFrameCodecHandlesNoGpu) {
+#ifndef FML_OS_MACOSX
+  GTEST_SKIP() << "Only works on macOS currently.";
+#endif
+
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  auto finish = [message_latch](Dart_NativeArguments args) {
+    message_latch->Signal();
+  };
+  AddNativeCallback("Finish", CREATE_NATIVE_ENTRY(finish));
+
+  auto turn_off_gpu = [&](Dart_NativeArguments args) {
+    auto handle = Dart_GetNativeArgument(args, 0);
+    bool value = true;
+    ASSERT_TRUE(Dart_IsBoolean(handle));
+    Dart_BooleanValue(handle, &value);
+    TurnOffGPU(shell.get(), value);
+  };
+  AddNativeCallback("TurnOffGPU", CREATE_NATIVE_ENTRY(turn_off_gpu));
+
+  auto flush_awaiting_tasks = [&](Dart_NativeArguments args) {
+    fml::WeakPtr io_manager = shell->GetIOManager();
+    task_runners.GetIOTaskRunner()->PostTask([io_manager] {
+      if (io_manager) {
+        std::shared_ptr<impeller::Context> impeller_context =
+            io_manager->GetImpellerContext();
+        // This will cause the stored tasks to overflow and start throwing them
+        // away.
+        for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
+          impeller_context->StoreTaskForGPU([] {}, [] {});
+        }
+      }
+    });
+  };
+  AddNativeCallback("FlushGpuAwaitingTasks",
+                    CREATE_NATIVE_ENTRY(flush_awaiting_tasks));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("singleFrameCodecHandlesNoGpu");
+
+  shell->RunEngine(std::move(configuration), [](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+}
+
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)

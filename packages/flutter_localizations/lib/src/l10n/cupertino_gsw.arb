@@ -30,10 +30,10 @@
   "clearButtonLabel": "Löschen",
   "cancelButtonLabel": "Abbrechen",
   "backButtonLabel": "Zurück",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "Zum Minimieren doppeltippen",
+  "expansionTileCollapsedHint": "Zum Maximieren doppeltippen",
+  "expansionTileExpandedTapHint": "Minimieren",
+  "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
+  "expandedHint": "Minimiert",
+  "collapsedHint": "Maximiert"
 }

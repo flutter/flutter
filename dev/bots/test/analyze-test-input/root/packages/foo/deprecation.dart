@@ -49,13 +49,13 @@ void test8() { }
 
 @Deprecated(
   'Version number test (should fail). '
-  'This feature was deprecated after v1.20.0.' // ERROR: Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.
+  'This feature was deprecated after v1.20.0.' // ERROR: Deprecation notice does not accurately indicate a beta branch version number; please see https://docs.flutter.dev/install/archive to find the latest beta build version number.
 )
 void test9() { }
 
 @Deprecated(
   'Version number test (should fail). '
-  'This feature was deprecated after v1.21.0.' // ERROR: Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.
+  'This feature was deprecated after v1.21.0.' // ERROR: Deprecation notice does not accurately indicate a beta branch version number; please see https://docs.flutter.dev/install/archive to find the latest beta build version number.
 )
 void test10() { }
 

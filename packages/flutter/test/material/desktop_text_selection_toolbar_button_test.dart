@@ -9,7 +9,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('can press', (WidgetTester tester) async {
-    bool pressed = false;
+    var pressed = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -41,5 +41,20 @@ void main() {
     expect(find.byType(TextButton), findsOneWidget);
     final TextButton button = tester.widget(find.byType(TextButton));
     expect(button.enabled, isFalse);
+  });
+
+  testWidgets('DesktopTextSelectionToolbarButton does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: DesktopTextSelectionToolbarButton(onPressed: null, child: Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DesktopTextSelectionToolbarButton)), Size.zero);
   });
 }

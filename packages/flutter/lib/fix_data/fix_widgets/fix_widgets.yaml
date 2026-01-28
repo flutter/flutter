@@ -20,9 +20,183 @@
 #     * Actions: fix_actions.yaml
 #     * BuildContext: fix_build_context.yaml
 #     * Element: fix_element.yaml
+#     * Expansible: (in this file)
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/177895
+  - title: "Migrate 'axisAlignment' to 'alignment'"
+    date: 2025-11-20
+    element:
+      uris: [ 'widgets.dart' ]
+      constructor: ''
+      inClass: 'SizeTransition'
+    oneOf:
+      - if: "axis == '' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == '' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.vertical' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == 'Axis.vertical' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.horizontal' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional({% axisAlignment %}, -1.0)'
+              requiredIf: "axis == 'Axis.horizontal' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+    variables:
+      axisAlignment:
+        kind: fragment
+        value: 'arguments[axisAlignment]'
+      axis:
+        kind: fragment
+        value: 'arguments[axis]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/177966
+  - title: "Migrate animation parameters to 'animationStyle'"
+    date: 2025-04-01
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'Expansible'
+    oneOf:
+      - if: "duration != '' && curve != '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, curve: {% curve %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "duration != '' && curve != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve != '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, curve: {% curve %})'
+              requiredIf: "duration != '' && curve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve == '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "duration != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve != '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(curve: {% curve %}, reverseCurve: {% reverseCurve %})'
+              requiredIf: "curve != '' && reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration != '' && curve == '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(duration: {% duration %})'
+              requiredIf: "duration != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve != '' && reverseCurve == ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(curve: {% curve %})'
+              requiredIf: "curve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+      - if: "duration == '' && curve == '' && reverseCurve != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 0
+            name: 'animationStyle'
+            style: optional_named
+            argumentValue:
+              expression: 'AnimationStyle(reverseCurve: {% reverseCurve %})'
+              requiredIf: "reverseCurve != ''"
+          - kind: 'removeParameter'
+            name: 'duration'
+          - kind: 'removeParameter'
+            name: 'curve'
+          - kind: 'removeParameter'
+            name: 'reverseCurve'
+    variables:
+      duration:
+        kind: 'fragment'
+        value: 'arguments[duration]'
+      curve:
+        kind: 'fragment'
+        value: 'arguments[curve]'
+      reverseCurve:
+        kind: 'fragment'
+        value: 'arguments[reverseCurve]'
+
   # Changes made in https://github.com/flutter/flutter/pull/139260
   - title: "Migrate to focusNode.enclosingScope!"
     date: 2023-11-29

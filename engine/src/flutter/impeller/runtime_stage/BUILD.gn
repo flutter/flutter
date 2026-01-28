@@ -38,6 +38,7 @@ impeller_component("runtime_stage") {
     "../base",
     "../core",
     "//flutter/fml",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 }
 

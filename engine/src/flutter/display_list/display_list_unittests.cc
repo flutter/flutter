@@ -5939,5 +5939,66 @@ TEST_F(DisplayListTest, DisplayListDetectsRuntimeEffect) {
   }
 }
 
+namespace {
+typedef void BuilderTransformer(DisplayListBuilder& builder);
+
+sk_sp<DisplayList> TestSaveLayerWithMatrix(BuilderTransformer transform) {
+  const DlScalar xoffset = 50;
+  const DlScalar yoffset = 50;
+  const DlScalar sigma = 10.0;
+
+  DisplayListBuilder builder;
+
+  const auto blur_filter =
+      DlImageFilter::MakeBlur(sigma, sigma, DlTileMode::kClamp);
+
+  builder.Translate(xoffset, yoffset);
+  transform(builder);
+
+  const DlPaint paint;
+  builder.DrawImage(kTestImage1, DlPoint(100.0, 100.0),
+                    DlImageSampling::kNearestNeighbor, &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrc);
+  builder.SaveLayer(std::nullopt, &save_paint, blur_filter.get());
+  builder.Restore();
+
+  return builder.Build();
+}
+}  // namespace
+
+TEST_F(DisplayListTest, SaveLayerWithValidScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.7, 0.7);
+              EXPECT_TRUE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithZeroXScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.0, 0.7);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithZeroYScaleDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Scale(0.7, 0.0);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
+TEST_F(DisplayListTest, SaveLayerWithLinearSkewDoesNotCrash) {
+  EXPECT_NE(TestSaveLayerWithMatrix([](DisplayListBuilder& builder) {
+              builder.Skew(1.0f, 1.0f);
+              EXPECT_FALSE(builder.GetMatrix().IsInvertible());
+            }),
+            nullptr);
+}
+
 }  // namespace testing
 }  // namespace flutter

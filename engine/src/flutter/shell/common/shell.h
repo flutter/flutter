@@ -676,6 +676,9 @@ class Shell final : public PlatformView::Delegate,
       CustomAccessibilityActionUpdates actions) override;
 
   // |Engine::Delegate|
+  void OnEngineSetApplicationLocale(std::string locale) override;
+
+  // |Engine::Delegate|
   void OnEngineSetSemanticsTreeEnabled(bool enabled) override;
 
   // |Engine::Delegate|
@@ -792,6 +795,11 @@ class Shell final : public PlatformView::Delegate,
   // Forces the FontCollection to reload the font manifest. Used to support
   // hot reload for fonts.
   bool OnServiceProtocolReloadAssetFonts(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document* response);
+
+  // Service protocol handler
+  bool OnServiceProtocolGetPipelineUsage(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 

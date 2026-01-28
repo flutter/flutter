@@ -12,6 +12,7 @@
   "shareButtonLabel": "Бөлүшүү",
   "pasteButtonLabel": "Чаптоо",
   "selectAllButtonLabel": "Баарын тандоо",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Изделген нерсе табылды",
+  "noResultsFound": "Эч нерсе табылган жок",
+  "radioButtonUnselectedLabel": "Тандалган жок"
 }

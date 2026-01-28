@@ -89,6 +89,10 @@ class Capabilities {
   /// @brief Whether primitive restart is supported.
   virtual bool SupportsPrimitiveRestart() const = 0;
 
+  /// @brief Whether 32-bit values are supported in index buffers used to draw
+  ///        primitives.
+  virtual bool Supports32BitPrimitiveIndices() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;
@@ -125,6 +129,9 @@ class Capabilities {
 
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
+
+  /// @brief The minimum alignment of storage buffer value offsets in bytes.
+  virtual size_t GetMinimumStorageBufferAlignment() const;
 
   /// @brief Whether the host buffer should use separate device buffers
   /// for indexes from other data.

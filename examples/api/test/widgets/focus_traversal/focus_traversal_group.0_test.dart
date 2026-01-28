@@ -13,34 +13,35 @@ void main() {
     return Focus.of(tester.element(find.text(text))).hasPrimaryFocus;
   }
 
-  testWidgets('The focus updates should follow the focus traversal groups policy', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.FocusTraversalGroupExampleApp());
+  testWidgets(
+    'The focus updates should follow the focus traversal groups policy',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.FocusTraversalGroupExampleApp());
 
-    // Set the focus to the first button.
-    Focus.of(tester.element(find.text('num: 0'))).requestFocus();
-    await tester.pump();
-
-    expect(hasFocus(tester, 'num: 0'), isTrue);
-
-    const List<String> focusOrder = <String>[
-      'num: 1',
-      'num: 2',
-      'String: A',
-      'String: B',
-      'String: C',
-      'ignored num: 3',
-      'ignored num: 2',
-      'ignored num: 1',
-      'num: 0',
-    ];
-
-    for (final String text in focusOrder) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      // Set the focus to the first button.
+      Focus.of(tester.element(find.text('num: 0'))).requestFocus();
       await tester.pump();
 
-      expect(hasFocus(tester, text), isTrue);
-    }
-  });
+      expect(hasFocus(tester, 'num: 0'), isTrue);
+
+      const List<String> focusOrder = <String>[
+        'num: 1',
+        'num: 2',
+        'String: A',
+        'String: B',
+        'String: C',
+        'ignored num: 3',
+        'ignored num: 2',
+        'ignored num: 1',
+        'num: 0',
+      ];
+
+      for (final String text in focusOrder) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+
+        expect(hasFocus(tester, text), isTrue);
+      }
+    },
+  );
 }

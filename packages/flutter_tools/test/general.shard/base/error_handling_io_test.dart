@@ -1554,7 +1554,7 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 
 class FakeExistsFile extends Fake implements File {
   late Exception error;
-  var existsCount = 0;
+  int existsCount = 0;
 
   @override
   bool existsSync() {

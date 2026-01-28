@@ -37,7 +37,7 @@ void main() {
   group('MenuStyle', () {
     test('MenuStyle lerp special cases', () {
       expect(MenuStyle.lerp(null, null, 0), null);
-      const MenuStyle data = MenuStyle();
+      const data = MenuStyle();
       expect(identical(MenuStyle.lerp(data, data, 0.5), data), true);
     });
 
@@ -309,7 +309,7 @@ List<Widget> createTestMenus({
   bool includeStandard = false,
   bool includeExtraGroups = false,
 }) {
-  final List<Widget> result = <Widget>[
+  final result = <Widget>[
     SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(TestMenu.mainMenu0) : null,
       onClose: onClose != null ? () => onClose(TestMenu.mainMenu0) : null,

@@ -6,7 +6,7 @@ import("//build/config/android/config.gni")
 import("//flutter/tools/templater/templater.gni")
 
 android_buildtools =
-    "//flutter/third_party/android_tools/sdk/build-tools/36.0.0"
+    "//flutter/third_party/android_tools/sdk/build-tools/36.1.0"
 aapt2 = "$android_buildtools/aapt2"
 zipalign = "$android_buildtools/zipalign"
 apksigner = "$android_buildtools/apksigner"

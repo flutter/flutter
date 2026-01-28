@@ -58,7 +58,12 @@ class _CheckboxExampleState extends State<CheckboxExample> {
             });
           },
         ),
-        Checkbox(isError: true, tristate: true, value: isChecked, onChanged: null),
+        Checkbox(
+          isError: true,
+          tristate: true,
+          value: isChecked,
+          onChanged: null,
+        ),
       ],
     );
   }

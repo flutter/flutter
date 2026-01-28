@@ -25,19 +25,19 @@ void main() {
 
         final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
 
-        for (int i = 0; i < 5; i++) {
+        for (var i = 0; i < 5; i++) {
           await driver.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
-        for (int i = 0; i < 5; i++) {
+        for (var i = 0; i < 5; i++) {
           await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       }, retainPriorEvents: true);
 
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('home_scroll_perf', pretty: true);
     }, timeout: Timeout.none);
   });

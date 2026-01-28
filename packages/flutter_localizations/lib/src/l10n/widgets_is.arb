@@ -12,6 +12,7 @@
   "shareButtonLabel": "Deila",
   "pasteButtonLabel": "Líma",
   "selectAllButtonLabel": "Velja allt",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Leitarniðurstöður fundust",
+  "noResultsFound": "Engar niðurstöður fundust",
+  "radioButtonUnselectedLabel": "Ekki valið"
 }

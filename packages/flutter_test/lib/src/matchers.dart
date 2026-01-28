@@ -661,9 +661,11 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// See also:
 ///
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
-///   * [containsSemantics], a similar matcher without default values for flags or actions.
+///   * [isSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
   String? identifier,
+  String? traversalParentIdentifier,
+  String? traversalChildIdentifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -685,6 +687,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -748,6 +752,8 @@ Matcher matchesSemantics({
 }) {
   return _MatchesSemanticsData(
     identifier: identifier,
+    traversalParentIdentifier: traversalParentIdentifier,
+    traversalChildIdentifier: traversalChildIdentifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -768,6 +774,8 @@ Matcher matchesSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -843,23 +851,18 @@ Matcher matchesSemantics({
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
-/// ## Sample code
-///
-/// ```dart
-/// testWidgets('containsSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
-///   // ...
-///   expect(tester.getSemantics(find.text('hello')), containsSemantics(label: 'hello'));
-///   handle.dispose();
-/// });
-/// ```
-///
 /// See also:
 ///
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
+@Deprecated(
+  'Migrate to isSemantics instead. '
+  'This feature was deprecated after v3.40.0-1.0.pre.',
+)
 Matcher containsSemantics({
   String? identifier,
+  String? traversalParentIdentifier,
+  String? traversalChildIdentifier,
   String? label,
   AttributedString? attributedLabel,
   String? hint,
@@ -881,6 +884,212 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
+  // Flags
+  bool? hasCheckedState,
+  bool? isChecked,
+  bool? isCheckStateMixed,
+  bool? isSelected,
+  bool? hasSelectedState,
+  bool? isButton,
+  bool? isSlider,
+  bool? isKeyboardKey,
+  bool? isLink,
+  bool? isFocused,
+  bool? isFocusable,
+  bool? isTextField,
+  bool? isReadOnly,
+  bool? hasEnabledState,
+  bool? isEnabled,
+  bool? isInMutuallyExclusiveGroup,
+  bool? isHeader,
+  bool? isObscured,
+  bool? isMultiline,
+  bool? namesRoute,
+  bool? scopesRoute,
+  bool? isHidden,
+  bool? isImage,
+  bool? isLiveRegion,
+  bool? hasToggledState,
+  bool? isToggled,
+  bool? hasImplicitScrolling,
+  bool? hasExpandedState,
+  bool? isExpanded,
+  bool? hasRequiredState,
+  bool? isRequired,
+  // Actions
+  bool? hasTapAction,
+  bool? hasFocusAction,
+  bool? hasLongPressAction,
+  bool? hasScrollLeftAction,
+  bool? hasScrollRightAction,
+  bool? hasScrollUpAction,
+  bool? hasScrollDownAction,
+  bool? hasIncreaseAction,
+  bool? hasDecreaseAction,
+  bool? hasShowOnScreenAction,
+  bool? hasMoveCursorForwardByCharacterAction,
+  bool? hasMoveCursorBackwardByCharacterAction,
+  bool? hasMoveCursorForwardByWordAction,
+  bool? hasMoveCursorBackwardByWordAction,
+  bool? hasSetTextAction,
+  bool? hasSetSelectionAction,
+  bool? hasCopyAction,
+  bool? hasCutAction,
+  bool? hasPasteAction,
+  bool? hasDidGainAccessibilityFocusAction,
+  bool? hasDidLoseAccessibilityFocusAction,
+  bool? hasDismissAction,
+  // Custom actions and overrides
+  String? onTapHint,
+  String? onLongPressHint,
+  List<CustomSemanticsAction>? customActions,
+  List<Matcher>? children,
+}) => isSemantics(
+  identifier: identifier,
+  traversalParentIdentifier: traversalParentIdentifier,
+  traversalChildIdentifier: traversalChildIdentifier,
+  label: label,
+  attributedLabel: attributedLabel,
+  hint: hint,
+  attributedHint: attributedHint,
+  value: value,
+  attributedValue: attributedValue,
+  increasedValue: increasedValue,
+  attributedIncreasedValue: attributedIncreasedValue,
+  decreasedValue: decreasedValue,
+  attributedDecreasedValue: attributedDecreasedValue,
+  tooltip: tooltip,
+  textDirection: textDirection,
+  rect: rect,
+  size: size,
+  elevation: elevation,
+  thickness: thickness,
+  platformViewId: platformViewId,
+  maxValueLength: maxValueLength,
+  currentValueLength: currentValueLength,
+  validationResult: validationResult,
+  inputType: inputType,
+  maxValue: maxValue,
+  minValue: minValue,
+  // Flags
+  hasCheckedState: hasCheckedState,
+  isChecked: isChecked,
+  isCheckStateMixed: isCheckStateMixed,
+  isSelected: isSelected,
+  hasSelectedState: hasSelectedState,
+  isButton: isButton,
+  isSlider: isSlider,
+  isKeyboardKey: isKeyboardKey,
+  isLink: isLink,
+  isFocused: isFocused,
+  isFocusable: isFocusable,
+  isTextField: isTextField,
+  isReadOnly: isReadOnly,
+  hasEnabledState: hasEnabledState,
+  isEnabled: isEnabled,
+  isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
+  isHeader: isHeader,
+  isObscured: isObscured,
+  isMultiline: isMultiline,
+  namesRoute: namesRoute,
+  scopesRoute: scopesRoute,
+  isHidden: isHidden,
+  isImage: isImage,
+  isLiveRegion: isLiveRegion,
+  hasToggledState: hasToggledState,
+  isToggled: isToggled,
+  hasImplicitScrolling: hasImplicitScrolling,
+  hasExpandedState: hasExpandedState,
+  isExpanded: isExpanded,
+  hasRequiredState: hasRequiredState,
+  isRequired: isRequired,
+  // Actions
+  hasTapAction: hasTapAction,
+  hasFocusAction: hasFocusAction,
+  hasLongPressAction: hasLongPressAction,
+  hasScrollLeftAction: hasScrollLeftAction,
+  hasScrollRightAction: hasScrollRightAction,
+  hasScrollUpAction: hasScrollUpAction,
+  hasScrollDownAction: hasScrollDownAction,
+  hasIncreaseAction: hasIncreaseAction,
+  hasDecreaseAction: hasDecreaseAction,
+  hasShowOnScreenAction: hasShowOnScreenAction,
+  hasMoveCursorForwardByCharacterAction: hasMoveCursorForwardByCharacterAction,
+  hasMoveCursorBackwardByCharacterAction: hasMoveCursorBackwardByCharacterAction,
+  hasMoveCursorForwardByWordAction: hasMoveCursorForwardByWordAction,
+  hasMoveCursorBackwardByWordAction: hasMoveCursorBackwardByWordAction,
+  hasSetTextAction: hasSetTextAction,
+  hasSetSelectionAction: hasSetSelectionAction,
+  hasCopyAction: hasCopyAction,
+  hasCutAction: hasCutAction,
+  hasPasteAction: hasPasteAction,
+  hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
+  hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
+  hasDismissAction: hasDismissAction,
+  // Custom actions and overrides
+  onTapHint: onTapHint,
+  onLongPressHint: onLongPressHint,
+  customActions: customActions,
+  children: children,
+);
+
+/// Asserts that a [SemanticsNode] contains the specified information.
+///
+/// There are no default expected values, so no unspecified values will be
+/// validated.
+///
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
+/// in order to use this method.
+///
+/// ## Sample code
+///
+/// ```dart
+/// testWidgets('isSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), isSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
+/// ```
+///
+/// See also:
+///
+///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
+///   * [matchesSemantics], a similar matcher with default values for flags and actions.
+Matcher isSemantics({
+  String? identifier,
+  String? traversalParentIdentifier,
+  String? traversalChildIdentifier,
+  String? label,
+  AttributedString? attributedLabel,
+  String? hint,
+  AttributedString? attributedHint,
+  String? value,
+  AttributedString? attributedValue,
+  String? increasedValue,
+  AttributedString? attributedIncreasedValue,
+  String? decreasedValue,
+  AttributedString? attributedDecreasedValue,
+  String? tooltip,
+  TextDirection? textDirection,
+  Rect? rect,
+  Size? size,
+  double? elevation,
+  double? thickness,
+  int? platformViewId,
+  int? maxValueLength,
+  int? currentValueLength,
+  SemanticsValidationResult? validationResult,
+  ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -944,6 +1153,8 @@ Matcher containsSemantics({
 }) {
   return _MatchesSemanticsData(
     identifier: identifier,
+    traversalChildIdentifier: traversalChildIdentifier,
+    traversalParentIdentifier: traversalParentIdentifier,
     label: label,
     attributedLabel: attributedLabel,
     hint: hint,
@@ -964,6 +1175,8 @@ Matcher containsSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1026,6 +1239,37 @@ Matcher containsSemantics({
   );
 }
 
+/// Asserts that a [CapturedAccessibilityAnnouncement] matches the expected message.
+///
+/// The [message] argument matches the [CapturedAccessibilityAnnouncement.message].
+/// The [textDirection] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.textDirection].
+/// The [assertiveness] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.assertiveness].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await SemanticsService.sendAnnouncement(tester.view, 'Hello', TextDirection.ltr);
+/// expect(tester.takeAnnouncements(), contains(isAccessibilityAnnouncement('Hello')));
+/// ```
+///
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which retrieves the announcements in unit tests.
+///  * [SemanticsService.sendAnnouncement], which sends an announcement.
+Matcher isAccessibilityAnnouncement(
+  String message, {
+  TextDirection? textDirection,
+  Assertiveness? assertiveness,
+  int? viewId,
+}) {
+  return _MatchesAccessibilityAnnouncement(
+    expectedMessage: message,
+    expectedTextDirection: textDirection,
+    expectedAssertiveness: assertiveness,
+    expectedViewId: viewId,
+  );
+}
+
 /// Asserts that the currently rendered widget meets the provided accessibility
 /// `guideline`.
 ///
@@ -1035,7 +1279,7 @@ Matcher containsSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// testWidgets('containsSemantics', (WidgetTester tester) async {
+/// testWidgets('isSemantics', (WidgetTester tester) async {
 ///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -1072,7 +1316,7 @@ class _FindsCountMatcher extends Matcher {
     assert(min != null || max != null);
     assert(min == null || max == null || min! <= max!);
     matchState[FinderBase] = finder;
-    int count = 0;
+    var count = 0;
     final Iterator<dynamic> iterator = finder.evaluate().iterator;
     if (min != null) {
       while (count < min! && iterator.moveNext()) {
@@ -1127,7 +1371,7 @@ class _FindsCountMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    final FinderBase<dynamic> finder = matchState[FinderBase] as FinderBase<dynamic>;
+    final finder = matchState[FinderBase] as FinderBase<dynamic>;
     final int count = finder.found.length;
     if (count == 0) {
       assert(min != null && min! > 0);
@@ -1155,7 +1399,7 @@ bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate)
   if (nodes.length != 1) {
     return false;
   }
-  bool result = false;
+  var result = false;
   nodes.single.visitAncestorElements((Element ancestor) {
     if (predicate(ancestor.widget)) {
       result = true;
@@ -1196,7 +1440,7 @@ class _IsOnstage extends Matcher {
     if (nodes.length != 1) {
       return false;
     }
-    bool result = true;
+    var result = true;
     nodes.single.visitAncestorElements((Element ancestor) {
       final Widget widget = ancestor.widget;
       if (widget is Offstage) {
@@ -1256,7 +1500,7 @@ class _IsSystemTextScaler extends Matcher {
 
   @override
   Description describe(Description description) {
-    final String scaleFactorExpectation = expectedUserTextScaleFactor == null
+    final scaleFactorExpectation = expectedUserTextScaleFactor == null
         ? ''
         : '(${expectedUserTextScaleFactor}x)';
     return description.add(
@@ -1285,7 +1529,7 @@ class _HasOneLineDescription extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = object.toString();
+    final description = object.toString();
     return description.isNotEmpty &&
         !description.contains('\n') &&
         !description.contains('Instance of ') &&
@@ -1334,7 +1578,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     final Iterator<String> expectedIt = _value.iterator;
     final Iterator<String> seenIt = normalized.iterator;
 
-    int lineNumber = 1;
+    var lineNumber = 1;
 
     bool hasExpected = expectedIt.moveNext();
     bool hasSeen = seenIt.moveNext();
@@ -1369,7 +1613,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     if (matchState.containsKey(_lineNumberValueKey) &&
         matchState.containsKey(_expectedLineValueKey) &&
         matchState.containsKey(_seenLineValueKey)) {
-      final int lineNumber = matchState[_lineNumberValueKey] as int;
+      final lineNumber = matchState[_lineNumberValueKey] as int;
       if (lineNumber > 1) {
         mismatchDescription = mismatchDescription
             .add('Lines $lineNumber differed, expected: \n')
@@ -1401,7 +1645,7 @@ bool _isVerticalLine(int c) {
 /// The last line of a text tree contains only vertical tree connector
 /// characters indicates a poorly formatted tree.
 bool _isAllTreeConnectorCharacters(String line) {
-  for (int i = 0; i < line.length; ++i) {
+  for (var i = 0; i < line.length; ++i) {
     final int c = line.codeUnitAt(i);
     if (!_isWhitespace(c) && !_isVerticalLine(c)) {
       return false;
@@ -1417,8 +1661,8 @@ class _HasGoodToStringDeep extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final List<String> issues = <String>[];
-    String description = object.toStringDeep() as String; // ignore: avoid_dynamic_calls
+    final issues = <String>[];
+    var description = object.toStringDeep() as String; // ignore: avoid_dynamic_calls
     if (description.endsWith('\n')) {
       // Trim off trailing \n as the remaining calculations assume
       // the description does not end with a trailing \n.
@@ -1440,7 +1684,7 @@ class _HasGoodToStringDeep extends Matcher {
       issues.add('Contains text "Instance of ".');
     }
 
-    for (int i = 0; i < lines.length; ++i) {
+    for (var i = 0; i < lines.length; ++i) {
       final String line = lines[i];
       if (line.isEmpty) {
         issues.add('Line ${i + 1} is empty.');
@@ -1458,10 +1702,10 @@ class _HasGoodToStringDeep extends Matcher {
     // If a toStringDeep method doesn't properly handle nested values that
     // contain line breaks it can fail to add the required prefixes to all
     // lined when toStringDeep is called specifying prefixes.
-    const String prefixLineOne = 'PREFIX_LINE_ONE____';
-    const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
-    final List<String> prefixIssues = <String>[];
-    String descriptionWithPrefixes =
+    const prefixLineOne = 'PREFIX_LINE_ONE____';
+    const prefixOtherLines = 'PREFIX_OTHER_LINES_';
+    final prefixIssues = <String>[];
+    var descriptionWithPrefixes =
         // ignore: avoid_dynamic_calls
         object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines)
             as String;
@@ -1478,13 +1722,13 @@ class _HasGoodToStringDeep extends Matcher {
       prefixIssues.add('First line does not contain expected prefix.');
     }
 
-    for (int i = 1; i < linesWithPrefixes.length; ++i) {
+    for (var i = 1; i < linesWithPrefixes.length; ++i) {
       if (!linesWithPrefixes[i].startsWith(prefixOtherLines)) {
         prefixIssues.add('Line ${i + 1} does not contain the expected prefix.');
       }
     }
 
-    final StringBuffer errorDescription = StringBuffer();
+    final errorDescription = StringBuffer();
     if (issues.isNotEmpty) {
       errorDescription.writeln('Bad toStringDeep():');
       errorDescription.writeln(description);
@@ -1602,23 +1846,23 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _matrixDistance(Matrix4 a, Matrix4 b) {
-  double delta = 0.0;
-  for (int i = 0; i < 16; i += 1) {
+  var delta = 0.0;
+  for (var i = 0; i < 16; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;
 }
 
 double _matrix3Distance(Matrix3 a, Matrix3 b) {
-  double delta = 0.0;
-  for (int i = 0; i < 9; i += 1) {
+  var delta = 0.0;
+  for (var i = 0; i < 9; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = (b - a) as Offset;
+  final delta = (b - a) as Offset;
   return delta.distance;
 }
 
@@ -1768,7 +2012,7 @@ class _IsMethodCall extends Matcher {
     if (a.length != b.length) {
       return false;
     }
-    for (int i = 0; i < a.length; i++) {
+    for (var i = 0; i < a.length; i++) {
       if (!_deepEquals(a[i], b[i])) {
         return false;
       }
@@ -1780,7 +2024,7 @@ class _IsMethodCall extends Matcher {
     if (a.length != b.length) {
       return false;
     }
-    for (final dynamic key in a.keys) {
+    for (final Object? key in a.keys) {
       if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) {
         return false;
       }
@@ -1961,7 +2205,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (borderRadius != null && !assertRoundedRectangle(shapeClipper, borderRadius!, matchState)) {
       return false;
@@ -1994,7 +2238,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != borderRadius) {
       return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
     }
@@ -2035,7 +2279,7 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Re
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
 
     if (shapeClipper.shape != shape) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
@@ -2079,11 +2323,11 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != BorderRadius.zero) {
       return failWithDescription(matchState, 'borderRadius was: ${border.borderRadius}');
     }
@@ -2117,11 +2361,11 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
-    final RoundedRectangleBorder border = shapeClipper.shape as RoundedRectangleBorder;
+    final border = shapeClipper.shape as RoundedRectangleBorder;
     if (border.borderRadius != borderRadius) {
       return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
     }
@@ -2143,7 +2387,7 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
-    final ShapeBorderClipper shapeClipper = renderObject.clipper! as ShapeBorderClipper;
+    final shapeClipper = renderObject.clipper! as ShapeBorderClipper;
     if (shapeClipper.shape != shape) {
       return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     }
@@ -2176,9 +2420,9 @@ class _CoversSameAreaAs extends Matcher {
 
   @override
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
-    for (int i = 0; i < sampleSize; i += 1) {
-      for (int j = 0; j < sampleSize; j += 1) {
-        final Offset offset = Offset(
+    for (var i = 0; i < sampleSize; i += 1) {
+      for (var j = 0; j < sampleSize; j += 1) {
+        final offset = Offset(
           i * (areaToCompare.width / sampleSize),
           j * (areaToCompare.height / sampleSize),
         );
@@ -2187,7 +2431,7 @@ class _CoversSameAreaAs extends Matcher {
           return false;
         }
 
-        final Offset noise = Offset(
+        final noise = Offset(
           maxHorizontalNoise * random.nextDouble(),
           maxVerticalNoise * random.nextDouble(),
         );
@@ -2252,13 +2496,13 @@ class _ColorSwatchMatcher<T> extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     if (item is ColorSwatch) {
-      final _ColorMatcher matcher = _ColorMatcher(_target, _threshold);
+      final matcher = _ColorMatcher(_target, _threshold);
       if (!matcher.matches(item, matchState)) {
         return false;
       }
 
       for (final T key in _target.keys) {
-        final _ColorMatcher matcher = _ColorMatcher(_target[key]!, _threshold);
+        final matcher = _ColorMatcher(_target[key]!, _threshold);
         if (!matcher.matches(item[key], matchState)) {
           return false;
         }
@@ -2295,8 +2539,8 @@ class _ColorMatcher extends Matcher {
 
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
   assert(imageA.length == imageB.length);
-  int delta = 0;
-  for (int i = 0; i < imageA.length; i += 4) {
+  var delta = 0;
+  for (var i = 0; i < imageA.length; i += 4) {
     if (imageA[i] != imageB[i] ||
         imageA[i + 1] != imageB[i + 1] ||
         imageA[i + 2] != imageB[i + 2] ||
@@ -2324,7 +2568,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       imageFuture = Future<ui.Image>.value(item);
       disposeImage = false;
     } else {
-      final Finder finder = item as Finder;
+      final finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
       if (elements.isEmpty) {
         return 'could not be rendered because no widget was found';
@@ -2375,6 +2619,8 @@ class _MatchesReferenceImage extends AsyncMatcher {
 class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     required this.identifier,
+    required this.traversalParentIdentifier,
+    required this.traversalChildIdentifier,
     required this.label,
     required this.attributedLabel,
     required this.hint,
@@ -2394,6 +2640,8 @@ class _MatchesSemanticsData extends Matcher {
     required this.currentValueLength,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2454,38 +2702,38 @@ class _MatchesSemanticsData extends Matcher {
     required String? onLongPressHint,
     required this.customActions,
     required this.children,
-  }) : flags = <SemanticsFlag, bool>{
-         SemanticsFlag.hasCheckedState: ?hasCheckedState,
-         SemanticsFlag.isChecked: ?isChecked,
-         SemanticsFlag.isCheckStateMixed: ?isCheckStateMixed,
-         SemanticsFlag.isSelected: ?isSelected,
-         SemanticsFlag.hasSelectedState: ?hasSelectedState,
-         SemanticsFlag.isButton: ?isButton,
-         SemanticsFlag.isSlider: ?isSlider,
-         SemanticsFlag.isKeyboardKey: ?isKeyboardKey,
-         SemanticsFlag.isLink: ?isLink,
-         SemanticsFlag.isTextField: ?isTextField,
-         SemanticsFlag.isReadOnly: ?isReadOnly,
-         SemanticsFlag.isFocused: ?isFocused,
-         SemanticsFlag.isFocusable: ?isFocusable,
-         SemanticsFlag.hasEnabledState: ?hasEnabledState,
-         SemanticsFlag.isEnabled: ?isEnabled,
-         SemanticsFlag.isInMutuallyExclusiveGroup: ?isInMutuallyExclusiveGroup,
-         SemanticsFlag.isHeader: ?isHeader,
-         SemanticsFlag.isObscured: ?isObscured,
-         SemanticsFlag.isMultiline: ?isMultiline,
-         SemanticsFlag.namesRoute: ?namesRoute,
-         SemanticsFlag.scopesRoute: ?scopesRoute,
-         SemanticsFlag.isHidden: ?isHidden,
-         SemanticsFlag.isImage: ?isImage,
-         SemanticsFlag.isLiveRegion: ?isLiveRegion,
-         SemanticsFlag.hasToggledState: ?hasToggledState,
-         SemanticsFlag.isToggled: ?isToggled,
-         SemanticsFlag.hasImplicitScrolling: ?hasImplicitScrolling,
-         SemanticsFlag.hasExpandedState: ?hasExpandedState,
-         SemanticsFlag.isExpanded: ?isExpanded,
-         SemanticsFlag.hasRequiredState: ?hasRequiredState,
-         SemanticsFlag.isRequired: ?isRequired,
+  }) : flags = <String, bool>{
+         'hasCheckedState': ?hasCheckedState,
+         'isChecked': ?isChecked,
+         'isCheckStateMixed': ?isCheckStateMixed,
+         'isSelected': ?isSelected,
+         'hasSelectedState': ?hasSelectedState,
+         'isButton': ?isButton,
+         'isSlider': ?isSlider,
+         'isKeyboardKey': ?isKeyboardKey,
+         'isLink': ?isLink,
+         'isTextField': ?isTextField,
+         'isReadOnly': ?isReadOnly,
+         'isFocused': ?isFocused,
+         'isFocusable': ?isFocusable,
+         'hasEnabledState': ?hasEnabledState,
+         'isEnabled': ?isEnabled,
+         'isInMutuallyExclusiveGroup': ?isInMutuallyExclusiveGroup,
+         'isHeader': ?isHeader,
+         'isObscured': ?isObscured,
+         'isMultiline': ?isMultiline,
+         'namesRoute': ?namesRoute,
+         'scopesRoute': ?scopesRoute,
+         'isHidden': ?isHidden,
+         'isImage': ?isImage,
+         'isLiveRegion': ?isLiveRegion,
+         'hasToggledState': ?hasToggledState,
+         'isToggled': ?isToggled,
+         'hasImplicitScrolling': ?hasImplicitScrolling,
+         'hasExpandedState': ?hasExpandedState,
+         'isExpanded': ?isExpanded,
+         'hasRequiredState': ?hasRequiredState,
+         'isRequired': ?isRequired,
        },
        actions = <SemanticsAction, bool>{
          SemanticsAction.tap: ?hasTapAction,
@@ -2517,6 +2765,8 @@ class _MatchesSemanticsData extends Matcher {
            : SemanticsHintOverrides(onTapHint: onTapHint, onLongPressHint: onLongPressHint);
 
   final String? identifier;
+  final String? traversalParentIdentifier;
+  final String? traversalChildIdentifier;
   final String? label;
   final AttributedString? attributedLabel;
   final String? hint;
@@ -2539,6 +2789,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult? validationResult;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///
@@ -2546,43 +2798,47 @@ class _MatchesSemanticsData extends Matcher {
   ///  2. If the flag/action maps to `false`, then it must not be present in the SemanticData
   ///  3. If the flag/action is not in the map, then it will not be validated against
   final Map<SemanticsAction, bool> actions;
-  final Map<SemanticsFlag, bool> flags;
+  final Map<String, bool> flags;
 
   @override
   Description describe(Description description, [String? index]) {
     description.add('${index == null ? '' : 'Child $index '}has semantics');
     if (label != null) {
-      description.add(' with label: $label');
+      description.add(' with label: ${_escape(label!)}');
     }
     if (attributedLabel != null) {
-      description.add(' with attributedLabel: $attributedLabel');
+      description.add(' with attributedLabel: ${_escapeAttributedString(attributedLabel!)}');
     }
     if (value != null) {
-      description.add(' with value: $value');
+      description.add(' with value: ${_escape(value!)}');
     }
     if (attributedValue != null) {
-      description.add(' with attributedValue: $attributedValue');
+      description.add(' with attributedValue: ${_escapeAttributedString(attributedValue!)}');
     }
     if (hint != null) {
-      description.add(' with hint: $hint');
+      description.add(' with hint: ${_escape(hint!)}');
     }
     if (attributedHint != null) {
-      description.add(' with attributedHint: $attributedHint');
+      description.add(' with attributedHint: ${_escapeAttributedString(attributedHint!)}');
     }
     if (increasedValue != null) {
-      description.add(' with increasedValue: $increasedValue ');
+      description.add(' with increasedValue: ${_escape(increasedValue!)} ');
     }
     if (attributedIncreasedValue != null) {
-      description.add(' with attributedIncreasedValue: $attributedIncreasedValue');
+      description.add(
+        ' with attributedIncreasedValue: ${_escapeAttributedString(attributedIncreasedValue!)}',
+      );
     }
     if (decreasedValue != null) {
-      description.add(' with decreasedValue: $decreasedValue ');
+      description.add(' with decreasedValue: ${_escape(decreasedValue!)} ');
     }
     if (attributedDecreasedValue != null) {
-      description.add(' with attributedDecreasedValue: $attributedDecreasedValue');
+      description.add(
+        ' with attributedDecreasedValue: ${_escapeAttributedString(attributedDecreasedValue!)}',
+      );
     }
     if (tooltip != null) {
-      description.add(' with tooltip: $tooltip');
+      description.add(' with tooltip: ${_escape(tooltip!)}');
     }
     if (inputType != null) {
       description.add(' with inputType: $inputType');
@@ -2598,27 +2854,27 @@ class _MatchesSemanticsData extends Matcher {
           .toList();
 
       if (expectedActions.isNotEmpty) {
-        description.add(' with actions: ${_createEnumsSummary(expectedActions)} ');
+        description.add(' with actions: ${_createSemanticsActionSummary(expectedActions)} ');
       }
       if (notExpectedActions.isNotEmpty) {
-        description.add(' without actions: ${_createEnumsSummary(notExpectedActions)} ');
+        description.add(' without actions: ${_createSemanticsActionSummary(notExpectedActions)} ');
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> expectedFlags = flags.entries
-          .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+      final List<String> expectedFlags = flags.entries
+          .where((MapEntry<String, bool> e) => e.value)
+          .map((MapEntry<String, bool> e) => e.key)
           .toList();
-      final List<SemanticsFlag> notExpectedFlags = flags.entries
-          .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-          .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+      final List<String> notExpectedFlags = flags.entries
+          .where((MapEntry<String, bool> e) => !e.value)
+          .map((MapEntry<String, bool> e) => e.key)
           .toList();
 
       if (expectedFlags.isNotEmpty) {
-        description.add(' with flags: ${_createEnumsSummary(expectedFlags)} ');
+        description.add(' with flags: ${expectedFlags.join(',')} ');
       }
       if (notExpectedFlags.isNotEmpty) {
-        description.add(' without flags: ${_createEnumsSummary(notExpectedFlags)} ');
+        description.add(' without flags: ${notExpectedFlags.join(', ')} ');
       }
     }
     if (textDirection != null) {
@@ -2648,11 +2904,17 @@ class _MatchesSemanticsData extends Matcher {
     if (validationResult != null) {
       description.add(' with validation result: $validationResult');
     }
+    if (minValue != null) {
+      description.add(' with minValue: $minValue');
+    }
+    if (maxValue != null) {
+      description.add(' with maxValue: $maxValue');
+    }
     if (children != null) {
       description.add(' with children:\n  ');
       final List<_MatchesSemanticsData> childMatches = children!.cast<_MatchesSemanticsData>();
-      int childIndex = 1;
-      for (final _MatchesSemanticsData child in childMatches) {
+      var childIndex = 1;
+      for (final child in childMatches) {
         child.describe(description, index != null ? '$index:$childIndex' : '$childIndex');
         if (child != childMatches.last) {
           description.add('\n  ');
@@ -2667,7 +2929,7 @@ class _MatchesSemanticsData extends Matcher {
     if (first.length != second.length) {
       return false;
     }
-    for (int i = 0; i < first.length; i++) {
+    for (var i = 0; i < first.length; i++) {
       if (first[i] is SpellOutStringAttribute &&
           (second[i] is! SpellOutStringAttribute || second[i].range != first[i].range)) {
         return false;
@@ -2681,6 +2943,27 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     return true;
+  }
+
+  static String _escape(String string) => string.replaceAll('\u202f', r'\u202f');
+
+  static AttributedString _escapeAttributedString(AttributedString attributedString) {
+    return AttributedString(
+      _escape(attributedString.string),
+      attributes: attributedString.attributes,
+    );
+  }
+
+  bool _checkStringMismatch(Map<dynamic, dynamic> matchState, String prefixText, String actual) {
+    return failWithDescription(matchState, '$prefixText was ${_escape(actual)}');
+  }
+
+  bool _checkStringAttributeMismatch(
+    Map<dynamic, dynamic> matchState,
+    String prefixText,
+    AttributedString actual,
+  ) {
+    return failWithDescription(matchState, '$prefixText was: ${_escapeAttributedString(actual)}');
   }
 
   @override
@@ -2700,7 +2983,7 @@ class _MatchesSemanticsData extends Matcher {
     };
 
     if (label != null && label != data.label) {
-      return failWithDescription(matchState, 'label was: ${data.label}');
+      return _checkStringMismatch(matchState, 'label', data.label);
     }
     if (attributedLabel != null &&
         (attributedLabel!.string != data.attributedLabel.string ||
@@ -2708,18 +2991,18 @@ class _MatchesSemanticsData extends Matcher {
               attributedLabel!.attributes,
               data.attributedLabel.attributes,
             ))) {
-      return failWithDescription(matchState, 'attributedLabel was: ${data.attributedLabel}');
+      return _checkStringAttributeMismatch(matchState, 'attributedLabel', data.attributedLabel);
     }
     if (hint != null && hint != data.hint) {
-      return failWithDescription(matchState, 'hint was: ${data.hint}');
+      return _checkStringMismatch(matchState, 'hint', data.hint);
     }
     if (attributedHint != null &&
         (attributedHint!.string != data.attributedHint.string ||
             !_stringAttributesEqual(attributedHint!.attributes, data.attributedHint.attributes))) {
-      return failWithDescription(matchState, 'attributedHint was: ${data.attributedHint}');
+      return _checkStringAttributeMismatch(matchState, 'attributedHint', data.attributedHint);
     }
     if (value != null && value != data.value) {
-      return failWithDescription(matchState, 'value was: ${data.value}');
+      return _checkStringMismatch(matchState, 'value', data.value);
     }
     if (attributedValue != null &&
         (attributedValue!.string != data.attributedValue.string ||
@@ -2727,10 +3010,10 @@ class _MatchesSemanticsData extends Matcher {
               attributedValue!.attributes,
               data.attributedValue.attributes,
             ))) {
-      return failWithDescription(matchState, 'attributedValue was: ${data.attributedValue}');
+      return _checkStringAttributeMismatch(matchState, 'attributedValue', data.attributedValue);
     }
     if (increasedValue != null && increasedValue != data.increasedValue) {
-      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+      return _checkStringMismatch(matchState, 'increasedValue', data.increasedValue);
     }
     if (attributedIncreasedValue != null &&
         (attributedIncreasedValue!.string != data.attributedIncreasedValue.string ||
@@ -2738,13 +3021,14 @@ class _MatchesSemanticsData extends Matcher {
               attributedIncreasedValue!.attributes,
               data.attributedIncreasedValue.attributes,
             ))) {
-      return failWithDescription(
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedIncreasedValue was: ${data.attributedIncreasedValue}',
+        'attributedIncreasedValue',
+        data.attributedIncreasedValue,
       );
     }
     if (decreasedValue != null && decreasedValue != data.decreasedValue) {
-      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
+      return _checkStringMismatch(matchState, 'decreasedValue', data.decreasedValue);
     }
     if (attributedDecreasedValue != null &&
         (attributedDecreasedValue!.string != data.attributedDecreasedValue.string ||
@@ -2752,13 +3036,14 @@ class _MatchesSemanticsData extends Matcher {
               attributedDecreasedValue!.attributes,
               data.attributedDecreasedValue.attributes,
             ))) {
-      return failWithDescription(
+      return _checkStringAttributeMismatch(
         matchState,
-        'attributedDecreasedValue was: ${data.attributedDecreasedValue}',
+        'attributedDecreasedValue',
+        data.attributedDecreasedValue,
       );
     }
     if (tooltip != null && tooltip != data.tooltip) {
-      return failWithDescription(matchState, 'tooltip was: ${data.tooltip}');
+      return _checkStringMismatch(matchState, 'tooltip', data.tooltip);
     }
     if (textDirection != null && textDirection != data.textDirection) {
       return failWithDescription(matchState, 'textDirection was: $textDirection');
@@ -2784,13 +3069,19 @@ class _MatchesSemanticsData extends Matcher {
     if (inputType != null && inputType != data.inputType) {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
+    if (minValue != null && minValue != data.minValue) {
+      return failWithDescription(matchState, 'minValue was: ${data.minValue}');
+    }
+    if (maxValue != null && maxValue != data.maxValue) {
+      return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
+    }
     if (actions.isNotEmpty) {
-      final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
-      final List<SemanticsAction> missingActions = <SemanticsAction>[];
+      final unexpectedActions = <SemanticsAction>[];
+      final missingActions = <SemanticsAction>[];
       for (final MapEntry<ui.SemanticsAction, bool> actionEntry in actions.entries) {
         final ui.SemanticsAction action = actionEntry.key;
         final bool actionExpected = actionEntry.value;
-        final bool actionPresent = (action.index & data.actions) == action.index;
+        final actionPresent = (action.index & data.actions) == action.index;
         if (actionPresent != actionExpected) {
           if (actionExpected) {
             missingActions.add(action);
@@ -2803,7 +3094,7 @@ class _MatchesSemanticsData extends Matcher {
       if (unexpectedActions.isNotEmpty || missingActions.isNotEmpty) {
         return failWithDescription(
           matchState,
-          'missing actions: ${_createEnumsSummary(missingActions)} unexpected actions: ${_createEnumsSummary(unexpectedActions)}',
+          'missing actions: ${_createSemanticsActionSummary(missingActions)} unexpected actions: ${_createSemanticsActionSummary(unexpectedActions)}',
         );
       }
     }
@@ -2841,24 +3132,25 @@ class _MatchesSemanticsData extends Matcher {
 
       expectedCustomActions.sort(sortActions);
       providedCustomActions.sort(sortActions);
-      for (int i = 0; i < expectedCustomActions.length; i++) {
+      for (var i = 0; i < expectedCustomActions.length; i++) {
         if (expectedCustomActions[i] != providedCustomActions[i]) {
           return failWithDescription(matchState, 'custom actions were: $providedCustomActions');
         }
       }
     }
     if (flags.isNotEmpty) {
-      final List<SemanticsFlag> unexpectedFlags = <SemanticsFlag>[];
-      final List<SemanticsFlag> missingFlags = <SemanticsFlag>[];
-      for (final MapEntry<ui.SemanticsFlag, bool> flagEntry in flags.entries) {
-        final ui.SemanticsFlag flag = flagEntry.key;
+      final Map<String, bool> foundFlags = _stringsMapFromSemanticsFlags(data.flagsCollection);
+      final unexpectedFlags = <String>[];
+      final missingFlags = <String>[];
+      for (final MapEntry<String, bool> flagEntry in flags.entries) {
+        final String flagName = flagEntry.key;
         final bool flagExpected = flagEntry.value;
-        final bool flagPresent = flag.index & data.flags == flag.index;
+        final bool flagPresent = foundFlags[flagName]!;
         if (flagPresent != flagExpected) {
           if (flagExpected) {
-            missingFlags.add(flag);
+            missingFlags.add(flagName);
           } else {
-            unexpectedFlags.add(flag);
+            unexpectedFlags.add(flagName);
           }
         }
       }
@@ -2866,13 +3158,13 @@ class _MatchesSemanticsData extends Matcher {
       if (unexpectedFlags.isNotEmpty || missingFlags.isNotEmpty) {
         return failWithDescription(
           matchState,
-          'missing flags: ${_createEnumsSummary(missingFlags)} unexpected flags: ${_createEnumsSummary(unexpectedFlags)}',
+          'missing flags: ${missingFlags.join(',')} unexpected flags: ${unexpectedFlags.join(',')}',
         );
       }
     }
-    bool allMatched = true;
+    var allMatched = true;
     if (children != null) {
-      int i = 0;
+      var i = 0;
       (node as SemanticsNode).visitChildren((SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
@@ -2897,16 +3189,48 @@ class _MatchesSemanticsData extends Matcher {
     return mismatchDescription.add(matchState['failure'] as String);
   }
 
-  static String _createEnumsSummary<T extends Object>(List<T> enums) {
-    assert(
-      T == SemanticsAction || T == SemanticsFlag,
-      'This method is only intended for lists of SemanticsActions or SemanticsFlags.',
-    );
-    if (T == SemanticsAction) {
-      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
-    } else {
-      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
+  static String _createSemanticsActionSummary(List<SemanticsAction> enums) {
+    return '[${enums.map((ui.SemanticsAction d) => d.name).join(', ')}]';
+  }
+}
+
+class _MatchesAccessibilityAnnouncement extends Matcher {
+  const _MatchesAccessibilityAnnouncement({
+    required this.expectedMessage,
+    required this.expectedTextDirection,
+    required this.expectedAssertiveness,
+    required this.expectedViewId,
+  });
+
+  final String expectedMessage;
+  final TextDirection? expectedTextDirection;
+  final Assertiveness? expectedAssertiveness;
+  final int? expectedViewId;
+
+  @override
+  bool matches(
+    covariant CapturedAccessibilityAnnouncement event,
+    Map<dynamic, dynamic> matchState,
+  ) {
+    return event.message == expectedMessage &&
+        (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness) &&
+        (expectedViewId == null || event.viewId == expectedViewId);
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('Semantic announcement with message "$expectedMessage"');
+    if (expectedTextDirection != null) {
+      description.add(', textDirection: $expectedTextDirection');
     }
+    if (expectedAssertiveness != null) {
+      description.add(', assertiveness: $expectedAssertiveness');
+    }
+    if (expectedViewId != null) {
+      description.add(', viewId: $expectedViewId');
+    }
+    return description;
   }
 }
 
@@ -2948,4 +3272,40 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
     }
     return null;
   }
+}
+
+Map<String, bool> _stringsMapFromSemanticsFlags(SemanticsFlags flagsCollection) {
+  return <String, bool>{
+    'hasCheckedState': flagsCollection.isChecked != ui.CheckedState.none,
+    'isChecked': flagsCollection.isChecked == ui.CheckedState.isTrue,
+    'isCheckStateMixed': flagsCollection.isChecked == ui.CheckedState.mixed,
+    'isSelected': flagsCollection.isSelected == ui.Tristate.isTrue,
+    'hasSelectedState': flagsCollection.isSelected != ui.Tristate.none,
+    'isButton': flagsCollection.isButton,
+    'isSlider': flagsCollection.isSlider,
+    'isKeyboardKey': flagsCollection.isKeyboardKey,
+    'isLink': flagsCollection.isLink,
+    'isFocused': flagsCollection.isFocused == ui.Tristate.isTrue,
+    'isFocusable': flagsCollection.isFocused != ui.Tristate.none,
+    'isTextField': flagsCollection.isTextField,
+    'isReadOnly': flagsCollection.isReadOnly,
+    'hasEnabledState': flagsCollection.isEnabled != ui.Tristate.none,
+    'isEnabled': flagsCollection.isEnabled == ui.Tristate.isTrue,
+    'isInMutuallyExclusiveGroup': flagsCollection.isInMutuallyExclusiveGroup,
+    'isHeader': flagsCollection.isHeader,
+    'isObscured': flagsCollection.isObscured,
+    'isMultiline': flagsCollection.isMultiline,
+    'namesRoute': flagsCollection.namesRoute,
+    'scopesRoute': flagsCollection.scopesRoute,
+    'isHidden': flagsCollection.isHidden,
+    'isImage': flagsCollection.isImage,
+    'isLiveRegion': flagsCollection.isLiveRegion,
+    'hasToggledState': flagsCollection.isToggled != ui.Tristate.none,
+    'isToggled': flagsCollection.isToggled == ui.Tristate.isTrue,
+    'hasImplicitScrolling': flagsCollection.hasImplicitScrolling,
+    'hasExpandedState': flagsCollection.isExpanded != ui.Tristate.none,
+    'isExpanded': flagsCollection.isExpanded == ui.Tristate.isTrue,
+    'hasRequiredState': flagsCollection.isRequired != ui.Tristate.none,
+    'isRequired': flagsCollection.isRequired == ui.Tristate.isTrue,
+  };
 }

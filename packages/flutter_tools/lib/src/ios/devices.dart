@@ -239,14 +239,26 @@ class IOSDevices extends PollingDeviceDiscovery {
   @override
   Future<void> stopPolling() async {
     await _observedDeviceEventsSubscription?.cancel();
+    _observedDeviceEventsSubscription = null;
+    xcdevice.cancelWirelessDiscovery();
   }
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<void> cancelWirelessDiscovery() async {
+    xcdevice.cancelWirelessDiscovery();
+  }
+
+  @override
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     if (!_platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
     }
-
+    if (forWirelessDiscovery) {
+      return xcdevice.getAvailableIOSDevicesForWirelessDiscovery(timeout: timeout);
+    }
     return xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
@@ -359,10 +371,10 @@ class IOSDevice extends Device {
   @override
   bool isConnected;
 
-  var devModeEnabled = false;
+  bool devModeEnabled = false;
 
   /// Device has trusted this computer and paired.
-  var isPaired = false;
+  bool isPaired = false;
 
   /// CoreDevice is a device connectivity stack introduced in Xcode 15. Devices
   /// with iOS 17 or greater are CoreDevices.
@@ -493,6 +505,8 @@ class IOSDevice extends Device {
         'Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag',
       );
     }
+
+    warnIfSlowWirelessDebugging(debuggingOptions);
 
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
@@ -774,6 +788,35 @@ class IOSDevice extends Device {
     }
   }
 
+  @visibleForTesting
+  void warnIfSlowWirelessDebugging(DebuggingOptions debuggingOptions) {
+    // The minimum iOS version where wireless debugging is known to be slow.
+    const minSlowWirelessDebugIOSVersion = 26;
+    final Version? sdkVersion = this.sdkVersion;
+
+    if (!isWirelesslyConnected ||
+        !debuggingOptions.debuggingEnabled ||
+        sdkVersion == null ||
+        sdkVersion.major < minSlowWirelessDebugIOSVersion) {
+      return;
+    }
+
+    final warningMessage =
+        'Wireless debugging on iOS ${sdkVersion.major} may be slower than expected. '
+        'For better performance, consider using a wired (USB) connection.';
+
+    _logger.printWarning(warningMessage);
+
+    _logger.sendEvent('app.warning', <String, Object?>{
+      'warningId': 'ios-wireless-slow',
+      'warning': warningMessage,
+      'category': 'ios-wireless-performance',
+      'deviceId': id,
+      'deviceOsVersion': sdkVersion.major,
+      'actionable': true,
+    });
+  }
+
   void _printInstallError(Directory bundle) {
     _logger.printError('Could not run ${bundle.path} on $id.');
     _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
@@ -1012,6 +1055,7 @@ class IOSDevice extends Device {
         bundlePath: package.deviceBundlePath,
         bundleId: package.id,
         launchArguments: launchArguments,
+        shutdownHooks: globals.shutdownHooks,
       );
 
       // If it succeeds to launch with LLDB, return, otherwise continue on to
@@ -1432,7 +1476,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   final _fallbackStreamFlutterMessages = <String>[];
 
   /// Used to track if a message prefixed with "flutter:" has been received from the primary log.
-  var primarySourceFlutterLogReceived = false;
+  bool primarySourceFlutterLogReceived = false;
 
   /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
   /// and Unified Logging (Dart VM). When using more than one of these logging
@@ -1666,14 +1710,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return;
     }
     _iMobileDevice.startLogger(_deviceId, _isWirelesslyConnected).then<void>((Process process) {
-      process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newSyslogLineHandler());
-      process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newSyslogLineHandler());
+      process.stdout.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
+      process.stderr.transform(utf8LineDecoder).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
         if (!linesController.hasListener) {
           return;
@@ -1851,7 +1889,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  var forwardedPorts = <ForwardedPort>[];
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
   @visibleForTesting
   void addForwardedPorts(List<ForwardedPort> ports) {

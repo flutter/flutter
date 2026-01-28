@@ -12,6 +12,7 @@
 
 namespace flutter {
 
+using FlutterViewId = int64_t;
 class FlutterWindowsEngine;
 
 // Handles messages on the flutter/accessibility channel.
@@ -27,7 +28,8 @@ class AccessibilityPlugin {
                     AccessibilityPlugin* plugin);
 
   // Announce a message through the assistive technology.
-  virtual void Announce(const std::string_view message);
+  virtual void Announce(const FlutterViewId view_id,
+                        const std::string_view message);
 
  private:
   // The engine that owns this plugin.

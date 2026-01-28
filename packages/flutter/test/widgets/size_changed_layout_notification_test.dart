@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SizeChangedLayoutNotification test', (WidgetTester tester) async {
-    bool notified = false;
+    var notified = false;
 
     await tester.pumpWidget(
       Center(

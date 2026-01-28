@@ -33,6 +33,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.highContrast = false,
     this.onOffSwitchLabels = false,
     this.supportsAnnounce = false,
+    this.autoPlayAnimatedImages = false,
+    this.autoPlayVideos = false,
+    this.deterministicCursor = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -45,6 +48,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     highContrast: true,
     onOffSwitchLabels: true,
     supportsAnnounce: true,
+    autoPlayAnimatedImages: true,
+    autoPlayVideos: true,
+    deterministicCursor: true,
   );
 
   @override
@@ -72,6 +78,15 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool supportsAnnounce;
 
   @override
+  final bool autoPlayAnimatedImages;
+
+  @override
+  final bool autoPlayVideos;
+
+  @override
+  final bool deterministicCursor;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -84,7 +99,10 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
-        other.supportsAnnounce == supportsAnnounce;
+        other.supportsAnnounce == supportsAnnounce &&
+        other.autoPlayAnimatedImages == autoPlayAnimatedImages &&
+        other.autoPlayVideos == autoPlayVideos &&
+        other.deterministicCursor == deterministicCursor;
   }
 
   @override
@@ -98,6 +116,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       highContrast,
       onOffSwitchLabels,
       supportsAnnounce,
+      autoPlayAnimatedImages,
+      autoPlayVideos,
+      deterministicCursor,
     );
   }
 
@@ -430,6 +451,208 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _brieflyShowPasswordTestValue = null;
   }
 
+  /// The system-suggested height of the text, as a multiple of the font size.
+  ///
+  /// This value takes precedence over any text height specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.height] and [StrutStyle.height].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.lineHeightScaleFactorOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [lineHeightScaleFactorOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [lineHeightScaleFactorOverride], use [clearLineHeightScaleFactorOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.lineHeightScaleFactorOverride] for the standard implementation
+  ///   * [clearLineHeightScaleFactorOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
+  @override
+  double? get lineHeightScaleFactorOverride => _forceLineHeightScaleFactorOverrideToBeNull
+      ? null
+      : _lineHeightScaleFactorOverrideTestValue ??
+            _platformDispatcher.lineHeightScaleFactorOverride;
+  double? _lineHeightScaleFactorOverrideTestValue;
+  bool _forceLineHeightScaleFactorOverrideToBeNull = false;
+
+  /// Hides the real line height scale factor and reports the given
+  /// [lineHeightScaleFactorOverrideTestValue] instead.
+  // ignore: avoid_setters_without_getters
+  set lineHeightScaleFactorOverrideTestValue(double? lineHeightScaleFactorOverrideTestValue) {
+    _lineHeightScaleFactorOverrideTestValue = lineHeightScaleFactorOverrideTestValue;
+    if (lineHeightScaleFactorOverrideTestValue == null) {
+      _forceLineHeightScaleFactorOverrideToBeNull = true;
+    }
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test line height scale factor and returns to using
+  /// the real line height scale factor.
+  void clearLineHeightScaleFactorOverrideTestValue() {
+    _lineHeightScaleFactorOverrideTestValue = null;
+    _forceLineHeightScaleFactorOverrideToBeNull = false;
+    onMetricsChanged?.call();
+  }
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each letter.
+  ///
+  /// A negative value can be used to bring the letters closer.
+  ///
+  /// This value takes precedence over any text letter spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.letterSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.letterSpacingOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [letterSpacingOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [letterSpacingOverride], use [clearLetterSpacingOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.letterSpacingOverride] for the standard implementation
+  ///   * [clearLetterSpacingOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
+  @override
+  double? get letterSpacingOverride => _forceLetterSpacingOverrideToBeNull
+      ? null
+      : _letterSpacingOverrideTestValue ?? _platformDispatcher.letterSpacingOverride;
+  double? _letterSpacingOverrideTestValue;
+  bool _forceLetterSpacingOverrideToBeNull = false;
+
+  /// Hides the real letter spacing and reports the given
+  /// [letterSpacingOverrideTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set letterSpacingOverrideTestValue(double? letterSpacingOverrideTestValue) {
+    _letterSpacingOverrideTestValue = letterSpacingOverrideTestValue;
+    if (letterSpacingOverrideTestValue == null) {
+      _forceLetterSpacingOverrideToBeNull = true;
+    }
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test letter spacing and returns to using the real
+  /// letter spacing.
+  void clearLetterSpacingOverrideTestValue() {
+    _letterSpacingOverrideTestValue = null;
+    _forceLetterSpacingOverrideToBeNull = false;
+    onMetricsChanged?.call();
+  }
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add between each sequence of white-space (i.e. between each word).
+  ///
+  /// A negative value can be used to bring the words closer.
+  ///
+  /// This value takes precedence over any text word spacing specified at the
+  /// application level. For example, at framework level, in the [TextStyle]
+  /// for [Text], [SelectableText], and [EditableText] widgets, this value
+  /// overrides the existing value of [TextStyle.wordSpacing].
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.wordSpacingOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [wordSpacingOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [wordSpacingOverride], use [clearWordSpacingOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.wordSpacingOverride] for the standard implementation
+  ///   * [clearWordSpacingOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
+  @override
+  double? get wordSpacingOverride => _forceWordSpacingOverrideToBeNull
+      ? null
+      : _wordSpacingOverrideTestValue ?? _platformDispatcher.wordSpacingOverride;
+  double? _wordSpacingOverrideTestValue;
+  bool _forceWordSpacingOverrideToBeNull = false;
+
+  /// Hides the real word spacing and reports the given
+  /// [wordSpacingOverrideTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set wordSpacingOverrideTestValue(double? wordSpacingOverrideTestValue) {
+    _wordSpacingOverrideTestValue = wordSpacingOverrideTestValue;
+    if (wordSpacingOverrideTestValue == null) {
+      _forceWordSpacingOverrideToBeNull = true;
+    }
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test word spacing and returns to using the real
+  /// word spacing.
+  void clearWordSpacingOverrideTestValue() {
+    _wordSpacingOverrideTestValue = null;
+    _forceWordSpacingOverrideToBeNull = false;
+    onMetricsChanged?.call();
+  }
+
+  /// The system-suggested amount of additional space (in logical pixels)
+  /// to add following each paragraph in text.
+  ///
+  /// This value takes precedence over any text paragraph spacing specified at
+  /// the application level.
+  ///
+  /// Returns null when no override has been set by the system.
+  ///
+  /// Defaults to the value provided by [PlatformDispatcher.paragraphSpacingOverride].
+  /// This can only be set in a test environment to emulate different platform
+  /// configurations. A standard [PlatformDispatcher] is not mutable from the
+  /// framework.
+  ///
+  /// Setting this value to `null` will force [paragraphSpacingOverride] to return
+  /// `null`. If you want to have the value default to the platform
+  /// [paragraphSpacingOverride], use [clearParagraphSpacingOverrideTestValue].
+  ///
+  /// See also:
+  ///
+  ///   * [PlatformDispatcher.paragraphSpacingOverride] for the standard implementation
+  ///   * [clearParagraphSpacingOverrideTestValue] to reset this value specifically
+  ///   * [clearAllTestValues] to reset all test values for this view
+  @override
+  double? get paragraphSpacingOverride => _forceParagraphSpacingOverrideToBeNull
+      ? null
+      : _paragraphSpacingOverrideTestValue ?? _platformDispatcher.paragraphSpacingOverride;
+  double? _paragraphSpacingOverrideTestValue;
+  bool _forceParagraphSpacingOverrideToBeNull = false;
+
+  /// Hides the real paragraph spacing and reports the given
+  /// [paragraphSpacingOverrideTestValue] instead.
+  /// ignore: avoid_setters_without_getters
+  set paragraphSpacingOverrideTestValue(double? paragraphSpacingOverrideTestValue) {
+    _paragraphSpacingOverrideTestValue = paragraphSpacingOverrideTestValue;
+    if (paragraphSpacingOverrideTestValue == null) {
+      _forceParagraphSpacingOverrideToBeNull = true;
+    }
+    onMetricsChanged?.call();
+  }
+
+  /// Deletes any existing test paragraph spacing and returns to using the real
+  /// paragraph spacing.
+  void clearParagraphSpacingOverrideTestValue() {
+    _paragraphSpacingOverrideTestValue = null;
+    _forceParagraphSpacingOverrideToBeNull = false;
+    onMetricsChanged?.call();
+  }
+
   @override
   FrameCallback? get onBeginFrame => _platformDispatcher.onBeginFrame;
   @override
@@ -483,6 +706,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;
+
+  /// The application locale set during the test.
+  Locale? applicationLocale;
+
+  @override
+  void setApplicationLocale(Locale locale) {
+    applicationLocale = locale;
+  }
 
   /// Hides the real semantics enabled and reports the given
   /// [semanticsEnabledTestValue] instead.
@@ -571,6 +802,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
+    clearLineHeightScaleFactorOverrideTestValue();
+    clearLetterSpacingOverrideTestValue();
+    clearWordSpacingOverrideTestValue();
+    clearParagraphSpacingOverrideTestValue();
     resetBrieflyShowPassword();
     resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
@@ -618,7 +853,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
-    final List<Object> extraDisplayKeys = <Object>[..._testDisplays.keys];
+    final extraDisplayKeys = <Object>[..._testDisplays.keys];
     for (final Display display in _platformDispatcher.displays) {
       extraDisplayKeys.remove(display.id);
       if (!_testDisplays.containsKey(display.id)) {
@@ -627,7 +862,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
     extraDisplayKeys.forEach(_testDisplays.remove);
 
-    final List<Object> extraViewKeys = <Object>[..._testViews.keys];
+    final extraViewKeys = <Object>[..._testViews.keys];
     for (final FlutterView view in _platformDispatcher.views) {
       // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
       late final TestDisplay display;
@@ -658,6 +893,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     }
 
     extraViewKeys.forEach(_testViews.remove);
+  }
+
+  /// Adds a [TestFlutterView] that wraps the given [view] to the list of views
+  /// managed by this [TestPlatformDispatcher].
+  ///
+  /// The added view will be associated with the first display in the list of
+  /// displays managed by this [TestPlatformDispatcher].
+  void addTestView(FlutterView view) {
+    _testViews[view.viewId] = TestFlutterView(
+      view: view,
+      platformDispatcher: this,
+      display: displays.first,
+    );
+    _updateViewsAndDisplays();
   }
 
   @override

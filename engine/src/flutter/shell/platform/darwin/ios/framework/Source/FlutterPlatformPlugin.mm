@@ -265,6 +265,15 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     [[[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleHeavy] impactOccurred];
   } else if ([@"HapticFeedbackType.selectionClick" isEqualToString:feedbackType]) {
     [[[UISelectionFeedbackGenerator alloc] init] selectionChanged];
+  } else if ([@"HapticFeedbackType.successNotification" isEqualToString:feedbackType]) {
+    [[[UINotificationFeedbackGenerator alloc] init]
+        notificationOccurred:UINotificationFeedbackTypeSuccess];
+  } else if ([@"HapticFeedbackType.warningNotification" isEqualToString:feedbackType]) {
+    [[[UINotificationFeedbackGenerator alloc] init]
+        notificationOccurred:UINotificationFeedbackTypeWarning];
+  } else if ([@"HapticFeedbackType.errorNotification" isEqualToString:feedbackType]) {
+    [[[UINotificationFeedbackGenerator alloc] init]
+        notificationOccurred:UINotificationFeedbackTypeError];
   }
 }
 

@@ -114,7 +114,7 @@ To write a new iOS memory test case `some_memory_perf` and add it to Flutter’s
 
 [large image changer task]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/large_image_changer_perf_android.dart
 
-[Dart timeline]:https://flutter.dev/docs/development/tools/devtools/timeline
+[Dart timeline]:https://docs.flutter.dev/development/tools/devtools/timeline
 
 [large image changer manifest ios]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L880
 

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.1.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,19 +14,22 @@ void main() {
     expect(find.byType(CustomScrollView), findsOneWidget);
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => (widget is Container) && widget.color == Colors.amber[200],
+        (Widget widget) =>
+            (widget is Container) && widget.color == Colors.amber[200],
       ),
       findsNWidgets(2),
     );
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => (widget is Container) && widget.color == Colors.blue[200],
+        (Widget widget) =>
+            (widget is Container) && widget.color == Colors.blue[200],
       ),
       findsOneWidget,
     );
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => (widget is Container) && widget.color == Colors.orange[300],
+        (Widget widget) =>
+            (widget is Container) && widget.color == Colors.orange[300],
       ),
       findsOneWidget,
     );
@@ -37,7 +41,9 @@ void main() {
   testWidgets('Fills up all available space', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverFillRemainingExampleApp());
 
-    final double listSpace = tester.getSize(find.byType(CustomScrollView)).height;
+    final double listSpace = tester
+        .getSize(find.byType(CustomScrollView))
+        .height;
     double contentHeight = 0.0;
     for (final Widget widget in tester.widgetList(
       find.byWidgetPredicate(

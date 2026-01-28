@@ -18,7 +18,10 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/runtime_stage/runtime_stage.h"
+#include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "impeller/runtime_stage/runtime_stage_playground.h"
+#include "runtime_stage_types_flatbuffers.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -32,9 +35,24 @@ TEST_P(RuntimeStageTest, CanReadValidBlob) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
-  ASSERT_TRUE(stage->IsValid());
+  ABSL_ASSERT_OK(stages);
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stage);
   ASSERT_EQ(stage->GetShaderStage(), RuntimeShaderStage::kFragment);
+}
+
+TEST_P(RuntimeStageTest, RejectInvalidFormatVersion) {
+  flatbuffers::FlatBufferBuilder builder;
+  fb::RuntimeStagesBuilder stages_builder(builder);
+  stages_builder.add_format_version(0);
+  auto stages = stages_builder.Finish();
+  builder.Finish(stages, fb::RuntimeStagesIdentifier());
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      builder.GetBufferPointer(), builder.GetSize());
+  auto runtime_stages = RuntimeStage::DecodeRuntimeStages(mapping);
+  EXPECT_FALSE(runtime_stages.ok());
+  EXPECT_EQ(runtime_stages.status().code(), absl::StatusCode::kInvalidArgument);
 }
 
 TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
@@ -50,7 +68,7 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
            junk_allocation->GetLength().GetByteSize());
   auto stages = RuntimeStage::DecodeRuntimeStages(
       CreateMappingFromAllocation(junk_allocation));
-  ASSERT_FALSE(stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())]);
+  ASSERT_FALSE(stages.ok());
 }
 
 TEST_P(RuntimeStageTest, CanReadUniforms) {
@@ -59,9 +77,11 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(stages);
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
-  ASSERT_TRUE(stage->IsValid());
+  ASSERT_TRUE(stage);
   switch (GetBackend()) {
     case PlaygroundBackend::kMetal:
       [[fallthrough]];
@@ -74,6 +94,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 0u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_alpha");
@@ -82,6 +103,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 1u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_sparkle_color");
@@ -90,6 +112,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_sparkle_alpha");
@@ -98,6 +121,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 3u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_blur");
@@ -106,6 +130,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 4u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_radius_scale");
@@ -114,6 +139,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 6u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_max_radius");
@@ -122,6 +148,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 7u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_resolution_scale");
@@ -130,6 +157,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 8u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_noise_scale");
@@ -138,6 +166,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 9u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_noise_phase");
@@ -146,6 +175,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 10u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
 
       {
@@ -155,6 +185,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_circle2");
@@ -163,6 +194,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 12u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_circle3");
@@ -171,6 +203,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 13u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation1");
@@ -179,6 +212,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 14u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation2");
@@ -187,6 +221,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 15u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
         auto uni = stage->GetUniform("u_rotation3");
@@ -195,6 +230,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 16u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+        EXPECT_TRUE(uni->padding_layout.empty());
       }
       break;
     }
@@ -214,14 +250,15 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       // introduced.
       // This means 36 * 4 = 144 bytes total.
 
-      EXPECT_EQ(uni->GetSize(), 144u);
-      std::vector<uint8_t> layout(uni->GetSize() / sizeof(float), 1);
-      layout[5] = 0;
-      layout[6] = 0;
-      layout[7] = 0;
-      layout[23] = 0;
+      EXPECT_EQ(uni->GetGPUSize(), 144u);
+      std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
+                                             RuntimePaddingType::kFloat);
+      layout[5] = RuntimePaddingType::kPadding;
+      layout[6] = RuntimePaddingType::kPadding;
+      layout[7] = RuntimePaddingType::kPadding;
+      layout[23] = RuntimePaddingType::kPadding;
 
-      EXPECT_THAT(uni->struct_layout, ::testing::ElementsAreArray(layout));
+      EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
       break;
     }
   }
@@ -237,7 +274,9 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerBeforeUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(stages);
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -262,7 +301,9 @@ TEST_P(RuntimeStageTest, CanReadUniformsSamplerAfterUBO) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(stages);
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   EXPECT_EQ(stage->GetUniforms().size(), 2u);
   auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
@@ -283,8 +324,10 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
-  ASSERT_TRUE(stage->IsValid());
+  ABSL_ASSERT_OK(stages);
+  auto stage =
+      stages.value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(stage);
   std::promise<bool> registration;
   auto future = registration.get_future();
   auto library = GetContext()->GetShaderLibrary();
@@ -313,8 +356,11 @@ TEST_P(RuntimeStageTest, CanRegisterStage) {
 }
 
 TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
-  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
-  auto stage = stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  ABSL_ASSERT_OK(stages_result);
+  auto stage =
+      stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
   ASSERT_TRUE(stage);
   ASSERT_NE(stage, nullptr);
@@ -356,7 +402,9 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
 }
 
 TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {
-  auto stages = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  auto stages_result = OpenAssetAsRuntimeStage("ink_sparkle.frag.iplr");
+  ABSL_ASSERT_OK(stages_result);
+  auto stages = stages_result.value();
   // Right now, SkSL gets implicitly bundled regardless of what the build rule
   // for this test requested. After
   // https://github.com/flutter/flutter/issues/138919, this may require a build

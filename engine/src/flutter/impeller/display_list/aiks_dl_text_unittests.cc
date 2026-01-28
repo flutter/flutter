@@ -11,6 +11,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
@@ -832,6 +833,44 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
                 .GetTextShadowCache()
                 .GetCacheSizeForTesting(),
             5u);
+}
+
+TEST_P(AiksTest, MultipleColorWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+
+  std::array<DlColor, 4> colors{DlColor::kRed(), DlColor::kGreen(),
+                                DlColor::kBlue(), DlColor::kRed()};
+  for (const auto& color : colors) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder, "A", kFontFixture,
+        TextRenderOptions{
+            .color = color,
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+        sk_font));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // The count of cache entries should match the number of distinct colors
+  // in the list.  Repeated usage of a color should not add to the cache.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            3u);
 }
 
 TEST_P(AiksTest, SingleIconShadowTest) {

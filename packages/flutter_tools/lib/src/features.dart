@@ -73,6 +73,12 @@ abstract class FeatureFlags {
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
+  /// Whether UIScene migration is enabled.
+  bool get isUISceneMigrationEnabled;
+
+  /// Wether riscv64 support is enabled.
+  bool get isRiscv64SupportEnabled;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -95,6 +101,8 @@ abstract class FeatureFlags {
     omitLegacyVersionFile,
     windowingFeature,
     lldbDebugging,
+    uiSceneMigration,
+    riscv64,
   ];
 
   /// All current Flutter feature flags that can be configured.
@@ -188,6 +196,7 @@ const nativeAssets = Feature(
   environmentOverride: 'FLUTTER_NATIVE_ASSETS',
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Enable Dart data assets building and bundling.
@@ -246,6 +255,31 @@ const lldbDebugging = Feature(
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// Enable UIScene lifecycle migration for iOS apps. When enabled, if possible the tool will
+/// attempt to auto-migrate the app. Otherwise, it will print a warning with instructions on how to
+/// migrate manually.
+const uiSceneMigration = Feature(
+  name: 'support for migrating to UIScene lifecycle',
+  extraHelpText:
+      'If enabled, Flutter will migrate your app to iOS UIScene lifecycle if possible or '
+      'otherwise instruct you to migrate manually.',
+  configSetting: 'enable-uiscene-migration',
+  environmentOverride: 'FLUTTER_UISCENE_MIGRATION',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
+);
+
+/// The [Feature] for building code targetting riscv64 architecture
+const riscv64 = Feature(
+  name: 'support for riscv64 architecture',
+  configSetting: 'enable-riscv64',
+  environmentOverride: 'FLUTTER_RISCV64',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true),
+  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.

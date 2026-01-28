@@ -31,7 +31,7 @@ Future<void> main() async {
     await flutter('precache', options: <String>['--android', '--no-ios']);
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
-    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
+    final projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
@@ -48,9 +48,7 @@ Future<void> main() async {
 
       section('Add to existing Android app');
 
-      final Directory hostAppDir = Directory(
-        path.join(tempDir.path, 'hello_host_app_with_custom_build'),
-      );
+      final hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_custom_build'));
       mkdir(hostAppDir);
       recursiveCopy(
         Directory(

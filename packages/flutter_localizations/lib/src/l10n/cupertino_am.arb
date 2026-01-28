@@ -30,10 +30,10 @@
   "clearButtonLabel": "አጽዳ",
   "cancelButtonLabel": "ይቅር",
   "backButtonLabel": "ተመለስ",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "ለመሰብሰብ ሁለቴ መታ ያድርጉ",
+  "expansionTileCollapsedHint": "ለመዘርጋት ድርብ ሁለቴ መታ ያድርጉ",
+  "expansionTileExpandedTapHint": "ሰብስብ",
+  "expansionTileCollapsedTapHint": "ለተጨማሪ ዝርዝሮች ይዘርጉ",
+  "expandedHint": "ተሰብስቧል",
+  "collapsedHint": "ተዘርግቷል"
 }

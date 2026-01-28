@@ -55,6 +55,8 @@ void main() {
           usageOfV1EmbeddingReferencesHandler,
           jlinkErrorWithJava21AndSourceCompatibility,
           missingNdkSourcePropertiesFile,
+          applyingKotlinAndroidPluginErrorHandler,
+          useNewAgpDslErrorHandler,
           incompatibleKotlinVersionHandler,
         ]),
       );
@@ -1000,7 +1002,7 @@ A problem occurred evaluating project ':app'.
             '│ To fix this issue, replace the following content:                                │\n'
             '│ /android/build.gradle:                                                           │\n'
             "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-            "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
+            "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                          │\n"
             '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
             '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
             '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip              │\n'
@@ -1613,6 +1615,86 @@ A problem occurred configuring project ':app'.
         testLogger.statusText,
         contains(r'C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264'),
       );
+    },
+    overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Failure to apply kotlin-android plugin',
+    () async {
+      const applyingKotlinAndroidPluginErrorExample = r'''
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'kotlin-android']
+> Failed to apply plugin 'kotlin-android'.
+   > ⛔ Failed to apply plugin 'com.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
+     Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
+     See https://issuetracker.google.com/438678642 for more details.
+      > java.lang.Throwable (no error message)
+    ''';
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      await applyingKotlinAndroidPluginErrorHandler.handler(
+        line: applyingKotlinAndroidPluginErrorExample,
+        project: project,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('Starting AGP 9+, the default has become built-in Kotlin.'),
+      );
+      expect(testLogger.statusText, contains('This results in a build failure'));
+      expect(testLogger.statusText, contains('when applying the kotlin-android plugin'));
+    },
+    overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Failure to apply kotlin-android plugin',
+    () async {
+      const useNewAgpDslErrorHandlerExample = r'''
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > java.lang.NullPointerException (no error message)
+    ''';
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      await useNewAgpDslErrorHandler.handler(
+        line: useNewAgpDslErrorHandlerExample,
+        project: project,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('Starting AGP 9+, only the new DSL interface will be read.'),
+      );
+      expect(testLogger.statusText, contains('This results in a build failure'));
+      expect(testLogger.statusText, contains('when applying the Flutter Gradle plugin'));
+      expect(testLogger.statusText, contains('If you are not upgrading to AGP 9+'));
+      expect(testLogger.statusText, contains('run `flutter analyze --suggestions`'));
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),

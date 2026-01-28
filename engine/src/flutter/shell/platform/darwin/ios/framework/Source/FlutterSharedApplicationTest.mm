@@ -97,4 +97,36 @@ FLUTTER_ASSERT_ARC
   [mockBundle stopMocking];
 }
 
+- (void)testFlutterDeeplinkingEnabledWhenNil {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"]).andReturn(nil);
+
+  XCTAssertTrue(FlutterSharedApplication.isFlutterDeepLinkingEnabled);
+  [mockBundle stopMocking];
+}
+
+- (void)testFlutterDeeplinkingEnabledWhenYes {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"]).andReturn(@YES);
+
+  XCTAssertTrue(FlutterSharedApplication.isFlutterDeepLinkingEnabled);
+  [mockBundle stopMocking];
+}
+
+- (void)testFlutterDeeplinkingEnabledWhenNo {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"]).andReturn(@NO);
+
+  XCTAssertFalse(FlutterSharedApplication.isFlutterDeepLinkingEnabled);
+  [mockBundle stopMocking];
+}
+
+- (void)testFlutterDeeplinkingEnabledWhenBogus {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"]).andReturn(@"hello");
+
+  XCTAssertFalse(FlutterSharedApplication.isFlutterDeepLinkingEnabled);
+  [mockBundle stopMocking];
+}
+
 @end

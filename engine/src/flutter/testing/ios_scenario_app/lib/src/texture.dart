@@ -19,7 +19,7 @@ class DisplayTexture extends Scenario {
 
   @override
   void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
+    final builder = SceneBuilder();
     builder.addTexture(
       _textureId,
       offset: Offset((view.physicalSize.width / 2.0) - (_textureWidth / 2.0), 0.0),

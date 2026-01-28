@@ -62,6 +62,109 @@ void main() {
     );
   });
 
+  testWidgets('showDragHandle adds a drag handle to the top of the sheet', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        showDragHandle: true,
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+    final Finder dragHandleFinder = find.byWidgetPredicate((Widget widget) {
+      return widget is DecoratedBox &&
+          widget.decoration is ShapeDecoration &&
+          (widget.decoration as ShapeDecoration).color == CupertinoColors.tertiaryLabel;
+    });
+    expect(dragHandleFinder, findsOneWidget);
+  });
+
+  testWidgets('showDragHandle adds a MediaQuery padding so content can render below the handle', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        showDragHandle: true,
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(
+                            child: SafeArea(child: Text('Page 2')),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+    final Finder dragHandleFinder = find.byWidgetPredicate((Widget widget) {
+      return widget is DecoratedBox &&
+          widget.decoration is ShapeDecoration &&
+          (widget.decoration as ShapeDecoration).color == CupertinoColors.tertiaryLabel;
+    });
+
+    final Offset dragHandleOffset = tester.getTopLeft(dragHandleFinder);
+    final Offset sheetContentOffset = tester.getTopLeft(find.text('Page 2'));
+    expect(sheetContentOffset.dy, greaterThan(dragHandleOffset.dy));
+  });
+
   testWidgets('Previous route moves slight downward when sheet route is pushed', (
     WidgetTester tester,
   ) async {
@@ -657,6 +760,58 @@ void main() {
     expect(find.text('Page: /next'), findsOneWidget);
   });
 
+  testWidgets('sheet with RouteSettings', (WidgetTester tester) async {
+    late RouteSettings currentRouteSetting;
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(
+            onDidChange: (Route<dynamic> newRoute) {
+              currentRouteSetting = newRoute.settings;
+            },
+          ),
+        ],
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      settings: const RouteSettings(name: 'simpleroute'),
+                      context: scaffoldKey.currentContext!,
+                      pageBuilder: (BuildContext context) {
+                        return const CupertinoPageScaffold(child: Text('Hello'));
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(currentRouteSetting.name, '/');
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Hello'), findsNothing);
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello'), findsOneWidget);
+    expect(currentRouteSetting.name, 'simpleroute');
+
+    Navigator.of(scaffoldKey.currentContext!).pop();
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting.name, '/');
+  });
+
   testWidgets('content does not go below the bottom of the screen', (WidgetTester tester) async {
     final GlobalKey scaffoldKey = GlobalKey();
 
@@ -924,7 +1079,7 @@ void main() {
 
       expect(find.text('Page 2'), findsOneWidget);
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
@@ -1152,8 +1307,8 @@ void main() {
       final GlobalKey homeKey = GlobalKey();
       final GlobalKey nestedNavigatorKey = GlobalKey<NavigatorState>();
       final GlobalKey sheetKey = GlobalKey();
-      bool wasPopped = false;
-      bool rootNavigatorPopped = false;
+      var wasPopped = false;
+      var rootNavigatorPopped = false;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -1277,7 +1432,7 @@ void main() {
 
       expect(find.text('Page 2'), findsOneWidget);
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
@@ -1307,7 +1462,7 @@ void main() {
     testWidgets('showCupertinoSheet shows snackbar at bottom of screen', (
       WidgetTester tester,
     ) async {
-      final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+      final scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
       void showSheet(BuildContext context) {
         showCupertinoSheet<void>(
@@ -1408,7 +1563,7 @@ void main() {
 
       expect(find.text('Page 2'), findsOneWidget);
 
-      RenderBox box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double initialPosition = box.localToGlobal(Offset.zero).dy;
 
       final TestGesture gesture = await tester.startGesture(const Offset(100, 400));
@@ -1425,6 +1580,246 @@ void main() {
       box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
       final double finalPosition = box.localToGlobal(Offset.zero).dy;
       expect(finalPosition, initialPosition);
+    });
+  });
+
+  group('draggable scrollable CupertinoSheetRoute', () {
+    Widget draggableScrollableApp(GlobalKey homeScaffoldKey, GlobalKey sheetScaffoldKey) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: homeScaffoldKey,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    showCupertinoSheet<void>(
+                      context: homeScaffoldKey.currentContext!,
+                      scrollableBuilder: (BuildContext context, ScrollController controller) {
+                        return CupertinoPageScaffold(
+                          key: sheetScaffoldKey,
+                          child: CustomScrollView(
+                            controller: controller,
+                            primary: false,
+                            slivers: <Widget>[
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate((
+                                  BuildContext context,
+                                  int index,
+                                ) {
+                                  return Container(
+                                    alignment: Alignment.center,
+                                    height: 100,
+                                    child: Text('Scroll Item $index'),
+                                  );
+                                }, childCount: 20),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Can be scrolled when at full height', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(draggableScrollableApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+      box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+      final double initialScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, -30));
+      await gesture.moveBy(const Offset(0, -100));
+      await tester.pump();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+      box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+      final double finalScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+      expect(finalSheetPosition, equals(initialSheetPosition));
+      expect(finalScrollPosition, lessThan(initialScrollPosition));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('Sheet slides down on downwards drag when scrollable content is at the top', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(draggableScrollableApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+      box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+      final double initialScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, 30));
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+
+      box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+      final double finalSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+      box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+      final double finalScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+      expect(finalSheetPosition, greaterThan(initialSheetPosition));
+      // Scroll should move down with sheet.
+      expect(finalScrollPosition, greaterThan(initialScrollPosition));
+      expect(
+        finalScrollPosition - initialScrollPosition,
+        closeTo(finalSheetPosition - initialSheetPosition, 0.0005),
+      );
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+      'While the drag gesture continues, the sheet switches between scrolling and dismiss animation correctly',
+      (WidgetTester tester) async {
+        final GlobalKey homeKey = GlobalKey();
+        final GlobalKey sheetKey = GlobalKey();
+
+        await tester.pumpWidget(draggableScrollableApp(homeKey, sheetKey));
+
+        await tester.tap(find.text('Push Page 2'));
+        await tester.pumpAndSettle();
+
+        var box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+        final double initialSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+        box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+        final double initialScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+        // Sheet will scroll on upwards drag.
+        final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+        // Do a small drag first to win the gesture arena.
+        await gesture.moveBy(const Offset(0, -30));
+        await gesture.moveBy(const Offset(0, -100));
+        await tester.pump();
+
+        box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+        double currentSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+        box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+        double currentScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+        // Sheet has not moved, but the scroll was triggered.
+        expect(currentSheetPosition, equals(initialSheetPosition));
+        expect(currentScrollPosition, lessThan(initialScrollPosition));
+
+        // Drag back down the same amount.
+        await gesture.moveBy(const Offset(0, 100));
+        await tester.pump();
+
+        box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+        currentSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+        box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+        currentScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+        // Sheet still has not moved, and the scroll returns to it's original spot.
+        expect(currentSheetPosition, equals(initialSheetPosition));
+        expect(currentScrollPosition, equals(initialScrollPosition));
+
+        // Drag downwards further.
+        await gesture.moveBy(const Offset(0, 100));
+        await tester.pump();
+
+        box = tester.renderObject(find.byKey(sheetKey)) as RenderBox;
+        currentSheetPosition = box.localToGlobal(Offset.zero).dy;
+
+        box = tester.renderObject(find.text('Scroll Item 3')) as RenderBox;
+        currentScrollPosition = box.localToGlobal(Offset.zero).dy;
+
+        // Entire sheet will have dragged down. Scrollable content will have moved down with it.
+        expect(currentSheetPosition, greaterThan(initialSheetPosition));
+        expect(currentScrollPosition, greaterThan(initialScrollPosition));
+        expect(
+          currentScrollPosition - initialScrollPosition,
+          equals(currentSheetPosition - initialSheetPosition),
+        );
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets('Fling while scrolled down does not trigger drag pop', (WidgetTester tester) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(draggableScrollableApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      // Scroll down some.
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      // Do a small drag first to win the gesture arena.
+      await gesture.moveBy(const Offset(0, -30));
+      await gesture.moveBy(const Offset(0, -400));
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Trigger fling up.
+      await tester.flingFrom(const Offset(100, 400), const Offset(0, 300), 500);
+      await tester.pumpAndSettle();
+
+      // Scrollable sheet should still be open.
+      expect(find.text('Scroll Item 3'), findsOneWidget);
+    });
+
+    testWidgets('Fling while scrolled to the top causes the drag fling', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(draggableScrollableApp(homeKey, sheetKey));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      // Trigger fling up.
+      await tester.flingFrom(const Offset(100, 400), const Offset(0, 300), 500);
+      await tester.pumpAndSettle();
+
+      // Scrollable sheet should not be open.
+      expect(find.text('Scroll Item 3'), findsNothing);
     });
   });
 
@@ -1558,4 +1953,410 @@ void main() {
       );
     },
   );
+
+  group('topGap parameter tests', () {
+    testWidgets('sheet uses default topGap when not specified', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      Navigator.push<void>(
+                        scaffoldKey.currentContext!,
+                        CupertinoSheetRoute<void>(
+                          builder: (BuildContext context) {
+                            return const CupertinoPageScaffold(child: Text('Page 2'));
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final double sheetTopOffset = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      // Should use default topGap ratio (8% of screen height = 0.08 * 600.0 = 48.0)
+      expect(sheetTopOffset, equals(600.0 * _kTopGapRatio));
+    });
+
+    testWidgets('sheet with custom topGap uses custom positioning', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      Navigator.push<void>(
+                        scaffoldKey.currentContext!,
+                        CupertinoSheetRoute<void>(
+                          builder: (BuildContext context) {
+                            return const CupertinoPageScaffold(child: Text('Page 2'));
+                          },
+                          topGap: 0.0,
+                        ),
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final double sheetTopOffset = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      expect(sheetTopOffset, equals(0.0));
+    });
+
+    testWidgets('showCupertinoSheet accepts topGap parameter', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: scaffoldKey.currentContext!,
+                        topGap: 0.15,
+                        builder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Text('Page 2'));
+                        },
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final double sheetTopOffset = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      expect(sheetTopOffset, equals(600.0 * 0.15));
+    });
+
+    testWidgets('custom topGap disables delegated transitions', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return CupertinoPageScaffold(
+                            child: Column(
+                              children: <Widget>[
+                                const Text('Page 2'),
+                                CupertinoButton(
+                                  onPressed: () {
+                                    Navigator.push<void>(
+                                      scaffoldKey.currentContext!,
+                                      CupertinoSheetRoute<void>(
+                                        builder: (BuildContext context) {
+                                          return const CupertinoPageScaffold(child: Text('Page 3'));
+                                        },
+                                        topGap: 0.1, // Custom topGap should disable transitions
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Push Page 3'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final double pageTwoYBeforePage3 = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      await tester.tap(find.text('Push Page 3'));
+      await tester.pumpAndSettle();
+
+      final double pageTwoYAfterPage3 = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      // Page 2 should remain at the same position because custom topGap disables transitions
+      expect(pageTwoYAfterPage3, equals(pageTwoYBeforePage3));
+
+      final double pageThreeY = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      expect(pageThreeY, equals(600.0 * 0.1));
+    });
+
+    testWidgets('default topGap allows delegated transitions', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Column(
+              children: <Widget>[
+                const Text('Page 1'),
+                CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return CupertinoPageScaffold(
+                            child: Column(
+                              children: <Widget>[
+                                const Text('Page 2'),
+                                CupertinoButton(
+                                  onPressed: () {
+                                    Navigator.push<void>(
+                                      scaffoldKey.currentContext!,
+                                      CupertinoSheetRoute<void>(
+                                        builder: (BuildContext context) {
+                                          return const CupertinoPageScaffold(child: Text('Page 3'));
+                                        },
+                                        // No topGap specified - should use default and allow transitions
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Push Page 3'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final double pageTwoYBeforePage3 = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      await tester.tap(find.text('Push Page 3'));
+      await tester.pumpAndSettle();
+
+      final double pageTwoYAfterPage3 = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      // Page 2 should move upward because default topGap allows delegated transitions
+      expect(pageTwoYAfterPage3, lessThan(pageTwoYBeforePage3));
+    });
+
+    testWidgets('topGap affects drag gesture calculations', (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+
+      Widget dragGestureAppWithTopGap(double topGap) {
+        return CupertinoApp(
+          home: CupertinoPageScaffold(
+            key: scaffoldKey,
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  const Text('Page 1'),
+                  CupertinoButton(
+                    onPressed: () {
+                      showCupertinoSheet<void>(
+                        context: scaffoldKey.currentContext!,
+                        topGap: topGap,
+                        pageBuilder: (BuildContext context) {
+                          return const CupertinoPageScaffold(child: Center(child: Text('Page 2')));
+                        },
+                      );
+                    },
+                    child: const Text('Push Page 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Test with custom topGap of 0.3
+      await tester.pumpWidget(dragGestureAppWithTopGap(0.3));
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final double sheetTopOffset = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      expect(sheetTopOffset, equals(600.0 * 0.3));
+
+      // Test that drag still works with custom topGap
+      final TestGesture gesture = await tester.startGesture(const Offset(100, 300));
+      await gesture.moveBy(const Offset(0, 100));
+      await tester.pump();
+
+      final double draggedPosition = tester
+          .getTopLeft(
+            find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+          )
+          .dy;
+
+      // Sheet should move down when dragged
+      expect(draggedPosition, greaterThan(sheetTopOffset));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    });
+  });
+  testWidgets('didUpdateWidget in sheet transition does not try and use multiple tickers', (
+    WidgetTester tester,
+  ) async {
+    final animation = AnimationController(vsync: const TestVSync());
+    final secondaryAnimation = AnimationController(vsync: const TestVSync());
+
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: secondaryAnimation,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    final newAnimation = AnimationController(vsync: const TestVSync());
+
+    // Should not throw an exception.
+    await tester.pumpWidget(
+      CupertinoSheetTransition(
+        primaryRouteAnimation: newAnimation,
+        secondaryRouteAnimation: secondaryAnimation,
+        linearTransition: false,
+        child: const SizedBox(height: 100, width: 100),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    animation.dispose();
+    secondaryAnimation.dispose();
+    newAnimation.dispose();
+  });
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      onDidChange(previousRoute!);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }

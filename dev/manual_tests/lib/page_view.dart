@@ -24,7 +24,7 @@ class PageViewAppState extends State<PageViewApp> {
   @override
   void initState() {
     super.initState();
-    const List<Size> cardSizes = <Size>[
+    const cardSizes = <Size>[
       Size(100.0, 300.0),
       Size(300.0, 100.0),
       Size(200.0, 400.0),
@@ -64,7 +64,7 @@ class PageViewAppState extends State<PageViewApp> {
       ),
     );
 
-    final BoxConstraints constraints = (scrollDirection == Axis.vertical)
+    final constraints = (scrollDirection == Axis.vertical)
         ? BoxConstraints.tightFor(height: pageSize.height)
         : BoxConstraints.tightFor(width: pageSize.width);
 

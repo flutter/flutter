@@ -20,6 +20,7 @@ void testMain() {
     // TODO(het): This fails on web because "".hashCode == null.hashCode == 0
     //expect(const Locale('en').hashCode, isNot(const Locale('en', '').hashCode));
     expect(const Locale('en', 'US').toString(), 'en_US');
+    expect(const Locale('en', '').toString(), 'en');
     expect(const Locale('iw').toString(), 'he');
     expect(const Locale('iw', 'DD').toString(), 'he_DE');
     expect(const Locale('iw', 'DD'), const Locale('he', 'DE'));

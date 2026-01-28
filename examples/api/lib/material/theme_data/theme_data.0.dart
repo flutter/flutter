@@ -91,7 +91,9 @@ class _HomeState extends State<Home> {
         ),
         child: Text(
           '${pointCount.toInt()} Points',
-          style: theme.textTheme.headlineMedium!.copyWith(color: colorScheme.onPrimaryContainer),
+          style: theme.textTheme.headlineMedium!.copyWith(
+            color: colorScheme.onPrimaryContainer,
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

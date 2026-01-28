@@ -466,7 +466,7 @@ Target androidx64ReleaseDeferredComponentsBundle = AndroidAotDeferredComponentsB
 );
 
 /// A set of all target names that build deferred component apps.
-var deferredComponentsTargets = <String>{
+Set<String> deferredComponentsTargets = <String>{
   androidArmProfileDeferredComponentsBundle.name,
   androidArm64ProfileDeferredComponentsBundle.name,
   androidx64ProfileDeferredComponentsBundle.name,

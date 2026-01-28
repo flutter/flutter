@@ -32,10 +32,10 @@ void testMain() {
 
       expect(browserSupportsCreateImageBitmap, isFalse);
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
+      final recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(region);
 
-      final CkGradientLinear gradient = CkGradientLinear(
+      final gradient = CkGradientLinear(
         ui.Offset(region.left + region.width / 4, region.height / 2),
         ui.Offset(region.right - region.width / 8, region.height / 2),
         const <ui.Color>[
@@ -50,7 +50,7 @@ void testMain() {
         null,
       );
 
-      final CkPaint paint = CkPaint()..shader = gradient;
+      final paint = CkPaint()..shader = gradient;
 
       canvas.drawRect(region, paint);
 

@@ -187,7 +187,7 @@ class Badge extends StatelessWidget {
     );
     final double effectiveWidthOffset;
     final Widget badge;
-    final bool hasLabel = label != null;
+    final hasLabel = label != null;
     if (hasLabel) {
       final double minSize = effectiveWidthOffset =
           largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
@@ -224,7 +224,7 @@ class Badge extends StatelessWidget {
     final AlignmentGeometry effectiveAlignment =
         alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr
+    final defaultOffset = textDirection == TextDirection.ltr
         ? const Offset(4, -4)
         : const Offset(-4, -4);
     // Adds a offset const Offset(0, 8) to avoiding breaking customers after
@@ -348,7 +348,7 @@ class _RenderBadge extends RenderAligningShiftedBox {
     child!.layout(const BoxConstraints(), parentUsesSize: true);
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final childParentData = child!.parentData! as BoxParentData;
     Offset badgeLocation =
         offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
     if (hasLabel) {
@@ -356,6 +356,44 @@ class _RenderBadge extends RenderAligningShiftedBox {
       badgeLocation = badgeLocation - Offset(0, badgeSize / 2);
     }
     childParentData.offset = badgeLocation;
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    // Mirrors performLayout: size is the tightest allowed (biggest) under bounded constraints.
+    // Callers (e.g., Stack) pass in tight constraints for Positioned.fill; otherwise, this
+    // is still consistent with performLayout which asserts bounded constraints.
+    return constraints.biggest;
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+
+    // Child is laid out with unconstrained BoxConstraints in performLayout.
+    const childConstraints = BoxConstraints();
+    final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+    if (childBaseline == null) {
+      return null;
+    }
+
+    // Mirror the paint offset logic from performLayout using dry sizes only.
+    final Size mySize = getDryLayout(constraints);
+    final Alignment resolvedAlignment = alignment.resolve(textDirection);
+    final Size childSize = child.getDryLayout(childConstraints);
+
+    Offset badgeLocation =
+        offset + resolvedAlignment.alongOffset(Offset(mySize.width - widthOffset, mySize.height));
+    if (hasLabel) {
+      // Subtract half of the badge height when we have a label (as in performLayout).
+      badgeLocation -= Offset(0, childSize.height / 2);
+    }
+
+    return childBaseline + badgeLocation.dy;
   }
 }
 

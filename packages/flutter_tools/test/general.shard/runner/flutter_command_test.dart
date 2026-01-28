@@ -1635,7 +1635,7 @@ class FakeDdsCommand extends FlutterCommand {
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  var maxRss = 0;
+  int maxRss = 0;
 }
 
 class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
@@ -1646,7 +1646,7 @@ class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
 }
 
 class FakeCache extends Fake implements Cache {
-  var artifacts = <Set<DevelopmentArtifact>>[];
+  List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
@@ -1681,7 +1681,7 @@ class FakeSignals implements Signals {
 }
 
 class FakeClock extends Fake implements SystemClock {
-  var times = <int>[];
+  List<int> times = <int>[];
 
   @override
   DateTime now() {

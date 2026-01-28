@@ -456,28 +456,28 @@ constexpr txt::TextDecorationStyle ToTxtType(
   return txt::TextDecorationStyle::kSolid;
 }
 
-constexpr txt::FontWeight ToTxtType(ImpellerFontWeight weight) {
+constexpr int ToTxtType(ImpellerFontWeight weight) {
   switch (weight) {
     case kImpellerFontWeight100:
-      return txt::FontWeight::w100;
+      return 100;
     case kImpellerFontWeight200:
-      return txt::FontWeight::w200;
+      return 200;
     case kImpellerFontWeight300:
-      return txt::FontWeight::w300;
+      return 300;
     case kImpellerFontWeight400:
-      return txt::FontWeight::w400;
+      return 400;
     case kImpellerFontWeight500:
-      return txt::FontWeight::w500;
+      return 500;
     case kImpellerFontWeight600:
-      return txt::FontWeight::w600;
+      return 600;
     case kImpellerFontWeight700:
-      return txt::FontWeight::w700;
+      return 700;
     case kImpellerFontWeight800:
-      return txt::FontWeight::w800;
+      return 800;
     case kImpellerFontWeight900:
-      return txt::FontWeight::w900;
+      return 900;
   }
-  return txt::FontWeight::w400;
+  return txt::FontWeight::normal;
 }
 
 constexpr txt::FontStyle ToTxtType(ImpellerFontStyle style) {

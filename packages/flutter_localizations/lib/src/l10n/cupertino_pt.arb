@@ -30,10 +30,10 @@
   "clearButtonLabel": "Limpar",
   "cancelButtonLabel": "Cancelar",
   "backButtonLabel": "Voltar",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "toque duas vezes para fechar",
+  "expansionTileCollapsedHint": "Toque duas vezes para abrir",
+  "expansionTileExpandedTapHint": "Feche",
+  "expansionTileCollapsedTapHint": "Abra para mostrar mais detalhes",
+  "expandedHint": "Fechado.",
+  "collapsedHint": "Aberto."
 }

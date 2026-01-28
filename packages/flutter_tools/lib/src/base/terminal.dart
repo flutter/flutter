@@ -244,7 +244,7 @@ class AnsiTerminal implements Terminal {
   final _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   @override
   String get warningMark {
@@ -402,7 +402,7 @@ class _TestTerminal implements Terminal {
   _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
 
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   @override
   String bolden(String message) => message;

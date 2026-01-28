@@ -17,9 +17,12 @@ namespace flutter {
 
 void DartIO::InitForIsolate(bool may_insecurely_connect_to_all_domains,
                             const std::string& domain_network_policy) {
+  // TODO(https://dartbug.com/61694): move this code into dart_io_api.h
   Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
   Dart_Handle result = Dart_SetNativeResolver(io_lib, dart::bin::LookupIONative,
                                               dart::bin::LookupIONativeSymbol);
+  FML_CHECK(!CheckAndHandleError(result));
+  result = Dart_SetFfiNativeResolver(io_lib, dart::bin::LookupIOFfiNative);
   FML_CHECK(!CheckAndHandleError(result));
 
   Dart_Handle ui_lib = Dart_LookupLibrary(ToDart("dart:ui"));

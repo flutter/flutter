@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'dropdown_menu.dart';
+import 'input_decorator.dart';
 import 'menu_style.dart';
 
 /// A [FormField] that contains a [DropdownMenu].
@@ -50,6 +51,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
     TextAlign textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
+    DropdownMenuDecorationBuilder? decorationBuilder,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,
@@ -70,11 +72,35 @@ class DropdownMenuFormField<T> extends FormField<T> {
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     super.validator,
     super.forceErrorText,
+    super.errorBuilder,
   }) : super(
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
-           final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
+           final state = field as _DropdownMenuFormFieldState<T>;
+
+           InputDecoration effectiveDecorationBuilder(
+             BuildContext context,
+             MenuController menuController,
+           ) {
+             final InputDecoration decoration =
+                 decorationBuilder?.call(context, menuController) ?? const InputDecoration();
+             final InputDecoration decorationWithLabels = decoration.copyWith(
+               label: label,
+               hintText: hintText,
+               helperText: helperText,
+             );
+
+             final String? errorText = state.errorText;
+             if (errorText == null) {
+               return decorationWithLabels;
+             }
+
+             return errorBuilder != null
+                 ? decorationWithLabels.copyWith(error: errorBuilder(state.context, errorText))
+                 : decorationWithLabels.copyWith(errorText: errorText);
+           }
+
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: DropdownMenu<T>(
@@ -84,10 +110,6 @@ class DropdownMenuFormField<T> extends FormField<T> {
                menuHeight: menuHeight,
                leadingIcon: leadingIcon,
                trailingIcon: trailingIcon,
-               label: label,
-               hintText: hintText,
-               helperText: helperText,
-               errorText: state.errorText,
                selectedTrailingIcon: selectedTrailingIcon,
                enableFilter: enableFilter,
                enableSearch: enableSearch,
@@ -95,6 +117,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
+               decorationBuilder: effectiveDecorationBuilder,
                menuStyle: menuStyle,
                controller: state.textFieldController,
                initialSelection: state.value,
@@ -117,7 +140,12 @@ class DropdownMenuFormField<T> extends FormField<T> {
 
   /// The callback is called when a selection is made.
   ///
-  /// Defaults to null. If null, only the text field is updated.
+  /// The callback receives the selected entry's value of type `T` when the user
+  /// chooses an item. It may also be invoked with `null` to indicate that the
+  /// selection was cleared / that no item was chosen.
+  ///
+  /// Defaults to null. If this callback itself is null, the widget still updates
+  /// the text field with the selected label.
   final ValueChanged<T?>? onSelected;
 
   /// Controls the text being edited.

@@ -10,6 +10,8 @@ typedef PreviewProperty = ({String key, DartObject object, bool isCallback});
 final class PreviewDetails {
   PreviewDetails({
     required this.scriptUri,
+    required this.line,
+    required this.column,
     required this.packageName,
     required this.functionName,
     required this.isBuilder,
@@ -19,6 +21,12 @@ final class PreviewDetails {
 
   /// The file:// URI pointing to the script in which the preview is defined.
   final Uri scriptUri;
+
+  /// The 1-based line at which the Preview annotation was applied.
+  final int line;
+
+  /// The 1-based column at which the Preview annotation was applied.
+  final int column;
 
   /// The name of the package in which the preview was defined.
   ///

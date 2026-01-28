@@ -28,17 +28,23 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
 }
 
 class SliverAnimatedOpacityExample extends StatefulWidget {
-  const SliverAnimatedOpacityExample({required this.duration, required this.curve, super.key});
+  const SliverAnimatedOpacityExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
 
   final Duration duration;
 
   final Curve curve;
 
   @override
-  State<SliverAnimatedOpacityExample> createState() => _SliverAnimatedOpacityExampleState();
+  State<SliverAnimatedOpacityExample> createState() =>
+      _SliverAnimatedOpacityExampleState();
 }
 
-class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExample>
+class _SliverAnimatedOpacityExampleState
+    extends State<SliverAnimatedOpacityExample>
     with SingleTickerProviderStateMixin {
   bool _visible = true;
 
@@ -54,7 +60,9 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
             itemExtent: 100.0,
             itemCount: 5,
             itemBuilder: (BuildContext context, int index) {
-              return Container(color: index.isEven ? Colors.indigo[200] : Colors.orange[200]);
+              return Container(
+                color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
+              );
             },
           ),
         ),

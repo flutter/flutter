@@ -125,7 +125,7 @@ class KeyData {
   final bool synthesized;
 
   String _logicalToString() {
-    final String result = '0x${logical.toRadixString(16)}';
+    final result = '0x${logical.toRadixString(16)}';
     // Find the bits that are not included in `valueMask`, shifted to the right.
     // For example, if [logical] is 0x12abcdabcd, then the result is 0x12.
     //

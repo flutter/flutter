@@ -30,10 +30,10 @@
   "clearButtonLabel": "Pastro",
   "cancelButtonLabel": "Anulo",
   "backButtonLabel": "Prapa",
-  "expansionTileExpandedHint": "double tap to collapse",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "trokit dy herë për ta palosur",
+  "expansionTileCollapsedHint": "trokit dy herë për ta zgjeruar",
+  "expansionTileExpandedTapHint": "Palos",
+  "expansionTileCollapsedTapHint": "Zgjero për më shumë detaje",
+  "expandedHint": "U palos",
+  "collapsedHint": "U zgjerua"
 }

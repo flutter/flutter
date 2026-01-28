@@ -12,6 +12,7 @@
   "shareButtonLabel": "I-share",
   "pasteButtonLabel": "I-paste",
   "selectAllButtonLabel": "Piliin lahat",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Nakakita ng mga resulta ng paghahanap",
+  "noResultsFound": "Walang nakitang resulta",
+  "radioButtonUnselectedLabel": "Hindi napili"
 }

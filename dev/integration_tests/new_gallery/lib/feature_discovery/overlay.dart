@@ -91,7 +91,7 @@ class Background extends StatelessWidget {
       final double left = min(textBounds.left, center.dx - 88.0);
       final double right = max(textBounds.right, center.dx + 88.0);
       final double endX = (left + right) / 2 + shift;
-      final Offset end = Offset(endX, endY);
+      final end = Offset(endX, endY);
 
       return animations.backgroundCenter(status, start, end).value;
     }
@@ -306,8 +306,9 @@ class TapTarget extends StatelessWidget {
               height: radius * 2,
               width: radius * 2,
               decoration: BoxDecoration(
-                color:
-                    theme.brightness == Brightness.dark ? theme.colorScheme.primary : Colors.white,
+                color: theme.brightness == Brightness.dark
+                    ? theme.colorScheme.primary
+                    : Colors.white,
                 shape: BoxShape.circle,
               ),
               child: child,

@@ -64,6 +64,76 @@ TEST_F(FlutterWindowsEngineTest, RunHeadless) {
   ASSERT_EQ(engine->view(123), nullptr);
 }
 
+TEST_F(FlutterWindowsEngineTest, TaskRunnerDelayedTask) {
+  bool finished = false;
+  auto runner = std::make_unique<TaskRunner>(
+      [] {
+        return static_cast<uint64_t>(
+            fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+      },
+      [&](const FlutterTask*) { finished = true; });
+  runner->PostFlutterTask(
+      FlutterTask{},
+      static_cast<uint64_t>((fml::TimePoint::Now().ToEpochDelta() +
+                             fml::TimeDelta::FromMilliseconds(50))
+                                .ToNanoseconds()));
+  auto start = fml::TimePoint::Now();
+  while (!finished) {
+    PumpMessage();
+  }
+  auto duration = fml::TimePoint::Now() - start;
+  EXPECT_GE(duration, fml::TimeDelta::FromMilliseconds(50));
+}
+
+// https://github.com/flutter/flutter/issues/173843)
+TEST_F(FlutterWindowsEngineTest, TaskRunnerDoesNotDeadlock) {
+  auto runner = std::make_unique<TaskRunner>(
+      [] {
+        return static_cast<uint64_t>(
+            fml::TimePoint::Now().ToEpochDelta().ToNanoseconds());
+      },
+      [&](const FlutterTask*) {});
+
+  struct RunnerHolder {
+    void PostTaskLoop() {
+      runner->PostTask([this] { PostTaskLoop(); });
+    }
+    std::unique_ptr<TaskRunner> runner;
+  };
+
+  RunnerHolder container{.runner = std::move(runner)};
+  // Spam flutter tasks.
+  container.PostTaskLoop();
+
+  const LPCWSTR class_name = L"FlutterTestWindowClass";
+  WNDCLASS wc = {0};
+  wc.lpfnWndProc = DefWindowProc;
+  wc.lpszClassName = class_name;
+  RegisterClass(&wc);
+
+  HWND window;
+  container.runner->PostTask([&] {
+    window = CreateWindowEx(0, class_name, L"Empty Window", WS_OVERLAPPEDWINDOW,
+                            CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, nullptr,
+                            nullptr, nullptr, nullptr);
+    ShowWindow(window, SW_SHOW);
+  });
+
+  while (true) {
+    ::MSG msg;
+    if (::GetMessage(&msg, nullptr, 0, 0)) {
+      if (msg.message == WM_PAINT) {
+        break;
+      }
+      ::TranslateMessage(&msg);
+      ::DispatchMessage(&msg);
+    }
+  }
+
+  DestroyWindow(window);
+  UnregisterClassW(class_name, nullptr);
+}
+
 TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.AddDartEntrypointArgument("arg1");
@@ -699,7 +769,11 @@ class MockFlutterWindowsView : public FlutterWindowsView {
  public:
   MockFlutterWindowsView(FlutterWindowsEngine* engine,
                          std::unique_ptr<WindowBindingHandler> wbh)
-      : FlutterWindowsView(kImplicitViewId, engine, std::move(wbh)) {}
+      : FlutterWindowsView(kImplicitViewId,
+                           engine,
+                           std::move(wbh),
+                           false,
+                           BoxConstraints()) {}
   ~MockFlutterWindowsView() {}
 
   MOCK_METHOD(void,
@@ -1358,15 +1432,18 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
   auto implicit_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
-      engine->CreateView(std::move(implicit_window));
+      engine->CreateView(std::move(implicit_window),
+                         /*is_sized_to_content=*/false, BoxConstraints());
 
   EXPECT_TRUE(implicit_view);
 
   // Create a second view. The embedder attempts to add it to the engine.
   auto second_window = std::make_unique<NiceMock<MockWindowBindingHandler>>();
 
-  EXPECT_DEBUG_DEATH(engine->CreateView(std::move(second_window)),
-                     "FlutterEngineAddView returned an unexpected result");
+  EXPECT_DEBUG_DEATH(
+      engine->CreateView(std::move(second_window),
+                         /*is_sized_to_content=*/false, BoxConstraints()),
+      "FlutterEngineAddView returned an unexpected result");
 }
 
 TEST_F(FlutterWindowsEngineTest, RemoveViewFailureDoesNotHang) {
@@ -1463,8 +1540,12 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   // We want to avoid adding an implicit view as the first view
   modifier.SetNextViewId(kImplicitViewId + 1);
 
-  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
-  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
+  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
+                                          /*is_sized_to_content=*/false,
+                                          BoxConstraints());
+  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
+                                          /*is_sized_to_content=*/false,
+                                          BoxConstraints());
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.

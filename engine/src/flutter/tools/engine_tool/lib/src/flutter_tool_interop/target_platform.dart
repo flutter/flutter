@@ -29,9 +29,6 @@ final class TargetPlatform {
   /// Android x64.
   static const androidX64 = TargetPlatform._('android-x64');
 
-  /// Android x86.
-  static const androidX86 = TargetPlatform._('android-x86');
-
   /// Linux ARM64.
   static const linuxArm64 = TargetPlatform._('linux-arm64');
 
@@ -86,13 +83,12 @@ final class TargetPlatform {
   /// }
   /// ```
   @visibleForTesting
-  static const knownPlatforms = [
+  static const List<TargetPlatform> knownPlatforms = [
     androidUnspecified,
     androidArm,
     androidArm64,
     androidRiscv64,
     androidX64,
-    androidX86,
     linuxArm64,
     linuxX64,
     windowsArm64,
@@ -113,7 +109,7 @@ final class TargetPlatform {
   ///
   /// Returns `null` if the [identifier] is not recognized.
   static TargetPlatform? tryParse(String identifier) {
-    for (final platform in knownPlatforms) {
+    for (final TargetPlatform platform in knownPlatforms) {
       if (platform.identifier == identifier) {
         return platform;
       }
@@ -125,7 +121,7 @@ final class TargetPlatform {
   ///
   /// Throws a [FormatException] if the [identifier] is not recognized.
   static TargetPlatform parse(String identifier) {
-    final platform = tryParse(identifier);
+    final TargetPlatform? platform = tryParse(identifier);
     if (platform == null) {
       throw FormatException(
         'Unrecognized TargetPlatform. It is possible that "$identifier" is '

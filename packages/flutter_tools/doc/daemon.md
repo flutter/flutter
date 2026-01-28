@@ -17,13 +17,13 @@ A set of `flutter daemon` commands/events are also exposed via `flutter run --ma
 The daemon speaks [JSON-RPC](http://json-rpc.org/) to clients. It uses stdin and stdout as the transport protocol. To send a command to the server, create your command as a JSON-RPC message, encode it to JSON, surround the encoded text with square brackets, and write it as one line of text to the stdin of the process:
 
 ```json
-[{"method":"daemon.version","id":0}]
+[{ "method": "daemon.version", "id": 0 }]
 ```
 
 The response will come back as a single line from stdout:
 
 ```json
-[{"id":0,"result":"0.1.0"}]
+[{ "id": 0, "result": "0.1.0" }]
 ```
 
 All requests and responses should be wrapped in square brackets. This ensures that the communications are resilient to stray output in the stdout/stdin stream.
@@ -35,17 +35,42 @@ Each command should have a `method` field. This is in the form '`domain.command`
 Any params for that command should be passed in through a `params` field. Here's an example request/response for the `device.getDevices` method:
 
 ```json
-[{"method":"device.getDevices","id":2}]
+[{ "method": "device.getDevices", "id": 2 }]
 ```
 
 ```json
-[{"id":2,"result":[{"id":"702ABC1F-5EA5-4F83-84AB-6380CA91D39A","name":"iPhone 6","platform":"ios_x64","available":true}]}]
+[
+  {
+    "id": 2,
+    "result": [
+      {
+        "id": "702ABC1F-5EA5-4F83-84AB-6380CA91D39A",
+        "name": "iPhone 6",
+        "platform": "ios_x64",
+        "available": true
+      }
+    ]
+  }
+]
 ```
 
 Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
 
 ```json
-[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true,"ephemeral":false,"platformType":"ios","category":"mobile"}}]
+[
+  {
+    "event": "device.added",
+    "params": {
+      "id": "1DD6786B-37D4-4355-AA15-B818A87A18B4",
+      "name": "iPhone XS Max",
+      "platform": "ios",
+      "emulator": true,
+      "ephemeral": false,
+      "platformType": "ios",
+      "category": "mobile"
+    }
+  }
+]
 ```
 
 ## Domains and Commands
@@ -75,7 +100,7 @@ The schema for each element in `reasons` is:
 - reasonText (String) - a description of why the platform is not supported
 - fixText (String) - human readable instructions of how to fix this reason
 - fixCode (String) - stringified version of the `_ReasonCode` enum. To be used
-by daemon clients who intend to auto-fix.
+  by daemon clients who intend to auto-fix.
 
 The possible platform types are the `PlatformType` enumeration in the lib/src/device.dart library.
 
@@ -158,6 +183,18 @@ This is sent once the application launch process is complete and the app is eith
 
 This is sent when output is logged for a running application. The `params` field will be a map with the fields `appId` and `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
+#### app.warning
+
+This is sent when a warning is issued for a running application that an editor may wish to handle specifically. The `params` field will be a map with the following fields:
+
+- `warningId`: A unique string identifying the warning type, suitable for client-side suppression.
+- `warning`: A string containing the warning message to be displayed to the user.
+- `category`: A string used to categorize the warning (for example, `ios-wireless-performance`).
+- `deviceId`: The ID of the device this warning is relevant to.
+- `deviceOsVersion`: An optional string representing the OS version of the device.
+- `actionable`: A boolean indicating if the warning includes a suggested action for the user.
+- `url`: An optional string containing a URL with more information about the warning.
+
 #### app.progress
 
 This is sent when an operation starts and again when it stops. When an operation starts, the event contains the fields `id`, an opaque identifier, and `message` containing text describing the operation. When that same operation ends, the event contains the same `id` field value as when the operation started, along with a `finished` bool field with the value true, but no `message` field.
@@ -169,6 +206,17 @@ This is sent when an app is stopped or detached from. The `params` field will be
 #### app.webLaunchUrl
 
 This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
+
+#### app.devTools
+
+This is sent after the [`app.debugPort`](#appdebugPort) event if DevTools is being served for this application instance. The
+`params` field will be a map with the string `uri` field containing the DevTools URI with query parameters already set to connect
+to the running application.
+
+#### app.dtd
+
+This is sent after the [`app.debugPort`](#appdebugPort) event if the Dart Tooling Daemon (DTD) is being served for this application
+instance. The `params` field will be a map with the string `uri` field containing the DTD URI.
 
 ### Daemon-to-Editor Requests
 
@@ -224,11 +272,11 @@ Removed a forwarded port. It takes `deviceId`, `devicePort`, and `hostPort` as r
 
 #### device.added
 
-This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
+This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 #### device.removed
 
-This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
+This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 ### emulator domain
 

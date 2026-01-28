@@ -581,7 +581,7 @@ abstract class PointerEvent with Diagnosticable {
     if (transform == null) {
       return position;
     }
-    final Vector3 position3 = Vector3(position.dx, position.dy, 0.0);
+    final position3 = Vector3(position.dx, position.dy, 0.0);
     final Vector3 transformed3 = transform.perspectiveTransform(position3);
     return Offset(transformed3.x, transformed3.y);
   }
@@ -624,7 +624,7 @@ abstract class PointerEvent with Diagnosticable {
   /// achieved by setting the third column and third row of the matrix to
   /// "0, 0, 1, 0".
   static Matrix4 removePerspectiveTransform(Matrix4 transform) {
-    final Vector4 vector = Vector4(0, 0, 1, 0);
+    final vector = Vector4(0, 0, 1, 0);
     return transform.clone()
       ..setColumn(2, vector)
       ..setRow(2, vector);

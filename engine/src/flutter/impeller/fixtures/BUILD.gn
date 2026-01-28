@@ -24,6 +24,7 @@ impeller_shaders("modern_shader_fixtures") {
     "sepia.vert",
     "swizzle.frag",
   ]
+  entry_point_prefix = ""
 }
 
 impeller_shaders("shader_fixtures") {
@@ -80,6 +81,7 @@ impeller_shaders("shader_fixtures") {
       "half.frag",
     ]
   }
+  entry_point_prefix = ""
 }
 
 impellerc("runtime_stages") {
@@ -91,9 +93,13 @@ impellerc("runtime_stages") {
     "interop_runtime_stage_cs.frag",
     "runtime_stage_simple.frag",
     "runtime_stage_position.frag",
+    "runtime_stage_filter_circle.frag",
+    "runtime_stage_filter_warp.frag",
     "gradient.frag",
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
+    "runtime_stage_border.frag",
+    "runtime_stage_vector_array.frag",
   ]
   sl_file_extension = "iplr"
 
@@ -114,6 +120,10 @@ test_fixtures("file_fixtures") {
     "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     "airplane.jpg",
+    "array_assignment.frag",
+    "array_initializer_with_constants.frag",
+    "array_initializer_with_variables.frag",
+    "array_initialization_without_initializer.frag",
     "bay_bridge.jpg",
     "blend_mode_dst.png",
     "blend_mode_src.png",
@@ -128,12 +138,15 @@ test_fixtures("file_fixtures") {
     "monkey.png",
     "multiple_stages.hlsl",
     "nine_patch_corners.png",
+    "nine_patch2.png",
     "resources_limit.vert",
     "sample.comp",
     "sample.frag",
     "sample.vert",
     "check_gles_definition.frag",
     "sample_with_binding.vert",
+    "sample_with_positioned_uniforms.frag",
+    "sample_with_uniforms.frag",
     "simple.vert.hlsl",
     "sa%m#ple.vert",
     "stage1.comp",
@@ -150,6 +163,7 @@ test_fixtures("file_fixtures") {
     "types.h",
     "wtf.otf",
     "texture_lookup.frag",
+    "mat2_test.frag",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]

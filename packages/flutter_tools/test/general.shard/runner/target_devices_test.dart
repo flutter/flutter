@@ -1829,7 +1829,6 @@ Checking for wireless devices...
         setUp(() {
           deviceManager.specifiedDeviceId = 'target-device';
         });
-
         testUsingContext('when multiple matches but first is unsupported by flutter', () async {
           deviceManager.iosDiscoverer.deviceList = <Device>[
             exactMatchAttachedUnsupportedIOSDevice,
@@ -2922,7 +2921,7 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery
 class TestTargetDeviceSelection extends TargetDeviceSelection {
   TestTargetDeviceSelection(super.logger);
 
-  var input = <String>[];
+  List<String> input = <String>[];
 
   @override
   Future<String> readUserInput() async {
@@ -2950,7 +2949,7 @@ class TestDeviceManager extends DeviceManager {
   String? specifiedDeviceId;
 
   @override
-  var hasSpecifiedAllDevices = false;
+  bool hasSpecifiedAllDevices = false;
 
   final androidDiscoverer = TestPollingDeviceDiscovery('android');
   final otherDiscoverer = TestPollingDeviceDiscovery('other');
@@ -2982,11 +2981,11 @@ class TestDeviceManager extends DeviceManager {
 class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   TestPollingDeviceDiscovery(super.name);
 
-  var deviceList = <Device>[];
-  var refreshDeviceList = <Device>[];
-  var devicesCalled = 0;
-  var discoverDevicesCalled = 0;
-  var numberOfTimesPolled = 0;
+  List<Device> deviceList = <Device>[];
+  List<Device> refreshDeviceList = <Device>[];
+  int devicesCalled = 0;
+  int discoverDevicesCalled = 0;
+  int numberOfTimesPolled = 0;
 
   @override
   bool get supportsPlatform => true;
@@ -2995,7 +2994,10 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   List<String> get wellKnownIds => const <String>[];
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     numberOfTimesPolled++;
     return deviceList;
   }
@@ -3007,7 +3009,11 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
       deviceList = refreshDeviceList;
@@ -3030,11 +3036,11 @@ class TestIOSDeviceDiscovery extends IOSDevices {
        super(xcdevice: xcdevice);
 
   final Platform _platform;
-  var deviceList = <Device>[];
-  var refreshDeviceList = <Device>[];
-  var devicesCalled = 0;
-  var discoverDevicesCalled = 0;
-  var numberOfTimesPolled = 0;
+  List<Device> deviceList = <Device>[];
+  List<Device> refreshDeviceList = <Device>[];
+  int devicesCalled = 0;
+  int discoverDevicesCalled = 0;
+  int numberOfTimesPolled = 0;
 
   final FakeXcdevice _xcdevice;
 
@@ -3042,7 +3048,10 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   FakeXcdevice get xcdevice => _xcdevice;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({
+    Duration? timeout,
+    bool forWirelessDiscovery = false,
+  }) async {
     numberOfTimesPolled++;
     if (!_platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
@@ -3057,7 +3066,11 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   }
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) {
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+    bool forWirelessDiscovery = false,
+  }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
       deviceList = refreshDeviceList;
@@ -3072,7 +3085,7 @@ class TestIOSDeviceDiscovery extends IOSDevices {
 class FakeXcdevice extends Fake implements XCDevice {
   XCDeviceEventNotification? waitForDeviceEvent;
 
-  var waitedForDeviceToConnect = false;
+  bool waitedForDeviceToConnect = false;
 
   @override
   Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
@@ -3091,6 +3104,9 @@ class FakeXcdevice extends Fake implements XCDevice {
 
   @override
   void cancelWaitForDeviceToConnect() {}
+
+  @override
+  void cancelWirelessDiscovery() {}
 }
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
@@ -3326,10 +3342,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool get isCliAnimationEnabled => supportsColor;
 
   @override
-  var usesTerminalUi = true;
+  bool usesTerminalUi = true;
 
   @override
-  var singleCharMode = false;
+  bool singleCharMode = false;
 
   void setPrompt(List<String> characters, String result) {
     _nextPrompt = characters;
@@ -3360,7 +3376,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class TestBufferLogger extends BufferLogger {
   TestBufferLogger.test({super.terminal, super.outputPreferences, super.verbose}) : super.test();
 
-  var originalStatusText = '';
+  String originalStatusText = '';
 
   @override
   void printStatus(

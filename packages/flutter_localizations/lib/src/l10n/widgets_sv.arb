@@ -12,6 +12,7 @@
   "shareButtonLabel": "Dela",
   "pasteButtonLabel": "Klistra in",
   "selectAllButtonLabel": "Markera allt",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Sökresultat hittades",
+  "noResultsFound": "Inga resultat hittades",
+  "radioButtonUnselectedLabel": "Inte markerad"
 }

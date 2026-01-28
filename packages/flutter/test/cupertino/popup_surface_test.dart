@@ -268,7 +268,7 @@ void main() {
   testWidgets(
     "Applying a FadeTransition to the CupertinoPopupSurface doesn't cause transparency",
     (WidgetTester tester) async {
-      final AnimationController controller = AnimationController(
+      final controller = AnimationController(
         duration: const Duration(milliseconds: 100),
         vsync: const TestVSync(),
       );

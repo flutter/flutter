@@ -12,6 +12,7 @@
   "shareButtonLabel": "Կիսվել",
   "pasteButtonLabel": "Տեղադրել",
   "selectAllButtonLabel": "Նշել բոլորը",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found"
+  "searchResultsFound": "Գտնվել են արդյունքներ",
+  "noResultsFound": "Ոչինչ չի գտնվել",
+  "radioButtonUnselectedLabel": "Ընտրված չէ"
 }

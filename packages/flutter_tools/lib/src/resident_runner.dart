@@ -125,6 +125,7 @@ class FlutterDevice {
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
         buildMode: buildInfo.mode,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
+        includeUnsupportedPlatformLibraryStubs: buildInfo.includeUnsupportedPlatformLibraryStubs,
         fileSystemRoots: buildInfo.fileSystemRoots,
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
@@ -1123,7 +1124,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     processManager: globals.processManager,
     platform: globals.platform,
     analytics: globals.analytics,
-    projectDir: globals.fs.currentDirectory,
+    projectDir: globals.fs.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
     defines: <String, String>{
@@ -1165,7 +1166,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// - [attach] is used to explicitly connect to an already running app.
   @protected
   @visibleForTesting
-  var stopAppDuringCleanup = true;
+  bool stopAppDuringCleanup = true;
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
@@ -1215,7 +1216,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
   /// for success, 1 for user error (e.g. bad arguments), 2 for other failures.
-  Future<int?> run({
+  Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     String? route,
@@ -1225,7 +1226,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   ///
   /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
   /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already performs an initial compilation.
-  Future<int?> attach({
+  Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool needsFullRestart = true,
@@ -1468,11 +1469,11 @@ abstract class ResidentRunner extends ResidentHandlers {
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
           final base = StringBuffer(uri.withoutQueryParameters().toString());
-          base.write(
-            uri.queryParameters.keys
-                .map((String key) => '$key=${uri.queryParameters[key]}')
-                .join('&'),
-          );
+          if (uri.hasQuery) {
+            base.write(
+              '?${uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&')}',
+            );
+          }
           return base.toString();
         }
 
@@ -1611,6 +1612,7 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
@@ -1657,6 +1659,72 @@ class TerminalHandler {
   /// This is only a buffer logger in unit tests
   @visibleForTesting
   BufferLogger get logger => _logger as BufferLogger;
+
+  /// Maps non-Latin keyboard layout characters to their Latin equivalents
+  /// based on physical key positions.
+  ///
+  /// This allows users with non-Latin keyboard layouts to use terminal commands
+  /// without switching layouts. The mappings are based on the physical position
+  /// of keys on the keyboard, not their linguistic equivalents.
+  ///
+  /// Currently supports:
+  /// - Cyrillic (Russian ЙЦУКЕН layout) → QWERTY Latin
+  ///
+  /// Contributors can add mappings for additional layouts (Arabic, Hebrew,
+  /// Greek, etc.) by adding entries to this map.
+  ///
+  /// Related issues: #27021, #100456, #116658
+  @visibleForTesting
+  static const keyboardLayoutMappings = <String, String>{
+    // Cyrillic (Russian ЙЦУКЕН) layout → QWERTY Latin
+    // Maps based on physical key positions for terminal commands
+    //
+    // WARNING: Some Cyrillic characters look visually identical to Latin characters
+    // but they are different Unicode code points! For example:
+    // - 'р' (U+0440, Cyrillic) maps to 'h', NOT 'p' (it looks like Latin 'p' but isn't)
+    // - 'с' (U+0441, Cyrillic) maps to 'c' (happens to look the same as Latin 'c')
+    // - 'а' (U+0430, Cyrillic) maps to 'f', NOT 'a' (it looks like Latin 'a' but isn't)
+    'к': 'r', 'К': 'R', // hot reload / hot restart
+    'й': 'q', 'Й': 'Q', // quit
+    'ц': 'w', 'Ц': 'W', // dump widget tree
+    'р': 'h', 'Р': 'H', // help
+    'ы': 's', 'Ы': 'S', // screenshot / semantics
+    'в': 'd', 'В': 'D', // detach
+    'а': 'f', 'А': 'F', // dump focus tree
+    'ф': 'a', 'Ф': 'A', // toggle profile widget builds
+    'п': 'g', 'П': 'G', // run source generators
+    'ш': 'i', 'Ш': 'I', // widget inspector / invert images
+    'д': 'l', 'Д': 'L', // dump layer tree
+    'щ': 'o', 'Щ': 'O', // toggle platform
+    'з': 'p', 'З': 'P', // debug paint / performance overlay
+    'т': 'n', 'Т': 'N', // (reserved for future use)
+    'е': 't', 'Е': 'T', // dump render tree
+    'г': 'u', 'Г': 'U', // dump semantics (inverse hit test)
+    'м': 'v', 'М': 'V', // open DevTools
+    'с': 'c', 'С': 'C', // clear screen
+    'и': 'b', 'И': 'B', // toggle brightness
+    // Contributors can add mappings for other non-Latin layouts as needed.
+    // Examples: Arabic, Hebrew, Greek keyboard layout mappings.
+  };
+
+  /// Maps a keyboard character to its Latin equivalent if a mapping exists.
+  ///
+  /// This method checks if the input character exists in [keyboardLayoutMappings]
+  /// and returns the corresponding Latin character. If no mapping is found,
+  /// it returns the original character unchanged.
+  ///
+  /// This enables users with non-Latin keyboard layouts (e.g., Cyrillic, Arabic)
+  /// to use terminal commands without switching their keyboard layout.
+  ///
+  /// Examples:
+  /// ```dart
+  /// _mapKeyToLatin('к') // returns 'r' (hot reload)
+  /// _mapKeyToLatin('r') // returns 'r' (no mapping needed)
+  /// _mapKeyToLatin('й') // returns 'q' (quit)
+  /// ```
+  static String _mapKeyToLatin(String key) {
+    return keyboardLayoutMappings[key] ?? key;
+  }
 
   void setupTerminal() {
     if (!_logger.quiet) {
@@ -1709,8 +1777,18 @@ class TerminalHandler {
   }
 
   /// Returns `true` if the input has been handled by this function.
+  ///
+  /// Supports both Latin and non-Latin keyboard layouts to allow developers
+  /// to use terminal commands without switching layouts. Currently supports:
+  /// - QWERTY (Latin, default)
+  /// - ЙЦУКЕН (Cyrillic)
+  ///
+  /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
+  /// adding entries to [keyboardLayoutMappings].
   Future<bool> _commonTerminalInputHandler(String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
+    // Map non-Latin characters to Latin equivalents based on physical key position
+    character = _mapKeyToLatin(character);
     switch (character) {
       case 'a':
         return residentRunner.debugToggleProfileWidgetBuilds();
@@ -1867,11 +1945,14 @@ class TerminalHandler {
 }
 
 class DebugConnectionInfo {
-  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri});
+  DebugConnectionInfo({this.httpUri, this.wsUri, this.baseUri, this.dtdUri, this.devToolsUri});
 
   final Uri? httpUri;
   final Uri? wsUri;
   final String? baseUri;
+
+  final Uri? dtdUri;
+  final Uri? devToolsUri;
 }
 
 /// Returns the next platform value for the switcher.

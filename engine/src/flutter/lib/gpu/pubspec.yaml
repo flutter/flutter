@@ -8,7 +8,7 @@ homepage: https://flutter.dev
 repository: https://github.com/flutter/engine/tree/main/lib/gpu
 
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
