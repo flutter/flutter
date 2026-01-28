@@ -435,7 +435,7 @@ void main() {
           .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
           .map((DiagnosticsNode node) => node.toString())
           .toList();
-      expect(description, expected);
+      expect(description, expected, reason: 'for ${detail.runtimeType}');
     }
   });
 }
