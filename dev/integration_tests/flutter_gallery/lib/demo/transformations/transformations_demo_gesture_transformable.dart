@@ -211,6 +211,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -219,11 +221,12 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
           : (TapUpDetails details) {
               widget.onTapUp!(
                 TapUpDetails(
-                  kind: details.kind,
                   globalPosition: fromViewport(
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -241,6 +244,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -253,6 +258,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -265,6 +272,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -279,6 +288,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -291,6 +302,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -303,6 +316,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -317,6 +332,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -329,6 +346,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
@@ -341,6 +360,8 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
                     details.globalPosition - getOffset(context),
                     _transform,
                   ),
+                  kind: details.kind,
+                  buttons: details.buttons,
                 ),
               );
             },
