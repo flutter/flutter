@@ -154,6 +154,58 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
+  testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController();
+    final EdgeInsets expectedPadding = EdgeInsets.all(10);
+    final EdgeInsets expectedViewInsets = EdgeInsets.only(bottom: 300);
+    final EdgeInsets expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
+
+    MediaQueryData? overlayChildData;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData(
+          padding: expectedPadding,
+          viewInsets: expectedViewInsets,
+          viewPadding: expectedViewPadding,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (context) {
+                  return MediaQuery(
+                    data: MediaQueryData(
+                      padding: EdgeInsets.zero,
+                      viewInsets: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                    ),
+                    child: OverlayPortal(
+                      controller: controller,
+                      overlayChildBuilder: (context) {
+                        overlayChildData = MediaQuery.of(context);
+                        return const SizedBox();
+                      },
+                      child: const SizedBox(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    controller.show();
+    await tester.pump();
+
+    expect(overlayChildData?.padding, expectedPadding);
+    expect(overlayChildData?.viewInsets, expectedViewInsets);
+    expect(overlayChildData?.viewPadding, expectedViewPadding);
+  });
+
   testWidgets('The overlay portal update semantics does not dirty overlay', (
     WidgetTester tester,
   ) async {
