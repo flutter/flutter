@@ -261,11 +261,10 @@ class ModalBarrier extends StatelessWidget {
       barrier = _SemanticsClipper(clipDetailsNotifier: clipDetailsNotifier!, child: barrier);
     }
 
-    return BlockSemantics(
-      child: ExcludeSemantics(
+    return ExcludeSemantics(
         excluding: excluding,
-        child: _ModalBarrierGestureDetector(onDismiss: handleDismiss, child: barrier),
-      ),
+        child: _ModalBarrierGestureDetector(onDismiss: handleDismiss, child: barrier)
+
     );
   }
 }

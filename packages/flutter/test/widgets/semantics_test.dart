@@ -2455,6 +2455,185 @@ void main() {
     await tester.pumpAndSettle();
     expect(label10, matchesSemantics(isHidden: false)); // ignore: avoid_redundant_argument_values
   });
+  testWidgets('ModalRoute blocks semantics focus when covered by another route', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Route A')),
+          body: const Text('Body A'),
+        ),
+      ),
+    );
+
+    // Initial state: Route A is current.
+    expect(semantics, includesNodeWith(label: 'Body A', flagsCollection: SemanticsFlags.none));
+
+    // Push a logical route that is transparent (PopupRoute) - Route B.
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          PageRouteBuilder<void>(
+            opaque: false,
+            pageBuilder: (BuildContext context, _, _) {
+              return const Scaffold(backgroundColor: Colors.transparent, body: Text('Body B'));
+            },
+          ),
+        );
+    await tester.pumpAndSettle();
+
+    // Now Route A is behind Route B. Route A should be blocked.
+    // Route B should NOT be blocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Body B', flagsCollection: SemanticsFlags.none));
+
+    // Push another logical route that is transparent (PopupRoute) - Route C.
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .push(
+          PageRouteBuilder<void>(
+            opaque: false,
+            pageBuilder: (BuildContext context, _, _) {
+              return const Scaffold(backgroundColor: Colors.transparent, body: Text('Body C'));
+            },
+          ),
+        );
+    await tester.pumpAndSettle();
+
+    // Route A and B should be blocked. Route C should NOT be blocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body B',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Body C', flagsCollection: SemanticsFlags.none));
+
+    // Pop Route C.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    // Route A should still be blocked. Route B should be unblocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Body B', flagsCollection: SemanticsFlags.none));
+
+    // Pop Route B.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+
+    // Route A should be unblocked.
+    expect(semantics, includesNodeWith(label: 'Body A', flagsCollection: SemanticsFlags.none));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Dialog blocks semantics focus of underlying route', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Route A')),
+          body: const Text('Body A'),
+        ),
+      ),
+    );
+
+    // Initial state: Route A is current.
+    expect(semantics, includesNodeWith(label: 'Body A', flagsCollection: SemanticsFlags.none));
+
+    // Show Dialog B.
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    showDialog<void>(
+      context: navigator.context,
+      builder: (BuildContext context) {
+        return const Dialog(child: Text('Dialog B'));
+      },
+    );
+    await tester.pumpAndSettle();
+
+    // Route A should be blocked. Dialog B should NOT be blocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Dialog B', flagsCollection: SemanticsFlags.none));
+
+    // Show Dialog C on top of B.
+    showDialog<void>(
+      context: navigator.context,
+      builder: (BuildContext context) {
+        return const Dialog(child: Text('Dialog C'));
+      },
+    );
+    await tester.pumpAndSettle();
+
+    // Route A and Dialog B should be blocked. Dialog C should NOT be blocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Dialog B',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Dialog C', flagsCollection: SemanticsFlags.none));
+
+    // Pop Dialog C.
+    navigator.pop();
+    await tester.pumpAndSettle();
+
+    // Route A should still be blocked. Dialog B should be unblocked.
+    expect(
+      semantics,
+      includesNodeWith(
+        label: 'Body A',
+        flagsCollection: SemanticsFlags(isAccessibilityFocusBlocked: true),
+      ),
+    );
+    expect(semantics, includesNodeWith(label: 'Dialog B', flagsCollection: SemanticsFlags.none));
+
+    // Pop Dialog B.
+    navigator.pop();
+    await tester.pumpAndSettle();
+
+    // Route A should be unblocked.
+    expect(semantics, includesNodeWith(label: 'Body A', flagsCollection: SemanticsFlags.none));
+
+    semantics.dispose();
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {
