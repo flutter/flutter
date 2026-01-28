@@ -358,14 +358,15 @@ class _PredictiveBackSharedElementPageTransitionState
     curve: _kCurve,
   );
 
-  // Ideally this would match the curvature of the physical Android device being
-  // used, but that is not yet supported. Instead, this value is a best guess at
-  // a value that looks reasonable on most devices.
+  // A fallback corner radius used when the display corner radii are
+  // unavailable (e.g., on Android API levels below 31, iOS, and other
+  // platforms). This is a best-guess value that looks reasonable on most
+  // devices.
   // See https://github.com/flutter/flutter/issues/97349.
   static const double _kDeviceBorderRadius = 32.0;
 
-  // Since we don't know the device border radius, this provides a smooth
-  // transition between the default radius and the actual radius.
+  // Provides a smooth transition between the default radius and the
+  // _kDeviceBorderRadius, when the display corner radii are unavailable.
   final Tween<double> _borderRadiusTween = Tween<double>(begin: 0.0, end: _kDeviceBorderRadius);
 
   // The route fades out after commit.
@@ -521,7 +522,9 @@ class _PredictiveBackSharedElementPageTransitionState
             child: Opacity(
               opacity: _opacityTween.evaluate(_commitAnimation),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
+                borderRadius:
+                    MediaQuery.displayCornerRadiiOf(context) ??
+                    BorderRadius.circular(_borderRadiusTween.evaluate(_bounceAnimation)),
                 child: child,
               ),
             ),
@@ -698,9 +701,13 @@ class _PredictiveBackFullscreenPageTransitionState
         animation: widget.animation,
         builder: _primaryAnimatedBuilder,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
-          ),
+          borderRadius:
+              MediaQuery.displayCornerRadiiOf(context) ??
+              const BorderRadius.all(
+                Radius.circular(
+                  _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
+                ),
+              ),
           child: widget.child,
         ),
       ),

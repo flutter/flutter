@@ -601,6 +601,92 @@ void main() {
       expect(find.text('push c'), findsNothing);
       expect(find.text('page c'), findsNothing);
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets(
+      'PredictiveBackPageTransitionsBuilder uses display corner radii when available',
+      (WidgetTester tester) async {
+        final routes = <String, WidgetBuilder>{
+          '/': (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
+          '/b': (BuildContext context) => const Text('page b'),
+        };
+
+        const displayCornerRadii = BorderRadius.all(Radius.circular(33.3));
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  for (final TargetPlatform platform in TargetPlatform.values)
+                    platform: pageTransitionsBuilder,
+                },
+              ),
+            ),
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).applyDisplayCornerRadii(displayCornerRadii),
+                child: child!,
+              );
+            },
+            routes: routes,
+          ),
+        );
+
+        expect(find.text('push'), findsOneWidget);
+        expect(find.text('page b'), findsNothing);
+        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+        expect(find.byType(ClipRRect), findsNothing);
+
+        await tester.tap(find.text('push'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('push'), findsNothing);
+        expect(find.text('page b'), findsOneWidget);
+        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+        expect(find.byType(ClipRRect), findsNothing);
+
+        // Only Android supports backGesture channel methods. Other platforms will
+        // do nothing.
+        if (defaultTargetPlatform != TargetPlatform.android) {
+          return;
+        }
+
+        // Start a system pop gesture, which will switch to using
+        // _PredictiveBackSharedElementPageTransition for the page transition.
+        final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+          const MethodCall('startBackGesture', <String, dynamic>{
+            'touchOffset': <double>[5.0, 300.0],
+            'progress': 0.0,
+            'swipeEdge': 0, // left
+          }),
+        );
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/backgesture',
+          startMessage,
+          (ByteData? _) {},
+        );
+        await tester.pump();
+
+        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (Widget widget) => widget is ClipRRect && widget.borderRadius == displayCornerRadii,
+          ),
+          findsOneWidget,
+        );
+      },
+      variant: TargetPlatformVariant.all(),
+    );
   }
 }
 
