@@ -163,8 +163,6 @@ FLUTTER_DARWIN_EXPORT
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
           restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
 
-- (void)enableMultiView;
-
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects),
