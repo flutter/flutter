@@ -159,6 +159,7 @@ void main() {
     final EdgeInsets expectedPadding = EdgeInsets.all(10);
     final EdgeInsets expectedViewInsets = EdgeInsets.only(bottom: 300);
     final EdgeInsets expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
+    final Size expectedSize = Size(800, 600);
 
     MediaQueryData? overlayChildData;
 
@@ -168,22 +169,23 @@ void main() {
           padding: expectedPadding,
           viewInsets: expectedViewInsets,
           viewPadding: expectedViewPadding,
+          size: expectedSize,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Overlay(
-            initialEntries: [
+            initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (context) {
+                builder: (BuildContext context) {
                   return MediaQuery(
-                    data: MediaQueryData(
+                    data: MediaQuery.of(context).copyWith(
                       padding: EdgeInsets.zero,
                       viewInsets: EdgeInsets.zero,
                       viewPadding: EdgeInsets.zero,
                     ),
                     child: OverlayPortal(
                       controller: controller,
-                      overlayChildBuilder: (context) {
+                      overlayChildBuilder: (BuildContext context) {
                         overlayChildData = MediaQuery.of(context);
                         return const SizedBox();
                       },
@@ -204,6 +206,7 @@ void main() {
     expect(overlayChildData?.padding, expectedPadding);
     expect(overlayChildData?.viewInsets, expectedViewInsets);
     expect(overlayChildData?.viewPadding, expectedViewPadding);
+    expect(overlayChildData?.size, expectedSize);
   });
 
   testWidgets('The overlay portal update semantics does not dirty overlay', (
