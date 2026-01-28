@@ -20,8 +20,6 @@ class PaintParagraph extends TextPaint {
     for (final TextLine line in layout.lines) {
       paintContext.save();
       paintContext.translate(line.formattingShift, yOffset);
-      WebParagraphDebug.log('_fillAllBlocks line at ${line.formattingShift}, $yOffset}');
-
       yOffset += line.advance.height;
 
       for (final LineBlock block in line.visualBlocks) {
@@ -37,16 +35,24 @@ class PaintParagraph extends TextPaint {
         );
 
         paintContext.save();
-        paintContext.translate(
-          block.spanShiftFromLineStart,
-          line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-        );
         switch (styleElement) {
           case StyleElements.shadows:
+            // For text and shadows we need to shift to the start of the block
+            paintContext.translate(
+              block.spanShiftFromLineStart,
+              line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+            );
             _fillBlockShadows(layout, block);
           case StyleElements.text:
+            // For text and shadows we need to shift to the start of the block
+            paintContext.translate(
+              block.spanShiftFromLineStart,
+              line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+            );
             _fillBlockText(layout, block);
           case StyleElements.decorations:
+            // For decorations we need to shift to the start of the line
+            paintContext.translate(block.shiftFromLineStart, 0);
             // Let's calculate the sizes
             final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
               layout,
@@ -164,7 +170,6 @@ class PaintParagraph extends TextPaint {
     paintContext.fillStyle = block.style.getForegroundColor().toCssString();
 
     final double thickness = calculateThickness(block.style);
-
     const DoubleDecorationSpacing = 3.0;
 
     for (final ui.TextDecoration decoration in [
@@ -186,7 +191,7 @@ class PaintParagraph extends TextPaint {
       final double x = sourceRect.left;
       final double y = sourceRect.top + position;
 
-      paintContext.reset();
+      paintContext.save();
       paintContext.lineWidth = thickness;
       paintContext.strokeStyle = block.style.decorationColor!.toCssString();
 
@@ -227,6 +232,7 @@ class PaintParagraph extends TextPaint {
             'solid: $x:${x + width}, $y ${block.style.decorationColor!.toCssString()}',
           );
       }
+      paintContext.restore();
     }
   }
 

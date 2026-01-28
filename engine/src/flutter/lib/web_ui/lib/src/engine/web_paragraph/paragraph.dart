@@ -146,6 +146,8 @@ enum StyleElements {
   text,
 }
 
+enum ShadowDirection { left, right, top, bottom }
+
 class WebTextStyle implements ui.TextStyle {
   factory WebTextStyle({
     String? fontFamily,
