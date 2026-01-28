@@ -445,4 +445,87 @@ void main() {
       },
     );
   });
+
+  group('splitSetCookieHeader', () {
+    test('should return single cookie unchanged', () {
+      final List<String> result = splitSetCookieHeader('sessionid=abc123; Path=/; HttpOnly');
+      expect(result, <String>['sessionid=abc123; Path=/; HttpOnly']);
+    });
+
+    test('should split two simple cookies', () {
+      final List<String> result = splitSetCookieHeader(
+        'csrftoken=abc; Path=/; SameSite=Lax, sessionid=xyz; Path=/; HttpOnly; SameSite=Lax',
+      );
+      expect(result, <String>[
+        'csrftoken=abc; Path=/; SameSite=Lax',
+        'sessionid=xyz; Path=/; HttpOnly; SameSite=Lax',
+      ]);
+    });
+
+    test('should handle cookies with Expires containing comma in date', () {
+      final List<String> result = splitSetCookieHeader(
+        'token=abc; Expires=Thu, 01 Jan 2025 00:00:00 GMT; Path=/, session=xyz; Path=/',
+      );
+      expect(result, <String>[
+        'token=abc; Expires=Thu, 01 Jan 2025 00:00:00 GMT; Path=/',
+        'session=xyz; Path=/',
+      ]);
+    });
+
+    test('should handle multiple cookies with Expires dates', () {
+      final List<String> result = splitSetCookieHeader(
+        'a=1; Expires=Mon, 01 Jan 2024 00:00:00 GMT, b=2; Expires=Tue, 02 Jan 2024 00:00:00 GMT',
+      );
+      expect(result, <String>[
+        'a=1; Expires=Mon, 01 Jan 2024 00:00:00 GMT',
+        'b=2; Expires=Tue, 02 Jan 2024 00:00:00 GMT',
+      ]);
+    });
+
+    test('should handle cookies with Max-Age attribute', () {
+      final List<String> result = splitSetCookieHeader(
+        'cookie1=value1; Max-Age=3600; Path=/, cookie2=value2; Max-Age=7200',
+      );
+      expect(result, <String>[
+        'cookie1=value1; Max-Age=3600; Path=/',
+        'cookie2=value2; Max-Age=7200',
+      ]);
+    });
+
+    test('should handle cookies with Domain attribute', () {
+      final List<String> result = splitSetCookieHeader(
+        'a=1; Domain=.example.com; Path=/, b=2; Domain=.test.com',
+      );
+      expect(result, <String>['a=1; Domain=.example.com; Path=/', 'b=2; Domain=.test.com']);
+    });
+
+    test('should handle cookies with SameSite attribute', () {
+      final List<String> result = splitSetCookieHeader(
+        'csrf=token; SameSite=Strict, session=id; SameSite=Lax',
+      );
+      expect(result, <String>['csrf=token; SameSite=Strict', 'session=id; SameSite=Lax']);
+    });
+
+    test('should handle three or more cookies', () {
+      final List<String> result = splitSetCookieHeader('a=1; Path=/, b=2; Path=/, c=3; Path=/');
+      expect(result, <String>['a=1; Path=/', 'b=2; Path=/', 'c=3; Path=/']);
+    });
+
+    test('should handle empty string', () {
+      final List<String> result = splitSetCookieHeader('');
+      expect(result, <String>[]);
+    });
+
+    test('should handle cookie with Secure and HttpOnly flags', () {
+      final List<String> result = splitSetCookieHeader(
+        'token=abc; Secure; HttpOnly; Path=/, other=xyz; Secure',
+      );
+      expect(result, <String>['token=abc; Secure; HttpOnly; Path=/', 'other=xyz; Secure']);
+    });
+
+    test('should handle cookie name with a dot', () {
+      final List<String> result = splitSetCookieHeader('app.session=123; Path=/, other.id=456');
+      expect(result, <String>['app.session=123; Path=/', 'other.id=456']);
+    });
+  });
 }

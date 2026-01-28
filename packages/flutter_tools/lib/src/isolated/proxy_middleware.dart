@@ -10,6 +10,65 @@ import '../web/devfs_proxy.dart';
 
 const _kLogEntryPrefix = '[proxyMiddleware]';
 
+const Set<String> _kCookieAttributes = <String>{
+  'domain',
+  'expires',
+  'httponly',
+  'max-age',
+  'partitioned',
+  'path',
+  'samesite',
+  'secure',
+};
+
+List<String> splitSetCookieHeader(String headerValue) {
+  if (headerValue.isEmpty) {
+    return <String>[];
+  }
+
+  final cookies = <String>[];
+  final currentCookie = StringBuffer();
+  final List<String> parts = headerValue.split(',');
+
+  for (final part in parts) {
+    final String trimmedPart = part.trim();
+    if (currentCookie.isEmpty) {
+      currentCookie.write(trimmedPart);
+    } else if (_isNewCookie(trimmedPart)) {
+      cookies.add(currentCookie.toString());
+      currentCookie.clear();
+      currentCookie.write(trimmedPart);
+    } else {
+      currentCookie.write(', $trimmedPart');
+    }
+  }
+
+  if (currentCookie.isNotEmpty) {
+    cookies.add(currentCookie.toString());
+  }
+
+  return cookies;
+}
+
+bool _isNewCookie(String part) {
+  final int equalsIndex = part.indexOf('=');
+  if (equalsIndex <= 0) {
+    return false;
+  }
+
+  final String beforeEquals = part.substring(0, equalsIndex);
+  final int lastSemicolon = beforeEquals.lastIndexOf(';');
+  final int lastSpace = beforeEquals.lastIndexOf(' ');
+  final int tokenStart = (lastSemicolon > lastSpace ? lastSemicolon : lastSpace) + 1;
+  final String token = beforeEquals.substring(tokenStart).trim().toLowerCase();
+
+  if (token.isEmpty || _kCookieAttributes.contains(token)) {
+    return false;
+  }
+
+  return RegExp(r'^[a-zA-Z0-9_.\-]+$').hasMatch(token);
+}
+
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
 /// The new request will have the same method, headers, body, and context as the
@@ -44,9 +103,10 @@ Future<shelf.Response> _applyProxyRules(
     final Uri finalTargetUrl = rule.finalTargetUri(request.requestedUri);
     try {
       final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
-      final shelf.Response proxyResponse = await handler(proxyBackendRequest);
+      shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
+      proxyResponse = _fixSetCookieHeaders(proxyResponse);
       return proxyResponse;
     } on Exception catch (e) {
       logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');
@@ -54,6 +114,26 @@ Future<shelf.Response> _applyProxyRules(
     }
   }
   return innerHandler(request);
+}
+
+/// Fixes Set-Cookie headers that were incorrectly merged into a single header.
+///
+/// The shelf_proxy package merges multiple Set-Cookie headers into one
+/// comma-separated value, but Set-Cookie is one of the few HTTP headers
+/// that cannot be safely combined this way because cookie values and
+/// Expires dates can contain commas.
+shelf.Response _fixSetCookieHeaders(shelf.Response response) {
+  final String? setCookieHeader = response.headers['set-cookie'];
+  if (setCookieHeader == null) {
+    return response;
+  }
+
+  final List<String> cookies = splitSetCookieHeader(setCookieHeader);
+  if (cookies.length <= 1) {
+    return response;
+  }
+
+  return response.change(headers: <String, Object>{...response.headers, 'set-cookie': cookies});
 }
 
 /// Creates a [shelf.Middleware] that proxies requests based on a list of [ProxyRule]s.
