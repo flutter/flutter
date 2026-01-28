@@ -822,18 +822,19 @@ object FlutterPluginUtils {
     internal fun addTaskForEngineShellArgumentManifestInjection(project: Project, androidEngineShellArgs: String) {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
 
-    androidComponents.onVariants { variant ->
-        val genTask = project.tasks.register("${variant.name}AddStaticManifestTask", AddStaticManifestTask::class.java) {
-            shellArgs.set(androidEngineShellArgs)
-            manifestOutputFile.set(
-                            project.layout.buildDirectory.file("generated/extra_manifest/${variant.name}/AndroidManifest.xml")
-                        )
-        }
+        androidComponents.onVariants { variant ->
+            val genTask = project.tasks.register("${variant.name}AddStaticManifestTask", AddStaticManifestTask::class.java) {
+                shellArgs.set(androidEngineShellArgs)
+                manifestOutputFile.set(
+                                project.layout.buildDirectory.file("generated/extra_manifest/${variant.name}/AndroidManifest.xml")
+                            )
+            }
 
-        variant.sources.manifests?.addGeneratedManifestFile(
-            genTask,
-            { it.manifestOutputFile }
-        )
+            variant.sources.manifests?.addGeneratedManifestFile(
+                genTask,
+                { it.manifestOutputFile }
+            )
+        }
     }
 }
 
