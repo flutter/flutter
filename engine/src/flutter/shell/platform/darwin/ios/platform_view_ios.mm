@@ -190,9 +190,8 @@ FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
 
 void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner_controller) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-  ApplyLocaleToOwnerController();
-
   AddOwnerViewController(owner_controller);
+  ApplyLocaleToOwnerController();
 }
 
 void PlatformViewIOS::AddOwnerViewController(__weak FlutterViewController* owner_controller) {
