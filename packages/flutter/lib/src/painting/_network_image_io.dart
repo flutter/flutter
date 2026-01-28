@@ -27,6 +27,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     this.scale = 1.0,
     this.headers,
     this.webHtmlElementStrategy = image_provider.WebHtmlElementStrategy.never,
+    this.onWebHtmlElementLoaded,
   });
 
   @override
@@ -40,6 +41,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
   @override
   final image_provider.WebHtmlElementStrategy webHtmlElementStrategy;
+
+  @override
+  final image_provider.WebHtmlElementLoadedCallback? onWebHtmlElementLoaded;
 
   @override
   Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
