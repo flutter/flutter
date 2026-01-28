@@ -75,6 +75,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
 - (BOOL)stateIsBackground;
+- (void)setupViewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVIEWCONTROLLER_INTERNAL_H_

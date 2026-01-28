@@ -3,7 +3,15 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_external_view_embedder.h"
+#include <cstddef>
 #include "fml/task_runner.h"
+#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#include "impeller/renderer/backend/metal/surface_mtl.h"
+#include "impeller/renderer/backend/metal/swapchain_transients_mtl.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "flutter/fml/make_copyable.h"
+#import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
+#import "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 
 #include "flutter/common/constants.h"
 
@@ -13,8 +21,11 @@ namespace flutter {
 
 IOSExternalViewEmbedder::IOSExternalViewEmbedder(
     __weak FlutterPlatformViewsController* platform_views_controller,
-    const std::shared_ptr<IOSContext>& context)
-    : platform_views_controller_(platform_views_controller), ios_context_(context) {
+    const std::shared_ptr<IOSContext>& context,
+    const CreateSurfaceFrameCallback& create_surface_frame_callback
+  ) : platform_views_controller_(platform_views_controller),
+      ios_context_(context),
+      create_surface_frame_callback_(create_surface_frame_callback) {
   FML_CHECK(ios_context_);
 }
 
@@ -22,9 +33,7 @@ IOSExternalViewEmbedder::~IOSExternalViewEmbedder() = default;
 
 // |ExternalViewEmbedder|
 DlCanvas* IOSExternalViewEmbedder::GetRootCanvas() {
-  // On iOS, the root surface is created from the on-screen render target. Only the surfaces for the
-  // various overlays are controlled by this class.
-  return nullptr;
+  return pending_frame_->Canvas();
 }
 
 // |ExternalViewEmbedder|
@@ -40,8 +49,11 @@ void IOSExternalViewEmbedder::BeginFrame(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::PrepareFlutterView(DlISize frame_size, double device_pixel_ratio) {
+void IOSExternalViewEmbedder::PrepareFlutterView(int64_t flutter_view_id, DlISize frame_size, double device_pixel_ratio) {
   FML_CHECK(platform_views_controller_);
+
+  pending_frame_ = create_surface_frame_callback_(flutter_view_id, frame_size);
+
   [platform_views_controller_ beginFrameWithSize:frame_size];
 }
 
@@ -78,12 +90,12 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFlutterView");
-
-  // TODO(dkwingsmt): This class only supports rendering into the implicit view.
-  // Properly support multi-view in the future.
-  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
+
+  [platform_views_controller_ submitFrame:std::move(pending_frame_)
+                           withIosContext:ios_context_
+                        withFlutterViewId:flutter_view_id];
+  frame->Submit();
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
@@ -132,6 +144,10 @@ void IOSExternalViewEmbedder::PushClipRSuperellipseToVisitedPlatformViews(
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PushClipPathToVisitedPlatformViews(const DlPath& clip_path) {
   [platform_views_controller_ pushClipPathToVisitedPlatformViews:clip_path];
+}
+
+void IOSExternalViewEmbedder::CollectView(int64_t view_id) {
+  [platform_views_controller_ collectView:view_id];
 }
 
 }  // namespace flutter

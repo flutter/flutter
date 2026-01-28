@@ -239,7 +239,7 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action) {
   // TODO(team-ios): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
-  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action, {});
+  platform_view_->DispatchSemanticsAction(view_controller_.viewIdentifier, node_uid, action, {});
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
@@ -247,7 +247,7 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   fml::MallocMapping args) {
   // TODO(team-ios): Remove implicit view assumption.
   // https://github.com/flutter/flutter/issues/142845
-  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action,
+  platform_view_->DispatchSemanticsAction(view_controller_.viewIdentifier, node_uid, action,
                                           std::move(args));
 }
 

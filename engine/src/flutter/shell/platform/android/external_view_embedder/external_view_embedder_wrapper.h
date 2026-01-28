@@ -59,7 +59,8 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(DlISize frame_size,
+  void PrepareFlutterView(int64_t flutter_view_id,
+                          DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|

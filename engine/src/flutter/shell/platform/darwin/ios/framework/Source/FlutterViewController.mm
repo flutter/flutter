@@ -65,10 +65,6 @@ typedef struct MouseState {
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
 @interface FlutterViewController () <FlutterBinaryMessenger, UIScrollViewDelegate>
-// TODO(dkwingsmt): Make the view ID property public once the iOS shell
-// supports multiple views.
-// https://github.com/flutter/flutter/issues/138168
-@property(nonatomic, readonly) int64_t viewIdentifier;
 
 // We keep a separate reference to this and create it ahead of time because we want to be able to
 // set up a shell along with its platform view before the view has to appear.
@@ -169,14 +165,12 @@ typedef struct MouseState {
   MouseState _mouseState;
 }
 
+// Synthesize properties declared readonly.
+@synthesize viewIdentifier = _viewIdentifier;
+
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
-
-// TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
-// No backing ivar is currently required; when multiple views are supported, we'll need to
-// synthesize the ivar and store the view identifier.
-@dynamic viewIdentifier;
 
 #pragma mark - Manage and override all designated initializers
 
@@ -187,16 +181,6 @@ typedef struct MouseState {
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;
-    if (engine.viewController) {
-      NSString* errorMessage =
-          [NSString stringWithFormat:
-                        @"The supplied FlutterEngine %@ is already used with FlutterViewController "
-                         "instance %@. One instance of the FlutterEngine can only be attached to "
-                         "one FlutterViewController at a time. Set FlutterEngine.viewController to "
-                         "nil before attaching it to another FlutterViewController.",
-                        engine.description, engine.viewController.description];
-      [FlutterLogger logError:errorMessage];
-    }
     _engine = engine;
     _engineNeedsLaunch = NO;
     _flutterView = [[FlutterView alloc] initWithDelegate:_engine
@@ -207,7 +191,7 @@ typedef struct MouseState {
     // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
     // Eliminate method calls in initializers and dealloc.
     [self performCommonViewControllerInitialization];
-    [engine setViewController:self];
+    [engine addViewController:self];
   }
 
   return self;
@@ -335,6 +319,10 @@ typedef struct MouseState {
   // Eliminate method calls in initializers and dealloc.
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
+}
+
+- (void)setupViewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  _viewIdentifier = viewIdentifier;
 }
 
 - (BOOL)isViewOpaque {
@@ -667,9 +655,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
 #pragma mark - Properties
 
 - (int64_t)viewIdentifier {
-  // TODO(dkwingsmt): Fill the view ID property with the correct value once the
-  // iOS shell supports multiple views.
-  return flutter::kFlutterImplicitViewId;
+  return _viewIdentifier;
 }
 
 - (BOOL)loadDefaultSplashScreenView {
@@ -792,14 +778,12 @@ static void SendFakeTouchEvent(UIScreen* screen,
   // thread.
   if (appeared) {
     [self installFirstFrameCallback];
-    self.platformViewsController.flutterView = self.flutterView;
-    self.platformViewsController.flutterViewController = self;
-    [self.engine notifyViewCreated];
+    [self.platformViewsController attachToFlutterViewController:self];
+    [self.engine notifyViewCreated:self.viewIdentifier];
   } else {
     self.displayingFlutterUI = NO;
-    [self.engine notifyViewDestroyed];
-    self.platformViewsController.flutterView = nil;
-    self.platformViewsController.flutterViewController = nil;
+    [self.engine notifyViewDestroyed:self.viewIdentifier];
+    [self.platformViewsController detachFromFlutterViewController:self.viewIdentifier];
   }
 }
 
@@ -810,10 +794,10 @@ static void SendFakeTouchEvent(UIScreen* screen,
 
   if (self.engine && self.engineNeedsLaunch) {
     [self.engine launchEngine:nil libraryURI:nil entrypointArgs:nil];
-    [self.engine setViewController:self];
+    [self.engine addViewController:self];
     self.engineNeedsLaunch = NO;
-  } else if (self.engine.viewController == self) {
-    [self.engine attachView];
+  } else if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
+    [self.engine attachView:_viewIdentifier];
   }
 
   // Register internal plugins.
@@ -875,7 +859,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (textInputPlugin != nil) {
     [self.keyboardManager addSecondaryResponder:textInputPlugin];
   }
-  if (self.engine.viewController == self) {
+  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     [textInputPlugin setUpIndirectScribbleInteraction:self];
   }
 }
@@ -886,7 +870,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
 
 - (void)viewWillAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillAppear");
-  if (self.engine.viewController == self) {
+  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     // Send platform settings to Flutter, e.g., platform brightness.
     [self onUserSettingsChanged:nil];
 
@@ -904,20 +888,19 @@ static void SendFakeTouchEvent(UIScreen* screen,
 
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
-  if (self.engine.viewController == self) {
+  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     [self onUserSettingsChanged:nil];
     [self onAccessibilityStatusChanged:nil];
-
-    if (self.stateIsActive) {
-      [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
-    }
+  }
+  if (self.stateIsActive) {
+    [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.resumed"];
   }
   [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillDisappear");
-  if (self.engine.viewController == self) {
+  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.inactive"];
   }
   [super viewWillDisappear:animated];
@@ -925,7 +908,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
 
 - (void)viewDidDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidDisappear");
-  if (self.engine.viewController == self) {
+  if ([self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     [self invalidateKeyboardAnimationVSyncClient];
     [self ensureViewportMetricsIsCorrect];
     [self surfaceUpdated:NO];
@@ -1395,7 +1378,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
   }
 
-  if (isUserInteracting && self.engine.viewController == self) {
+  if (isUserInteracting && [self.engine viewControllerForIdentifier:_viewIdentifier] == self) {
     [_touchRateCorrectionVSyncClient await];
   } else {
     [_touchRateCorrectionVSyncClient pause];
@@ -1413,9 +1396,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (_shouldIgnoreViewportMetricsUpdatesDuringRotation) {
     return;
   }
-  if (self.engine.viewController == self) {
-    [self.engine updateViewportMetrics:_viewportMetrics];
-  }
+  [self.engine updateViewportMetrics:_viewportMetrics viewIdentifier:_viewIdentifier];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -1699,7 +1680,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (isLocal && ![isLocal boolValue]) {
     return YES;
   }
-  return self.engine.viewController != self;
+  return [self.engine viewControllerForIdentifier:_viewIdentifier] != self;
 }
 
 - (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification {
