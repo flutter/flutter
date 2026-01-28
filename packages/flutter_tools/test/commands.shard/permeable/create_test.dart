@@ -2913,6 +2913,28 @@ void main() {
   );
 
   testUsingContext(
+    'plugin includes only setting.gradle.kts',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/181565.
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--org=com.example',
+        '--platforms=android',
+        projectDir.path,
+      ]);
+
+      expect(projectDir.childDirectory('android').childFile('settings.gradle.kts'), exists);
+      expect(projectDir.childDirectory('android').childFile('settings.gradle'), isNot(exists));
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+  );
+
+  testUsingContext(
     'plugin includes native Swift unit tests',
     () async {
       final command = CreateCommand();

@@ -319,7 +319,6 @@
     "templates/plugin_shared/.metadata.tmpl",
     "templates/plugin_shared/analysis_options.yaml.tmpl",
     "templates/plugin_shared/android.tmpl/.gitignore",
-    "templates/plugin_shared/android.tmpl/settings.gradle.tmpl",
     "templates/plugin_shared/android.tmpl/src/main/AndroidManifest.xml.tmpl",
     "templates/plugin_shared/CHANGELOG.md.tmpl",
     "templates/plugin_shared/LICENSE.tmpl",
