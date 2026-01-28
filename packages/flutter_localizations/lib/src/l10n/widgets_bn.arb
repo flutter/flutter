@@ -12,7 +12,7 @@
   "shareButtonLabel": "শেয়ার করুন",
   "pasteButtonLabel": "পেস্ট করুন",
   "selectAllButtonLabel": "সব বেছে নিন",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "সার্চ ফলাফল পাওয়া গেছে",
+  "noResultsFound": "কোনো ফলাফল পাওয়া যায়নি",
+  "radioButtonUnselectedLabel": "বেছে নেওয়া হয়নি"
 }
