@@ -2117,3 +2117,340 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     setChildParentData(child!, constraints, geometry!);
   }
 }
+
+mixin SliverSequenceMixin<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
+    on RenderObject, ContainerRenderObjectMixin<RenderSliver, ParentDataClass> {
+  /// {@template flutter.rendering.RenderViewportBase.paintOrder}
+  /// The order in which to paint the slivers;
+  /// equivalently, the order in which to arrange them in the z-direction.
+  ///
+  /// Whichever order the slivers are painted in,
+  /// they will be hit-tested in the opposite order.
+  ///
+  /// To think of this as an ordering in the z-direction:
+  /// whichever sliver is painted last (and hit-tested first) is on top,
+  /// because it will paint over other slivers if there is overlap.
+  /// Similarly, whichever sliver is painted first (and hit-tested last)
+  /// is on the bottom.
+  /// {@endtemplate}
+  ///
+  /// The default is [SliverPaintOrder.firstIsTop].
+  SliverPaintOrder get paintOrder;
+
+  /// Determines the size and position of some of the children of the viewport.
+  ///
+  /// This function is the workhorse of `performLayout` implementations in
+  /// subclasses.
+  ///
+  /// Layout starts with `child`, proceeds according to the `advance` callback,
+  /// and stops once `advance` returns null.
+  ///
+  ///  * `scrollOffset` is the [SliverConstraints.scrollOffset] to pass the
+  ///    first child. The scroll offset is adjusted by
+  ///    [SliverGeometry.scrollExtent] for subsequent children.
+  ///  * `overlap` is the [SliverConstraints.overlap] to pass the first child.
+  ///    The overlay is adjusted by the [SliverGeometry.paintOrigin] and
+  ///    [SliverGeometry.paintExtent] for subsequent children.
+  ///  * `layoutOffset` is the layout offset at which to place the first child.
+  ///    The layout offset is updated by the [SliverGeometry.layoutExtent] for
+  ///    subsequent children.
+  ///  * `remainingPaintExtent` is [SliverConstraints.remainingPaintExtent] to
+  ///    pass the first child. The remaining paint extent is updated by the
+  ///    [SliverGeometry.layoutExtent] for subsequent children.
+  ///  * `mainAxisExtent` is the [SliverConstraints.viewportMainAxisExtent] to
+  ///    pass to each child.
+  ///  * `crossAxisExtent` is the [SliverConstraints.crossAxisExtent] to pass to
+  ///    each child.
+  ///  * `growthDirection` is the [SliverConstraints.growthDirection] to pass to
+  ///    each child.
+  ///
+  /// Returns the first non-zero [SliverGeometry.scrollOffsetCorrection]
+  /// encountered, if any. Otherwise returns 0.0. Typical callers will call this
+  /// function repeatedly until it returns 0.0.
+  @protected
+  double layoutChildSequence({
+    required RenderSliver? child,
+    required AxisDirection axisDirection,
+    required AxisDirection crossAxisDirection,
+    required double scrollOffset,
+    required double overlap,
+    required double layoutOffset,
+    required double remainingPaintExtent,
+    required double mainAxisExtent,
+    required double crossAxisExtent,
+    required ScrollDirection userScrollDirection,
+    required GrowthDirection growthDirection,
+    required RenderSliver? Function(RenderSliver child) advance,
+    required double remainingCacheExtent,
+    required double cacheOrigin,
+    void Function(SliverGeometry geometry)? updateParentGeometry,
+  }) {
+    assert(scrollOffset.isFinite);
+    assert(scrollOffset >= 0.0);
+    final initialLayoutOffset = layoutOffset;
+    final ScrollDirection adjustedUserScrollDirection = applyGrowthDirectionToScrollDirection(
+      userScrollDirection,
+      growthDirection,
+    );
+    final originRemainingCacheExtent = remainingCacheExtent;
+    double maxPaintOffset = layoutOffset + overlap;
+    var precedingScrollExtent = 0.0;
+
+    late var hasVisualOverflow = false;
+    late var maxPaintExtent = 0.0;
+    late var maxScrollObstructionExtent = 0.0;
+
+    while (child != null) {
+      final sliverScrollOffset = scrollOffset <= 0.0 ? 0.0 : scrollOffset;
+      // If the scrollOffset is too small we adjust the paddedOrigin because it
+      // doesn't make sense to ask a sliver for content before its scroll
+      // offset.
+      final double correctedCacheOrigin = math.max(cacheOrigin, -sliverScrollOffset);
+      final double cacheExtentCorrection = cacheOrigin - correctedCacheOrigin;
+
+      assert(sliverScrollOffset >= correctedCacheOrigin.abs());
+      assert(correctedCacheOrigin <= 0.0);
+      assert(sliverScrollOffset >= 0.0);
+      assert(cacheExtentCorrection <= 0.0);
+
+      child.layout(
+        SliverConstraints(
+          axisDirection: axisDirection,
+          growthDirection: growthDirection,
+          userScrollDirection: adjustedUserScrollDirection,
+          scrollOffset: sliverScrollOffset,
+          precedingScrollExtent: precedingScrollExtent,
+          overlap: maxPaintOffset - layoutOffset,
+          remainingPaintExtent: math.max(
+            0.0,
+            remainingPaintExtent - layoutOffset + initialLayoutOffset,
+          ),
+          crossAxisExtent: crossAxisExtent,
+          crossAxisDirection: crossAxisDirection,
+          viewportMainAxisExtent: mainAxisExtent,
+          remainingCacheExtent: math.max(0.0, remainingCacheExtent + cacheExtentCorrection),
+          cacheOrigin: correctedCacheOrigin,
+        ),
+        parentUsesSize: true,
+      );
+
+      final SliverGeometry childLayoutGeometry = child.geometry!;
+      assert(childLayoutGeometry.debugAssertIsValid());
+
+      if (updateParentGeometry != null) {
+        hasVisualOverflow = hasVisualOverflow || childLayoutGeometry.hasVisualOverflow;
+        maxPaintExtent += childLayoutGeometry.maxPaintExtent;
+        maxScrollObstructionExtent += childLayoutGeometry.maxScrollObstructionExtent;
+      }
+
+      // If there is a correction to apply, we'll have to start over.
+      if (childLayoutGeometry.scrollOffsetCorrection != null) {
+        return childLayoutGeometry.scrollOffsetCorrection!;
+      }
+
+      // We use the child's paint origin in our coordinate system as the
+      // layoutOffset we store in the child's parent data.
+      final double effectiveLayoutOffset = layoutOffset + childLayoutGeometry.paintOrigin;
+
+      // `effectiveLayoutOffset` becomes meaningless once we moved past the trailing edge
+      // because `childLayoutGeometry.layoutExtent` is zero. Using the still increasing
+      // 'scrollOffset` to roughly position these invisible slivers in the right order.
+      if (updateParentGeometry != null || childLayoutGeometry.visible || scrollOffset > 0) {
+        updateChildLayoutOffset(child, effectiveLayoutOffset, growthDirection);
+      } else {
+        updateChildLayoutOffset(child, -scrollOffset + initialLayoutOffset, growthDirection);
+      }
+
+      maxPaintOffset = math.max(
+        effectiveLayoutOffset + childLayoutGeometry.paintExtent,
+        maxPaintOffset,
+      );
+      scrollOffset -= childLayoutGeometry.scrollExtent;
+      precedingScrollExtent += childLayoutGeometry.scrollExtent;
+      layoutOffset += childLayoutGeometry.layoutExtent;
+      if (childLayoutGeometry.cacheExtent != 0.0) {
+        remainingCacheExtent -= childLayoutGeometry.cacheExtent - cacheExtentCorrection;
+        cacheOrigin = math.min(correctedCacheOrigin + childLayoutGeometry.cacheExtent, 0.0);
+      }
+
+      updateOutOfBandData(growthDirection, childLayoutGeometry);
+
+      // move on to the next child
+      child = advance(child);
+    }
+
+    if (updateParentGeometry != null) {
+      final double effectiveOverlap = math.min(0, overlap);
+      layoutOffset = math.min(layoutOffset + effectiveOverlap, maxPaintOffset);
+      updateParentGeometry(
+        SliverGeometry(
+          paintOrigin: effectiveOverlap,
+          scrollExtent: precedingScrollExtent,
+          paintExtent: maxPaintOffset,
+          layoutExtent: layoutOffset,
+          cacheExtent: originRemainingCacheExtent - remainingCacheExtent,
+          maxPaintExtent: math.max(maxPaintExtent, maxPaintOffset),
+          maxScrollObstructionExtent: maxScrollObstructionExtent,
+          hasVisualOverflow: hasVisualOverflow,
+        ),
+      );
+    }
+
+    // we made it without a correction, whee!
+    return 0.0;
+  }
+
+  @protected
+  RenderSliver? get origin;
+
+  /// Returns the total scroll obstruction extent of all slivers in the viewport
+  /// before [child].
+  ///
+  /// This is the extent by which the actual area in which content can scroll
+  /// is reduced. For example, an app bar that is pinned at the top will reduce
+  /// the area in which content can actually scroll by the height of the app bar.
+  @protected
+  double computeMaxScrollObstructionExtentBefore(
+    RenderSliver child, {
+    required RenderSliver? Function(RenderSliver child) advance,
+  }) {
+    assert(child.parent == this);
+    var pinnedExtent = 0.0;
+    RenderSliver? current = origin;
+    while (current != child) {
+      pinnedExtent += current!.geometry!.maxScrollObstructionExtent;
+      current = advance(current);
+    }
+    return pinnedExtent;
+  }
+
+  /// Called during [layoutChildSequence] to store the layout offset for the
+  /// given child.
+  ///
+  /// Different subclasses using different representations for their children's
+  /// layout offset (e.g., logical or physical coordinates). This function lets
+  /// subclasses transform the child's layout offset before storing it in the
+  /// child's parent data.
+  @protected
+  void updateChildLayoutOffset(
+    RenderSliver child,
+    double layoutOffset,
+    GrowthDirection growthDirection,
+  );
+
+  /// Called during [layoutChildSequence] for each child.
+  ///
+  /// Typically used by subclasses to update any out-of-band data, such as the
+  /// max scroll extent, for each child.
+  @protected
+  void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {}
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    childrenInPaintOrder
+        .where(
+          (RenderSliver sliver) =>
+              sliver.geometry!.visible ||
+              sliver.geometry!.cacheExtent > 0.0 ||
+              sliver.ensureSemantics,
+        )
+        .forEach(visitor);
+  }
+
+  /// Provides an iterable that walks the children of the viewport, in the order
+  /// that they should be painted.
+  ///
+  /// This should be the reverse order of [childrenInHitTestOrder].
+  @protected
+  Iterable<RenderSliver> get childrenInPaintOrder {
+    return switch (paintOrder) {
+      SliverPaintOrder.firstIsTop => _childrenLastToFirst,
+      SliverPaintOrder.lastIsTop => _childrenFirstToLast,
+    };
+  }
+
+  /// Provides an iterable that walks the children of the viewport, in the order
+  /// that hit-testing should use.
+  ///
+  /// This should be the reverse order of [childrenInPaintOrder].
+  @protected
+  Iterable<RenderSliver> get childrenInHitTestOrder {
+    return switch (paintOrder) {
+      SliverPaintOrder.firstIsTop => _childrenFirstToLast,
+      SliverPaintOrder.lastIsTop => _childrenLastToFirst,
+    };
+  }
+
+  Iterable<RenderSliver> get _childrenLastToFirst {
+    final children = <RenderSliver>[];
+    RenderSliver? child = lastChild;
+    while (child != null) {
+      children.add(child);
+      child = childBefore(child);
+    }
+    return children;
+  }
+
+  Iterable<RenderSliver> get _childrenFirstToLast {
+    final children = <RenderSliver>[];
+    RenderSliver? child = firstChild;
+    while (child != null) {
+      children.add(child);
+      child = childAfter(child);
+    }
+    return children;
+  }
+
+  /// The offset at which the given `child` should be painted.
+  ///
+  /// The returned offset is from the top left corner of the inside of the
+  /// viewport to the top left corner of the paint coordinate system of the
+  /// `child`.
+  ///
+  /// See also:
+  ///
+  ///  * [computeAbsolutePaintOffset], which computes the paint offset from an
+  ///    explicit layout offset and growth direction instead of using the values
+  ///    computed for the child during layout.
+  @protected
+  Offset paintOffsetOf(RenderSliver child);
+
+  @protected
+  void paintContents(PaintingContext context, Offset offset) {
+    for (final RenderSliver child in childrenInPaintOrder) {
+      if (child.geometry!.visible) {
+        context.paintChild(child, offset + paintOffsetOf(child));
+      }
+    }
+  }
+
+  /// Returns the scroll offset within the viewport for the given
+  /// `scrollOffsetWithinChild` within the given `child`.
+  ///
+  /// The returned value is an estimate that assumes the slivers within the
+  /// viewport do not change the layout extent in response to changes in their
+  /// scroll offset.
+  @protected
+  double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild) {
+    assert(child.parent == this);
+    final GrowthDirection growthDirection = child.constraints.growthDirection;
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        var scrollOffsetToChild = 0.0;
+        RenderSliver? current = origin;
+        while (current != child) {
+          scrollOffsetToChild += current!.geometry!.scrollExtent;
+          current = childAfter(current);
+        }
+        return scrollOffsetToChild + scrollOffsetWithinChild;
+      case GrowthDirection.reverse:
+        var scrollOffsetToChild = 0.0;
+        RenderSliver? current = childBefore(origin!);
+        while (current != child) {
+          scrollOffsetToChild -= current!.geometry!.scrollExtent;
+          current = childBefore(current);
+        }
+        return scrollOffsetToChild - scrollOffsetWithinChild;
+    }
+  }
+}
