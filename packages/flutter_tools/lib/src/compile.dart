@@ -532,6 +532,7 @@ abstract interface class ResidentCompiler {
     String? librariesSpec;
     TargetModel targetModel = targetModelOverride ?? .flutter;
 
+    // Configure the compiler to target the DDC runtime.
     if (targetPlatform case .web_javascript) {
       sdkRoot = artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path;
       targetModel = .dartdevc;
@@ -933,45 +934,43 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     final command = <String>[
       ...commandToStartFrontendServer,
-      ...<String>[
-        '--sdk-root',
-        sdkRoot,
-        '--incremental',
-        if (testCompilation) '--no-print-incremental-dependencies',
-        '--target=$targetModel',
-        // TODO(annagrin): remove once this becomes the default behavior
-        // in the frontend_server.
-        // https://github.com/flutter/flutter/issues/59902
-        '--experimental-emit-debug-metadata',
-        for (final Object dartDefine in dartDefines) '-D$dartDefine',
-        if (outputPath != null) ...<String>['--output-dill', outputPath],
-        // If we have a platform dill, we don't need to pass the libraries spec,
-        // since the information is embedded in the .dill file.
-        if (librariesSpec != null && platformDill == null) ...<String>[
-          '--libraries-spec',
-          librariesSpec!,
-        ],
-        if (packagesPath != null) ...<String>['--packages', packagesPath!],
-        ...buildModeOptions(buildMode, dartDefines),
-        if (trackWidgetCreation) '--track-widget-creation',
-        if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
-        for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
-        if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
-        if (initializeFromDill != null) ...<String>['--initialize-from-dill', initializeFromDill!],
-        if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
-        if (additionalSourceUri != null) ...<String>[
-          '--source',
-          additionalSourceUri,
-          '--source',
-          'package:flutter/src/dart_plugin_registrant.dart',
-          '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
-        ],
-        if (nativeAssetsUri != null) ...<String>['--native-assets', nativeAssetsUri],
-        if (platformDill != null) ...<String>['--platform', platformDill!],
-        // See: https://github.com/flutter/flutter/issues/103994
-        '--verbosity=error',
-        ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
+      '--sdk-root',
+      sdkRoot,
+      '--incremental',
+      if (testCompilation) '--no-print-incremental-dependencies',
+      '--target=$targetModel',
+      // TODO(annagrin): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/59902
+      '--experimental-emit-debug-metadata',
+      for (final Object dartDefine in dartDefines) '-D$dartDefine',
+      if (outputPath != null) ...<String>['--output-dill', outputPath],
+      // If we have a platform dill, we don't need to pass the libraries spec,
+      // since the information is embedded in the .dill file.
+      if (librariesSpec != null && platformDill == null) ...<String>[
+        '--libraries-spec',
+        librariesSpec!,
       ],
+      if (packagesPath != null) ...<String>['--packages', packagesPath!],
+      ...buildModeOptions(buildMode, dartDefines),
+      if (trackWidgetCreation) '--track-widget-creation',
+      if (includeUnsupportedPlatformLibraryStubs) '--include-unsupported-platform-library-stubs',
+      for (final String root in fileSystemRoots) ...<String>['--filesystem-root', root],
+      if (fileSystemScheme != null) ...<String>['--filesystem-scheme', fileSystemScheme!],
+      if (initializeFromDill != null) ...<String>['--initialize-from-dill', initializeFromDill!],
+      if (assumeInitializeFromDillUpToDate) '--assume-initialize-from-dill-up-to-date',
+      if (additionalSourceUri != null) ...<String>[
+        '--source',
+        additionalSourceUri,
+        '--source',
+        'package:flutter/src/dart_plugin_registrant.dart',
+        '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
+      ],
+      if (nativeAssetsUri != null) ...<String>['--native-assets', nativeAssetsUri],
+      if (platformDill != null) ...<String>['--platform', platformDill!],
+      // See: https://github.com/flutter/flutter/issues/103994
+      '--verbosity=error',
+      ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
     ];
     _logger.printTrace(command.join(' '));
     _server = await _processManager.start(command);
