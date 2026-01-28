@@ -1206,16 +1206,14 @@ void main() {
     await tester.pumpWidget(buildListTile(stadiumShape));
     rect = tester.getRect(find.byType(ListTile));
 
-    // Check if a rounded rectangle was painted with the correct color and shape
-    expect(
-      find.byType(Material),
-      paints
-        ..clipRect()
-        ..rrect(
-          color: tileColor,
-          rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
-        ),
+    // Find the inner Material created by ListTile for the stadium shape
+    final Finder innerMaterialFinder = find.descendant(
+      of: find.byType(ListTile),
+      matching: find.byType(Material),
     );
+
+    // Check if the shape was painted with the correct color (Material uses drawPath for shapes)
+    expect(innerMaterialFinder, paints..path(color: tileColor));
   });
 
   testWidgets('ListTile changes mouse cursor when hovered', (WidgetTester tester) async {

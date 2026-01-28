@@ -28,6 +28,7 @@ import 'debug.dart';
 import 'divider.dart';
 import 'icon_button.dart';
 import 'icon_button_theme.dart';
+import 'material.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
@@ -975,8 +976,93 @@ class ListTile extends StatelessWidget {
             ? ListTileTitleAlignment.threeLine
             : ListTileTitleAlignment.titleHeight);
 
+    final ShapeBorder? effectiveShape = shape ?? tileTheme.shape;
+    final Color effectiveTileColor = _tileBackgroundColor(theme, tileTheme, defaults);
+
+    // Determine if clipping is needed for the tile's shape.
+    //
+    // Rectangular shapes (Border or RoundedRectangleBorder with zero radius)
+    // do not require clipping and can use the standard Ink-based approach.
+    // Non-rectangular shapes (e.g., StadiumBorder, RoundedRectangleBorder with
+    // non-zero radius) require a Material widget with clipping to ensure
+    // proper rendering, especially when used with clamping scroll physics.
+    final bool needsClippedMaterial = switch (effectiveShape) {
+      null => false,
+      Border() => false,
+      RoundedRectangleBorder(:final borderRadius) when borderRadius == BorderRadius.zero => false,
+      _ => true,
+    };
+
+
+    if (needsClippedMaterial) {
+      return Material(
+        color: effectiveTileColor,
+        shape: effectiveShape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: effectiveShape,
+          onTap: enabled ? onTap : null,
+          onLongPress: enabled ? onLongPress : null,
+          onFocusChange: onFocusChange,
+          mouseCursor: effectiveMouseCursor,
+          canRequestFocus: enabled,
+          focusNode: focusNode,
+          focusColor: focusColor,
+          hoverColor: hoverColor,
+          splashColor: splashColor,
+          autofocus: autofocus,
+          enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+          statesController: statesController,
+          child: Semantics(
+            button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
+            selected: selected,
+            enabled: enabled,
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              minimum: resolvedContentPadding,
+              child: IconTheme.merge(
+                data: iconThemeData,
+                child: IconButtonTheme(
+                  data: iconButtonThemeData,
+                  child: _ListTile(
+                    leading: leadingIcon,
+                    title: titleText,
+                    subtitle: subtitleText,
+                    trailing: trailingIcon,
+                    isDense: _isDenseLayout(theme, tileTheme),
+                    visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
+                    isThreeLine:
+                        isThreeLine ??
+                        tileTheme.isThreeLine ??
+                        theme.listTileTheme.isThreeLine ??
+                        false,
+                    textDirection: textDirection,
+                    titleBaselineType:
+                        titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
+                    subtitleBaselineType:
+                        subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
+                    horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+                    minVerticalPadding:
+                        minVerticalPadding ??
+                        tileTheme.minVerticalPadding ??
+                        defaults.minVerticalPadding!,
+                    minLeadingWidth:
+                        minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                    minTileHeight: minTileHeight ?? tileTheme.minTileHeight,
+                    titleAlignment: effectiveTitleAlignment,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // For rectangular shapes, use the original Ink-based approach
     return InkWell(
-      customBorder: shape ?? tileTheme.shape,
+      customBorder: effectiveShape,
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
       onFocusChange: onFocusChange,
@@ -995,8 +1081,8 @@ class ListTile extends StatelessWidget {
         enabled: enabled,
         child: Ink(
           decoration: ShapeDecoration(
-            shape: shape ?? tileTheme.shape ?? const Border(),
-            color: _tileBackgroundColor(theme, tileTheme, defaults),
+            shape: effectiveShape ?? const Border(),
+            color: effectiveTileColor,
           ),
           child: SafeArea(
             top: false,
