@@ -28,6 +28,7 @@ import 'package:flutter/widgets.dart';
 /// });
 /// ```
 // TODO(rkishan516): Move this to flutter_test package.
+// Tracking issue: https://github.com/flutter/flutter/issues/181283
 class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
   const TestWidgetsApp({super.key, required this.home, this.color = const Color(0xFFFFFFFF)});

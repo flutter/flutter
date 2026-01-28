@@ -1247,8 +1247,6 @@ void main() {
         },
       ),
     );
-    // Let WidgetsApp settle before checking frame scheduling.
-    await tester.pumpAndSettle();
 
     expect(find.text('unhover inner'), findsOneWidget);
     expect(find.text('unhover outer'), findsOneWidget);
@@ -1307,8 +1305,9 @@ void main() {
         );
       }
 
-      return TestWidgetsApp(
-        home: Align(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
           alignment: Alignment.topLeft,
           child: MouseRegion(
             onEnter: (PointerEnterEvent e) {
