@@ -32,6 +32,10 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.38 Changes
 
+### [3.38.9](https://github.com/flutter/flutter/releases/tag/3.38.9)
+
+- [flutter/181568](https://github.com/flutter/flutter/pull/181568) Update Dart to 3.10.8.
+
 ### [3.38.8](https://github.com/flutter/flutter/releases/tag/3.38.8)
 
 - [flutter/178151](https://github.com/flutter/flutter/issues/178151) - `flutter run -d chrome` may crash with a `DartDevelopmentServiceException` when the application shuts down during the startup sequence.
