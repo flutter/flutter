@@ -316,6 +316,96 @@ void testMain() {
     );
   });
 
+  group('iframe touch scroll handling', () {
+    tearDown(() {
+      // Reset iframe detection cache after each test
+      debugResetIframeDetectionCache();
+    });
+
+    test('does not prevent default for touch pointerdown when in iframe', () {
+      // Simulate being embedded in an iframe
+      debugSetIframeEmbeddingForTests(true);
+
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {};
+
+      // Create a cancelable touch pointerdown event
+      final DomEvent event = createDomPointerEvent('pointerdown', <String, dynamic>{
+        'bubbles': true,
+        'cancelable': true,
+        'pointerId': 1,
+        'button': 0,
+        'buttons': 1,
+        'clientX': 100,
+        'clientY': 100,
+        'pointerType': 'touch',
+      });
+
+      rootElement.dispatchEvent(event);
+
+      expect(
+        event.defaultPrevented,
+        isFalse,
+        reason: 'Touch pointerdown in iframe should allow default to enable native scroll',
+      );
+    });
+
+    test('prevents default for mouse pointerdown when in iframe', () {
+      // Simulate being embedded in an iframe
+      debugSetIframeEmbeddingForTests(true);
+
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {};
+
+      // Create a cancelable mouse pointerdown event (not touch)
+      final DomEvent event = createDomPointerEvent('pointerdown', <String, dynamic>{
+        'bubbles': true,
+        'cancelable': true,
+        'pointerId': 1,
+        'button': 0,
+        'buttons': 1,
+        'clientX': 100,
+        'clientY': 100,
+        'pointerType': 'mouse',
+      });
+
+      rootElement.dispatchEvent(event);
+
+      // Mouse events should still have default prevented even in iframe
+      expect(
+        event.defaultPrevented,
+        isTrue,
+        reason: 'Mouse pointerdown should still prevent default even in iframe',
+      );
+    });
+
+    test('prevents default for touch pointerdown when NOT in iframe', () {
+      // Simulate NOT being in an iframe
+      debugSetIframeEmbeddingForTests(false);
+
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {};
+
+      // Create a cancelable touch pointerdown event
+      final DomEvent event = createDomPointerEvent('pointerdown', <String, dynamic>{
+        'bubbles': true,
+        'cancelable': true,
+        'pointerId': 1,
+        'button': 0,
+        'buttons': 1,
+        'clientX': 100,
+        'clientY': 100,
+        'pointerType': 'touch',
+      });
+
+      rootElement.dispatchEvent(event);
+
+      // Touch events outside iframe should have default prevented
+      expect(
+        event.defaultPrevented,
+        isTrue,
+        reason: 'Touch pointerdown outside iframe should prevent default',
+      );
+    });
+  });
+
   test('can receive pointer events on the app root', () {
     final _BasicEventContext context = _PointerEventContext();
     ui.PointerDataPacket? receivedPacket;
