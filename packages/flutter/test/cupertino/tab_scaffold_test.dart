@@ -1367,6 +1367,312 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoTabScaffold)), Size.zero);
     imageCache.clear();
   });
+
+  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+    // 2 nodes for 2 tabs
+    final focusNodes = <FocusNode>[];
+    for (var i = 0; i < 2; i++) {
+      final focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTextField(focusNode: focusNodes[index], autofocus: true);
+          },
+        ),
+      ),
+    );
+
+    expect(focusNodes[0].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isFalse);
+    expect(focusNodes[1].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isTrue);
+    expect(focusNodes[1].hasFocus, isFalse);
+  });
+
+  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
+    final focusNodes = <FocusNode>[];
+    for (var i = 0; i < 4; i++) {
+      final focusNode = FocusNode();
+      focusNodes.add(focusNode);
+      addTearDown(focusNode.dispose);
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return Column(
+              children: <Widget>[
+                CupertinoTextField(focusNode: focusNodes[index * 2], placeholder: 'TextField 1'),
+                CupertinoTextField(
+                  focusNode: focusNodes[index * 2 + 1],
+                  placeholder: 'TextField 2',
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(focusNodes.any((FocusNode node) => node.hasFocus), isFalse);
+
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 2'));
+
+    expect(focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)), 1);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 1'));
+
+    expect(focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)), 2);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    // Upon going back to tab 1, the item it tab 1 that previously had the focus
+    // (TextField 2) gets it back.
+    expect(focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)), 1);
+  });
+
+  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    var tabDecoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabBar),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    // Pump again but with dark theme.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          primaryColor: CupertinoColors.destructiveRed,
+        ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    tabDecoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabBar),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
+
+    final RichText tab1 = tester.widget(
+      find.descendant(of: find.text('Tab 1'), matching: find.byType(RichText)),
+    );
+    // Tab 2 should still be selected after changing theme.
+    expect(tab1.text.style!.color!.value, 0xFF757575);
+    final RichText tab2 = tester.widget(
+      find.descendant(of: find.text('Tab 2'), matching: find.byType(RichText)),
+    );
+    expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
+  });
+
+  testWidgets('dark mode background color', (WidgetTester tester) async {
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFF123456),
+      darkColor: Color(0xFF654321),
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    // The DecoratedBox with the smallest depth is the DecoratedBox of the
+    // CupertinoTabScaffold.
+    var tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.color.value);
+
+    // Dark mode
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoTabScaffold(
+          backgroundColor: backgroundColor,
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    tabDecoration =
+        tester
+                .firstWidget<DecoratedBox>(
+                  find.descendant(
+                    of: find.byType(CupertinoTabScaffold),
+                    matching: find.byType(DecoratedBox),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
+  });
+
+  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+    // Regression testing for https://github.com/flutter/flutter/issues/28457.
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return const CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableState = tester.state<EditableTextState>(
+      find.byType(EditableText),
+    );
+
+    await tester.enterText(find.byType(CupertinoTextField), "don't lose me");
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100)),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return const CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The exact same state instance is still there.
+    expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
+    expect(find.text("don't lose me"), findsOneWidget);
+  });
+
+  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 99,
+              maxScaleFactor: 99,
+              child: CupertinoTabScaffold(
+                tabBar: CupertinoTabBar(
+                  items: List<BottomNavigationBarItem>.generate(
+                    10,
+                    (int i) => BottomNavigationBarItem(
+                      icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+                      label: '$i',
+                    ),
+                  ),
+                ),
+                tabBuilder: (BuildContext context, int index) => const Text('content'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(of: find.byType(CupertinoTabBar), matching: find.byType(RichText)),
+    );
+
+    final Iterable<RichText> contents = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.text('content'),
+        matching: find.byType(RichText),
+        skipOffstage: false,
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(
+      barItems,
+      isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))),
+    );
+
+    expect(contents.length, greaterThan(0));
+    expect(
+      contents,
+      isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))),
+    );
+    imageCache.clear();
+  });
 }
 
 CupertinoTabBar _buildTabBar({int selectedTab = 0}) {
