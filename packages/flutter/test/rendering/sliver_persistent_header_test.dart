@@ -18,7 +18,6 @@ void main() {
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      cacheExtent: 0,
       children: <RenderSliver>[header],
     );
     layout(root);
@@ -33,7 +32,6 @@ void main() {
     final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
-      cacheExtent: 0,
       children: <RenderSliver>[header],
     );
     layout(root);

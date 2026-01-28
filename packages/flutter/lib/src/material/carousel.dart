@@ -705,7 +705,6 @@ class _CarouselViewState extends State<CarouselView> {
           physics: physics,
           viewportBuilder: (BuildContext context, ViewportOffset position) {
             return Viewport(
-              cacheExtent: 0.0,
               cacheExtentStyle: CacheExtentStyle.viewport,
               axisDirection: axisDirection,
               offset: position,
