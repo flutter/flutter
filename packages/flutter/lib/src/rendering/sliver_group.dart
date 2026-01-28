@@ -210,6 +210,21 @@ bool _assertOutOfExtent(double extent) {
 /// at the top of the [Viewport] regardless of the scroll offset.
 class RenderSliverMainAxisGroup extends RenderSliver
     with ContainerRenderObjectMixin<RenderSliver, SliverPhysicalContainerParentData> {
+  /// Creates a sliver that places multiple sliver children in a linear array along
+  /// the main axis.
+  RenderSliverMainAxisGroup({bool keepPinned = false}) : _keepPinned = keepPinned;
+
+  /// Whether to keep the sliver children pinned in place.
+  bool get keepPinned => _keepPinned;
+  bool _keepPinned;
+  set keepPinned(bool value) {
+    if (_keepPinned == value) {
+      return;
+    }
+    _keepPinned = value;
+    markNeedsLayout();
+  }
+
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalContainerParentData) {
@@ -286,6 +301,11 @@ class RenderSliverMainAxisGroup extends RenderSliver
 
   @override
   void performLayout() {
+    if (firstChild == null) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
     double scrollOffset = 0;
     double layoutOffset = 0;
     double maxPaintExtent = 0;
@@ -314,11 +334,15 @@ class RenderSliverMainAxisGroup extends RenderSliver
       final double correctedCacheOrigin = math.max(cacheOrigin, -childScrollOffset);
       final double cacheExtentCorrection = cacheOrigin - correctedCacheOrigin;
 
+      final double overlap = keepPinned
+          ? _fixPrecisionError(paintOffset - layoutOffset)
+          : math.max(0.0, _fixPrecisionError(paintOffset - beforeOffsetPaintExtent));
+
       child.layout(
         constraints.copyWith(
           scrollOffset: childScrollOffset,
           cacheOrigin: correctedCacheOrigin,
-          overlap: math.max(0.0, _fixPrecisionError(paintOffset - beforeOffsetPaintExtent)),
+          overlap: overlap,
           remainingPaintExtent: _fixPrecisionError(
             constraints.remainingPaintExtent - beforeOffsetPaintExtent,
           ),
@@ -370,32 +394,28 @@ class RenderSliverMainAxisGroup extends RenderSliver
       }());
     }
 
-    final double remainingExtent = math.max(0, scrollOffset - constraints.scrollOffset);
-    // If the children's paint extent exceeds the remaining scroll extent of the `RenderSliverMainAxisGroup`,
-    // they need to be corrected.
-    if (paintOffset > remainingExtent) {
-      // Whether the current remaining space can accommodate all pinned children.
-      final bool pinnedChildrenOverflow =
-          maxScrollObstructionExtent > remainingExtent - constraints.overlap;
-      final double paintCorrection = paintOffset - remainingExtent;
-      paintOffset = remainingExtent;
-      child = firstChild;
-      while (child != null) {
-        final SliverGeometry childLayoutGeometry = child.geometry!;
-        final childParentData = child.parentData! as SliverPhysicalParentData;
-        final double childMainAxisPaintOffset = switch (constraints.axis) {
-          Axis.vertical => childParentData.paintOffset.dy,
-          Axis.horizontal => childParentData.paintOffset.dx,
-        };
-        final double childPaintEnd = childMainAxisPaintOffset + childLayoutGeometry.paintExtent;
-        final bool childIsPinned = childLayoutGeometry.maxScrollObstructionExtent > 0;
-        if (childPaintEnd > remainingExtent || (pinnedChildrenOverflow && childIsPinned)) {
-          childParentData.paintOffset = switch (constraints.axis) {
-            Axis.vertical => Offset(0.0, childParentData.paintOffset.dy - paintCorrection),
-            Axis.horizontal => Offset(childParentData.paintOffset.dx - paintCorrection, 0.0),
-          };
+    if (!keepPinned) {
+      final double remainingExtent = math.max(0, scrollOffset - constraints.scrollOffset);
+      // If the children's paint extent exceeds the remaining scroll extent of the `RenderSliverMainAxisGroup`,
+      // they need to be corrected.
+      if (paintOffset > remainingExtent) {
+        final double paintCorrection = paintOffset - remainingExtent;
+        paintOffset = remainingExtent;
+        child = firstChild;
+        while (child != null) {
+          final SliverGeometry childLayoutGeometry = child.geometry!;
+          final bool childIsTooLarge = childLayoutGeometry.paintExtent > remainingExtent;
+          final bool pinnedHeadersOverflow = maxScrollObstructionExtent > remainingExtent;
+          final bool childIsPinnedHeader = childLayoutGeometry.maxScrollObstructionExtent > 0;
+          if (childIsTooLarge || (pinnedHeadersOverflow && childIsPinnedHeader)) {
+            final childParentData = child.parentData! as SliverPhysicalParentData;
+            childParentData.paintOffset = switch (constraints.axis) {
+              Axis.vertical => Offset(0.0, childParentData.paintOffset.dy - paintCorrection),
+              Axis.horizontal => Offset(childParentData.paintOffset.dx - paintCorrection, 0.0),
+            };
+          }
+          child = childAfter(child);
         }
-        child = childAfter(child);
       }
     }
 
@@ -405,12 +425,20 @@ class RenderSliverMainAxisGroup extends RenderSliver
       to: scrollOffset,
     );
     final double paintExtent = clampDouble(paintOffset, 0, constraints.remainingPaintExtent);
+    final double? layoutExtent = keepPinned
+        ?
+          // Sometimes, layoutOffset can slighly be greater than paintExtent
+          // with `precisionErrorTolerance`
+          math.min(layoutOffset, paintExtent)
+        : null;
 
     geometry = SliverGeometry(
       scrollExtent: scrollOffset,
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,
+      layoutExtent: layoutExtent,
       maxPaintExtent: maxPaintExtent,
+      maxScrollObstructionExtent: keepPinned ? maxScrollObstructionExtent : 0.0,
       hasVisualOverflow:
           scrollOffset > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
@@ -490,6 +518,12 @@ class RenderSliverMainAxisGroup extends RenderSliver
       }
       child = childAfter(child);
     }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('keepPinned', keepPinned, defaultValue: false));
   }
 
   static double _fixPrecisionError(double number) {

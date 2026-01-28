@@ -1853,14 +1853,29 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
 class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the main axis.
-  const SliverMainAxisGroup({super.key, required List<Widget> slivers}) : super(children: slivers);
+  const SliverMainAxisGroup({super.key, this.keepPinned = false, required List<Widget> slivers})
+    : super(children: slivers);
+
+  /// Whether to keep the sliver children pinned in place.
+  final bool keepPinned;
 
   @override
   MultiChildRenderObjectElement createElement() => _SliverMainAxisGroupElement(this);
 
   @override
   RenderSliverMainAxisGroup createRenderObject(BuildContext context) {
-    return RenderSliverMainAxisGroup();
+    return RenderSliverMainAxisGroup(keepPinned: keepPinned);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverMainAxisGroup renderObject) {
+    renderObject.keepPinned = keepPinned;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('keepPinned', keepPinned, defaultValue: false));
   }
 }
 
