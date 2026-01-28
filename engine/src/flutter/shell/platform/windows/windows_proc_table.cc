@@ -13,6 +13,10 @@ WindowsProcTable::WindowsProcTable() {
   user32_ = fml::NativeLibrary::Create("user32.dll");
   get_pointer_type_ =
       user32_->ResolveFunction<GetPointerType_*>("GetPointerType");
+  get_pointer_info_ =
+      user32_->ResolveFunction<GetPointerInfo_*>("GetPointerInfo");
+  get_pointer_pen_info_ =
+      user32_->ResolveFunction<GetPointerPenInfo_*>("GetPointerPenInfo");
   enable_non_client_dpi_scaling_ =
       user32_->ResolveFunction<EnableNonClientDpiScaling_*>(
           "EnableNonClientDpiScaling");
@@ -35,6 +39,25 @@ BOOL WindowsProcTable::GetPointerType(UINT32 pointer_id,
   }
 
   return get_pointer_type_.value()(pointer_id, pointer_type);
+}
+
+BOOL WindowsProcTable::GetPointerInfo(UINT32 pointer_id,
+                                      POINTER_INFO* pointer_info) const {
+  if (!get_pointer_info_.has_value()) {
+    return FALSE;
+  }
+
+  return get_pointer_info_.value()(pointer_id, pointer_info);
+}
+
+BOOL WindowsProcTable::GetPointerPenInfo(
+    UINT32 pointer_id,
+    POINTER_PEN_INFO* pointer_pen_info) const {
+  if (!get_pointer_pen_info_.has_value()) {
+    return FALSE;
+  }
+
+  return get_pointer_pen_info_.value()(pointer_id, pointer_pen_info);
 }
 
 LRESULT WindowsProcTable::GetThreadPreferredUILanguages(DWORD flags,
