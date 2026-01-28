@@ -1429,7 +1429,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           math.max(currentDragValue, currentValues.start + _minThumbSeparationValue),
         ),
       };
-      onChanged!(_newValues);
+      onChanged!(_discretizeRangeValues(_newValues));
     }
   }
 
