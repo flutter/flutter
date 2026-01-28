@@ -296,9 +296,6 @@ mixin _ChildWindowHierarchyMixin {
 
     return activateable;
   }
-
-  /// The rectangle of this window in global coordinates.
-  Rect get rect;
 }
 
 class _TestRegularWindowController extends RegularWindowController with _ChildWindowHierarchyMixin {
@@ -351,19 +348,6 @@ class _TestRegularWindowController extends RegularWindowController with _ChildWi
 
   @override
   bool get isFullscreen => _isFullscreen;
-
-  @override
-  Rect get rect {
-    // Regular windows are centered in the display.
-    final ui.Display display = rootView.display;
-    final Size size = contentSize;
-    return Rect.fromLTWH(
-      display.size.width / 2 - size.width / 2,
-      display.size.height / 2 - size.height / 2,
-      size.width,
-      size.height,
-    );
-  }
 
   @override
   void setSize(Size size) {
@@ -515,19 +499,6 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
   bool get isMinimized => _isMinimized;
 
   @override
-  Rect get rect {
-    // Dialog windows are centered in the display.
-    final ui.Display display = rootView.display;
-    final Size size = contentSize;
-    return Rect.fromLTWH(
-      display.size.width / 2 - size.width / 2,
-      display.size.height / 2 - size.height / 2,
-      size.width,
-      size.height,
-    );
-  }
-
-  @override
   void setSize(Size size) {
     _size = size;
     _constrainToBounds();
@@ -604,9 +575,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
       constraints: _constraints,
       onRender: (size) {
         if (_isSizedToContent && _lastRenderedSize != size) {
-          // Trigger a re-render with the correct size.
           _lastRenderedSize = size;
-          platformDispatcher.scheduleFrame();
           scheduleMicrotask(() {
             notifyListeners();
           });
@@ -625,10 +594,10 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   // ignore: unused_field
   final bool _isSizedToContent;
   Size? _lastRenderedSize;
-  Rect? _currentRect;
 
   @override
-  Size get contentSize => _isSizedToContent ? _placeTooltipWindow() : _constraints.smallest;
+  Size get contentSize =>
+      _isSizedToContent && _lastRenderedSize != null ? _lastRenderedSize! : _constraints.biggest;
 
   @override
   BaseWindowController get parent => _parent;
@@ -651,38 +620,6 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
     removeAllChildren();
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(parent, this);
-  }
-
-  Size _placeTooltipWindow() {
-    if (_lastRenderedSize == null) {
-      return _constraints.smallest;
-    }
-
-    final childWindowMixin = parent as _ChildWindowHierarchyMixin;
-    final double scale = rootView.devicePixelRatio;
-    final scaledAnchorRect = Rect.fromLTWH(
-      _anchorRect.left * scale,
-      _anchorRect.top * scale,
-      _anchorRect.width * scale,
-      _anchorRect.height * scale,
-    );
-    final Offset scaledOffset = _positioner.offset * scale;
-    final WindowPositioner scaledPositioner = _positioner.copyWith(offset: scaledOffset);
-
-    /// Center the parent window in the display.
-    final ui.Display display = rootView.display;
-    _currentRect = scaledPositioner.placeWindow(
-      childSize: _lastRenderedSize!,
-      anchorRect: scaledAnchorRect.translate(childWindowMixin.rect.left, childWindowMixin.rect.top),
-      parentRect: childWindowMixin.rect,
-      displayRect: Rect.fromLTWH(0, 0, display.size.width, display.size.height),
-    );
-    return _currentRect!.size;
-  }
-
-  @override
-  Rect get rect {
-    return _currentRect ?? Rect.zero;
   }
 }
 
@@ -729,12 +666,6 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   bool get isActivated => windowingOwner.isWindowControllerActive(this);
-
-  @override
-  Rect get rect {
-    // TODO: Implement proper popup positioning logic.
-    return Rect.zero;
-  }
 
   @override
   void activate() {
