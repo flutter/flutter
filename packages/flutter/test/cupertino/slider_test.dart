@@ -5,7 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -42,17 +41,15 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               );
             },
@@ -80,17 +77,15 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               );
             },
@@ -121,20 +116,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                    onChangeStart: (double value) {
-                      numberOfTimesOnChangeStartIsCalled++;
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  onChangeStart: (double value) {
+                    numberOfTimesOnChangeStartIsCalled++;
+                  },
                 ),
               );
             },
@@ -166,20 +159,18 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                    onChangeEnd: (double value) {
-                      numberOfTimesOnChangeEndIsCalled++;
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  onChangeEnd: (double value) {
+                    numberOfTimesOnChangeEndIsCalled++;
+                  },
                 ),
               );
             },
@@ -210,23 +201,21 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                    onChangeStart: (double value) {
-                      startValue = value;
-                    },
-                    onChangeEnd: (double value) {
-                      endValue = value;
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  onChangeStart: (double value) {
+                    startValue = value;
+                  },
+                  onChangeEnd: (double value) {
+                    endValue = value;
+                  },
                 ),
               );
             },
@@ -273,17 +262,15 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               );
             },
@@ -359,17 +346,15 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               );
             },
@@ -402,27 +387,25 @@ void main() {
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                    onChangeStart: (double value) {
-                      setState(() {
-                        startValue = value;
-                      });
-                    },
-                    onChangeEnd: (double value) {
-                      setState(() {
-                        endValue = value;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  onChangeStart: (double value) {
+                    setState(() {
+                      startValue = value;
+                    });
+                  },
+                  onChangeEnd: (double value) {
+                    setState(() {
+                      endValue = value;
+                    });
+                  },
                 ),
               );
             },
@@ -792,17 +775,15 @@ void main() {
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return Material(
-                child: Center(
-                  child: CupertinoSlider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
+              return Center(
+                child: CupertinoSlider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               );
             },
