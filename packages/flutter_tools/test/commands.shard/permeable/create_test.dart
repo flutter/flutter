@@ -2912,7 +2912,6 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
-
   testUsingContext(
     'plugin includes only setting.gradle.kts',
     () async {
