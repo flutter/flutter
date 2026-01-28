@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2072,5 +2073,31 @@ void main() {
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('ExpansionTile statesController', (WidgetTester tester) async {
+    final WidgetStatesController controller = WidgetStatesController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            statesController: controller,
+            title: const Text('Title'),
+            children: const <Widget>[SizedBox(height: 100, width: 100)],
+          ),
+        ),
+      ),
+    );
+
+    expect(controller.value, <WidgetState>{});
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.text('Title')));
+    await tester.pumpAndSettle();
+
+    expect(controller.value, <WidgetState>{WidgetState.hovered});
+
+    await gesture.removePointer();
   });
 }
