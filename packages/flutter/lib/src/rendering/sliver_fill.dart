@@ -13,6 +13,7 @@ import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'sliver_fixed_extent_list.dart';
+import 'sliver_multi_box_adaptor.dart';
 
 /// A sliver that contains multiple box children that each fill the viewport.
 ///
@@ -32,9 +33,13 @@ import 'sliver_fixed_extent_list.dart';
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
-  RenderSliverFillViewport({required super.childManager, double viewportFraction = 1.0})
-    : assert(viewportFraction > 0.0),
-      _viewportFraction = viewportFraction;
+  RenderSliverFillViewport({
+    required super.childManager,
+    double viewportFraction = 1.0,
+    bool allowImplicitScrolling = true,
+  }) : assert(viewportFraction > 0.0),
+       _viewportFraction = viewportFraction,
+       _allowImplicitScrolling = allowImplicitScrolling;
 
   @override
   double get itemExtent => constraints.viewportMainAxisExtent * viewportFraction;
@@ -52,6 +57,43 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     }
     _viewportFraction = value;
     markNeedsLayout();
+  }
+
+  /// Whether the user can traverse to the hidden pages.
+  ///
+  /// If set to false, the hidden pages are excluded from the semantics tree.
+  bool get allowImplicitScrolling => _allowImplicitScrolling;
+  bool _allowImplicitScrolling;
+  set allowImplicitScrolling(bool value) {
+    if (_allowImplicitScrolling == value) {
+      return;
+    }
+    _allowImplicitScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (allowImplicitScrolling) {
+      super.visitChildrenForSemantics(visitor);
+      return;
+    }
+
+    final double visibleStart = constraints.scrollOffset;
+    final double visibleEnd = visibleStart + constraints.viewportMainAxisExtent;
+
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final double childStart =
+          (child.parentData! as SliverMultiBoxAdaptorParentData).layoutOffset!;
+      if (childStart >= visibleEnd) {
+        break;
+      }
+      if (childStart + itemExtent > visibleStart) {
+        visitor(child);
+      }
+      child = childAfter(child);
+    }
   }
 }
 

@@ -1661,4 +1661,250 @@ void main() {
     controller.animateToPage(1, duration: const Duration(milliseconds: 50), curve: Curves.bounceIn);
     expect(tester.takeException(), null);
   });
+
+  testWidgets('PageView respects cacheExtent', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          cacheExtent: 1.0,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('Page 0'), findsOneWidget);
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+
+    // Invalid configuration: allowImplicitScrolling: true && cacheExtent: 0.0
+    expect(() {
+      PageView(
+        controller: controller,
+        cacheExtent: 0.0,
+        allowImplicitScrolling: true,
+        children: List<Widget>.generate(3, (int i) {
+          return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+        }),
+      );
+    }, throwsAssertionError);
+  });
+
+  testWidgets('PageView cacheExtent defaults to allowImplicitScrolling behavior', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({required bool allowImplicitScrolling, double? cacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: allowImplicitScrolling,
+          cacheExtent: cacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Default (allowImplicitScrolling: false) -> cacheExtent: 0.0
+    await tester.pumpWidget(build(allowImplicitScrolling: false));
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+
+    // allowImplicitScrolling: true -> cacheExtent: 1.0
+    await tester.pumpWidget(build(allowImplicitScrolling: true));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+
+    // Invalid configuration: allowImplicitScrolling: true && cacheExtent: 0.0
+    expect(() => build(allowImplicitScrolling: true, cacheExtent: 0.0), throwsAssertionError);
+  });
+
+  testWidgets('PageView updates cacheExtent dynamically', (WidgetTester tester) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    Widget build({double? cacheExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          cacheExtent: cacheExtent,
+          children: List<Widget>.generate(3, (int i) {
+            return SizedBox(key: ValueKey<int>(i), child: Text('Page $i'));
+          }),
+        ),
+      );
+    }
+
+    // Start with 0.0
+    await tester.pumpWidget(build(cacheExtent: 0.0));
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+
+    // Update to 1.0
+    await tester.pumpWidget(build(cacheExtent: 1.0));
+    expect(find.text('Page 1', skipOffstage: false), findsOneWidget);
+
+    // Update back to 0.0
+    await tester.pumpWidget(build(cacheExtent: 0.0));
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('PageView semantics respects allowImplicitScrolling', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    // Off-screen pages should be excluded from semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(children: const <Widget>[Text('Page 1'), Text('Page 2')]),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page 2')));
+
+    // Off-screen pages should be included in semantics.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'Page 1'));
+    expect(semantics, includesNodeWith(label: 'Page 2'));
+
+    semantics.dispose();
+  });
+
+  testWidgets('PageView cacheExtent does not affect ïhasImplicitScrolling semantics flag', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          cacheExtent: 2.0,
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    // Pages are pre-built due to cacheExtent.
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 3', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 4', skipOffstage: false), findsNothing);
+
+    // hasImplicitScrolling is controlled by allowImplicitScrolling, not cacheExtent.
+    expect(
+      semantics,
+      isNot(includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling])),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('PageView showOnScreen blocks scrolling when allowImplicitScrolling is false', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          cacheExtent: 1.0, // Explicitly set cacheExtent.
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    // Page 2 exists due to cacheExtent.
+    final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+    expect(targetFinder, findsOneWidget);
+
+    final RenderObject target = tester.renderObject(targetFinder);
+    target.showOnScreen();
+    await tester.pumpAndSettle();
+
+    // Should not scroll.
+    expect(controller.page, 0.0);
+  });
+
+  testWidgets('PageView showOnScreen scrolls when allowImplicitScrolling is true', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          cacheExtent: 1.0, // Explicitly set cacheExtent.
+          allowImplicitScrolling: true, // Enabled.
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+    expect(targetFinder, findsOneWidget);
+
+    final RenderObject target = tester.renderObject(targetFinder);
+    target.showOnScreen();
+    await tester.pumpAndSettle();
+
+    // Should scroll.
+    expect(controller.page, 1.0);
+  });
+
+  testWidgets('PageView showOnScreen scrolling behavior is consistent with default cacheExtent', (
+    WidgetTester tester,
+  ) async {
+    // This test verifies that providing an explicit cacheExtent behaves consistently
+    // with PageView's default behavior when allowImplicitScrolling is true.
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2'), Text('Page 3'), Text('Page 4')],
+        ),
+      ),
+    );
+
+    // Page 2 (index 1) is within the implicit cache extent.
+    final Finder targetFinder = find.text('Page 2', skipOffstage: false);
+    expect(targetFinder, findsOneWidget);
+
+    final RenderObject target = tester.renderObject(targetFinder);
+    target.showOnScreen();
+    await tester.pumpAndSettle();
+
+    // Should scroll (existing behavior).
+    expect(controller.page, 1.0);
+  });
 }
