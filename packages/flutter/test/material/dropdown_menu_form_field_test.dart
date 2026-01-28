@@ -229,7 +229,9 @@ void main() {
     expect(dropdownMenu.showTrailingIcon, showTrailingIcon);
   });
 
-  testWidgets('Passes trailingIconFocusNode to underlying DropdownMenu', (WidgetTester tester) async {
+  testWidgets('Passes trailingIconFocusNode to underlying DropdownMenu', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
