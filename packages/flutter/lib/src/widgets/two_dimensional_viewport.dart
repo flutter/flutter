@@ -8,8 +8,6 @@
 /// @docImport 'viewport.dart';
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -725,20 +723,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   bool _hasVisualOverflow = false;
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
+  final List<ChildVicinity> _currentChildVicinities = <ChildVicinity>[];
+
   @override
   bool get isRepaintBoundary => true;
 
   @override
   bool get sizedByParent => true;
-
-  // Keeps track of the upper and lower bounds of ChildVicinity indices when
-  // subclasses call buildOrObtainChildFor during layoutChildSequence. These
-  // values are used to sort children in accordance with the mainAxis for
-  // paint order.
-  int? _leadingXIndex;
-  int? _trailingXIndex;
-  int? _leadingYIndex;
-  int? _trailingYIndex;
 
   /// The first child of the viewport according to the traversal order of the
   /// [mainAxis].
@@ -1301,13 +1292,23 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
   }
 
+  void _sortByYIndex() {
+    _currentChildVicinities.sort((a, b) {
+      final int yComparison = a.yIndex.compareTo(b.yIndex);
+      if (yComparison != 0) {
+        return yComparison;
+      }
+      return a.xIndex.compareTo(b.xIndex);
+    });
+  }
+
+  void _sortByXIndex() {
+    _currentChildVicinities.sort();
+  }
+
   // Ensures all children have a layoutOffset, sets paintExtent & paintOffset,
   // and arranges children in paint order.
   void _reifyChildren() {
-    assert(_leadingXIndex != null);
-    assert(_trailingXIndex != null);
-    assert(_leadingYIndex != null);
-    assert(_trailingYIndex != null);
     assert(_firstChild == null);
     assert(_lastChild == null);
     RenderBox? previousChild;
@@ -1319,35 +1320,22 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         // typical default for matrices, which is why the inverse follows
         // through in the horizontal case below.
         // Minor
-        for (int minorIndex = _leadingYIndex!; minorIndex <= _trailingYIndex!; minorIndex++) {
-          // Major
-          for (int majorIndex = _leadingXIndex!; majorIndex <= _trailingXIndex!; majorIndex++) {
-            final vicinity = ChildVicinity(xIndex: majorIndex, yIndex: minorIndex);
-            previousChild =
-                _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
-          }
-        }
+        _sortByYIndex();
       case Axis.horizontal:
         // Column major traversal
         // Minor
-        for (int minorIndex = _leadingXIndex!; minorIndex <= _trailingXIndex!; minorIndex++) {
-          // Major
-          for (int majorIndex = _leadingYIndex!; majorIndex <= _trailingYIndex!; majorIndex++) {
-            final vicinity = ChildVicinity(xIndex: minorIndex, yIndex: majorIndex);
-            previousChild =
-                _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
-          }
-        }
+        _sortByXIndex();
+    }
+    for (final ChildVicinity vicinity in _currentChildVicinities) {
+      previousChild =
+          _completeChildParentData(vicinity, previousChild: previousChild) ?? previousChild;
     }
     _lastChild = previousChild;
     if (_lastChild != null) {
       parentDataOf(_lastChild!)._nextSibling = null;
     }
     // Reset for next layout pass.
-    _leadingXIndex = null;
-    _trailingXIndex = null;
-    _leadingYIndex = null;
-    _trailingYIndex = null;
+    _currentChildVicinities.clear();
   }
 
   RenderBox? _completeChildParentData(ChildVicinity vicinity, {RenderBox? previousChild}) {
@@ -1420,28 +1408,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(vicinity != ChildVicinity.invalid);
     // This should only be called during layout.
     assert(debugDoingThisLayout);
-    if (_leadingXIndex == null ||
-        _trailingXIndex == null ||
-        _leadingXIndex == null ||
-        _trailingYIndex == null) {
-      // First child of this layout pass. Set leading and trailing trackers.
-      _leadingXIndex = vicinity.xIndex;
-      _trailingXIndex = vicinity.xIndex;
-      _leadingYIndex = vicinity.yIndex;
-      _trailingYIndex = vicinity.yIndex;
-    } else {
-      // If any of these are still null, we missed a child.
-      assert(_leadingXIndex != null);
-      assert(_trailingXIndex != null);
-      assert(_leadingYIndex != null);
-      assert(_trailingYIndex != null);
-
-      // Update as we go.
-      _leadingXIndex = math.min(vicinity.xIndex, _leadingXIndex!);
-      _trailingXIndex = math.max(vicinity.xIndex, _trailingXIndex!);
-      _leadingYIndex = math.min(vicinity.yIndex, _leadingYIndex!);
-      _trailingYIndex = math.max(vicinity.yIndex, _trailingYIndex!);
-    }
     if (_needsDelegateRebuild ||
         (!_children.containsKey(vicinity) && !_keepAliveBucket.containsKey(vicinity))) {
       invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
@@ -1461,6 +1427,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final RenderBox child = _children[vicinity]!;
     _activeChildrenForLayoutPass[vicinity] = child;
     parentDataOf(child).vicinity = vicinity;
+    _currentChildVicinities.add(vicinity);
     return child;
   }
 
