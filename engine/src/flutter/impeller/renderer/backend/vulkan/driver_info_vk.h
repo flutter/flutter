@@ -280,6 +280,8 @@ class DriverInfoVK {
  private:
   bool is_valid_ = false;
   Version api_version_;
+  uint32_t driver_version_;
+  uint32_t device_id_ = 0;
   VendorVK vendor_ = VendorVK::kUnknown;
   DeviceTypeVK type_ = DeviceTypeVK::kUnknown;
   // If the VendorVK is  VendorVK::kQualcomm, this will be populated with the
