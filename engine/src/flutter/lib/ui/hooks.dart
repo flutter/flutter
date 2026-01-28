@@ -396,6 +396,11 @@ void _drawFrame() {
 }
 
 @pragma('vm:entry-point')
+void _textureFrameAvailable(int textureId) {
+  PlatformDispatcher.instance._textureFrameAvailable(textureId);
+}
+
+@pragma('vm:entry-point')
 bool _onError(Object error, StackTrace? stackTrace) {
   return PlatformDispatcher.instance._dispatchError(error, stackTrace ?? StackTrace.empty);
 }

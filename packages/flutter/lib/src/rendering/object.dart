@@ -1117,6 +1117,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   @nonVirtual
   Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
+  bool get needsLayout => _nodesNeedingLayout.isNotEmpty;
+
   /// Whether this pipeline is currently in the layout phase.
   ///
   /// Specifically, whether [flushLayout] is currently running.
@@ -1273,6 +1275,12 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   @protected
   @nonVirtual
   Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
+
+  /// Returns true if there are any nodes that need to be painted.
+  ///
+  /// This is used by [RendererBinding.drawFrame] to determine which views
+  /// need to be composited.
+  bool get needsPaint => _nodesNeedingPaint.isNotEmpty;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
