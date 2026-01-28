@@ -336,6 +336,40 @@ void main() {
     expect(columnRect.right, 100.0);
   });
 
+  testWidgets('ExpansionTile expandedAlignment with directional test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                expandedAlignment: AlignmentDirectional.topEnd,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100),
+                  SizedBox(height: 100, width: 80),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+
+    // The expandedAlignment is used to define the alignment of the Column widget in
+    // expanded tile, not the alignment of the children inside the Column.
+    expect(columnRect.left, 0.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the right edge of Column from X-axis should be 100.0.
+    expect(columnRect.right, 100.0);
+  });
+
   testWidgets('ExpansionTile expandedCrossAxisAlignment test', (WidgetTester tester) async {
     const child0Key = Key('child0');
     const child1Key = Key('child1');
@@ -371,6 +405,57 @@ void main() {
     // Since expandedAlignment is set to Alignment.centerRight, the column of children
     // should be aligned to the center right of the expanded tile. This provides confirmation
     // that the expandedCrossAxisAlignment.start is 700.0, where columnRect.left is.
+    expect(columnRect.right, 800.0);
+    // The width of the Column is the width of the largest child. The largest width
+    // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
+    expect(columnRect.left, 700.0);
+
+    // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
+    // the offset of the left edge of both the children from X-axis should be 700.0.
+    expect(child0Rect.left, 700.0);
+    expect(child1Rect.left, 700.0);
+  });
+
+  testWidgets('ExpansionTile expandedCrossAxisAlignment with directional expandedAlignment test', (
+    WidgetTester tester,
+  ) async {
+    const child0Key = Key('child0');
+    const child1Key = Key('child1');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Material(
+            child: Center(
+              child: ExpansionTile(
+                title: Text('title'),
+                // Set the column's alignment to AlignmentDirectional.centerStart to test CrossAxisAlignment
+                // of children widgets. This helps distinguish the effect of expandedAlignment
+                // and expandedCrossAxisAlignment later in the test.
+                expandedAlignment: AlignmentDirectional.centerStart,
+                expandedCrossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  SizedBox(height: 100, width: 100, key: child0Key),
+                  SizedBox(height: 100, width: 80, key: child1Key),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    final Rect columnRect = tester.getRect(find.byType(Column).last);
+    final Rect child0Rect = tester.getRect(find.byKey(child0Key));
+    final Rect child1Rect = tester.getRect(find.byKey(child1Key));
+
+    // Since expandedAlignment is set to AlignmentDirectional.centerStart, the column of children
+    // should be aligned to the center left of the expanded tile. This provides confirmation
+    // that the expandedCrossAxisAlignment.end is 700.0, where columnRect.left is.
     expect(columnRect.right, 800.0);
     // The width of the Column is the width of the largest child. The largest width
     // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
