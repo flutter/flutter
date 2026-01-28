@@ -2932,6 +2932,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     required this.orientation,
     required this.parentOrientation,
     required this.reservedPadding,
+    required this.mediaQueryData,
   });
 
   // Rectangle of underlying button, relative to the overlay's dimensions.
@@ -2966,6 +2967,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // How close to the edge of the safe area the menu will be placed.
   final EdgeInsetsGeometry reservedPadding;
 
+  final MediaQueryData mediaQueryData;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus the view padding
@@ -2978,7 +2981,9 @@ class _MenuLayout extends SingleChildLayoutDelegate {
     // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
-    final Rect overlayRect = Offset.zero & size;
+    final Rect overlayRect = mediaQueryData.padding.deflateRect(
+      mediaQueryData.viewInsets.deflateRect(Offset.zero & size),
+    );
     double x;
     double y;
     if (menuPosition == null) {
@@ -3416,6 +3421,7 @@ class _Submenu extends StatelessWidget {
                 orientation: anchor._orientation,
                 parentOrientation: anchor._parent?._orientation ?? Axis.horizontal,
                 reservedPadding: reservedPadding,
+                mediaQueryData: mediaQuery,
               ),
               child: menuPanel,
             );
