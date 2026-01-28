@@ -1223,11 +1223,14 @@ class DropdownButton<T> extends StatefulWidget {
   /// its own decorations, like [InputDecorator].
   final bool isDense;
 
-  /// Set the dropdown's inner contents to horizontally fill its parent.
+  /// Controls whether the dropdown's inner contents expand to fill the
+  /// available space.
   ///
-  /// By default this button's inner width is the minimum size of its contents.
-  /// If [isExpanded] is true, the inner width is expanded to fill its
-  /// surrounding container.
+  /// When `true`, the inner width and height of the dropdown are expanded
+  /// to match its parent container. By default, the inner width is only as
+  /// wide as its contents, and the height is minimal. Setting this to `true`
+  /// ensures that the dropdown's underline and items align properly within
+  /// its container.
   final bool isExpanded;
 
   /// If null, then the menu item heights will vary according to each menu item's
@@ -1728,6 +1731,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               isEmpty: widget._isEmpty,
               isFocused: _hasPrimaryFocus,
               isHovering: _isHovering,
+              expands: widget.isExpanded,
               child: widget.padding == null
                   ? result
                   : Padding(padding: widget.padding!, child: result),
