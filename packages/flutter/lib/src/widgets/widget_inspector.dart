@@ -26,6 +26,7 @@ import 'dart:ui'
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:meta/meta_meta.dart';
 
@@ -3061,29 +3062,33 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack containing a _RenderInspectorOverlay as a child.
-    return Stack(
-      children: <Widget>[
-        GestureDetector(
-          onTap: _handleTap,
-          onPanDown: _handlePanDown,
-          onPanEnd: _handlePanEnd,
-          onPanUpdate: _handlePanUpdate,
-          behavior: HitTestBehavior.opaque,
-          excludeFromSemantics: true,
-          child: IgnorePointer(
-            ignoring: _isSelectModeWithSelectionOnTapEnabled,
-            key: _ignorePointerKey,
-            child: widget.child,
+    return SafeArea(
+      child: Stack(
+        children: <Widget>[
+          GestureDetector(
+            onTap: _handleTap,
+            onPanDown: _handlePanDown,
+            onPanEnd: _handlePanEnd,
+            onPanUpdate: _handlePanUpdate,
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            child: IgnorePointer(
+              ignoring: _isSelectModeWithSelectionOnTapEnabled,
+              key: _ignorePointerKey,
+              child: widget.child,
+            ),
           ),
-        ),
-        Positioned.fill(child: _InspectorOverlay(selection: selection)),
-        if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
-          _WidgetInspectorButtonGroup(
-            tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
-            exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,
-            moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
-          ),
-      ],
+          Positioned.fill(child: _InspectorOverlay(selection: selection)),
+          if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
+            _WidgetInspectorButtonGroup(
+              tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
+              exitWidgetSelectionButtonBuilder:
+                  widget.exitWidgetSelectionButtonBuilder!,
+              moveExitWidgetSelectionButtonBuilder:
+                  widget.moveExitWidgetSelectionButtonBuilder,
+            ),
+        ],
+      ),
     );
   }
 }
