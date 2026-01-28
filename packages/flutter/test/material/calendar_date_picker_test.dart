@@ -1542,56 +1542,82 @@ void main() {
         semantics.dispose();
       });
 
-      // This is a regression test for https://github.com/flutter/flutter/issues/143439.
+      // This test verifies that date selection changes are announced using live regions,
+      // maintaining the fix for https://github.com/flutter/flutter/issues/143439
+      // after migrating away from the deprecated SemanticsService.sendAnnouncement.
       testWidgets(
         'Selected date Semantics announcement on onDateChanged',
         (WidgetTester tester) async {
           final SemanticsHandle semantics = tester.ensureSemantics();
           const localizations = DefaultMaterialLocalizations();
           final initialDate = DateTime(2016, DateTime.january, 15);
+          final currentDate = DateTime(
+            2016,
+            DateTime.january,
+            3,
+          ); // Default in calendarDatePicker helper.
           DateTime? selectedDate;
 
           await tester.pumpWidget(
             calendarDatePicker(
               initialDate: initialDate,
+              currentDate: currentDate,
               onDateChanged: (DateTime value) {
                 selectedDate = value;
               },
             ),
           );
 
-          final bool isToday = DateUtils.isSameDay(initialDate, selectedDate);
-          final semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
-
-          // The initial date should be announced.
+          // Verify initial date announcement exists and is a live region.
+          bool isToday = DateUtils.isSameDay(currentDate, initialDate);
+          var semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final initialLabel = '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix';
+          final Finder initialAnnouncement = find.bySemanticsLabel(initialLabel);
+          expect(initialAnnouncement, findsOneWidget);
           expect(
-            tester.takeAnnouncements().last,
-            isAccessibilityAnnouncement(
-              '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
-            ),
+            tester
+                .getSemantics(initialAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
-          // Select a new date.
+          // Select a new date (20th).
           await tester.tap(find.text('20'));
           await tester.pumpAndSettle();
 
-          // The selected date should be announced.
+          // Verify the new selection is announced via a live region.
+          isToday = DateUtils.isSameDay(currentDate, selectedDate);
+          semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final selectedLabel =
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix';
+          final Finder selectedAnnouncement = find.bySemanticsLabel(selectedLabel);
+          expect(selectedAnnouncement, findsOneWidget);
           expect(
-            tester.takeAnnouncements().last,
-            isAccessibilityAnnouncement(
-              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
-            ),
+            tester
+                .getSemantics(selectedAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
-          // Select the initial date.
+          // Select the initial date again (15th).
           await tester.tap(find.text('15'));
+          await tester.pumpAndSettle();
 
-          // The initial date should be announced as selected.
+          // Verify re-selection announcement via a live region.
+          isToday = DateUtils.isSameDay(currentDate, selectedDate);
+          semanticLabelSuffix = isToday ? ', ${localizations.currentDateLabel}' : '';
+          final reSelectedLabel =
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix';
+          final Finder reSelectedAnnouncement = find.bySemanticsLabel(reSelectedLabel);
+          expect(reSelectedAnnouncement, findsOneWidget);
           expect(
-            tester.takeAnnouncements().first,
-            isAccessibilityAnnouncement(
-              '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
-            ),
+            tester
+                .getSemantics(reSelectedAnnouncement)
+                .getSemanticsData()
+                .hasFlag(SemanticsFlag.isLiveRegion),
+            isTrue,
           );
 
           semantics.dispose();
