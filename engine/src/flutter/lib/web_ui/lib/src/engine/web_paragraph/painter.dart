@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
@@ -61,6 +63,9 @@ abstract class Painter {
     );
   }
 }
+
+final DomHTMLCanvasElement? _domHtmlCanvasElement = null;
+    //domDocument.createElement('canvas') as DomHTMLCanvasElement;
 
 class CanvasKitPainter extends Painter {
   CkImage? singleImageCache;
@@ -143,6 +148,68 @@ class CanvasKitPainter extends Painter {
 
   @override
   void drawParagraph(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
+    if (!hasSingleImageCache) {
+      // We should have resized the small canvas before calling this method
+      if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
+        WebParagraphDebug.error(
+          '_resizePaintCanvas needed: '
+          'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
+        );
+        assert(false);
+      }
+
+      SkImage? skImage;
+      if (_domHtmlCanvasElement != null) {
+        _domHtmlCanvasElement!.width = sourceRect.width;
+        _domHtmlCanvasElement!.height = sourceRect.height;
+
+        final context2D =
+            _domHtmlCanvasElement!.getContext('2d', {'willReadFrequently': true})!
+                as DomCanvasRenderingContext2D;
+        context2D.drawImage(paintCanvas, 0, 0);
+
+        final DomImageData imageData = context2D.getImageData(
+          0,
+          0,
+          sourceRect.width.ceil(),
+          sourceRect.height.ceil(),
+        );
+
+        final imageInfo = SkImageInfo(
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: sourceRect.width,
+          height: sourceRect.height,
+        );
+
+        skImage = canvasKit.MakeImage(
+          imageInfo,
+          Uint8List.view(imageData.data.buffer),
+          4 * sourceRect.width,
+        );
+      } else {
+        // Transfer the buffer from the small canvas
+        // This is synchronous and returns the handle immediately
+        final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
+        skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+      }
+
+      if (skImage == null) {
+        throw Exception('Failed to convert text image bitmap to an SkImage.');
+      }
+      singleImageCache = CkImage(skImage);
+    }
+
+    canvas.drawImageRect(
+      singleImageCache!,
+      sourceRect,
+      targetRect,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+  }
+
+  void drawParagraph1(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     if (!hasSingleImageCache) {
       // We should have resized the small canvas before calling this method
       if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
