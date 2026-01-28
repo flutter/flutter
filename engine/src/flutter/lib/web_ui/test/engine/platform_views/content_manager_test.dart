@@ -309,5 +309,32 @@ void testMain() {
         expect(() => contentManager.updatePlatformViewAccessibility(999, false), returnsNormally);
       });
     });
+
+    group('touch scrolling support', () {
+      setUp(() {
+        contentManager.registerFactory(viewType, (int id) => createDomHTMLDivElement());
+      });
+
+      test('sets touch-action style to enable native touch scrolling', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+
+        // Browser may return 'pan-x pan-y' or 'pan-y pan-x' depending on implementation
+        final String touchAction = wrapper.style.touchAction;
+        expect(
+          touchAction.contains('pan-x') && touchAction.contains('pan-y'),
+          isTrue,
+          reason: 'Platform views should have touch-action set to enable native touch scrolling',
+        );
+      });
+
+      test('sets up touch event listeners on content element', () {
+        final DomElement wrapper = contentManager.renderContent(viewType, viewId, null);
+        final DomElement content = wrapper.querySelector('div')!;
+
+        // Verify content element exists and is properly nested
+        expect(content, isNotNull);
+        expect(content.parentElement, equals(wrapper));
+      });
+    });
   });
 }

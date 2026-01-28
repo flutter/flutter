@@ -1193,6 +1193,54 @@ void testMain() {
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 
+  group('wheel event over HTML platform view', () {
+    test('wheel event dispatched to framework when not over platform view', () {
+      // When wheel event target is the root element (not inside platform view),
+      // _getHtmlScrollableInfo returns null and event is dispatched to framework.
+      final _ButtonedEventMixin context = _PointerEventContext();
+      final packets = <ui.PointerDataPacket>[];
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      final DomEvent event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+      );
+      rootElement.dispatchEvent(event);
+
+      // Event should be handled by Flutter (dispatched to framework)
+      // First wheel event generates 2 data items: synthesized add + scroll
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
+      expect(packets[0].data[1].scrollDeltaY, equals(100.0));
+      // And preventDefault should be called (since no widget allowed platform default)
+      expect(event.defaultPrevented, isTrue);
+    });
+
+    test('wheel event preventDefault is called when framework does not allow platform default', () {
+      final _ButtonedEventMixin context = _PointerEventContext();
+
+      // Don't set onPointerDataPacket - framework doesn't respond
+      final DomEvent event = context.wheel(
+        buttons: 0,
+        clientX: 10,
+        clientY: 10,
+        deltaX: 0,
+        deltaY: 100,
+      );
+      rootElement.dispatchEvent(event);
+
+      // preventDefault should be called since no widget allowed platform default
+      expect(event.defaultPrevented, isTrue);
+    });
+  });
+
   test('does calculate delta and pointer identifier correctly', () {
     final _ButtonedEventMixin context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
