@@ -223,6 +223,8 @@ public class FlutterView extends FrameLayout
                     }
                   }
                 });
+          } else {
+            Log.e(TAG, "Activity not available to run resize on UI thread.");
           }
         }
       };
