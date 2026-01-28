@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeTextInputControl with TextInputControl {
@@ -67,22 +67,35 @@ class FakeTextInputControl with TextInputControl {
 }
 
 void main() {
-  testWidgets('EditableText updates style when boldText changes', (WidgetTester tester) async {
-    final control = FakeTextInputControl();
-    TextInput.setInputControl(control);
+  late FakeTextInputControl control;
+  late TextEditingController controller;
+  late FocusNode focusNode;
 
+  setUp(() {
+    control = FakeTextInputControl();
+    TextInput.setInputControl(control);
+    controller = TextEditingController();
+    focusNode = FocusNode();
+  });
+
+  tearDown(() {
+    TextInput.restorePlatformInputControl();
+    controller.dispose();
+    focusNode.dispose();
+  });
+
+  testWidgets('EditableText updates style when boldText changes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(fontWeight: FontWeight.normal),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(fontWeight: FontWeight.normal),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -97,17 +110,16 @@ void main() {
 
     // Update boldText
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(boldText: true),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(fontWeight: FontWeight.normal),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(boldText: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(fontWeight: FontWeight.normal),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -116,28 +128,22 @@ void main() {
 
     expect(control.lastStyle, isNotNull);
     expect(control.lastStyle?.fontWeight, FontWeight.bold);
-
-    TextInput.restorePlatformInputControl();
   });
 
   testWidgets('EditableText updates style when letterSpacingOverride changes', (
     WidgetTester tester,
   ) async {
-    final control = FakeTextInputControl();
-    TextInput.setInputControl(control);
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(letterSpacing: 1.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(letterSpacing: 1.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -151,17 +157,16 @@ void main() {
 
     // Update letterSpacingOverride
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(letterSpacingOverride: 5.0),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(letterSpacing: 1.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(letterSpacingOverride: 5.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(letterSpacing: 1.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -170,28 +175,22 @@ void main() {
 
     expect(control.lastStyle, isNotNull);
     expect(control.lastStyle?.letterSpacing, 5.0);
-
-    TextInput.restorePlatformInputControl();
   });
 
   testWidgets('EditableText updates style when wordSpacingOverride changes', (
     WidgetTester tester,
   ) async {
-    final control = FakeTextInputControl();
-    TextInput.setInputControl(control);
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(wordSpacing: 2.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(wordSpacing: 2.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -205,17 +204,16 @@ void main() {
 
     // Update wordSpacingOverride
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(wordSpacingOverride: 10.0),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(wordSpacing: 2.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(wordSpacingOverride: 10.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(wordSpacing: 2.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -224,28 +222,22 @@ void main() {
 
     expect(control.lastStyle, isNotNull);
     expect(control.lastStyle?.wordSpacing, 10.0);
-
-    TextInput.restorePlatformInputControl();
   });
 
   testWidgets('EditableText updates style when lineHeightScaleFactorOverride changes', (
     WidgetTester tester,
   ) async {
-    final control = FakeTextInputControl();
-    TextInput.setInputControl(control);
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(lineHeightScaleFactorOverride: 1.0),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(fontSize: 20.0, height: 1.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(lineHeightScaleFactorOverride: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 20.0, height: 1.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -260,17 +252,16 @@ void main() {
 
     // Update lineHeightScaleFactorOverride to 2.0
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(lineHeightScaleFactorOverride: 2.0),
-          child: Material(
-            child: EditableText(
-              controller: TextEditingController(),
-              focusNode: FocusNode(),
-              style: const TextStyle(fontSize: 20.0, height: 1.0),
-              cursorColor: Colors.blue,
-              backgroundCursorColor: Colors.grey,
-            ),
+      MediaQuery(
+        data: const MediaQueryData(lineHeightScaleFactorOverride: 2.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 20.0, height: 1.0),
+            cursorColor: const Color(0xFF000000),
+            backgroundCursorColor: const Color(0xFF000000),
           ),
         ),
       ),
@@ -279,7 +270,5 @@ void main() {
 
     expect(control.lastStyle, isNotNull);
     expect(control.lastStyle!.lineHeight, 40.0);
-
-    TextInput.restorePlatformInputControl();
   });
 }
