@@ -975,6 +975,7 @@ void main() {
     expect(dropdownMenu.menuController, null);
 
     final menuController = MenuController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
