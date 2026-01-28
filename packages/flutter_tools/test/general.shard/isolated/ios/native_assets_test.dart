@@ -191,6 +191,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          appBuildDirectory: null,
         );
         await installCodeAssets(
           dartHookResult: dartHookResult,
