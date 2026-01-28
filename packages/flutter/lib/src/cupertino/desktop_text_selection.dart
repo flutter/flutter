@@ -70,7 +70,11 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
     return Offset.zero;
   }
 

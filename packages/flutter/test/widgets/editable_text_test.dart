@@ -538,6 +538,45 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('when cursorWidth is updated, TextSelectionOverlay should be updated', (
+    WidgetTester tester,
+  ) async {
+    Widget buildWidget(double cursorWidth) {
+      return MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          cursorWidth: cursorWidth,
+          selectionControls: materialTextSelectionControls,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(2.0));
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Ensure valid selection and focus.
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist.
+    state.toggleToolbar();
+    await tester.pump();
+
+    // Verify initial state.
+    expect(state.selectionOverlay, isNotNull);
+
+    // Update cursorWidth.
+    await tester.pumpWidget(buildWidget(10.0));
+
+    // Verify selectionOverlay still exists after update.
+    expect(state.selectionOverlay, isNotNull);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -17187,7 +17226,7 @@ void main() {
     await tester.pumpWidget(widget);
     await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, 75.0);
+    expect(scrollController.offset, 76.0);
   });
 
   testWidgets(
@@ -17931,7 +17970,11 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
     return Offset.zero;
   }
 
@@ -18036,7 +18079,11 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
     return Offset.zero;
   }
 
@@ -18293,7 +18340,11 @@ class _FakeTextSelectionHandleControls extends TextSelectionControls
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
     return Offset.zero;
   }
 

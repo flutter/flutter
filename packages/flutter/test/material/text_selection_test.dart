@@ -138,7 +138,7 @@ void main() {
           renderEditable,
         );
         expect(endpoints.length, 1);
-        final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+        final Offset handlePos = endpoints[0].point + const Offset(0.0, 10.0);
         await tester.tapAt(handlePos, pointer: 7);
         await tester.pumpAndSettle();
         expect(find.text('Cut'), findsNothing);
@@ -423,7 +423,7 @@ void main() {
           renderEditable,
         );
         expect(endpoints.length, 1);
-        final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+        final Offset handlePos = endpoints[0].point + const Offset(0.0, 10.0);
         await tester.tapAt(handlePos, pointer: 7);
         await tester.pumpAndSettle();
         expect(find.text('Cut'), findsNothing);
@@ -532,7 +532,7 @@ void main() {
           renderEditable,
         );
         expect(endpoints.length, 1);
-        final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+        final Offset handlePos = endpoints[0].point + const Offset(0.0, 10.0);
         await tester.tapAt(handlePos, pointer: 7);
         await tester.pumpAndSettle();
         expect(find.text('Cut'), findsNothing);
@@ -580,7 +580,6 @@ void main() {
               child: MediaQuery(
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
                 child: Align(
-                  alignment: Alignment.bottomCenter,
                   child: Material(
                     child: TextField(
                       decoration: const InputDecoration(contentPadding: EdgeInsets.all(8.0)),
@@ -612,7 +611,7 @@ void main() {
           renderEditable,
         );
         expect(endpoints.length, 1);
-        final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+        final Offset handlePos = endpoints[0].point + const Offset(0.0, 10.0);
         await tester.tapAt(handlePos, pointer: 7);
         await tester.pumpAndSettle();
         expect(find.text('Cut'), findsNothing);
@@ -770,4 +769,53 @@ void main() {
     skip: isBrowser, // [intended] we don't supply the cut/copy/paste buttons on the web.
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
   );
+
+  group('getHandleAnchor', () {
+    test('returns correct anchor for collapsed handle', () {
+      const expected = Offset(10.0, -5.0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+      );
+      expect(actual, equals(expected));
+    });
+
+    test('returns correct anchor for left handle', () {
+      const expected = Offset(22.0, 0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        0,
+      );
+      expect(actual, equals(expected));
+    });
+
+    test('returns correct anchor for right handle', () {
+      const Offset expected = Offset.zero;
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.right,
+        0,
+      );
+      expect(actual, equals(expected));
+    });
+
+    test('returns correct anchor for collapsed handle with custom cursor width', () {
+      const expected = Offset(1.0, -5.0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 20.0,
+      );
+      expect(actual, equals(expected));
+    });
+
+    test('returns correct anchor for collapsed handle with odd cursor width', () {
+      const expected = Offset(5.75, -5.0);
+      final Offset actual = materialTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        0,
+        cursorWidth: 10.5,
+      );
+      expect(actual, equals(expected));
+    });
+  });
 }
