@@ -64,6 +64,20 @@ See: https://github.com/flutter/flutter/issues/30701.
     expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
   });
 
+  testWidgets('Can create a modal dialog of the main window', (
+    WidgetTester tester,
+  ) async {
+    multiple_windows.main();
+    await tester.pump(); // triggers a frame
+
+    final toTap = find.widgetWithText(OutlinedButton, 'Modal Dialog');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Dialog'), findsOneWidget);
+  });
+
   testWidgets('Can create a modal dialog of a regular window', (
     WidgetTester tester,
   ) async {

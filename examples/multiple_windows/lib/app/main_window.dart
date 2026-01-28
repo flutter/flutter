@@ -194,60 +194,84 @@ class _WindowCreatorCard extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                OutlinedButton(
-                  onPressed: () {
-                    final UniqueKey key = UniqueKey();
-                    windowManager.add(
-                      KeyedWindow(
-                        key: key,
-                        controller: RegularWindowController(
-                          delegate: CallbackRegularWindowControllerDelegate(
-                            onDestroyed: () => windowManager.remove(key),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: RegularWindowController(
+                              delegate: CallbackRegularWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Regular',
+                              preferredSize: windowSettings.regularSize,
+                            ),
                           ),
-                          title: 'Regular',
-                          preferredSize: windowSettings.regularSize,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Regular'),
-                ),
-                const SizedBox(height: 8),
-                TooltipButton(parentController: windowController),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: () {
-                    final UniqueKey key = UniqueKey();
-                    windowManager.add(
-                      KeyedWindow(
-                        key: key,
-                        controller: DialogWindowController(
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowManager.remove(key),
+                        );
+                      },
+                      child: const Text('Regular'),
+                    ),
+                    const SizedBox(height: 8),
+                    TooltipButton(parentController: windowController),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: DialogWindowController(
+                              delegate: CallbackDialogWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Modeless Dialog',
+                              preferredSize: windowSettings.dialogSize,
+                            ),
                           ),
-                          title: 'Modeless Dialog',
-                          preferredSize: windowSettings.dialogSize,
-                        ),
+                        );
+                      },
+                      child: const Text('Modeless Dialog'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () {
+                        final UniqueKey key = UniqueKey();
+                        windowManager.add(
+                          KeyedWindow(
+                            key: key,
+                            controller: DialogWindowController(
+                              delegate: CallbackDialogWindowControllerDelegate(
+                                onDestroyed: () => windowManager.remove(key),
+                              ),
+                              title: 'Modal Dialog',
+                              preferredSize: windowSettings.dialogSize,
+                              parent: windowController,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Modal Dialog'),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(
+                        child: const Text('SETTINGS'),
+                        onPressed: () {
+                          showWindowSettingsDialog(context, windowSettings);
+                        },
                       ),
-                    );
-                  },
-                  child: const Text('Modeless Dialog'),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  alignment: Alignment.bottomRight,
-                  child: TextButton(
-                    child: const Text('SETTINGS'),
-                    onPressed: () {
-                      showWindowSettingsDialog(context, windowSettings);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
+              ),
             ),
           ],
         ),
