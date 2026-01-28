@@ -681,7 +681,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
       shape: expansionTileBorder,
     );
 
-    final Widget tile = Padding(
+    Widget tile = Padding(
       padding: decoration.padding,
       child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[header, body]),
     );
@@ -699,6 +699,14 @@ class _ExpansionTileState extends State<ExpansionTile> {
         shape: expansionTileBorder,
         child: tile,
       );
+    }
+
+    // If the background color is not transparent, wrap the tile in a Material widget.
+    // This is needed to ensure that the ListTile background color or ink splashes
+    // are visible. A DecoratedBox with a non-transparent color will hide the
+    // background color or ink splashes of the ListTile.
+    if (backgroundColor.a > 0) {
+      tile = Material(type: MaterialType.transparency, child: tile);
     }
 
     return DecoratedBox(decoration: decoration, child: tile);
