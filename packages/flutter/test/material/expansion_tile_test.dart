@@ -2099,5 +2099,7 @@ void main() {
     expect(controller.value, <WidgetState>{WidgetState.hovered});
 
     await gesture.removePointer();
+    await tester.pumpAndSettle();
+    expect(controller.value, <WidgetState>{});
   });
 }
