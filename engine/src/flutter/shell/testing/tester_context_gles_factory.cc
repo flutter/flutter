@@ -14,11 +14,17 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
+#include "impeller/entity/gles/entity_shaders_gles.h"
+#include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
+#include "impeller/entity/gles/modern_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -144,7 +150,25 @@ EGLDisplay CreateSwangleDisplay() {
   return EGL_NO_DISPLAY;
 }
 
-}  // namespace
+class TesterGLContext : public SwitchableGLContext {
+ public:
+  TesterGLContext(EGLDisplay display, EGLSurface surface, EGLContext context)
+      : display_(display), surface_(surface), context_(context) {}
+
+  bool SetCurrent() override {
+    return ::eglMakeCurrent(display_, surface_, surface_, context_) == EGL_TRUE;
+  }
+
+  bool RemoveCurrent() override {
+    ::eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    return true;
+  }
+
+ private:
+  EGLDisplay display_;
+  EGLSurface surface_;
+  EGLContext context_;
+};
 
 class TesterGLESDelegate : public GPUSurfaceGLDelegate {
  public:
@@ -229,9 +253,16 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
     if (!IsValid()) {
       return std::make_unique<GLContextDefaultResult>(false);
     }
-    EGLBoolean result =
-        ::eglMakeCurrent(display_, surface_, surface_, context_);
-    return std::make_unique<GLContextDefaultResult>(result == EGL_TRUE);
+    if (::eglGetCurrentContext() == context_) {
+      // Context is already current
+      return std::make_unique<GLContextDefaultResult>(true);
+    }
+
+    // Set the current context by instantiating a GLContextSwitch with a
+    // TesterGLContext. This clears the current context on destruction of the
+    // GLContextSwitch.
+    return std::make_unique<GLContextSwitch>(
+        std::make_unique<TesterGLContext>(display_, surface_, context_));
   }
 
   // |GPUSurfaceGLDelegate|
@@ -264,6 +295,32 @@ class TesterGLESDelegate : public GPUSurfaceGLDelegate {
   EGLSurface surface_ = EGL_NO_SURFACE;
 };
 
+class TesterGLESWorker : public impeller::ReactorGLES::Worker {
+ public:
+  explicit TesterGLESWorker(TesterGLESDelegate* delegate)
+      : delegate_(delegate) {}
+
+  bool CanReactorReactOnCurrentThreadNow(
+      const impeller::ReactorGLES& reactor) const override {
+    std::unique_ptr<GLContextResult> result = delegate_->GLContextMakeCurrent();
+    if (!result->GetResult()) {
+      return false;
+    }
+    // Move the result into a TaskObserver to ensure it is destroyed (and the
+    // current egl context cleared) at the end of the current task.
+    fml::MessageLoop::GetCurrent().AddTaskObserver(
+        reinterpret_cast<intptr_t>(this),
+        fml::MakeCopyable([this, result = std::move(result)]() {
+          fml::MessageLoop::GetCurrent().RemoveTaskObserver(
+              reinterpret_cast<intptr_t>(this));
+        }));
+    return true;
+  }
+
+ private:
+  TesterGLESDelegate* delegate_;
+};
+
 class TesterContextGLES : public TesterContext {
  public:
   TesterContextGLES() = default;
@@ -278,7 +335,6 @@ class TesterContextGLES : public TesterContext {
   bool Initialize() {
     delegate_ = std::make_unique<TesterGLESDelegate>();
     if (!delegate_->IsValid()) {
-      // This will fail right now, but it isn't required for dart tests today.
       return false;
     }
 
@@ -298,7 +354,17 @@ class TesterContextGLES : public TesterContext {
       return false;
     }
 
-    std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {};
+    std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_entity_shaders_gles_data,
+            impeller_entity_shaders_gles_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_modern_shaders_gles_data,
+            impeller_modern_shaders_gles_length),
+        std::make_shared<fml::NonOwnedMapping>(
+            impeller_framebuffer_blend_shaders_gles_data,
+            impeller_framebuffer_blend_shaders_gles_length),
+    };
     context_ = impeller::ContextGLES::Create(impeller::Flags{}, std::move(gl),
                                              shader_mappings, false);
 
@@ -307,6 +373,9 @@ class TesterContextGLES : public TesterContext {
       FML_LOG(ERROR) << "Could not create OpenGLES context.";
       return false;
     }
+
+    worker_ = std::make_shared<TesterGLESWorker>(delegate_.get());
+    context_->AddReactorWorker(worker_);
 
     return true;
   }
@@ -330,9 +399,12 @@ class TesterContextGLES : public TesterContext {
   }
 
  private:
-  std::shared_ptr<impeller::ContextGLES> context_;
   std::unique_ptr<TesterGLESDelegate> delegate_;
+  std::shared_ptr<TesterGLESWorker> worker_;
+  std::shared_ptr<impeller::ContextGLES> context_;
 };
+
+}  // namespace
 
 std::unique_ptr<TesterContext> TesterContextGLESFactory::Create() {
   SetupSwiftshaderOnce(true);
