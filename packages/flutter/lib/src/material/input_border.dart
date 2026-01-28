@@ -303,6 +303,8 @@ class UnderlineInputBorder extends InputBorder {
 ///
 ///  * [UnderlineInputBorder], the default [InputDecorator] border which
 ///    draws a horizontal line at the bottom of the input decorator's container.
+///  * [ShapedInputBorder], an [InputDecorator] border which draws a custom
+///    [ShapeBorder] around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].
@@ -323,7 +325,7 @@ class OutlineInputBorder extends InputBorder {
   ///
   ///  * [InputDecoration.floatingLabelBehavior], which should be set to
   ///    [FloatingLabelBehavior.never] when the [borderSide] is
-  ///    [BorderSide.none]. If let as [FloatingLabelBehavior.auto], the label
+  ///    [BorderSide.none]. If left as [FloatingLabelBehavior.auto], the label
   ///    will extend beyond the container as if the border were still being
   ///    drawn.
   const OutlineInputBorder({
@@ -573,4 +575,235 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   int get hashCode => Object.hash(borderSide, borderRadius, gapPadding);
+}
+
+/// Draws a custom shape around an [InputDecorator]'s container.
+///
+/// This border allows any [ShapeBorder] to be used as an input decorator border.
+/// This provides maximum flexibility for custom border shapes while maintaining
+/// the gap functionality for floating labels.
+///
+/// When the input decorator's label is floating, for example because its
+/// input child has the focus, the label appears in a gap in the border outline.
+///
+/// The input decorator's "container" is the optionally filled area above the
+/// decorator's helper, error, and counter.
+///
+/// {@tool dartpad}
+/// This sample shows how to use [ShapedInputBorder] with different
+/// [ShapeBorder] implementations.
+///
+/// ** See code in examples/api/lib/material/shaped_input_border/shaped_input_border.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [OutlineInputBorder], a traditional rounded rectangle border.
+///  * [UnderlineInputBorder], the default [InputDecorator] border which
+///    draws a horizontal line at the bottom of the input decorator's container.
+///  * [RoundedSuperellipseBorder], which can be used with this border for iOS-style shapes.
+///  * [InputDecoration], which is used to configure an [InputDecorator].
+class ShapedInputBorder extends InputBorder {
+  /// Creates a shaped outline border for an [InputDecorator].
+  ///
+  /// The [shape] parameter defines the custom border shape. It can be any
+  /// [ShapeBorder] such as [RoundedSuperellipseBorder], [StadiumBorder],
+  /// [BeveledRectangleBorder], or a custom shape.
+  ///
+  /// If the [borderSide] parameter is [BorderSide.none], it will not draw a
+  /// border. However, it will still define a shape (which you can see if
+  /// [InputDecoration.filled] is true).
+  ///
+  /// If an application does not specify a [borderSide] parameter of
+  /// value [BorderSide.none], the input decorator substitutes its own, using
+  /// [copyWith], based on the current theme and [InputDecorator.isFocused].
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.floatingLabelBehavior], which should be set to
+  ///    [FloatingLabelBehavior.never] when the [borderSide] is
+  ///    [BorderSide.none]. If left as [FloatingLabelBehavior.auto], the label
+  ///    will extend beyond the container as if the border were still being
+  ///    drawn.
+  const ShapedInputBorder({
+    super.borderSide = const BorderSide(),
+    required this.shape,
+    this.gapPadding = 4.0,
+  }) : assert(gapPadding >= 0.0);
+
+  /// Horizontal padding on either side of the border's
+  /// [InputDecoration.labelText] width gap.
+  ///
+  /// This value is used by the [paint] method to compute the actual gap width.
+  final double gapPadding;
+
+  /// The shape of the border.
+  final ShapeBorder shape;
+
+  @override
+  bool get isOutline => true;
+
+  @override
+  ShapedInputBorder copyWith({BorderSide? borderSide, ShapeBorder? shape, double? gapPadding}) {
+    return ShapedInputBorder(
+      borderSide: borderSide ?? this.borderSide,
+      shape: shape ?? this.shape,
+      gapPadding: gapPadding ?? this.gapPadding,
+    );
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    return EdgeInsets.all(borderSide.width);
+  }
+
+  @override
+  ShapedInputBorder scale(double t) {
+    return ShapedInputBorder(
+      borderSide: borderSide.scale(t),
+      shape: shape.scale(t),
+      gapPadding: gapPadding * t,
+    );
+  }
+
+  @override
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+    if (a is ShapedInputBorder) {
+      return ShapedInputBorder(
+        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        shape: ShapeBorder.lerp(a.shape, shape, t)!,
+        gapPadding: a.gapPadding,
+      );
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+    if (b is ShapedInputBorder) {
+      return ShapedInputBorder(
+        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        shape: ShapeBorder.lerp(shape, b.shape, t)!,
+        gapPadding: b.gapPadding,
+      );
+    }
+    return super.lerpTo(b, t);
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return shape.getInnerPath(rect.deflate(borderSide.width), textDirection: textDirection);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return shape.getOuterPath(rect, textDirection: textDirection);
+  }
+
+  @override
+  void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
+    if (shape is OutlinedBorder) {
+      (shape as OutlinedBorder).paintInterior(canvas, rect, paint, textDirection: textDirection);
+    } else {
+      // Fallback for shapes that don't support paintInterior.
+      canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), paint);
+    }
+  }
+
+  @override
+  bool get preferPaintInterior => shape.preferPaintInterior;
+
+  Path _gapBorderPath(Rect rect, double start, double extent, {TextDirection? textDirection}) {
+    // Create a continuous path for the border with a gap in the top edge.
+    final Path outerPath = shape.getOuterPath(rect, textDirection: textDirection);
+
+    // If there's no meaningful gap, return the full outline.
+    if (start <= 0 && extent <= 0) {
+      return outerPath;
+    }
+
+    // Create a rectangle that represents the gap area.
+    // The gap is on the top edge, so we create a rect that covers the gap region.
+    final gapLeft = start;
+    final double gapRight = start + extent;
+
+    // Create a path that excludes the gap area by combining with a difference operation.
+    // We'll subtract a small rectangle at the top where the gap should be.
+    final gapRect = Path()
+      ..addRect(
+        Rect.fromLTRB(
+          clampDouble(gapLeft, rect.left, rect.right),
+          rect.top - 1.0, // Extend slightly beyond to ensure clean cut.
+          clampDouble(gapRight, rect.left, rect.right),
+          rect.top + 1.0, // Small height to only affect top edge.
+        ),
+      );
+
+    return Path.combine(PathOperation.difference, outerPath, gapRect);
+  }
+
+  /// Draw the custom shape around [rect].
+  ///
+  /// The [borderSide] defines the line's color and weight.
+  ///
+  /// The top side of the border may be interrupted by a single gap
+  /// if [gapExtent] is non-null. In that case the gap begins at
+  /// `gapStart - gapPadding` (assuming that the [textDirection] is [TextDirection.ltr]).
+  /// The gap's width is `(gapPadding + gapExtent + gapPadding) * gapPercentage`.
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double? gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection? textDirection,
+  }) {
+    assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
+
+    final Paint paint = borderSide.toPaint();
+    final Rect deflatedRect = rect.deflate(borderSide.width / 2.0);
+
+    if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
+      // Draw the shape without a gap.
+      if (shape is OutlinedBorder) {
+        final outlinedShape = shape as OutlinedBorder;
+        // Create a copy with our border side.
+        final OutlinedBorder shapedBorder = outlinedShape.copyWith(side: borderSide);
+        shapedBorder.paint(canvas, deflatedRect, textDirection: textDirection);
+      } else {
+        canvas.drawPath(shape.getOuterPath(deflatedRect, textDirection: textDirection), paint);
+      }
+    } else {
+      final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage)!;
+      final double start = switch (textDirection!) {
+        TextDirection.rtl => gapStart + gapPadding - extent,
+        TextDirection.ltr => gapStart - gapPadding,
+      };
+      final Path path = _gapBorderPath(
+        deflatedRect,
+        math.max(0.0, start),
+        extent,
+        textDirection: textDirection,
+      );
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ShapedInputBorder &&
+        other.borderSide == borderSide &&
+        other.shape == shape &&
+        other.gapPadding == gapPadding;
+  }
+
+  @override
+  int get hashCode => Object.hash(borderSide, shape, gapPadding);
 }
