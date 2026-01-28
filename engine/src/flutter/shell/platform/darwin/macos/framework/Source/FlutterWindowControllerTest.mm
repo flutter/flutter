@@ -202,4 +202,43 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.5, false);
   EXPECT_EQ(window.miniaturized, YES);
 }
+
+TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
+  FlutterWindowCreationRequest request{
+      .has_size = true,
+      .size = {.width = 800, .height = 600},
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+
+  FlutterEngine* engine = GetFlutterEngine();
+  int64_t engine_id = reinterpret_cast<int64_t>(engine);
+
+  IsolateScope isolate_scope(isolate());
+
+  // Create multiple windows
+  int64_t handle1 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+  int64_t handle2 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+  int64_t handle3 = InternalFlutter_WindowController_CreateRegularWindow(engine_id, &request);
+
+  // Verify windows are created
+  FlutterViewController* viewController1 = [engine viewControllerForIdentifier:handle1];
+  FlutterViewController* viewController2 = [engine viewControllerForIdentifier:handle2];
+  FlutterViewController* viewController3 = [engine viewControllerForIdentifier:handle3];
+  EXPECT_NE(viewController1, nil);
+  EXPECT_NE(viewController2, nil);
+  EXPECT_NE(viewController3, nil);
+
+  // Close all windows on engine restart
+  [engine engineCallbackOnPreEngineRestart];
+
+  // Verify all windows are closed and view controllers are disposed
+  viewController1 = [engine viewControllerForIdentifier:handle1];
+  viewController2 = [engine viewControllerForIdentifier:handle2];
+  viewController3 = [engine viewControllerForIdentifier:handle3];
+  EXPECT_EQ(viewController1, nil);
+  EXPECT_EQ(viewController2, nil);
+  EXPECT_EQ(viewController3, nil);
+}
 }  // namespace flutter::testing
