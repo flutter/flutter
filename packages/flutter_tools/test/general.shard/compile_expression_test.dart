@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -32,16 +33,18 @@ void main() {
     testLogger = BufferLogger.test();
     processManager = FakeProcessManager();
     frontendServerStdIn = MemoryIOSink();
-    fileSystem = MemoryFileSystem.test();
+    fileSystem = MemoryFileSystem.test()
+      ..file(Artifact.flutterPatchedSdkPath.toString()).createSync();
     generator = ResidentCompiler(
-      'sdkroot',
-      buildMode: BuildMode.debug,
-      artifacts: Artifacts.test(),
+      targetPlatform: .unsupported,
+      buildInfo: BuildInfo.debug,
+      artifacts: Artifacts.test(fileSystem: fileSystem),
       processManager: processManager,
       logger: testLogger,
       platform: FakePlatform(),
       fileSystem: fileSystem,
       shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
     );
 
     stdErrStreamController = StreamController<String>();

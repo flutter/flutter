@@ -357,7 +357,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: targetFile,
-      targetModel: TargetModel(stringArg('target-model')!),
+      targetModelOverride: TargetModel(stringArg('target-model')!),
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: _platform,
