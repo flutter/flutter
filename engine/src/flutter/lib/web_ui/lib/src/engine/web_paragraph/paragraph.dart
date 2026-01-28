@@ -14,6 +14,7 @@ import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
+import 'paint_paragraph.dart';
 import 'painter.dart';
 
 @visibleForTesting
@@ -969,20 +970,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    final (ui.Rect sourceRect, ui.Rect targetRect) = _paint.calculateParagraph(
-      _layout,
-      offset,
-      ui.window.devicePixelRatio,
-    );
-    _paint.fillAsSingleImage(canvas, _layout, sourceRect, offset);
-    _paint.paintAsSingleImage(canvas, _layout, sourceRect, targetRect, offset);
-  }
-
-  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio, 1000.0, 1000.0);
-    for (final TextLine line in _layout.lines) {
-      _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
-    }
+    _paint.paint(canvas, _layout, _painter, offset.dx, offset.dy);
   }
 
   @override
@@ -1092,7 +1080,8 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this, CanvasKitPainter());
+  late final TextPaint _paint = PaintParagraph(this);
+  late final Painter _painter = CanvasKitPainter();
 }
 
 class WebLineMetrics implements ui.LineMetrics {

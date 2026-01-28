@@ -564,20 +564,29 @@ class TextLayout {
                 strutStyle.strutAscent;
             bottom = top + strutStyle.strutAscent + strutStyle.strutDescent;
           case ui.BoxHeightStyle.includeLineSpacingMiddle:
-            top =
-                line.advance.top +
-                (line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent) / 2;
-            bottom =
-                line.advance.top +
-                line.fontBoundingBoxAscent +
-                (line.fontBoundingBoxDescent + block.rawFontBoundingBoxDescent) / 2;
+            final double shift = (line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent) / 2;
+            top = line.advance.top + shift;
+            bottom = line.advance.bottom + shift;
+            if (lineIndex == 0) {
+              top += shift;
+            }
+            if (lineIndex == lines.length - 1) {
+              bottom -= shift;
+            }
           case ui.BoxHeightStyle.includeLineSpacingTop:
-            top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
-            bottom = line.advance.top + line.fontBoundingBoxAscent + line.fontBoundingBoxDescent;
-          case ui.BoxHeightStyle.includeLineSpacingBottom:
+            final double shift = line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
             top = line.advance.top;
-            bottom =
-                line.advance.top + line.fontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
+            bottom = line.advance.bottom;
+            if (lineIndex == 0) {
+              top += shift;
+            }
+          case ui.BoxHeightStyle.includeLineSpacingBottom:
+            final double shift = line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
+            top = line.advance.top + shift;
+            bottom = line.advance.bottom + shift;
+            if (lineIndex == lines.length - 1) {
+              bottom -= shift;
+            }
         }
         left = firstRect.left - (line.advance.left + line.formattingShift);
         right = left + firstRect.width;
