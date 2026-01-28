@@ -330,9 +330,8 @@ import java.util.Set;
 
     final boolean useSoftwareRendering =
         intent != null
-            ? activity
-                .intent
-                .getBooleanExtra(FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+            ? activity.intent.getBooleanExtra(
+                FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
             : false;
 
     // As part of https://github.com/flutter/flutter/issues/172553, the ability to set
