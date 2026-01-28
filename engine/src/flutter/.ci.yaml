@@ -30,10 +30,10 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       device_type: none
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
   windows:
     properties:
@@ -465,12 +465,12 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.5|Mac-15.7
+      - os=Mac-15.7
 
   - name: Mac clangd
     recipe: engine_v2/builder
@@ -494,13 +494,13 @@ targets:
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.5|Mac-15.7
-      - cpu=x86
+      - os=Mac-15.7
+      - cpu=arm64
 
   - name: Mac mac_ios_engine_ddm
     recipe: engine_v2/engine_v2
@@ -514,13 +514,13 @@ targets:
       config_name: mac_ios_engine_ddm
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-15.5|Mac-15.7
-      - cpu=x86
+      - os=Mac-15.7
+      - cpu=arm64
 
   - name: Linux windows_android_aot_engine
     recipe: engine_v2/engine_v2
