@@ -777,7 +777,13 @@ $_dartPluginRegisterWith
 }
 ''';
 
-Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> writeIOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? pluginRegistrantHeader,
+  File? pluginRegistrantImplementation,
+  TemplateRenderer? templateRenderer,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     IOSPlugin.kConfigKey,
@@ -798,20 +804,20 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
       _pluginRegistrantPodspecTemplate,
       context,
       registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
-      globals.templateRenderer,
+      templateRenderer ?? globals.templateRenderer,
     );
   }
   await _renderTemplateToFile(
     _objcPluginRegistryHeaderTemplate,
     context,
-    project.ios.pluginRegistrantHeader,
-    globals.templateRenderer,
+    pluginRegistrantHeader ?? project.ios.pluginRegistrantHeader,
+    templateRenderer ?? globals.templateRenderer,
   );
   await _renderTemplateToFile(
     _objcPluginRegistryImplementationTemplate,
     context,
-    project.ios.pluginRegistrantImplementation,
-    globals.templateRenderer,
+    pluginRegistrantImplementation ?? project.ios.pluginRegistrantImplementation,
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -892,7 +898,12 @@ Future<void> _writePluginCmakefile(
   );
 }
 
-Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> writeMacOSPluginRegistrant(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  File? pluginRegistrantImplementation,
+  TemplateRenderer? templateRenderer,
+}) async {
   final List<Plugin> methodChannelPlugins = _filterMethodChannelPlugins(
     plugins,
     MacOSPlugin.kConfigKey,
@@ -909,8 +920,8 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   await _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
     context,
-    project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
-    globals.templateRenderer,
+    pluginRegistrantImplementation ?? project.macos.pluginRegistrantImplementation,
+    templateRenderer ?? globals.templateRenderer,
   );
 }
 
@@ -1293,10 +1304,10 @@ Future<void> injectPlugins(
       pluginResolutionType: _PluginResolutionType.nativeOrDart,
     );
     if (iosPlatform) {
-      await _writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
+      await writeIOSPluginRegistrant(project, pluginsByPlatform[IOSPlugin.kConfigKey]!);
     }
     if (macOSPlatform) {
-      await _writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
+      await writeMacOSPluginRegistrant(project, pluginsByPlatform[MacOSPlugin.kConfigKey]!);
     }
     final DarwinDependencyManagement darwinDependencyManagerSetup =
         darwinDependencyManagement ??

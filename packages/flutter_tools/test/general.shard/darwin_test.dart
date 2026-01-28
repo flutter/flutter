@@ -33,6 +33,11 @@ void main() {
         );
         expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
       });
+      testWithoutContext('fromName', () {
+        expect(FlutterDarwinPlatform.fromName('ios'), FlutterDarwinPlatform.ios);
+        expect(FlutterDarwinPlatform.fromName('iOS'), null);
+        expect(FlutterDarwinPlatform.fromName('android'), null);
+      });
     });
     group('macOS', () {
       testWithoutContext('deployment target is 10.15', () {
@@ -54,6 +59,11 @@ void main() {
           FlutterDarwinPlatform.macos,
         );
         expect(FlutterDarwinPlatform.fromTargetPlatform(TargetPlatform.android), null);
+      });
+      testWithoutContext('fromName', () {
+        expect(FlutterDarwinPlatform.fromName('macos'), FlutterDarwinPlatform.macos);
+        expect(FlutterDarwinPlatform.fromName('macOS'), null);
+        expect(FlutterDarwinPlatform.fromName('android'), null);
       });
     });
   });
