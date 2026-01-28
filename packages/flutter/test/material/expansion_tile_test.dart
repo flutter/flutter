@@ -7,9 +7,12 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
@@ -615,6 +618,74 @@ void main() {
 
     expect(getIconColor(), iconColor);
     expect(getTextColor(), textColor);
+  });
+
+  testWidgets('ExpansionTile shows hover color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color hoverColor = Colors.green; // Green
+    const Color backgroundColor = Colors.blue; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(hoverColor: hoverColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Hover the tile.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Title')));
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: hoverColor),
+    );
+  });
+
+  testWidgets('ExpansionTile shows focus color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color focusColor = Colors.pink; // Green
+    const Color backgroundColor = Colors.amber; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: focusColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Focus the tile.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: focusColor),
+    );
   });
 
   testWidgets('ExpansionTile Border', (WidgetTester tester) async {
