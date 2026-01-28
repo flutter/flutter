@@ -40,12 +40,17 @@ class TestButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
 
+  void _onFocus() => focusNode?.requestFocus();
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      label: 'button',
       button: true,
       enabled: onPressed != null,
       onTap: onPressed,
+      onFocus: _onFocus,
+      focusable: true,
       child: FocusableActionDetector(
         enabled: onPressed != null,
         focusNode: focusNode,
