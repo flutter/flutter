@@ -15,7 +15,10 @@ class CupertinoSheetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(title: 'Cupertino Sheet', home: HomePage());
+    return const CupertinoApp(
+      title: 'Scrollable Cupertino Sheet',
+      home: HomePage(),
+    );
   }
 }
 
@@ -26,7 +29,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Sheet Example'),
+        middle: Text('Scrollable Cupertino Sheet Example'),
         automaticBackgroundVisibility: false,
       ),
       child: Center(
@@ -39,11 +42,11 @@ class HomePage extends StatelessWidget {
                   CupertinoSheetRoute<void>(
                     scrollableBuilder:
                         (BuildContext context, ScrollController controller) =>
-                            const _SheetScaffold(),
+                            _ScrollableSheetBody(scrollController: controller),
                   ),
                 );
               },
-              child: const Text('Open Bottom Sheet'),
+              child: const Text('Open Sheet'),
             ),
           ],
         ),
@@ -52,38 +55,43 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _SheetScaffold extends StatelessWidget {
-  const _SheetScaffold();
+class _ScrollableSheetBody extends StatelessWidget {
+  const _ScrollableSheetBody({required this.scrollController});
+
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('CupertinoSheetRoute'),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).maybePop();
-              },
-              child: const Text('Go Back'),
-            ),
-            const Text('You can also close this sheet by dragging downwards'),
-            CupertinoButton.filled(
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoSheetRoute<void>(
-                    scrollableBuilder:
-                        (BuildContext context, ScrollController controller) =>
-                            const _SheetScaffold(),
-                  ),
-                );
-              },
-              child: const Text('Push Another Sheet'),
-            ),
-          ],
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.systemGrey3,
+        middle: const Text('Scrollable Sheet'),
+        automaticBackgroundVisibility: false,
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Text('Close'),
+          onPressed: () {
+            CupertinoSheetRoute.popSheet(context);
+          },
         ),
+      ),
+      child: CustomScrollView(
+        controller: scrollController,
+        primary: false,
+        slivers: <Widget>[
+          SliverList(
+            delegate: SliverChildBuilderDelegate((
+              BuildContext context,
+              int index,
+            ) {
+              return Container(
+                alignment: Alignment.center,
+                height: 100,
+                child: const Text('Scroll Me'),
+              );
+            }, childCount: 20),
+          ),
+        ],
       ),
     );
   }
