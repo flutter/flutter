@@ -2,14 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'chip.dart';
-/// @docImport 'color_scheme.dart';
-/// @docImport 'list_tile.dart';
-library;
-
 import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -56,13 +50,16 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
+/// This widget is backed by [RawAvatar] and uses [ShapeDecoration] internally.
+///
 /// See also:
 ///
 ///  * [Chip], for representing users or concepts in long form.
 ///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with
 ///    some text for a fixed height list entry.
+///  * [RawAvatar], the underlying widget that powers [CircleAvatar].
 ///  * <https://material.io/design/components/chips.html#input-chips>
-class CircleAvatar extends StatelessWidget {
+class CircleAvatar extends StatefulWidget {
   /// Creates a circle that represents a user.
   const CircleAvatar({
     super.key,
@@ -173,27 +170,31 @@ class CircleAvatar extends StatelessWidget {
   /// the size will snap to 40 pixels instantly.
   final double? maxRadius;
 
-  // The default radius if nothing is specified.
-  static const double _defaultRadius = 20.0;
+  @override
+  State<CircleAvatar> createState() => _CircleAvatarState();
+}
 
-  // The default min if only the max is specified.
-  static const double _defaultMinRadius = 0.0;
+class _CircleAvatarState extends State<CircleAvatar> {
+  // The duration for animating theme changes.
+  static const Duration _kTextStyleChangeDuration = Duration(milliseconds: 200);
 
-  // The default max if only the min is specified.
-  static const double _defaultMaxRadius = double.infinity;
+  // Whether the foreground image has failed to load.
+  bool _foregroundImageFailed = false;
 
-  double get _minDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
+  @override
+  void didUpdateWidget(CircleAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset the failed state if the foreground image changes.
+    if (widget.foregroundImage != oldWidget.foregroundImage) {
+      _foregroundImageFailed = false;
     }
-    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
   }
 
-  double get _maxDiameter {
-    if (radius == null && minRadius == null && maxRadius == null) {
-      return _defaultRadius * 2.0;
-    }
-    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+  void _handleForegroundImageError(Object exception, StackTrace? stackTrace) {
+    setState(() {
+      _foregroundImageFailed = true;
+    });
+    widget.onForegroundImageError?.call(exception, stackTrace);
   }
 
   @override
@@ -201,67 +202,75 @@ class CircleAvatar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
     final Color? effectiveForegroundColor =
-        foregroundColor ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
+        widget.foregroundColor ??
+        (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
     final TextStyle effectiveTextStyle = theme.useMaterial3
         ? theme.textTheme.titleMedium!
         : theme.primaryTextTheme.titleMedium!;
     TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
     Color? effectiveBackgroundColor =
-        backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
+        widget.backgroundColor ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
       effectiveBackgroundColor = switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         Brightness.dark => theme.primaryColorLight,
         Brightness.light => theme.primaryColorDark,
       };
     } else if (effectiveForegroundColor == null) {
-      textStyle = switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
+      textStyle = switch (ThemeData.estimateBrightnessForColor(widget.backgroundColor!)) {
         Brightness.dark => textStyle.copyWith(color: theme.primaryColorLight),
         Brightness.light => textStyle.copyWith(color: theme.primaryColorDark),
       };
     }
-    final double minDiameter = _minDiameter;
-    final double maxDiameter = _maxDiameter;
-    return AnimatedContainer(
-      constraints: BoxConstraints(
-        minHeight: minDiameter,
-        minWidth: minDiameter,
-        maxWidth: maxDiameter,
-        maxHeight: maxDiameter,
-      ),
-      duration: kThemeChangeDuration,
-      decoration: BoxDecoration(
-        color: effectiveBackgroundColor,
-        image: backgroundImage != null
-            ? DecorationImage(
-                image: backgroundImage!,
-                onError: onBackgroundImageError,
-                fit: BoxFit.cover,
-              )
-            : null,
-        shape: BoxShape.circle,
-      ),
-      foregroundDecoration: foregroundImage != null
-          ? BoxDecoration(
-              image: DecorationImage(
-                image: foregroundImage!,
-                onError: onForegroundImageError,
-                fit: BoxFit.cover,
-              ),
-              shape: BoxShape.circle,
-            )
-          : null,
-      child: child == null
-          ? null
-          : Center(
-              // Need to disable text scaling here so that the text doesn't
-              // escape the avatar when the textScaleFactor is large.
-              child: MediaQuery.withNoTextScaling(
-                child: IconTheme(
-                  data: theme.iconTheme.copyWith(color: textStyle.color),
-                  child: DefaultTextStyle(style: textStyle, child: child!),
-                ),
+
+    final Widget? childContent = widget.child == null
+        ? null
+        : Center(
+            child: MediaQuery.withNoTextScaling(
+              child: IconTheme(
+                data: theme.iconTheme.copyWith(color: textStyle.color),
+                child: DefaultTextStyle(style: textStyle, child: widget.child!),
               ),
             ),
+          );
+
+    // Convert radius to constraints (diameter = radius * 2)
+    final BoxConstraints? constraints;
+    if (widget.radius != null) {
+      final double diameter = widget.radius! * 2.0;
+      constraints = BoxConstraints.tightFor(width: diameter, height: diameter);
+    } else if (widget.minRadius != null || widget.maxRadius != null) {
+      constraints = BoxConstraints(
+        minWidth: widget.minRadius != null ? widget.minRadius! * 2.0 : 0.0,
+        minHeight: widget.minRadius != null ? widget.minRadius! * 2.0 : 0.0,
+        maxWidth: widget.maxRadius != null ? widget.maxRadius! * 2.0 : double.infinity,
+        maxHeight: widget.maxRadius != null ? widget.maxRadius! * 2.0 : double.infinity,
+      );
+    } else {
+      constraints = null;
+    }
+
+    // Determine which image to show: foregroundImage (if not failed) or backgroundImage as fallback.
+    final ImageProvider? effectiveImage;
+    final ImageErrorListener? effectiveOnImageError;
+    if (widget.foregroundImage != null && !_foregroundImageFailed) {
+      effectiveImage = widget.foregroundImage;
+      effectiveOnImageError = _handleForegroundImageError;
+    } else {
+      effectiveImage = widget.backgroundImage;
+      effectiveOnImageError = widget.onBackgroundImageError;
+    }
+
+    return RawAvatar(
+      constraints: constraints,
+      shape: const CircleBorder(),
+      backgroundColor: effectiveBackgroundColor,
+      image: effectiveImage,
+      onImageError: effectiveOnImageError,
+      child: AnimatedDefaultTextStyle(
+        style: textStyle,
+        duration: _kTextStyleChangeDuration,
+        child: childContent ?? const SizedBox.shrink(),
+      ),
     );
   }
 }
