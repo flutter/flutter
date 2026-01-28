@@ -14,9 +14,8 @@ in vec2 position;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  // We can just absorb W and override the depth value here because we don't
-  // need to worry about perspective correcting any vertex attributes when
-  // drawing clips.
-  gl_Position /= gl_Position.w;
-  gl_Position.z = frame_info.depth;
+  // We can just override the depth value (relative to W) here because we
+  // don't need to worry about perspective correcting any vertex attributes
+  // when drawing clips.
+  gl_Position.z = frame_info.depth * gl_Position.w;
 }
