@@ -154,18 +154,25 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
-  testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (WidgetTester tester) async {
-    final OverlayPortalController controller = OverlayPortalController();
-    final EdgeInsets expectedPadding = EdgeInsets.all(10);
-    final EdgeInsets expectedViewInsets = EdgeInsets.only(bottom: 300);
-    final EdgeInsets expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
-    final Size expectedSize = Size(800, 600);
+  testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController();
+    const expectedPadding = EdgeInsets.all(10);
+    const expectedViewInsets = EdgeInsets.only(bottom: 300);
+    const expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
+    const expectedSize = Size(800, 600);
 
     MediaQueryData? overlayChildData;
+    OverlayEntry? entry;
+    addTearDown(() {
+      entry?.remove();
+      entry?.dispose();
+    });
 
     await tester.pumpWidget(
       MediaQuery(
-        data: MediaQueryData(
+        data: const MediaQueryData(
           padding: expectedPadding,
           viewInsets: expectedViewInsets,
           viewPadding: expectedViewPadding,
@@ -175,7 +182,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(
