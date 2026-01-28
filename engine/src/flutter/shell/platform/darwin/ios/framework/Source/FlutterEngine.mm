@@ -555,23 +555,12 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
-  FlutterViewController* currentController =
-      [_viewControllers objectForKey:@(flutter::kFlutterImplicitViewId)];
-  if (currentController == viewController) {
-    // From nil to nil, or from non-nil to the same controller.
-    return;
-  }
-  if (currentController == nil && viewController != nil) {
-    // From nil to non-nil.
-    [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
-  } else if (currentController != nil) {
     if (viewController != nil) {
       // Swap the existing `FlutterViewController` for backward compatibly
       [self registerViewController:viewController forIdentifier:flutter::kFlutterImplicitViewId];
     } else {
       [self deregisterViewControllerForIdentifier:flutter::kFlutterImplicitViewId];
     }
-  }
 }
 
 - (void)registerViewController:(FlutterViewController*)controller
@@ -616,10 +605,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   id<NSObject> observer = [self.flutterViewControllerWillDeallocObservers objectForKey:@(viewIdentifier)];
   [[NSNotificationCenter defaultCenter] removeObserver:observer];
   [self.flutterViewControllerWillDeallocObservers removeObjectForKey:@(viewIdentifier)];
-
-  if ([_viewControllers count] == 1 ) {
-    [self notifyLowMemory];
-  }
   {
     if (viewIdentifier != flutter::kFlutterImplicitViewId) {
       bool removed = NO;
@@ -636,6 +621,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.platformView->RemoveOwnerViewController(viewIdentifier);
 
   [_viewControllers removeObjectForKey:@(viewIdentifier)];
+
+  if ([_viewControllers count] == 0) {
+    [self updateDisplays];
+    [self notifyLowMemory];
+  }
 }
 
 - (void)addViewController:(FlutterViewController*)controller {
