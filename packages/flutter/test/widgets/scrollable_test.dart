@@ -5,13 +5,13 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'utils.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -24,62 +24,39 @@ Future<void> pumpTest(
   bool enableMouseDrag = true,
 }) async {
   await tester.pumpWidget(
-    MaterialApp(
-      scrollBehavior: const NoScrollbarBehavior().copyWith(
-        dragDevices: enableMouseDrag
-            ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
-            : null,
-        pointerAxisModifiers: axisModifier,
-      ),
-      theme: ThemeData(platform: platform),
-      home: CustomScrollView(
-        controller: controller,
-        reverse: reverse,
-        scrollDirection: scrollDirection,
-        physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: scrollDirection == Axis.vertical ? 2000.0 : null,
-              width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior().copyWith(
+          dragDevices: enableMouseDrag
+              ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+              : null,
+          pointerAxisModifiers: axisModifier,
+        ),
+        child: CustomScrollView(
+          controller: controller,
+          reverse: reverse,
+          scrollDirection: scrollDirection,
+          physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: scrollDirection == Axis.vertical ? 2000.0 : null,
+                width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
-  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
-class NoScrollbarBehavior extends MaterialScrollBehavior {
+class NoScrollbarBehavior extends ScrollBehavior {
   const NoScrollbarBehavior();
 
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
-}
-
-// Pump a nested scrollable. The outer scrollable contains a sliver of a
-// 300-pixel-long scrollable followed by a 2000-pixel-long content.
-Future<void> pumpDoubleScrollableTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(platform: platform),
-      home: const CustomScrollView(
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 300,
-              child: CustomScrollView(
-                slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-        ],
-      ),
-    ),
-  );
-  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
 const double dragOffset = 200.0;
@@ -99,12 +76,6 @@ double getScrollVelocity(WidgetTester tester) {
   return position.activity!.velocity;
 }
 
-void resetScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final position = viewport.offset as ScrollPosition;
-  position.jumpTo(0.0);
-}
-
 void main() {
   testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
     HitTestBehavior? getBehavior(Type of) {
@@ -115,35 +86,49 @@ void main() {
     }
 
     await tester.pumpWidget(
-      const MaterialApp(home: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      const MaterialApp(home: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent)),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: ListView(hitTestBehavior: HitTestBehavior.translucent)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(ListView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: GridView.extent(maxCrossAxisExtent: 1, hitTestBehavior: HitTestBehavior.translucent),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.extent(maxCrossAxisExtent: 1, hitTestBehavior: HitTestBehavior.translucent),
       ),
     );
     expect(getBehavior(GridView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(home: PageView(hitTestBehavior: HitTestBehavior.translucent)),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(hitTestBehavior: HitTestBehavior.translucent),
+      ),
     );
     expect(getBehavior(PageView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListWheelScrollView(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListWheelScrollView(
           itemExtent: 10,
           hitTestBehavior: HitTestBehavior.translucent,
           children: const <Widget>[],
@@ -159,8 +144,9 @@ void main() {
     final Key key = UniqueKey();
     var tapped = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Stack(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
           children: <Widget>[
             Positioned.fill(
               child: GestureDetector(
@@ -176,42 +162,6 @@ void main() {
     );
     await tester.tapAt(tester.getCenter(find.byKey(key)));
     expect(tapped, isTrue);
-  });
-
-  testWidgets('Flings on different platforms', (WidgetTester tester) async {
-    await pumpTest(tester, TargetPlatform.android);
-    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getScrollOffset(tester), dragOffset);
-    await tester.pump(); // trigger fling
-    expect(getScrollOffset(tester), dragOffset);
-    await tester.pump(const Duration(seconds: 5));
-    final double androidResult = getScrollOffset(tester);
-
-    resetScrollOffset(tester);
-
-    await pumpTest(tester, TargetPlatform.iOS);
-    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
-    // Scroll starts ease into the scroll on iOS.
-    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
-    await tester.pump(); // trigger fling
-    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
-    await tester.pump(const Duration(seconds: 5));
-    final double iOSResult = getScrollOffset(tester);
-
-    resetScrollOffset(tester);
-
-    await pumpTest(tester, TargetPlatform.macOS);
-    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
-    // Scroll starts ease into the scroll on iOS.
-    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
-    await tester.pump(); // trigger fling
-    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
-    await tester.pump(const Duration(seconds: 5));
-    final double macOSResult = getScrollOffset(tester);
-
-    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
-    expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
   });
 
   testWidgets(
@@ -494,7 +444,28 @@ void main() {
     // to the same event, for example when scrollables are nested, there used
     // to be exceptions at scrolling events.
 
-    await pumpDoubleScrollableTest(tester, TargetPlatform.fuchsia);
+    // Pump a nested scrollable. The outer scrollable contains a sliver of a
+    // 300-pixel-long scrollable followed by a 2000-pixel-long content.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 300,
+                child: CustomScrollView(
+                  slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+          ],
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
     final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
@@ -751,8 +722,9 @@ void main() {
   group('setCanDrag to false with active drag gesture: ', () {
     Future<void> pumpTestWidget(WidgetTester tester, {required bool canDrag}) {
       return tester.pumpWidget(
-        MaterialApp(
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             physics: canDrag
                 ? const AlwaysScrollableScrollPhysics()
                 : const NeverScrollableScrollPhysics(),
@@ -1041,19 +1013,19 @@ void main() {
                   children: <Widget>[
                     Container(
                       key: Key('${pageIndex}_${listIndex}_0'),
-                      color: Colors.red,
+                      color: const Color(0xFFFF0000),
                       width: 200,
                       height: 10,
                     ),
                     Container(
                       key: Key('${pageIndex}_${listIndex}_1'),
-                      color: Colors.blue,
+                      color: const Color(0xFF0000FF),
                       width: 200,
                       height: 10,
                     ),
                     Container(
                       key: Key('${pageIndex}_${listIndex}_2'),
-                      color: Colors.green,
+                      color: const Color(0xFF00FF00),
                       width: 200,
                       height: 10,
                     ),
@@ -1102,85 +1074,6 @@ void main() {
     expect(targetMidLeftPage1, findsOneWidget);
   });
 
-  testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
-    final TickerProvider vsync = TestTickerProvider();
-    final controller = TabController(length: 3, vsync: vsync);
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TabBarView(
-          controller: controller,
-          children: List<ListView>.generate(3, (int pageIndex) {
-            return ListView(
-              key: Key('list_$pageIndex'),
-              children: List<Widget>.generate(100, (int listIndex) {
-                return Row(
-                  children: <Widget>[
-                    Container(
-                      key: Key('${pageIndex}_${listIndex}_0'),
-                      color: Colors.red,
-                      width: 200,
-                      height: 10,
-                    ),
-                    Container(
-                      key: Key('${pageIndex}_${listIndex}_1'),
-                      color: Colors.blue,
-                      width: 200,
-                      height: 10,
-                    ),
-                    Container(
-                      key: Key('${pageIndex}_${listIndex}_2'),
-                      color: Colors.green,
-                      width: 200,
-                      height: 10,
-                    ),
-                  ],
-                );
-              }),
-            );
-          }),
-        ),
-      ),
-    );
-
-    final Finder targetMidRightPage0 = find.byKey(const Key('0_25_2'));
-    final Finder targetMidRightPage1 = find.byKey(const Key('1_25_2'));
-    final Finder targetMidLeftPage1 = find.byKey(const Key('1_25_0'));
-
-    expect(find.byKey(const Key('list_0')), findsOneWidget);
-    expect(find.byKey(const Key('list_1')), findsNothing);
-    expect(targetMidRightPage0, findsOneWidget);
-    expect(targetMidRightPage1, findsNothing);
-    expect(targetMidLeftPage1, findsNothing);
-
-    await tester.ensureVisible(targetMidRightPage0);
-    await tester.pumpAndSettle();
-    expect(targetMidRightPage0, findsOneWidget);
-    expect(targetMidRightPage1, findsNothing);
-    expect(targetMidLeftPage1, findsNothing);
-
-    controller.index = 1;
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('list_0')), findsNothing);
-    expect(find.byKey(const Key('list_1')), findsOneWidget);
-    await tester.ensureVisible(targetMidRightPage1);
-    await tester.pumpAndSettle();
-
-    expect(targetMidRightPage0, findsNothing);
-    expect(targetMidRightPage1, findsOneWidget);
-    expect(targetMidLeftPage1, findsOneWidget);
-
-    await tester.ensureVisible(targetMidLeftPage1);
-    await tester.pumpAndSettle();
-
-    expect(targetMidRightPage0, findsNothing);
-    expect(targetMidRightPage1, findsOneWidget);
-    expect(targetMidLeftPage1, findsOneWidget);
-  });
-
   testWidgets('PointerScroll on nested NeverScrollable ListView goes to outer Scrollable.', (
     WidgetTester tester,
   ) async {
@@ -1191,33 +1084,29 @@ void main() {
     addTearDown(innerController.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: Scaffold(
-          body: SingleChildScrollView(
-            controller: outerController,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    for (int i = 0; i < 100; i++) Text('SingleChildScrollView $i'),
-                  ],
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: outerController,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                children: <Widget>[for (int i = 0; i < 100; i++) Text('SingleChildScrollView $i')],
+              ),
+              SizedBox(
+                height: 3000,
+                width: 400,
+                child: ListView.builder(
+                  controller: innerController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Nested NeverScrollable ListView $index');
+                  },
                 ),
-                SizedBox(
-                  height: 3000,
-                  width: 400,
-                  child: ListView.builder(
-                    controller: innerController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Nested NeverScrollable ListView $index');
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1253,9 +1142,10 @@ void main() {
     addTearDown(controller.dispose);
 
     Widget build(double height) {
-      return MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          child: SizedBox(
             width: double.infinity,
             height: height,
             child: SingleChildScrollView(
@@ -1292,8 +1182,9 @@ void main() {
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/90912.
       await tester.pumpWidget(
-        const MaterialApp(
-          home: CustomScrollView(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
           ),
         ),
@@ -1361,13 +1252,16 @@ void main() {
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
     Widget buildFrame(Set<ui.PointerDeviceKind>? dragDevices) {
-      return MaterialApp(
-        scrollBehavior: const NoScrollbarBehavior().copyWith(dragDevices: dragDevices),
-        home: ListView.builder(
-          itemCount: 1000,
-          itemBuilder: (BuildContext context, int index) {
-            return Text('Item $index');
-          },
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior().copyWith(dragDevices: dragDevices),
+          child: ListView.builder(
+            itemCount: 1000,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
+          ),
         ),
       );
     }
@@ -1440,8 +1334,9 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     final listView = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: TickerMode(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
           enabled: true,
           child: ListView.builder(
             key: listView,
@@ -1467,8 +1362,9 @@ void main() {
     // This can happen when a route is push or pop from top.
     // It will reconstruct the scroll position and apply content dimensions.
     await tester.pumpWidget(
-      MaterialApp(
-        home: TickerMode(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TickerMode(
           enabled: false,
           child: ListView.builder(
             key: listView,
@@ -1504,17 +1400,30 @@ void main() {
   testWidgets('Two panel semantics is added to the sibling nodes of direct children', (
     WidgetTester tester,
   ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
     final SemanticsHandle handle = tester.ensureSemantics();
     final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ListView(
-            key: key,
-            children: const <Widget>[
-              TextField(autofocus: true, decoration: InputDecoration(prefixText: 'prefix')),
-            ],
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          key: key,
+          children: <Widget>[
+            Semantics(tagForChildren: const SemanticsTag('tag'), child: const Text('prefix')),
+            EditableText(
+              autofocus: true,
+              controller: controller,
+              focusNode: focusNode,
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: const Color(0xFF000000),
+              style: const TextStyle(),
+            ),
+          ],
         ),
       ),
     );
@@ -1587,16 +1496,22 @@ void main() {
     }
 
     // This should cache the inner node in Scrollable with the children text1.
-    await tester.pumpWidget(MaterialApp(home: buildScrollable(true)));
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(true)),
+    );
     expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     // This does not use two panel, this should clear cached inner node.
-    await tester.pumpWidget(MaterialApp(home: buildScrollable(false)));
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(false)),
+    );
     expect(
       semantics,
       isNot(includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics})),
     );
     // If the inner node was cleared in the previous step, this should not crash.
-    await tester.pumpWidget(MaterialApp(home: buildScrollable(true)));
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: buildScrollable(true)),
+    );
     expect(semantics, includesNodeWith(tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics}));
     expect(tester.takeException(), isNull);
     semantics.dispose();
@@ -1604,8 +1519,9 @@ void main() {
 
   testWidgets('deltaToScrollOrigin getter', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: CustomScrollView(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
         ),
       ),
@@ -1626,9 +1542,9 @@ void main() {
 
   testWidgets('resolvedPhysics getter', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
-        home: const CustomScrollView(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
           physics: AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
         ),
@@ -1663,24 +1579,35 @@ void main() {
         builder: (BuildContext context) {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return MaterialApp(
-                home: Scaffold(
-                  body: Scrollable(
-                    scrollBehavior: const MaterialScrollBehavior().copyWith(
-                      dragDevices: <ui.PointerDeviceKind>{if (enable) ui.PointerDeviceKind.mouse},
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Column(
+                  children: [
+                    TestButton(
+                      onPressed: () {
+                        setState(() {
+                          enable = !enable;
+                        });
+                      },
+                      child: const Text('Toggle dragDevices'),
                     ),
-                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
-                      offset: position,
-                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+                    Expanded(
+                      child: Scrollable(
+                        scrollBehavior: const NoScrollbarBehavior().copyWith(
+                          dragDevices: <ui.PointerDeviceKind>{
+                            if (enable) ui.PointerDeviceKind.mouse,
+                          },
+                        ),
+                        viewportBuilder: (BuildContext context, ViewportOffset position) =>
+                            Viewport(
+                              offset: position,
+                              slivers: const <Widget>[
+                                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+                              ],
+                            ),
+                      ),
                     ),
-                  ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        enable = !enable;
-                      });
-                    },
-                  ),
+                  ],
                 ),
               );
             },
@@ -1700,7 +1627,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
 
     // Change state to include mouse pointer device.
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.text('Toggle dragDevices'));
     await tester.pump();
 
     // Gesture should work after state change.
@@ -1724,25 +1651,34 @@ void main() {
         builder: (BuildContext context) {
           return StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
-              return MaterialApp(
-                home: Scaffold(
-                  body: Scrollable(
-                    physics: const ScrollPhysics(),
-                    scrollBehavior: scrollBehavior,
-                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
-                      offset: position,
-                      slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: Column(
+                  children: [
+                    TestButton(
+                      onPressed: () {
+                        setState(() {
+                          scrollBehavior = const NoScrollbarBehavior().copyWith(
+                            dragDevices: <ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse},
+                          );
+                        });
+                      },
+                      child: const Text('Update ScrollBehavior'),
                     ),
-                  ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        scrollBehavior = const MaterialScrollBehavior().copyWith(
-                          dragDevices: <ui.PointerDeviceKind>{ui.PointerDeviceKind.mouse},
-                        );
-                      });
-                    },
-                  ),
+                    Expanded(
+                      child: Scrollable(
+                        physics: const ScrollPhysics(),
+                        scrollBehavior: scrollBehavior,
+                        viewportBuilder: (BuildContext context, ViewportOffset position) =>
+                            Viewport(
+                              offset: position,
+                              slivers: const <Widget>[
+                                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+                              ],
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -1762,7 +1698,7 @@ void main() {
     expect(getScrollOffset(tester), 0.0);
 
     // Change state to include mouse pointer device.
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.text('Update ScrollBehavior'));
     await tester.pump();
 
     // Gesture should work after state change.
@@ -1806,12 +1742,5 @@ class ExtraSuperPessimisticScrollPhysics extends ScrollPhysics {
   @override
   ScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return ExtraSuperPessimisticScrollPhysics(parent: buildParent(ancestor));
-  }
-}
-
-class TestTickerProvider extends TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick) {
-    return Ticker(onTick);
   }
 }

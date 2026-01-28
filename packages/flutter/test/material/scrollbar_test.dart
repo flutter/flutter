@@ -15,7 +15,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
@@ -68,6 +70,97 @@ class NoScrollbarBehavior extends MaterialScrollBehavior {
 }
 
 void main() {
+  testWidgets('MaterialScrollBehavior flings on different platforms', (WidgetTester tester) async {
+    double getScrollOffset(WidgetTester tester, {bool last = true}) {
+      Finder viewportFinder = find.byType(Viewport);
+      if (last) {
+        viewportFinder = viewportFinder.last;
+      }
+      final RenderViewport viewport = tester.renderObject(viewportFinder);
+      return viewport.offset.pixels;
+    }
+
+    void resetScrollOffset(WidgetTester tester) {
+      final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+      final position = viewport.offset as ScrollPosition;
+      position.jumpTo(0.0);
+    }
+
+    Future<void> pumpTest(
+      WidgetTester tester,
+      TargetPlatform? platform, {
+      bool scrollable = true,
+      bool reverse = false,
+      Set<LogicalKeyboardKey>? axisModifier,
+      Axis scrollDirection = Axis.vertical,
+      ScrollController? controller,
+      bool enableMouseDrag = true,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          scrollBehavior: const NoScrollbarBehavior().copyWith(
+            dragDevices: enableMouseDrag
+                ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+                : null,
+            pointerAxisModifiers: axisModifier,
+          ),
+          theme: ThemeData(platform: platform),
+          home: CustomScrollView(
+            controller: controller,
+            reverse: reverse,
+            scrollDirection: scrollDirection,
+            physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: scrollDirection == Axis.vertical ? 2000.0 : null,
+                  width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+    }
+
+    const dragOffset = 200.0;
+
+    await pumpTest(tester, TargetPlatform.android);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), dragOffset);
+    await tester.pump(const Duration(seconds: 5));
+    final double androidResult = getScrollOffset(tester);
+
+    resetScrollOffset(tester);
+
+    await pumpTest(tester, TargetPlatform.iOS);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(const Duration(seconds: 5));
+    final double iOSResult = getScrollOffset(tester);
+
+    resetScrollOffset(tester);
+
+    await pumpTest(tester, TargetPlatform.macOS);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(); // trigger fling
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
+    await tester.pump(const Duration(seconds: 5));
+    final double macOSResult = getScrollOffset(tester);
+
+    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
+    expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
+    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
+  });
+
   testWidgets("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(
