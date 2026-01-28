@@ -2076,7 +2076,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile statesController', (WidgetTester tester) async {
-    final WidgetStatesController controller = WidgetStatesController();
+    final controller = WidgetStatesController();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
