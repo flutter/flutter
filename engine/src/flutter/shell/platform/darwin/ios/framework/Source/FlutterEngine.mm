@@ -1131,6 +1131,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
           lookUpSelectedText:(NSString*)selectedText {
+  [self.textInputPlugin prepareForLookUp];
   [self.platformPlugin showLookUpViewController:selectedText];
 }
 
