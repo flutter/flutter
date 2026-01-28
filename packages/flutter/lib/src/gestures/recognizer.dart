@@ -184,9 +184,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   // Accept any input.
   static bool _defaultButtonAcceptBehavior(int buttons) => true;
 
-  /// Holds a mapping between pointer IDs and the kind of devices they are
-  /// coming from.
-  final Map<int, PointerDeviceKind> _pointerToKind = <int, PointerDeviceKind>{};
+  /// Holds a mapping between pointer IDs and the data associated with them, like
+  /// kind of devices they are coming from or which buttons are being pressed.
+  final Map<int, _RecognizerEventData> _pointerToEventData = <int, _RecognizerEventData>{};
 
   /// Registers a new pointer pan/zoom that might be relevant to this gesture
   /// detector.
@@ -207,7 +207,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This method is called for each and all pointers being added. In
   /// most cases, you want to override [addAllowedPointerPanZoom] instead.
   void addPointerPanZoom(PointerPanZoomStartEvent event) {
-    _pointerToKind[event.pointer] = event.kind;
+    _pointerToEventData[event.pointer] = _RecognizerEventData(
+      kind: event.kind,
+      buttons: event.buttons,
+    );
     if (isPointerPanZoomAllowed(event)) {
       addAllowedPointerPanZoom(event);
     } else {
@@ -241,7 +244,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This method is called for each and all pointers being added. In
   /// most cases, you want to override [addAllowedPointer] instead.
   void addPointer(PointerDownEvent event) {
-    _pointerToKind[event.pointer] = event.kind;
+    _pointerToEventData[event.pointer] = _RecognizerEventData(
+      kind: event.kind,
+      buttons: event.buttons,
+    );
     if (isPointerAllowed(event)) {
       addAllowedPointer(event);
     } else {
@@ -293,8 +299,18 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// with that pointer ID.
   @protected
   PointerDeviceKind getKindForPointer(int pointer) {
-    assert(_pointerToKind.containsKey(pointer));
-    return _pointerToKind[pointer]!;
+    assert(_pointerToEventData.containsKey(pointer));
+    return _pointerToEventData[pointer]!.kind;
+  }
+
+  /// For a given pointer ID, returns the buttons associated with it.
+  ///
+  /// The pointer ID is expected to be a valid one i.e. an event was received
+  /// with that pointer ID.
+  @protected
+  int getButtonsForPointer(int pointer) {
+    assert(_pointerToEventData.containsKey(pointer));
+    return _pointerToEventData[pointer]!.buttons;
   }
 
   /// Releases any resources used by the object.
@@ -841,4 +857,18 @@ class OffsetPair {
 
   @override
   String toString() => '${objectRuntimeType(this, 'OffsetPair')}(local: $local, global: $global)';
+}
+
+/// Data associated with a pointer event.
+///
+/// This is stored by [GestureRecognizer]s on a per-pointer basis.
+class _RecognizerEventData {
+  /// Creates a new [_RecognizerEventData].
+  _RecognizerEventData({required this.kind, required this.buttons});
+
+  /// The kind of device that generated the event.
+  final PointerDeviceKind kind;
+
+  /// The buttons that were pressed for this event.
+  final int buttons;
 }
