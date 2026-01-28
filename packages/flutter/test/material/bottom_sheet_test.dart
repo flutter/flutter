@@ -3047,6 +3047,74 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('ModalBottomSheet uses AnimationStyle curve and reverseCurve', (
+    WidgetTester tester,
+  ) async {
+    final Key sheetKey = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                    context: context,
+                    sheetAnimationStyle: const AnimationStyle(
+                      curve: Curves.easeIn,
+                      reverseCurve: Curves.easeOut,
+                      duration: Duration(milliseconds: 300),
+                      reverseDuration: Duration(milliseconds: 300),
+                    ),
+                    builder: (BuildContext context) {
+                      return SizedBox.expand(
+                        child: ColoredBox(
+                          key: sheetKey,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+
+    // Advance the animation by 1/3 of the duration.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(547.3, 0.1));
+
+    // Advance the animation to the end.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(262.5));
+
+    // Dismiss the bottom sheet.
+    await tester.tap(find.widgetWithText(FilledButton, 'Close'));
+    await tester.pump();
+
+    // Advance the animation by 1/4 of the duration.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, closeTo(427.3, 0.1));
+
+    // Advance the animation to the end.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(tester.getTopLeft(find.byKey(sheetKey)).dy, equals(600.0));
+  });
 }
 
 class _TestPage extends StatelessWidget {

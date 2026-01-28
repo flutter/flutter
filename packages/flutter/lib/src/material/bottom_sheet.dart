@@ -738,7 +738,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         onDragEnd: handleDragEnd,
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue = animationCurve.transform(widget.route.animation!.value);
+        final double animationValue = widget.route.animation!.value;
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -1023,8 +1023,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
+  CurvedAnimation? _animation;
+
   @override
   void dispose() {
+    _animation?.dispose();
     _clipDetailsNotifier.dispose();
     super.dispose();
   }
@@ -1078,6 +1081,18 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       );
     }
     return _animationController!;
+  }
+
+  @override
+  Animation<double> createAnimation() {
+    if (sheetAnimationStyle != AnimationStyle.noAnimation) {
+      return _animation ??= CurvedAnimation(
+        parent: super.createAnimation(),
+        curve: sheetAnimationStyle?.curve ?? _modalBottomSheetCurve,
+        reverseCurve: sheetAnimationStyle?.reverseCurve ?? _modalBottomSheetCurve,
+      );
+    }
+    return super.createAnimation();
   }
 
   @override
@@ -1137,9 +1152,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         ColorTween(
           begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
-        ).chain(
-          CurveTween(curve: barrierCurve),
-        ), // changedInternalState is called if barrierCurve updates
+        ),
       );
       return AnimatedModalBarrier(
         color: color,
