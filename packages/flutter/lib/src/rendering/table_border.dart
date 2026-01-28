@@ -251,6 +251,151 @@ class TableBorder {
     );
   }
 
+  /// Draws all vertical dividers between columns without checking for spans.
+  void _paintVerticalDividersUnspanned(
+    Canvas canvas,
+    Rect rect,
+    Iterable<double> columns,
+    Paint paint,
+    Path path,
+  ) {
+    if (columns.isEmpty || verticalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = verticalInside.color
+      ..strokeWidth = verticalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    for (final x in columns) {
+      path.moveTo(rect.left + x, rect.top);
+      path.lineTo(rect.left + x, rect.bottom);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws all horizontal dividers between rows without checking for spans.
+  void _paintHorizontalDividersUnspanned(
+    Canvas canvas,
+    Rect rect,
+    Iterable<double> rows,
+    Paint paint,
+    Path path,
+  ) {
+    if (rows.isEmpty || horizontalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = horizontalInside.color
+      ..strokeWidth = horizontalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    for (final y in rows) {
+      path.moveTo(rect.left, rect.top + y);
+      path.lineTo(rect.right, rect.top + y);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws vertical dividers between columns, skipping spanned regions.
+  void _paintVerticalDividersWithSpans(
+    Canvas canvas,
+    Rect rect,
+    List<double> columnList,
+    Float64List rowHeights,
+    List<Set<int>> spannedColumnsPerRow,
+    Paint paint,
+    Path path,
+  ) {
+    if (columnList.isEmpty || verticalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = verticalInside.color
+      ..strokeWidth = verticalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    double yOffset = rect.top;
+
+    for (var y = 0; y < rowHeights.length; y++) {
+      final double nextY = yOffset + rowHeights[y];
+      final Set<int> hiddenCols = y < spannedColumnsPerRow.length
+          ? spannedColumnsPerRow[y]
+          : const <int>{};
+
+      for (var x = 0; x < columnList.length; x++) {
+        if (hiddenCols.contains(x + 1)) {
+          continue;
+        }
+        final double xPos = rect.left + columnList[x];
+        path
+          ..moveTo(xPos, yOffset)
+          ..lineTo(xPos, nextY);
+      }
+
+      yOffset = nextY;
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  /// Draws horizontal dividers between rows, skipping spanned regions.
+  void _paintHorizontalDividersWithSpans(
+    Canvas canvas,
+    Rect rect,
+    List<double> rowList,
+    List<double> columnList,
+    List<Set<int>> spannedRowsPerColumn,
+    Paint paint,
+    Path path,
+  ) {
+    if (rowList.isEmpty || horizontalInside.style == BorderStyle.none) {
+      return;
+    }
+
+    paint
+      ..color = horizontalInside.color
+      ..strokeWidth = horizontalInside.width
+      ..style = PaintingStyle.stroke;
+    path.reset();
+
+    // Compute absolute column offsets including the left and right edges.
+    final int columnCount = columnList.length;
+    final columnOffsets = Float64List(columnCount + 2);
+    columnOffsets[0] = rect.left;
+    for (var i = 0; i < columnCount; i++) {
+      columnOffsets[i + 1] = rect.left + columnList[i];
+    }
+    columnOffsets[columnCount + 1] = rect.right;
+
+    for (var y = 0; y < rowList.length; y++) {
+      final double yPos = rect.top + rowList[y];
+
+      for (var x = 0; x < columnOffsets.length - 1; x++) {
+        final Set<int> hiddenRows = x < spannedRowsPerColumn.length
+            ? spannedRowsPerColumn[x]
+            : const <int>{};
+
+        if (hiddenRows.contains(y + 1)) {
+          continue;
+        }
+        final double xStart = columnOffsets[x];
+        final double xEnd = columnOffsets[x + 1];
+        path
+          ..moveTo(xStart, yPos)
+          ..lineTo(xEnd, yPos);
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
   /// Paints the border around the given [Rect] on the given [Canvas], with the
   /// given rows and columns.
   ///
@@ -268,6 +413,17 @@ class TableBorder {
   /// single value, 100.0, which is the vertical position between the two
   /// columns (relative to the left edge of `rect`).
   ///
+  /// The [rowHeights] list contains the absolute height of each row and is used
+  /// to compute vertical border positions more efficiently during painting.
+  ///
+  /// The [spannedColumnsPerRow] list defines, for each row, which column
+  /// dividers should be skipped when painting (e.g., for cells that span
+  /// multiple columns).
+  ///
+  /// The [spannedRowsPerColumn] list defines, for each column, which row
+  /// dividers should be skipped when painting (e.g., for cells that span
+  /// multiple rows).
+  ///
   /// The [verticalInside] border is only drawn if there are at least two
   /// columns. The [horizontalInside] border is only drawn if there are at least
   /// two rows. The horizontal borders are drawn after the vertical borders.
@@ -275,61 +431,61 @@ class TableBorder {
   /// The outer borders (in the order [top], [right], [bottom], [left], with
   /// [left] above the others) are painted after the inner borders.
   ///
-  /// The paint order is particularly notable in the case of
+  /// The paint order is particularly relevant when using
   /// partially-transparent borders.
   void paint(
     Canvas canvas,
     Rect rect, {
     required Iterable<double> rows,
     required Iterable<double> columns,
+    required Float64List rowHeights,
+    List<Set<int>> spannedColumnsPerRow = const <Set<int>>[],
+    List<Set<int>> spannedRowsPerColumn = const <Set<int>>[],
   }) {
-    // properties can't be null
-
-    // arguments can't be null
+    // Validate row and column offsets are within the table's bounds.
     assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
-    if (columns.isNotEmpty || rows.isNotEmpty) {
-      final paint = Paint();
-      final path = Path();
+    final paint = Paint();
+    final path = Path();
 
-      if (columns.isNotEmpty) {
-        switch (verticalInside.style) {
-          case BorderStyle.solid:
-            paint
-              ..color = verticalInside.color
-              ..strokeWidth = verticalInside.width
-              ..style = PaintingStyle.stroke;
-            path.reset();
-            for (final x in columns) {
-              path.moveTo(rect.left + x, rect.top);
-              path.lineTo(rect.left + x, rect.bottom);
-            }
-            canvas.drawPath(path, paint);
-          case BorderStyle.none:
-            break;
-        }
-      }
+    // Determine which types of spans exist to choose the optimal rendering path.
+    final bool hasRowSpans = spannedRowsPerColumn.isNotEmpty;
+    final bool hasColSpans = spannedColumnsPerRow.isNotEmpty;
 
-      if (rows.isNotEmpty) {
-        switch (horizontalInside.style) {
-          case BorderStyle.solid:
-            paint
-              ..color = horizontalInside.color
-              ..strokeWidth = horizontalInside.width
-              ..style = PaintingStyle.stroke;
-            path.reset();
-            for (final y in rows) {
-              path.moveTo(rect.left, rect.top + y);
-              path.lineTo(rect.right, rect.top + y);
-            }
-            canvas.drawPath(path, paint);
-          case BorderStyle.none:
-            break;
-        }
-      }
+    final List<double> columnList = columns.toList();
+
+    if (hasRowSpans) {
+      final List<double> rowList = rows.toList();
+
+      _paintHorizontalDividersWithSpans(
+        canvas,
+        rect,
+        rowList,
+        columnList,
+        spannedRowsPerColumn,
+        paint,
+        path,
+      );
+    } else {
+      _paintHorizontalDividersUnspanned(canvas, rect, rows, paint, path);
     }
 
+    if (hasColSpans) {
+      _paintVerticalDividersWithSpans(
+        canvas,
+        rect,
+        columnList,
+        rowHeights,
+        spannedColumnsPerRow,
+        paint,
+        path,
+      );
+    } else {
+      _paintVerticalDividersUnspanned(canvas, rect, columns, paint, path);
+    }
+
+    // Paint the outer border of the table.
     _paintTableBorder(canvas, rect);
   }
 

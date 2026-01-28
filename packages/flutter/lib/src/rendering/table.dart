@@ -25,9 +25,25 @@ class TableCellParentData extends BoxParentData {
   /// The row that the child was in the last time it was laid out.
   int? y;
 
+  /// The number of columns this cell should span.
+  int colSpan = 1;
+
+  /// The number of rows this cell should span.
+  int rowSpan = 1;
+
+  /// Whether this cell is visible (not hidden by spanning cells).
+  /// Hidden cells have their rowSpan or colSpan set to 0.
+  bool get _isVisible => rowSpan != 0 && colSpan != 0;
+
+  /// Whether this cell spans multiple rows or columns.
+  bool get _hasSpan => colSpan > 1 || rowSpan > 1;
+
   @override
   String toString() =>
-      '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}';
+      '${super.toString()}; '
+      '${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}'
+      '${colSpan <= 1 ? '' : '$colSpan cols'}'
+      '${rowSpan <= 1 ? '' : '$rowSpan rows'}';
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
@@ -609,6 +625,20 @@ class RenderTable extends RenderBox {
     config.role = SemanticsRole.table;
     config.isSemanticBoundary = true;
     config.explicitChildNodes = true;
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    // Skip hidden cells as they are not laid out and should not appear in the
+    // semantics tree.
+    for (final RenderBox? child in _children) {
+      if (child != null && child.hasSize) {
+        final cellParentData = child.parentData! as TableCellParentData;
+        if (cellParentData._isVisible) {
+          visitor(child);
+        }
+      }
+    }
   }
 
   final Map<int, _Index> _idToIndexMap = <int, _Index>{};
@@ -1238,6 +1268,176 @@ class RenderTable extends RenderBox {
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 
+  // Cached layout data used during painting to avoid recomputation.
+  List<Set<int>> _cachedSpannedColumnsForRows = const <Set<int>>[];
+  List<Set<int>> _cachedSpannedRowsForColumns = const <Set<int>>[];
+  Float64List _cachedRowHeights = Float64List(0);
+
+  /// Invalidates the cached span information when the table structure changes.
+  void _invalidateSpanCache() {
+    _cachedSpannedColumnsForRows = const <Set<int>>[];
+    _cachedSpannedRowsForColumns = const <Set<int>>[];
+  }
+
+  /// Computes and caches the span information for table borders.
+  /// This is called during layout to avoid recomputation during paint.
+  void _computeSpanInformation() {
+    if (rows == 0 || columns == 0) {
+      _invalidateSpanCache();
+      return;
+    }
+
+    // Pre-allocate lists with correct size for better performance
+    final logicalSpannedColumnsPerRow = List<Set<int>>.generate(
+      rows,
+      (_) => <int>{},
+      growable: false,
+    );
+    final logicalSpannedRowsPerColumn = List<Set<int>>.generate(
+      columns,
+      (_) => <int>{},
+      growable: false,
+    );
+
+    for (var y = 0; y < rows; y++) {
+      for (var x = 0; x < columns; x++) {
+        final int xy = x + y * columns;
+        final RenderBox? child = _children[xy];
+        if (child == null) {
+          continue;
+        }
+
+        final parentData = child.parentData! as TableCellParentData;
+        final int colSpan = parentData.colSpan;
+        final int rowSpan = parentData.rowSpan;
+
+        // Only process if there are actual spans to avoid unnecessary work
+        if (!parentData._hasSpan) {
+          continue;
+        }
+
+        // Check if rowSpan or colSpan exceeds the table bounds
+        assert(() {
+          // Check if colSpan exceeds available columns
+          if (x + colSpan > columns) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Invalid TableCell.colSpan'),
+              ErrorDescription(
+                'In row $y, the cell at column $x has a colSpan of $colSpan, '
+                'which extends beyond the total number of columns ($columns).',
+              ),
+              ErrorHint(
+                'Ensure that colSpan does not exceed the remaining columns in the row.\n'
+                'For example, if a table has $columns columns, '
+                'and you are at column index $x, the maximum valid colSpan is '
+                '${columns - x}.',
+              ),
+            ]);
+          }
+
+          // Check if rowSpan exceeds available rows
+          if (y + rowSpan > rows) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Invalid TableCell.rowSpan'),
+              ErrorDescription(
+                'In row $y, the cell at column $x has a rowSpan of $rowSpan, '
+                'which extends beyond the total number of rows ($rows).',
+              ),
+              ErrorHint(
+                'Ensure that rowSpan does not exceed the remaining rows in the table.\n'
+                'For example, if a table has $rows rows, '
+                'and you are at row index $y, the maximum valid rowSpan is '
+                '${rows - y}.',
+              ),
+            ]);
+          }
+          return true;
+        }());
+
+        // Calculate bounds once to avoid repeated boundary checks
+        final int maxColSpan = math.min(colSpan, columns - x);
+        final int maxRowSpan = math.min(rowSpan, rows - y);
+
+        // Mark vertical dividers to skip for the first row of the span.
+        if (colSpan > 1) {
+          for (var dx = 1; dx < maxColSpan; dx++) {
+            logicalSpannedColumnsPerRow[y].add(x + dx);
+          }
+        }
+
+        // Mark horizontal dividers to skip for the first column of the span.
+        if (rowSpan > 1) {
+          for (var dy = 1; dy < maxRowSpan; dy++) {
+            logicalSpannedRowsPerColumn[x].add(y + dy);
+          }
+        }
+
+        // Mark internal dividers to skip for cells that span both rows and columns.
+        if (colSpan > 1 && rowSpan > 1) {
+          for (var dx = 1; dx < maxColSpan; dx++) {
+            for (var dy = 1; dy < maxRowSpan; dy++) {
+              logicalSpannedRowsPerColumn[x + dx].add(y + dy);
+              logicalSpannedColumnsPerRow[y + dy].add(x + dx);
+            }
+          }
+        }
+      }
+    }
+
+    switch (textDirection) {
+      case TextDirection.ltr:
+        // In LTR mode, use the logical span mappings directly.
+        _cachedSpannedColumnsForRows = logicalSpannedColumnsPerRow;
+        _cachedSpannedRowsForColumns = logicalSpannedRowsPerColumn;
+      case TextDirection.rtl:
+        // In RTL mode, convert logical span mappings to visual coordinates.
+        _cachedSpannedColumnsForRows = logicalSpannedColumnsPerRow.map((Set<int> rowSpans) {
+          return rowSpans.map((int col) => columns - col).toSet();
+        }).toList();
+
+        _cachedSpannedRowsForColumns = List<Set<int>>.generate(columns, (int visualCol) {
+          final int logicalCol = columns - 1 - visualCol;
+          return logicalCol < logicalSpannedRowsPerColumn.length
+              ? logicalSpannedRowsPerColumn[logicalCol]
+              : <int>{};
+        });
+    }
+  }
+
+  /// Updates the cached row heights derived from the current `_rowTops`.
+  ///
+  /// These cached values are used during painting to determine the visual
+  /// height of each row without recomputing differences at draw time.
+  void _updateCachedRowHeights() {
+    if (_rowTops.length > 1) {
+      _cachedRowHeights = Float64List(_rowTops.length - 1);
+      for (var i = 0; i < _cachedRowHeights.length; i++) {
+        _cachedRowHeights[i] = _rowTops[i + 1] - _rowTops[i];
+      }
+    } else {
+      _cachedRowHeights = Float64List(0);
+    }
+  }
+
+  @override
+  void markNeedsLayout() {
+    _invalidateSpanCache();
+    super.markNeedsLayout();
+  }
+
+  /// Computes the visual x-position for a cell, adjusting for text direction
+  /// and column span.
+  double _computeCellX({
+    required Float64List positions,
+    required int columnIndex,
+    required int colSpan,
+  }) {
+    return switch (textDirection) {
+      TextDirection.ltr => positions[columnIndex],
+      TextDirection.rtl => positions[columnIndex + colSpan - 1],
+    };
+  }
+
   /// Returns the position and dimensions of the box that the given
   /// row covers, in this render object's coordinate space (so the
   /// left coordinate is always 0.0).
@@ -1290,6 +1490,7 @@ class RenderTable extends RenderBox {
       return constraints.constrain(Size.zero);
     }
     final List<double> widths = _computeColumnWidths(constraints);
+    final pendingRowSpanHeights = Float64List(rows);
     final double tableWidth = widths.fold(0.0, (double a, double b) => a + b);
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {
@@ -1299,6 +1500,15 @@ class RenderTable extends RenderBox {
         final RenderBox? child = _children[xy];
         if (child != null) {
           final childParentData = child.parentData! as TableCellParentData;
+          final int colSpan = childParentData.colSpan;
+          final int rowSpan = childParentData.rowSpan;
+
+          // Compute the total width covered by this cell's column span.
+          var spanWidth = 0.0;
+          for (var i = 0; i < colSpan && (x + i) < columns; i++) {
+            spanWidth += widths[x + i];
+          }
+
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               assert(
@@ -1312,11 +1522,38 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
             case TableCellVerticalAlignment.intrinsicHeight:
-              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: widths[x]));
-              rowHeight = math.max(rowHeight, childSize.height);
+              final Size childSize = child.getDryLayout(BoxConstraints.tightFor(width: spanWidth));
+              if (rowSpan == 1) {
+                rowHeight = math.max(rowHeight, childSize.height);
+              } else if (rowSpan > 1) {
+                final int targetY = y + rowSpan - 1;
+                if (targetY < rows) {
+                  pendingRowSpanHeights[targetY] = math.max(
+                    pendingRowSpanHeights[targetY],
+                    childSize.height,
+                  );
+                }
+              }
             case TableCellVerticalAlignment.fill:
               break;
           }
+        }
+      }
+
+      final double pendingHeightForThisRow = pendingRowSpanHeights[y];
+      rowHeight = math.max(rowHeight, pendingHeightForThisRow);
+      pendingRowSpanHeights[y] = 0.0; // Reset current row
+
+      // Update pending heights - subtract rowHeight from future rows
+      for (int futureY = y + 1; futureY < rows; futureY++) {
+        if (pendingRowSpanHeights[futureY] > 0) {
+          // For cells spanning multiple rows, reduce the pending height by the
+          // current row's height. Use math.max to ensure non-negative values,
+          // as the pending height may already be satisfied by earlier rows.
+          pendingRowSpanHeights[futureY] = math.max(
+            0.0,
+            pendingRowSpanHeights[futureY] - rowHeight,
+          );
         }
       }
       rowTop += rowHeight;
@@ -1338,7 +1575,18 @@ class RenderTable extends RenderBox {
       return;
     }
     final List<double> widths = _computeColumnWidths(constraints);
-    final positions = List<double>.filled(columns, 0.0);
+    final hiddenCells = List<Set<int>>.generate(rows, (_) => <int>{}, growable: false);
+    // Use typed lists for predictable memory layout and faster indexed access.
+    final positions = Float64List(columns);
+    final pendingRowSpanHeights = Float64List(rows);
+    final rowHeights = Float64List(rows);
+    final beforeBaselineDistances = Float64List(rows);
+    // Use flat arrays instead of nested lists for better cache locality.
+    final spanWidths = Float64List(rows * columns);
+    final baselines = Float64List(rows * columns);
+
+    var hasCellSpans = false;
+
     switch (textDirection) {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;
@@ -1357,94 +1605,204 @@ class RenderTable extends RenderBox {
     }
     _rowTops.clear();
     _baselineDistance = null;
-    // then, lay out each row
+
+    // First layout pass: measure children and collect span information.
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {
-      _rowTops.add(rowTop);
       var rowHeight = 0.0;
       var haveBaseline = false;
       var beforeBaselineDistance = 0.0;
       var afterBaselineDistance = 0.0;
-      final baselines = List<double>.filled(columns, 0.0);
+      final Set<int> currentRowHiddenCells = hiddenCells[y];
+
       for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
-        if (child != null) {
-          final childParentData = child.parentData! as TableCellParentData;
-          childParentData.x = x;
-          childParentData.y = y;
-          switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
-            case TableCellVerticalAlignment.baseline:
-              assert(
-                textBaseline != null,
-                'An explicit textBaseline is required when using baseline alignment.',
-              );
-              child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
-              final double? childBaseline = child.getDistanceToBaseline(
-                textBaseline!,
-                onlyReal: true,
-              );
-              if (childBaseline != null) {
-                beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
-                afterBaselineDistance = math.max(
-                  afterBaselineDistance,
-                  child.size.height - childBaseline,
-                );
-                baselines[x] = childBaseline;
-                haveBaseline = true;
-              } else {
-                rowHeight = math.max(rowHeight, child.size.height);
-                childParentData.offset = Offset(positions[x], rowTop);
+        if (child == null) {
+          continue;
+        }
+        final childParentData = child.parentData! as TableCellParentData;
+        childParentData.x = x;
+        childParentData.y = y;
+
+        final int colSpan = childParentData.colSpan;
+        final int rowSpan = childParentData.rowSpan;
+
+        // Compute the total width covered by this cell's column span.
+        var spanWidth = 0.0;
+        for (var i = 0; i < colSpan && (x + i) < columns; i++) {
+          spanWidth += widths[x + i];
+        }
+        spanWidths[y * columns + x] = spanWidth;
+
+        // Mark hidden cells that are covered by a spanning cell.
+        if (colSpan > 1 || rowSpan > 1) {
+          hasCellSpans = true;
+          for (var dx = 0; dx < colSpan && x + dx < columns; dx++) {
+            for (var dy = 0; dy < rowSpan && y + dy < rows; dy++) {
+              if (dx == 0 && dy == 0) {
+                continue;
               }
-            case TableCellVerticalAlignment.top:
-            case TableCellVerticalAlignment.middle:
-            case TableCellVerticalAlignment.bottom:
-            case TableCellVerticalAlignment.intrinsicHeight:
-              child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
-              rowHeight = math.max(rowHeight, child.size.height);
-            case TableCellVerticalAlignment.fill:
-              break;
+              hiddenCells[y + dy].add(x + dx);
+            }
           }
         }
+
+        final bool isHiddenCell = currentRowHiddenCells.contains(x);
+        if (isHiddenCell) {
+          continue;
+        }
+
+        // Layout the child according to its vertical alignment.
+        switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+          case TableCellVerticalAlignment.baseline:
+            assert(
+              textBaseline != null,
+              'An explicit textBaseline is required when using baseline alignment.',
+            );
+            child.layout(BoxConstraints.tightFor(width: spanWidth), parentUsesSize: true);
+
+            final double? childBaseline = child.getDistanceToBaseline(
+              textBaseline!,
+              onlyReal: true,
+            );
+
+            if (childBaseline != null) {
+              beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
+              afterBaselineDistance = math.max(
+                afterBaselineDistance,
+                child.size.height - childBaseline,
+              );
+              baselines[y * columns + x] = childBaseline;
+              haveBaseline = true;
+            } else {
+              rowHeight = math.max(rowHeight, child.size.height);
+              final double cellX = _computeCellX(
+                positions: positions,
+                columnIndex: x,
+                colSpan: colSpan,
+              );
+              childParentData.offset = Offset(cellX, rowTop);
+            }
+          case TableCellVerticalAlignment.top:
+          case TableCellVerticalAlignment.middle:
+          case TableCellVerticalAlignment.bottom:
+          case TableCellVerticalAlignment.intrinsicHeight:
+            child.layout(BoxConstraints.tightFor(width: spanWidth), parentUsesSize: true);
+            final double childHeight = child.size.height;
+
+            if (rowSpan == 1) {
+              rowHeight = math.max(rowHeight, childHeight);
+            } else if (rowSpan > 1) {
+              final int targetY = y + rowSpan - 1;
+              if (targetY < rows) {
+                pendingRowSpanHeights[targetY] = math.max(
+                  pendingRowSpanHeights[targetY],
+                  childHeight,
+                );
+              }
+            }
+
+          case TableCellVerticalAlignment.fill:
+            break;
+        }
       }
+
+      final double pendingHeightForThisRow = pendingRowSpanHeights[y];
+      rowHeight = math.max(rowHeight, pendingHeightForThisRow);
+      pendingRowSpanHeights[y] = 0.0; // Reset after use.
+
+      // Adjust pending heights for future rows by subtracting the current height.
+      for (int futureY = y + 1; futureY < rows; futureY++) {
+        if (pendingRowSpanHeights[futureY] > 0) {
+          // For cells spanning multiple rows, reduce the pending height by the
+          // current row's height. Use math.max to ensure non-negative values,
+          // as the pending height may already be satisfied by earlier rows.
+          pendingRowSpanHeights[futureY] = math.max(
+            0.0,
+            pendingRowSpanHeights[futureY] - rowHeight,
+          );
+        }
+      }
+
       if (haveBaseline) {
         if (y == 0) {
           _baselineDistance = beforeBaselineDistance;
         }
         rowHeight = math.max(rowHeight, beforeBaselineDistance + afterBaselineDistance);
       }
+      rowHeights[y] = rowHeight;
+      beforeBaselineDistances[y] = beforeBaselineDistance;
+    }
+
+    // Second layout pass: position children using final row heights.
+    rowTop = 0.0;
+    for (var y = 0; y < rows; y += 1) {
+      _rowTops.add(rowTop);
+      final double beforeBaselineDistance = beforeBaselineDistances[y];
+      final double rowHeight = rowHeights[y];
+      final Set<int> currentRowHiddenCells = hiddenCells[y];
+
       for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
-        if (child != null) {
-          final childParentData = child.parentData! as TableCellParentData;
-          switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
-            case TableCellVerticalAlignment.baseline:
-              childParentData.offset = Offset(
-                positions[x],
-                rowTop + beforeBaselineDistance - baselines[x],
-              );
-            case TableCellVerticalAlignment.top:
-              childParentData.offset = Offset(positions[x], rowTop);
-            case TableCellVerticalAlignment.middle:
-              childParentData.offset = Offset(
-                positions[x],
-                rowTop + (rowHeight - child.size.height) / 2.0,
-              );
-            case TableCellVerticalAlignment.bottom:
-              childParentData.offset = Offset(positions[x], rowTop + rowHeight - child.size.height);
-            case TableCellVerticalAlignment.fill:
-            case TableCellVerticalAlignment.intrinsicHeight:
-              child.layout(BoxConstraints.tightFor(width: widths[x], height: rowHeight));
-              childParentData.offset = Offset(positions[x], rowTop);
+        if (child == null) {
+          continue;
+        }
+
+        final childParentData = child.parentData! as TableCellParentData;
+        final int rowSpan = childParentData.rowSpan;
+        final bool isHiddenCell = currentRowHiddenCells.contains(x);
+        if (isHiddenCell) {
+          continue;
+        }
+
+        // Compute the total height covered by this cell's row span.
+        var spanHeight = rowHeight;
+        if (rowSpan > 1) {
+          spanHeight = 0.0;
+          for (var dy = 0; dy < rowSpan && (y + dy) < rows; dy++) {
+            spanHeight += rowHeights[y + dy];
           }
         }
+
+        final int colSpan = childParentData.colSpan;
+        final double cellX = _computeCellX(positions: positions, columnIndex: x, colSpan: colSpan);
+
+        // Set the child's final offset based on vertical alignment.
+        switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
+          case TableCellVerticalAlignment.baseline:
+            childParentData.offset = Offset(
+              cellX,
+              rowTop + beforeBaselineDistance - baselines[y * columns + x],
+            );
+          case TableCellVerticalAlignment.top:
+            childParentData.offset = Offset(cellX, rowTop);
+          case TableCellVerticalAlignment.middle:
+            childParentData.offset = Offset(cellX, rowTop + (spanHeight - child.size.height) / 2.0);
+          case TableCellVerticalAlignment.bottom:
+            childParentData.offset = Offset(cellX, rowTop + spanHeight - child.size.height);
+          case TableCellVerticalAlignment.fill:
+          case TableCellVerticalAlignment.intrinsicHeight:
+            final double spanWidth = spanWidths[y * columns + x];
+
+            child.layout(BoxConstraints.tightFor(width: spanWidth, height: spanHeight));
+            childParentData.offset = Offset(cellX, rowTop);
+        }
       }
+
       rowTop += rowHeight;
     }
     _rowTops.add(rowTop);
     size = constraints.constrain(Size(_tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
+
+    if (hasCellSpans) {
+      // Cache row heights derived from the final row geometry.
+      _updateCachedRowHeights();
+      // Cache span metadata for use during painting.
+      _computeSpanInformation();
+    }
   }
 
   @override
@@ -1452,7 +1810,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
-      if (child != null) {
+      if (child != null && child.hasSize) {
         final childParentData = child.parentData! as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
@@ -1481,6 +1839,7 @@ class RenderTable extends RenderBox {
           borderRect,
           rows: const <double>[],
           columns: const <double>[],
+          rowHeights: Float64List(0),
         );
       }
       return;
@@ -1505,7 +1864,7 @@ class RenderTable extends RenderBox {
     }
     for (var index = 0; index < _children.length; index += 1) {
       final RenderBox? child = _children[index];
-      if (child != null) {
+      if (child != null && child.hasSize) {
         final childParentData = child.parentData! as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
@@ -1519,7 +1878,16 @@ class RenderTable extends RenderBox {
       final borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, _rowTops.last);
       final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts!.skip(1);
-      border!.paint(context.canvas, borderRect, rows: rows, columns: columns);
+
+      border!.paint(
+        context.canvas,
+        borderRect,
+        rows: rows,
+        columns: columns,
+        spannedColumnsPerRow: _cachedSpannedColumnsForRows,
+        spannedRowsPerColumn: _cachedSpannedRowsForColumns,
+        rowHeights: _cachedRowHeights,
+      );
     }
   }
 
