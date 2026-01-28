@@ -1901,6 +1901,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     HardwareKeyboard.instance.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
+    HardwareKeyboard.instance.markStateInitializedForTesting();
+    // ignore: invalid_use_of_visible_for_testing_member
     keyEventManager.clearState();
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();

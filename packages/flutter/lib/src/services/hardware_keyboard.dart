@@ -416,6 +416,8 @@ class HardwareKeyboard {
   final Map<PhysicalKeyboardKey, LogicalKeyboardKey> _pressedKeys =
       <PhysicalKeyboardKey, LogicalKeyboardKey>{};
 
+  bool _keyboardStateInitialized = false;
+
   /// The set of [PhysicalKeyboardKey]s that are pressed.
   ///
   /// If called from a key event handler, the result will already include the effect
@@ -506,6 +508,9 @@ class HardwareKeyboard {
 
   void _assertEventIsRegular(KeyEvent event) {
     assert(() {
+      if (!_keyboardStateInitialized) {
+        return true;
+      }
       const common =
           'If this occurs in real application, please report this '
           'bug to Flutter. If this occurs in unit tests, please ensure that '
@@ -601,6 +606,7 @@ class HardwareKeyboard {
         _pressedKeys[physicalKey] = logicalKey;
       }
     }
+    _keyboardStateInitialized = true;
   }
 
   bool _dispatchKeyEvent(KeyEvent event) {
@@ -693,7 +699,18 @@ class HardwareKeyboard {
     _pressedKeys.clear();
     _lockModes.clear();
     _handlers.clear();
+    _keyboardStateInitialized = false;
     assert(_modifiedHandlers == null);
+  }
+
+  /// Marks the keyboard state as initialized for testing purposes.
+  ///
+  /// This allows assertion checks in [_assertEventIsRegular] to work properly
+  /// in tests without needing to call [syncKeyboardState], which requires
+  /// an actual engine connection.
+  @visibleForTesting
+  void markStateInitializedForTesting() {
+    _keyboardStateInitialized = true;
   }
 }
 
