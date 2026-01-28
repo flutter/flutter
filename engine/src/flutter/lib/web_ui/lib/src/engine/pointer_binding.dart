@@ -27,6 +27,30 @@ const bool _debugLogPointerEvents = false;
 /// Set this to true to log all the events sent to the Flutter framework.
 const bool _debugLogFlutterEvents = false;
 
+/// Resets iframe detection cache for tests.
+@visibleForTesting
+void debugResetIframeDetectionCache() {
+  _WheelEventListenerMixin._cachedIsInIframe = null;
+}
+
+/// Overrides iframe detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetIframeEmbeddingForTests(bool? isInIframe) {
+  _WheelEventListenerMixin._cachedIsInIframe = isInIframe;
+}
+
+/// Resets full-page app detection cache for tests.
+@visibleForTesting
+void debugResetFullPageAppCache() {
+  _WheelEventListenerMixin._cachedIsFullPageApp = null;
+}
+
+/// Overrides full-page app detection for tests. Pass `null` to restore auto-detection.
+@visibleForTesting
+void debugSetFullPageAppForTests(bool? isFullPage) {
+  _WheelEventListenerMixin._cachedIsFullPageApp = isFullPage;
+}
+
 /// The signature of a callback that handles pointer events.
 typedef _PointerDataCallback = void Function(DomEvent event, List<ui.PointerData>);
 
@@ -545,7 +569,16 @@ abstract class _BaseAdapter {
   final List<Listener> _listeners = <Listener>[];
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
+
+  /// Two flags to track scroll handling for the two-flag system:
+  /// 1. _lastWheelEventAllowedDefault: true if a scrollable is at boundary
+  /// 2. _lastWheelEventHandledByWidget: true if a scrollable consumed the event
+  ///
+  /// This enables proper handling of nested scrollables:
+  /// - If inner scrollable handles the event, don't scroll parent page
+  /// - If all scrollables are at boundary, scroll parent page
   bool _lastWheelEventAllowedDefault = false;
+  bool _lastWheelEventHandledByWidget = false;
 
   DomElement get _viewTarget => _view.dom.rootElement;
   DomEventTarget get _globalTarget => _view.embeddingStrategy.globalEventTarget;
@@ -605,6 +638,67 @@ abstract class _BaseAdapter {
 
 mixin _WheelEventListenerMixin on _BaseAdapter {
   static double? _defaultScrollLineHeight;
+
+  /// Cached result of iframe detection.
+  static bool? _cachedIsInIframe;
+
+  /// Cached result of full-page app detection.
+  static bool? _cachedIsFullPageApp;
+
+  /// Check if Flutter is embedded inside an iframe.
+  ///
+  /// Used to determine whether to prevent scroll chaining to the parent page.
+  bool _isEmbeddedInIframe() {
+    if (_cachedIsInIframe != null) {
+      return _cachedIsInIframe!;
+    }
+
+    try {
+      // If window.parent is the same object as window, we're not in an iframe.
+      // If they're different, we're in an iframe.
+      final DomWindow? parent = domWindow.parent;
+      if (parent == null) {
+        _cachedIsInIframe = false;
+        return false;
+      }
+      // Use identical() to check if parent and window are the same object
+      _cachedIsInIframe = !identical(parent, domWindow);
+      return _cachedIsInIframe!;
+    } catch (e) {
+      // Cross-origin iframe - assume embedded
+      _cachedIsInIframe = true;
+      return true;
+    }
+  }
+
+  /// Check if Flutter is running as a full-page app (not embedded as a component).
+  ///
+  /// Full-page apps have `flt-embedding="full-page"` attribute on the body.
+  /// Custom element apps have `flt-embedding="custom-element"` on their host.
+  ///
+  /// This distinction is important for scroll handling in iframes:
+  /// - Full-page in iframe: always preventDefault, scroll parent window when at boundary
+  /// - Custom element in iframe: let browser handle normal scroll flow (iframe first, then parent)
+  bool _isFullPageApp() {
+    if (_cachedIsFullPageApp != null) {
+      return _cachedIsFullPageApp!;
+    }
+
+    try {
+      final DomElement? body = domDocument.body;
+      if (body != null) {
+        final String? embedding = body.getAttribute('flt-embedding');
+        _cachedIsFullPageApp = embedding == 'full-page';
+        return _cachedIsFullPageApp!;
+      }
+    } catch (e) {
+      // If we can't determine embedding type, default to full-page.
+      // This is the conservative choice: it applies the iframe scroll fix,
+      // which is the expected behavior for most Flutter web apps.
+    }
+    _cachedIsFullPageApp = true;
+    return true;
+  }
 
   bool _isAcceleratedMouseWheelDelta(num delta, num? wheelDelta) {
     // On macOS, scrolling using a mouse wheel by default uses an acceleration
@@ -747,8 +841,14 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
         onRespond: ({bool allowPlatformDefault = false}) {
-          // Once `allowPlatformDefault` is `true`, never go back to `false`!
-          _lastWheelEventAllowedDefault |= allowPlatformDefault;
+          // Track both: platform default and widget handling
+          if (allowPlatformDefault) {
+            // Widget is at boundary, wants platform to handle
+            _lastWheelEventAllowedDefault = true;
+          } else {
+            // Widget explicitly handled this event
+            _lastWheelEventHandledByWidget = true;
+          }
         },
       );
     }
@@ -775,15 +875,52 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     if (_debugLogPointerEvents) {
       print(event.type);
     }
+
+    // Reset flags before dispatching to framework
     _lastWheelEventAllowedDefault = false;
-    // [ui.PointerData] can set the `_lastWheelEventAllowedDefault` variable
-    // to true, when the framework says so. See the implementation of `respond`
-    // when creating the PointerData object above.
-    _callback(event, _convertWheelEventToPointerData(event as DomWheelEvent));
-    // This works because the `_callback` is handled synchronously in the
-    // framework, so it's able to modify `_lastWheelEventAllowedDefault`.
-    if (!_lastWheelEventAllowedDefault) {
+    _lastWheelEventHandledByWidget = false;
+
+    final wheelEvent = event as DomWheelEvent;
+
+    // Dispatch to framework (this triggers onRespond callbacks synchronously)
+    _callback(event, _convertWheelEventToPointerData(wheelEvent));
+
+    // Determine if we should prevent default and/or scroll parent
+    final bool isInIframe = _isEmbeddedInIframe();
+    final bool isFullPage = _isFullPageApp();
+
+    // Special handling only for full-page Flutter apps running inside an iframe.
+    // Custom element apps (Flutter embedded as a component) should let the
+    // browser handle normal scroll flow.
+    if (isInIframe && isFullPage) {
+      // Full-page app in an iframe: always preventDefault to block native
+      // scroll chaining. Without this, both the iframe content AND the parent
+      // window would scroll simultaneously when the user scrolls.
       event.preventDefault();
+
+      // Scroll parent window only when Flutter scrollables can't use the event:
+      // - _lastWheelEventAllowedDefault: at least one scrollable is at boundary
+      // - !_lastWheelEventHandledByWidget: no scrollable consumed the event
+      //
+      // For nested scrollables, inner widgets set _lastWheelEventHandledByWidget
+      // to true, preventing parent window scroll even if outer is at boundary.
+      //
+      // Fixes GitHub issue #156985
+      final bool shouldScrollParent =
+          _lastWheelEventAllowedDefault && !_lastWheelEventHandledByWidget;
+      if (shouldScrollParent) {
+        scrollParentWindow(wheelEvent.deltaX, wheelEvent.deltaY);
+      }
+    } else {
+      // Original behavior for:
+      // 1. Apps NOT in an iframe (normal page)
+      // 2. Custom element apps in an iframe (Flutter as a component)
+      //
+      // Only preventDefault when a scrollable widget handles the event.
+      // This preserves native scroll behavior when Flutter can't scroll.
+      if (!_lastWheelEventAllowedDefault) {
+        event.preventDefault();
+      }
     }
   }
 

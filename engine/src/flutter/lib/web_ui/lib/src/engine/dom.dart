@@ -119,6 +119,14 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
+  /// Scrolls the window by the given amount in pixels.
+  external void scrollBy(int x, int y);
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
@@ -2647,4 +2655,37 @@ extension type DomTextCluster._(JSObject _) implements JSObject {
   external int get end;
   external double get x;
   external double get y;
+}
+
+/// Testing hook for parent scroll; when set, scrollParentWindow invokes
+/// this callback instead of calling the parent's `scrollBy`.
+@visibleForTesting
+void Function(int deltaX, int deltaY)? debugParentScrollHandler;
+
+/// Scrolls the parent/host window by the given delta.
+///
+/// Used when Flutter is embedded in a same-origin iframe and needs to scroll
+/// the parent page when all Flutter scrollables are at their boundary.
+///
+/// For cross-origin iframes, this will silently fail due to browser security
+/// restrictions - there is no workaround for this browser limitation.
+void scrollParentWindow(double deltaX, double deltaY) {
+  try {
+    final DomWindow? parent = domWindow.parent;
+    if (parent != null && !identical(parent, domWindow)) {
+      final int dx = deltaX.toInt();
+      final int dy = deltaY.toInt();
+      // Testing hook
+      if (debugParentScrollHandler != null) {
+        debugParentScrollHandler!(dx, dy);
+        return;
+      }
+      // Direct scroll - works for same-origin iframes
+      // For cross-origin, this throws SecurityError (caught below)
+      parent.scrollBy(dx, dy);
+    }
+  } catch (e) {
+    // Cross-origin iframe - browser security prevents parent access
+    // Silently fail - this is expected behavior
+  }
 }

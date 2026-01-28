@@ -20,6 +20,18 @@ List<ui.PointerData> _allPointerData(List<ui.PointerDataPacket> packets) {
   return packets.expand((ui.PointerDataPacket packet) => packet.data).toList();
 }
 
+class _MockParentScroll {
+  int callCount = 0;
+  int? lastDeltaX;
+  int? lastDeltaY;
+
+  void call(int deltaX, int deltaY) {
+    callCount++;
+    lastDeltaX = deltaX;
+    lastDeltaY = deltaY;
+  }
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -61,6 +73,9 @@ void testMain() {
 
     ui.PlatformDispatcher.instance.onPointerDataPacket = null;
     dpi = EngineFlutterDisplay.instance.devicePixelRatio;
+    debugSetIframeEmbeddingForTests(false);
+    debugSetFullPageAppForTests(null);
+    debugParentScrollHandler = null;
   });
 
   tearDown(() {
@@ -747,6 +762,153 @@ void testMain() {
     rootElement.dispatchEvent(event);
     expect(EngineSemantics.instance.gestureMode, GestureMode.pointerEvents);
   });
+
+  test('wheel event in full-page iframe does not scroll parent when handled', () {
+    final mockParent = _MockParentScroll();
+    addTearDown(() {
+      debugParentScrollHandler = null;
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugParentScrollHandler = mockParent.call;
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: false);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 10,
+      clientY: 10,
+      deltaX: 5,
+      deltaY: 15,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+    expect(mockParent.callCount, 0);
+    expect(mockParent.lastDeltaX, isNull);
+  });
+
+  test('wheel event in full-page iframe scrolls parent when platform default allowed', () {
+    final mockParent = _MockParentScroll();
+    addTearDown(() {
+      debugParentScrollHandler = null;
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugParentScrollHandler = mockParent.call;
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(true);
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: true);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 20,
+      clientY: 30,
+      deltaX: 7,
+      deltaY: 21,
+    );
+    rootElement.dispatchEvent(event);
+
+    expect(event.defaultPrevented, isTrue);
+    expect(mockParent.callCount, 1);
+    expect(mockParent.lastDeltaX, 7);
+    expect(mockParent.lastDeltaY, 21);
+  });
+
+  test('wheel event in custom-element iframe uses original behavior when handled', () {
+    // Custom element apps in iframes should NOT use the special iframe handling.
+    // They should use original behavior: only preventDefault when handled.
+    final mockParent = _MockParentScroll();
+    addTearDown(() {
+      debugParentScrollHandler = null;
+      debugResetIframeDetectionCache();
+      debugResetFullPageAppCache();
+      ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+    });
+    debugParentScrollHandler = mockParent.call;
+    debugSetIframeEmbeddingForTests(true);
+    debugSetFullPageAppForTests(false); // Custom element, not full-page
+
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        if (datum.signalKind == ui.PointerSignalKind.scroll) {
+          datum.respond(allowPlatformDefault: false);
+        }
+      }
+    };
+
+    final DomEvent event = _PointerEventContext().wheel(
+      buttons: 0,
+      clientX: 10,
+      clientY: 10,
+      deltaX: 5,
+      deltaY: 15,
+    );
+    rootElement.dispatchEvent(event);
+
+    // Original behavior: preventDefault called because allowPlatformDefault=false
+    expect(event.defaultPrevented, isTrue);
+    // Should NOT scroll parent - custom element apps let browser handle scroll flow
+    expect(mockParent.callCount, 0);
+  });
+
+  test(
+    'wheel event in custom-element iframe allows browser scroll when platform default allowed',
+    () {
+      // Custom element apps in iframes should let browser handle natural scroll flow.
+      // When allowPlatformDefault=true, the browser should scroll the iframe content,
+      // NOT the parent window.
+      final mockParent = _MockParentScroll();
+      addTearDown(() {
+        debugParentScrollHandler = null;
+        debugResetIframeDetectionCache();
+        debugResetFullPageAppCache();
+        ui.PlatformDispatcher.instance.onPointerDataPacket = null;
+      });
+      debugParentScrollHandler = mockParent.call;
+      debugSetIframeEmbeddingForTests(true);
+      debugSetFullPageAppForTests(false); // Custom element, not full-page
+
+      ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        for (final ui.PointerData datum in packet.data) {
+          if (datum.signalKind == ui.PointerSignalKind.scroll) {
+            datum.respond(allowPlatformDefault: true);
+          }
+        }
+      };
+
+      final DomEvent event = _PointerEventContext().wheel(
+        buttons: 0,
+        clientX: 20,
+        clientY: 30,
+        deltaX: 7,
+        deltaY: 21,
+      );
+      rootElement.dispatchEvent(event);
+
+      // Original behavior: don't preventDefault when allowPlatformDefault=true
+      expect(event.defaultPrevented, isFalse);
+      // Should NOT call scrollParentWindow - let browser handle natural scroll flow
+      expect(mockParent.callCount, 0);
+    },
+  );
 
   test('does synthesize add or hover or move for scroll', () {
     final _ButtonedEventMixin context = _PointerEventContext();
