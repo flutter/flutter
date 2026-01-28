@@ -250,17 +250,30 @@ final class RunTarget {
       // WEB
       TargetPlatform.webJavascript => 'chrome_$mode',
 
+      // iOS
+      // -----------------------------------------------------------------------
+      TargetPlatform.iOSUnspecified || TargetPlatform.iOSX64 || TargetPlatform.iOSArm64 => () {
+        if (device.emulator) {
+          return switch (mode) {
+            'debug' => () {
+              return switch (device.targetPlatform) {
+                TargetPlatform.iOSX64 => 'ios_debug_sim',
+                _ => 'ios_debug_sim_unopt_arm64',
+              };
+            }(),
+            'profile' || 'release' => throw FatalError(
+              'iOS simulator does not support $mode builds.\n'
+              'Use debug mode on simulator, or run on a physical device for $mode mode.',
+            ),
+            _ => throw FatalError('Unknown mode: $mode'),
+          };
+        } else {
+          return 'ios_$mode';
+        }
+      }(),
+
       // Unsupported platforms.
       // -----------------------------------------------------------------------
-      // iOS.
-      // TODO(matanlurey): https://github.com/flutter/flutter/issues/155960
-      TargetPlatform.iOSUnspecified ||
-      TargetPlatform.iOSX64 ||
-      TargetPlatform.iOSArm64 => throw FatalError(
-        'iOS targets are currently unsupported.\n\nIf you are an '
-        'iOS engine developer, and have a need for this, please either +1 or '
-        'help us implement https://github.com/flutter/flutter/issues/155960.',
-      ),
 
       // LEGACY ANDROID
       TargetPlatform.androidArm => throw FatalError(

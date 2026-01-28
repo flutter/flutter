@@ -82,6 +82,10 @@ void main() {
 
           expect(target.buildConfigFor('debug'), expectedDebugTargets[platform]);
         });
+      } else if (platform == TargetPlatform.iOSUnspecified ||
+          platform == TargetPlatform.iOSX64 ||
+          platform == TargetPlatform.iOSArm64) {
+        continue;
       } else {
         test('${platform.identifier} => FatalError', () {
           final Device device = _device(platform);
@@ -91,6 +95,64 @@ void main() {
         });
       }
     }
+
+    group('iOS device', () {
+      test('iOSUnspecified debug => ios_debug', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('debug'), 'ios_debug');
+      });
+
+      test('iOSUnspecified profile => ios_profile', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('profile'), 'ios_profile');
+      });
+
+      test('iOSUnspecified release => ios_release', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('release'), 'ios_release');
+      });
+
+      test('iOSArm64 debug => ios_debug', () {
+        final Device device = _device(TargetPlatform.iOSArm64);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('debug'), 'ios_debug');
+      });
+    });
+
+    group('iOS simulator', () {
+      test('iOSUnspecified debug => ios_debug_sim_unopt_arm64', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified, emulator: true);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('debug'), 'ios_debug_sim_unopt_arm64');
+      });
+
+      test('iOSX64 debug => ios_debug_sim', () {
+        final Device device = _device(TargetPlatform.iOSX64, emulator: true);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('debug'), 'ios_debug_sim');
+      });
+
+      test('iOSArm64 debug => ios_debug_sim_unopt_arm64', () {
+        final Device device = _device(TargetPlatform.iOSArm64, emulator: true);
+        final target = RunTarget.fromDevice(device);
+        expect(target.buildConfigFor('debug'), 'ios_debug_sim_unopt_arm64');
+      });
+
+      test('iOSUnspecified profile => FatalError', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified, emulator: true);
+        final target = RunTarget.fromDevice(device);
+        expect(() => target.buildConfigFor('profile'), throwsFatalError);
+      });
+
+      test('iOSUnspecified release => FatalError', () {
+        final Device device = _device(TargetPlatform.iOSUnspecified, emulator: true);
+        final target = RunTarget.fromDevice(device);
+        expect(() => target.buildConfigFor('release'), throwsFatalError);
+      });
+    });
   });
 
   group('buildTargetsForShell', () {
@@ -151,10 +213,11 @@ void main() {
   });
 }
 
-Device _device(TargetPlatform platform) {
+Device _device(TargetPlatform platform, {bool emulator = false}) {
   return Device(
     name: 'Test Device <${platform.identifier}>',
     id: platform.identifier,
     targetPlatform: platform,
+    emulator: emulator,
   );
 }
