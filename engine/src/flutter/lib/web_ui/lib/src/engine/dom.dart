@@ -178,6 +178,12 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   /// The Trusted Types API (when available).
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
   external DomTrustedTypePolicyFactory? get trustedTypes;
+
+  /// Returns the parent window of the current window.
+  ///
+  /// If this window is the topmost window, returns itself.
+  /// Used to detect if the current window is inside an iframe.
+  external DomWindow get parent;
 }
 
 typedef DomRequestAnimationFrameCallback = void Function(JSNumber highResTime);
@@ -477,6 +483,25 @@ extension type DomElement._(JSObject _) implements DomNode {
   external double scrollTop;
   external double scrollLeft;
   external DomTokenList get classList;
+
+  /// Scrolls the element into the visible area of the browser window.
+  ///
+  /// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+  @JS('scrollIntoView')
+  external void _scrollIntoView([JSAny? options]);
+
+  /// Scrolls the element into view with optional configuration.
+  ///
+  /// If [options] is null, scrolls with default behavior.
+  /// Common options: {'block': 'center', 'inline': 'nearest', 'behavior': 'smooth'}
+  void scrollIntoView([Map<String, dynamic>? options]) {
+    if (options == null) {
+      _scrollIntoView();
+    } else {
+      _scrollIntoView(options.toJSAnyDeep);
+    }
+  }
+
   external String className;
 
   external void blur();

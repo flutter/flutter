@@ -1308,6 +1308,25 @@ abstract class DefaultTextEditingStrategy
 
   DomHTMLFormElement? get focusedFormElement => inputConfiguration.autofillGroup?.formElement;
 
+  /// Returns true if the current window is inside an iframe.
+  ///
+  /// This is used to detect when we need to explicitly scroll text inputs
+  /// into view.
+  ///
+  /// Marked visible-for-testing so tests can override it without relying on
+  /// library-private members.
+  @visibleForTesting
+  bool get isInIframe => !identical(domWindow.parent, domWindow);
+
+  /// Scrolls the active DOM element into view if running inside an iframe.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/178743
+  void scrollIntoViewIfInIframe() {
+    if (isInIframe) {
+      activeDomElement.scrollIntoView(<String, dynamic>{'block': 'center', 'inline': 'nearest'});
+    }
+  }
+
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
@@ -1886,6 +1905,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   void placeElement() {
     moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
+    scrollIntoViewIfInIframe();
   }
 }
 
