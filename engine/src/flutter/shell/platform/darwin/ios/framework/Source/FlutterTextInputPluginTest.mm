@@ -14,6 +14,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
+#include "flutter/common/constants.h"
+
 FLUTTER_ASSERT_ARC
 
 @interface FlutterEngine ()
@@ -145,10 +147,12 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [super setUp];
   engine = OCMClassMock([FlutterEngine class]);
 
-  textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine];
-
   viewController = [[FlutterViewController alloc] init];
-  textInputPlugin.viewController = viewController;
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(viewController);
+
+  textInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine
+                                                   textInputDelegate:engine];
 
   // Clear pasteboard between tests.
   UIPasteboard.generalPasteboard.items = @[];
@@ -258,8 +262,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 - (void)testWillNotCrashWhenViewControllerIsNil {
   FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
   FlutterTextInputPlugin* inputPlugin =
-      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
-  XCTAssertNil(inputPlugin.viewController);
+      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputPluginDelegate>)flutterEngine
+                                     textInputDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
+  XCTAssertNil(inputPlugin.currentViewController);
   FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"TextInput.show"
                                                                     arguments:nil];
   XCTestExpectation* expectation = [[XCTestExpectation alloc] initWithDescription:@"result called"];
@@ -295,10 +300,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
     FlutterEngine* flutterEngine = OCMClassMock([FlutterEngine class]);
     weakFlutterEngine = flutterEngine;
     XCTAssertNotNil(weakFlutterEngine, @"flutter engine must not be nil");
+    id<FlutterTextInputPluginDelegate> pluginDelegate =
+        (id<FlutterTextInputPluginDelegate>)flutterEngine;
+    OCMStub([pluginDelegate viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(flutterViewController);
     FlutterTextInputPlugin* flutterTextInputPlugin = [[FlutterTextInputPlugin alloc]
-        initWithDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
+        initWithDelegate:pluginDelegate
+       textInputDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
     weakFlutterTextInputPlugin = flutterTextInputPlugin;
-    flutterTextInputPlugin.viewController = flutterViewController;
 
     // Set client so the text input plugin has an active view.
     NSDictionary* config = self.mutableTemplateCopy;
@@ -523,8 +532,12 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testInputHiderOverlapWithTextWhenScribbleIsDisabledAfterIOS17AndDoesNotOverlapBeforeIOS17 {
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(viewController);
   FlutterTextInputPlugin* myInputPlugin =
-      [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+      [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                     textInputDelegate:mockEngine];
 
   FlutterMethodCall* setClientCall =
       [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
@@ -779,7 +792,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   @autoreleasepool {
     FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
     FlutterTextInputPlugin* inputPlugin = [[FlutterTextInputPlugin alloc]
-        initWithDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
+        initWithDelegate:(id<FlutterTextInputPluginDelegate>)flutterEngine
+       textInputDelegate:(id<FlutterTextInputDelegate>)flutterEngine];
     activeView = inputPlugin.activeView;
   }
   [activeView updateEditingState];
@@ -806,8 +820,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterViewController* mockViewController = OCMPartialMock(viewController);
   OCMStub([mockViewController pressesBegan:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
   OCMStub([mockViewController pressesEnded:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
-
-  textInputPlugin.viewController = mockViewController;
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(mockViewController);
 
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -835,8 +849,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterViewController* mockViewController = OCMPartialMock(viewController);
   OCMStub([mockViewController pressesBegan:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
   OCMStub([mockViewController pressesEnded:[OCMArg isNotNil] withEvent:[OCMArg isNotNil]]);
-
-  textInputPlugin.viewController = mockViewController;
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(mockViewController);
 
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -934,7 +948,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [testEngine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
 
   FlutterTextInputPlugin* inputPlugin =
-      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputDelegate>)testEngine];
+      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputPluginDelegate>)testEngine
+                                     textInputDelegate:(id<FlutterTextInputDelegate>)testEngine];
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:inputPlugin];
 
   [testEngine flutterTextInputView:inputView
@@ -1679,7 +1694,7 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   [self setClientId:123 configuration:self.mutableTemplateCopy];
 
   FlutterTextInputView* inputView = textInputPlugin.activeView;
-  textInputPlugin.viewController.view.frame = CGRectMake(0, 0, 0, 0);
+  textInputPlugin.currentViewController.view.frame = CGRectMake(0, 0, 0, 0);
 
   [inputView
       setTextInputState:@{@"text" : @"COMPOSING", @"composingBase" : @1, @"composingExtent" : @3}];
@@ -3128,8 +3143,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testFlutterTextInputPluginRetainsFlutterTextInputView {
   FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
-  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine];
-  myInputPlugin.viewController = flutterViewController;
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(flutterViewController);
+  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine
+                                                                         textInputDelegate:engine];
 
   __weak UIView* activeView;
   @autoreleasepool {
@@ -3154,8 +3171,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 }
 
 - (void)testFlutterTextInputPluginHostViewNilCrash {
-  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine];
-  myInputPlugin.viewController = nil;
+  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine
+                                                                         textInputDelegate:engine];
   XCTAssertThrows([myInputPlugin hostView], @"Throws exception if host view is nil");
 }
 
@@ -3164,14 +3181,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   FlutterEngine* flutterEngine = [[FlutterEngine alloc] init];
   [flutterEngine runWithEntrypoint:nil];
   flutterEngine.viewController = flutterViewController;
-  XCTAssertNotNil(flutterEngine.textInputPlugin.viewController);
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), self.mutableTemplateCopy ]];
+  [flutterEngine.textInputPlugin handleMethodCall:setClientCall
+                                           result:^(id _Nullable result){
+                                           }];
+  XCTAssertNotNil(flutterEngine.textInputPlugin.currentViewController);
   XCTAssertNotNil([flutterEngine.textInputPlugin hostView]);
 }
 
 - (void)testSetPlatformViewClient {
   FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
-  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine];
-  myInputPlugin.viewController = flutterViewController;
+  OCMStub([engine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+      .andReturn(flutterViewController);
+  FlutterTextInputPlugin* myInputPlugin = [[FlutterTextInputPlugin alloc] initWithDelegate:engine
+                                                                         textInputDelegate:engine];
 
   FlutterMethodCall* setClientCall = [FlutterMethodCall
       methodCallWithMethodName:@"TextInput.setClient"
@@ -3201,8 +3226,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldNotPresentEditMenuIfNotFirstResponder {
   if (@available(iOS 16.0, *)) {
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     BOOL shownEditMenu = [myInputPlugin showEditMenu:@{}];
     XCTAssertFalse(shownEditMenu, @"Should not show edit menu if not first responder.");
   }
@@ -3210,10 +3237,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithCorrectConfiguration {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
     FlutterMethodCall* setClientCall =
         [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
@@ -3256,10 +3286,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithCorectTargetRect {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -3303,10 +3336,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithSuggestedItemsByDefaultIfNoFrameworkData {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -3359,10 +3395,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithCorectItemsAndCorrectOrderingForBasicEditingActions {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -3420,10 +3459,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithCorectItemsUnderNestedSubtreeForBasicEditingActions {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -3499,10 +3541,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldPresentEditMenuWithCorectItemsForMoreAdditionalItems {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -4059,10 +4104,13 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
 - (void)testEditMenu_shouldCreateCustomMenuItemWithCorrectProperties {
   if (@available(iOS 16.0, *)) {
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+    id mockEngine = OCMClassMock([FlutterEngine class]);
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
@@ -4119,10 +4167,12 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                   arguments:@[ @(123), @"test-callback-id" ]];
         }));
 
-    FlutterTextInputPlugin* myInputPlugin =
-        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine];
     FlutterViewController* myViewController = [[FlutterViewController alloc] init];
-    myInputPlugin.viewController = myViewController;
+    OCMStub([mockEngine viewControllerForIdentifier:flutter::kFlutterImplicitViewId])
+        .andReturn(myViewController);
+    FlutterTextInputPlugin* myInputPlugin =
+        [[FlutterTextInputPlugin alloc] initWithDelegate:mockEngine
+                                       textInputDelegate:mockEngine];
     [myViewController loadView];
 
     FlutterMethodCall* setClientCall =
