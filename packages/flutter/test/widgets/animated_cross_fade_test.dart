@@ -415,6 +415,139 @@ void main() {
     );
     expect(tester.getSize(find.byType(AnimatedCrossFade)), Size.zero);
   });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called when animation completes forward', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    expect(onEndCallCount, 0);
+
+    // Transition to showSecond.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    // Pump halfway through animation.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(onEndCallCount, 0);
+
+    // Pump to complete animation and settle.
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+  });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called when animation completes reverse', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    expect(onEndCallCount, 0);
+
+    // Reverse transition to showFirst.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      ),
+    );
+
+    // Pump halfway through animation.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(onEndCallCount, 0);
+
+    // Pump to complete animation and settle.
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+  });
+
+  testWidgets('AnimatedCrossFade onEnd callback is called for each animation cycle', (
+    WidgetTester tester,
+  ) async {
+    var onEndCallCount = 0;
+
+    Widget buildWidget(CrossFadeState state) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedCrossFade(
+          firstChild: const SizedBox(width: 100.0, height: 100.0),
+          secondChild: const SizedBox(width: 200.0, height: 200.0),
+          crossFadeState: state,
+          duration: const Duration(milliseconds: 200),
+          onEnd: () {
+            onEndCallCount++;
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(CrossFadeState.showFirst));
+    expect(onEndCallCount, 0);
+
+    // First forward transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showSecond));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 1);
+
+    // First reverse transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showFirst));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 2);
+
+    // Second forward transition.
+    await tester.pumpWidget(buildWidget(CrossFadeState.showSecond));
+    await tester.pumpAndSettle();
+    expect(onEndCallCount, 3);
+  });
 }
 
 class _TickerWatchingWidget extends StatefulWidget {

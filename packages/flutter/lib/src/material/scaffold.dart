@@ -72,7 +72,6 @@ enum _ScaffoldSlot {
   floatingActionButton,
   drawer,
   endDrawer,
-  statusBar,
 }
 
 /// Manages [SnackBar]s and [MaterialBanner]s for descendant [Scaffold]s.
@@ -1273,11 +1272,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }());
     }
 
-    if (hasChild(_ScaffoldSlot.statusBar)) {
-      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: minInsets.top));
-      positionChild(_ScaffoldSlot.statusBar, Offset.zero);
-    }
-
     if (hasChild(_ScaffoldSlot.drawer)) {
       layoutChild(_ScaffoldSlot.drawer, BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
@@ -2193,7 +2187,8 @@ class Scaffold extends StatefulWidget {
 ///
 /// Can display [BottomSheet]s. Retrieve a [ScaffoldState] from the current
 /// [BuildContext] using [Scaffold.of].
-class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, RestorationMixin {
+class ScaffoldState extends State<Scaffold>
+    with TickerProviderStateMixin, RestorationMixin, WidgetsBindingObserver {
   @override
   String? get restorationId => widget.restorationId;
 
@@ -2743,10 +2738,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
   // iOS FEATURES - status bar tap, back gesture
 
-  // On iOS and macOS, if `primary` is true, tapping the status bar scrolls the app's primary scrollable
+  // On iOS, if `primary` is true, tapping the status bar scrolls the app's primary scrollable
   // to the top. We implement this by looking up the primary scroll controller and
   // scrolling it to the top when tapped.
-  void _handleStatusBarTap() {
+  @override
+  void handleStatusBarTap() {
+    super.handleStatusBarTap();
+    assert(widget.primary);
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(
@@ -2787,6 +2785,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     );
 
     _bottomSheetScrimAnimationController = AnimationController(vsync: this);
+    if (widget.primary) {
+      WidgetsBinding.instance.addObserver(this);
+    }
   }
 
   @protected
@@ -2828,6 +2829,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         _updatePersistentBottomSheet();
       }
     }
+    switch ((oldWidget.primary, widget.primary)) {
+      case (true, false):
+        WidgetsBinding.instance.removeObserver(this);
+      case (false, true):
+        WidgetsBinding.instance.addObserver(this);
+      case (true, true) || (false, false):
+    }
   }
 
   @protected
@@ -2847,6 +2855,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     _maybeBuildPersistentBottomSheet();
     super.didChangeDependencies();
+  }
+
+  @override
+  void deactivate() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    if (widget.primary) {
+      WidgetsBinding.instance.addObserver(this);
+    }
   }
 
   @protected
@@ -3149,33 +3171,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       removeRightPadding: true,
       removeBottomPadding: true,
     );
-
-    switch (themeData.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        if (!widget.primary) {
-          break;
-        }
-        _addIfNonNull(
-          children,
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _handleStatusBarTap,
-            // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
-            excludeFromSemantics: true,
-          ),
-          _ScaffoldSlot.statusBar,
-          removeLeftPadding: false,
-          removeTopPadding: true,
-          removeRightPadding: false,
-          removeBottomPadding: true,
-        );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-    }
 
     if (_endDrawerOpened.value) {
       _buildDrawer(children, textDirection);
