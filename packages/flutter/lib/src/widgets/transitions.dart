@@ -1047,7 +1047,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// See [DefaultTextStyle.maxLines] for more details.
-  final int? maxLines;
+  final num? maxLines;
 
   /// The widget below this widget in the tree.
   ///

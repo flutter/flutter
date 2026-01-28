@@ -6697,7 +6697,7 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
   /// edge of the box.
-  final int? maxLines;
+  final num? maxLines;
 
   /// Used to select a font when the same Unicode character can
   /// be rendered differently, depending on the locale.
@@ -6790,7 +6790,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(
       DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),
     );
-    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(DiagnosticsProperty<num>('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(
       EnumProperty<TextWidthBasis>(
         'textWidthBasis',
