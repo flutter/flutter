@@ -202,7 +202,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/system_context_menu_test.dart',
     'packages/flutter/test/widgets/scrollable_fling_test.dart',
     'packages/flutter/test/widgets/debug_test.dart',
-    'packages/flutter/test/widgets/banner_test.dart',
     'packages/flutter/test/widgets/sliver_persistent_header_test.dart',
     'packages/flutter/test/widgets/transformed_scrollable_test.dart',
     'packages/flutter/test/widgets/run_app_async_test.dart',
