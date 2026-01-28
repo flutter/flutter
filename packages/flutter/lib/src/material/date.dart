@@ -8,8 +8,11 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'date_picker.dart';
+import 'input_date_picker_form_field.dart';
 import 'material_localizations.dart';
 
 /// Controls the calendar system used in the date picker.
@@ -28,6 +31,8 @@ import 'material_localizations.dart';
 /// See also:
 ///
 ///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
+///  * [DateInputCalendarDelegate], an interface for delegates that support
+///    customizing date text input and formatting.
 ///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
 abstract class CalendarDelegate<T extends DateTime> {
   /// Creates a calendar delegate.
@@ -241,6 +246,19 @@ class GregorianCalendarDelegate extends CalendarDelegate<DateTime> {
   String dateHelpText(MaterialLocalizations localizations) {
     return localizations.dateHelpText;
   }
+}
+
+/// A [GregorianCalendarDelegate] that synchronizes calendar operations with
+/// text input requirements, such as [inputFormatters].
+///
+/// Subclasses must provide the appropriate [inputFormatters] to ensure
+/// that user entry matches the parsing logic in [parseCompactDate].
+abstract class DateInputCalendarDelegate extends GregorianCalendarDelegate {
+  /// Creates a calendar delegate.
+  const DateInputCalendarDelegate();
+
+  /// The formatters applied to the text field to guide and validate user input.
+  List<TextInputFormatter> get inputFormatters;
 }
 
 /// Utility functions for working with dates.

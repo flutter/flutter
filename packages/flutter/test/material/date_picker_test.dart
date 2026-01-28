@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/clipboard_utils.dart';
 
 void main() {
@@ -2765,6 +2766,111 @@ void main() {
     );
     expect(tester.getSize(find.byType(DatePickerDialog)).isEmpty, isTrue);
   });
+
+  group('DateInputCalendarDelegate', () {
+    Widget buildApp() {
+      return MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                    initialEntryMode: DatePickerEntryMode.input,
+                    calendarDelegate: const TestDateInputCalendarDelegate(),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    testWidgets('applies inputFormatters and allows text entry parsing', (
+      WidgetTester tester,
+    ) async {
+      late DateTime? result;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Open'),
+                  onPressed: () async {
+                    result = await showDatePicker(
+                      context: context,
+                      initialDate: initialDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
+                      initialEntryMode: DatePickerEntryMode.input,
+                      calendarDelegate: const TestDateInputCalendarDelegate(),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '20240620');
+      await tester.pump();
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(result, DateTime(2024, 6, 20));
+    });
+
+    testWidgets('filters non-digit input via inputFormatters', (WidgetTester tester) async {
+      await tester.pumpWidget(buildApp());
+
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+
+      final Finder textField = find.byType(TextField);
+      expect(textField, findsOneWidget);
+
+      await tester.enterText(textField, '2024-06-20');
+      await tester.pump();
+
+      final TextField field = tester.widget<TextField>(textField);
+      final TextEditingController controller = field.controller!;
+      // Only digits should remain.
+      expect(controller.text, '20240620');
+    });
+
+    testWidgets('rejects alphabetic characters via inputFormatters', (WidgetTester tester) async {
+      await tester.pumpWidget(buildApp());
+
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+
+      final Finder textField = find.byType(TextField);
+      expect(textField, findsOneWidget);
+
+      // Try to enter letters mixed with digits.
+      await tester.enterText(textField, '20ab24cd0620');
+      await tester.pump();
+
+      final TextField field = tester.widget<TextField>(textField);
+      final TextEditingController controller = field.controller!;
+
+      // Alphabetic characters should be filtered out.
+      expect(controller.text, '20240620');
+    });
+  });
 }
 
 class _RestorableDatePickerDialogTestWidget extends StatefulWidget {
@@ -2894,5 +3000,26 @@ class TestCalendarDelegate extends GregorianCalendarDelegate {
   @override
   int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
     return 1;
+  }
+}
+
+class TestDateInputCalendarDelegate extends DateInputCalendarDelegate {
+  const TestDateInputCalendarDelegate();
+
+  @override
+  List<TextInputFormatter> get inputFormatters => <TextInputFormatter>[
+    FilteringTextInputFormatter.digitsOnly,
+  ];
+
+  @override
+  DateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+    // yyyyMMdd
+    if (inputString == null || inputString.length != 8) {
+      return null;
+    }
+    final int year = int.parse(inputString.substring(0, 4));
+    final int month = int.parse(inputString.substring(4, 6));
+    final int day = int.parse(inputString.substring(6, 8));
+    return DateTime(year, month, day);
   }
 }
