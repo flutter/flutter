@@ -79,6 +79,11 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
   FML_CHECK(use_angle_) << "Must use Angle on macOS for OpenGL ES.";
   ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 #endif  // FML_OS_MACOSX
+#if FML_OS_LINUX
+  // Use EGL even on X11 then the client can select the GLES implementation
+  // by defining __EGL_VENDOR_LIBRARY_FILENAMES
+  ::glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
   ::glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   ::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
