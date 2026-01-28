@@ -93,6 +93,22 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
+
+  /// Creates a copy of this event but replacing the provided fields, while
+  /// maintaining the others.
+  DragStartDetails copyWith({
+    Offset? globalPosition,
+    Offset? localPosition,
+    Duration? sourceTimeStamp,
+    PointerDeviceKind? kind,
+  }) {
+    return DragStartDetails(
+      globalPosition: globalPosition ?? this.globalPosition,
+      localPosition: localPosition ?? this.localPosition,
+      sourceTimeStamp: sourceTimeStamp ?? this.sourceTimeStamp,
+      kind: kind ?? this.kind,
+    );
+  }
 }
 
 /// {@template flutter.gestures.dragdetails.GestureDragStartCallback}
@@ -181,6 +197,26 @@ class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails 
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
   }
+
+  /// Creates a copy of this event but replacing the provided fields, while
+  /// maintaining the others.
+  DragUpdateDetails copyWith({
+    Offset? globalPosition,
+    Offset? localPosition,
+    Duration? sourceTimeStamp,
+    Offset? delta,
+    double? primaryDelta,
+    PointerDeviceKind? kind,
+  }) {
+    return DragUpdateDetails(
+      globalPosition: globalPosition ?? this.globalPosition,
+      localPosition: localPosition ?? this.localPosition,
+      sourceTimeStamp: sourceTimeStamp ?? this.sourceTimeStamp,
+      delta: delta ?? this.delta,
+      primaryDelta: primaryDelta ?? this.primaryDelta,
+      kind: kind ?? this.kind,
+    );
+  }
 }
 
 /// {@template flutter.gestures.dragdetails.GestureDragUpdateCallback}
@@ -252,5 +288,21 @@ class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
     properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
+  }
+
+  /// Creates a copy of this event but replacing the provided fields, while
+  /// maintaining the others.
+  DragEndDetails copyWith({
+    Offset? globalPosition,
+    Offset? localPosition,
+    Velocity? velocity,
+    double? primaryVelocity,
+  }) {
+    return DragEndDetails(
+      globalPosition: globalPosition ?? this.globalPosition,
+      localPosition: localPosition ?? this.localPosition,
+      velocity: velocity ?? this.velocity,
+      primaryVelocity: primaryVelocity ?? this.primaryVelocity,
+    );
   }
 }
