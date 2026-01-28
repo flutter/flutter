@@ -192,8 +192,13 @@ let package = Package(
               .childDirectory(platformName)
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
+          final String pbxprojFileContents = pbxprojFile.readAsStringSync();
           expect(pbxprojFile.existsSync(), isTrue);
-          expect(pbxprojFile.readAsStringSync(), contains('FlutterGeneratedPluginSwiftPackage'));
+          expect(pbxprojFileContents, contains('FlutterGeneratedPluginSwiftPackage'));
+          expect(
+            pbxprojFileContents.contains('784666492D4C4C64000A1A5F /* FlutterFramework */'),
+            isTrue,
+          );
 
           final File xcschemeFile = fileSystem
               .directory(appDirectoryPath)
@@ -212,6 +217,19 @@ let package = Package(
           expect(podspec.existsSync(), isTrue);
           expect(podspec.readAsStringSync(), contains('Sources'));
           expect(podspec.readAsStringSync().contains('Classes'), isFalse);
+
+          final File swiftManifest = fileSystem
+              .directory(createdSwiftPackagePlugin.pluginPath)
+              .childDirectory(platformName)
+              .childDirectory(createdSwiftPackagePlugin.pluginName)
+              .childFile('Package.swift');
+          expect(swiftManifest.existsSync(), isTrue);
+          expect(
+            swiftManifest.readAsStringSync().contains(
+              '.package(name: "FlutterFramework", path: "../FlutterFramework")',
+            ),
+            isTrue,
+          );
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
