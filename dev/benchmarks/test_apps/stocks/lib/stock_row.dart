@@ -26,8 +26,8 @@ class StockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
-    String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
+    final lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
+    var changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0) {
       changeInPrice = '+$changeInPrice';
     }

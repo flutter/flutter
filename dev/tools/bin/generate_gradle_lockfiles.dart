@@ -18,7 +18,7 @@ import 'package:file/local.dart';
 import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
-  const String usageMessage =
+  const usageMessage =
       "If you don't wish to re-generate the "
       'settings.gradle, build.gradle, and gradle-wrapper.properties files,\n'
       'add the flag `--no-gradle-generation`.\n'
@@ -26,9 +26,9 @@ void main(List<String> arguments) {
       'defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
-  const String ignoreFilename = '.ignore-locking.md';
+  const ignoreFilename = '.ignore-locking.md';
 
-  final ArgParser argParser = ArgParser()
+  final argParser = ArgParser()
     ..addFlag(
       'gradle-generation',
       help: 'Re-generate gradle files in each processed directory.',
@@ -63,7 +63,7 @@ void main(List<String> arguments) {
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
   final bool useExclusion = (args['exclusion'] as bool?) ?? true;
 
-  final bool ignoreLocking = args['ignore-locking'] != null;
+  final ignoreLocking = args['ignore-locking'] != null;
   final String ignoreReason = (args['ignore-locking'] as String?) ?? '';
   // This is an explicit flag that insures the ignore
   // lockfile isn't deleted unless specified.  This should prevent
@@ -119,7 +119,7 @@ void main(List<String> arguments) {
     print('Running without exclusion.');
   }
 
-  for (final Directory androidDirectory in androidDirectories) {
+  for (final androidDirectory in androidDirectories) {
     if (!androidDirectory.existsSync()) {
       throw '$androidDirectory does not exist';
     }

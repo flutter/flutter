@@ -27,7 +27,7 @@ const getBrowserEngine = () => {
   return "unknown";
 }
 
-/** @type {import("./types").BrowserEnvironment} */
+/** @type {import("./types").BrowserEngine} */
 const browserEngine = getBrowserEngine();
 
 const hasImageCodecs = () => {
@@ -38,7 +38,7 @@ const hasImageCodecs = () => {
   // Frequently, when a browser launches an API that other browsers already
   // support, there are subtle incompatibilities that may cause apps to crash if,
   // we blindly adopt the new implementation. This check prevents us from picking
-  // up potentially incompatible implementations of ImagdeDecoder API. Instead,
+  // up potentially incompatible implementations of ImageDecoder API. Instead,
   // when a new browser engine launches the API, we'll evaluate it and enable it
   // explicitly.
   return browserEngine === "blink";
@@ -72,6 +72,12 @@ const detectWebGLVersion = () => {
   return -1;
 }
 
+const isChromeExtension = () => {
+  // Checks for the presence of the Chrome extension ID.
+  // See: https://developer.chrome.com/docs/extensions/reference/api/runtime
+  return window.chrome && chrome.runtime && chrome.runtime.id;
+}
+
 /** @type {import("./types").BrowserEnvironment} */
 export const browserEnvironment = {
   browserEngine: browserEngine,
@@ -80,4 +86,5 @@ export const browserEnvironment = {
   supportsWasmGC: supportsWasmGC(),
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
+  isChromeExtension: isChromeExtension(),
 };

@@ -263,6 +263,9 @@ abstract class UnpackIOS extends UnpackDarwin {
   BuildMode get buildMode;
 
   @override
+  FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
+
+  @override
   Future<void> build(Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
@@ -295,7 +298,22 @@ abstract class UnpackIOS extends UnpackDarwin {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     await thinFramework(environment, frameworkBinaryPath, archs);
-    await _signFramework(environment, frameworkBinary, buildMode);
+
+    var codesignFramework = true;
+    if (environment.defines[kXcodeBuildScript] == kXcodeBuildScriptValuePrepare) {
+      // Skip codesigning during "prepare" when using SwiftPM. When SwiftPM places the Flutter
+      // framework in the BUILT_PRODUCTS_DIR, it does not codesign it (it is later codesigned
+      // in TARGET_BUILD_DIR). Skipping codesigning will improve the caching for the "prepare" script.
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+      final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+      if (xcodeProject.usesSwiftPackageManager &&
+          xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
+        codesignFramework = false;
+      }
+    }
+    if (codesignFramework) {
+      await _signFramework(environment, frameworkBinary, buildMode);
+    }
   }
 
   Future<void> _copyFrameworkDysm(
@@ -723,9 +741,12 @@ abstract class IosAssetBundle extends Target {
     );
 
     // Copy the plist from either the project or module.
-    flutterProject.ios.appFrameworkInfoPlist.copySync(
-      environment.outputDir.childDirectory('App.framework').childFile('Info.plist').path,
-    );
+    final File appFrameworkInfoPlist = environment.outputDir
+        .childDirectory('App.framework')
+        .childFile('Info.plist');
+    flutterProject.ios.appFrameworkInfoPlist.copySync(appFrameworkInfoPlist.path);
+
+    await _updateMinimumOSVersion(appFrameworkInfoPlist, environment);
 
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -823,6 +844,25 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
         );
       }
     }
+  }
+}
+
+/// Update the MinimumOSVersion key in the given Info.plist file.
+Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) async {
+  final minimumOSVersion = FlutterDarwinPlatform.ios.deploymentTarget().toString();
+  final plutilArgs = <String>[
+    'plutil',
+    '-replace',
+    'MinimumOSVersion',
+    '-string',
+    minimumOSVersion,
+    infoPlist.path,
+  ];
+  final ProcessResult result = await environment.processManager.run(plutilArgs);
+  if (result.exitCode != 0) {
+    printXcodeWarning(
+      'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+    );
   }
 }
 

@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/platform_menu_bar/platform_menu_bar.0.dart' as example;
+import 'package:flutter_api_samples/material/platform_menu_bar/platform_menu_bar.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -31,7 +32,9 @@ void main() {
       await tester.pumpWidget(const example.ExampleApp());
 
       expect(
-        find.text('This space intentionally left blank.\nShow a message here using the menu.'),
+        find.text(
+          'This space intentionally left blank.\nShow a message here using the menu.',
+        ),
         findsOne,
       );
       expect(find.byType(PlatformMenuBar), findsOne);
@@ -69,7 +72,8 @@ void main() {
                     },
                     <String, Object>{
                       'id': 7,
-                      'label': "There's a million things I haven't done, but just you wait.",
+                      'label':
+                          "There's a million things I haven't done, but just you wait.",
                       'enabled': true,
                       'shortcutTrigger': 50,
                       'shortcutModifiers': 1,
@@ -77,14 +81,20 @@ void main() {
                   ],
                 },
                 <String, Object>{'id': 9, 'isDivider': true},
-                <String, Object>{'id': 10, 'enabled': true, 'platformProvidedMenu': 1},
+                <String, Object>{
+                  'id': 10,
+                  'enabled': true,
+                  'platformProvidedMenu': 1,
+                },
               ],
             },
           ],
         }),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.macOS,
+    }),
   );
 }
 
@@ -121,5 +131,6 @@ class _FakeMenuChannel implements MethodChannel {
   String get name => 'flutter/menu';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
+  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) =>
+      incoming = handler;
 }

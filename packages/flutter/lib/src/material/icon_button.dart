@@ -401,7 +401,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   focusColor: Colors.orange.withOpacity(0.3),
+  ///   focusColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.sunny),
   ///   onPressed: () {
   ///     // ...
@@ -421,7 +421,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   hoverColor: Colors.orange.withOpacity(0.3),
+  ///   hoverColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.ac_unit),
   ///   onPressed: () {
   ///     // ...
@@ -474,7 +474,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   /// IconButton(
-  ///   highlightColor: Colors.orange.withOpacity(0.3),
+  ///   highlightColor: Colors.orange.withValues(alpha: 0.3),
   ///   icon: const Icon(Icons.question_mark),
   ///   onPressed: () {
   ///     // ...
@@ -936,7 +936,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final bool toggleable = widget.isSelected != null;
+    final toggleable = widget.isSelected != null;
 
     return _IconButtonM3(
       statesController: statesController,
@@ -1030,7 +1030,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
-    final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
+    final isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
     final bool isDefaultColor = identical(iconTheme.color, switch (Theme.brightnessOf(context)) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,

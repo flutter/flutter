@@ -82,9 +82,9 @@ class SnippetDartdocParser {
     String type = '',
     bool silent = true,
   }) {
-    final List<SourceLine> lines = <SourceLine>[];
+    final lines = <SourceLine>[];
     int lineNumber = startLine ?? 0;
-    final List<String> inputStrings = <String>[
+    final inputStrings = <String>[
       // The parser wants to read the arguments from the input, so we create a new
       // tool line to match the given arguments, so that we can use the same parser for
       // editing and docs generation.
@@ -95,12 +95,12 @@ class SnippetDartdocParser {
       ...input.readAsLinesSync().map<String>((String line) => '/// $line'.trimRight()),
       '/// {@end-tool}',
     ];
-    for (final String line in inputStrings) {
+    for (final line in inputStrings) {
       lines.add(SourceLine(line, element: element ?? '', line: lineNumber, file: sourceFile));
       lineNumber++;
     }
     // No need to get assumptions: dartdoc won't give that to us.
-    final SourceElement newElement = SourceElement(
+    final newElement = SourceElement(
       SourceElementType.unknownType,
       element!,
       -1,
@@ -123,10 +123,10 @@ class SnippetDartdocParser {
   /// given `file`.
   List<SourceLine> parseAssumptions(File file) {
     // Whether or not we're in the file-wide preamble section ("Examples can assume").
-    bool inPreamble = false;
-    final List<SourceLine> preamble = <SourceLine>[];
-    int lineNumber = 0;
-    int charPosition = 0;
+    var inPreamble = false;
+    final preamble = <SourceLine>[];
+    var lineNumber = 0;
+    var charPosition = 0;
     for (final String line in file.readAsLinesSync()) {
       if (inPreamble && line.trim().isEmpty) {
         // Reached the end of the preamble.
@@ -165,11 +165,11 @@ class SnippetDartdocParser {
   /// `elements`, and sets the resulting samples as the `samples` member of
   /// each element in the supplied iterable.
   void parseFromComments(Iterable<SourceElement> elements, {bool silent = true}) {
-    int dartpadCount = 0;
-    int sampleCount = 0;
-    int snippetCount = 0;
+    var dartpadCount = 0;
+    var sampleCount = 0;
+    var snippetCount = 0;
 
-    for (final SourceElement element in elements) {
+    for (final element in elements) {
       if (element.comment.isEmpty) {
         continue;
       }
@@ -201,18 +201,18 @@ class SnippetDartdocParser {
   /// `element`.
   void parseComment(SourceElement element) {
     // Whether or not we're in a snippet code sample.
-    bool inSnippet = false;
+    var inSnippet = false;
     // Whether or not we're in a '```dart' segment.
-    bool inDart = false;
-    bool foundSourceLink = false;
-    bool foundDartSection = false;
+    var inDart = false;
+    var foundSourceLink = false;
+    var foundDartSection = false;
     File? linkedFile;
-    List<SourceLine> block = <SourceLine>[];
-    List<String> snippetArgs = <String>[];
-    final List<CodeSample> samples = <CodeSample>[];
+    var block = <SourceLine>[];
+    var snippetArgs = <String>[];
+    final samples = <CodeSample>[];
     final Directory flutterRoot = FlutterInformation.instance.getFlutterRoot();
 
-    int index = 0;
+    var index = 0;
     for (final SourceLine line in element.comment) {
       final String trimmedLine = line.text.trim();
       if (inSnippet) {
@@ -352,7 +352,7 @@ class SnippetDartdocParser {
         }
       }
     }
-    for (final CodeSample sample in samples) {
+    for (final sample in samples) {
       sample.metadata.addAll(<String, Object?>{
         'id': '${sample.element}.${sample.index}',
         'element': sample.element,
@@ -383,7 +383,7 @@ class SnippetDartdocParser {
     // Match group 2 (quote) contains the quote character used (which is discarded).
     // Match group 3 (value) is a quoted arg, if any, without the quotes.
     // Match group 4 (unquoted) is the unquoted arg, if any.
-    final RegExp argMatcher = RegExp(
+    final argMatcher = RegExp(
       r'(?<option>[-_a-zA-Z0-9]+=)?' // option name
       r'(?:' // Start a new non-capture group for the two possibilities.
       r'''(?<quote>["'])(?<value>(?:\\{2})*|(?:.*?[^\\](?:\\{2})*))\2|''' // value with quotes.
@@ -396,7 +396,7 @@ class SnippetDartdocParser {
     // front so that they parse as options to support legacy dartdoc
     // functionality of "option=value".
     return matches.map<String>((RegExpMatch match) {
-      String option = '';
+      var option = '';
       if (match.namedGroup('option') != null && !match.namedGroup('option')!.startsWith('-')) {
         option = '--';
       }

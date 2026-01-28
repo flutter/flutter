@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/navigator/navigator.restorable_push.0.dart' as example;
+import 'package:flutter_api_samples/widgets/navigator/navigator.restorable_push.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('It pushes a restorable route and pops it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and pops it', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorablePushExampleApp());
 
     expect(find.widgetWithText(AppBar, 'Sample Code'), findsOne);
@@ -22,7 +25,9 @@ void main() {
     expect(find.byType(BackButton), findsNothing);
   });
 
-  testWidgets('It pushes a restorable route and restores it', (WidgetTester tester) async {
+  testWidgets('It pushes a restorable route and restores it', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.RestorablePushExampleApp());
 
     expect(find.widgetWithText(AppBar, 'Sample Code'), findsOne);

@@ -30,28 +30,33 @@ class CharacterActivatorExample extends StatefulWidget {
   const CharacterActivatorExample({super.key});
 
   @override
-  State<CharacterActivatorExample> createState() => _CharacterActivatorExampleState();
+  State<CharacterActivatorExample> createState() =>
+      _CharacterActivatorExampleState();
 }
 
 class _CharacterActivatorExampleState extends State<CharacterActivatorExample> {
   @override
   Widget build(BuildContext context) {
     return Shortcuts(
-      shortcuts: const <ShortcutActivator, Intent>{CharacterActivator('?'): HelpMenuIntent()},
+      shortcuts: const <ShortcutActivator, Intent>{
+        CharacterActivator('?'): HelpMenuIntent(),
+      },
       child: Actions(
         actions: <Type, Action<Intent>>{
           HelpMenuIntent: CallbackAction<HelpMenuIntent>(
             onInvoke: (HelpMenuIntent intent) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Keep calm and carry on!')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Keep calm and carry on!')),
+              );
               return null;
             },
           ),
         },
         child: const Focus(
           autofocus: true,
-          child: Column(children: <Widget>[Text('Press question mark for help')]),
+          child: Column(
+            children: <Widget>[Text('Press question mark for help')],
+          ),
         ),
       ),
     );

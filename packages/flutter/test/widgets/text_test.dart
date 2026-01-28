@@ -15,7 +15,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('DefaultTextStyle.merge correctly merges arguments', (WidgetTester tester) async {
-    DefaultTextStyle defaultTextStyle = const DefaultTextStyle.fallback();
+    var defaultTextStyle = const DefaultTextStyle.fallback();
 
     await tester.pumpWidget(
       Directionality(
@@ -248,7 +248,7 @@ void main() {
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(const Text('Hello'));
-      final String message = tester.takeException().toString();
+      final message = tester.takeException().toString();
       expect(message, contains('Directionality'));
       expect(message, contains(' Text '));
     },
@@ -286,7 +286,7 @@ void main() {
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
-    const TextStyle textStyle = TextStyle();
+    const textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -317,7 +317,7 @@ void main() {
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
-    const TextStyle textStyle = TextStyle();
+    const textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -351,8 +351,8 @@ void main() {
 
   testWidgets('inline widgets works with textScaleFactor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
-    final UniqueKey key = UniqueKey();
-    double textScaleFactor = 1.0;
+    final key = UniqueKey();
+    var textScaleFactor = 1.0;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -431,11 +431,11 @@ void main() {
   });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text(r'$$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(label: 'Double dollars', textDirection: TextDirection.ltr),
       ],
@@ -628,8 +628,8 @@ void main() {
   });
 
   testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -645,7 +645,7 @@ void main() {
         ),
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           children: <TestSemantics>[
@@ -668,9 +668,9 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -687,7 +687,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -714,13 +714,13 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontSize: 200);
-    const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
-    const String offScreenText = 'off screen';
-    final ScrollController controller = ScrollController();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle(fontSize: 200);
+    const onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
+    const offScreenText = 'off screen';
+    final controller = ScrollController();
     addTearDown(controller.dispose);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -739,7 +739,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics(
           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
@@ -777,9 +777,9 @@ void main() {
   testWidgets('recognizers split semantic node when TextSpan overflows', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -797,7 +797,7 @@ void main() {
         ),
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -825,9 +825,9 @@ void main() {
   testWidgets('recognizers split semantic nodes with text span labels', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -844,7 +844,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -868,11 +868,11 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final LongPressGestureRecognizer recognizer1 = LongPressGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer1 = LongPressGestureRecognizer();
     addTearDown(recognizer1.dispose);
-    final TapGestureRecognizer recognizer2 = TapGestureRecognizer();
+    final recognizer2 = TapGestureRecognizer();
     addTearDown(recognizer2.dispose);
 
     await tester.pumpWidget(
@@ -899,7 +899,7 @@ void main() {
     // The presence of the bidi formatting characters in the text is a
     // bit dubious, but that's what we do currently, and it's not really
     // clear what the perfect behavior would be...
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
@@ -941,9 +941,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -955,7 +955,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -977,9 +977,9 @@ void main() {
   });
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1008,7 +1008,7 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           children: <TestSemantics>[
@@ -1034,9 +1034,9 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/62945
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle();
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    const textStyle = TextStyle();
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1066,7 +1066,7 @@ void main() {
         textScaleFactor: 2,
       ),
     );
-    final TestSemantics expectedSemantics = TestSemantics.root(
+    final expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
           rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
@@ -1109,9 +1109,9 @@ void main() {
   testWidgets('receives fontFamilyFallback and package from root ThemeData', (
     WidgetTester tester,
   ) async {
-    const String fontFamily = 'fontFamily';
-    const String package = 'package_name';
-    final List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
+    const fontFamily = 'fontFamily';
+    const package = 'package_name';
+    final fontFamilyFallback = <String>['font', 'family', 'fallback'];
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1129,7 +1129,7 @@ void main() {
     final InlineSpan text = richText.text;
     final TextStyle? style = text.style;
     expect(style?.fontFamily, equals('packages/$package/$fontFamily'));
-    for (int i = 0; i < fontFamilyFallback.length; i++) {
+    for (var i = 0; i < fontFamilyFallback.length; i++) {
       final String fallback = fontFamilyFallback[i];
       expect(style?.fontFamilyFallback?[i], equals('packages/$package/$fallback'));
     }
@@ -1223,8 +1223,8 @@ void main() {
       );
     }
 
-    const double fontHeight = 14.0;
-    const double screenWidth = 800.0;
+    const fontHeight = 14.0;
+    const screenWidth = 800.0;
 
     // When textWidthBasis is parent, takes up full screen width.
     await createText(TextWidthBasis.parent);
@@ -1322,10 +1322,10 @@ void main() {
           if (method != #drawParagraph) {
             return false;
           }
-          final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-          final Offset offset = arguments[1] as Offset;
+          final paragraph = arguments[0] as ui.Paragraph;
+          final offset = arguments[1] as Offset;
           final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
-          for (final ui.LineMetrics line in lines) {
+          for (final line in lines) {
             if (line.left + offset.dx + line.width >= 400) {
               throw 'line $line is greater than the max width constraints';
             }
@@ -1340,7 +1340,7 @@ void main() {
   testWidgets('Paragraph.getBoxesForRange returns nothing when selection range is zero length', (
     WidgetTester tester,
   ) async {
-    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle());
     builder.addText('hello');
     final ui.Paragraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 1000));
@@ -1352,8 +1352,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
     // Without the fix for this bug the pump widget will throw a RangeError.
     await tester.pumpWidget(
@@ -1419,8 +1419,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 2', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1473,8 +1473,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 3', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1533,8 +1533,8 @@ void main() {
   testWidgets('WidgetSpans with no semantic information are elided from semantics - case 4', (
     WidgetTester tester,
   ) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TapGestureRecognizer recognizer = TapGestureRecognizer();
+    final semantics = SemanticsTester(tester);
+    final recognizer = TapGestureRecognizer();
     addTearDown(recognizer.dispose);
 
     await tester.pumpWidget(
@@ -1637,7 +1637,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
-    const Key textKey = Key('RichText');
+    const textKey = Key('RichText');
     Widget textWithNestedInlineSpans({
       required double textScaleFactor,
       required double screenWidth,
@@ -1787,16 +1787,16 @@ void main() {
   });
 
   testWidgets('can set heading level', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
 
-    for (int level = 1; level <= 6; level++) {
+    for (var level = 1; level <= 6; level++) {
       await tester.pumpWidget(
         Semantics(
           headingLevel: 1,
           child: Text('Heading level $level', textDirection: TextDirection.ltr),
         ),
       );
-      final TestSemantics expectedSemantics = TestSemantics.root(
+      final expectedSemantics = TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
             label: 'Heading level $level',

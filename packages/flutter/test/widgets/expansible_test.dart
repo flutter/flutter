@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Controller expands and collapses the widget', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -34,7 +34,7 @@ void main() {
   });
 
   testWidgets('Can listen to the expansion state', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     bool? expansionState;
     controller.addListener(() {
       expansionState = controller.isExpanded;
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWidgets('Can set expansible to be initially expanded', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     controller.expand();
     await tester.pumpWidget(
       MaterialApp(
@@ -109,7 +109,7 @@ void main() {
   });
 
   testWidgets('Can compose header and body with expansibleBuilder', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -153,8 +153,8 @@ void main() {
   });
 
   testWidgets('Respects maintainState', (WidgetTester tester) async {
-    final ExpansibleController controller1 = ExpansibleController();
-    final ExpansibleController controller2 = ExpansibleController();
+    final controller1 = ExpansibleController();
+    final controller2 = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
@@ -198,7 +198,7 @@ void main() {
   });
 
   testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -249,8 +249,8 @@ void main() {
   });
 
   testWidgets('ExpansionTile can accept a new controller', (WidgetTester tester) async {
-    final ExpansibleController controller1 = ExpansibleController();
-    final ExpansibleController controller2 = ExpansibleController();
+    final controller1 = ExpansibleController();
+    final controller2 = ExpansibleController();
     addTearDown(() {
       controller1.dispose();
       controller2.dispose();
@@ -310,8 +310,8 @@ void main() {
   testWidgets('Expansible can accept a new controller with a different state', (
     WidgetTester tester,
   ) async {
-    final ExpansibleController controller1 = ExpansibleController();
-    final ExpansibleController controller2 = ExpansibleController();
+    final controller1 = ExpansibleController();
+    final controller2 = ExpansibleController();
     addTearDown(() {
       controller1.dispose();
       controller2.dispose();
@@ -365,7 +365,7 @@ void main() {
   });
 
   testWidgets('Respects animationStyle duration and curves', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -420,7 +420,7 @@ void main() {
   testWidgets('AnimationStyle takes precedence over deprecated properties', (
     WidgetTester tester,
   ) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -460,7 +460,7 @@ void main() {
   });
 
   testWidgets('AnimationStyle.noAnimation disables animation', (WidgetTester tester) async {
-    final ExpansibleController controller = ExpansibleController();
+    final controller = ExpansibleController();
     await tester.pumpWidget(
       MaterialApp(
         home: Expansible(
@@ -488,5 +488,57 @@ void main() {
     expect(find.text('Body'), findsNothing);
 
     controller.dispose();
+  });
+
+  testWidgets('Expansible does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ExpansibleController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Expansible(
+            headerBuilder: (_, _) => const Text('X'),
+            bodyBuilder: (_, _) => const Text('Y'),
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Expansible)), Size.zero);
+    controller.expand();
+    await tester.pump();
+  });
+
+  testWidgets('Controller can be toggled', (WidgetTester tester) async {
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          headerBuilder: (BuildContext context, Animation<double> animation) =>
+              GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
+
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+
+    expect(find.text('Body'), findsNothing);
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
   });
 }

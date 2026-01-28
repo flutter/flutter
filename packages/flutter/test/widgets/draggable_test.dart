@@ -19,10 +19,10 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    int dragStartedCount = 0;
-    int moveCount = 0;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var dragStartedCount = 0;
+    var moveCount = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -98,7 +98,7 @@ void main() {
   testWidgets('Drag and drop - onLeave callback fires correctly with generic parameter', (
     WidgetTester tester,
   ) async {
-    final Map<String, int> leftBehind = <String, int>{'Target 1': 0, 'Target 2': 0};
+    final leftBehind = <String, int>{'Target 1': 0, 'Target 2': 0};
 
     await tester.pumpWidget(
       MaterialApp(
@@ -168,7 +168,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onLeave callback fires correctly', (WidgetTester tester) async {
-    final Map<String, int> leftBehind = <String, int>{'Target 1': 0, 'Target 2': 0};
+    final leftBehind = <String, int>{'Target 1': 0, 'Target 2': 0};
 
     await tester.pumpWidget(
       MaterialApp(
@@ -241,7 +241,7 @@ void main() {
   testWidgets('Drag and drop - onMove callback fires correctly with generic parameter', (
     WidgetTester tester,
   ) async {
-    final Map<String, int> targetMoveCount = <String, int>{'Target 1': 0, 'Target 2': 0};
+    final targetMoveCount = <String, int>{'Target 1': 0, 'Target 2': 0};
 
     await tester.pumpWidget(
       MaterialApp(
@@ -307,7 +307,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onMove callback fires correctly', (WidgetTester tester) async {
-    final Map<String, int> targetMoveCount = <String, int>{'Target 1': 0, 'Target 2': 0};
+    final targetMoveCount = <String, int>{'Target 1': 0, 'Target 2': 0};
 
     await tester.pumpWidget(
       MaterialApp(
@@ -381,7 +381,7 @@ void main() {
   testWidgets('Drag and drop - onMove is not called if moved with null data', (
     WidgetTester tester,
   ) async {
-    bool onMoveCalled = false;
+    var onMoveCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -421,7 +421,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
@@ -510,7 +510,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - tapping button', (WidgetTester tester) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
@@ -569,7 +569,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - long press draggable, short press', (WidgetTester tester) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
@@ -620,7 +620,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - long press draggable, long press', (WidgetTester tester) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
@@ -671,7 +671,7 @@ void main() {
   testWidgets('Drag and drop - horizontal and vertical draggables in vertical block', (
     WidgetTester tester,
   ) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(
@@ -785,7 +785,7 @@ void main() {
   testWidgets('Drag and drop - horizontal and vertical draggables in horizontal block', (
     WidgetTester tester,
   ) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(
@@ -898,7 +898,7 @@ void main() {
   });
 
   group('Drag and drop - Draggables with a set axis only move along that axis', () {
-    final List<String> events = <String>[];
+    final events = <String>[];
 
     Widget build() {
       return MaterialApp(
@@ -1029,7 +1029,7 @@ void main() {
   });
 
   group('Drag and drop - onDragUpdate called if draggable moves along a set axis', () {
-    int updated = 0;
+    var updated = 0;
     Offset dragDelta = Offset.zero;
 
     setUp(() {
@@ -1190,9 +1190,9 @@ void main() {
   testWidgets('Drag and drop - onDraggableCanceled not called if dropped on accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDraggableCanceledCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDraggableCanceledCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1262,9 +1262,9 @@ void main() {
   testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDraggableCanceledCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDraggableCanceledCalled = false;
     late Velocity onDraggableCanceledVelocity;
     late Offset onDraggableCanceledOffset;
 
@@ -1340,9 +1340,9 @@ void main() {
   testWidgets(
     'Drag and drop - onDraggableCanceled called if dropped on non-accepting target with details',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
-      final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-      bool onDraggableCanceledCalled = false;
+      final accepted = <int>[];
+      final acceptedDetails = <DragTargetDetails<int>>[];
+      var onDraggableCanceledCalled = false;
       late Velocity onDraggableCanceledVelocity;
       late Offset onDraggableCanceledOffset;
 
@@ -1419,9 +1419,9 @@ void main() {
   testWidgets(
     'Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
-      final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-      bool onDraggableCanceledCalled = false;
+      final accepted = <int>[];
+      final acceptedDetails = <DragTargetDetails<int>>[];
+      var onDraggableCanceledCalled = false;
       late Velocity onDraggableCanceledVelocity;
       late Offset onDraggableCanceledOffset;
 
@@ -1481,9 +1481,9 @@ void main() {
   testWidgets('Drag and drop - onDragEnd not called if dropped on non-accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragEndCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(
       MaterialApp(
@@ -1561,9 +1561,9 @@ void main() {
   testWidgets(
     'Drag and drop - onDragEnd not called if dropped on non-accepting target with details',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
-      final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-      bool onDragEndCalled = false;
+      final accepted = <int>[];
+      final acceptedDetails = <DragTargetDetails<int>>[];
+      var onDragEndCalled = false;
       late DraggableDetails onDragEndDraggableDetails;
       await tester.pumpWidget(
         MaterialApp(
@@ -1693,7 +1693,7 @@ void main() {
   testWidgets('Drag and drop - Can drag and drop over a non-accepting target multiple times', (
     WidgetTester tester,
   ) async {
-    int numberOfTimesOnDraggableCanceledCalled = 0;
+    var numberOfTimesOnDraggableCanceledCalled = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -1775,9 +1775,9 @@ void main() {
   testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragCompletedCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragCompletedCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1847,9 +1847,9 @@ void main() {
   testWidgets(
     'Drag and drop - onDragCompleted not called if dropped on non-accepting target with details',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
-      final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-      bool onDragCompletedCalled = false;
+      final accepted = <int>[];
+      final acceptedDetails = <DragTargetDetails<int>>[];
+      var onDragCompletedCalled = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1920,9 +1920,9 @@ void main() {
   testWidgets('Drag and drop - onDragEnd called if dropped on accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragEndCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(
       MaterialApp(
@@ -1982,10 +1982,7 @@ void main() {
     await tester.pump();
 
     final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
-    final Offset expectedDropOffset = Offset(
-      droppedLocation.dx,
-      secondLocation.dy - firstLocation.dy,
-    );
+    final expectedDropOffset = Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy);
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
@@ -2003,9 +2000,9 @@ void main() {
   testWidgets('DragTarget does not call onDragEnd when remove from the tree', (
     WidgetTester tester,
   ) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
-    int timesOnDragEndCalled = 0;
+    var timesOnDragEndCalled = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -2071,9 +2068,9 @@ void main() {
   testWidgets('Drag and drop - onDragCompleted called if dropped on accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragCompletedCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragCompletedCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2143,10 +2140,10 @@ void main() {
   testWidgets('Drag and drop - allow pass through of unaccepted data test', (
     WidgetTester tester,
   ) async {
-    final List<int> acceptedInts = <int>[];
-    final List<DragTargetDetails<int>> acceptedIntsDetails = <DragTargetDetails<int>>[];
-    final List<double> acceptedDoubles = <double>[];
-    final List<DragTargetDetails<double>> acceptedDoublesDetails = <DragTargetDetails<double>>[];
+    final acceptedInts = <int>[];
+    final acceptedIntsDetails = <DragTargetDetails<int>>[];
+    final acceptedDoubles = <double>[];
+    final acceptedDoublesDetails = <DragTargetDetails<double>>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2271,13 +2268,11 @@ void main() {
   testWidgets('Drag and drop - allow pass through of unaccepted data twice test', (
     WidgetTester tester,
   ) async {
-    final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
-    final List<DragTargetDetails<DragTargetData>> acceptedDragTargetDataDetails =
-        <DragTargetDetails<DragTargetData>>[];
-    final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    final List<DragTargetDetails<ExtendedDragTargetData>> acceptedExtendedDragTargetDataDetails =
-        <DragTargetDetails<ExtendedDragTargetData>>[];
-    final DragTargetData dragTargetData = DragTargetData();
+    final acceptedDragTargetDatas = <DragTargetData>[];
+    final acceptedDragTargetDataDetails = <DragTargetDetails<DragTargetData>>[];
+    final acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
+    final acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
+    final dragTargetData = DragTargetData();
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -2323,7 +2318,7 @@ void main() {
     final Offset dragTargetLocation = tester.getCenter(find.text('Source'));
     final Offset targetLocation = tester.getCenter(find.text('Target1'));
 
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       final TestGesture gesture = await tester.startGesture(dragTargetLocation);
       await tester.pump();
       await gesture.moveTo(targetLocation);
@@ -2344,8 +2339,8 @@ void main() {
   });
 
   testWidgets('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
 
     Widget build(int maxSimultaneousDrags) {
       return MaterialApp(
@@ -2473,8 +2468,8 @@ void main() {
   testWidgets('Drag and drop - onAccept is not called if dropped with null data', (
     WidgetTester tester,
   ) async {
-    bool onAcceptCalled = false;
-    bool onAcceptWithDetailsCalled = false;
+    var onAcceptCalled = false;
+    var onAcceptWithDetailsCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2545,7 +2540,7 @@ void main() {
         ..dispose(),
     );
 
-    bool didTap = false;
+    var didTap = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -2627,7 +2622,7 @@ void main() {
   testWidgets('DragTarget does not set state when remove from the tree', (
     WidgetTester tester,
   ) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
@@ -2685,8 +2680,8 @@ void main() {
   });
 
   testWidgets('Drag and drop - remove draggable', (WidgetTester tester) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2765,7 +2760,7 @@ void main() {
   });
 
   testWidgets('Tap above long-press draggable works', (WidgetTester tester) async {
-    final List<String> events = <String>[];
+    final events = <String>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2790,9 +2785,9 @@ void main() {
   testWidgets('long-press draggable calls onDragEnd called if dropped on accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragEndCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
 
     await tester.pumpWidget(
@@ -2862,10 +2857,7 @@ void main() {
     await tester.pump();
 
     final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
-    final Offset expectedDropOffset = Offset(
-      droppedLocation.dx,
-      secondLocation.dy - firstLocation.dy,
-    );
+    final expectedDropOffset = Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy);
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
@@ -2883,9 +2875,9 @@ void main() {
   testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (
     WidgetTester tester,
   ) async {
-    final List<int> accepted = <int>[];
-    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-    bool onDragCompletedCalled = false;
+    final accepted = <int>[];
+    final acceptedDetails = <DragTargetDetails<int>>[];
+    var onDragCompletedCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2963,7 +2955,7 @@ void main() {
   testWidgets('long-press draggable calls onDragStartedCalled after long press', (
     WidgetTester tester,
   ) async {
-    bool onDragStartedCalled = false;
+    var onDragStartedCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3002,7 +2994,7 @@ void main() {
   });
 
   testWidgets('Custom long press delay for LongPressDraggable', (WidgetTester tester) async {
-    bool onDragStartedCalled = false;
+    var onDragStartedCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: LongPressDraggable<int>(
@@ -3042,7 +3034,7 @@ void main() {
   });
 
   testWidgets('Default long press delay for LongPressDraggable', (WidgetTester tester) async {
-    bool onDragStartedCalled = false;
+    var onDragStartedCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: LongPressDraggable<int>(
@@ -3109,8 +3101,8 @@ void main() {
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+    final rootNavigatorKey = GlobalKey<NavigatorState>();
+    final childNavigatorKey = GlobalKey<NavigatorState>();
     // Create a [MaterialApp], with a nested [Navigator], which has the
     // [Draggable].
     await tester.pumpWidget(
@@ -3171,8 +3163,8 @@ void main() {
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (
     WidgetTester tester,
   ) async {
-    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+    final rootNavigatorKey = GlobalKey<NavigatorState>();
+    final childNavigatorKey = GlobalKey<NavigatorState>();
     // Create a [MaterialApp], with a nested [Navigator], which has the
     // [Draggable].
     await tester.pumpWidget(
@@ -3260,7 +3252,7 @@ void main() {
   testWidgets('Drag and drop - DragTarget<Object> can accept Draggable<int> data', (
     WidgetTester tester,
   ) async {
-    final List<Object> accepted = <Object>[];
+    final accepted = <Object>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -3296,7 +3288,7 @@ void main() {
   testWidgets(
     'Drag and drop - DragTarget<int> can accept Draggable<Object> data when runtime type is int',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
+      final accepted = <int>[];
       await tester.pumpWidget(
         MaterialApp(
           home: Column(
@@ -3333,8 +3325,8 @@ void main() {
   testWidgets(
     'Drag and drop - DragTarget<int> should not accept Draggable<Object> data when runtime type null',
     (WidgetTester tester) async {
-      final List<int> accepted = <int>[];
-      bool isReceiveNullDataForCheck = false;
+      final accepted = <int>[];
+      var isReceiveNullDataForCheck = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Column(
@@ -3376,7 +3368,7 @@ void main() {
   );
 
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+    final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
@@ -3571,7 +3563,7 @@ void main() {
   testWidgets('Drag and drop - when a dragAnchorStrategy is provided it gets called', (
     WidgetTester tester,
   ) async {
-    bool dragAnchorStrategyCalled = false;
+    var dragAnchorStrategyCalled = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3695,7 +3687,7 @@ void main() {
   testWidgets('Drag and drop - unmounting overlay ends drag gracefully', (
     WidgetTester tester,
   ) async {
-    final ValueNotifier<bool> mountedNotifier = ValueNotifier<bool>(true);
+    final mountedNotifier = ValueNotifier<bool>(true);
     addTearDown(mountedNotifier.dispose);
 
     await tester.pumpWidget(
@@ -3786,7 +3778,7 @@ void main() {
   });
 
   testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
-    bool onTap = false;
+    var onTap = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -3817,7 +3809,7 @@ void main() {
   testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (
     WidgetTester tester,
   ) async {
-    bool onTap = false;
+    var onTap = false;
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -3951,9 +3943,9 @@ Future<void> _testLongPressDraggableHapticFeedback({
   required bool hapticFeedbackOnStart,
   required int expectedHapticFeedbackCount,
 }) async {
-  bool onDragStartedCalled = false;
+  var onDragStartedCalled = false;
 
-  int hapticFeedbackCalls = 0;
+  var hapticFeedbackCalls = 0;
   tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
     MethodCall methodCall,
   ) async {
@@ -4006,9 +3998,9 @@ Future<void> _testChildAnchorFeedbackPosition({
   double top = 0.0,
   double left = 0.0,
 }) async {
-  final List<int> accepted = <int>[];
-  final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
-  int dragStartedCount = 0;
+  final accepted = <int>[];
+  final acceptedDetails = <DragTargetDetails<int>>[];
+  var dragStartedCount = 0;
 
   await tester.pumpWidget(
     Stack(

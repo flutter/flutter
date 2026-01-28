@@ -35,7 +35,7 @@ class TypographyDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final List<_TextStyleItem> styleItems = <_TextStyleItem>[
+    final styleItems = <_TextStyleItem>[
       _TextStyleItem(name: 'Headline 1', style: textTheme.displayLarge!, text: 'Light 96sp'),
       _TextStyleItem(name: 'Headline 2', style: textTheme.displayMedium!, text: 'Light 60sp'),
       _TextStyleItem(name: 'Headline 3', style: textTheme.displaySmall!, text: 'Regular 48sp'),

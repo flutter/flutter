@@ -12,7 +12,9 @@ void main() {
     await tester.pumpWidget(const example.RadioListTileApp());
 
     // Initially the third radio button is not selected.
-    RadioGroup<int> group = tester.widget<RadioGroup<int>>(find.byType(RadioGroup<int>));
+    RadioGroup<int> group = tester.widget<RadioGroup<int>>(
+      find.byType(RadioGroup<int>),
+    );
     expect(group.groupValue, null);
 
     // Tap the third radio button.

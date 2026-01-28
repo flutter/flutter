@@ -32,15 +32,16 @@ class ErrorBuilderExample extends StatelessWidget {
       ),
       child: Image.network(
         'https://example.does.not.exist/image.jpg',
-        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-          // Appropriate logging or analytics, e.g.
-          // myAnalytics.recordError(
-          //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
-          //   exception,
-          //   stackTrace,
-          // );
-          return const Text('Image failed to load');
-        },
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+              // Appropriate logging or analytics, e.g.
+              // myAnalytics.recordError(
+              //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
+              //   exception,
+              //   stackTrace,
+              // );
+              return const Text('Image failed to load');
+            },
       ),
     );
   }

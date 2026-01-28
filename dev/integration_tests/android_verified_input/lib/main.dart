@@ -25,7 +25,7 @@ Future<dynamic> onMethodChannelCall(MethodCall call) {
     // Android side is notifying us of the result of verifying the input
     // event.
     case 'notify_verified_input':
-      final bool result = call.arguments as bool;
+      final result = call.arguments as bool;
       // FlutterDriver handler, note that this captures the notification
       // value delivered via the method channel.
       Future<String> handler(String? message) async {

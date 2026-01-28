@@ -914,19 +914,19 @@ class TestTarget extends Target {
   Future<void> build(Environment environment) => _build(environment);
 
   @override
-  var dependencies = <Target>[];
+  List<Target> dependencies = <Target>[];
 
   @override
-  var inputs = <Source>[];
+  List<Source> inputs = <Source>[];
 
   @override
-  var depfiles = <String>[];
+  List<String> depfiles = <String>[];
 
   @override
-  var name = 'test';
+  String name = 'test';
 
   @override
-  var outputs = <Source>[];
+  List<Source> outputs = <Source>[];
 
   @override
   String? buildKey;

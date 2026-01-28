@@ -56,16 +56,28 @@ class ButtonTypesGroup extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          IconButton(icon: const Icon(Icons.filter_drama), onPressed: onPressed),
+          IconButton(
+            icon: const Icon(Icons.filter_drama),
+            onPressed: onPressed,
+          ),
 
           // Filled icon button
-          IconButton.filled(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.filled(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
 
           // Filled tonal icon button
-          IconButton.filledTonal(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.filledTonal(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
 
           // Outlined icon button
-          IconButton.outlined(onPressed: onPressed, icon: const Icon(Icons.filter_drama)),
+          IconButton.outlined(
+            onPressed: onPressed,
+            icon: const Icon(Icons.filter_drama),
+          ),
         ],
       ),
     );

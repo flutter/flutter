@@ -387,5 +387,5 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
 class FakeProcessInfo extends Fake implements ProcessInfo {
   @override
-  var maxRss = 123456789;
+  int maxRss = 123456789;
 }

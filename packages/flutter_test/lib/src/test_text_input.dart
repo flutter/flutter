@@ -133,7 +133,7 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        final List<dynamic> arguments = methodCall.arguments as List<dynamic>;
+        final arguments = methodCall.arguments as List<dynamic>;
         _client = arguments[0] as int;
         setClientArgs = arguments[1] as Map<String, dynamic>;
       case 'TextInput.updateConfig':
@@ -230,7 +230,7 @@ class TestTextInput {
   /// that the real IME will become confused as to the current state of input.
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
-      final Completer<void> completer = Completer<void>();
+      final completer = Completer<void>();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
@@ -328,7 +328,7 @@ class TestTextInput {
   /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction.
   Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
     assert(isRegistered);
-    List<List<dynamic>> response = <List<dynamic>>[];
+    var response = <List<dynamic>>[];
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(

@@ -54,9 +54,9 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
     final BoxConstraints childConstraints = constraints.asBoxConstraints();
-    int leadingGarbage = 0;
-    int trailingGarbage = 0;
-    bool reachedEnd = false;
+    var leadingGarbage = 0;
+    var trailingGarbage = 0;
+    var reachedEnd = false;
 
     // This algorithm in principle is straight-forward: find the first child
     // that overlaps the given scrollOffset, creating more children at the top
@@ -100,7 +100,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // layout offset, we have to find the first child that has valid layout
     // offset.
     if (childScrollOffset(firstChild!) == null) {
-      int leadingChildrenWithoutLayoutOffset = 0;
+      var leadingChildrenWithoutLayoutOffset = 0;
       while (earliestUsefulChild != null && childScrollOffset(earliestUsefulChild) == null) {
         earliestUsefulChild = childAfter(earliestUsefulChild);
         leadingChildrenWithoutLayoutOffset += 1;
@@ -129,8 +129,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       // We have to add children before the earliestUsefulChild.
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
       if (earliestUsefulChild == null) {
-        final SliverMultiBoxAdaptorParentData childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+        final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
 
         if (scrollOffset == 0.0) {
@@ -157,14 +156,12 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // Let's assume there is no child before the first child. We will
         // correct it on the next layout if it is not.
         geometry = SliverGeometry(scrollOffsetCorrection: -firstChildScrollOffset);
-        final SliverMultiBoxAdaptorParentData childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+        final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
         return;
       }
 
-      final SliverMultiBoxAdaptorParentData childParentData =
-          earliestUsefulChild.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = earliestUsefulChild.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = firstChildScrollOffset;
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
@@ -186,8 +183,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
         assert(earliestUsefulChild != null);
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild!);
-        final SliverMultiBoxAdaptorParentData childParentData =
-            firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+        final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
         // We only need to correct if the leading child actually has a
         // paint extent.
@@ -220,8 +216,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // been laid out, and is in fact our leadingChildWithLayout. It's possible
     // that some children beyond that one have also been laid out.
 
-    bool inLayoutRange = true;
-    RenderBox? child = earliestUsefulChild;
+    var inLayoutRange = true;
+    var child = earliestUsefulChild;
     int index = indexOf(child!);
     double endScrollOffset = childScrollOffset(child)! + paintExtentOf(child);
     bool advance() {
@@ -255,8 +251,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         trailingChildWithLayout = child;
       }
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData =
-          child!.parentData! as SliverMultiBoxAdaptorParentData;
+      final childParentData = child!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = endScrollOffset;
       assert(childParentData.index == index);
       endScrollOffset = childScrollOffset(child!)! + paintExtentOf(child!);

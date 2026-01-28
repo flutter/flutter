@@ -32,7 +32,11 @@ class AvatarBoxConstraintsExample extends StatelessWidget {
           avatar: Icon(Icons.star),
           label: SizedBox(
             width: 150,
-            child: Text('One line text.', maxLines: 3, overflow: TextOverflow.ellipsis),
+            child: Text(
+              'One line text.',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
         SizedBox(height: 10),

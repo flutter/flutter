@@ -51,7 +51,10 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample>
       color: Colors.white,
       child: AlignTransition(
         alignment: _animation,
-        child: const Padding(padding: EdgeInsets.all(8.0), child: FlutterLogo(size: 150.0)),
+        child: const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: FlutterLogo(size: 150.0),
+        ),
       ),
     );
   }

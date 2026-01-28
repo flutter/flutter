@@ -12,14 +12,14 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('RenderSliverOpacity does not composite if it is transparent', () {
-    final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
+    final renderSliverOpacity = RenderSliverOpacity(
       opacity: 0.0,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -31,13 +31,13 @@ void main() {
   });
 
   test('RenderSliverOpacity does composite if it is opaque', () {
-    final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
+    final renderSliverOpacity = RenderSliverOpacity(
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -49,14 +49,14 @@ void main() {
   });
 
   test('RenderSliverOpacity reuses its layer', () {
-    final RenderSliverOpacity renderSliverOpacity = RenderSliverOpacity(
+    final renderSliverOpacity = RenderSliverOpacity(
       opacity: 0.5,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -80,14 +80,14 @@ void main() {
     final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
       ..value = 0.0;
 
-    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+    final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -102,14 +102,14 @@ void main() {
     final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
       ..value = 0.5;
 
-    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+    final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -124,14 +124,14 @@ void main() {
     final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
       ..value = 1.0;
 
-    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+    final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
@@ -146,14 +146,14 @@ void main() {
     final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
       ..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
 
-    final RenderSliverAnimatedOpacity renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
+    final renderSliverAnimatedOpacity = RenderSliverAnimatedOpacity(
       opacity: opacityAnimation,
       sliver: RenderSliverToBoxAdapter(
         child: RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
       ),
     );
 
-    final RenderViewport root = RenderViewport(
+    final root = RenderViewport(
       crossAxisDirection: AxisDirection.right,
       offset: ViewportOffset.zero(),
       cacheExtent: 250.0,

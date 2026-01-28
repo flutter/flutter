@@ -183,7 +183,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     final double columnCardHeight = size.height / cardCount!;
     final double rowCardWidth = size.width;
     final Offset offset = translation!.alongSize(size);
-    double columnCardY = 0.0;
+    var columnCardY = 0.0;
     double rowCardX = -(selectedIndex! * rowCardWidth);
 
     // When tCollapsed > 0 the titles spread apart
@@ -203,17 +203,17 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     // Compute the size and origin of each card, title, and indicator for the maxHeight
     // "column" layout, and the midHeight "row" layout. The actual layout is just the
     // interpolated value between the column and row layouts for t.
-    for (int index = 0; index < cardCount!; index++) {
+    for (var index = 0; index < cardCount!; index++) {
       // Layout the card for index.
-      final Rect columnCardRect = Rect.fromLTWH(
+      final columnCardRect = Rect.fromLTWH(
         columnCardX,
         columnCardY,
         columnCardWidth,
         columnCardHeight,
       );
-      final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
+      final rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
       final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect)!.shift(offset);
-      final String cardId = 'card$index';
+      final cardId = 'card$index';
       if (hasChild(cardId)) {
         layoutChild(cardId, BoxConstraints.tight(cardRect.size));
         positionChild(cardId, cardRect.topLeft);
@@ -224,8 +224,8 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double columnTitleY = columnCardRect.centerLeft.dy - titleSize.height / 2.0;
       final double rowTitleY = rowCardRect.centerLeft.dy - titleSize.height / 2.0;
       final double centeredRowTitleX = rowTitleX + (rowTitleWidth - titleSize.width) / 2.0;
-      final Offset columnTitleOrigin = Offset(columnTitleX, columnTitleY);
-      final Offset rowTitleOrigin = Offset(centeredRowTitleX, rowTitleY);
+      final columnTitleOrigin = Offset(columnTitleX, columnTitleY);
+      final rowTitleOrigin = Offset(centeredRowTitleX, rowTitleY);
       final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin)!;
       positionChild('title$index', titleOrigin + offset);
 
@@ -236,12 +236,12 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       );
       final double columnIndicatorX = cardRect.centerRight.dx - indicatorSize.width - 16.0;
       final double columnIndicatorY = cardRect.bottomRight.dy - indicatorSize.height - 16.0;
-      final Offset columnIndicatorOrigin = Offset(columnIndicatorX, columnIndicatorY);
-      final Rect titleRect = Rect.fromPoints(titleOrigin, titleSize.bottomRight(titleOrigin));
+      final columnIndicatorOrigin = Offset(columnIndicatorX, columnIndicatorY);
+      final titleRect = Rect.fromPoints(titleOrigin, titleSize.bottomRight(titleOrigin));
       final double centeredRowIndicatorX =
           rowIndicatorX + (rowIndicatorWidth - indicatorSize.width) / 2.0;
       final double rowIndicatorY = titleRect.bottomCenter.dy + 16.0;
-      final Offset rowIndicatorOrigin = Offset(centeredRowIndicatorX, rowIndicatorY);
+      final rowIndicatorOrigin = Offset(centeredRowIndicatorX, rowIndicatorY);
       final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin)!;
       positionChild('indicator$index', indicatorOrigin + offset);
 
@@ -313,9 +313,9 @@ class _AllSectionsView extends AnimatedWidget {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.15;
     }
 
-    final List<Widget> children = List<Widget>.from(sectionCards);
+    final children = List<Widget>.from(sectionCards);
 
-    for (int index = 0; index < sections.length; index++) {
+    for (var index = 0; index < sections.length; index++) {
       final Section section = sections[index];
       children.add(
         LayoutId(
@@ -329,7 +329,7 @@ class _AllSectionsView extends AnimatedWidget {
       );
     }
 
-    for (int index = 0; index < sections.length; index++) {
+    for (var index = 0; index < sections.length; index++) {
       children.add(
         LayoutId(
           id: 'indicator$index',
@@ -529,8 +529,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   List<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
-    final List<Widget> sectionCards = <Widget>[];
-    for (int index = 0; index < allSections.length; index++) {
+    final sectionCards = <Widget>[];
+    for (var index = 0; index < allSections.length; index++) {
       sectionCards.add(
         LayoutId(
           id: 'card$index',
@@ -548,8 +548,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
       );
     }
 
-    final List<Widget> headings = <Widget>[];
-    for (int index = 0; index < allSections.length; index++) {
+    final headings = <Widget>[];
+    for (var index = 0; index < allSections.length; index++) {
       headings.add(
         ColoredBox(
           color: _kAppBackgroundColor,

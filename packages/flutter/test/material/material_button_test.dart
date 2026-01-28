@@ -105,7 +105,7 @@ void main() {
   });
 
   testWidgets('Does MaterialButton work with hover', (WidgetTester tester) async {
-    const Color hoverColor = Color(0xff001122);
+    const hoverColor = Color(0xff001122);
 
     await tester.pumpWidget(
       Directionality(
@@ -130,9 +130,9 @@ void main() {
   });
 
   testWidgets('Does MaterialButton work with focus', (WidgetTester tester) async {
-    const Color focusColor = Color(0xff001122);
+    const focusColor = Color(0xff001122);
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
+    final focusNode = FocusNode(debugLabel: 'MaterialButton Node');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -160,20 +160,20 @@ void main() {
   testWidgets('MaterialButton elevation and colors have proper precedence', (
     WidgetTester tester,
   ) async {
-    const double elevation = 10.0;
-    const double focusElevation = 11.0;
-    const double hoverElevation = 12.0;
-    const double highlightElevation = 13.0;
-    const Color focusColor = Color(0xff001122);
-    const Color hoverColor = Color(0xff112233);
-    const Color highlightColor = Color(0xff223344);
+    const elevation = 10.0;
+    const focusElevation = 11.0;
+    const hoverElevation = 12.0;
+    const highlightElevation = 13.0;
+    const focusColor = Color(0xff001122);
+    const hoverColor = Color(0xff112233);
+    const highlightColor = Color(0xff223344);
 
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(MaterialButton),
       matching: find.byType(Material),
     );
 
-    final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
+    final focusNode = FocusNode(debugLabel: 'MaterialButton Node');
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -309,7 +309,7 @@ void main() {
   );
 
   testWidgets('MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton');
+    final focusNode = FocusNode(debugLabel: 'MaterialButton');
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -399,8 +399,8 @@ void main() {
   testWidgets('MaterialButton onPressed and onLongPress callbacks are distinctly recognized', (
     WidgetTester tester,
   ) async {
-    bool didPressButton = false;
-    bool didLongPressButton = false;
+    var didPressButton = false;
+    var didLongPressButton = false;
 
     await tester.pumpWidget(
       Directionality(
@@ -491,8 +491,8 @@ void main() {
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (
     WidgetTester tester,
   ) async {
-    const Color directSplashColor = Color(0xFF000011);
-    const Color directHighlightColor = Color(0xFF000011);
+    const directSplashColor = Color(0xFF000011);
+    const directHighlightColor = Color(0xFF000011);
 
     Widget buttonWidget = Center(
       child: MaterialButton(
@@ -525,8 +525,8 @@ void main() {
 
     // Painter is translated to the center by the Center widget and not
     // the Material widget.
-    const Rect expectedClipRect = Rect.fromLTRB(0.0, 0.0, 88.0, 36.0);
-    final Path expectedClipPath = Path()
+    const expectedClipRect = Rect.fromLTRB(0.0, 0.0, 88.0, 36.0);
+    final expectedClipPath = Path()
       ..addRRect(RRect.fromRectAndRadius(expectedClipRect, const Radius.circular(2.0)));
     expect(
       Material.of(tester.element(find.byType(InkWell))),
@@ -541,8 +541,8 @@ void main() {
         ..rect(color: directHighlightColor),
     );
 
-    const Color themeSplashColor1 = Color(0xFF001100);
-    const Color themeHighlightColor1 = Color(0xFF001100);
+    const themeSplashColor1 = Color(0xFF001100);
+    const themeHighlightColor1 = Color(0xFF001100);
 
     buttonWidget = Center(
       child: MaterialButton(
@@ -581,8 +581,8 @@ void main() {
         ..rect(color: themeHighlightColor1),
     );
 
-    const Color themeSplashColor2 = Color(0xFF002200);
-    const Color themeHighlightColor2 = Color(0xFF002200);
+    const themeSplashColor2 = Color(0xFF002200);
+    const themeHighlightColor2 = Color(0xFF002200);
 
     await tester.pumpWidget(
       Directionality(
@@ -636,11 +636,11 @@ void main() {
   testWidgets(
     'Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics',
     (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
+      final semantics = SemanticsTester(tester);
 
-      const Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
+      const expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
       // Button is in center of screen
-      final Matrix4 expectedButtonTransform = Matrix4.identity()
+      final expectedButtonTransform = Matrix4.identity()
         ..translate(
           TestSemantics.fullScreen.width / 2 - expectedButtonSize.width / 2,
           TestSemantics.fullScreen.height / 2 - expectedButtonSize.height / 2,
@@ -860,8 +860,8 @@ void main() {
   });
 
   testWidgets('MaterialButton responds to density changes.', (WidgetTester tester) async {
-    const Key key = Key('test');
-    const Key childKey = Key('test child');
+    const key = Key('test');
+    const childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(

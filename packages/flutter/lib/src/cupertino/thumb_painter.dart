@@ -58,10 +58,7 @@ class CupertinoThumbPainter {
   void paint(Canvas canvas, Rect rect) {
     // Paint RRects instead of RSuperellipses here, because practically
     // [CupertinoSlider] only draws circular thumbs.
-    final RRect thumbShape = RRect.fromRectAndRadius(
-      rect,
-      Radius.circular(rect.shortestSide / 2.0),
-    );
+    final thumbShape = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0));
 
     for (final BoxShadow shadow in shadows) {
       canvas.drawRRect(thumbShape.shift(shadow.offset), shadow.toPaint());

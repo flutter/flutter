@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/text_field/text_field.3.dart' as example;
+import 'package:flutter_api_samples/material/text_field/text_field.3.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -28,32 +29,48 @@ void main() {
       );
     });
 
-    testWidgets('adds new line when Shift+Enter is pressed', (WidgetTester tester) async {
+    testWidgets('adds new line when Shift+Enter is pressed', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const example.TextFieldExampleApp());
 
       final Finder textFieldFinder = find.byType(TextField);
 
       await tester.enterText(textFieldFinder, 'Hello');
-      expect(find.descendant(of: textFieldFinder, matching: find.text('Hello')), findsOneWidget);
+      expect(
+        find.descendant(of: textFieldFinder, matching: find.text('Hello')),
+        findsOneWidget,
+      );
 
       await pressShiftEnter(tester);
 
-      expect(find.descendant(of: textFieldFinder, matching: find.text('Hello\n')), findsOneWidget);
+      expect(
+        find.descendant(of: textFieldFinder, matching: find.text('Hello\n')),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('displays entered text when TextField is submitted', (WidgetTester tester) async {
+    testWidgets('displays entered text when TextField is submitted', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(const example.TextFieldExampleApp());
 
       final Finder textFieldFinder = find.byType(TextField);
 
       await tester.enterText(textFieldFinder, 'Hello');
-      expect(find.descendant(of: textFieldFinder, matching: find.text('Hello')), findsOneWidget);
+      expect(
+        find.descendant(of: textFieldFinder, matching: find.text('Hello')),
+        findsOneWidget,
+      );
 
       await pressShiftEnter(tester);
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pump();
 
-      expect(find.descendant(of: textFieldFinder, matching: find.text('')), findsOneWidget);
+      expect(
+        find.descendant(of: textFieldFinder, matching: find.text('')),
+        findsOneWidget,
+      );
       expect(find.text('Submitted text:\n\nHello\n'), findsOneWidget);
     });
   });

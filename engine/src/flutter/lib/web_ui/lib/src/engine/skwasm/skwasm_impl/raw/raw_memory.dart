@@ -29,7 +29,7 @@ class StackScope {
   Pointer<Int8> convertStringToNative(String string) {
     final Uint8List encoded = utf8.encode(string);
     final Pointer<Int8> pointer = allocInt8Array(encoded.length + 1);
-    for (int i = 0; i < encoded.length; i++) {
+    for (var i = 0; i < encoded.length; i++) {
       pointer[i] = encoded[i];
     }
     pointer[encoded.length] = 0;
@@ -62,15 +62,15 @@ class StackScope {
   Pointer<Float> convertMatrix44toNative(Float64List matrix4) {
     assert(matrix4.length == 16);
     final Pointer<Float> pointer = allocFloatArray(16);
-    for (int i = 0; i < 16; i++) {
+    for (var i = 0; i < 16; i++) {
       pointer[i] = matrix4[i];
     }
     return pointer;
   }
 
   Float64List convertMatrix44FromNative(Pointer<Float> buffer) {
-    final Float64List matrix = Float64List(16);
-    for (int i = 0; i < 16; i++) {
+    final matrix = Float64List(16);
+    for (var i = 0; i < 16; i++) {
       matrix[i] = buffer[i];
     }
     return matrix;
@@ -87,7 +87,7 @@ class StackScope {
 
   Pointer<Float> convertRectsToNative(List<ui.Rect> rects) {
     final Pointer<Float> pointer = allocFloatArray(rects.length * 4);
-    for (int i = 0; i < rects.length; i++) {
+    for (var i = 0; i < rects.length; i++) {
       final ui.Rect rect = rects[i];
       pointer[i * 4] = rect.left;
       pointer[i * 4 + 1] = rect.top;
@@ -141,7 +141,7 @@ class StackScope {
 
   Pointer<Float> convertRSTransformsToNative(List<ui.RSTransform> transforms) {
     final Pointer<Float> pointer = allocFloatArray(transforms.length * 4);
-    for (int i = 0; i < transforms.length; i++) {
+    for (var i = 0; i < transforms.length; i++) {
       final ui.RSTransform transform = transforms[i];
       pointer[i * 4] = transform.scos;
       pointer[i * 4 + 1] = transform.ssin;
@@ -153,7 +153,7 @@ class StackScope {
 
   Pointer<Float> convertDoublesToNative(List<double> values) {
     final Pointer<Float> pointer = allocFloatArray(values.length);
-    for (int i = 0; i < values.length; i++) {
+    for (var i = 0; i < values.length; i++) {
       pointer[i] = values[i];
     }
     return pointer;
@@ -161,7 +161,7 @@ class StackScope {
 
   Pointer<Uint16> convertIntsToUint16Native(List<int> values) {
     final Pointer<Uint16> pointer = allocUint16Array(values.length);
-    for (int i = 0; i < values.length; i++) {
+    for (var i = 0; i < values.length; i++) {
       pointer[i] = values[i];
     }
     return pointer;
@@ -169,7 +169,7 @@ class StackScope {
 
   Pointer<Uint32> convertIntsToUint32Native(List<int> values) {
     final Pointer<Uint32> pointer = allocUint32Array(values.length);
-    for (int i = 0; i < values.length; i++) {
+    for (var i = 0; i < values.length; i++) {
       pointer[i] = values[i];
     }
     return pointer;
@@ -177,7 +177,7 @@ class StackScope {
 
   Pointer<Float> convertPointArrayToNative(List<ui.Offset> points) {
     final Pointer<Float> pointer = allocFloatArray(points.length * 2);
-    for (int i = 0; i < points.length; i++) {
+    for (var i = 0; i < points.length; i++) {
       pointer[i * 2] = points[i].dx;
       pointer[i * 2 + 1] = points[i].dy;
     }
@@ -186,7 +186,7 @@ class StackScope {
 
   Pointer<Uint32> convertColorArrayToNative(List<ui.Color> colors) {
     final Pointer<Uint32> pointer = allocUint32Array(colors.length);
-    for (int i = 0; i < colors.length; i++) {
+    for (var i = 0; i < colors.length; i++) {
       pointer[i] = colors[i].value;
     }
     return pointer;

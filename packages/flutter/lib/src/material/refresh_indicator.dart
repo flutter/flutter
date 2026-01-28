@@ -562,7 +562,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   void _show() {
     assert(_status != RefreshIndicatorStatus.refresh);
     assert(_status != RefreshIndicatorStatus.snap);
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
     _status = RefreshIndicatorStatus.snap;
     widget.onStatusChange?.call(_status);
@@ -647,7 +647,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
             left: 0.0,
             right: 0.0,
             child: SizeTransition(
-              axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
+              alignment: AlignmentDirectional(-1.0, _isIndicatorAtTop! ? 1.0 : -1.0),
               sizeFactor: _positionFactor, // This is what brings it down.
               child: Padding(
                 padding: _isIndicatorAtTop!

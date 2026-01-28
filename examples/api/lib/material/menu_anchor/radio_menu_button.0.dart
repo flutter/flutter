@@ -37,9 +37,14 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _entry = ShortcutRegistry.of(context).addAll(<ShortcutActivator, VoidCallbackIntent>{
+    _entry = ShortcutRegistry.of(context).addAll(<
+      ShortcutActivator,
+      VoidCallbackIntent
+    >{
       _redShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.red)),
-      _greenShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.green)),
+      _greenShortcut: VoidCallbackIntent(
+        () => _setBackgroundColor(Colors.green),
+      ),
       _blueShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.blue)),
     });
   }
@@ -87,19 +92,20 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
               child: const Text('Blue Background'),
             ),
           ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
-            return TextButton(
-              focusNode: _buttonFocusNode,
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
+          builder:
+              (BuildContext context, MenuController controller, Widget? child) {
+                return TextButton(
+                  focusNode: _buttonFocusNode,
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: const Text('OPEN MENU'),
+                );
               },
-              child: const Text('OPEN MENU'),
-            );
-          },
         ),
         Expanded(child: Container(color: _backgroundColor)),
       ],

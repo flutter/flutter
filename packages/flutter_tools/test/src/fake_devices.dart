@@ -14,7 +14,7 @@ import 'fakes.dart';
 
 /// A list of fake devices to test JSON serialization
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
-var fakeDevices = <FakeDeviceJsonData>[
+List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   FakeDeviceJsonData(
     FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
     <String, Object>{
@@ -167,7 +167,7 @@ class FakeDevice extends Device {
   Future<void> dispose() async {}
 
   @override
-  var targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
+  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -188,10 +188,10 @@ class FakeDevice extends Device {
   DeviceConnectionInterface connectionInterface;
 
   @override
-  var isLocalEmulator = Future<bool>.value(true);
+  Future<bool> isLocalEmulator = Future<bool>.value(true);
 
   @override
-  var sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
+  Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 
   @override
   FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
@@ -251,7 +251,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
     devices.forEach(addDevice);
   }
 
-  var discoverDevicesCalled = false;
+  bool discoverDevicesCalled = false;
 
   @override
   Future<List<Device>> discoverDevices({
@@ -274,9 +274,9 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   Stream<Device> get onRemoved => _onRemovedController.stream;
 
   @override
-  var wellKnownIds = <String>[];
+  List<String> wellKnownIds = <String>[];
 
-  var diagnostics = <String>[];
+  List<String> diagnostics = <String>[];
 
   @override
   Future<List<String>> getDiagnostics() => Future<List<String>>.value(diagnostics);
@@ -287,7 +287,7 @@ class FakeDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'FakeLogReader';
 
-  var disposed = false;
+  bool disposed = false;
 
   final _lineQueue = <String>[];
   late final _linesController = StreamController<String>.broadcast(onListen: _onListen);

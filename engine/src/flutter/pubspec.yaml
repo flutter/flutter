@@ -76,7 +76,7 @@ name: _engine_workspace
 
 # Required for workspace support.
 environment:
-  sdk: ^3.8.0-0
+  sdk: ^3.9.0-0
 
 # Declare all packages that are part of the workspace.
 workspace:

@@ -37,7 +37,7 @@ enum TestStep {
 }
 
 Future<int> runTest({bool coverage = false, bool noPub = false}) async {
-  final Stopwatch clock = Stopwatch()..start();
+  final clock = Stopwatch()..start();
   final Process analysis = await startFlutter(
     'test',
     options: <String>[
@@ -47,7 +47,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     ],
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
-  int badLines = 0;
+  final badLines = <String>[];
   TestStep step = TestStep.starting;
 
   analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((
@@ -65,16 +65,15 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index <= TestStep.testWritesFirstCarriageReturn.index && entry.trim() == '') {
-      // we have a blank line at the start
+      // flutter_tools will print a blank line at the start of the test when using some versions
+      // of the Dart test package.  In test package version 1.29 this line is no longer present.
       step = TestStep.testWritesFirstCarriageReturn;
     } else {
       final Match? match = testOutputPattern.matchAsPrefix(entry);
       if (match == null) {
-        badLines += 1;
+        badLines.add('badline(nomatch): "$entry"');
       } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index &&
-            step.index <= TestStep.testLoading.index &&
-            match.group(1)!.startsWith('loading ')) {
+        if (step.index <= TestStep.testLoading.index && match.group(1)!.startsWith('loading ')) {
           // first the test loads
           step = TestStep.testLoading;
         } else if (step.index <= TestStep.testRunning.index &&
@@ -86,7 +85,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
           // then the test finishes
           step = TestStep.testPassed;
         } else {
-          badLines += 1;
+          badLines.add('badline(fallthrough): "$entry"');
         }
       }
     }
@@ -95,15 +94,18 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
     String entry,
   ) {
     print('test stderr: $entry');
-    badLines += 1;
+    badLines.add('badline(stderr): "$entry"');
   });
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0) {
     throw Exception('flutter test failed with exit code $result');
   }
-  if (badLines > 0) {
-    throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
+  if (badLines.isNotEmpty) {
+    const separator = '\n  ';
+    throw Exception(
+      'flutter test rendered unexpected output:$separator${badLines.join(separator)}',
+    );
   }
   if (step != TestStep.testPassed) {
     throw Exception('flutter test did not finish (only reached step $step)');
@@ -113,7 +115,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
 }
 
 Future<void> pubGetDependencies(List<Directory> directories) async {
-  for (final Directory directory in directories) {
+  for (final directory in directories) {
     await inDirectory<void>(directory, () async {
       await flutter('pub', options: <String>['get']);
     });
@@ -122,7 +124,7 @@ Future<void> pubGetDependencies(List<Directory> directories) async {
 
 void main() {
   task(() async {
-    final File nodeSourceFile = File(
+    final nodeSourceFile = File(
       path.join(
         flutterDirectory.path,
         'packages',
@@ -161,7 +163,7 @@ void main() {
       ); // run test again with interface changed
       // run test with coverage enabled.
       final int withCoverage = await runTest(coverage: true, noPub: true);
-      final Map<String, dynamic> data = <String, dynamic>{
+      final data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,
         'interface_change_elapsed_time_ms': interfaceChange,
