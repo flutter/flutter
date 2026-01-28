@@ -31,7 +31,7 @@ import 'text_capitalization.dart';
 bool _debugVisibleTextEditing = false;
 
 /// Set this to `true` to print when text input commands are scheduled and run.
-bool _debugPrintTextInputCommands = false;
+bool _debugPrintTextInputCommands = true;
 
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;
@@ -213,6 +213,10 @@ class EngineAutofillForm {
   /// The ID of the view that this form is rendered into.
   final int viewId;
 
+  static bool get _isSafariStrategy =>
+      textEditing.strategy is SafariDesktopTextEditingStrategy ||
+      textEditing.strategy is IOSTextEditingStrategy;
+
   /// Creates an [EngineAutofillFrom] from the JSON representation of a Flutter
   /// framework `TextInputConfiguration` object.
   ///
@@ -241,7 +245,6 @@ class EngineAutofillForm {
     final elements = <String, DomHTMLElement>{};
     final items = <String, AutofillInfo>{};
     final DomHTMLFormElement formElement = createDomHTMLFormElement();
-    final isSafariDesktopStrategy = textEditing.strategy is SafariDesktopTextEditingStrategy;
     DomHTMLElement? insertionReferenceNode;
 
     // Validation is in the framework side.
@@ -253,7 +256,7 @@ class EngineAutofillForm {
     // We need to explicitly disable pointer events on the form in Safari Desktop,
     // so that we don't have pointer event collisions if users hover over or click
     // into the invisible autofill elements within the form.
-    _styleAutofillElements(formElement, shouldDisablePointerEvents: isSafariDesktopStrategy);
+    _styleAutofillElements(formElement, shouldDisablePointerEvents: _isSafariStrategy);
 
     // We keep the ids in a list then sort them later, in case the text fields'
     // locations are re-ordered on the framework side.
@@ -262,6 +265,7 @@ class EngineAutofillForm {
     // The focused text editing element will not be created here.
     final focusedElement = AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
 
+    print('<form>');
     if (fields != null) {
       var fieldIsFocusedElement = false;
       for (final Map<String, dynamic> field in fields.cast<Map<String, dynamic>>()) {
@@ -284,6 +288,10 @@ class EngineAutofillForm {
           autofill.editingState.applyToDomElement(htmlElement);
           autofill.applyToDomElement(htmlElement);
 
+          print(
+            ' ┣━━ <input id="${autofill.uniqueIdentifier}" name="${autofill.autofillHint}" value="${autofill.editingState.text}">',
+          );
+
           // Safari Desktop does not respect elements that are invisible (or
           // have no size) and that leads to issues with autofill only partially
           // working (ref: https://github.com/flutter/flutter/issues/71275).
@@ -292,8 +300,8 @@ class EngineAutofillForm {
           // sized and placed on the DOM, we also have to disable pointer events.
           _styleAutofillElements(
             htmlElement,
-            shouldHideElement: !isSafariDesktopStrategy,
-            shouldDisablePointerEvents: isSafariDesktopStrategy,
+            shouldHideElement: !_isSafariStrategy,
+            shouldDisablePointerEvents: _isSafariStrategy,
           );
 
           items[autofill.uniqueIdentifier] = autofill;
@@ -308,6 +316,7 @@ class EngineAutofillForm {
             fieldIsFocusedElement = false;
           }
         } else {
+          print(' ┣━━ <focused element>');
           // current field is the focused element that we create elsewhere
           fieldIsFocusedElement = true;
         }
@@ -342,6 +351,7 @@ class EngineAutofillForm {
     _styleAutofillElements(submitButton, isOffScreen: true);
     submitButton.className = 'submitBtn';
     submitButton.type = 'submit';
+    print(' ┗━━ <button>');
 
     formElement.append(submitButton);
 
@@ -400,6 +410,15 @@ class EngineAutofillForm {
       subscriptions.add(
         DomSubscription(
           element,
+          'focus',
+          createDomEventListener((DomEvent e) {
+            print('{{{ Autofill focus }}}');
+          }),
+        ),
+      );
+      subscriptions.add(
+        DomSubscription(
+          element,
           'input',
           createDomEventListener((DomEvent e) {
             if (items![key] == null) {
@@ -419,6 +438,7 @@ class EngineAutofillForm {
 
   void handleChange(DomElement domElement, AutofillInfo autofillInfo) {
     final newEditingState = EditingState.fromDomElement(domElement as DomHTMLElement);
+    print('{{{ Autofill input: "${newEditingState.text}" }}}');
 
     _sendAutofillEditingState(autofillInfo.uniqueIdentifier, newEditingState);
   }
@@ -1812,6 +1832,11 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         activeDomElement,
         'focus',
         createDomEventListener((DomEvent _) {
+          print('IOSTextEditingStrategy: focus event received');
+          if (!owner.isEditing) {
+            print('IOSTextEditingStrategy: refocus {${owner._clientId}}');
+            owner.channel.refocus(owner._clientId);
+          }
           // Cancel previous timer if exists.
           _schedulePlacement();
         }),
@@ -2348,6 +2373,7 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
   void updateEditingState(int? clientId, EditingState? editingState) {
+    print('--- TextEditingChannel.updateEditingState("${editingState?.text}")');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -2387,10 +2413,23 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.onConnectionClosed' message to the framework.
   void onConnectionClosed(int? clientId) {
+    print('--- TextEditingChannel.onConnectionClosed');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
         MethodCall('TextInputClient.onConnectionClosed', <dynamic>[clientId]),
+      ),
+      _emptyCallback,
+    );
+  }
+
+  /// Sends the 'TextInput.refocus' message to the framework.
+  void refocus(int? clientId) {
+    print('--- TextEditingChannel.refocus');
+    EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
+      'flutter/textinput',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('TextInput.refocus', <dynamic>[clientId]),
       ),
       _emptyCallback,
     );
@@ -2421,7 +2460,32 @@ class HybridTextEditing {
   ///
   /// The constructor also decides which text editing strategy to use depending
   /// on the operating system and browser engine.
-  HybridTextEditing();
+  HybridTextEditing() {
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
+      for (final EngineFlutterView view in EnginePlatformDispatcher.instance.views) {
+        _addRefocusListenerToView(view.viewId);
+      }
+      EnginePlatformDispatcher.instance.viewManager.onViewCreated.listen(_addRefocusListenerToView);
+    }
+  }
+
+  void _addRefocusListenerToView(int viewId) {
+    final EngineFlutterView? view = EnginePlatformDispatcher.instance.viewManager[viewId];
+    view!.dom.textEditingHost.addEventListener('focusin', createDomEventListener(_handleRefocus));
+  }
+
+  void _handleRefocus(DomEvent event) {
+    if (isEditing) {
+      return;
+    }
+    final target = event.target as DomElement?;
+    if (target == null) {
+      return;
+    }
+    if (target.classList.contains(HybridTextEditing.textEditingClass)) {
+      channel.refocus(_clientId);
+    }
+  }
 
   late final TextEditingChannel channel = TextEditingChannel(this);
 
@@ -2449,7 +2513,7 @@ class HybridTextEditing {
 
   void acceptCommand(TextInputCommand command, ui.VoidCallback callback) {
     if (_debugPrintTextInputCommands) {
-      print('flutter/textinput channel command: ${command.runtimeType}');
+      print('+++ flutter/textinput channel command: ${command.runtimeType}');
     }
     command.run(this);
     callback();
