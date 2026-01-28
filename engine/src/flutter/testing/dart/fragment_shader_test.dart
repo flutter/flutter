@@ -52,6 +52,145 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  group('FragmentProgram getUniform*', () {
+    late FragmentShader shader;
+
+    setUpAll(() async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('uniforms.frag.iplr');
+      shader = program.fragmentShader();
+    });
+
+    _runSkiaTest('FragmentProgram uniform info', () async {
+      final List<UniformFloatSlot> slots = [
+        shader.getUniformFloat('iFloatUniform'),
+        shader.getUniformFloat('iVec2Uniform', 0),
+        shader.getUniformFloat('iVec2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 0),
+        shader.getUniformFloat('iMat2Uniform', 1),
+        shader.getUniformFloat('iMat2Uniform', 2),
+        shader.getUniformFloat('iMat2Uniform', 3),
+      ];
+      for (var i = 0; i < slots.length; ++i) {
+        expect(slots[i].shaderIndex, equals(i));
+      }
+    });
+
+    test('FragmentProgram getUniformFloat unknown', () async {
+      expect(
+        () {
+          shader.getUniformFloat('unknown');
+        },
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('No uniform named "unknown"'),
+          ),
+        ),
+      );
+    });
+
+    test('FragmentProgram getUniformFloat offset overflow', () async {
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', 2),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `2` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformFloat offset underflow', () async {
+      expect(
+        () => shader.getUniformFloat('iVec2Uniform', -1),
+        throwsA(
+          isA<IndexError>().having(
+            (e) => e.message,
+            'message',
+            contains('Index `-1` out of bounds for `iVec2Uniform`.'),
+          ),
+        ),
+      );
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec2', () async {
+      final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
+      slot.set(6.0, 7.0);
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec2 wrong size', () async {
+      expect(
+        () => shader.getUniformVec2('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 2.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec2('iFloatUniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iFloatUniform` has size 1, not size 2.'),
+          ),
+        ),
+      );
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec3', () async {
+      final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
+      slot.set(0.8, 0.1, 0.3);
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec3 wrong size', () async {
+      expect(
+        () => shader.getUniformVec3('iVec2Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec2Uniform` has size 2, not size 3.'),
+          ),
+        ),
+      );
+      expect(
+        () => shader.getUniformVec3('iVec4Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec4Uniform` has size 4, not size 3.'),
+          ),
+        ),
+      );
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec4', () async {
+      final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
+      slot.set(11.0, 22.0, 19.0, 96.0);
+    }, skip: !_isMacMetal());
+
+    test('FragmentProgram getUniformVec4 wrong size', () async {
+      expect(
+        () => shader.getUniformVec4('iVec3Uniform'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            contains('`iVec3Uniform` has size 3, not size 4.'),
+          ),
+        ),
+      );
+    }, skip: !_isMacMetal());
+  });
+
   test('FragmentProgram getImageSampler', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
@@ -477,39 +616,31 @@ void main() async {
     shader.dispose();
   });
 
-  test(
-    'FragmentShader shader with array uniforms renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test('FragmentShader shader with array uniforms renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
-      for (var i = 0; i < 20; i++) {
-        shader.setFloat(i, i.toDouble());
-      }
+    final FragmentShader shader = program.fragmentShader();
+    for (var i = 0; i < 20; i++) {
+      shader.setFloat(i, i.toDouble());
+    }
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
-  test(
-    'FragmentShader shader with mat2 uniform renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+  test('FragmentShader shader with mat2 uniform renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
+    final FragmentShader shader = program.fragmentShader();
 
-      shader.setFloat(0, 4.0); // m00
-      shader.setFloat(1, 8.0); // m01
-      shader.setFloat(2, 16.0); // m10
-      shader.setFloat(3, 32.0); // m11
+    shader.setFloat(0, 4.0); // m00
+    shader.setFloat(1, 8.0); // m01
+    shader.setFloat(2, 16.0); // m10
+    shader.setFloat(3, 32.0); // m11
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
   test('ImageFilter.shader errors if shader does not have correct uniform layout', () async {
     // TODO(gaaclarke): This test was disabled for a long time and has been
@@ -665,6 +796,11 @@ void _runImpellerTest(String name, Future<void> Function() callback) {
     }
     await callback();
   });
+}
+
+// TODO(walley892): remove this function and associated test skips, https://github.com/flutter/flutter/issues/181562
+bool _isMacMetal() {
+  return Platform.isMacOS && Platform.executableArguments.contains('--impeller-backend=metal');
 }
 
 // Expect that all of the shaders in this folder render green.
