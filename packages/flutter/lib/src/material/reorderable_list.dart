@@ -23,7 +23,7 @@ import 'theme.dart';
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 ///
 /// This sample shows by dragging the user can reorder the items of the list.
-/// The [onReorder] parameter is required and will be called when a child
+/// The [onReorderItem] parameter will be called when a child
 /// widget is dragged to a new position.
 ///
 /// {@tool dartpad}
@@ -78,7 +78,13 @@ class ReorderableListView extends StatefulWidget {
   ReorderableListView({
     super.key,
     required List<Widget> children,
-    required this.onReorder,
+    @Deprecated(
+      'Use the onReorderItem callback instead. '
+      'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
+    this.onReorder,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -113,6 +119,12 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        ),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length;
@@ -149,7 +161,13 @@ class ReorderableListView extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     required this.itemCount,
-    required this.onReorder,
+    @Deprecated(
+      'Use the onReorderItem callback instead. '
+      'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+      'This feature was deprecated after v3.41.0-0.0.pre.',
+    )
+    this.onReorder,
+    this.onReorderItem,
     this.onReorderStart,
     this.onReorderEnd,
     this.itemExtent,
@@ -181,6 +199,12 @@ class ReorderableListView extends StatefulWidget {
              (itemExtent == null && itemExtentBuilder == null) ||
              (prototypeItem == null && itemExtentBuilder == null),
          'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
+       ),
+       assert(
+         (onReorderItem != null && onReorder == null) ||
+             (onReorderItem == null && onReorder != null),
+         'The onReorder callback is obsolete and is replaced by onReorderItem. '
+         'Remove the onReorder callback when both callbacks are provided.',
        );
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
@@ -190,7 +214,15 @@ class ReorderableListView extends StatefulWidget {
   final int itemCount;
 
   /// {@macro flutter.widgets.reorderable_list.onReorder}
-  final ReorderCallback onReorder;
+  @Deprecated(
+    'Use the onReorderItem callback instead. '
+    'The onReorderItem callback adjusts the newIndex parameter for a removed item at the oldIndex. '
+    'This feature was deprecated after v3.41.0-0.0.pre.',
+  )
+  final ReorderCallback? onReorder;
+
+  /// {@macro flutter.widgets.reorderable_list.onReorderItem}
+  final ReorderCallback? onReorderItem;
 
   /// {@macro flutter.widgets.reorderable_list.onReorderStart}
   final void Function(int index)? onReorderStart;
@@ -476,6 +508,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             prototypeItem: widget.prototypeItem,
             itemCount: widget.itemCount,
             onReorder: widget.onReorder,
+            onReorderItem: widget.onReorderItem,
             onReorderStart: (int index) {
               _dragging.value = true;
               widget.onReorderStart?.call(index);
