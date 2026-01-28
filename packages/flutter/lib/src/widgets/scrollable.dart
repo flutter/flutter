@@ -976,10 +976,15 @@ class ScrollableState extends State<Scrollable>
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final scrollEvent = event as PointerScrollEvent;
+    final double delta = _pointerSignalEventDelta(scrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
       position.pointerScroll(delta);
+      // Tell engine this scrollable handled the event.
+      // This prevents parent page from scrolling when nested scrollables exist.
+      // See: https://github.com/flutter/flutter/issues/156985
+      scrollEvent.respond(allowPlatformDefault: false);
     }
   }
 
