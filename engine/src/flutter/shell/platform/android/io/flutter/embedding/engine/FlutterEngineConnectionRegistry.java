@@ -330,10 +330,12 @@ import java.util.Set;
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity, lifecycle);
     final Intent intent = activity.getIntent();
 
-    final boolean useSoftwareRendering =
+    // TODO(camsim99): Remove ability to set this flag via Intents. See
+    // https://github.com/flutter/flutter/issues/180686.
+    boolean useSoftwareRendering =
         intent != null
-            ? activity.intent.getBooleanExtra(
-                FlutterShellArgs.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
+            ? intent.getBooleanExtra(
+                FlutterShellArgsIntentUtils.ARG_KEY_ENABLE_SOFTWARE_RENDERING, false)
             : false;
 
     // As part of https://github.com/flutter/flutter/issues/172553, the ability to set
@@ -341,18 +343,14 @@ import java.util.Set;
     // developers about the new method for doing so if this was attempted.
     // TODO(camsim99): Remove this warning after a stable release has passed:
     // https://github.com/flutter/flutter/issues/179274.
-    if (intent != null) {
-      if (intent.hasExtra("enable-software-rendering")) {
-        Log.w(
-            TAG,
-            "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
-                + FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey
-                + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
-      }
-    }
-
-    // Check manifest for software rendering configuration.
-    if (useSoftwareRendering == false) {
+    if (useSoftwareRendering) {
+      Log.w(
+          TAG,
+          "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
+              + FlutterShellArgs.ENABLE_SOFTWARE_RENDERING.metadataKey
+              + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Android-Flutter-Shell-Arguments.md for more info.");
+    } else {
+      // Check manifest for software rendering configuration.
       useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
     }
 
