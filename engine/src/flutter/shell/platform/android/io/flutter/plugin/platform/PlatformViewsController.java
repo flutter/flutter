@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
@@ -166,8 +165,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         // TODO(egarciad): Remove the need for this.
         // https://github.com/flutter/flutter/issues/96679
         public void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request) {
-          // API level 19 is required for `android.graphics.ImageReader`.
-          enforceMinimumAndroidApiVersion(19);
           ensureValidRequest(request);
           throwIfHCPPEnabled();
 
@@ -249,7 +246,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void dispose(int viewId) {
           final PlatformView platformView = platformViews.get(viewId);
           if (platformView == null) {
@@ -312,7 +308,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void offset(int viewId, double top, double left) {
           if (usesVirtualDisplay(viewId)) {
             // Virtual displays don't need an accessibility offset.
@@ -322,7 +317,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
           // an offset to the wrapper view.
           // This ensures that the accessibility highlights are drawn in the expected position on
           // screen.
-          // This offset doesn't affect the position of the embeded view by itself since the GL
+          // This offset doesn't affect the position of the embedded view by itself since the GL
           // texture is positioned by the Flutter engine, which knows where to position different
           // types of layers.
           final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
@@ -340,7 +335,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        @RequiresApi(API_LEVELS.API_23)
         public void resize(
             @NonNull PlatformViewsChannel.PlatformViewResizeRequest request,
             @NonNull PlatformViewsChannel.PlatformViewBufferResized onComplete) {
@@ -495,17 +489,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
       };
 
-  /// Throws an exception if the SDK version is below minSdkVersion.
-  private void enforceMinimumAndroidApiVersion(int minSdkVersion) {
-    if (Build.VERSION.SDK_INT < minSdkVersion) {
-      throw new IllegalStateException(
-          "Trying to use platform views with API "
-              + Build.VERSION.SDK_INT
-              + ", required API level is: "
-              + minSdkVersion);
-    }
-  }
-
   private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
     if (!validateDirection(request.direction)) {
       throw new IllegalStateException(
@@ -560,7 +543,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Configures the view for Hybrid Composition mode.
   private void configureForHybridComposition(
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
-    enforceMinimumAndroidApiVersion(19);
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
   }
@@ -578,9 +560,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     // This mode adds the view to a virtual display, which is wired up to a GL texture that
     // is composed by the Flutter engine.
-
-    // API level 20 is required to use VirtualDisplay#setSurface.
-    enforceMinimumAndroidApiVersion(20);
 
     Log.i(TAG, "Hosting view in a virtual display for platform view: " + request.viewId);
 
@@ -623,16 +602,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // Configures the view for Texture Layer Hybrid Composition mode, returning the associated
   // texture ID.
-  @RequiresApi(API_LEVELS.API_23)
   @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
   public long configureForTextureLayerComposition(
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     // This mode attaches the view to the Android view hierarchy and record its drawing
     // operations, so they can be forwarded to a GL texture that is composed by the
     // Flutter engine.
-
-    // API level 23 is required to use Surface#lockHardwareCanvas().
-    enforceMinimumAndroidApiVersion(23);
     Log.i(TAG, "Hosting view in view hierarchy for platform view: " + request.viewId);
 
     final int physicalWidth = toPhysicalPixels(request.logicalWidth);
@@ -716,7 +691,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @VisibleForTesting
   public MotionEvent toMotionEvent(
-      float density, PlatformViewTouch touch, boolean usingVirtualDiplay) {
+      float density, PlatformViewTouch touch, boolean usingVirtualDisplay) {
     MotionEventTracker.MotionEventId motionEventId =
         MotionEventTracker.MotionEventId.from(touch.motionEventId);
     MotionEvent trackedEvent = motionEventTracker.pop(motionEventId);
@@ -737,7 +712,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
 
-    if (!usingVirtualDiplay && trackedEvent != null) {
+    if (!usingVirtualDisplay && trackedEvent != null) {
       // We have the original event. Check if pointer counts and actions match.
       if (trackedEvent.getPointerCount() == touch.pointerCount
           && trackedEvent.getAction() == touch.action) {
@@ -988,11 +963,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   public void onPreEngineRestart() {
-    diposeAllViews();
+    disposeAllViews();
   }
 
   @Override
@@ -1122,7 +1097,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return toLogicalPixels(physicalPixels, getDisplayDensity());
   }
 
-  private void diposeAllViews() {
+  private void disposeAllViews() {
     while (platformViews.size() > 0) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
@@ -1286,9 +1261,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       flutterView.addView(overlayView);
     }
 
-    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams((int) width, (int) height);
-    layoutParams.leftMargin = (int) x;
-    layoutParams.topMargin = (int) y;
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(width, height);
+    layoutParams.leftMargin = x;
+    layoutParams.topMargin = y;
     overlayView.setLayoutParams(layoutParams);
     overlayView.setVisibility(View.VISIBLE);
     overlayView.bringToFront();
