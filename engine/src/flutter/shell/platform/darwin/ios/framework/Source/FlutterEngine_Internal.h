@@ -125,6 +125,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)sendDeepLinkToFramework:(NSURL*)url completionHandler:(void (^)(BOOL success))completion;
 
 /**
+ * Enables multi-view support.
+ *
+ *  - When multiview is disabled, the engine will only assign views to the
+ *    implicit view ID. The implicit view ID can be reused if and only if the
+ *    implicit view ID is unassigned.
+ *  - When multiview is enabled, the engine will assign views to a
+ *    self-incrementing ID.
+ *
+ * Calling enableMultiView when multiview is already enabled is a noop.
+ *
+ */
+- (void)enableMultiView;
+
+/**
  * Attach a view controller to the engine as its default controller.
  *
  * Since FlutterEngine can only handle the implicit view for now, the given
