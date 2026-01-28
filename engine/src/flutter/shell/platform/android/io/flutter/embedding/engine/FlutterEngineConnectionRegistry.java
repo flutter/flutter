@@ -59,6 +59,7 @@ import java.util.Set;
 
   // Standard FlutterPlugin
   @NonNull private final FlutterEngine flutterEngine;
+  @NonNull private final FlutterLoader flutterLoader;
   @NonNull private final FlutterPlugin.FlutterPluginBinding pluginBinding;
 
   // ActivityAware
@@ -100,6 +101,7 @@ import java.util.Set;
       @NonNull FlutterLoader flutterLoader,
       @Nullable FlutterEngineGroup group) {
     this.flutterEngine = flutterEngine;
+    this.flutterLoader = flutterLoader;
     pluginBinding =
         new FlutterPlugin.FlutterPluginBinding(
             appContext,

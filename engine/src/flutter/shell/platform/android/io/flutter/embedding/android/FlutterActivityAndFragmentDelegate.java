@@ -38,6 +38,7 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Delegate that implements all Flutter logic that is the same between a {@link FlutterActivity} and
@@ -331,9 +332,12 @@ import java.util.List;
         "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
             + " this FlutterFragment.");
 
+    warnIfEngineFlagsSetViaIntent(host.getActivity().getIntent());
+    String[] flutterShellArgs =
+        host.getFlutterShellArgs() == null ? new String[0] : host.getFlutterShellArgs();
     FlutterEngineGroup group =
         engineGroup == null
-            ? new FlutterEngineGroup(host.getContext(), host.getFlutterShellArgs().toArray())
+            ? new FlutterEngineGroup(host.getContext(), flutterShellArgs)
             : engineGroup;
     flutterEngine =
         group.createAndRunEngine(
@@ -1114,9 +1118,8 @@ import java.util.List;
     @NonNull
     Lifecycle getLifecycle();
 
-    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
     @NonNull
-    FlutterShellArgs getFlutterShellArgs();
+    String[] getFlutterShellArgs();
 
     /**
      * Returns the ID of a statically cached {@link io.flutter.embedding.engine.FlutterEngine} to
