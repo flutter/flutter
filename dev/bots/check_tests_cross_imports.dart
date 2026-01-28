@@ -267,10 +267,11 @@ class TestsCrossImportChecker {
   static final Set<String> knownCupertinoCrossImports = <String>{
     'packages/flutter/test/cupertino/text_selection_test.dart',
     'packages/flutter/test/cupertino/app_test.dart',
-    'packages/flutter/test/cupertino/sheet_test.dart',
     'packages/flutter/test/cupertino/form_row_test.dart',
     'packages/flutter/test/cupertino/colors_test.dart',
     'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
+    // TODO(justinmc): Should we put this test in Material?
+    'packages/flutter/test/cupertino/material/cupertino_sheet_material_snackbar_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
