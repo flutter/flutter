@@ -1300,9 +1300,9 @@ class SimpleDialog extends StatelessWidget {
 
     // The paddingScaleFactor is used to adjust the padding of Dialog
     // children.
-    final TextStyle defaultTextStyle =
+    final TextStyle effectiveTitleTextStyle =
         titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.titleLarge!;
-    final double fontSize = defaultTextStyle.fontSize ?? kDefaultFontSize;
+    final double fontSize = effectiveTitleTextStyle.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
     final double effectiveTextScale =
         MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
@@ -1322,7 +1322,7 @@ class SimpleDialog extends StatelessWidget {
               : effectiveTitlePadding.bottom,
         ),
         child: DefaultTextStyle(
-          style: defaultTextStyle,
+          style: effectiveTitleTextStyle,
           child: Semantics(
             // For iOS platform, the focus always lands on the title.
             // Set nameRoute to false to avoid title being announce twice.
