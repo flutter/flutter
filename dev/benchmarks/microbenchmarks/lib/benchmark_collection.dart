@@ -33,6 +33,7 @@ import 'stocks/build_bench.dart' as build_bench;
 import 'stocks/build_bench_profiled.dart' as build_bench_profiled;
 import 'stocks/layout_bench.dart' as layout_bench;
 import 'ui/image_bench.dart' as image_bench;
+import 'widgets/inherited_dependency_bench.dart' as inherited_dependency_bench;
 
 typedef Benchmark = (String name, Future<void> Function() value);
 
@@ -65,6 +66,7 @@ Future<void> main() async {
     ('stocks/layout_bench.dart', layout_bench.execute),
     ('ui/image_bench.dart', image_bench.execute),
     ('layout/text_intrinsic_bench.dart', text_intrinsic_bench.execute),
+    ('widgets/inherited_dependency_bench.dart', inherited_dependency_bench.execute),
     (
       'foundation/all_elements_bench.dart',
       () async {
