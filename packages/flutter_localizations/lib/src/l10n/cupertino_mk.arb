@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "собирање",
   "expansionTileCollapsedTapHint": "проширување за повеќе детали",
   "expandedHint": "Собрано",
-  "collapsedHint": "Проширено"
+  "collapsedHint": "Проширено",
+  "translateButtonLabel": "Translate"
 }

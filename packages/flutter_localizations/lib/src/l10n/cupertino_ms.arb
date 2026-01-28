@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Kuncupkan",
   "expansionTileCollapsedTapHint": "Kembangkan untuk mendapatkan butiran lanjut",
   "expandedHint": "Dikuncupkan",
-  "collapsedHint": "Dikembangkan"
+  "collapsedHint": "Dikembangkan",
+  "translateButtonLabel": "Translate"
 }

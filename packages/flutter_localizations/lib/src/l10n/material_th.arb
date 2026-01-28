@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ค้นหาบนอินเทอร์เน็ต",
   "shareButtonLabel": "แชร์",
   "clearButtonTooltip": "ล้างข้อความ",
-  "selectedDateLabel": "เลือกไว้"
+  "selectedDateLabel": "เลือกไว้",
+  "translateButtonLabel": "Translate"
 }

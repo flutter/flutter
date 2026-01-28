@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Piliin lahat",
   "searchResultsFound": "Nakakita ng mga resulta ng paghahanap",
   "noResultsFound": "Walang nakitang resulta",
-  "radioButtonUnselectedLabel": "Hindi napili"
+  "radioButtonUnselectedLabel": "Hindi napili",
+  "translateButtonLabel": "Translate"
 }

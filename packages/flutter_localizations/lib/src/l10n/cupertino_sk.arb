@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Zbaliť",
   "expansionTileCollapsedTapHint": "Rozbaliť a zobraziť ďalšie podrobnosti",
   "expandedHint": "Zbalené",
-  "collapsedHint": "Rozbalené"
+  "collapsedHint": "Rozbalené",
+  "translateButtonLabel": "Translate"
 }

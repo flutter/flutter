@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Strni",
   "expansionTileCollapsedTapHint": "Razširitev za več podrobnosti",
   "expandedHint": "Strnjeno",
-  "collapsedHint": "Razširjeno"
+  "collapsedHint": "Razširjeno",
+  "translateButtonLabel": "Translate"
 }

@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Որոնել համացանցում",
   "shareButtonLabel": "Կիսվել",
   "clearButtonTooltip": "Մաքրել տեքստը",
-  "selectedDateLabel": "Ընտրված է"
+  "selectedDateLabel": "Ընտրված է",
+  "translateButtonLabel": "Translate"
 }

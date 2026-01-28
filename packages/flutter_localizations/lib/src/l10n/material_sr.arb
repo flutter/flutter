@@ -149,5 +149,6 @@
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели",
   "clearButtonTooltip": "Обриши текст",
-  "selectedDateLabel": "Изабрано"
+  "selectedDateLabel": "Изабрано",
+  "translateButtonLabel": "Translate"
 }

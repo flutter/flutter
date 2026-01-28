@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ჩაკეცვა",
   "expansionTileCollapsedTapHint": "მეტი დეტალებისთვის გააფართოეთ",
   "expandedHint": "ჩაკეცილია",
-  "collapsedHint": "გაფართოებულია"
+  "collapsedHint": "გაფართოებულია",
+  "translateButtonLabel": "Translate"
 }

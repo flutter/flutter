@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "আড়াল করুন",
   "expansionTileCollapsedTapHint": "আরও বিবরণ পেতে বড় করে দেখুন",
   "expandedHint": "আড়াল করা হয়েছে",
-  "collapsedHint": "বড় করা হয়েছে"
+  "collapsedHint": "বড় করা হয়েছে",
+  "translateButtonLabel": "Translate"
 }

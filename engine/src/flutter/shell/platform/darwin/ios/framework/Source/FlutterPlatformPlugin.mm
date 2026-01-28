@@ -156,6 +156,9 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   } else if ([method isEqualToString:@"LookUp.invoke"]) {
     [self showLookUpViewController:args];
     result(nil);
+  } else if ([method isEqualToString:@"Translate.invoke"]) {
+    [self showTranslateViewController:args];
+    result(nil);
   } else if ([method isEqualToString:@"Share.invoke"]) {
     [self showShareViewController:args];
     result(nil);
@@ -449,6 +452,45 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   [engineViewController presentViewController:referenceLibraryViewController
                                      animated:YES
                                    completion:nil];
+}
+
+- (void)showTranslateViewController:(NSString*)term {
+  UIViewController* flutterViewController = [self.engine viewController];
+  FLTTranslateViewController* translateViewController;
+
+  if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+    // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
+    // bounds
+    FlutterTextInputPlugin* _textInputPlugin = [self.engine textInputPlugin];
+    UITextRange* range = _textInputPlugin.textInputView.selectedTextRange;
+
+    // firstRectForRange cannot be used here as it's current implementation does
+    // not always return the full rect of the range.
+    CGRect firstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.start];
+    CGRect transformedFirstRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:firstRect];
+    CGRect lastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        caretRectForPosition:(FlutterTextPosition*)range.end];
+    CGRect transformedLastRect = [(FlutterTextInputView*)_textInputPlugin.textInputView
+        localRectFromFrameworkTransform:lastRect];
+
+    // In case of RTL Language, get the minimum x coordinate too
+    CGRect ipadBounds =
+        CGRectMake(fmin(transformedFirstRect.origin.x, transformedLastRect.origin.x),
+                   transformedFirstRect.origin.y,
+                   abs(transformedLastRect.origin.x - transformedFirstRect.origin.x),
+                   transformedFirstRect.size.height);
+
+    translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term
+                                                                    ipadBounds:ipadBounds];
+  } else {
+    translateViewController = [[FLTTranslateViewController alloc] initWithTerm:term];
+  }
+
+  [flutterViewController addChildViewController:translateViewController];
+  [flutterViewController.view addSubview:translateViewController.view];
+  [translateViewController didMoveToParentViewController:flutterViewController];
 }
 
 - (UITextField*)textField {

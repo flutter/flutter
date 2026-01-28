@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Свиване",
   "expansionTileCollapsedTapHint": "Разгъване за още подробности",
   "expandedHint": "Свито",
-  "collapsedHint": "Разгънато"
+  "collapsedHint": "Разгънато",
+  "translateButtonLabel": "Translate"
 }

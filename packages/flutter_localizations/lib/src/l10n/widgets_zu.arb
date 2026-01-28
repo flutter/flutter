@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Khetha konke",
   "searchResultsFound": "Imiphumela yokusesha itholakele",
   "noResultsFound": "Ayikho imiphumela etholakele",
-  "radioButtonUnselectedLabel": "Ayikhethiwe"
+  "radioButtonUnselectedLabel": "Ayikhethiwe",
+  "translateButtonLabel": "Translate"
 }

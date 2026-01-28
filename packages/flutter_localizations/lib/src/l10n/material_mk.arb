@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Пребарајте на интернет",
   "shareButtonLabel": "Сподели",
   "clearButtonTooltip": "Избриши го текстот",
-  "selectedDateLabel": "Избрано"
+  "selectedDateLabel": "Избрано",
+  "translateButtonLabel": "Translate"
 }

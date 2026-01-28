@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Pasirinkti viską",
   "searchResultsFound": "Rasta paieškos rezultatų",
   "noResultsFound": "Rezultatų nerasta",
-  "radioButtonUnselectedLabel": "Nepasirinkta"
+  "radioButtonUnselectedLabel": "Nepasirinkta",
+  "translateButtonLabel": "Translate"
 }

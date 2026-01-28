@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Vybrat vše",
   "searchResultsFound": "Byly nalezeny výsledky vyhledávání",
   "noResultsFound": "Nebyly nalezeny žádné výsledky",
-  "radioButtonUnselectedLabel": "Nevybráno"
+  "radioButtonUnselectedLabel": "Nevybráno",
+  "translateButtonLabel": "Translate"
 }

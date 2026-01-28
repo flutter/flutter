@@ -893,6 +893,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                              shareSelectedText:[self textInRange:_selectedTextRange]];
 }
 
+- (void)handleTranslateAction {
+  [self.textInputDelegate flutterTextInputView:self
+                         translateSelectedText:[self textInRange:_selectedTextRange]];
+}
+
 // DFS algorithm to search a UICommand from the menu tree.
 - (UICommand*)searchCommandWithSelector:(SEL)selector
                                 element:(UIMenuElement*)element API_AVAILABLE(ios(16.0)) {
@@ -1002,6 +1007,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                        type:type
                                    selector:@selector(captureTextFromCamera:)
                               suggestedMenu:suggestedMenu];
+      }
+    } else if ([type isEqualToString:@"translate"]) {
+      if (@available(ios 17.4, *)) {
+        [self addAdditionalBasicCommandToItems:items
+                                          type:type
+                                      selector:@selector(handleTranslateAction)
+                                   encodedItem:encodedItem];
       }
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];

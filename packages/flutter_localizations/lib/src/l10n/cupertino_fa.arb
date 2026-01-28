@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "جمع کردن",
   "expansionTileCollapsedTapHint": "ازهم بازکردن برای جزئیات بیشتر",
   "expandedHint": "جمع‌شده",
-  "collapsedHint": "ازهم بازشده"
+  "collapsedHint": "ازهم بازشده",
+  "translateButtonLabel": "Translate"
 }

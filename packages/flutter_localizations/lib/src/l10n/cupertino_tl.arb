@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "I-collapse",
   "expansionTileCollapsedTapHint": "I-expand para sa higit pang detalye",
   "expandedHint": "Naka-collapse",
-  "collapsedHint": "Naka-expand"
+  "collapsedHint": "Naka-expand",
+  "translateButtonLabel": "Translate"
 }

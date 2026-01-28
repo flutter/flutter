@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Hamısını seçin",
   "searchResultsFound": "Axtarış nəticələri tapıldı",
   "noResultsFound": "Nəticə tapılmadı",
-  "radioButtonUnselectedLabel": "Seçilmədi"
+  "radioButtonUnselectedLabel": "Seçilmədi",
+  "translateButtonLabel": "Translate"
 }

@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Deursoek web",
   "shareButtonLabel": "Deel",
   "clearButtonTooltip": "Vee teks uit",
-  "selectedDateLabel": "Gekies"
+  "selectedDateLabel": "Gekies",
+  "translateButtonLabel": "Translate"
 }

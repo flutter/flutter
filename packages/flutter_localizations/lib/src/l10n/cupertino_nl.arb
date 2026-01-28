@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Samenvouwen",
   "expansionTileCollapsedTapHint": "Uitvouwen voor meer informatie",
   "expandedHint": "Samengevouwen",
-  "collapsedHint": "Uitgevouwen"
+  "collapsedHint": "Uitgevouwen",
+  "translateButtonLabel": "Translate"
 }

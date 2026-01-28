@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Selectați tot",
   "searchResultsFound": "Am găsit rezultate ale căutării",
   "noResultsFound": "Niciun rezultat",
-  "radioButtonUnselectedLabel": "Neselectat"
+  "radioButtonUnselectedLabel": "Neselectat",
+  "translateButtonLabel": "Translate"
 }

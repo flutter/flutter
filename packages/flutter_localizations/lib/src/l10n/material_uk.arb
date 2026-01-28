@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Пошук в Інтернеті",
   "shareButtonLabel": "Поділитися",
   "clearButtonTooltip": "Видалити текст",
-  "selectedDateLabel": "Вибрано"
+  "selectedDateLabel": "Вибрано",
+  "translateButtonLabel": "Translate"
 }

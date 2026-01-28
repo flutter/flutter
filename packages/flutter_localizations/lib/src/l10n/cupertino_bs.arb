@@ -40,5 +40,6 @@
   "expansionTileExpandedTapHint": "Sužavanje",
   "expansionTileCollapsedTapHint": "Proširivanje za više detalja",
   "expandedHint": "Suženo",
-  "collapsedHint": "Prošireno"
+  "collapsedHint": "Prošireno",
+  "translateButtonLabel": "Translate"
 }

@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ဝဘ်တွင်ရှာရန်",
   "shareButtonLabel": "မျှဝေရန်",
   "clearButtonTooltip": "စာသား ဖယ်ရှားရန်",
-  "selectedDateLabel": "ရွေးထားသည်"
+  "selectedDateLabel": "ရွေးထားသည်",
+  "translateButtonLabel": "Translate"
 }

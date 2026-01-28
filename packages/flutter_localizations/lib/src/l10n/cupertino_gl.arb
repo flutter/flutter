@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Contraer",
   "expansionTileCollapsedTapHint": "Despregar para obter máis detalles",
   "expandedHint": "Contraído",
-  "collapsedHint": "Despregado"
+  "collapsedHint": "Despregado",
+  "translateButtonLabel": "Translate"
 }

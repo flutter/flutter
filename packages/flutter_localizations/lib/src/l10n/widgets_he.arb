@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "בחירת הכול",
   "searchResultsFound": "נמצאו תוצאות חיפוש",
   "noResultsFound": "לא נמצאו תוצאות",
-  "radioButtonUnselectedLabel": "לא נבחר"
+  "radioButtonUnselectedLabel": "לא נבחר",
+  "translateButtonLabel": "Translate"
 }

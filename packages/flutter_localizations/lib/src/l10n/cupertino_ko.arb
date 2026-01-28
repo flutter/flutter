@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "접기",
   "expansionTileCollapsedTapHint": "자세히 알아보려면 펼치기",
   "expandedHint": "접힘",
-  "collapsedHint": "펼침"
+  "collapsedHint": "펼침",
+  "translateButtonLabel": "Translate"
 }

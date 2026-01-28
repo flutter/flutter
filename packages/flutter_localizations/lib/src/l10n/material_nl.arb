@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Op internet zoeken",
   "shareButtonLabel": "Delen",
   "clearButtonTooltip": "Tekst wissen",
-  "selectedDateLabel": "Geselecteerd"
+  "selectedDateLabel": "Geselecteerd",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Избери ги сите",
   "searchResultsFound": "Најдени се резултати од пребарувањето",
   "noResultsFound": "Не се најдени резултати",
-  "radioButtonUnselectedLabel": "Не е избрано"
+  "radioButtonUnselectedLabel": "Не е избрано",
+  "translateButtonLabel": "Translate"
 }

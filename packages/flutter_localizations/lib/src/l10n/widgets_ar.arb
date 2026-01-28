@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "اختيار الكل",
   "searchResultsFound": "تم العثور على نتائج بحث",
   "noResultsFound": "لم يتم العثور على نتائج",
-  "radioButtonUnselectedLabel": "غير محدّد"
+  "radioButtonUnselectedLabel": "غير محدّد",
+  "translateButtonLabel": "Translate"
 }

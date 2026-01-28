@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Bilatu sarean",
   "shareButtonLabel": "Partekatu",
   "clearButtonTooltip": "Garbitu testua",
-  "selectedDateLabel": "Hautatuta"
+  "selectedDateLabel": "Hautatuta",
+  "translateButtonLabel": "Translate"
 }

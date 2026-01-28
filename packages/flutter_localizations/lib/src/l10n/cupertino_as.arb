@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "সংকোচন কৰক",
   "expansionTileCollapsedTapHint": "অধিক সবিশেষ জানিবলৈ বিস্তাৰ কৰক",
   "expandedHint": "সংকোচন কৰা আছে",
-  "collapsedHint": "বিস্তাৰ কৰা আছে"
+  "collapsedHint": "বিস্তাৰ কৰা আছে",
+  "translateButtonLabel": "Translate"
 }
