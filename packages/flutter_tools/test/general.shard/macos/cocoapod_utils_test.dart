@@ -518,6 +518,10 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      relativeSwiftPackagesDirectory.childDirectory('FlutterFramework');
+
+  @override
   bool usesSwiftPackageManager = false;
 
   @override
@@ -565,6 +569,10 @@ class FakeIosProject extends Fake implements IosProject {
   @override
   File get flutterPluginSwiftPackageManifest =>
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      relativeSwiftPackagesDirectory.childDirectory('FlutterFramework');
 
   @override
   bool usesSwiftPackageManager = false;
