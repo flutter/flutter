@@ -427,4 +427,132 @@ let package = Package(
       );
     });
   });
+
+  group('Parse SwiftPackagePackageDependency', () {
+    testWithoutContext('from fileSystem entries', () {
+      final SwiftPackagePackageDependency? parsed = SwiftPackagePackageDependency.fromJson({
+        'fileSystem': [
+          {
+            'identity': 'plugin_a',
+            'nameForTargetDependencyResolutionOnly': 'PluginA',
+            'path': '/path/to/local/PluginA',
+            'productFilter': null,
+            'traits': [
+              {'name': 'default'},
+            ],
+          },
+        ],
+      });
+      expect(parsed, isNotNull);
+      expect(parsed!.name, 'PluginA');
+      expect(parsed.path, '/path/to/local/PluginA');
+    });
+
+    testWithoutContext('returns null if missing name or path', () {
+      final SwiftPackagePackageDependency? parsedWithoutPath =
+          SwiftPackagePackageDependency.fromJson({
+            'fileSystem': [
+              {
+                'identity': 'plugin_a',
+                'nameForTargetDependencyResolutionOnly': 'PluginA',
+                'productFilter': null,
+                'traits': [
+                  {'name': 'default'},
+                ],
+              },
+            ],
+          });
+      expect(parsedWithoutPath, isNull);
+
+      final SwiftPackagePackageDependency? parsedWithoutName =
+          SwiftPackagePackageDependency.fromJson({
+            'fileSystem': [
+              {
+                'identity': 'plugin_a',
+                'path': '/path/to/local/PluginA',
+                'productFilter': null,
+                'traits': [
+                  {'name': 'default'},
+                ],
+              },
+            ],
+          });
+      expect(parsedWithoutName, isNull);
+    });
+
+    testWithoutContext('returns null if not fileSystem type', () {
+      final SwiftPackagePackageDependency? parsed = SwiftPackagePackageDependency.fromJson({
+        'sourceControl': [
+          {
+            'identity': 'remote-package',
+            'location': {
+              'remote': [
+                {'urlString': 'https://url-to-remote-package'},
+              ],
+            },
+            'productFilter': null,
+            'requirement': {
+              'range': [
+                {'lowerBound': '1.0.0', 'upperBound': '2.0.0'},
+              ],
+            },
+            'traits': [
+              {'name': 'default'},
+            ],
+          },
+        ],
+      });
+      expect(parsed, isNull);
+    });
+  });
+
+  group('Parse SwiftPackageTarget and SwiftPackageTargetDependency', () {
+    testWithoutContext('from regular entries', () {
+      final SwiftPackageTarget? parsed = SwiftPackageTarget.fromJson({
+        'dependencies': [
+          {
+            'product': ['PluginB', 'PluginB', null, null],
+          },
+          {
+            'target': ['App', null],
+          },
+        ],
+        'exclude': [],
+        'name': 'PluginA',
+        'packageAccess': true,
+        'resources': [],
+        'settings': [],
+        'type': 'regular',
+      });
+      expect(parsed, isNotNull);
+      expect(parsed!.name, 'PluginA');
+      expect(parsed.path, isNull);
+      expect(parsed.targetType, SwiftPackageTargetType.target);
+      expect(parsed.dependencies, isNotNull);
+      expect(parsed.dependencies![0].name, 'PluginB');
+      expect(parsed.dependencies![0].package, 'PluginB');
+      expect(parsed.dependencies![0].dependencyType, SwiftPackageTargetDependencyType.product);
+      expect(parsed.dependencies![1].name, 'App');
+      expect(parsed.dependencies![1].package, null);
+      expect(parsed.dependencies![1].dependencyType, SwiftPackageTargetDependencyType.target);
+    });
+
+    testWithoutContext('from binary entries', () {
+      final SwiftPackageTarget? parsed = SwiftPackageTarget.fromJson({
+        'dependencies': [],
+        'exclude': [],
+        'name': 'App',
+        'packageAccess': false,
+        'path': 'Sources/Frameworks/App.xcframework',
+        'resources': [],
+        'settings': [],
+        'type': 'binary',
+      });
+      expect(parsed, isNotNull);
+      expect(parsed!.name, 'App');
+      expect(parsed.path, 'Sources/Frameworks/App.xcframework');
+      expect(parsed.targetType, SwiftPackageTargetType.binaryTarget);
+      expect(parsed.dependencies, isNull);
+    });
+  });
 }

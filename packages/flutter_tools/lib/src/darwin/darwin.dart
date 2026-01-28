@@ -115,6 +115,15 @@ enum FlutterDarwinPlatform {
     return null;
   }
 
+  static FlutterDarwinPlatform? fromName(String name) {
+    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
+      if (name == darwinPlatform.name) {
+        return darwinPlatform;
+      }
+    }
+    return null;
+  }
+
   /// Returns corresponding [XcodeBasedProject] for the platform.
   XcodeBasedProject xcodeProject(FlutterProject project) {
     switch (this) {
