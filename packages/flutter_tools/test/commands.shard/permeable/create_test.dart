@@ -4279,6 +4279,25 @@ void main() {
     );
   });
 
+  testUsingContext('plugin_ffi template shows deprecation warning', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--platforms=android',
+      projectDir.path,
+    ]);
+    expect(logger.warningText, contains('The "plugin_ffi" template is deprecated'));
+    expect(logger.warningText, contains('Use the "package_ffi" template instead.'));
+    expect(
+      logger.warningText,
+      contains('https://docs.flutter.dev/platform-integration/bind-native-code'),
+    );
+  }, overrides: {Logger: () => logger});
+
   testUsingContext(
     'should show warning when disabled platforms are selected while creating an FFI plugin',
     () async {
