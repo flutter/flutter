@@ -2690,6 +2690,43 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
+  testWidgets('ModalRoute.readFrom does not cause rebuilds', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Builder(
+          builder: (BuildContext context) {
+            final ModalRoute<void>? _ = ModalRoute.readFrom<void>(context);
+            log.add('building page 1');
+            return const Text('home');
+          },
+        ),
+      ),
+    );
+    expect(find.text('page2'), findsNothing);
+    expect(find.text('home'), findsOneWidget);
+    expect(log, <String>['building page 1']);
+    log.clear();
+
+    navigatorKey.currentState!.push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          log.add('building page 2');
+          return const Text('page2');
+        },
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('page2'), findsOneWidget);
+    // Should just build page 2.
+    expect(log, <String>['building page 2']);
+    log.clear();
+  });
+
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(restorationScopeId: 'app', home: _RestorableDialogTestWidget()),
