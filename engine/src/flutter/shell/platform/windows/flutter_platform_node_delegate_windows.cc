@@ -30,6 +30,10 @@ FlutterPlatformNodeDelegateWindows::~FlutterPlatformNodeDelegateWindows() {
   }
 }
 
+bool FlutterPlatformNodeDelegateWindows::IsIAccessibleExEnabled() {
+  return view_->GetEngine()->iaccessibleex_enabled();
+}
+
 // |ui::AXPlatformNodeDelegate|
 void FlutterPlatformNodeDelegateWindows::Init(std::weak_ptr<OwnerBridge> bridge,
                                               ui::AXNode* node) {

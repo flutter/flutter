@@ -22,6 +22,9 @@ FlutterEngine::FlutterEngine(const DartProject& project) {
       static_cast<FlutterDesktopGpuPreference>(project.gpu_preference());
   c_engine_properties.ui_thread_policy =
       static_cast<FlutterDesktopUIThreadPolicy>(project.ui_thread_policy());
+  c_engine_properties.accessibility_mode =
+      static_cast<FlutterDesktopAccessibilityMode>(
+          project.accessibility_mode());
 
   const std::vector<std::string>& entrypoint_args =
       project.dart_entrypoint_arguments();
