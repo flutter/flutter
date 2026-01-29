@@ -154,6 +154,68 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
+  testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (
+    WidgetTester tester,
+  ) async {
+    final controller = OverlayPortalController();
+    const expectedPadding = EdgeInsets.all(10);
+    const expectedViewInsets = EdgeInsets.only(bottom: 300);
+    const expectedViewPadding = EdgeInsets.only(top: 50, bottom: 20);
+    const expectedSize = Size(800, 600);
+
+    MediaQueryData? overlayChildData;
+    OverlayEntry? entry;
+    addTearDown(() {
+      entry?.remove();
+      entry?.dispose();
+    });
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: expectedPadding,
+          viewInsets: expectedViewInsets,
+          viewPadding: expectedViewPadding,
+          size: expectedSize,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      padding: EdgeInsets.zero,
+                      viewInsets: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                    ),
+                    child: OverlayPortal(
+                      controller: controller,
+                      overlayChildBuilder: (BuildContext context) {
+                        overlayChildData = MediaQuery.of(context);
+                        return const SizedBox();
+                      },
+                      child: const SizedBox(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    controller.show();
+    await tester.pump();
+
+    expect(overlayChildData?.padding, expectedPadding);
+    expect(overlayChildData?.viewInsets, expectedViewInsets);
+    expect(overlayChildData?.viewPadding, expectedViewPadding);
+    expect(overlayChildData?.size, expectedSize);
+  });
+
   testWidgets('The overlay portal update semantics does not dirty overlay', (
     WidgetTester tester,
   ) async {
