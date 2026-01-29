@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
+import 'editable_text_utils.dart' show TestTextField;
 import 'semantics_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
@@ -1054,7 +1055,7 @@ void main() {
               keyboardDismissBehavior: behavior,
               child: Column(
                 children: focusNodes.map((FocusNode focusNode) {
-                  return SizedBox(height: 50, child: TextField(focusNode: focusNode));
+                  return SizedBox(height: 50, child: TestTextField(focusNode: focusNode));
                 }).toList(),
               ),
             ),
@@ -1066,8 +1067,8 @@ void main() {
     // ScrollViewKeyboardDismissBehavior.onDrag dismiss keyboard on drag
     await boilerplate(ScrollViewKeyboardDismissBehavior.onDrag);
 
-    Finder finder = find.byType(TextField).first;
-    TextField textField = tester.widget(finder);
+    Finder finder = find.byType(TestTextField).first;
+    TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -1078,7 +1079,7 @@ void main() {
     // ScrollViewKeyboardDismissBehavior.manual does no dismiss the keyboard
     await boilerplate(ScrollViewKeyboardDismissBehavior.manual);
 
-    finder = find.byType(TextField).first;
+    finder = find.byType(TestTextField).first;
     textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
@@ -1098,7 +1099,7 @@ void main() {
           drawer: Container(),
           body: Column(
             children: <Widget>[
-              const TextField(),
+              const TestTextField(),
               Expanded(
                 child: SingleChildScrollView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -1112,7 +1113,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(TextField).first;
+    final Finder finder = find.byType(TestTextField).first;
     await tester.tap(finder);
     expect(tester.testTextInput.isVisible, isTrue);
 
