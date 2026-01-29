@@ -929,10 +929,6 @@ def gather_dart_tests(
   dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  impeller_backends = ['', 'vulkan', 'opengles']
-  if (is_mac()):
-    impeller_backends.append('metal')
-
   opengles_skipped_tests = [
       'assets_test.dart',
       'canvas_test.dart',
@@ -956,6 +952,9 @@ def gather_dart_tests(
       'tracing_test.dart',
   ]
 
+  impeller_backends = ['', 'vulkan']
+  if is_mac():
+    impeller_backends.append('metal')
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
       dart_test_basename = os.path.basename(dart_test_file)
