@@ -443,7 +443,7 @@ Future<void> testMain() async {
     paragraph.paint(canvas, const Offset(50, 50));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multishadows.png', region: region);
-  });
+  }, solo: true);
 
   test('Draw WebParagraph multiple decorations on text', () async {
     final recorder = PictureRecorder();
@@ -455,7 +455,11 @@ Future<void> testMain() async {
     const greenColor = Color(0xFF00FF00);
     const grayColor = Color(0xFF888888);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      color: const Color(0xFF000000),
+    );
 
     final defaultStyle = WebTextStyle(foreground: blackPaint);
 
@@ -663,6 +667,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), bluePaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
@@ -674,6 +679,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), redPaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,

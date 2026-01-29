@@ -1,0 +1,118 @@
+mall: layout=10, paint=100
+medium: layout=10, paint=100
+large: layout=10, paint=100
+
+CPU Text layout for Chrome, single
+bool useCPUTextLayout = true;
+bool withCacheId = true;
+bool singleImagePaint = true;
+
+Dummy test running first to wark up GPU
+
+SKPARAGRAPH
+===========
+00:06 +1: Build/Layout/Paint small text                                                                                                                                            
+build.first: 0ms
+layout.first: 0ms
+build: 1ms
+layout: 0ms
+paint.first: 58ms
+paint: 4504ms
+
+00:11 +2: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 1ms
+layout: 0ms
+paint.first: 46ms
+paint: 4628ms
+
+00:18 +3: Build/Layout/Paint large text                                                                                                                                            
+build.first: 2ms
+layout.first: 2ms
+build: 7ms
+layout: 11ms
+paint.first: 77ms
+paint: 6203ms
+
+
+WEBPARAGRAPH
+============
+00:06 +1: Build/Layout/Paint small text                                                                                                                                            
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+paint.first: 61ms
+paint: 4349ms
+
+00:11 +2: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+preroll_frame: 51ms
+apply_frame: 10ms
+paint.first: 52ms
+paint: 4371ms
+
+00:18 +3: Build/Layout/Paint large text                                                                                                                                            
+build.first: 0ms
+layout.first: 9ms
+build: 0ms
+layout: 75ms
+paint.first: 572ms
+paint: 5977ms
+
+
+
+
+DomElement
+00:06 +1: Build/Layout/Paint small text                                                                                                                                            
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+preroll_frame: 66ms
+paint: 4474ms
+
+00:11 +2: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 1ms
+paint.first: 55ms
+paint: 4357ms
+
+00:18 +3: Build/Layout/Paint large text                                                                                                                                            
+build.first: 0ms
+layout.first: 10ms
+build: 0ms
+layout: 70ms
+paint.first: 561ms
+paint: 5909ms
+
+OffscreenCanvas
+00:06 +1: Build/Layout/Paint small text                                                                                                                                            
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+paint.first: 60ms
+paint: 4371ms
+
+00:11 +2: Build/Layout/Paint medium text                                                                                                                                           
+build.first: 0ms
+layout.first: 0ms
+build: 0ms
+layout: 2ms
+paint.first: 51ms
+paint: 4346ms
+
+00:18 +3: Build/Layout/Paint large text                                                                                                                                            
+build.first: 0ms
+layout.first: 11ms
+build: 0ms
+layout: 70ms
+paint.first: 565ms
+paint: 5801ms

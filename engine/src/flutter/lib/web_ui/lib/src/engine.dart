@@ -167,6 +167,8 @@ export 'engine/web_paragraph/debug.dart';
 export 'engine/web_paragraph/font_collection.dart';
 export 'engine/web_paragraph/layout.dart';
 export 'engine/web_paragraph/paint.dart';
+export 'engine/web_paragraph/paint_clusters.dart';
+export 'engine/web_paragraph/paint_paragraph.dart';
 export 'engine/web_paragraph/painter.dart';
 export 'engine/web_paragraph/paragraph.dart';
 export 'engine/web_paragraph/wrapper.dart';
