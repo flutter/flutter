@@ -287,9 +287,8 @@ abstract interface class CupertinoMenuEntry {
 
   /// Whether this menu item is a divider.
   ///
-  /// When [isDivider] is false, a separator will be drawn if the
-  /// menu item immediately below this item has mixed in
-  /// [CupertinoMenuEntry] and has set [isDivider] to false.
+  /// When [isDivider] returns false on adjacent [CupertinoMenuEntry]s, a divider
+  /// will be drawn between them.
   bool get isDivider;
 }
 
@@ -371,7 +370,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 ///
 /// * [CupertinoMenuItem], a Cupertino-themed menu item used in a
 ///   [CupertinoMenuAnchor].
-/// * [CupertinoLargeMenuDivider], a large divider used to separate
+/// * [CupertinoMenuDivider], a large divider used to separate
 ///   [CupertinoMenuItem]s.
 /// * [CupertinoMenuEntry], an interface that can be implemented to customize
 ///   the appearance of menu items in a [CupertinoMenuAnchor].
@@ -430,7 +429,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// Increasing [Offset.dy] values of [alignmentOffset] move the menu position
   /// down.
   ///
-  /// If the [alignment] is an [AlignmentDirectional] AND the text direction is
+  /// If the [alignment] is an [AlignmentDirectional] and the text direction is
   /// [TextDirection.rtl], a larger [Offset.dx] component of [alignmentOffset]
   /// moves the menu position to the left. Otherwise, a larger [Offset.dx] moves
   /// the menu position to the right.
@@ -488,9 +487,9 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// gesture to select and activate menu items.
   ///
   /// If the widget built by [builder] is disabled, [longPressToOpenDuration]
-  /// should be set to [false] to prevent the menu from opening on long-press.
+  /// should be set to false to prevent the menu from opening on long-press.
   ///
-  /// Defaults to [false], which disables the behavior.
+  /// Defaults to false, which disables the behavior.
   final bool enableLongPressToOpen;
 
   /// {@macro flutter.widgets.RawMenuAnchor.useRootOverlay}
@@ -597,23 +596,15 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   static const Duration longPressToOpenDuration = Duration(milliseconds: 400);
   static const Tolerance springTolerance = Tolerance(velocity: 0.1);
 
-  /// Approximated using settling duration calculation (see
-  /// https://github.com/flutter/flutter/pull/164411#issuecomment-2691969477)
-  /// with a settling duration of 500 ms, an initialVelocity of 0.5, and a bounce of 0.2,
-  /// then tweaked to match iOS
-  static const SpringDescription forwardSpring = SpringDescription(
-    mass: 1.0,
-    stiffness: 349.1,
-    damping: 29.9,
+  // Approximated from the iOS 18.5 Simulator.
+  static final SpringDescription forwardSpring = SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 337),
+    bounce: 0.2,
   );
 
-  /// Approximated using settling duration calculation (see
-  /// https://github.com/flutter/flutter/pull/164411#issuecomment-2691969477)
-  /// with a duration of 500 ms and bounce of 0, then tweaked to match iOS
-  static const SpringDescription reverseSpring = SpringDescription(
-    mass: 1.0,
-    stiffness: 235.1,
-    damping: 30.7,
+  // Approximated from the iOS 18.5 Simulator.
+  static final SpringDescription reverseSpring = SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 409),
   );
 
   late final AnimationController _animationController;
@@ -988,6 +979,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
       children.add(const _CupertinoMenuDivider());
     }
+
     _children = children;
   }
 
@@ -999,7 +991,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
       context,
     ).platformDispatcher.accessibilityFeatures;
 
-    switch (accessibilityFeatures!) {
+    switch (accessibilityFeatures) {
       case ui.AccessibilityFeatures(disableAnimations: true):
         _scaleAnimation.parent = kAlwaysCompleteAnimation;
         _fadeAnimation.parent = kAlwaysCompleteAnimation;
@@ -1619,7 +1611,7 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
   }
 }
 
-/// A horizontal divider used to separate [CupertinoMenuItem]s
+/// A horizontal divider used to separate [CupertinoMenuItem]s.
 ///
 /// The default thickness of the divider is 1 physical pixel.
 ///
@@ -1633,8 +1625,8 @@ class _CupertinoMenuDivider extends StatelessWidget {
   /// [ui.BlendMode.overlay].
   ///
   /// On all platforms except web, this color is applied to the divider before
-  /// the [color] is applied, and is used to give the appearance of the divider
-  /// cutting into the background.
+  /// the [color] is applied, and is used to create a subtle translucent effect
+  /// against the menu background.
   // The following colors were measured from the iOS 17.2 simulator, and opacity was
   // extrapolated:
   // Dark mode on black       Color.fromRGBO(97, 97, 97)
@@ -1693,7 +1685,7 @@ class _CupertinoDividerPainter extends CustomPainter {
 
     // BlendMode.overlay is not supported on the web.
     if (!kIsWeb) {
-      final Paint overlayPainter = Paint()
+      final overlayPainter = Paint()
         ..style = PaintingStyle.stroke
         ..color = overlayColor
         ..isAntiAlias = antiAlias
@@ -1701,7 +1693,7 @@ class _CupertinoDividerPainter extends CustomPainter {
       canvas.drawLine(p1, p2, overlayPainter);
     }
 
-    final Paint colorPainter = Paint()
+    final colorPainter = Paint()
       ..style = PaintingStyle.stroke
       ..color = color
       ..isAntiAlias = antiAlias;
@@ -1938,7 +1930,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   bool hasLeading(BuildContext context) => leading != null;
 
   @override
-  bool get isDivider => true;
+  bool get isDivider => false;
 
   /// The default mouse cursor for a [CupertinoMenuItem].
   static final WidgetStateProperty<MouseCursor> _defaultCursor =
@@ -2448,13 +2440,13 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
 /// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
 /// * [CupertinoMenuEntry], an interface that can be used to control whether
 ///   dividers are shown before or after a menu item.
-class CupertinoLargeMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
+class CupertinoMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
   /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
-  const CupertinoLargeMenuDivider({super.key, this.color = defaultColor});
+  const CupertinoMenuDivider({super.key, this.color = defaultColor});
 
   /// The color of the divider.
   ///
-  /// Defaults to [CupertinoLargeMenuDivider.defaultColor].
+  /// Defaults to [CupertinoMenuDivider.defaultColor].
   final Color color;
 
   @override
@@ -2463,7 +2455,7 @@ class CupertinoLargeMenuDivider extends StatelessWidget implements CupertinoMenu
   @override
   bool hasLeading(BuildContext context) => false;
 
-  /// Default color for a [CupertinoLargeMenuDivider].
+  /// Default color for a [CupertinoMenuDivider].
   // The following colors were measured from debug mode on the iOS 18.5 simulator,
   static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
     color: Color.fromRGBO(0, 0, 0, 0.08),
@@ -2519,7 +2511,8 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
   };
-  Map<Type, GestureRecognizerFactory>? gestures;
+  Map<Type, GestureRecognizerFactory>? _gestures;
+  DeviceGestureSettings? _gestureSettings;
 
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
@@ -2587,6 +2580,16 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
     isEnabled = widget.onPressed != null;
     isFocused = _focusNode.hasPrimaryFocus;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final DeviceGestureSettings? newGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    if (_gestureSettings != newGestureSettings) {
+      _gestureSettings = newGestureSettings;
+      _gestures = null;
+    }
   }
 
   @override
@@ -2738,8 +2741,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   @override
   Widget build(BuildContext context) {
     if (isEnabled) {
-      final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
-      gestures ??= <Type, GestureRecognizerFactory>{
+      _gestures ??= <Type, GestureRecognizerFactory>{
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
@@ -2747,12 +2749,12 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
               ..onTapDown = _handleTapDown
               ..onTapUp = _handleTapUp
               ..onTapCancel = _handleTapCancel
-              ..gestureSettings = gestureSettings;
+              ..gestureSettings = _gestureSettings;
           },
         ),
       };
     } else {
-      gestures = null;
+      _gestures = null;
     }
 
     return MergeSemantics(
@@ -2776,7 +2778,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
                 builder: _buildStatefulWrapper,
                 child: RawGestureDetector(
                   behavior: widget.behavior,
-                  gestures: gestures ?? const <Type, GestureRecognizerFactory>{},
+                  gestures: _gestures ?? const <Type, GestureRecognizerFactory>{},
                   child: widget.child,
                 ),
               ),
@@ -2792,7 +2794,6 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 ///
 /// An ancestor [_SwipeRegion] must be present in order to receive these
 /// callbacks.
-@optionalTypeArgs
 abstract interface class _SwipeTarget {
   /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
   /// should be considered "on" the [_SwipeTarget], and false otherwise (for
