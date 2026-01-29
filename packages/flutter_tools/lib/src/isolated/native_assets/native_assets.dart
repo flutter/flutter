@@ -53,14 +53,6 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
-  final Directory buildDir = fileSystem.directory(buildUri);
-  if (!await buildDir.exists()) {
-    // Ensure the folder exists so the native build system can copy it even
-    // if there's no native assets.
-    await buildDir.create(recursive: true);
-  }
-
   if (!await _hookRunRequired(buildRunner)) {
     return DartHooksResult.empty();
   }
@@ -105,7 +97,18 @@ Future<void> installCodeAssets({
   required Uri nativeAssetsFileUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
+  final Uri buildUri = nativeAssetsBuildUri(
+    projectUri,
+    targetOS.name,
+    environmentDefines: environmentDefines,
+  );
+  final Directory buildDir = fileSystem.directory(buildUri);
+  if (!await buildDir.exists()) {
+    // Ensure the folder exists so the native build system can copy it even
+    // if there's no native assets.
+    await buildDir.create(recursive: true);
+  }
+
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -364,7 +367,11 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, String osName) {
+Uri nativeAssetsBuildUri(Uri projectUri, String osName, {Map<String, String>? environmentDefines}) {
+  final String? override = environmentDefines?[kNativeAssetsInstallDirectory];
+  if (override != null) {
+    return Uri.parse(override);
+  }
   final String buildDir = getBuildDirectory();
   return projectUri.resolve('$buildDir/native_assets/$osName/');
 }

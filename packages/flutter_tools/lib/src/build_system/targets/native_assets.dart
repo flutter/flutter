@@ -16,7 +16,65 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
 
-/// Runs the dart build of the app.
+/// A target that captures the environment defines relevant for native assets
+/// and writes them to a file.
+///
+/// This is a "generator" target. It translates non-file build parameters
+/// (environment defines) into a file that can be used as a proper input
+/// for other build targets. This is needed for the situations where the build
+/// directory is not unique for different environment defines such as
+/// `flutter build ios-framework`.
+class DartBuildEnvironment extends Target {
+  const DartBuildEnvironment();
+
+  // Filename for the JSON file that captures the build environment.
+  static const String filename = 'dart_build_environment.json';
+
+  @override
+  String get name => 'dart_build_environment';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    // The target's own source file is an input to ensure it rebuilds if its
+    // logic changes.
+    Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/$filename')];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final defines = <String, String?>{
+      // The build mode influences whether link hooks are run.
+      kBuildMode: environment.defines[kBuildMode],
+      // Environment defines that influence the CodeAssetConfig: The target OS,
+      // target architect architectures, target SDK, and minimum SDK version.
+      kTargetPlatform: environment.defines[kTargetPlatform],
+      kIosArchs: environment.defines[kIosArchs],
+      kSdkRoot: environment.defines[kSdkRoot],
+      kAndroidArchs: environment.defines[kAndroidArchs],
+      kMinSdkVersion: environment.defines[kMinSdkVersion],
+      // TODO(dcharkes): When removing MacOS and iOS API version level
+      // hardcoding, add them here.
+      // https://github.com/flutter/flutter/issues/145104
+    };
+    final String content = json.encode(defines);
+    final File outputFile = environment.buildDir.childFile(filename);
+
+    if (outputFile.existsSync() && await outputFile.readAsString() == content) {
+      return;
+    }
+    await outputFile.writeAsString(content);
+  }
+}
+
+/// Runs the dart build and link hooks.
 class DartBuild extends Target {
   const DartBuild({
     @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
@@ -110,6 +168,9 @@ class DartBuild extends Target {
     ),
     // If different packages are resolved, different native assets might need to be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
+    // The native assets environment, which is dependent on the defines, is an
+    // input to the native assets build.
+    Source.pattern('{BUILD_DIR}/${DartBuildEnvironment.filename}'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
@@ -134,7 +195,7 @@ class DartBuild extends Target {
   }
 
   @override
-  List<Target> get dependencies => <Target>[];
+  List<Target> get dependencies => const <Target>[DartBuildEnvironment()];
 
   static const dartHookResultFilename = 'dart_build_result.json';
   static const depFilename = 'dart_build.d';
@@ -144,8 +205,6 @@ class DartBuildForNative extends DartBuild {
   const DartBuildForNative({@visibleForTesting super.buildRunner});
 
   // TODO(dcharkes): Add `KernelSnapshot()` for AOT builds only when adding tree-shaking information. https://github.com/dart-lang/native/issues/153
-  @override
-  List<Target> get dependencies => const <Target>[];
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.

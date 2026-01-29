@@ -318,27 +318,46 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}',
       );
 
-      // Copy the native assets. The native assets have already been signed in
-      // buildNativeAssetsMacOS.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/ios/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          '--filter',
-          '- native_assets.json',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+      // Package native assets.
+      final Directory nativeAssetSimulatorDirectory = globals.fs.directory(
+        project.directory.uri.resolve(
+          '${getBuildDirectory()}/native_assets/ios_${EnvironmentType.simulator.name}/',
+        ),
+      );
+      final Directory nativeAssetDeviceDirectory = globals.fs.directory(
+        project.directory.uri.resolve(
+          '${getBuildDirectory()}/native_assets/ios_${EnvironmentType.physical.name}/',
+        ),
+      );
+      final Iterable<Directory> frameworkDirectoriesSimulator = nativeAssetSimulatorDirectory
+          .listSync()
+          .whereType<Directory>();
+      final Iterable<Directory> frameworkDirectoriesDevice = nativeAssetDeviceDirectory
+          .listSync()
+          .whereType<Directory>();
+      if (frameworkDirectoriesDevice.length != frameworkDirectoriesSimulator.length) {
+        throwToolExit(
+          'Did not find the same frameworks for device and simulator.\n'
+          '$frameworkDirectoriesDevice $frameworkDirectoriesSimulator',
+        );
+      }
+      for (final frameworkDirectorySimulator in frameworkDirectoriesSimulator) {
+        final Directory frameworkDirectoryDevice = nativeAssetDeviceDirectory.childDirectory(
+          frameworkDirectorySimulator.basename,
+        );
+        if (!frameworkDirectoryDevice.existsSync()) {
+          throwToolExit(
+            'Did not find the same frameworks for device and simulator.\n'
+            '$frameworkDirectoriesDevice $frameworkDirectoriesSimulator',
+          );
         }
+        final frameworks = [frameworkDirectoryDevice, frameworkDirectorySimulator];
+        await BuildFrameworkCommand.produceXCFramework(
+          frameworks,
+          frameworkDirectorySimulator.basename.replaceAll('.framework', ''),
+          modeDirectory,
+          globals.processManager,
+        );
       }
 
       try {
@@ -514,6 +533,9 @@ end
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
+            kNativeAssetsInstallDirectory: project.directory.uri
+                .resolve('${getBuildDirectory()}/native_assets/ios_${sdkType.name}/')
+                .toString(),
           },
           artifacts: globals.artifacts!,
           fileSystem: globals.fs,

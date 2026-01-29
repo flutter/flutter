@@ -1021,6 +1021,12 @@ const kAndroidArchs = 'AndroidArchs';
 /// https://developer.android.com/ndk/guides/other_build_systems#overview
 const kMinSdkVersion = 'MinSdkVersion';
 
+/// The define to control what the install location for code assets is.
+///
+/// Used in `flutter build ios-framework` to avoid writing simulator and device
+/// assets in the same directory.
+const kNativeAssetsInstallDirectory = 'NativeAssetsInstallDirectory';
+
 /// Path to the SDK root to be used as the isysroot.
 const kSdkRoot = 'SdkRoot';
 
