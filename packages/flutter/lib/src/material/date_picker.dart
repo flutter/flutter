@@ -2855,7 +2855,7 @@ class _DayItemState extends State<_DayItem> {
     final TextDirection textDirection = Directionality.of(context);
     final Color highlightColor = widget.highlightColor;
 
-    BoxDecoration? decoration;
+    Decoration? decoration;
     TextStyle? itemStyle = textTheme.bodyMedium;
 
     T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
@@ -2894,13 +2894,17 @@ class _DayItemState extends State<_DayItem> {
       ),
     );
 
+    final OutlinedBorder dayShape =
+        resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states) ??
+        const CircleBorder();
+
     _HighlightPainter? highlightPainter;
 
     if (widget.isSelectedDayStart || widget.isSelectedDayEnd) {
       // The selected start and end dates gets a circle background
       // highlight, and a contrasting text color.
       itemStyle = itemStyle?.apply(color: dayForegroundColor);
-      decoration = BoxDecoration(color: dayBackgroundColor, shape: BoxShape.circle);
+      decoration = ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
       if (widget.isRangeSelected && !widget.isOneDayRange) {
         final _HighlightPainterStyle style = widget.isSelectedDayStart
@@ -2927,11 +2931,11 @@ class _DayItemState extends State<_DayItem> {
     } else if (widget.isToday) {
       // The current day gets a different text color and a circle stroke
       // border.
-      itemStyle = itemStyle?.apply(color: colorScheme.primary);
-      decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary),
-        shape: BoxShape.circle,
+      final BorderSide todaySide = (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
+        color: colorScheme.primary,
       );
+
+      decoration = ShapeDecoration(shape: dayShape.copyWith(side: todaySide));
     }
 
     final String dayText = localizations.formatDecimal(widget.day.day);
