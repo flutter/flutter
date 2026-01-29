@@ -267,14 +267,13 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     pass.SetPipeline(pipeline);
 
     std::array<BufferView, 2> vertex_buffers = {
-        BufferView::CreateFromSharedDeviceBuffer(
-            device_buffer,
-            Range(offsetof(Cube, positions), sizeof(Cube::positions))),
-        BufferView::CreateFromSharedDeviceBuffer(
-            device_buffer, Range(offsetof(Cube, colors), sizeof(Cube::colors))),
+        BufferView(device_buffer,
+                   Range(offsetof(Cube, positions), sizeof(Cube::positions))),
+        BufferView(device_buffer,
+                   Range(offsetof(Cube, colors), sizeof(Cube::colors))),
     };
 
-    auto index_buffer = BufferView::CreateFromSharedDeviceBuffer(
+    BufferView index_buffer(
         device_buffer, Range(offsetof(Cube, indices), sizeof(Cube::indices)));
     pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
     pass.SetElementCount(36);
