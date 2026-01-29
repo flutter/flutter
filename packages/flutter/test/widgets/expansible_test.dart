@@ -5,20 +5,27 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Future<void> pumpTestWidget(WidgetTester tester, Widget child) {
+  return tester.pumpWidget(
+    WidgetsApp(
+      builder: (BuildContext context, Widget? navigator) => child,
+      color: const Color(0xffffffff),
+    ),
+  );
+}
+
 void main() {
   testWidgets('Controller expands and collapses the widget', (WidgetTester tester) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -41,17 +48,15 @@ void main() {
       expansionState = controller.isExpanded;
     });
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -79,25 +84,22 @@ void main() {
   testWidgets('Can set expansible to be initially expanded', (WidgetTester tester) async {
     final controller = ExpansibleController();
     controller.expand();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Expansible(
-                controller: controller,
-                bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                    const Text('Body'),
-                headerBuilder: (BuildContext context, Animation<double> animation) =>
-                    GestureDetector(
-                      onTap: controller.isExpanded ? controller.collapse : controller.expand,
-                      child: const Text('Header'),
-                    ),
+    await pumpTestWidget(
+      tester,
+      SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Expansible(
+              controller: controller,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Body'),
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller.isExpanded ? controller.collapse : controller.expand,
+                child: const Text('Header'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -113,21 +115,19 @@ void main() {
 
   testWidgets('Can compose header and body with expansibleBuilder', (WidgetTester tester) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
-          expansibleBuilder:
-              (BuildContext context, Widget header, Widget body, Animation<double> animation) {
-                return header;
-              },
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
         ),
-        color: const Color(0xffffffff),
+        expansibleBuilder:
+            (BuildContext context, Widget header, Widget body, Animation<double> animation) {
+              return header;
+            },
       ),
     );
 
@@ -159,36 +159,32 @@ void main() {
   testWidgets('Respects maintainState', (WidgetTester tester) async {
     final controller1 = ExpansibleController();
     final controller2 = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Expansible(
-                controller: controller1,
-                maintainState: false,
-                bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                    const Text('Maintaining State'),
-                headerBuilder: (BuildContext context, Animation<double> animation) =>
-                    GestureDetector(
-                      onTap: controller1.isExpanded ? controller1.collapse : controller1.expand,
-                      child: const Text('Header'),
-                    ),
+    await pumpTestWidget(
+      tester,
+      SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Expansible(
+              controller: controller1,
+              maintainState: false,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Maintaining State'),
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller1.isExpanded ? controller1.collapse : controller1.expand,
+                child: const Text('Header'),
               ),
-              Expansible(
-                controller: controller2,
-                bodyBuilder: (BuildContext context, Animation<double> animation) =>
-                    const Text('Discarding State'),
-                headerBuilder: (BuildContext context, Animation<double> animation) =>
-                    GestureDetector(
-                      onTap: controller2.isExpanded ? controller2.collapse : controller2.expand,
-                      child: const Text('Header'),
-                    ),
+            ),
+            Expansible(
+              controller: controller2,
+              bodyBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text('Discarding State'),
+              headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+                onTap: controller2.isExpanded ? controller2.collapse : controller2.expand,
+                child: const Text('Header'),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -204,21 +200,19 @@ void main() {
 
   testWidgets('Respects animation duration and curves', (WidgetTester tester) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
-          reverseCurve: Curves.easeIn,
-          bodyBuilder: (BuildContext context, Animation<double> animation) =>
-              const SizedBox(height: 50.0, child: Placeholder()),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        reverseCurve: Curves.easeIn,
+        bodyBuilder: (BuildContext context, Animation<double> animation) =>
+            const SizedBox(height: 50.0, child: Placeholder()),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -262,14 +256,12 @@ void main() {
       controller2.dispose();
     });
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller1,
-          headerBuilder: (_, _) => const Text('Header'),
-          bodyBuilder: (_, _) => const Text('Body'),
-        ),
-        color: const Color(0xffffffff),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller1,
+        headerBuilder: (_, _) => const Text('Header'),
+        bodyBuilder: (_, _) => const Text('Body'),
       ),
     );
 
@@ -286,14 +278,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsNothing);
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller2,
-          headerBuilder: (_, _) => const Text('Header'),
-          bodyBuilder: (_, _) => const Text('Body'),
-        ),
-        color: const Color(0xffffffff),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller2,
+        headerBuilder: (_, _) => const Text('Header'),
+        bodyBuilder: (_, _) => const Text('Body'),
       ),
     );
 
@@ -321,14 +311,12 @@ void main() {
       controller2.dispose();
     });
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller1,
-          headerBuilder: (_, _) => const Text('Header'),
-          bodyBuilder: (_, _) => const Text('Body'),
-        ),
-        color: const Color(0xffffffff),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller1,
+        headerBuilder: (_, _) => const Text('Header'),
+        bodyBuilder: (_, _) => const Text('Body'),
       ),
     );
 
@@ -340,14 +328,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsOne);
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller2,
-          headerBuilder: (_, _) => const Text('Header'),
-          bodyBuilder: (_, _) => const Text('Body'),
-        ),
-        color: const Color(0xffffffff),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller2,
+        headerBuilder: (_, _) => const Text('Header'),
+        bodyBuilder: (_, _) => const Text('Body'),
       ),
     );
     await tester.pumpAndSettle();
@@ -368,23 +354,21 @@ void main() {
 
   testWidgets('Respects animationStyle duration and curves', (WidgetTester tester) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          animationStyle: const AnimationStyle(
-            duration: Duration(milliseconds: 120),
-            curve: Curves.easeOut,
-            reverseCurve: Curves.easeIn,
-          ),
-          bodyBuilder: (BuildContext context, Animation<double> animation) =>
-              const SizedBox(height: 50.0, child: Placeholder()),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        animationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
         ),
-        color: const Color(0xffffffff),
+        bodyBuilder: (BuildContext context, Animation<double> animation) =>
+            const SizedBox(height: 50.0, child: Placeholder()),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
+        ),
       ),
     );
 
@@ -424,22 +408,20 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          animationStyle: const AnimationStyle(
-            duration: Duration(milliseconds: 100),
-            curve: Curves.linear,
-          ),
-          bodyBuilder: (BuildContext context, Animation<double> animation) =>
-              const SizedBox(height: 50.0, child: Placeholder()),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        animationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 100),
+          curve: Curves.linear,
         ),
-        color: const Color(0xffffffff),
+        bodyBuilder: (BuildContext context, Animation<double> animation) =>
+            const SizedBox(height: 50.0, child: Placeholder()),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
+        ),
       ),
     );
 
@@ -465,18 +447,16 @@ void main() {
 
   testWidgets('AnimationStyle.noAnimation disables animation', (WidgetTester tester) async {
     final controller = ExpansibleController();
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          animationStyle: AnimationStyle.noAnimation,
-          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
-            onTap: controller.isExpanded ? controller.collapse : controller.expand,
-            child: const Text('Header'),
-          ),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        animationStyle: AnimationStyle.noAnimation,
+        bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+        headerBuilder: (BuildContext context, Animation<double> animation) => GestureDetector(
+          onTap: controller.isExpanded ? controller.collapse : controller.expand,
+          child: const Text('Header'),
         ),
-        color: const Color(0xffffffff),
       ),
     );
 
@@ -521,15 +501,13 @@ void main() {
     final controller = ExpansibleController();
     addTearDown(controller.dispose);
 
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (context, child) => Expansible(
-          controller: controller,
-          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
-          headerBuilder: (BuildContext context, Animation<double> animation) =>
-              GestureDetector(onTap: controller.toggle, child: const Text('Header')),
-        ),
-        color: const Color(0xffffffff),
+    await pumpTestWidget(
+      tester,
+      Expansible(
+        controller: controller,
+        bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+        headerBuilder: (BuildContext context, Animation<double> animation) =>
+            GestureDetector(onTap: controller.toggle, child: const Text('Header')),
       ),
     );
 
