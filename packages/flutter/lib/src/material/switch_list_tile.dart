@@ -197,6 +197,7 @@ class SwitchListTile extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.autofocus = false,
     this.tileColor,
@@ -263,6 +264,7 @@ class SwitchListTile extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.autofocus = false,
     this.applyCupertinoTheme,
@@ -459,6 +461,9 @@ class SwitchListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// Controls the interactive states of the backing [ListTile].
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
@@ -667,6 +672,7 @@ class SwitchListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        statesController: statesController,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         horizontalTitleGap: horizontalTitleGap,
