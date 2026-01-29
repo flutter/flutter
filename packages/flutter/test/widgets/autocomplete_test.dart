@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'list_tile_test_utils.dart';
 
 import 'multi_view_testing.dart';
 
@@ -198,7 +199,7 @@ void main() {
                                 onTap: () {
                                   onSelected(option);
                                 },
-                                child: ListTile(title: Text(option)),
+                                child: TestListTile(title: Text(option)),
                               ),
                             )
                             .toList(),
@@ -315,7 +316,7 @@ void main() {
                                 onTap: () {
                                   onSelected(option);
                                 },
-                                child: ListTile(title: Text(option)),
+                                child: TestListTile(title: Text(option)),
                               );
                             },
                           ),

@@ -294,9 +294,8 @@ const std::vector<GLint>& BufferBindingsGLES::ComputeUniformLocations(
       continue;
     }
 
-    size_t element_count = member.array_elements.value_or(1);
-    const std::string member_key =
-        CreateUniformMemberKey(metadata->name, member.name, element_count > 1);
+    const std::string member_key = CreateUniformMemberKey(
+        metadata->name, member.name, member.array_elements.has_value());
     const absl::flat_hash_map<std::string, GLint>::iterator computed_location =
         uniform_locations_.find(member_key);
     if (computed_location == uniform_locations_.end()) {
@@ -375,17 +374,7 @@ bool BufferBindingsGLES::BindUniformBufferV2(
       continue;
     }
 
-    // The reflector/runtime stage data is confused as to whether 0 means
-    // no elements or whether it is not an array. Specifically:
-    //   * The built-in generated header files use std::nullopt to mean not
-    //   an array. Setting the array_elements count to 1 generates incorrect
-    //   code that tries to create 1 length arrays.
-    //   * The runtime stage flatbuffer serializes the std::nullopt as 0,
-    //     and thus needs to treat array length of 0 as a scalar element.
     size_t element_count = member.array_elements.value_or(1);
-    if (element_count == 0) {
-      element_count = 1;
-    }
     size_t element_stride = member.byte_length / element_count;
     auto* buffer_data =
         reinterpret_cast<const GLfloat*>(buffer_ptr + member.offset);
