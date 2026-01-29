@@ -1620,7 +1620,10 @@ void main() {
             DefaultWidgetsLocalizations.delegate,
             DefaultMaterialLocalizations.delegate,
           ],
-          child: Directionality(textDirection: TextDirection.ltr, child: child),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay.wrap(child: child),
+          ),
         );
       }
 
@@ -1628,19 +1631,11 @@ void main() {
         Scaffold(
           resizeToAvoidBottomInset: false,
           body: const Placeholder(),
-          bottomNavigationBar: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return BottomNavigationBar(
-                    items: const <BottomNavigationBarItem>[
-                      BottomNavigationBarItem(icon: Icon(Icons.add), label: 'test'),
-                      BottomNavigationBarItem(icon: Icon(Icons.add), label: 'test'),
-                    ],
-                  );
-                },
-              );
-            },
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.add), label: 'test'),
+              BottomNavigationBarItem(icon: Icon(Icons.add), label: 'test'),
+            ],
           ),
         ),
       );
@@ -1663,7 +1658,9 @@ void main() {
         ),
       );
       final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
-      expect(initialPoint, finalPoint);
+      // BottomNavigationBar adds 20 pixel padding so the center point moves
+      // by 10 pixels.
+      expect(initialPoint, finalPoint.translate(0, 10));
     });
 
     testWidgets('floatingActionButton', (WidgetTester tester) async {

@@ -2718,33 +2718,31 @@ Future<void> mediaQueryBoilerplate(
             size: tester.view.physicalSize / tester.view.devicePixelRatio,
           ),
           child: Material(
-            child: Center(
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Navigator(
-                  onGenerateRoute: (RouteSettings settings) {
-                    return MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
-                        return TextButton(
-                          onPressed: () {
-                            showTimePicker(
-                              context: context,
-                              initialTime: initialTime,
-                              initialEntryMode: entryMode,
-                              helpText: helpText,
-                              hourLabelText: hourLabelText,
-                              minuteLabelText: minuteLabelText,
-                              errorInvalidText: errorInvalidText,
-                              onEntryModeChanged: onEntryModeChange,
-                              orientation: orientation,
-                            );
-                          },
-                          child: const Text('X'),
-                        );
-                      },
-                    );
-                  },
-                ),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  return MaterialPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return TextButton(
+                        onPressed: () {
+                          showTimePicker(
+                            context: context,
+                            initialTime: initialTime,
+                            initialEntryMode: entryMode,
+                            helpText: helpText,
+                            hourLabelText: hourLabelText,
+                            minuteLabelText: minuteLabelText,
+                            errorInvalidText: errorInvalidText,
+                            onEntryModeChanged: onEntryModeChange,
+                            orientation: orientation,
+                          );
+                        },
+                        child: const Text('X'),
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),

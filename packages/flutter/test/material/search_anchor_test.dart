@@ -2622,24 +2622,24 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
-          return Scaffold(
-            body: Padding(padding: const EdgeInsets.all(rootSpacing), child: child),
-          );
+          return Padding(padding: const EdgeInsets.all(rootSpacing), child: child);
         },
-        home: Material(
-          child: SearchAnchor(
-            isFullScreen: false,
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  controller.openView();
-                },
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
-            },
+        home: Scaffold(
+          body: Material(
+            child: SearchAnchor(
+              isFullScreen: false,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
           ),
         ),
       ),

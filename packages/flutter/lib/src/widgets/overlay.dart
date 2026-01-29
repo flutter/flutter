@@ -173,14 +173,14 @@ class OverlayEntry implements Listenable {
   /// Whether the content of this [OverlayEntry] can be used to size the
   /// [Overlay].
   ///
-  /// In most situations the overlay sizes itself based on its incoming
-  /// constraints to be as large as possible. However, if that would result in
-  /// an infinite size, it has to rely on one of its children to size itself. In
-  /// this situation, the overlay will consult the topmost non-[Positioned]
-  /// overlay entry that has this property set to true, lay it out with the
-  /// incoming [BoxConstraints] of the overlay, and force all other
-  /// non-[Positioned] overlay entries to have the same size. The [Positioned]
-  /// entries are laid out as usual based on the calculated size of the overlay.
+  /// In most situations the overlay should get tight constraints which
+  /// determine the size of overlay. However if the constraints are loose, it
+  /// has to rely on one of its children to size itself. In this situation, the
+  /// overlay will consult the topmost non-[Positioned] overlay entry that has
+  /// this property set to true, lay it out with the incoming [BoxConstraints]
+  /// of the overlay, and force all other non-[Positioned] overlay entries to
+  /// have the same size. The [Positioned] entries are laid out as usual based
+  /// on the calculated size of the overlay.
   ///
   /// Overlay entries that set this to true must be able to handle unconstrained
   /// [BoxConstraints].
@@ -1337,7 +1337,8 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size = constraints.biggest.isFinite
+    final Size size =
+        (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite))
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
@@ -1362,7 +1363,7 @@ class _RenderTheater extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (constraints.biggest.isFinite) {
+    if (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite)) {
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1412,7 +1413,7 @@ class _RenderTheater extends RenderBox
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
-    if (constraints.biggest.isFinite) {
+    if (constraints.isTight || (!_hasSizeDeterminingChild() && constraints.biggest.isFinite)) {
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
@@ -1429,6 +1430,19 @@ class _RenderTheater extends RenderBox
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
+  }
+
+  bool _hasSizeDeterminingChild() {
+    RenderBox? child = _lastOnstageChild;
+    while (child != null) {
+      final childParentData = child.parentData! as _TheaterParentData;
+      if ((childParentData.overlayEntry?.canSizeOverlay ?? false) &&
+          !childParentData.isPositioned) {
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 
   RenderBox _findSizeDeterminingChild() {

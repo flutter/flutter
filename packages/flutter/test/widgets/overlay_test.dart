@@ -1777,6 +1777,27 @@ void main() {
     expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
   });
 
+  testWidgets('Overlay.wrap is sized by child with loose constraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: UnconstrainedBox(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 10,
+              maxWidth: 700,
+              minHeight: 10,
+              maxHeight: 600,
+            ),
+            child: Overlay.wrap(child: const SizedBox(width: 123, height: 456)),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Overlay)), const Size(123, 456));
+  });
+
   testWidgets('Overlay is sized by child in an unconstrained environment', (
     WidgetTester tester,
   ) async {
