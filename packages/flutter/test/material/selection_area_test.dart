@@ -706,4 +706,84 @@ void main() {
     );
     expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
   });
+
+  testWidgets(
+    'Nested SelectionArea - right click on child should not trigger parent menu',
+    (WidgetTester tester) async {
+      SelectedContent? parentSelection;
+      SelectedContent? childSelection;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SelectionArea(
+              onSelectionChanged: (SelectedContent? content) {
+                parentSelection = content;
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  const Text('Parent Text'),
+                  SelectionArea(
+                    onSelectionChanged: (SelectedContent? content) {
+                      childSelection = content;
+                    },
+                    child: Container(
+                      height: 100,
+                      width: 100,
+                      color: const Color(0xffffff00),
+                      child: const Text('Child Text'),
+                    ),
+                  ),
+                  const Text('Other Parent Text'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Find the text in the nested SelectionArea
+      final Finder childTextFinder = find.text('Child Text');
+      expect(childTextFinder, findsOneWidget);
+
+      // Perform a right click (secondary tap) on the child text
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(childTextFinder),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Verify context menu appears (skip on macOS and web where toolbars don't show in tests)
+      if (defaultTargetPlatform != TargetPlatform.macOS && !kIsWeb) {
+        final Finder selectAllItem = find.text('Select all');
+        expect(selectAllItem, findsOneWidget, reason: 'Context menu should appear');
+      }
+
+      // Tap Select All if available
+      if (defaultTargetPlatform != TargetPlatform.macOS && !kIsWeb) {
+        await tester.tap(find.text('Select all'));
+        await tester.pumpAndSettle();
+      }
+
+      expect(
+        parentSelection?.plainText,
+        isNull,
+        reason: 'Parent should NOT be selected when interacting with child context menu',
+      );
+
+      if (defaultTargetPlatform != TargetPlatform.macOS && !kIsWeb) {
+        expect(
+          childSelection?.plainText,
+          equals('Child Text'),
+          reason: 'Child content SHOULD be selected',
+        );
+      }
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
 }
