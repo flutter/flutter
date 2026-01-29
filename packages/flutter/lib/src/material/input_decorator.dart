@@ -2678,11 +2678,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       expands: widget.expands,
     );
 
+    // Pass error or hint text to semantics so screen readers announce it
+    // along with the input field (via aria-description on web).
+    // Error takes priority over hint since it requires user action.
+    // Note: When an error widget is displayed (even without errorText),
+    // we don't announce hintText since the visual state shows an error.
+    final bool hasErrorWidget = decoration.error != null || decoration.errorText != null;
+    final String? semanticsHint = hasErrorWidget ? decoration.errorText : decoration.hintText;
+
+    final Widget result = Semantics(hint: semanticsHint, child: decorator);
+
     final BoxConstraints? constraints = decoration.constraints;
     if (constraints != null) {
-      return ConstrainedBox(constraints: constraints, child: decorator);
+      return ConstrainedBox(constraints: constraints, child: result);
     }
-    return decorator;
+    return result;
   }
 }
 
