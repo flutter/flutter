@@ -2031,21 +2031,10 @@ class _OverlayPortalState extends State<OverlayPortal> {
       );
     }
 
-    MediaQueryData data = MediaQuery.of(context);
-    final OverlayState? overlay = Overlay.maybeOf(
-      context,
-      rootOverlay: widget.overlayLocation == OverlayChildLocation.rootOverlay,
-    );
-    if (overlay != null) {
-      final MediaQueryData overlayData = MediaQuery.of(overlay.context);
-      data = data.copyWith(
-        padding: overlayData.padding,
-        viewPadding: overlayData.viewPadding,
-        viewInsets: overlayData.viewInsets,
-      );
-    }
+    final _OverlayEntryLocation overlayLocation = _getLocation(zOrderIndex, widget.overlayLocation);
+    final MediaQueryData data = MediaQuery.of(overlayLocation._childModel.context);
     return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex, widget.overlayLocation),
+      overlayLocation: overlayLocation,
       overlayChild: _DeferredLayout(
         childIdentifier: this,
         child: MediaQuery(
