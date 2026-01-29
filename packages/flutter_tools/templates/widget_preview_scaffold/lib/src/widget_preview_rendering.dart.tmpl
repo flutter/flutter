@@ -881,11 +881,7 @@ class PreviewAssetBundle extends PlatformAssetBundle {
   ///
   /// For example, if a preview is defined in 'package:foo/src/bar.dart', this
   /// will have the value 'foo'.
-  ///
-  /// This should only be null if the preview is defined in a file that's not
-  /// part of a Flutter library (e.g., is defined in a test).
-  // TODO(bkonyi): verify what the behavior should be in this scenario.
-  final String? packageName;
+  final String packageName;
 
   // Assets shipped via package dependencies have paths that start with
   // 'packages'.
@@ -903,8 +899,7 @@ class PreviewAssetBundle extends PlatformAssetBundle {
     if (key == 'AssetManifest.bin' ||
         key == 'AssetManifest.bin.json' ||
         key == 'FontManifest.json' ||
-        key.startsWith(_kPackagesPrefix) ||
-        packageName == null) {
+        key.startsWith(_kPackagesPrefix)) {
       return super.load(key);
     }
     // Other assets are from the parent project. Map their keys to package

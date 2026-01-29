@@ -1,0 +1,18 @@
+{
+  "reorderItemToStart": "Bog chuig an tús",
+  "reorderItemToEnd": "Bog chuig an deireadh",
+  "reorderItemUp": "Bog suas",
+  "reorderItemDown": "Bog síos",
+  "reorderItemLeft": "Bog ar chlé",
+  "reorderItemRight": "Bog ar dheis",
+  "searchResultsFound": "Aimsíodh torthaí cuardaigh",
+  "noResultsFound": "Níor aimsíodh aon toradh",
+  "copyButtonLabel": "Cóipeáil",
+  "cutButtonLabel": "Gearr",
+  "lookUpButtonLabel": "Cuardaigh",
+  "searchWebButtonLabel": "Cuardaigh an Gréasán",
+  "shareButtonLabel": "Comhroinn",
+  "pasteButtonLabel": "Greamaigh",
+  "selectAllButtonLabel": "Roghnaigh gach rud",
+  "radioButtonUnselectedLabel": "Níor roghnaíodh é"
+}

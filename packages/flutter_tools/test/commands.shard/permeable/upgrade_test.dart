@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
@@ -504,7 +506,7 @@ void main() {
     );
 
     testUsingContext(
-      'Can upgrade to a newer version with the same Git revision',
+      'Can upgrade to a newer version with the same framework Git revision',
       () async {
         const revision = 'abc123';
         const version = '1.2.3';
@@ -541,6 +543,65 @@ void main() {
       },
       overrides: <Type, Generator>{
         ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'always regenerates flutter.version.json',
+      () async {
+        const revision = 'abc123';
+        const version = '3.38.1';
+        const upstreamVersion = '3.38.2';
+        const engineRevision = 'zyxw';
+
+        final flutterVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: version,
+          engineRevision: engineRevision,
+          gitTagVersion: GitTagVersion.parse(version),
+        );
+
+        final latestVersion = FakeFlutterVersion(
+          frameworkRevision: revision,
+          frameworkVersion: upstreamVersion,
+          engineRevision: engineRevision,
+          gitTagVersion: GitTagVersion.parse(upstreamVersion),
+        );
+
+        final CommandRunner<void> runner = createTestCommandRunner(
+          UpgradeCommand(verboseHelp: false, commandRunner: fakeCommandRunner),
+        );
+
+        fakeCommandRunner.alreadyUpToDate = false;
+        fakeCommandRunner.remoteVersion = latestVersion;
+        fakeCommandRunner.workingDirectory = 'workingDirectory/aaa/bbb';
+
+        await runInContext(
+          () async {
+            await runner.run(<String>['upgrade', '--force']);
+            // Verify that flutter.version.json is deleted before running phase two of the
+            // upgrade command. This should cause the version file to be regenerated based on the
+            // current branch state.
+            expect(flutterVersion.didDeleteVersionFile, true);
+          },
+          overrides: <Type, Generator>{
+            FlutterVersion: () => flutterVersion,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => fakePlatform,
+          },
+        );
+
+        await runInContext(() async {
+          await runner.run(<String>['upgrade', '--continue']);
+          // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
+          // if it doesn't exist.
+          expect(latestVersion.didEnsureVersionFile, true);
+          expect(latestVersion.didDeleteVersionFile, false);
+        }, overrides: {FlutterVersion: () => latestVersion});
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => fakePlatform,
       },
     );
