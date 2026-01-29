@@ -4,7 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +22,8 @@ class TestState extends State<StatefulWidget> {
 class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
   const _MyGlobalObjectKey(super.value);
 }
+
+const Color _kTestColor = Color(0xFF00FF00);
 
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
@@ -995,7 +998,7 @@ void main() {
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
         ColoredBox(
-          color: Colors.green,
+          color: _kTestColor,
           child: SizedBox(key: key),
         ),
       ],
@@ -1151,9 +1154,9 @@ void main() {
       const Key key1 = GlobalObjectKey('key1');
       const Key key2 = GlobalObjectKey('key2');
       late StateSetter setState;
-      var tabBarViewCnt = 2;
-      var tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
-      addTearDown(tabController.dispose);
+      var pageViewCnt = 2;
+      var pageController = PageController();
+      addTearDown(pageController.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -1161,11 +1164,11 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
-              return TabBarView(
-                controller: tabController,
+              return PageView(
+                controller: pageController,
                 children: <Widget>[
-                  if (tabBarViewCnt > 0) const Text('key1', key: key1),
-                  if (tabBarViewCnt > 1) const Text('key2', key: key2),
+                  if (pageViewCnt > 0) const Text('key1', key: key1),
+                  if (pageViewCnt > 1) const Text('key2', key: key2),
                 ],
               );
             },
@@ -1173,27 +1176,26 @@ void main() {
         ),
       );
 
-      expect(tabController.index, 0);
+      expect(pageController.page, 0);
 
-      // switch tabs 0 -> 1
+      // switch pages 0 -> 1
+      pageController.jumpToPage(1);
+      await tester.pumpAndSettle();
+
+      expect(pageController.page, 1);
+
+      // rebuild PageView that only have the 1st page with GlobalKey 'key1'
       setState(() {
-        tabController.index = 1;
+        pageViewCnt = 1;
+        // In PageView, if we reduce count, the controller might be out of bounds if we don't reset.
+        // The original test replaced the controller. We can do the same.
+        pageController = PageController();
+        addTearDown(pageController.dispose);
       });
 
-      await tester.pump(const Duration(seconds: 1)); // finish the animation
+      await tester.pumpAndSettle(); 
 
-      expect(tabController.index, 1);
-
-      // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
-      setState(() {
-        tabBarViewCnt = 1;
-        tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
-        addTearDown(tabController.dispose);
-      });
-
-      await tester.pump(const Duration(seconds: 1)); // finish the animation
-
-      expect(tabController.index, 0);
+      expect(pageController.page, 0);
     },
   );
 
@@ -1322,7 +1324,7 @@ void main() {
         children: <Widget>[
           Container(),
           Container(key: GlobalKey()),
-          ColoredBox(color: Colors.green, child: Container()),
+          ColoredBox(color: _kTestColor, child: Container()),
           Container(key: GlobalKey()),
           Container(),
         ],
@@ -1341,7 +1343,7 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├ColoredBox(color: MaterialColor(primary value: ${const Color(0xff4caf50)}), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '├ColoredBox(color: Color(alpha: 1.0000, red: 0.0000, green: 1.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
         '│└Container\n'
         '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
         '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
@@ -1686,8 +1688,7 @@ void main() {
       const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
     );
     final navigationBarTheme = _TestInheritedElement(
-      const NavigationBarTheme(
-        data: NavigationBarThemeData(indicatorColor: Color(0xff00ff00)),
+      const TestInheritedWidget(
         child: Placeholder(),
       ),
     );
@@ -1716,7 +1717,7 @@ void main() {
     expect(dependencies.length, equals(3));
     expect(
       dependenciesProperty.toDescription(),
-      '[Directionality, FocusTraversalOrder, NavigationBarTheme]',
+      '[Directionality, FocusTraversalOrder, TestInheritedWidget]',
     );
   });
 
@@ -2138,6 +2139,13 @@ The findRenderObject() method was called for the following element:
       expect(element.debugIsDefunct, true);
     },
   );
+}
+
+class TestInheritedWidget extends InheritedWidget {
+  const TestInheritedWidget({super.key, required super.child});
+
+  @override
+  bool updateShouldNotify(TestInheritedWidget oldWidget) => false;
 }
 
 class _TestInheritedElement extends InheritedElement {
