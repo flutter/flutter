@@ -212,9 +212,16 @@ class Dismissible extends StatefulWidget {
   /// This defaults to [HitTestBehavior.opaque].
   final HitTestBehavior behavior;
 
-  /// Defines if the fling action is allowed for dismissal
+  /// Whether the dismissible can be dismissed by flinging.
   ///
-  /// This defaults to true
+  /// By default, flinging the dismissible will start a dismissal animation. If
+  /// this is set to false, the dismissible can only be dismissed by dragging it
+  /// far enough.
+  ///
+  /// Setting this to false can be useful to reduce accidental dismissals when
+  /// the dismissible is part of a scrollable list.
+  ///
+  /// Defaults to true.
   final bool allowFling;
 
   /// Called when the dismissible widget has been dragged.
