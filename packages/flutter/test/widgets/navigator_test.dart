@@ -5668,68 +5668,65 @@ void main() {
         (WidgetTester tester) async {
           late StateSetter builderSetState;
           final pages = <_Page>[_Page.home];
-          bool canPop() => pages.length <= 1;
 
           await tester.pumpWidget(
             MaterialApp(
               home: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   builderSetState = setState;
-                  return PopScope<Object?>(
-                    canPop: canPop(),
-                    onPopInvokedWithResult: (bool success, Object? result) {
-                      if (success || pages.last == _Page.noPop) {
+                  return Navigator(
+                    onDidRemovePage: (Page<void> page) {
+                      final bool pageIsPresent = pages.where((_Page testPage) {
+                        return testPage.name == page.name;
+                      }).isNotEmpty;
+                      if (!pageIsPresent) {
                         return;
                       }
                       setState(() {
-                        pages.removeLast();
+                        pages.removeWhere((_Page testPage) {
+                          return testPage.name == page.name;
+                        });
                       });
                     },
-                    child: Navigator(
-                      onPopPage: (Route<void> route, void result) {
-                        if (!route.didPop(null)) {
-                          return false;
-                        }
-                        setState(() {
-                          pages.removeLast();
-                        });
-                        return true;
-                      },
-                      pages: pages.map((_Page page) {
-                        switch (page) {
-                          case _Page.home:
-                            return MaterialPage<void>(
-                              child: _LinksPage(
-                                title: 'Home page',
-                                buttons: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_Page.one);
-                                      });
-                                    },
-                                    child: const Text('Go to _Page.one'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_Page.noPop);
-                                      });
-                                    },
-                                    child: const Text('Go to _Page.noPop'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          case _Page.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
-                          case _Page.noPop:
-                            return const MaterialPage<void>(
-                              child: _LinksPage(title: 'Cannot pop page', canPop: false),
-                            );
-                        }
-                      }).toList(),
-                    ),
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Page one'),
+                          );
+                        case _Page.noPop:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                          );
+                      }
+                    }).toList(),
                   );
                 },
               ),
@@ -5742,33 +5739,39 @@ void main() {
           await tester.tap(find.text('Go to _Page.one'));
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home, _Page.one});
           expect(find.text('Page one'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isTrue);
 
           await simulateSystemBack();
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home});
           expect(find.text('Home page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isFalse);
 
           await tester.tap(find.text('Go to _Page.noPop'));
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
           expect(find.text('Cannot pop page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isTrue);
 
           await simulateSystemBack();
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
           expect(find.text('Cannot pop page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isTrue);
 
           // Circumvent "Cannot pop page" by directly modifying pages.
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
           builderSetState(() {
             pages.removeLast();
           });
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home});
           expect(find.text('Home page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isFalse);
         },
@@ -5780,67 +5783,64 @@ void main() {
         'starting with existing route history',
         (WidgetTester tester) async {
           final pages = <_Page>[_Page.home, _Page.one];
-          bool canPop() => pages.length <= 1;
 
           await tester.pumpWidget(
             MaterialApp(
               home: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
-                  return PopScope<Object?>(
-                    canPop: canPop(),
-                    onPopInvokedWithResult: (bool success, Object? result) {
-                      if (success || pages.last == _Page.noPop) {
+                  return Navigator(
+                    onDidRemovePage: (Page<void> page) {
+                      final bool pageIsPresent = pages.where((_Page testPage) {
+                        return testPage.name == page.name;
+                      }).isNotEmpty;
+                      if (!pageIsPresent) {
                         return;
                       }
                       setState(() {
-                        pages.removeLast();
+                        pages.removeWhere((_Page testPage) {
+                          return testPage.name == page.name;
+                        });
                       });
                     },
-                    child: Navigator(
-                      onPopPage: (Route<void> route, void result) {
-                        if (!route.didPop(null)) {
-                          return false;
-                        }
-                        setState(() {
-                          pages.removeLast();
-                        });
-                        return true;
-                      },
-                      pages: pages.map((_Page page) {
-                        switch (page) {
-                          case _Page.home:
-                            return MaterialPage<void>(
-                              child: _LinksPage(
-                                title: 'Home page',
-                                buttons: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_Page.one);
-                                      });
-                                    },
-                                    child: const Text('Go to _Page.one'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_Page.noPop);
-                                      });
-                                    },
-                                    child: const Text('Go to _Page.noPop'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          case _Page.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
-                          case _Page.noPop:
-                            return const MaterialPage<void>(
-                              child: _LinksPage(title: 'Cannot pop page', canPop: false),
-                            );
-                        }
-                      }).toList(),
-                    ),
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Page one'),
+                          );
+                        case _Page.noPop:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                          );
+                      }
+                    }).toList(),
                   );
                 },
               ),
@@ -5854,6 +5854,7 @@ void main() {
           await simulateSystemBack();
           await tester.pumpAndSettle();
 
+          expect(pages, <_Page>{_Page.home});
           expect(find.text('Home page'), findsOneWidget);
           expect(find.text('Page one'), findsNothing);
           expect(lastFrameworkHandlesBack, isFalse);
@@ -5867,86 +5868,84 @@ void main() {
         (WidgetTester tester) async {
           // Regression test for https://github.com/flutter/flutter/issues/141189.
           final pages = <_PageWithYesPop>[_PageWithYesPop.home];
-          bool canPop() => pages.length <= 1;
           var onPopInvokedCallCount = 0;
 
           await tester.pumpWidget(
             MaterialApp(
               home: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
-                  return PopScope<Object?>(
-                    canPop: canPop(),
-                    onPopInvokedWithResult: (bool success, Object? result) {
-                      if (success || pages.last == _PageWithYesPop.noPop) {
+                  return Navigator(
+                    onDidRemovePage: (Page<void> page) {
+                      final bool pageIsPresent = pages.where((_PageWithYesPop testPage) {
+                        return testPage.name == page.name;
+                      }).isNotEmpty;
+                      if (!pageIsPresent) {
                         return;
                       }
                       setState(() {
-                        pages.removeLast();
+                        pages.removeWhere((_PageWithYesPop testPage) {
+                          return testPage.name == page.name;
+                        });
                       });
                     },
-                    child: Navigator(
-                      onPopPage: (Route<void> route, void result) {
-                        if (!route.didPop(null)) {
-                          return false;
-                        }
-                        setState(() {
-                          pages.removeLast();
-                        });
-                        return true;
-                      },
-                      pages: pages.map((_PageWithYesPop page) {
-                        switch (page) {
-                          case _PageWithYesPop.home:
-                            return MaterialPage<void>(
-                              child: _LinksPage(
-                                title: 'Home page',
-                                buttons: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_PageWithYesPop.one);
-                                      });
-                                    },
-                                    child: const Text('Go to _PageWithYesPop.one'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_PageWithYesPop.noPop);
-                                      });
-                                    },
-                                    child: const Text('Go to _PageWithYesPop.noPop'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        pages.add(_PageWithYesPop.yesPop);
-                                      });
-                                    },
-                                    child: const Text('Go to _PageWithYesPop.yesPop'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          case _PageWithYesPop.one:
-                            return const MaterialPage<void>(child: _LinksPage(title: 'Page one'));
-                          case _PageWithYesPop.noPop:
-                            return const MaterialPage<void>(
-                              child: _LinksPage(title: 'Cannot pop page', canPop: false),
-                            );
-                          case _PageWithYesPop.yesPop:
-                            return MaterialPage<void>(
-                              child: _LinksPage(
-                                title: 'Can pop page',
-                                canPop: true,
-                                onPopInvoked: (bool didPop, void result) {
-                                  onPopInvokedCallCount += 1;
-                                },
-                              ),
-                            );
-                        }
-                      }).toList(),
-                    ),
+                    pages: pages.map((_PageWithYesPop page) {
+                      switch (page) {
+                        case _PageWithYesPop.home:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.noPop'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_PageWithYesPop.yesPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _PageWithYesPop.yesPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _PageWithYesPop.one:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Page one'),
+                          );
+                        case _PageWithYesPop.noPop:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                          );
+                        case _PageWithYesPop.yesPop:
+                          return MaterialPage<void>(
+                            name: page.name,
+                            child: _LinksPage(
+                              title: 'Can pop page',
+                              canPop: true,
+                              onPopInvoked: (bool didPop, void result) {
+                                onPopInvokedCallCount += 1;
+                              },
+                            ),
+                          );
+                      }
+                    }).toList(),
                   );
                 },
               ),
@@ -5960,6 +5959,7 @@ void main() {
           await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
           await tester.pumpAndSettle();
 
+          expect(pages, <_PageWithYesPop>{_PageWithYesPop.home, _PageWithYesPop.yesPop});
           expect(find.text('Can pop page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isTrue);
           expect(onPopInvokedCallCount, equals(0));
@@ -5968,6 +5968,7 @@ void main() {
           await simulateSystemBack();
           await tester.pumpAndSettle();
 
+          expect(pages, <_PageWithYesPop>{_PageWithYesPop.home});
           expect(find.text('Home page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isFalse);
           expect(onPopInvokedCallCount, equals(1));
@@ -5975,6 +5976,7 @@ void main() {
           await tester.tap(find.text('Go to _PageWithYesPop.yesPop'));
           await tester.pumpAndSettle();
 
+          expect(pages, <_PageWithYesPop>{_PageWithYesPop.home, _PageWithYesPop.yesPop});
           expect(find.text('Can pop page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isTrue);
           expect(onPopInvokedCallCount, equals(1));
@@ -5983,6 +5985,7 @@ void main() {
           await tester.tap(find.text('Go back'));
           await tester.pumpAndSettle();
 
+          expect(pages, <_PageWithYesPop>{_PageWithYesPop.home});
           expect(find.text('Home page'), findsOneWidget);
           expect(lastFrameworkHandlesBack, isFalse);
           expect(onPopInvokedCallCount, equals(2));
@@ -6043,80 +6046,209 @@ void main() {
         expect(find.text('page1'), findsOneWidget);
         expect(page1.popInvoked, <CanPopPageInvoke>[(false, 1)]);
       });
+
+      testWidgets(
+        'using both handlesBacksWhenNested and NavigatorPopHandler',
+        (WidgetTester tester) async {
+          late StateSetter builderSetState;
+          final pages = <_Page>[_Page.home];
+          final nestedNavigatorKey = GlobalKey<NavigatorState>();
+
+          await tester.pumpWidget(
+            MaterialApp(
+              home: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  builderSetState = setState;
+                  // This setup mimics someone that manually handled nested
+                  // Navigators before handlesBacksWhenNested was introduced in
+                  // https://github.com/flutter/flutter/pull/152330.
+                  return NavigatorPopHandler<void>(
+                    onPopWithResult: (void result) async {
+                      nestedNavigatorKey.currentState!.maybePop();
+                    },
+                    child: Navigator(
+                      key: nestedNavigatorKey,
+                      onDidRemovePage: (Page<void> page) {
+                        final bool pageIsPresent = pages.where((_Page testPage) {
+                          return testPage.toString() == page.name;
+                        }).isNotEmpty;
+                        if (!pageIsPresent) {
+                          return;
+                        }
+                        setState(() {
+                          pages.removeWhere((_Page testPage) {
+                            return testPage.toString() == page.name;
+                          });
+                        });
+                      },
+                      pages: pages.map((_Page page) {
+                        switch (page) {
+                          case _Page.home:
+                            return MaterialPage<void>(
+                              name: _Page.home.toString(),
+                              child: _LinksPage(
+                                title: 'Home page',
+                                buttons: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        pages.add(_Page.one);
+                                      });
+                                    },
+                                    child: const Text('Go to _Page.one'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        pages.add(_Page.noPop);
+                                      });
+                                    },
+                                    child: const Text('Go to _Page.noPop'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          case _Page.one:
+                            return MaterialPage<void>(
+                              name: _Page.one.toString(),
+                              child: const _LinksPage(title: 'Page one'),
+                            );
+                          case _Page.noPop:
+                            return MaterialPage<void>(
+                              name: _Page.noPop.toString(),
+                              child: const _LinksPage(title: 'Cannot pop page', canPop: false),
+                            );
+                        }
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+
+          await tester.tap(find.text('Go to _Page.one'));
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.one});
+          expect(find.text('Page one'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          await simulateSystemBack();
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home});
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+
+          await tester.tap(find.text('Go to _Page.noPop'));
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          expect(find.text('Cannot pop page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          await simulateSystemBack();
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          expect(find.text('Cannot pop page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isTrue);
+
+          // Circumvent "Cannot pop page" by directly modifying pages.
+          expect(pages, <_Page>{_Page.home, _Page.noPop});
+          builderSetState(() {
+            pages.removeLast();
+          });
+          await tester.pumpAndSettle();
+
+          expect(pages, <_Page>{_Page.home});
+          expect(find.text('Home page'), findsOneWidget);
+          expect(lastFrameworkHandlesBack, isFalse);
+        },
+        variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
+      );
     });
   });
 
-  testWidgets('NavigatorPopHandler.onPopWithResult', (WidgetTester tester) async {
-    final nav = GlobalKey<NavigatorState>();
-    final nestedNav = GlobalKey<NavigatorState>();
-    const result = 'i am a result';
-    final List<String?> results = <String>[];
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: nav,
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => _LinksPage(
-            title: 'Home page',
-            buttons: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/one');
-                },
-                child: const Text('Go to one'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/nested');
-                },
-                child: const Text('Go to nested'),
-              ),
-            ],
-          ),
-          '/one': (BuildContext context) => _LinksPage(
-            title: 'Page one',
-            buttons: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/one/one');
-                },
-                child: const Text('Go to one/one'),
-              ),
-            ],
-          ),
-          '/nested': (BuildContext context) => _NestedNavigatorsPage(
-            navigatorKey: nestedNav,
-            onPopWithResult: (String? result) {
-              results.add(result);
-            },
-          ),
-        },
-      ),
-    );
+  testWidgets(
+    'manual nested Navigators with handlesBacksWhenNested false and NavigatorPopHandler.onPopWithResult',
+    (WidgetTester tester) async {
+      final nav = GlobalKey<NavigatorState>();
+      final nestedNav = GlobalKey<NavigatorState>();
+      const result = 'i am a result';
+      final List<String?> results = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/nested');
+                  },
+                  child: const Text('Go to nested'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/nested': (BuildContext context) => _NestedNavigatorsPage(
+              navigatorKey: nestedNav,
+              onPopWithResult: (String? result) {
+                results.add(result);
+              },
+            ),
+          },
+        ),
+      );
 
-    expect(find.text('Home page'), findsOneWidget);
+      expect(find.text('Home page'), findsOneWidget);
 
-    await tester.tap(find.text('Go to nested'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Go to nested'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - home'), findsOneWidget);
+      expect(find.text('Nested - home'), findsOneWidget);
 
-    await tester.tap(find.text('Go to nested/one'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Go to nested/one'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - page one'), findsOneWidget);
-    expect(results, isEmpty);
+      expect(find.text('Nested - page one'), findsOneWidget);
+      expect(results, isEmpty);
 
-    // Pop the root Navigator, despite being on a route in the nested
-    // Navigator. This is to trigger NavigatorPopHandler.onPopWithResult with
-    // a the given result.
-    await nav.currentState?.maybePop(result);
-    await tester.pumpAndSettle();
+      // Pop the root Navigator, despite being on a route in the nested
+      // Navigator. This is to trigger NavigatorPopHandler.onPopWithResult with
+      // a the given result.
+      await nav.currentState?.maybePop(result);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - home'), findsOneWidget);
-    expect(results, hasLength(1));
-    expect(results.first, result);
-  });
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(results, hasLength(1));
+      expect(results.first, result);
+    },
+  );
 
   testWidgets('Directional focus traversal behavior with nested Navigators.', (
     WidgetTester tester,
@@ -6616,6 +6748,9 @@ class _NestedNavigatorsPage extends StatefulWidget {
 
   final GlobalKey<NavigatorState>? navigatorKey;
 
+  /// The callback to call when NavigatorPopHandler.onPopWithResult is called.
+  ///
+  /// If null, then no NavigatorPopHandler is used.
   final PopResultCallback<String>? onPopWithResult;
 
   @override
@@ -6634,67 +6769,73 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
   @override
   Widget build(BuildContext context) {
     final rootContext = context;
+    final Widget child = Navigator(
+      key: _navigatorKey,
+      handlesBacksWhenNested: widget.onPopWithResult == null,
+      initialRoute: '/',
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return _LinksPage(
+                  title: 'Nested - home',
+                  onBack: () {
+                    Navigator.of(rootContext).pop();
+                  },
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one');
+                      },
+                      child: const Text('Go to nested/one'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/popscope');
+                      },
+                      child: const Text('Go to nested/popscope'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(rootContext).pop();
+                      },
+                      child: const Text('Go back out of nested nav'),
+                    ),
+                  ],
+                );
+              },
+            );
+          case '/one':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return const _LinksPage(title: 'Nested - page one');
+              },
+            );
+          case '/popscope':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return _LinksPage(canPop: widget.popScopePageEnabled, title: 'Nested - PopScope');
+              },
+            );
+          default:
+            throw Exception('Invalid route: ${settings.name}');
+        }
+      },
+      //),
+    );
+    if (widget.onPopWithResult == null) {
+      return child;
+    }
     return NavigatorPopHandler<String>(
       onPopWithResult: (String? result) {
-        widget.onPopWithResult?.call(result);
+        widget.onPopWithResult!.call(result);
         if (widget.popScopePageEnabled == false) {
           return;
         }
         _navigatorKey.currentState!.pop(result);
       },
-      child: Navigator(
-        key: _navigatorKey,
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case '/':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return _LinksPage(
-                    title: 'Nested - home',
-                    onBack: () {
-                      Navigator.of(rootContext).pop();
-                    },
-                    buttons: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/one');
-                        },
-                        child: const Text('Go to nested/one'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/popscope');
-                        },
-                        child: const Text('Go to nested/popscope'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(rootContext).pop();
-                        },
-                        child: const Text('Go back out of nested nav'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            case '/one':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _LinksPage(title: 'Nested - page one');
-                },
-              );
-            case '/popscope':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return _LinksPage(canPop: widget.popScopePageEnabled, title: 'Nested - PopScope');
-                },
-              );
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-        },
-      ),
+      child: child,
     );
   }
 }

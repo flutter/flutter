@@ -33,6 +33,7 @@ import 'framework.dart';
 import 'heroes.dart';
 import 'notification_listener.dart';
 import 'overlay.dart';
+import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
@@ -1583,6 +1584,7 @@ class Navigator extends StatefulWidget {
     this.routeTraversalEdgeBehavior = kDefaultRouteTraversalEdgeBehavior,
     this.routeDirectionalTraversalEdgeBehavior = kDefaultRouteDirectionalTraversalEdgeBehavior,
     this.onDidRemovePage,
+    this.handlesBacksWhenNested = true,
   });
 
   /// The list of pages with which to populate the history.
@@ -1650,6 +1652,28 @@ class Navigator extends StatefulWidget {
   /// is updated, if the given [Page] is still present, it will be interpreted
   /// as a new page to display.
   final DidRemovePageCallback? onDidRemovePage;
+
+  /// Whether this [Navigator] should handle back gestures in lieu of the root
+  /// [Navigator] when nested.
+  ///
+  /// In a typical [WidgetsApp], the root [Navigator] receives all system back
+  /// gestures. However, the user will expect the current route to be popped in
+  /// a system back gesture, and that route may not be in the root Navigator
+  /// when using one or more nested [Navigator]s.
+  ///
+  /// When this is true and the [Navigator] is nested, [PopScope] will be used
+  /// to handle system back gestures in lieu of its parent [Navigator].
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [NavigatorPopHandler], which can be used to manually handle system back
+  ///    gestures with a nested [Navigator].
+  ///  * [PopScope], which provides even more control over system back behavior.
+  ///  * [CupertinoTabView], which sets this parameter to false in order to
+  ///    provide custom back handling for its nested [Navigator]s.
+  final bool handlesBacksWhenNested;
 
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
@@ -3696,6 +3720,36 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   final _History _history = _History();
+  late bool _isRootNavigator;
+
+  /// The value of [canPop] before the most recent change in navigation history.
+  bool get _lastCanPop => _lastCanPopCached;
+  bool _lastCanPopCached = false; // Because history is empty to start.
+  set _lastCanPop(bool value) {
+    // If this Navigator handles back gestures, then rebuild when canPop changes
+    // so that the PopScope can be updated.
+    if (_handlesBackGestures && value != _lastCanPop) {
+      switch (SchedulerBinding.instance.schedulerPhase) {
+        case SchedulerPhase.postFrameCallbacks:
+          setState(() {});
+        case SchedulerPhase.idle:
+        case SchedulerPhase.midFrameMicrotasks:
+        case SchedulerPhase.persistentCallbacks:
+        case SchedulerPhase.transientCallbacks:
+          ServicesBinding.instance.addPostFrameCallback((Duration timestamp) {
+            if (!mounted) {
+              return;
+            }
+            setState(() {});
+          });
+      }
+    }
+    _lastCanPopCached = value;
+  }
+
+  // If this is a nested Navigator, handle system backs so that the root
+  // Navigator doesn't get all of them.
+  bool get _handlesBackGestures => widget.handlesBacksWhenNested && !_isRootNavigator;
 
   /// A set for entries that are waiting to dispose until their subtrees are
   /// disposed.
@@ -3722,16 +3776,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
-    final bool navigatorCanPop = canPop();
+    _lastCanPop = canPop();
+
     final bool routeBlocksPop;
-    if (!navigatorCanPop) {
+    if (!_lastCanPop) {
       final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       routeBlocksPop =
           lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
     } else {
       routeBlocksPop = false;
     }
-    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
+    final notification = NavigationNotification(canHandlePop: _lastCanPop || routeBlocksPop);
     // Avoid dispatching a notification in the middle of a build.
     switch (SchedulerBinding.instance.schedulerPhase) {
       case SchedulerPhase.postFrameCallbacks:
@@ -3803,6 +3858,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     ServicesBinding.instance.accessibilityFocus.addListener(_recordLastFocus);
     _history.addListener(_handleHistoryChanged);
+
+    _isRootNavigator = _getIsRootNavigator();
   }
 
   // Record the last focused node in route entry.
@@ -3909,6 +3966,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(_isRootNavigator == _getIsRootNavigator());
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       if (entry.route.navigator == this) {
@@ -3916,6 +3974,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       }
     }
   }
+
+  bool _getIsRootNavigator() => Navigator.maybeOf(context, rootNavigator: true) == this;
 
   /// Dispose all lingering router entries immediately.
   void _forcedDisposeAllRouteEntries() {
@@ -4073,6 +4133,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       assert(observer.navigator == null);
       NavigatorObserver._navigators[observer] = this;
     }
+
+    // Do this in activate, not didChangeDependencies, to minimize the number of
+    // times it needs to be called.
+    _isRootNavigator = _getIsRootNavigator();
   }
 
   @protected
@@ -5895,8 +5959,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
-    // this level.
-    return HeroControllerScope.none(
+    final Widget child = HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
@@ -5939,6 +6002,21 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         ),
       ),
     );
+
+    if (_handlesBackGestures) {
+      return PopScope(
+        // This widget uses _lastCanPop to rebuild whenever canPop changes.
+        canPop: !canPop(),
+        onPopInvokedWithResult: (bool didPop, Object? result) {
+          if (didPop) {
+            return;
+          }
+          maybePop();
+        },
+        child: child,
+      );
+    }
+    return child;
   }
 }
 
