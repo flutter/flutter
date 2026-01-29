@@ -194,6 +194,7 @@ static const char* kUniformRowsKey = "rows";
 static const char* kUniformColumnsKey = "columns";
 static const char* kUniformBitWidthKey = "bit_width";
 static const char* kUniformArrayElementsKey = "array_elements";
+static const char* kUniformStructElementsKey = "struct_elements";
 
 static std::string RuntimeStageBackendToString(RuntimeStageBackend backend) {
   switch (backend) {
@@ -336,6 +337,13 @@ std::unique_ptr<fb::RuntimeStageT> RuntimeStageData::CreateStageFlatbuffer(
       desc->padding_layout.push_back(static_cast<fb::PaddingType>(byte_type));
     }
     desc->struct_float_count = uniform.struct_float_count;
+
+    for (const StructField& field : uniform.struct_fields) {
+      auto field_desc = std::make_unique<fb::StructFieldT>(fb::StructFieldT{});
+      field_desc->name = field.name;
+      field_desc->byte_size = field.byte_size;
+      desc->struct_fields.emplace_back(std::move(field_desc));
+    }
 
     runtime_stage->uniforms.emplace_back(std::move(desc));
   }
