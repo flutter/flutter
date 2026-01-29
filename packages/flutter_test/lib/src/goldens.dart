@@ -82,6 +82,7 @@ abstract class GoldenFileComparator {
   ///
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
+  @awaitNotRequired
   Future<void> update(Uri golden, Uint8List imageBytes);
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with

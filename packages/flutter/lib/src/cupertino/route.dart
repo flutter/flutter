@@ -1313,6 +1313,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
+@awaitNotRequired
 Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1407,6 +1408,7 @@ Widget _buildCupertinoDialogTransitions(
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
+@awaitNotRequired
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,

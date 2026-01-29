@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -72,6 +73,7 @@ void main() {
   const wideWindowSize = Size(1920.0, 1080.0);
   const narrowWindowSize = Size(1070.0, 1770.0);
 
+  @awaitNotRequired
   Future<void> prepareDatePicker(
     WidgetTester tester,
     Future<void> Function(Future<DateTime?> date) callback, {

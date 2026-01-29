@@ -10,7 +10,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -199,6 +199,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> animateToPage(int page, {required Duration duration, required Curve curve}) {
     assert(_debugCheckPageControllerAttached());
     final position = this.position as _PagePosition;
@@ -243,6 +244,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> nextPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
@@ -251,6 +253,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> previousPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }

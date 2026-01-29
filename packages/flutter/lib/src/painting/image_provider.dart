@@ -481,7 +481,8 @@ abstract class ImageProvider<T extends Object> {
       }
       if (!didError) {
         didError = true;
-        errorCallback(obtainedKey, exception, stack);
+        // TODO(victorsanni): Annotate errorCallback typedef with @awaitNotRequired.
+        errorCallback.call(obtainedKey, exception, stack);
       }
     }
 

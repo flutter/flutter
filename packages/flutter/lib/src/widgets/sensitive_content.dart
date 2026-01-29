@@ -4,10 +4,10 @@
 
 import 'dart:math' show max;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart'
     show ContentSensitivity, PlatformException, SensitiveContentService;
 
-import '../foundation/assertions.dart' show FlutterErrorDetails;
 import 'async.dart' show AsyncSnapshot, ConnectionState, FutureBuilder;
 import 'basic.dart' show SizedBox;
 import 'framework.dart';
@@ -143,6 +143,7 @@ class SensitiveContentHost {
 
   /// Registers a [SensitiveContent] widget that will help determine the
   /// [ContentSensitivity] for the widget tree.
+  @awaitNotRequired
   static Future<void> register(ContentSensitivity desiredSensitivity) {
     return instance._register(desiredSensitivity);
   }
@@ -224,6 +225,7 @@ class SensitiveContentHost {
 
   /// Unregisters a [SensitiveContent] widget from the [_ContentSensitivitySetting] tracking
   /// the content sensitivity of the widget tree.
+  @awaitNotRequired
   static Future<void> unregister(ContentSensitivity widgetSensitivity) async {
     return instance._unregister(widgetSensitivity);
   }

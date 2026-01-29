@@ -143,6 +143,7 @@ Future<String> getBranchName({
 /// Updates the footer of the api documentation with the correct branch and versions.
 /// [footerPath] is the path to the location of the footer js file and [version] is a
 /// string with the version calculated by the flutter tool.
+@awaitNotRequired
 Future<void> createFooter(
   File footerFile,
   String version, {

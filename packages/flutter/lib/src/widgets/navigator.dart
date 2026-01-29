@@ -1899,6 +1899,7 @@ class Navigator extends StatefulWidget {
   ///
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   static Future<T?> pushNamed<T extends Object?>(
     BuildContext context,
@@ -2016,6 +2017,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///    can be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
@@ -2112,6 +2114,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     BuildContext context,
     String routeName, {
@@ -2219,6 +2222,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     BuildContext context,
     String newRouteName,
@@ -2306,6 +2310,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> push<T extends Object?>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
   }
@@ -2397,6 +2402,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
     BuildContext context,
     Route<T> newRoute, {
@@ -2492,6 +2498,7 @@ class Navigator extends StatefulWidget {
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<T?> pushAndRemoveUntil<T extends Object?>(
     BuildContext context,
     Route<T> newRoute,
@@ -2723,6 +2730,7 @@ class Navigator extends StatefulWidget {
   ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
+  @awaitNotRequired
   static Future<bool> maybePop<T extends Object?>(BuildContext context, [T? result]) {
     return Navigator.of(context).maybePop<T>(result);
   }
@@ -4726,6 +4734,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushNamed], which pushes a route that can be restored
   ///    during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) {
     return push<T?>(_routeNamed<T>(routeName, arguments: arguments)!);
@@ -4791,6 +4800,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushReplacementNamed], which pushes a replacement route that
   ///  can be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushReplacementNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4868,6 +4878,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePopAndPushNamed], which pushes a new route that can be
   ///    restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> popAndPushNamed<T extends Object?, TO extends Object?>(
     String routeName, {
@@ -4933,6 +4944,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushNamedAndRemoveUntil], which pushes a new route that can
   ///    be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushNamedAndRemoveUntil<T extends Object?>(
     String newRouteName,
@@ -5007,6 +5019,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
@@ -5139,6 +5152,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushReplacement], which pushes a replacement route that can
   ///    be restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushReplacement<T extends Object?, TO extends Object?>(
     Route<T> newRoute, {
@@ -5243,6 +5257,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePushAndRemoveUntil], which pushes a route that can be
   ///    restored during state restoration.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> pushAndRemoveUntil<T extends Object?>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!newRoute._installed);
@@ -5527,6 +5542,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///  * [ModalRoute], which provides a `scopedOnPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
+  @awaitNotRequired
   Future<bool> maybePop<T extends Object?>([T? result]) async {
     final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {

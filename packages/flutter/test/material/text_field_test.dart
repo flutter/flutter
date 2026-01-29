@@ -18979,7 +18979,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(TextField)), Size.zero);
     controller.selection = const TextSelection.collapsed(offset: 0);
-    tester.pump();
+    await tester.pump();
   });
 
   testWidgets(

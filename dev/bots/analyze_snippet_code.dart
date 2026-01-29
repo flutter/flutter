@@ -1303,6 +1303,8 @@ Future<void> _runInteractive({
   });
 
   var busy = false;
+
+  @awaitNotRequired
   Future<void> rerun() async {
     assert(!busy);
     try {

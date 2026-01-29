@@ -1228,6 +1228,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// May result in an infinite loop or run out of memory if microtasks continue
   /// to recursively schedule new microtasks. Will not run any timers scheduled
   /// after this method was invoked, even if they are zero-time timers.
+  @awaitNotRequired
   Future<void> idle() {
     return TestAsyncUtils.guard<void>(() {
       final completer = Completer<void>();

@@ -488,6 +488,7 @@ class Scrollable extends StatefulWidget {
   /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
+  @awaitNotRequired
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,

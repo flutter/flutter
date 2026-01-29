@@ -828,6 +828,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// * Expose a [Future] in your application code that signals the readiness of
   ///   your widget tree, then await that future inside [callback].
+  @awaitNotRequired
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
     @Deprecated(

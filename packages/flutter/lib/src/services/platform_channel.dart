@@ -237,6 +237,7 @@ class BasicMessageChannel<T> {
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
+  @awaitNotRequired
   Future<T?> send(T message) async {
     return codec.decodeMessage(await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
@@ -534,6 +535,7 @@ class MethodChannel {
   ///    [JSONMethodCodec].
   ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
+  @awaitNotRequired
   @optionalTypeArgs
   Future<T?> invokeMethod<T>(String method, [dynamic arguments]) {
     return _invokeMethod<T>(method, missingOk: false, arguments: arguments);

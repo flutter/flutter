@@ -146,6 +146,7 @@ abstract class Recorder {
   ///
   /// This is useful for doing one-time setup work that's needed for the
   /// benchmark.
+  @awaitNotRequired
   Future<void> setUpAll() async {}
 
   /// The implementation of the benchmark that will produce a [Profile].

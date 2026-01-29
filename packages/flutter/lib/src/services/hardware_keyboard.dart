@@ -1150,6 +1150,7 @@ class KeyEventManager {
   ///
   /// This handler is deprecated, and will be removed. Use
   /// [HardwareKeyboard.addHandler] instead.
+  @awaitNotRequired
   @Deprecated(
     'No longer supported. Use HardwareKeyboard.instance.addHandler instead. '
     'This feature was deprecated after v3.18.0-2.0.pre.',

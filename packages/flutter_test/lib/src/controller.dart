@@ -1049,6 +1049,7 @@ abstract class WidgetController {
   /// For example, a test that verifies that tapping a disabled button does not
   /// trigger the button would set `warnIfMissed` to false, because the button
   /// would ignore the tap.
+  @awaitNotRequired
   Future<void> tap(
     finders.FinderBase<Element> finder, {
     int? pointer,

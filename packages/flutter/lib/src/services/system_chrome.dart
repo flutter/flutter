@@ -544,6 +544,7 @@ abstract final class SystemChrome {
   ///
   /// Should you decide to opt out of multitasking you can do this by
   /// setting "Requires full screen" to true in the Xcode Deployment Info.
+  @awaitNotRequired
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
@@ -606,6 +607,7 @@ abstract final class SystemChrome {
   /// If your app targets Android SDK 16 (API 36) or later, then your Flutter app uses [SystemUiMode.edgeToEdge] by default
   /// on Android and setting any of the other [SystemUiMode]s will NOT work. There is
   /// no way to opt out of [SystemUiMode.edgeToEdge].
+  @awaitNotRequired
   static Future<void> setEnabledSystemUIMode(
     SystemUiMode mode, {
     List<SystemUiOverlay>? overlays,

@@ -195,6 +195,7 @@ abstract class FlutterDriver {
   ///
   ///  * [VMServiceFlutterDriver], which uses vmservice to implement.
   ///  * [WebFlutterDriver], which uses webdriver to implement.
+  @awaitNotRequired
   Future<Map<String, dynamic>> sendCommand(Command command) async => throw UnimplementedError();
 
   /// Checks the status of the Flutter Driver extension.
@@ -213,6 +214,7 @@ abstract class FlutterDriver {
   }
 
   /// Taps at the center of the widget located by [finder].
+  @awaitNotRequired
   Future<void> tap(SerializableFinder finder, {Duration? timeout}) async {
     await sendCommand(Tap(finder, timeout: timeout));
   }
@@ -226,6 +228,7 @@ abstract class FlutterDriver {
   ///
   ///  * [FlutterDriver.runUnsynchronized], which will execute an action
   ///    with frame sync disabled even while frames are pending.
+  @awaitNotRequired
   Future<void> waitFor(SerializableFinder finder, {Duration? timeout}) async {
     await sendCommand(WaitFor(finder, timeout: timeout));
   }
@@ -794,6 +797,7 @@ abstract class FlutterDriver {
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
+  @awaitNotRequired
   Future<void> close() async {
     throw UnimplementedError();
   }

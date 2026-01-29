@@ -7,6 +7,7 @@ import 'dart:convert' show utf8;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+@awaitNotRequired
 Future<void> main() async {
   const text = Text('Hello, world!', textDirection: TextDirection.ltr);
   // These calls must not result in an error. They behave differently in

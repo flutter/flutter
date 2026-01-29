@@ -1834,6 +1834,7 @@ class CarouselController extends ScrollController {
   /// The [Duration] defaults to 300 milliseconds and [Curve] defaults to [Curves.ease].
   ///
   /// Does nothing if the carousel is not attached to this controller.
+  @awaitNotRequired
   Future<void> animateToItem(
     int index, {
     Duration duration = const Duration(milliseconds: 300),

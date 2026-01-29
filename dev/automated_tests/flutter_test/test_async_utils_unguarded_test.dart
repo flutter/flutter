@@ -13,6 +13,7 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   }
 }
 
+@awaitNotRequired
 Future<void> helperFunction(WidgetTester tester) async {
   await tester.pump();
 }
