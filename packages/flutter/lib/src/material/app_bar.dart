@@ -804,16 +804,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   bool _getEffectiveCenterTitle(ThemeData theme, AppBarThemeData appbarTheme) {
     bool platformCenter() {
-      switch (theme.platform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          return false;
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
-          return actions == null || actions!.length < 2;
+      if (theme.platform == TargetPlatform.iOS || theme.platform == TargetPlatform.macOS) {
+        return actions == null || actions!.length < 2;
       }
+      return false;
     }
 
     return centerTitle ?? appbarTheme.centerTitle ?? platformCenter();
