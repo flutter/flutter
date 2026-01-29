@@ -26,6 +26,18 @@
 #     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/179776
+  - title: 'Replaced by cupertino CupertinoPageTransitionsBuilder'
+    date: 2026-01-15
+    element:
+      uris: ['material.dart']
+      class: 'CupertinoPageTransitionsBuilder'
+    changes:
+    - kind: 'replacedBy'
+      newElement:
+        uris: ['cupertino.dart']
+        class: 'CupertinoPageTransitionsBuilder'
+
   # Changes made in https://github.com/flutter/flutter/pull/15303
   - title: "Replace 'child' with 'builder'"
     date: 2020-12-17
