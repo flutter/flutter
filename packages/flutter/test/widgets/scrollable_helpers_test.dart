@@ -727,11 +727,8 @@ void main() {
                   child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                       return ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) {
+                        onReorderItem: (int oldIndex, int newIndex) {
                           setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex -= 1;
-                            }
                             final String item = items.removeAt(oldIndex);
                             items.insert(newIndex, item);
                           });
