@@ -238,6 +238,7 @@ class TabController extends ChangeNotifier {
   /// then [index] will also be zero.
   int get index => _index;
   int _index;
+
   set index(int value) {
     _changeIndex(value);
   }
@@ -275,6 +276,7 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController!.value - _index.toDouble();
+
   set offset(double value) {
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
@@ -368,7 +370,32 @@ class DefaultTabController extends StatefulWidget {
     required this.child,
     this.animationDuration,
   }) : assert(length >= 0),
-       assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
+       index = null;
+
+  /// Creates a default tab controller whose active tab is controlled externally.
+  ///
+  /// When using this constructor, the [DefaultTabController] becomes *controlled*.
+  /// The selected tab index is kept in sync with [index] on every rebuild. When
+  /// [index] changes, the active tab is updated accordingly.
+  ///
+  /// User interactions that request a tab change (for example tapping a tab or
+  /// swiping the [TabBarView]) do not automatically update [index]. The caller is
+  /// responsible for updating [index] in response to these interactions;
+  /// otherwise the visual selection and [index] may diverge.
+  ///
+  /// This is useful when the selected tab is derived from application state
+  /// (for example routing or state management) and should be updated
+  /// declaratively, without accessing the [TabController] via context.
+  const DefaultTabController.controlled({
+    super.key,
+    required this.length,
+    required int this.index,
+    this.animationDuration,
+    required this.child,
+  }) : assert(length >= 0),
+        assert(length == 0 || (index >= 0 && index < length)),
+        initialIndex = 0;
 
   /// The total number of tabs.
   ///
@@ -385,6 +412,16 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// Defaults to kTabScrollDuration.
   final Duration? animationDuration;
+
+  /// Controls the active tab index.
+  ///
+  /// If non-null, the [DefaultTabController] will keep
+  /// the internal [TabController.index] in sync with this value whenever the
+  /// widget is rebuilt.
+  ///
+  /// This allows the active tab to be controlled declaratively (for example
+  /// from application state) without accessing the [TabController] via context.
+  final int? index;
 
   /// The widget below this widget in the tree.
   ///
@@ -468,7 +505,7 @@ class _DefaultTabControllerState extends State<DefaultTabController>
     _controller = TabController(
       vsync: this,
       length: widget.length,
-      initialIndex: widget.initialIndex,
+      initialIndex: widget.index ?? widget.initialIndex,
       animationDuration: widget.animationDuration,
     );
   }
@@ -512,9 +549,17 @@ class _DefaultTabControllerState extends State<DefaultTabController>
       _controller = _controller._copyWithAndDispose(
         length: widget.length,
         animationDuration: widget.animationDuration,
-        index: _controller.index,
+        index: widget.index ?? _controller.index,
         previousIndex: _controller.previousIndex,
       );
+    }
+    if (oldWidget.index == null || widget.index == null) {
+      return;
+    }
+    if (widget.index != null && oldWidget.index != widget.index) {
+      if (_controller.index != widget.index) {
+        _controller.animateTo(widget.index!);
+      }
     }
   }
 }
