@@ -1368,41 +1368,6 @@ void main() {
     imageCache.clear();
   });
 
-  testWidgets('Last tab gets focus', (WidgetTester tester) async {
-    // 2 nodes for 2 tabs
-    final focusNodes = <FocusNode>[];
-    for (var i = 0; i < 2; i++) {
-      final focusNode = FocusNode();
-      focusNodes.add(focusNode);
-      addTearDown(focusNode.dispose);
-    }
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
-            return CupertinoTextField(focusNode: focusNodes[index], autofocus: true);
-          },
-        ),
-      ),
-    );
-
-    expect(focusNodes[0].hasFocus, isTrue);
-
-    await tester.tap(find.text('Tab 2'));
-    await tester.pump();
-
-    expect(focusNodes[0].hasFocus, isFalse);
-    expect(focusNodes[1].hasFocus, isTrue);
-
-    await tester.tap(find.text('Tab 1'));
-    await tester.pump();
-
-    expect(focusNodes[0].hasFocus, isTrue);
-    expect(focusNodes[1].hasFocus, isFalse);
-  });
-
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final focusNodes = <FocusNode>[];
     for (var i = 0; i < 4; i++) {

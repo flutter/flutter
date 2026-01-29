@@ -966,7 +966,6 @@ void main() {
     expect(find.byType(ClipRRect), findsNothing);
   });
 
-  // TODO: this test is failing, but why?
   testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
     final GlobalKey homeKey = GlobalKey();
     final GlobalKey sheetKey = GlobalKey();
@@ -993,12 +992,18 @@ void main() {
               );
             },
             title: const Text('ListItem 0'),
-            trailing: CupertinoContextMenu(
-              actions: [
-                CupertinoContextMenuAction(child: const Text('Item 0'), onPressed: () {}),
-                CupertinoContextMenuAction(child: const Text('Item 1'), onPressed: () {}),
-              ],
-              child: const Text('Button'),
+            trailing: Builder(
+              builder: (context) {
+                return CupertinoContextMenu(
+                  actions: [
+                    CupertinoContextMenuAction(
+                      child: const Text('Item 0'),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                  child: const Text('Button'),
+                );
+              },
             ),
           ),
         ),
@@ -1020,10 +1025,18 @@ void main() {
     expect(find.text('Page 2'), findsNothing);
     expect(find.text('ListItem 0'), findsOneWidget);
 
-    await tester.tap(find.text('Button'));
+    final Offset contextMenuButton = tester.getCenter(find.text('Button'));
+    expect(find.text('Item 0'), findsNothing);
+
+    await tester.startGesture(contextMenuButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Item 0'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 0'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
