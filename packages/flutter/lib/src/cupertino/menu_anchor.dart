@@ -1665,6 +1665,51 @@ class _CupertinoMenuDivider extends StatelessWidget {
   }
 }
 
+/// A large horizontal divider that is used to separate [CupertinoMenuItem]s in
+/// a [CupertinoMenuAnchor].
+///
+/// The divider has a height of 8 logical pixels. The [color] parameter can be
+/// provided to customize the color of the divider.
+///
+/// See also:
+///
+/// * [CupertinoMenuItem], a Cupertino-style menu item.
+/// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
+/// * [CupertinoMenuEntry], an interface that can be used to control whether
+///   dividers are shown before or after a menu item.
+class CupertinoMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
+  /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
+  const CupertinoMenuDivider({super.key, this.color = defaultColor});
+
+  /// The color of the divider.
+  ///
+  /// Defaults to [CupertinoMenuDivider.defaultColor].
+  final Color color;
+
+  @override
+  bool get isDivider => true;
+
+  @override
+  bool hasLeading(BuildContext context) => false;
+
+  /// Default color for a [CupertinoMenuDivider].
+  // The following colors were measured from debug mode on the iOS 18.5 simulator,
+  static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
+    color: Color.fromRGBO(0, 0, 0, 0.08),
+    darkColor: Color.fromRGBO(0, 0, 0, 0.16),
+  );
+
+  static const double _height = 8.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: CupertinoDynamicColor.resolve(color, context),
+      child: const SizedBox(height: _height, width: double.infinity),
+    );
+  }
+}
+
 // Draws an aliased line that approximates the appearance of an iOS 18.5 menu
 // divider using blend modes.
 class _CupertinoDividerPainter extends CustomPainter {
@@ -2425,51 +2470,6 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
     final double dy = offset.dy.clamp(0.0, size.height - child!.size.height);
 
     childParentData.offset = Offset(dx, dy);
-  }
-}
-
-/// A large horizontal divider that is used to separate [CupertinoMenuItem]s in
-/// a [CupertinoMenuAnchor].
-///
-/// The divider has a height of 8 logical pixels. The [color] parameter can be
-/// provided to customize the color of the divider.
-///
-/// See also:
-///
-/// * [CupertinoMenuItem], a Cupertino-style menu item.
-/// * [CupertinoMenuAnchor], a widget that creates a Cupertino-style popup menu.
-/// * [CupertinoMenuEntry], an interface that can be used to control whether
-///   dividers are shown before or after a menu item.
-class CupertinoMenuDivider extends StatelessWidget implements CupertinoMenuEntry {
-  /// Creates a large horizontal divider for a [CupertinoMenuAnchor].
-  const CupertinoMenuDivider({super.key, this.color = defaultColor});
-
-  /// The color of the divider.
-  ///
-  /// Defaults to [CupertinoMenuDivider.defaultColor].
-  final Color color;
-
-  @override
-  bool get isDivider => true;
-
-  @override
-  bool hasLeading(BuildContext context) => false;
-
-  /// Default color for a [CupertinoMenuDivider].
-  // The following colors were measured from debug mode on the iOS 18.5 simulator,
-  static const CupertinoDynamicColor defaultColor = CupertinoDynamicColor.withBrightness(
-    color: Color.fromRGBO(0, 0, 0, 0.08),
-    darkColor: Color.fromRGBO(0, 0, 0, 0.16),
-  );
-
-  static const double _height = 8.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: CupertinoDynamicColor.resolve(color, context),
-      child: const SizedBox(height: _height, width: double.infinity),
-    );
   }
 }
 
