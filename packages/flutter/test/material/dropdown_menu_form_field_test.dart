@@ -24,20 +24,16 @@ void main() {
     menuEntries.add(entry);
   }
 
-  Finder findMenuItem(MenuItem menuItem) {
-    // For each menu item there are two MenuItemButton widgets.
-    // The last one is the real button item in the menu.
-    // The first one is not visible, it is part of _DropdownMenuBody
-    // which is used to compute the dropdown width.
-    return find.widgetWithText(MenuItemButton, menuItem.label).last;
-  }
-
   Finder findMenuItemButton(String label) {
     // For each menu items there are two MenuItemButton widgets.
     // The last one is the real button item in the menu.
     // The first one is not visible, it is part of _DropdownMenuBody
     // which is used to compute the dropdown width.
     return find.widgetWithText(MenuItemButton, label).last;
+  }
+
+  Finder findMenuItem(MenuItem menuItem) {
+    return findMenuItemButton(menuItem.label);
   }
 
   testWidgets('Creates an underlying DropdownMenu', (WidgetTester tester) async {
@@ -884,7 +880,7 @@ void main() {
     expect(dropdownMenu.restorationId, restorationId);
   });
 
-  testWidgets('Field state is correcly updated', (WidgetTester tester) async {
+  testWidgets('Field state is correctly updated', (WidgetTester tester) async {
     final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     await tester.pumpWidget(
@@ -1366,7 +1362,7 @@ void main() {
     expect(onSelectedCallCount, 1);
   });
 
-  testWidgets('onSelect is called exactly once when reseted', (WidgetTester tester) async {
+  testWidgets('onSelect is called exactly once when reset', (WidgetTester tester) async {
     var onSelectedCallCount = 0;
     final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
     await tester.pumpWidget(
@@ -1436,7 +1432,7 @@ void main() {
     );
 
     // Open the menu.
-    await tester.tap(find.byType(DropdownMenu<String?>));
+    await tester.tap(find.byType(DropdownMenuFormField<String?>));
     await tester.pump();
 
     // Select the 'None' item.
