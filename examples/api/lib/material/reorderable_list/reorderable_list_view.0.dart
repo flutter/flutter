@@ -48,11 +48,8 @@ class _ReorderableListViewExampleState extends State<ReorderableExample> {
             title: Text('Item ${_items[index]}'),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorderItem: (int oldIndex, int newIndex) {
         setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
           final int item = _items.removeAt(oldIndex);
           _items.insert(newIndex, item);
         });
