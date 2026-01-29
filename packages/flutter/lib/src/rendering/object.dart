@@ -1534,10 +1534,18 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // This node merely presents its subtree in the mergeup, so we need to clear
           // the geometry for all the semantics nodes in the mergeup.
           for (final _RenderObjectSemantics child
-              in node._semantics.mergeUp.whereType<_RenderObjectSemantics>().where(
-                (_RenderObjectSemantics e) => e.shouldFormSemanticsNode,
-              )) {
-            child.geometry = null;
+              in node._semantics.mergeUp.whereType<_RenderObjectSemantics>()) {
+            if (child.shouldFormSemanticsNode) {
+              child.geometry = null;
+            } else {
+              // Even though this node does not form a semantics node, it still
+              // represents a group of render objects in the subtree, where node that
+              // forms a semantics node is in its _children.
+              for (final _RenderObjectSemantics nodeInSubtree in child._children) {
+                assert(nodeInSubtree.shouldFormSemanticsNode);
+                nodeInSubtree.geometry = null;
+              }
+            }
           }
           continue;
         }
@@ -1550,7 +1558,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       for (final node in nodesToProcessGeometry) {
         _RenderObjectSemantics target = node._semantics;
         // All the parent data on the active tree should be up to date at this point
-        // except for the blocked branch.
+        // except for the blocked branches.
         //
         // We MUST NOT update the geometry of the blocked branch since ensureGeometry short
         // circuited when it reaches a node whose geometry is up to date. Updating
@@ -2678,9 +2686,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return true;
     }());
     owner!._nodesNeedingLayout.add(this);
-    if (owner!._semanticsOwner != null) {
-      owner!._nodesNeedingSemanticsGeometryUpdate.add(this);
-    }
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -5731,15 +5736,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         in result.$1.whereType<_RenderObjectSemantics>()) {
       assert(childSemantics.contributesToSemanticsTree);
       if (childSemantics.shouldFormSemanticsNode) {
-        // In general geometry is only dirty during the first build or markNeedsLayout.
-        // In both cases, the renderobject will be added to the list of nodes needing
-        // geometry update.
-        //
-        // This specific casecan happen if a renderobject decided to conditionally include
-        // child without going through markNeedsLayout.
-        if (childSemantics.geometryDirty) {
-          renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
-        }
         _children.add(childSemantics);
       } else {
         _children.addAll(childSemantics._children);
