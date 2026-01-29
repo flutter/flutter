@@ -952,7 +952,7 @@ def gather_dart_tests(
       'tracing_test.dart',
   ]
 
-  impeller_backends = ['', 'vulkan']
+  impeller_backends = ['', 'vulkan', 'opengles']
   if is_mac():
     impeller_backends.append('metal')
   if 'release' not in build_dir:
