@@ -891,6 +891,7 @@ const _iosBinaryDirs = <List<String>>[
 ];
 
 const _androidBinaryDirs = <List<String>>[
+  <String>['android-x86', 'android-x86/artifacts.zip'],
   <String>['android-x64', 'android-x64/artifacts.zip'],
   <String>['android-arm', 'android-arm/artifacts.zip'],
   <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
