@@ -5433,7 +5433,12 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   bool _hasUniform(String name) {
-    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
+    return _uniformInfo.any((dynamic entryDynamic) {
+      final entry = entryDynamic! as Map<String, Object>;
+      return entry['name'] == name ||
+          (entry['type'] == 'Struct' &&
+              (entry['struct_field_names']! as List<dynamic>).contains(name));
+    });
   }
 
   int _getImageSamplerIndex(String name) {
@@ -5465,12 +5470,32 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     const sizeOfFloat = 4;
     for (final Object? entryDynamic in _uniformInfo) {
       final entry = entryDynamic! as Map<String, Object>;
-      sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
-      if (entry['name'] == name) {
-        found = true;
+      if (found) {
         break;
       }
-      offset += sizeInFloats;
+
+      if (entry['type'] == 'Struct') {
+        final elementNames = entry['struct_field_names']! as List<dynamic>;
+        final elementSizes = entry['struct_field_bytes']! as List<dynamic>;
+
+        for (var i = 0; i < elementNames.length; ++i) {
+          final elementName = elementNames[i]! as String;
+          final elementSize = elementSizes[i]! as int;
+          sizeInFloats = elementSize ~/ sizeOfFloat;
+          if (elementName == name) {
+            found = true;
+            break;
+          }
+          offset += sizeInFloats;
+        }
+      } else {
+        sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+        if (entry['name'] == name) {
+          found = true;
+          break;
+        }
+        offset += sizeInFloats;
+      }
     }
 
     if (!found) {

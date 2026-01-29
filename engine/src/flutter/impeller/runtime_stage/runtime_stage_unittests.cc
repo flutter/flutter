@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstddef>
 #include <future>
 
 #include "flutter/fml/make_copyable.h"
@@ -73,7 +74,8 @@ TEST_P(RuntimeStageTest, CanRejectInvalidBlob) {
 
 TEST_P(RuntimeStageTest, CanReadUniforms) {
   const std::shared_ptr<fml::Mapping> fixture =
-      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+      flutter::testing::OpenFixtureAsMapping(
+          "all_supported_uniforms.frag.iplr");
   ASSERT_TRUE(fixture);
   ASSERT_GT(fixture->GetSize(), 0u);
   auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
@@ -86,63 +88,88 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
     case PlaygroundBackend::kMetal:
       [[fallthrough]];
     case PlaygroundBackend::kOpenGLES: {
-      ASSERT_EQ(stage->GetUniforms().size(), 17u);
+      ASSERT_EQ(stage->GetUniforms().size(), 14u);
       {
-        auto uni = stage->GetUniform("u_color");
+        // uFloat
+        auto uni = stage->GetUniform("uFloat");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.rows, 1u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 0u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_alpha");
+        // uVec2
+        auto uni = stage->GetUniform("uVec2");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 2u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 1u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_sparkle_color");
+        // uVec3
+        auto uni = stage->GetUniform("uVec3");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 2u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
+        auto padding = uni->padding_layout;
+        if (GetBackend() == PlaygroundBackend::kMetal) {
+          EXPECT_EQ(padding.size(), 4u);
+          EXPECT_EQ(padding[0], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[1], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[2], RuntimePaddingType::kFloat);
+          EXPECT_EQ(padding[3], RuntimePaddingType::kPadding);
+        } else {
+          EXPECT_TRUE(padding.empty());
+        }
       }
       {
-        auto uni = stage->GetUniform("u_sparkle_alpha");
+        // uVec4
+        auto uni = stage->GetUniform("uVec4");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 3u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_blur");
+        // uMat2
+        auto uni = stage->GetUniform("uMat2");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 4u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_radius_scale");
+        // uMat3
+        auto uni = stage->GetUniform("uMat3");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
+        EXPECT_EQ(uni->dimensions.cols, 3u);
+        EXPECT_EQ(uni->location, 5u);
+        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+      }
+      {
+        // uMat4
+        auto uni = stage->GetUniform("uMat4");
+        ASSERT_NE(uni, nullptr);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.cols, 4u);
         EXPECT_EQ(uni->location, 6u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_max_radius");
+        // uFloatArray
+        auto uni = stage->GetUniform("uFloatArray");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 1u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
@@ -151,16 +178,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_resolution_scale");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 8u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
-      }
-      {
-        auto uni = stage->GetUniform("u_noise_scale");
+        auto uni = stage->GetUniform("uVec2Array");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 2u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
@@ -169,66 +187,50 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_noise_phase");
+        // uVec3Array
+        auto uni = stage->GetUniform("uVec3Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 1u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 10u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
-      }
-
-      {
-        auto uni = stage->GetUniform("u_circle1");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 11u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_circle2");
+        // uVec4Array
+        auto uni = stage->GetUniform("uVec4Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 12u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
-      }
-      {
-        auto uni = stage->GetUniform("u_circle3");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
         EXPECT_EQ(uni->dimensions.cols, 1u);
         EXPECT_EQ(uni->location, 13u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_rotation1");
+        // uMat2Array
+        auto uni = stage->GetUniform("uMat2Array");
         ASSERT_NE(uni, nullptr);
         EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 14u);
-        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
-        EXPECT_TRUE(uni->padding_layout.empty());
-      }
-      {
-        auto uni = stage->GetUniform("u_rotation2");
-        ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
+        EXPECT_EQ(uni->dimensions.cols, 2u);
         EXPECT_EQ(uni->location, 15u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
       {
-        auto uni = stage->GetUniform("u_rotation3");
+        // uMat3Array
+        auto uni = stage->GetUniform("uMat3Array");
         ASSERT_NE(uni, nullptr);
-        EXPECT_EQ(uni->dimensions.rows, 2u);
-        EXPECT_EQ(uni->dimensions.cols, 1u);
-        EXPECT_EQ(uni->location, 16u);
+        EXPECT_EQ(uni->dimensions.rows, 3u);
+        EXPECT_EQ(uni->dimensions.cols, 3u);
+        EXPECT_EQ(uni->location, 17u);
+        EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
+      }
+      {
+        // uMat4Array
+        auto uni = stage->GetUniform("uMat4Array");
+        ASSERT_NE(uni, nullptr);
+        EXPECT_EQ(uni->dimensions.rows, 4u);
+        EXPECT_EQ(uni->dimensions.cols, 4u);
+        EXPECT_EQ(uni->location, 19u);
         EXPECT_EQ(uni->type, RuntimeUniformType::kFloat);
         EXPECT_TRUE(uni->padding_layout.empty());
       }
@@ -236,29 +238,93 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
     }
     case PlaygroundBackend::kVulkan: {
       EXPECT_EQ(stage->GetUniforms().size(), 1u);
-      auto uni = stage->GetUniform(RuntimeStage::kVulkanUBOName);
+      const RuntimeUniformDescription* uni =
+          stage->GetUniform(RuntimeStage::kVulkanUBOName);
       ASSERT_TRUE(uni);
       EXPECT_EQ(uni->type, RuntimeUniformType::kStruct);
-      EXPECT_EQ(uni->struct_float_count, 32u);
+      EXPECT_EQ(uni->struct_float_count, 35u);
 
-      // There are 36 4 byte chunks in the UBO: 32 for the 32 floats, and 4 for
-      // padding. Initialize a vector as if they'll all be floats, then manually
-      // set the few padding bytes. If the shader changes, the padding locations
-      // will change as well. For example, if `u_alpha` was moved to the end,
-      // three bytes of padding could potentially be dropped - or if some of the
-      // scalar floats were changed to vec2 or vec4s, or if any vec3s are
-      // introduced.
-      // This means 36 * 4 = 144 bytes total.
-
-      EXPECT_EQ(uni->GetGPUSize(), 144u);
+      EXPECT_EQ(uni->GetGPUSize(), 640u);
       std::vector<RuntimePaddingType> layout(uni->GetGPUSize() / sizeof(float),
                                              RuntimePaddingType::kFloat);
-      layout[5] = RuntimePaddingType::kPadding;
-      layout[6] = RuntimePaddingType::kPadding;
+      // uFloat and uVec2 are packed into a vec4 with 1 byte of padding between.
+      layout[1] = RuntimePaddingType::kPadding;
+      // uVec3 is packed as a vec4 with 1 byte of padding.
       layout[7] = RuntimePaddingType::kPadding;
-      layout[23] = RuntimePaddingType::kPadding;
+      // uMat2 is packed as two vec4s, with the last 2 bytes of each being
+      // padding.
+      layout[14] = RuntimePaddingType::kPadding;
+      layout[15] = RuntimePaddingType::kPadding;
+      layout[18] = RuntimePaddingType::kPadding;
+      layout[19] = RuntimePaddingType::kPadding;
+      // uMat3 is packed as 3 vec4s, with the last 3 bytes being padding
+      layout[29] = RuntimePaddingType::kPadding;
+      layout[30] = RuntimePaddingType::kPadding;
+      layout[31] = RuntimePaddingType::kPadding;
+      // uFloatArray is packed as 2 vec4s, with the last 3 bytes of each
+      // being padding.
+      layout[49] = RuntimePaddingType::kPadding;
+      layout[50] = RuntimePaddingType::kPadding;
+      layout[51] = RuntimePaddingType::kPadding;
+      layout[53] = RuntimePaddingType::kPadding;
+      layout[54] = RuntimePaddingType::kPadding;
+      layout[55] = RuntimePaddingType::kPadding;
+      // uVec2Array is packed as 2 vec4s, with 2 bytes of padding at the end of
+      // each.
+      layout[58] = RuntimePaddingType::kPadding;
+      layout[59] = RuntimePaddingType::kPadding;
+      layout[62] = RuntimePaddingType::kPadding;
+      layout[63] = RuntimePaddingType::kPadding;
+      // uVec3Array is packed as 2 vec4s, with the last byte of each as padding.
+      layout[67] = RuntimePaddingType::kPadding;
+      layout[71] = RuntimePaddingType::kPadding;
+      // uVec4Array has no padding.
+      // uMat2Array[2] is packed as 4 vec4s, With the last 2 bytes of each being
+      // padding. padding.
+      layout[82] = RuntimePaddingType::kPadding;
+      layout[83] = RuntimePaddingType::kPadding;
+      layout[86] = RuntimePaddingType::kPadding;
+      layout[87] = RuntimePaddingType::kPadding;
+      layout[90] = RuntimePaddingType::kPadding;
+      layout[91] = RuntimePaddingType::kPadding;
+      layout[94] = RuntimePaddingType::kPadding;
+      layout[95] = RuntimePaddingType::kPadding;
+      // uMat3Array[2] is packed as 6 vec4s, with the last 3 bytes of the 3rd
+      // and 6th being padding.
+      layout[105] = RuntimePaddingType::kPadding;
+      layout[106] = RuntimePaddingType::kPadding;
+      layout[107] = RuntimePaddingType::kPadding;
+      layout[117] = RuntimePaddingType::kPadding;
+      layout[118] = RuntimePaddingType::kPadding;
+      layout[119] = RuntimePaddingType::kPadding;
+      // uMat4Array[2] is packed as 8 vec4s with no padding.
+      layout[152] = RuntimePaddingType::kPadding;
+      layout[153] = RuntimePaddingType::kPadding;
+      layout[154] = RuntimePaddingType::kPadding;
+      layout[155] = RuntimePaddingType::kPadding;
+      layout[156] = RuntimePaddingType::kPadding;
+      layout[157] = RuntimePaddingType::kPadding;
+      layout[158] = RuntimePaddingType::kPadding;
+      layout[159] = RuntimePaddingType::kPadding;
 
       EXPECT_THAT(uni->padding_layout, ::testing::ElementsAreArray(layout));
+
+      std::vector<std::pair<std::string, unsigned int>> expected_uniforms = {
+          {"uFloat", 4},      {"uVec2", 8},       {"uVec3", 12},
+          {"uVec4", 16},      {"uMat2", 16},      {"uMat3", 36},
+          {"uMat4", 64},      {"uFloatArray", 8}, {"uVec2Array", 16},
+          {"uVec3Array", 24}, {"uVec4Array", 32}, {"uMat2Array", 32},
+          {"uMat3Array", 72}, {"uMat4Array", 128}};
+
+      ASSERT_EQ(uni->struct_fields.size(), expected_uniforms.size());
+
+      for (size_t i = 0; i < expected_uniforms.size(); ++i) {
+        const auto& element = uni->struct_fields[i];
+        const auto& expected = expected_uniforms[i];
+
+        EXPECT_EQ(element.name, expected.first) << "index: " << i;
+        EXPECT_EQ(element.byte_size, expected.second) << "index: " << i;
+      }
       break;
     }
   }
