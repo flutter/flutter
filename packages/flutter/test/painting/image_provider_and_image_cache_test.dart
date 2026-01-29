@@ -56,7 +56,14 @@ void main() {
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
 
-    provider.resolve(ImageConfiguration.empty);
+    final ImageStream stream = provider.resolve(ImageConfiguration.empty);
+    final listener = ImageStreamListener(
+      (ImageInfo info, bool syncCall) {},
+      onError: (Object exception, StackTrace? stackTrace) {
+        throw exception;
+      },
+    );
+    stream.addListener(listener);
 
     expect(imageCache.statusForKey(key).pending, true);
     expect(imageCache.pendingImageCount, 1);
@@ -65,6 +72,7 @@ void main() {
 
     expect(imageCache.statusForKey(provider).untracked, true);
     expect(imageCache.pendingImageCount, 0);
+    stream.removeListener(listener);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56314
 
   test('ImageProvider can evict images', () async {
