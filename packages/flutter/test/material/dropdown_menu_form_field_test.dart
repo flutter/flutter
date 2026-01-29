@@ -243,6 +243,8 @@ void main() {
     expect(dropdownMenu.trailingIconFocusNode, null);
 
     final trailingIconFocusNode = FocusNode();
+    addTearDown(trailingIconFocusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
