@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// TODO(justinmc): Don't test Material interactions in Cupertino tests.
-// https://github.com/flutter/flutter/issues/177028
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/163572.
   testWidgets('showCupertinoSheet shows snackbar at bottom of screen', (WidgetTester tester) async {
