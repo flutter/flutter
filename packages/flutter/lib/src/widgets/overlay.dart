@@ -2032,7 +2032,10 @@ class _OverlayPortalState extends State<OverlayPortal> {
     }
 
     MediaQueryData data = MediaQuery.of(context);
-    final OverlayState? overlay = Overlay.maybeOf(context);
+    final OverlayState? overlay = Overlay.maybeOf(
+      context,
+      rootOverlay: widget.overlayLocation == OverlayChildLocation.rootOverlay,
+    );
     if (overlay != null) {
       final MediaQueryData overlayData = MediaQuery.of(overlay.context);
       data = data.copyWith(

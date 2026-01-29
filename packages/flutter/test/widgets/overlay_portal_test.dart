@@ -154,6 +154,67 @@ void main() {
     expect(directionSeenByOverlayChild, textDirection);
   });
 
+  testWidgets(
+    'OverlayPortal overlayChild located in root Overlay receives MediaQuery properties from root Overlay context',
+    (WidgetTester tester) async {
+      final controller = OverlayPortalController();
+      const rootPadding = EdgeInsets.all(10);
+      const innerPadding = EdgeInsets.all(20);
+
+      MediaQueryData? overlayChildData;
+      OverlayEntry? outerEntry;
+      OverlayEntry? innerEntry;
+      addTearDown(() {
+        outerEntry?.remove();
+        outerEntry?.dispose();
+        innerEntry?.remove();
+        innerEntry?.dispose();
+      });
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: rootPadding),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                outerEntry = OverlayEntry(
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: const MediaQueryData(padding: innerPadding),
+                      child: Overlay(
+                        initialEntries: <OverlayEntry>[
+                          innerEntry = OverlayEntry(
+                            builder: (BuildContext context) {
+                              return OverlayPortal(
+                                controller: controller,
+                                overlayLocation: OverlayChildLocation.rootOverlay,
+                                overlayChildBuilder: (BuildContext context) {
+                                  overlayChildData = MediaQuery.of(context);
+                                  return const SizedBox();
+                                },
+                                child: const SizedBox(),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.show();
+      await tester.pump();
+
+      expect(overlayChildData?.padding, rootPadding);
+    },
+  );
+
   testWidgets('OverlayPortal overlayChild receives MediaQuery properties from Overlay context', (
     WidgetTester tester,
   ) async {
