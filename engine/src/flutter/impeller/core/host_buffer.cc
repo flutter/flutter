@@ -56,9 +56,10 @@ BufferView HostBuffer::Emplace(const void* buffer,
   auto [range, device_buffer, raw_device_buffer] =
       EmplaceInternal(buffer, length, align);
   if (device_buffer) {
-    return BufferView(std::move(device_buffer), range);
-  } else if (raw_device_buffer) {
-    return BufferView(raw_device_buffer, range);
+    return BufferView::CreateFromSharedDeviceBuffer(std::move(device_buffer),
+                                                    range);
+  } else if (!raw_device_buffer.expired()) {
+    return BufferView::CreateFromWeakDeviceBuffer(raw_device_buffer, range);
   } else {
     return {};
   }
@@ -68,9 +69,10 @@ BufferView HostBuffer::Emplace(const void* buffer, size_t length) {
   auto [range, device_buffer, raw_device_buffer] =
       EmplaceInternal(buffer, length);
   if (device_buffer) {
-    return BufferView(std::move(device_buffer), range);
-  } else if (raw_device_buffer) {
-    return BufferView(raw_device_buffer, range);
+    return BufferView::CreateFromSharedDeviceBuffer(std::move(device_buffer),
+                                                    range);
+  } else if (!raw_device_buffer.expired()) {
+    return BufferView::CreateFromWeakDeviceBuffer(raw_device_buffer, range);
   } else {
     return {};
   }
@@ -82,9 +84,10 @@ BufferView HostBuffer::Emplace(size_t length,
   auto [range, device_buffer, raw_device_buffer] =
       EmplaceInternal(length, align, cb);
   if (device_buffer) {
-    return BufferView(std::move(device_buffer), range);
-  } else if (raw_device_buffer) {
-    return BufferView(raw_device_buffer, range);
+    return BufferView::CreateFromSharedDeviceBuffer(std::move(device_buffer),
+                                                    range);
+  } else if (!raw_device_buffer.expired()) {
+    return BufferView::CreateFromWeakDeviceBuffer(raw_device_buffer, range);
   } else {
     return {};
   }
@@ -115,7 +118,7 @@ bool HostBuffer::MaybeCreateNewBuffer() {
   return true;
 }
 
-std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
+std::tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
 HostBuffer::EmplaceInternal(size_t length,
                             size_t align,
                             const EmplaceProc& cb) {
@@ -138,7 +141,8 @@ HostBuffer::EmplaceInternal(size_t length,
       cb(device_buffer->OnGetContents());
       device_buffer->Flush(Range{0, length});
     }
-    return std::make_tuple(Range{0, length}, std::move(device_buffer), nullptr);
+    return std::make_tuple(Range{0, length}, std::move(device_buffer),
+                           std::weak_ptr<DeviceBuffer>{});
   }
 
   size_t padding = 0;
@@ -160,10 +164,10 @@ HostBuffer::EmplaceInternal(size_t length,
   current_buffer->Flush(output_range);
 
   offset_ += length;
-  return std::make_tuple(output_range, nullptr, current_buffer.get());
+  return std::make_tuple(output_range, nullptr, current_buffer);
 }
 
-std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
+std::tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
 HostBuffer::EmplaceInternal(const void* buffer, size_t length) {
   // If the requested allocation is bigger than the block size, create a one-off
   // device buffer and write to that.
@@ -182,7 +186,8 @@ HostBuffer::EmplaceInternal(const void* buffer, size_t length) {
         return {};
       }
     }
-    return std::make_tuple(Range{0, length}, std::move(device_buffer), nullptr);
+    return std::make_tuple(Range{0, length}, std::move(device_buffer),
+                           std::weak_ptr<DeviceBuffer>{});
   }
 
   auto old_length = GetLength();
@@ -200,11 +205,10 @@ HostBuffer::EmplaceInternal(const void* buffer, size_t length) {
     current_buffer->Flush(Range{old_length, length});
   }
   offset_ += length;
-  return std::make_tuple(Range{old_length, length}, nullptr,
-                         current_buffer.get());
+  return std::make_tuple(Range{old_length, length}, nullptr, current_buffer);
 }
 
-std::tuple<Range, std::shared_ptr<DeviceBuffer>, DeviceBuffer*>
+std::tuple<Range, std::shared_ptr<DeviceBuffer>, std::weak_ptr<DeviceBuffer>>
 HostBuffer::EmplaceInternal(const void* buffer, size_t length, size_t align) {
   if (align == 0 || (GetLength() % align) == 0) {
     return EmplaceInternal(buffer, length);

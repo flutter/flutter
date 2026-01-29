@@ -263,12 +263,15 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
             vertex_buffer_offset + pcmd->VtxOffset * sizeof(ImDrawVert);
 
         impeller::VertexBuffer vertex_buffer;
-        vertex_buffer.vertex_buffer = impeller::BufferView(
-            buffer, impeller::Range(vb_start, draw_list_vtx_bytes - vb_start));
-        vertex_buffer.index_buffer = impeller::BufferView(
-            buffer, impeller::Range(index_buffer_offset +
-                                        pcmd->IdxOffset * sizeof(ImDrawIdx),
-                                    pcmd->ElemCount * sizeof(ImDrawIdx)));
+        vertex_buffer.vertex_buffer =
+            impeller::BufferView::CreateFromSharedDeviceBuffer(
+                buffer,
+                impeller::Range(vb_start, draw_list_vtx_bytes - vb_start));
+        vertex_buffer.index_buffer =
+            impeller::BufferView::CreateFromSharedDeviceBuffer(
+                buffer, impeller::Range(index_buffer_offset +
+                                            pcmd->IdxOffset * sizeof(ImDrawIdx),
+                                        pcmd->ElemCount * sizeof(ImDrawIdx)));
         vertex_buffer.vertex_count = pcmd->ElemCount;
         vertex_buffer.index_type = impeller::IndexType::k16bit;
         render_pass.SetVertexBuffer(std::move(vertex_buffer));

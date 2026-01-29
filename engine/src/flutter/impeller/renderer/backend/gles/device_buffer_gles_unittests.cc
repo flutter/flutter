@@ -35,10 +35,10 @@ TEST(DeviceBufferGLESTest, BindUniformData) {
   auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
   reactor->AddWorker(worker);
 
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
   DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
-                                 reactor, backing_store);
+                                 reactor, std::move(backing_store));
   EXPECT_FALSE(device_buffer.GetHandle().has_value());
   EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
       DeviceBufferGLES::BindingType::kUniformBuffer));

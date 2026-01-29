@@ -36,11 +36,13 @@ TEST(BufferBindingsGLESTest, BindUniformData) {
                                              .byte_length = sizeof(float),
                                              .array_elements = std::nullopt}}};
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float)}));
-  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = sizeof(float)},
-                                 reactor, backing_store);
-  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+  auto device_buffer = std::make_shared<DeviceBufferGLES>(
+      DeviceBufferDescriptor{.size = sizeof(float)}, reactor,
+      std::move(backing_store));
+  const auto buffer_view = BufferView::CreateFromWeakDeviceBuffer(
+      device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
@@ -70,12 +72,13 @@ TEST(BufferBindingsGLESTest, BindArrayData) {
                                              .byte_length = sizeof(float) * 4,
                                              .array_elements = 4}}};
   std::shared_ptr<ReactorGLES> reactor;
-  std::shared_ptr<Allocation> backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   ASSERT_TRUE(backing_store->Truncate(Bytes{sizeof(float) * 4}));
-  DeviceBufferGLES device_buffer(
+  auto device_buffer = std::make_shared<DeviceBufferGLES>(
       DeviceBufferDescriptor{.size = sizeof(float) * 4}, reactor,
-      backing_store);
-  BufferView buffer_view(&device_buffer, Range(0, sizeof(float)));
+      std::move(backing_store));
+  const auto buffer_view = BufferView::CreateFromWeakDeviceBuffer(
+      device_buffer, Range(0, sizeof(float)));
   bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
 
   EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
