@@ -2931,6 +2931,7 @@ class _DayItemState extends State<_DayItem> {
     } else if (widget.isToday) {
       // The current day gets a different text color and a circle stroke
       // border.
+      itemStyle = itemStyle?.apply(color: colorScheme.primary);
       final BorderSide todaySide = (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
         color: colorScheme.primary,
       );
