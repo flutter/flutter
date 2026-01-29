@@ -126,7 +126,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/editable_text_scribble_test.dart',
     'packages/flutter/test/widgets/draggable_scrollable_sheet_test.dart',
     'packages/flutter/test/widgets/autofill_group_test.dart',
-    'packages/flutter/test/widgets/box_decoration_test.dart',
+
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
     'packages/flutter/test/widgets/scroll_position_test.dart',
     'packages/flutter/test/widgets/sliver_tree_test.dart',
@@ -191,7 +191,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/slivers_evil_test.dart',
     'packages/flutter/test/widgets/container_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
-    'packages/flutter/test/widgets/framework_test.dart',
+
     'packages/flutter/test/widgets/ticker_mode_test.dart',
     'packages/flutter/test/widgets/absorb_pointer_test.dart',
     'packages/flutter/test/widgets/semantics_role_checks_test.dart',
