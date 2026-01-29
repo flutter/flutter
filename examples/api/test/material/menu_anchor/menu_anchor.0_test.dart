@@ -27,7 +27,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Background Color'), findsOneWidget);
     expect(find.text(example.MenuEntry.colorRed.label), findsOneWidget);
@@ -35,7 +35,7 @@ void main() {
     expect(find.text(example.MenuEntry.colorBlue.label), findsOneWidget);
 
     await tester.tap(find.text('Background Color'));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
 
     expect(find.text(example.MenuEntry.colorRed.label), findsNothing);
     expect(find.text(example.MenuEntry.colorGreen.label), findsNothing);
@@ -134,5 +134,41 @@ void main() {
       tester.getTopLeft(find.byType(MenuAnchor)),
       const Offset(0.0, safeAreaPadding),
     );
+  });
+
+  testWidgets('MenuAnchor can toggle between opening and closing', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.MenuApp());
+
+    await tester.tap(find.text('OPEN MENU'));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    Finder panel = find
+        .descendant(
+          of: find.byType(MenuAnchor),
+          matching: find.byType(FadeTransition),
+        )
+        .first;
+
+    final double panelHeight = tester.getSize(panel).height;
+    // Height differs based on platform, so use a large range.
+    expect(panelHeight, closeTo(135, 20));
+
+    await tester.tap(find.text('OPEN MENU'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final double panelHeightAfterClose = tester.getSize(panel).height;
+    expect(panelHeightAfterClose, closeTo(90, 20));
+
+    await tester.tap(find.text('OPEN MENU'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final double panelHeightAfterReopen = tester.getSize(panel).height;
+    expect(panelHeightAfterReopen, closeTo(140, 20));
   });
 }
