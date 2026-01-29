@@ -13,7 +13,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -511,8 +510,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
+            return Center(
                 child: CupertinoSwitch(
                   dragStartBehavior: DragStartBehavior.down,
                   value: value,
@@ -524,7 +522,6 @@ void main() {
                     });
                   },
                 ),
-              ),
             );
           },
         ),
@@ -584,15 +581,13 @@ void main() {
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: CupertinoSwitch(
-                  dragStartBehavior: DragStartBehavior.down,
-                  value: value,
-                  onChanged: (bool newValue) {
-                    setState(() => value = newValue);
-                  },
-                ),
+            return Center(
+              child: CupertinoSwitch(
+                dragStartBehavior: DragStartBehavior.down,
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() => value = newValue);
+                },
               ),
             );
           },
@@ -1152,7 +1147,7 @@ void main() {
     var value = false;
     await tester.pumpWidget(
       CupertinoTheme(
-        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        data: const CupertinoThemeData(primaryColor: Color(0xFFFFC107), applyThemeToAll: true),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
@@ -1441,16 +1436,14 @@ void main() {
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Center(
-                child: CupertinoSwitch(
-                  value: value,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
-                ),
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
               ),
             );
           },
@@ -1490,26 +1483,32 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            void onChanged(bool newValue) {
-              setState(() {
-                value = newValue;
-              });
-            }
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              void onChanged(bool newValue) {
+                setState(() {
+                  value = newValue;
+                });
+              }
 
-            return Material(
-              child: MergeSemantics(
-                child: ListTile(
-                  title: const Text('test'),
-                  onTap: () {
+              return MergeSemantics(
+                child: GestureDetector(
+                  onTap: Feedback.wrapForTap(() {
                     onChanged(!value);
-                  },
-                  trailing: CupertinoSwitch(value: value, onChanged: onChanged),
+                  }, context),
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('test'),
+                      CupertinoSwitch(value: value, onChanged: onChanged),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1628,7 +1627,7 @@ void main() {
       if (states.contains(WidgetState.focused)) {
         return focusedTrackOutlineColor;
       }
-      return Colors.transparent;
+      return const Color(0x00000000);
     }
 
     final WidgetStateProperty<Color> trackOutlineColor = WidgetStateColor.resolveWith(
@@ -1638,15 +1637,13 @@ void main() {
     Widget buildSwitch() {
       return Directionality(
         textDirection: TextDirection.rtl,
-        child: Material(
-          child: Center(
-            child: CupertinoSwitch(
-              focusNode: focusNode,
-              autofocus: true,
-              value: true,
-              trackOutlineColor: trackOutlineColor,
-              onChanged: (_) {},
-            ),
+        child: Center(
+          child: CupertinoSwitch(
+            focusNode: focusNode,
+            autofocus: true,
+            value: true,
+            trackOutlineColor: trackOutlineColor,
+            onChanged: (_) {},
           ),
         ),
       );
@@ -1791,9 +1788,9 @@ void main() {
     );
 
     Widget buildSwitch() {
-      return MaterialApp(
-        home: Material(
-          child: Center(
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
             child: CupertinoSwitch(
               focusNode: focusNode,
               autofocus: true,
@@ -1802,7 +1799,6 @@ void main() {
               trackOutlineColor: trackOutlineColor,
               onChanged: (_) {},
             ),
-          ),
         ),
       );
     }
@@ -1868,7 +1864,7 @@ void main() {
 
     // The active icon shows when the switch is on.
     await tester.pumpWidget(
-      buildSwitch(enabled: true, active: true, activeIcon: const Icon(Icons.close)),
+      buildSwitch(enabled: true, active: true, activeIcon: const Icon(CupertinoIcons.clear)),
     );
     await tester.pumpAndSettle();
     expect(
@@ -1881,7 +1877,7 @@ void main() {
 
     // The inactive icon shows when the switch is off.
     await tester.pumpWidget(
-      buildSwitch(enabled: true, active: false, inactiveIcon: const Icon(Icons.close)),
+      buildSwitch(enabled: true, active: false, inactiveIcon: const Icon(CupertinoIcons.clear)),
     );
     await tester.pumpAndSettle();
     expect(
@@ -1895,7 +1891,7 @@ void main() {
 
     // The active icon doesn't show when the switch is off.
     await tester.pumpWidget(
-      buildSwitch(enabled: true, active: false, activeIcon: const Icon(Icons.check)),
+      buildSwitch(enabled: true, active: false, activeIcon: const Icon(CupertinoIcons.check_mark)),
     );
     await tester.pumpAndSettle();
     expect(
@@ -1908,7 +1904,7 @@ void main() {
 
     // The inactive icon doesn't show when the switch is on.
     await tester.pumpWidget(
-      buildSwitch(enabled: true, active: true, inactiveIcon: const Icon(Icons.check)),
+      buildSwitch(enabled: true, active: true, inactiveIcon: const Icon(CupertinoIcons.check_mark)),
     );
     await tester.pumpAndSettle();
     expect(
