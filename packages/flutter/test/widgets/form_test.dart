@@ -219,15 +219,15 @@ void main() {
       expect(find.text('Second error message'), findsOneWidget);
 
       if (test.supportsAnnounce) {
-        final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-        expect(announcement.message, 'First error message');
-        expect(announcement.textDirection, TextDirection.ltr);
-        expect(announcement.assertiveness, Assertiveness.assertive);
+        expect(tester.takeAnnouncements(), [
+          isAccessibilityAnnouncement(
+            'First error message',
+            textDirection: TextDirection.ltr,
+            assertiveness: Assertiveness.assertive,
+          ),
+        ]);
       } else {
-        final CapturedAccessibilityAnnouncement? announcement = tester
-            .takeAnnouncements()
-            .firstOrNull;
-        expect(announcement, null);
+        expect(tester.takeAnnouncements(), isEmpty);
       }
     });
   }
@@ -443,10 +443,13 @@ void main() {
     await tester.pump();
     expect(find.text('error'), findsOneWidget);
 
-    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-    expect(announcement.message, 'error');
-    expect(announcement.textDirection, TextDirection.ltr);
-    expect(announcement.assertiveness, Assertiveness.assertive);
+    expect(tester.takeAnnouncements(), [
+      isAccessibilityAnnouncement(
+        'error',
+        textDirection: TextDirection.ltr,
+        assertiveness: Assertiveness.assertive,
+      ),
+    ]);
   });
 
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
@@ -1794,7 +1797,7 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(
+      isSemantics(
         isTextField: true,
         isFocusable: true,
         validationResult: SemanticsValidationResult.valid,
@@ -1806,12 +1809,38 @@ void main() {
     await pumpWidget();
     expect(
       tester.getSemantics(find.byType(TextFormField).last),
-      containsSemantics(
+      isSemantics(
         isTextField: true,
         isFocusable: true,
         validationResult: SemanticsValidationResult.invalid,
       ),
     );
+  });
+
+  testWidgets('Form does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Form(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Form)), Size.zero);
+  });
+
+  testWidgets('FormField does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: FormField<String>(builder: (FormFieldState<String> field) => const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(FormField<String>)), Size.zero);
   });
 }
 

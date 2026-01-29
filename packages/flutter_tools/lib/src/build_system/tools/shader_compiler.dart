@@ -112,6 +112,7 @@ class ShaderCompiler {
       case TargetPlatform.android:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.windows_arm64:
         return <String>[

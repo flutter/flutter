@@ -1081,6 +1081,24 @@ void main() {
         expect(keyEventHandled, isTrue);
       },
     );
+
+    testWidgets('FocusScope does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final focusScopeNode = FocusScopeNode();
+      addTearDown(tester.view.reset);
+      addTearDown(focusScopeNode.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: FocusScope(node: focusScopeNode, child: const Text('X')),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(FocusScope)), Size.zero);
+      focusScopeNode.requestFocus();
+      await tester.pump();
+    });
   });
 
   group('Focus', () {
@@ -1863,6 +1881,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(focusNode.hasFocus, isTrue);
       semantics.dispose();
+    });
+
+    testWidgets('Focus does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final focusNode = FocusNode();
+      addTearDown(tester.view.reset);
+      addTearDown(focusNode.dispose);
+      const key = Key('focus');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Focus(key: key, focusNode: focusNode, child: const Text('X')),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byKey(key)), Size.zero);
+      focusNode.requestFocus();
+      await tester.pump();
     });
   });
 

@@ -60,6 +60,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
   static const int _kNoAnnounceIndex = 1 << 7;
+  static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
+  static const int _kNoAutoPlayVideosIndex = 1 << 9;
+  static const int _kDeterministicCursorIndex = 1 << 10;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -82,6 +85,16 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   // announce than discourage it.
   @override
   bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto-play.
+  @override
+  bool get autoPlayAnimatedImages => _kNoAutoPlayAnimatedImagesIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto-play.
+  @override
+  bool get autoPlayVideos => _kNoAutoPlayVideosIndex & _index == 0;
+  @override
+  bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
 
   @override
   String toString() {
@@ -110,6 +123,15 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (supportsAnnounce) {
       features.add('supportsAnnounce');
     }
+    if (autoPlayAnimatedImages) {
+      features.add('autoPlayAnimatedImages');
+    }
+    if (autoPlayVideos) {
+      features.add('autoPlayVideos');
+    }
+    if (deterministicCursor) {
+      features.add('deterministicCursor');
+    }
     return 'AccessibilityFeatures$features';
   }
 
@@ -133,6 +155,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? highContrast,
     bool? onOffSwitchLabels,
     bool? supportsAnnounce,
+    bool? autoPlayAnimatedImages,
+    bool? autoPlayVideos,
+    bool? deterministicCursor,
   }) {
     final builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -144,6 +169,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
     builder.supportsAnnounce = supportsAnnounce ?? this.supportsAnnounce;
+    builder.autoPlayAnimatedImages = autoPlayAnimatedImages ?? this.autoPlayAnimatedImages;
+    builder.autoPlayVideos = autoPlayVideos ?? this.autoPlayVideos;
+    builder.deterministicCursor = deterministicCursor ?? this.deterministicCursor;
 
     return builder.build();
   }
@@ -164,6 +192,15 @@ class EngineAccessibilityFeaturesBuilder {
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // announce than discourage it.
   bool get supportsAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto-play.
+  bool get autoPlayAnimatedImages =>
+      EngineAccessibilityFeatures._kNoAutoPlayAnimatedImagesIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto-play.
+  bool get autoPlayVideos => EngineAccessibilityFeatures._kNoAutoPlayVideosIndex & _index == 0;
+  bool get deterministicCursor =>
+      EngineAccessibilityFeatures._kDeterministicCursorIndex & _index != 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -206,6 +243,28 @@ class EngineAccessibilityFeaturesBuilder {
   set supportsAnnounce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
     _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
+  }
+
+  // This setter uses an inverted check (!value instead of value) to set the
+  // autoPlayAnimatedImages field in EngineAccessibilityFeatures since most
+  // of the platforms don't have an option to disable this setting.
+  set autoPlayAnimatedImages(bool value) {
+    const int noAutoPlayAnimatedImages =
+        EngineAccessibilityFeatures._kNoAutoPlayAnimatedImagesIndex;
+    _index = !value ? _index | noAutoPlayAnimatedImages : _index & ~noAutoPlayAnimatedImages;
+  }
+
+  // This setter uses an inverted check (!value instead of value) to set the
+  // autoPlayVideos field in EngineAccessibilityFeatures since most of the
+  // platforms don't have an option to disable this setting.
+  set autoPlayVideos(bool value) {
+    const int noAutoPlayVideos = EngineAccessibilityFeatures._kNoAutoPlayVideosIndex;
+    _index = !value ? _index | noAutoPlayVideos : _index & ~noAutoPlayVideos;
+  }
+
+  set deterministicCursor(bool value) {
+    const int deterministicCursor = EngineAccessibilityFeatures._kDeterministicCursorIndex;
+    _index = value ? _index | deterministicCursor : _index & ~deterministicCursor;
   }
 
   /// Creates and returns an instance of EngineAccessibilityFeatures based on the value of _index

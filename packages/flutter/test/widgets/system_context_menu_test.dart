@@ -1332,4 +1332,74 @@ void main() {
     skip: kIsWeb, // [intended]
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets(
+    'Default iOS SystemContextMenu includes Share for non-empty selection',
+    (WidgetTester tester) async {
+      final itemsReceived = <List<IOSSystemContextMenuItemData>>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'ContextMenu.showSystemContextMenu') {
+            final arguments = methodCall.arguments as Map<String, dynamic>;
+            final untypedItems = arguments['items'] as List<dynamic>;
+            final lastItems = <IOSSystemContextMenuItemData>[
+              for (final dynamic value in untypedItems)
+                systemContextMenuItemDataFromJson(value as Map<String, dynamic>),
+            ];
+            itemsReceived.add(lastItems);
+          }
+          return;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final controller = TextEditingController(text: 'Hello world');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(supportsShowingSystemContextMenu: true),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: TextField(
+                  controller: controller,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(editableTextState: editableTextState);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Focus the field first (this establishes the TextInputConnection).
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Set a non-empty selection to enable sharing.
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5); // "Hello"
+      await tester.pump();
+
+      // Nit: ensure no platform message sent before showing toolbar.
+      expect(itemsReceived, isEmpty);
+
+      // Show the context menu.
+      expect(state.showToolbar(), true);
+      await tester.pump();
+
+      // Assert that the platform message included a Share item.
+      expect(itemsReceived, isNotEmpty);
+      expect(itemsReceived.last, contains(isA<IOSSystemContextMenuItemDataShare>()));
+    },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }

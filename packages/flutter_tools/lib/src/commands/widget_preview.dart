@@ -166,6 +166,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             'Generated the widget preview environment scaffolding at a given location '
             'for testing purposes.',
         hide: !verbose,
+      )
+      ..addFlag(
+        kDisableDtdServiceUuid,
+        help: 'Disables the addition of a UUID to the widget preview DTD service and stream.',
+        hide: !verbose,
       );
   }
 
@@ -175,9 +180,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const kHeadless = 'headless';
   static const kWebServer = 'web-server';
   static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
-
-  /// Environment variable used to pass the DTD URI to the widget preview scaffold.
-  static const kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
+  static const kDisableDtdServiceUuid = 'disable-dtd-service-uuid';
 
   @visibleForTesting
   static const kBrowserNotFoundErrorMessage =
@@ -258,6 +261,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     onHotRestartPreviewerRequest: onHotRestartRequest,
     dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
     project: rootProject.widgetPreviewScaffoldProject,
+    addUuidToServiceName: !boolArg(kDisableDtdServiceUuid),
   );
 
   /// The currently running instance of the widget preview scaffold.
@@ -401,7 +405,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
       await _dtdService.connect(dtdWsUri: existingDtdUri);
     }
-    _previewCodeGenerator.populateDtdConnectionInfo(_dtdService.dtdUri!);
+    _previewCodeGenerator.populateDtdConnectionInfo(
+      dtdUri: _dtdService.dtdUri!,
+      widgetPreviewServiceName: _dtdService.widgetPreviewService,
+      widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+    );
   }
 
   Future<int> runPreviewEnvironment({required FlutterProject widgetPreviewScaffoldProject}) async {
@@ -473,6 +481,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           // Don't try and download canvaskit from the CDN.
           useLocalCanvasKit: true,
           webEnableHotReload: true,
+          includeUnsupportedPlatformLibraryStubs: true,
         ),
         webEnableExposeUrl: false,
         webEnableExpressionEvaluation: true,

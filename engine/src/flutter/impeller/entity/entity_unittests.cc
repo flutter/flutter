@@ -1922,12 +1922,9 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
-  auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsDataBuffer(),
-      runtime_stage->GetUniforms()[0],
-      GetContentContext()
-          ->GetTransientsDataBuffer()
-          .GetMinimumUniformAlignment());
+  auto buffer_view = RuntimeEffectContents::EmplaceUniform(
+      uniform_data->data(), GetContentContext()->GetTransientsDataBuffer(),
+      runtime_stage->GetUniforms()[0]);
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2617,6 +2614,104 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     entity.SetContents(contents);
 
     return entity.Render(context, pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
+  // This playground shows the enlarged corner of a rounded superellipse to
+  // compare pathing algorithm against the filling algorithm (benchmark) at very
+  // large ratio.
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    constexpr float corner_radius = 100.0;
+
+    // UI state.
+    static float logarithm_of_ratio = 1.5;  // ratio = size / corner_radius
+
+    float ratio = std::exp(logarithm_of_ratio);
+
+    float rect_size = corner_radius * ratio;
+    Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
+    constexpr float screen_canvas_padding = 200.0f;
+    constexpr float screen_canvas_size = 1000.0f;
+
+    // Scale so that "corner radius" is as long as half the canvas.
+    float scale = screen_canvas_size / 2 / corner_radius;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
+      ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
+      ImGui::Text("  where Ratio = RectSize / CornerRadius");
+    }
+    ImGui::End();
+
+    auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
+    auto transform = Matrix::MakeTranslation(top_right) *
+                     Matrix::MakeScale(Vector2(scale, scale)) *
+                     Matrix::MakeTranslation(Vector2(-rect_size, 0));
+    bool success = true;
+
+    auto fill_geom =
+        std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
+    // Fill
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Red());
+      contents->SetGeometry(fill_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Stroke
+    auto path = flutter::DlPath::MakeRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(rect, corner_radius));
+    auto stroke_geom = Geometry::MakeStrokePath(path, {.width = 2 / scale});
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Blue());
+      contents->SetGeometry(stroke_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Draw a ruler to show the length in portion of rect size.
+    auto screen_top_right =
+        Matrix::MakeScale(GetContentScale()).Invert() * top_right;
+    constexpr float font_size = 13.0f;
+    for (int i = -1; i < 100; i++) {
+      float screen_offset_y = static_cast<float>(i) * 20.0f;
+      std::string label;
+      if (i == -1) {
+        label = "Ruler: (in portion of rect size)";
+      } else if (i == 0) {
+        label = "- 0.0";
+      } else {
+        float portion_of_rect =
+            screen_offset_y * GetContentScale().y / scale / rect_size;
+        label = std::format("- {:.2g}", portion_of_rect);
+      }
+      ImGui::GetBackgroundDrawList()->AddText(
+          nullptr, font_size,
+          // Draw the ruler at around the flat part of the curve, which is
+          // somewhere to the left of the top right corner.
+          //
+          // Offset vertically by font_size/2 so that the hyphen aligns with the
+          // top of shape.
+          {screen_top_right.x - 500,
+           screen_top_right.y + screen_offset_y - font_size / 2},
+          IM_COL32_WHITE, label.c_str());
+    }
+    return success;
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));

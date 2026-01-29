@@ -1137,17 +1137,6 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   Widget build(BuildContext context) {
     Widget result = _buildWidgetApp(context);
-    result = Focus(
-      canRequestFocus: false,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if ((event is! KeyDownEvent && event is! KeyRepeatEvent) ||
-            event.logicalKey != LogicalKeyboardKey.escape) {
-          return KeyEventResult.ignored;
-        }
-        return Tooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
-      },
-      child: result,
-    );
     assert(() {
       if (widget.debugShowMaterialGrid) {
         result = GridPaper(
