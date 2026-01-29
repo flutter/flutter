@@ -64,6 +64,33 @@ TEST(FlutterJSONCodec, ThrowsOnInvalidDecode) {
               testing::KilledBySignal(SIGABRT), "No string key for value in object around line 1");
 }
 
+TEST(FlutterJSONCodec, DecodesInvalidUnicode) {
+  const char* bytes = "\"hello \xdf\xff world\"";
+  NSData* value = [NSData dataWithBytes:bytes length:strlen(bytes)];
+  FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
+  id decoded = [codec decode:value];
+  ASSERT_TRUE([decoded isKindOfClass:[NSString class]]);
+  // \xdf\xff is invalid UTF-8, so it should be replaced by replacement characters.
+  // The exact number of replacement characters depends on the specific recovery strategy,
+  // but it should definitely be a valid string and not nil or crash.
+  ASSERT_TRUE([decoded containsString:@"hello "]);
+  ASSERT_TRUE([decoded containsString:@" world"]);
+}
+
+TEST(FlutterJSONCodec, DecodesLoneSurrogates) {
+  // Input is a JSON object with a string containing a lone surrogate escape sequence.
+  // "{\"key\": \"test \\udfff test\"}"
+  const char* bytes = "{\"key\": \"test \\udfff test\"}";
+  NSData* value = [NSData dataWithBytes:bytes length:strlen(bytes)];
+  FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
+  id decoded = [codec decode:value];
+  ASSERT_TRUE([decoded isKindOfClass:[NSDictionary class]]);
+  NSString* stringVal = ((NSDictionary*)decoded)[@"key"];
+  ASSERT_TRUE([stringVal isKindOfClass:[NSString class]]);
+  // If successful, result might contain replacement char or the surrogate?
+  // We just want to ensure it doesn't crash (assert).
+}
+
 TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   ASSERT_TRUE([codec encode:nil] == nil);
