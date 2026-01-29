@@ -3986,8 +3986,8 @@ class EditableTextState extends State<EditableText>
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
-        ..setEditingState(localValue)
         ..updateStyle(_getTextInputStyle())
+        ..setEditingState(localValue)
         ..show();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
