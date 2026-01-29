@@ -219,8 +219,7 @@ class FailingAllocator : public Allocator {
   std::shared_ptr<Allocator> delegate_;
 };
 
-#ifdef NDEBUG
-TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrashInRelease) {
+TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   ScopedValidationDisable disable;
   std::shared_ptr<FailingAllocator> allocator =
       std::make_shared<FailingAllocator>(GetContext()->GetResourceAllocator());
@@ -233,7 +232,6 @@ TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrashInRelease) {
   EXPECT_EQ(view.GetRange().offset, 0u);
   EXPECT_EQ(view.GetRange().length, 0u);
 }
-#endif
 
 }  // namespace  testing
 }  // namespace impeller
