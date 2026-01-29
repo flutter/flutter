@@ -82,8 +82,8 @@ class DialogWindowContent extends StatelessWidget {
         listenable: windowManager,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow childWindow in windowManager.getChildrenOf(
-            window,
+          for (final KeyedWindow childWindow in windowManager.getWindows(
+            parent: window,
           )) {
             childViews.add(
               WindowContent(

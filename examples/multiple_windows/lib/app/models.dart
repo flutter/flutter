@@ -56,7 +56,7 @@ class WindowManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  Iterable<KeyedWindow> getChildrenOf(BaseWindowController? parent) {
+  Iterable<KeyedWindow> getWindows({required BaseWindowController? parent}) {
     return _windows.where((KeyedWindow window) => window.parent == parent);
   }
 }

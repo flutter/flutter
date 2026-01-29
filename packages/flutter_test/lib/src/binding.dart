@@ -591,7 +591,6 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
   ui.Rect _anchorRect;
   WindowPositioner _positioner;
   final BaseWindowController _parent;
-  // ignore: unused_field
   final bool _isSizedToContent;
   Size? _lastRenderedSize;
 

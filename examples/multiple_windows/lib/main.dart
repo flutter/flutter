@@ -76,8 +76,8 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
           listenable: windowManager,
           builder: (BuildContext context, Widget? child) {
             final List<Widget> childViews = <Widget>[mainWindowWidget];
-            for (final KeyedWindow window in windowManager.getChildrenOf(
-              null,
+            for (final KeyedWindow window in windowManager.getWindows(
+              parent: null,
             )) {
               if (!window.isMainWindow) {
                 childViews.add(

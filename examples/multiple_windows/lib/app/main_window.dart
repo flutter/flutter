@@ -31,8 +31,8 @@ class MainWindow extends StatelessWidget {
         listenable: windowManager,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> childViews = <Widget>[];
-          for (final KeyedWindow window in windowManager.getChildrenOf(
-            controller,
+          for (final KeyedWindow window in windowManager.getWindows(
+            parent: controller,
           )) {
             childViews.add(
               WindowContent(
