@@ -213,7 +213,8 @@ class _TweenCurve extends Curve {
 ///
 /// {@tool dartpad}
 /// This example shows how to use a [MenuAnchor] to wrap a button and open a
-/// cascading menu from the button.
+/// cascading menu from the button. This example also shows how to use
+/// [onAnimationStatusChanged] to track animation status and toggle the menu.
 ///
 /// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.0.dart **
 /// {@end-tool}
@@ -392,11 +393,11 @@ class MenuAnchor extends StatefulWidget {
   /// [AnimationStatus.completed] when the menu is opened, and
   /// [AnimationStatus.dismissed] when the menu is closed.
   ///
-  /// Because the [MenuController.isOpen] property is true while the menu is
-  /// opening, opened, and closing, it cannot be used to determine whether the
-  /// menu is closing or opening. As such, this callback provides a way to
-  /// determine when the menu is opening or closing, and allows anchors to
-  /// toggle between the opening and closing states of the menu.
+  /// This callback provides a way to determine when the menu is opening or
+  /// closing. This is necessary because the [MenuController.isOpen] property
+  /// remains true throughout the opening, opened, and closing phases, and
+  /// therefore cannot be used on its own to determine the current animation
+  /// direction.
   ///
   /// {@tool snippet}
   /// This example shows how to use the [onAnimationStatusChanged] callback to

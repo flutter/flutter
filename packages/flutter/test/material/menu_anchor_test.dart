@@ -2079,6 +2079,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       expect(focusedMenu, equals('MenuItemButton(Text("Sub Menu 12"))'));
     });
+
     testWidgets('hoverOpenDelay delays when a SubmenuButton opens', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -2175,6 +2176,8 @@ void main() {
 
     testWidgets(
       'Throws if non-zero hoverOpenDelay is applied to MenuBar items',
+      experimentalLeakTesting: LeakTesting.settings
+          .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -2206,8 +2209,6 @@ void main() {
           ),
         );
       },
-      experimentalLeakTesting: LeakTesting.settings
-          .withIgnoredAll(), // leaking by design because of exception
     );
 
     testWidgets('scrolling does not trigger hover traversal', (WidgetTester tester) async {
