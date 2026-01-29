@@ -73,6 +73,8 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
+    buildCodeAssets: true,
+    buildDataAssets: true,
   );
 
   // Then "install" the code assets so they can be used at runtime.
