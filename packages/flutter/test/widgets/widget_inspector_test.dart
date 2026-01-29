@@ -1276,6 +1276,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // [intended] Test requires --track-widget-creation flag.
         skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
       );
+
       testWidgets(
         'Inspector buttons respect bottom viewPadding and do not overlap system navigation bar',
         (WidgetTester tester) async {
@@ -1331,7 +1332,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             expect(
               positioned.bottom,
               fakeBottomPadding,
-              reason: 'Button "$name" should sit exactly above bottom viewPadding + margin',
+              reason: 'Button "$name" should sit exactly above bottom viewPadding',
             );
           });
         },
