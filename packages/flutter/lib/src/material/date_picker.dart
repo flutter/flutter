@@ -533,7 +533,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     });
   }
 
-  void _handleDateChanged(DateTime date) {
+  void _handleDateChanged(DateTime? date) {
     setState(() => _selectedDate.value = date);
   }
 
