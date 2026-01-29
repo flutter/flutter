@@ -64,6 +64,7 @@ void main() {
     );
     owner.ensureSemantics();
     owner.rootNode = renderObject;
+    renderObject.scheduleInitialLayout();
     renderObject.layout(
       const BoxConstraints.tightForFinite(),
     ); // semantics are only calculated if layout information is up to date.
@@ -87,6 +88,7 @@ void main() {
 
     final renderObject = TestRenderObject();
     owner.rootNode = renderObject;
+    renderObject.scheduleInitialLayout();
     renderObject.layout(const BoxConstraints.tightForFinite());
     owner.flushSemantics();
 
