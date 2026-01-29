@@ -229,6 +229,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments,
     bool configOnly = false,
   }) async {
     await buildGradleApp(
@@ -238,6 +239,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       isBuildingBundle: false,
       localGradleErrors: gradleErrors,
       configOnly: configOnly,
+      androidShellArguments: androidShellArguments,
       maxRetries: 1,
     );
   }
@@ -248,10 +250,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     bool configOnly = false,
   }) async {
+    // TODO(camsim99): Fix this flow.
     await buildGradleApp(
       project: project,
       androidBuildInfo: androidBuildInfo,
@@ -261,6 +265,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
       configOnly: configOnly,
+      androidShellArguments: androidShellArguments,
       maxRetries: 1,
     );
   }
@@ -440,6 +445,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required bool isBuildingBundle,
     required List<GradleHandledError> localGradleErrors,
     required bool configOnly,
+    required List<String> androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     int retry = 0,
@@ -467,6 +473,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
+    // TODO(camsim99): Can I not do something like that??? This is tea...
     updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
     final options = <String>[];
@@ -484,6 +491,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
     final String assembleTask = isBuildingBundle
         ? getBundleTaskFor(buildInfo)
         : getAssembleTaskFor(buildInfo);
+
+    // Add engine shell arugments to be injected into the manifest.
+    final String androidShellArgumentsStr = androidShellArguments.join(',');
+    options.add('-PandroidShellArguments=$androidShellArgumentsStr');
 
     if (_logger.isVerbose) {
       options.add('--full-stacktrace');

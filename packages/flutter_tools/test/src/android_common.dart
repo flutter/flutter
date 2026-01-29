@@ -30,6 +30,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments,
     bool configOnly = false,
   }) async {}
 
@@ -38,6 +39,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     required FlutterProject project,
     required AndroidBuildInfo androidBuildInfo,
     required String target,
+    required List<String> androidShellArguments,
     bool validateDeferredComponents = true,
     bool deferredComponentsEnabled = false,
     bool configOnly = false,
