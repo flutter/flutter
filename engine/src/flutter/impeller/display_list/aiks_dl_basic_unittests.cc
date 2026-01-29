@@ -2237,5 +2237,56 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, PerspectiveRectangle) {
+  int perspective = 58;
+  bool use_clip = true;
+  bool diff_clip = false;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderInt("perspective%", &perspective, 0, 100);
+      ImGui::Checkbox("use clip", &use_clip);
+      if (use_clip) {
+        ImGui::Checkbox("diff clip", &diff_clip);
+      }
+      ImGui::SetWindowPos("Controls", ImVec2(500, 100));
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+
+    Scalar val = perspective * -0.00005f;
+    builder.TransformFullPerspective(
+        // clang-format off
+        1.0f,  0.0f, 0.0f, 400.0f,
+        0.0f,  1.0f, 0.0f, 400.0f,
+        0.0f,  0.0f, 1.0f, 0.0f,
+        0.0f,  val,  0.0f, 2.2f
+        // clang-format on
+    );
+
+    if (use_clip) {
+      Rect clip = DlRect::MakeLTRB(0, 0, 400, 800);
+      DlClipOp clip_op = DlClipOp::kIntersect;
+      if (diff_clip) {
+        clip = clip.Expand(-20);
+        clip_op = DlClipOp::kDifference;
+      }
+      builder.ClipRect(clip, clip_op);
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor::kBlue());
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 800), paint);
+
+    builder.DrawColor(DlColor::kWhite().withAlphaF(0.5f),
+                      DlBlendMode::kSrcOver);
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 }  // namespace testing
 }  // namespace impeller
