@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -963,7 +964,7 @@ void main() {
             home: Material(
               child: Shortcuts.manager(
                 manager: testManager,
-                child: TextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1002,7 +1003,7 @@ void main() {
                     },
                   ),
                 },
-                child: TextField(key: textFieldKey, autofocus: true),
+                child: TestTextField(key: textFieldKey, autofocus: true),
               ),
             ),
           ),
@@ -1044,7 +1045,7 @@ void main() {
                 },
                 child: Actions(
                   actions: <Type, Action<Intent>>{TestIntent: DoNothingAction(consumesKey: false)},
-                  child: TextField(key: textFieldKey, autofocus: true),
+                  child: TestTextField(key: textFieldKey, autofocus: true),
                 ),
               ),
             ),
@@ -1089,7 +1090,7 @@ void main() {
                       LogicalKeySet(LogicalKeyboardKey.keyA):
                           const DoNothingAndStopPropagationIntent(),
                     },
-                    child: TextField(key: textFieldKey, autofocus: true),
+                    child: TestTextField(key: textFieldKey, autofocus: true),
                   ),
                 ),
               ),
@@ -1843,7 +1844,7 @@ void main() {
                     SelectionChangedCause.keyboard,
                   ),
                 },
-                child: TextField(autofocus: true, controller: controller),
+                child: TestTextField(autofocus: true, controller: controller),
               ),
             ),
           ),
