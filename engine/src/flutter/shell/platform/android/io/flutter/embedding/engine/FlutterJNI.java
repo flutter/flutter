@@ -1328,7 +1328,6 @@ public class FlutterJNI {
     platformViewsController.destroyOverlaySurfaces();
   }
 
-  // This will get called on the raster thread.
   @SuppressWarnings("unused")
   @UiThread
   public void maybeResizeSurfaceView(int width, int height) {

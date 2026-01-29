@@ -13,7 +13,7 @@ import io.flutter.Log;
 
 class ContentSizingFlag {
 
-  private static final String TAG = "ContenxtSizingFlag";
+  private static final String TAG = "ContentSizingFlag";
 
   // Default to DISABLED
   private static final boolean DEFAULT = false;
