@@ -88,6 +88,7 @@ impellerc("runtime_stages") {
   mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
+    "all_supported_uniforms.frag",
     "runtime_stage_example.frag",
     "runtime_stage_filter_example.frag",
     "interop_runtime_stage_cs.frag",
