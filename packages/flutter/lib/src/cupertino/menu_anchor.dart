@@ -2889,6 +2889,12 @@ class _SwipeRegionState extends State<_SwipeRegion> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _recognizer?.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+  }
+
+  @override
   void dispose() {
     assert(_surfaces.isEmpty);
     _disposeInactiveRecognizer();
