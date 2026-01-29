@@ -13,6 +13,8 @@ namespace flutter {
 #define kTargetArchitectureName "arm"
 #elif defined(FML_ARCH_CPU_ARM64)
 #define kTargetArchitectureName "arm64"
+#elif defined(FML_ARCH_CPU_X86)
+#define kTargetArchitectureName "ia32"
 #elif defined(FML_ARCH_CPU_X86_64)
 #define kTargetArchitectureName "x64"
 #elif defined(FML_ARCH_CPU_RISCV32)

@@ -36,6 +36,7 @@ The `$FLUTTER_SHA` is the Git hash in the [Flutter repository](https://github.co
 |:-----:|:------------:|:-----------:|:--------------:|:-------------:|
 | armv7 |              |             | android-arm    |               |
 | arm64 | darwin-arm64 | linux-arm64 | android-arm64  | windows-arm64 |
+| x86   |              |             | android-x86    |               |
 | x64   | darwin-x64   | linux-x64   | android-x64    | windows-x64   |
 
 
