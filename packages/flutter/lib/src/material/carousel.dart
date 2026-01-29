@@ -1755,7 +1755,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   // Use `toInt()` to truncate the fractional part, ensuring the leading item
   // only advances after fully crossing the next item's boundary.
   int get leadingItem {
-    final int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
+    int leadingItem = getItemFromPixels(pixels, viewportDimension).toInt();
     // When `consumeMaxWeight` is true, there is some reserved space before
     // item 0 so that item 0 can be expanded to occupy the maximum
     // weight while scrolling. The way how consumeMaxWeight works is that we assume
@@ -1766,7 +1766,11 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     // The subtraction may cause negative number for leading item. In this case,
     // constrain the leading item to 0.
     if (consumeMaxWeight && flexWeights != null) {
-      return math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+      leadingItem = math.max(leadingItem - flexWeights!.indexOf(flexWeights!.max), 0);
+    }
+    // For infinite scrolling, wrap the index to the range [0, itemCount - 1].
+    if (infinite && itemCount != null && itemCount! > 0) {
+      leadingItem = leadingItem % itemCount!;
     }
     return leadingItem;
   }
