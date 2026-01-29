@@ -35,6 +35,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'icon_data.dart';
+import 'media_query.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -3830,6 +3831,8 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+
     final Widget selectionModeButtons = Column(
       children: <Widget>[?_tapBehaviorButton, _exitWidgetSelectionButton],
     );
@@ -3860,7 +3863,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       textDirection: Directionality.of(context),
       start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
       end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
-      bottom: _kExitWidgetSelectionButtonMargin,
+      bottom: bottomPadding,
       child: buttonGroup,
     );
   }

@@ -1276,6 +1276,67 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         // [intended] Test requires --track-widget-creation flag.
         skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
       );
+
+      testWidgets(
+        'Inspector buttons respect bottom viewPadding and do not overlap system navigation bar',
+        (WidgetTester tester) async {
+          WidgetInspectorService.instance.isSelectMode = true;
+
+          const fakeBottomPadding = 50.0;
+          const exitLabel = 'exit';
+          const moveLabel = 'move';
+          const tapLabel = 'tap';
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: fakeBottomPadding)),
+                child: WidgetInspector(
+                  exitWidgetSelectionButtonBuilder:
+                      (context, {required key, required onPressed, required semanticsLabel}) =>
+                          Container(key: key, child: const Text(exitLabel)),
+                  moveExitWidgetSelectionButtonBuilder:
+                      (
+                        context, {
+                        required onPressed,
+                        required semanticsLabel,
+                        bool? usesDefaultAlignment,
+                      }) => const SizedBox(child: Text(moveLabel)),
+                  tapBehaviorButtonBuilder:
+                      (
+                        context, {
+                        required onPressed,
+                        required selectionOnTapEnabled,
+                        required semanticsLabel,
+                      }) => const SizedBox(child: Text(tapLabel)),
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+              ),
+            ),
+          );
+
+          final Map<String, Finder> buttons = {
+            'exit': find.text(exitLabel),
+            'move': find.text(moveLabel),
+            'tap': find.text(tapLabel),
+          };
+
+          buttons.forEach((name, finder) {
+            expect(finder, findsOneWidget, reason: 'Button "$name" should exist');
+
+            final Positioned positioned = tester.widget<Positioned>(
+              find.ancestor(of: finder, matching: find.byType(Positioned)),
+            );
+
+            expect(
+              positioned.bottom,
+              fakeBottomPadding,
+              reason: 'Button "$name" should sit exactly above bottom viewPadding',
+            );
+          });
+        },
+      );
     });
 
     testWidgets('test transformDebugCreator will re-order if after stack trace', (
