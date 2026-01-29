@@ -1129,11 +1129,19 @@ class _CupertinoDragGestureController<T> {
       );
     } else {
       if (isCurrent) {
-        // This route is destined to pop at this point. Reuse navigator's pop.
-        navigator.pop();
-      }
-
-      if (popDragController.isAnimating) {
+        // If the sheet is current, it shouldn't be popped immediately. The user
+        // might catch the sheet mid-flight. Animate back to 0.0 first, and only
+        // pop the route if the animation completes successfully.
+        popDragController
+            .animateBack(0.0, duration: _kDroppedSheetDragAnimationDuration, curve: animationCurve)
+            .then<void>((void value) {
+              if (getIsCurrent() && popDragController.value == 0.0) {
+                navigator.pop();
+              }
+            });
+      } else {
+        // If the sheet was already popped (back button pressed during drag),
+        // just finish the visual animation.
         popDragController.animateBack(
           0.0,
           duration: _kDroppedSheetDragAnimationDuration,
@@ -1146,7 +1154,6 @@ class _CupertinoDragGestureController<T> {
       // Keep the userGestureInProgress in true state so we don't change the
       // curve of the page transition mid-flight since CupertinoPageTransition
       // depends on userGestureInProgress.
-      // late AnimationStatusListener animationStatusCallback;
       void animationStatusCallback(AnimationStatus status) {
         navigator.didStopUserGesture();
         popDragController.removeStatusListener(animationStatusCallback);

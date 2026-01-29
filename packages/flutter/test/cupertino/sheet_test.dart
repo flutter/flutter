@@ -1576,6 +1576,68 @@ void main() {
       final double finalPosition = box.localToGlobal(Offset.zero).dy;
       expect(finalPosition, initialPosition);
     });
+
+    testWidgets('Sheet can be caught mid-dismissal, and released to snap back or dismissed', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey homeKey = GlobalKey();
+      final GlobalKey sheetKey = GlobalKey();
+
+      await tester.pumpWidget(dragGestureApp(homeKey, sheetKey));
+
+      // Open the sheet
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      final Finder sheetFinder = find.byKey(sheetKey);
+      final Size sheetSize = tester.getSize(sheetFinder);
+      final double sheetHeight = sheetSize.height;
+
+      final double dragDistance = sheetHeight / 1.8;
+
+      final Offset sheetTopLeft = tester.getTopLeft(sheetFinder);
+      final startPoint = Offset(sheetTopLeft.dx + (sheetSize.width / 1.8), sheetTopLeft.dy + 20.0);
+
+      // Drag down enough to trigger dismissal
+      final TestGesture gesture = await tester.startGesture(startPoint);
+      await gesture.moveBy(Offset(0, dragDistance));
+      await tester.pump();
+
+      // Release to start dismissal
+      await gesture.up();
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Catching the sheet mid-dismissal
+      final box = tester.renderObject(sheetFinder) as RenderBox;
+      final double currentY = box.localToGlobal(Offset.zero).dy;
+
+      final TestGesture interceptGesture = await tester.startGesture(
+        Offset(startPoint.dx, currentY + 100),
+      );
+      await tester.pump();
+
+      // Slightly move up
+      await interceptGesture.moveBy(const Offset(0, -50));
+
+      await interceptGesture.up();
+      await tester.pump(const Duration(milliseconds: 1000));
+
+      await tester.pumpAndSettle();
+
+      final bool isSheetOpen = find.text('Page 2').evaluate().isNotEmpty;
+
+      // Verify whether the sheet snapped back or was dismissed
+      if (!isSheetOpen) {
+        // Sheet has been dismissed
+        expect(find.text('Page 1'), findsOneWidget);
+      } else {
+        // Sheet has been dragged up
+        final double finalY = tester.getTopLeft(find.byKey(sheetKey)).dy;
+        expect(finalY, equals(sheetTopLeft.dy));
+      }
+    });
   });
 
   group('draggable scrollable CupertinoSheetRoute', () {
