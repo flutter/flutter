@@ -9,7 +9,6 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1522,7 +1521,7 @@ void main() {
     testWidgets('when route is not fullscreenDialog, it has a barrierColor', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const MaterialApp(home: SizedBox.expand()));
+      await tester.pumpWidget(const CupertinoApp(home: SizedBox.expand()));
 
       tester
           .state<NavigatorState>(find.byType(Navigator))
@@ -1538,7 +1537,7 @@ void main() {
     testWidgets('when route is a fullscreenDialog, it has no barrierColor', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const MaterialApp(home: SizedBox.expand()));
+      await tester.pumpWidget(const CupertinoApp(home: SizedBox.expand()));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(buildRoute(fullscreenDialog: true));
       await tester.pumpAndSettle();
@@ -1577,7 +1576,7 @@ void main() {
         });
       }
 
-      await tester.pumpWidget(const MaterialApp(home: SizedBox.expand()));
+      await tester.pumpWidget(const CupertinoApp(home: SizedBox.expand()));
 
       tester
           .state<NavigatorState>(find.byType(Navigator))
@@ -1646,17 +1645,17 @@ void main() {
             // _CupertinoEdgeShadowDecoration draws the shadows with a series of
             // differently colored 1px rects. Skip all rects not drawn by a
             // _CupertinoEdgeShadowDecoration.
-            if (rect.width != 1.0) {
-              return true;
-            }
-            throw '''
-    Expected: no rects with a width of 1px.
+            if (rect.width == 1.0 && rect.left >= 0.0) {
+              throw '''
+          Expected: no visible rects with a width of 1px.
           Found: $rect.
           ''';
+            }
+            return true;
           });
         }
 
-        await tester.pumpWidget(const MaterialApp(home: SizedBox.expand()));
+        await tester.pumpWidget(const CupertinoApp(home: SizedBox.expand()));
 
         final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
@@ -1670,7 +1669,8 @@ void main() {
         tester.state<NavigatorState>(find.byType(Navigator)).pop();
 
         await tester.pumpAndSettle();
-        expect(box, paintsNoShadows());
+        final RenderBox boxAfterPop = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+        expect(boxAfterPop, paintsNoShadows());
       },
     );
   });
@@ -2452,7 +2452,7 @@ void main() {
 
     final r = CupertinoPageRoute<void>(
       builder: (BuildContext context) {
-        return const Scaffold(body: Center(child: Text('child')));
+        return const CupertinoPageScaffold(child: Center(child: Text('child')));
       },
     );
 
@@ -2463,7 +2463,7 @@ void main() {
         home: Center(
           child: Builder(
             builder: (BuildContext context) {
-              return ElevatedButton(
+              return CupertinoButton(
                 child: const Text('Home'),
                 onPressed: () {
                   navigator = Navigator.of(context);
@@ -2477,7 +2477,7 @@ void main() {
     );
 
     final TestGesture gesture = await tester.createGesture();
-    await gesture.down(tester.getCenter(find.byType(ElevatedButton)));
+    await gesture.down(tester.getCenter(find.byType(CupertinoButton)));
     await gesture.up();
 
     await tester.pumpAndSettle();
@@ -2756,7 +2756,7 @@ void main() {
 
   testWidgets('Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
             return CupertinoButton(
@@ -2803,7 +2803,7 @@ void main() {
 
   testWidgets('CupertinoModalPopupRoute does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      CupertinoApp(
         home: Navigator(
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<dynamic>(
@@ -2832,7 +2832,7 @@ void main() {
 
   testWidgets('CupertinoDialogRoute does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      CupertinoApp(
         home: Navigator(
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<dynamic>(
@@ -3318,7 +3318,7 @@ class _TestPageUpdateState extends State<_TestPageUpdate> {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<State<StatefulWidget>> navKey = GlobalKey();
-    return MaterialApp(
+    return CupertinoApp(
       home: Navigator(
         key: navKey,
         pages: updatePages
@@ -3338,13 +3338,13 @@ class _TestPageUpdateState extends State<_TestPageUpdate> {
   }
 
   Widget buildMainPage() {
-    return Scaffold(
-      body: Center(
+    return CupertinoPageScaffold(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Main'),
-            ElevatedButton(
+            CupertinoButton(
               onPressed: () {
                 Future<void>.delayed(const Duration(seconds: 2), () {
                   setState(() {
@@ -3405,7 +3405,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
         });
       },
       child: const Center(
-        child: Text('Hold', style: TextStyle(color: Colors.blue)),
+        child: Text('Hold', style: TextStyle(color: CupertinoColors.activeBlue)),
       ),
     );
   }
