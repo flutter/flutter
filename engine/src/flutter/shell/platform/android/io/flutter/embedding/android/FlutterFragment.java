@@ -22,7 +22,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
@@ -251,7 +250,7 @@ public class FlutterFragment extends Fragment
     private String initialRoute = "/";
     private boolean handleDeeplinking = false;
     private String appBundlePath = null;
-    private FlutterShellArgs shellArgs = null;
+    private String[] shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
@@ -327,7 +326,7 @@ public class FlutterFragment extends Fragment
 
     /** Any special configuration arguments for the Flutter engine */
     @NonNull
-    public NewEngineFragmentBuilder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
+    public NewEngineFragmentBuilder flutterShellArgs(@NonNull String[] shellArgs) {
       this.shellArgs = shellArgs;
       return this;
     }
@@ -454,9 +453,8 @@ public class FlutterFragment extends Fragment
           dartEntrypointArgs != null ? new ArrayList(dartEntrypointArgs) : null);
       // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of
       // conflating.
-      if (null != shellArgs) {
-        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
-      }
+      args.putStringArray(
+          ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs == null ? new String[0] : shellArgs);
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
@@ -1293,10 +1291,9 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
-  public FlutterShellArgs getFlutterShellArgs() {
+  public String[] getFlutterShellArgs() {
     String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
-    return new FlutterShellArgs(
-        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+    return flutterShellArgsArray == null ? new String[0] : flutterShellArgsArray;
   }
 
   /**

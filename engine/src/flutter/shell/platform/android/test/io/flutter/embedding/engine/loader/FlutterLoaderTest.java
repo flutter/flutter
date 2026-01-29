@@ -8,6 +8,7 @@ import static android.os.Looper.getMainLooper;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -204,35 +205,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsTheLeakVMFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.LeakVM", false);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String leakVMArg = "--leak-vm=false";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(leakVMArg));
-  }
-
-  @Test
   public void itUsesCorrectExecutorService() {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     ExecutorService mockExecutorService = mock(ExecutorService.class);
@@ -294,122 +266,6 @@ public class FlutterLoaderTest {
   }
 
   @Test
-  public void itSetsEnableImpellerFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String enableImpellerArg = "--enable-impeller=true";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableImpellerArg));
-  }
-
-  @Test
-  public void itSetsEnableFlutterGPUFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableFlutterGPU", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String enableImpellerArg = "--enable-flutter-gpu";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(enableImpellerArg));
-  }
-
-  @Test
-  public void itSetsEnableSurfaceControlFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.EnableSurfaceControl", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String disabledControlArg = "--enable-surface-control";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(disabledControlArg));
-  }
-
-  @Test
-  public void itSetsShaderInitModeFromMetaData() {
-    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
-    Bundle metaData = new Bundle();
-    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
-    ctx.getApplicationInfo().metaData = metaData;
-
-    FlutterLoader.Settings settings = new FlutterLoader.Settings();
-    assertFalse(flutterLoader.initialized());
-    flutterLoader.startInitialization(ctx, settings);
-    flutterLoader.ensureInitializationComplete(ctx, null);
-    shadowOf(getMainLooper()).idle();
-
-    final String shaderModeArg = "--impeller-lazy-shader-mode";
-    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(mockFlutterJNI, times(1))
-        .init(
-            eq(ctx),
-            shellArgsCaptor.capture(),
-            anyString(),
-            anyString(),
-            anyString(),
-            anyLong(),
-            anyInt());
-    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
-    assertTrue(arguments.contains(shaderModeArg));
-  }
-
-  @Test
   public void itSetsAotSharedLibraryNameIfPathIsInInternalStorage() throws IOException {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
@@ -446,9 +302,11 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
-      String[] args = {aotSharedLibraryNameArg};
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      Bundle metadata = new Bundle();
+      metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metadata;
+
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -467,8 +325,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertTrue(
           "Args sent to FlutterJni.init incorrectly did not include path " + path,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -523,9 +380,11 @@ public class FlutterLoaderTest {
 
     for (Path testPath : pathsToTest) {
       String path = testPath.toString();
-      String aotSharedLibraryNameArg = FlutterLoader.aotSharedLibraryNameFlag + path;
-      String[] args = {aotSharedLibraryNameArg};
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      Bundle metadata = new Bundle();
+      metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", path);
+      ctx.getApplicationInfo().metaData = metadata;
+
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -544,8 +403,7 @@ public class FlutterLoaderTest {
       // mode, actualArgs would contain the default arguments for AOT shared library name on top
       // of aotSharedLibraryNameArg.
       String canonicalTestPath = testPath.toFile().getCanonicalPath();
-      String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalTestPath;
+      String canonicalAotSharedLibraryNameArg = "--aot-shared-library-name=" + canonicalTestPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonical path " + canonicalTestPath,
           actualArgs.contains(canonicalAotSharedLibraryNameArg));
@@ -572,8 +430,11 @@ public class FlutterLoaderTest {
 
     String invalidFilePath = "my\0file.so";
 
-    String[] args = {FlutterLoader.aotSharedLibraryNameFlag + invalidFilePath};
-    flutterLoader.ensureInitializationComplete(ctx, args);
+    Bundle metadata = new Bundle();
+    metadata.putString("io.flutter.embedding.android.AOTSharedLibraryName", invalidFilePath);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    flutterLoader.ensureInitializationComplete(ctx, null);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI)
@@ -592,7 +453,7 @@ public class FlutterLoaderTest {
     // mode, actualArgs would contain the default arguments for AOT shared library name on top
     // of aotSharedLibraryNameArg.
     for (String arg : actualArgs) {
-      if (arg.startsWith(FlutterLoader.aotSharedLibraryNameFlag)) {
+      if (arg.startsWith("--aot-shared-library-name=")) {
         fail();
       }
     }
@@ -620,9 +481,11 @@ public class FlutterLoaderTest {
     when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
     doReturn(realSoFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getPath();
-    String[] args = {symlinkArg};
-    flutterLoader.ensureInitializationComplete(ctx, args);
+    Bundle metadata = new Bundle();
+    metadata.putString(
+        "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getPath());
+    ctx.getApplicationInfo().metaData = metadata;
+    flutterLoader.ensureInitializationComplete(ctx, null);
 
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI)
@@ -638,12 +501,14 @@ public class FlutterLoaderTest {
     List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
     String canonicalSymlinkCanonicalizedPath = realSoFile.getCanonicalPath();
+    String aotSharedLibraryNameFlag = "--aot-shared-library-name=";
+    String symlinkAotSharedLibraryNameArg = aotSharedLibraryNameFlag + spySymlinkFile.getPath();
     String canonicalAotSharedLibraryNameArg =
-        FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+        aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
     assertFalse(
         "Args sent to FlutterJni.init incorrectly included absolute symlink path: "
             + spySymlinkFile.getAbsolutePath(),
-        actualArgs.contains(symlinkArg));
+        actualArgs.contains(symlinkAotSharedLibraryNameArg));
     assertTrue(
         "Args sent to FlutterJni.init incorrectly did not include canonicalized path of symlink: "
             + canonicalSymlinkCanonicalizedPath,
@@ -674,15 +539,17 @@ public class FlutterLoaderTest {
     List<File> unsafeFiles = Arrays.asList(nonSoFile, fileJustOutsideInternalStorage);
     Files.deleteIfExists(spySymlinkFile.toPath());
 
-    String symlinkArg = FlutterLoader.aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
-    String[] args = {symlinkArg};
+    Bundle metadata = new Bundle();
+    metadata.putString(
+        "io.flutter.embedding.android.AOTSharedLibraryName", spySymlinkFile.getAbsolutePath());
+    ctx.getApplicationInfo().metaData = metadata;
 
     for (File unsafeFile : unsafeFiles) {
       // Simulate a symlink since some filesystems do not support symlinks.
       when(flutterLoader.getFileFromPath(spySymlinkFile.getPath())).thenReturn(spySymlinkFile);
       doReturn(unsafeFile.getCanonicalPath()).when(spySymlinkFile).getCanonicalPath();
 
-      flutterLoader.ensureInitializationComplete(ctx, args);
+      flutterLoader.ensureInitializationComplete(ctx, null);
 
       ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
       verify(mockFlutterJNI)
@@ -698,8 +565,11 @@ public class FlutterLoaderTest {
       List<String> actualArgs = Arrays.asList(shellArgsCaptor.getValue());
 
       String canonicalSymlinkCanonicalizedPath = unsafeFile.getCanonicalPath();
+      String aotSharedLibraryNameFlag = "--aot-shared-library-name=";
+      String symlinkAotSharedLibraryNameArg =
+          aotSharedLibraryNameFlag + spySymlinkFile.getAbsolutePath();
       String canonicalAotSharedLibraryNameArg =
-          FlutterLoader.aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
+          aotSharedLibraryNameFlag + canonicalSymlinkCanonicalizedPath;
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included canonicalized path of symlink: "
               + canonicalSymlinkCanonicalizedPath,
@@ -707,7 +577,7 @@ public class FlutterLoaderTest {
       assertFalse(
           "Args sent to FlutterJni.init incorrectly included absolute path of symlink: "
               + spySymlinkFile.getAbsolutePath(),
-          actualArgs.contains(symlinkArg));
+          actualArgs.contains(symlinkAotSharedLibraryNameArg));
 
       // Clean up created files.
       spySymlinkFile.delete();
@@ -717,6 +587,525 @@ public class FlutterLoaderTest {
       // FlutterLoader.ensureInitialized and mockFlutterJNI.init for testing.
       flutterLoader.initialized = false;
       clearInvocations(mockFlutterJNI);
+    }
+  }
+
+  @Test
+  public void itSetsEnableSoftwareRenderingFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableSoftwareRendering",
+        true,
+        "--enable-software-rendering");
+  }
+
+  @Test
+  public void getSofwareRenderingEnabledViaManifest_returnsExpectedValueWhenSetViaManifest() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putBoolean("io.flutter.embedding.android.EnableSoftwareRendering", true);
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    assertTrue(flutterLoader.getSofwareRenderingEnabledViaManifest());
+  }
+
+  @Test
+  public void itSetsSkiaDeterministicRenderingFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.SkiaDeterministicRendering",
+        true,
+        "--skia-deterministic-rendering");
+  }
+
+  @Test
+  public void itSetsFlutterAssetsDirFromMetadata() {
+    String expectedAssetsDir = "flutter_assets_dir";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.FlutterAssetsDir",
+        expectedAssetsDir,
+        "--flutter-assets-dir=" + expectedAssetsDir);
+  }
+
+  @Test
+  public void itSetsOldGenHeapSizeFromMetaData() {
+    // Test old gen heap size can be set from metadata.
+    int expectedOldGenHeapSize = 256;
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.OldGenHeapSize",
+        expectedOldGenHeapSize,
+        "--old-gen-heap-size=" + expectedOldGenHeapSize);
+
+    // Test that default old gen heap size will not be included if it
+    // is configured via the manifest.
+    ActivityManager activityManager =
+        (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+    ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+    activityManager.getMemoryInfo(memInfo);
+    int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.OldGenHeapSize",
+        expectedOldGenHeapSize,
+        "--old-gen-heap-size=" + oldGenHeapSizeMegaBytes,
+        false);
+  }
+
+  @Test
+  public void itSetsEnableImpellerFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableImpeller", true, "--enable-impeller=true");
+  }
+
+  @Test
+  public void itSetsImpellerBackendFromMetadata() {
+    String expectedImpellerBackend = "Vulkan";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerBackend",
+        expectedImpellerBackend,
+        "--impeller-backend=" + expectedImpellerBackend);
+  }
+
+  @Test
+  public void itSetsEnableSurfaceControlFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
+  }
+
+  @Test
+  public void itSetsEnableFlutterGPUFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableFlutterGPU", true, "--enable-flutter-gpu");
+  }
+
+  @Test
+  public void itSetsImpellerLazyShaderModeFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerLazyShaderInitialization",
+        true,
+        "--impeller-lazy-shader-mode=true");
+  }
+
+  @Test
+  public void itSetsImpellerAntiAliasLinesFromMetadata() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ImpellerAntialiasLines", true, "--impeller-antialias-lines");
+  }
+
+  @Test
+  public void itSetsVmSnapshotDataFromMetaData() {
+    String expectedVmSnapshotData = "vm_snapshot_data";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.VmSnapshotData",
+        expectedVmSnapshotData,
+        "--vm-snapshot-data=" + expectedVmSnapshotData);
+  }
+
+  @Test
+  public void itSetsIsolateSnapshotDataFromMetaData() {
+    String expectedIsolateSnapshotData = "isolate_snapshot_data";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.IsolateSnapshotData",
+        expectedIsolateSnapshotData,
+        "--isolate-snapshot-data=" + expectedIsolateSnapshotData);
+  }
+
+  @Test
+  public void itSetsUseTestFontsFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.UseTestFonts", true, "--use-test-fonts");
+  }
+
+  @Test
+  public void itSetsVmServicePortFromMetaData() {
+    int expectedVmServicePort = 12345;
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.VMServicePort",
+        expectedVmServicePort,
+        "--vm-service-port=" + expectedVmServicePort);
+  }
+
+  @Test
+  public void itSetsEnableVulkanValidationFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableVulkanValidation", true, "--enable-vulkan-validation");
+  }
+
+  @Test
+  public void itSetsEnableOpenGLGPUTracingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableOpenGLGPUTracing", true, "--enable-opengl-gpu-tracing");
+  }
+
+  @Test
+  public void itSetsEnableVulkanGPUTracingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableVulkanGPUTracing", true, "--enable-vulkan-gpu-tracing");
+  }
+
+  @Test
+  public void itSetsLeakVMFromMetaData() {
+    // Test that LeakVM can be set via manifest.
+    testFlagFromMetaData("io.flutter.embedding.android.LeakVM", false, "--leak-vm=false");
+
+    // Test that default LeakVM will not be included if it is configured via the manifest.
+    testFlagFromMetaData("io.flutter.embedding.android.LeakVM", false, "--leak-vm=true", false);
+  }
+
+  @Test
+  public void itSetsTraceStartupFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.TraceStartup", true, "--trace-startup");
+  }
+
+  @Test
+  public void itSetsStartPausedFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.StartPaused", true, "--start-paused");
+  }
+
+  @Test
+  public void itSetsDisableServiceAuthCodesFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DisableServiceAuthCodes",
+        true,
+        "--disable-service-auth-codes");
+  }
+
+  @Test
+  public void itSetsEndlessTraceBufferFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EndlessTraceBuffer", true, "--endless-trace-buffer");
+  }
+
+  @Test
+  public void itSetsEnableDartProfilingFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.EnableDartProfiling", true, "--enable-dart-profiling");
+  }
+
+  @Test
+  public void itSetsProfileStartupFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.ProfileStartup", true, "--profile-startup");
+  }
+
+  @Test
+  public void itSetsTraceSkiaFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.TraceSkia", true, "--trace-skia");
+  }
+
+  @Test
+  public void itSetsTraceSkiaAllowlistFromMetaData() {
+    String expectedTraceSkiaAllowList = "allowed1,allowed2,allowed3";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceSkiaAllowList",
+        expectedTraceSkiaAllowList,
+        "--trace-skia-allowlist=" + expectedTraceSkiaAllowList);
+  }
+
+  @Test
+  public void itSetsTraceSystraceFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.TraceSystrace", true, "--trace-systrace");
+  }
+
+  @Test
+  public void itSetsTraceToFileFromMetaData() {
+    String expectedTraceToFilePath = "/path/to/trace/file";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.TraceToFile",
+        expectedTraceToFilePath,
+        "--trace-to-file=" + expectedTraceToFilePath);
+  }
+
+  @Test
+  public void itSetsProfileMicrotasksFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.ProfileMicrotasks", true, "--profile-microtasks");
+  }
+
+  @Test
+  public void itSetsDumpSkpOnShaderCompilationFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DumpSkpOnShaderCompilation",
+        true,
+        "--dump-skp-on-shader-compilation");
+  }
+
+  @Test
+  public void itSetsPurgePersistentCacheFromMetaData() {
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.PurgePersistentCache", true, "--purge-persistent-cache");
+  }
+
+  @Test
+  public void itSetsVerboseLoggingFromMetaData() {
+    testFlagFromMetaData("io.flutter.embedding.android.VerboseLogging", true, "--verbose-logging");
+  }
+
+  @Test
+  public void itSetsDartFlagsFromMetaData() {
+    String expectedDartFlags = "--enable-asserts --enable-vm-service";
+    testFlagFromMetaData(
+        "io.flutter.embedding.android.DartFlags",
+        expectedDartFlags,
+        "--dart-flags=" + expectedDartFlags);
+  }
+
+  @Test
+  public void itDoesNotSetDisableMergedPlatformUIThreadFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    metadata.putBoolean("io.flutter.embedding.android.DisableMergedPlatformUIThread", true);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+
+    // Verify that an IllegalArgumentException is thrown when DisableMergedPlatformUIThread is set,
+    // as it is no longer supported.
+    Exception exception =
+        assertThrows(
+            RuntimeException.class, () -> flutterLoader.ensureInitializationComplete(ctx, null));
+    Throwable cause = exception.getCause();
+
+    assertNotNull(cause);
+    assertTrue(
+        "Expected cause to be IllegalArgumentException", cause instanceof IllegalArgumentException);
+    assertTrue(
+        cause
+            .getMessage()
+            .contains(
+                "io.flutter.embedding.android.DisableMergedPlatformUIThread is deprecated and no longer allowed."));
+  }
+
+  @Test
+  public void itDoesNotSetUnrecognizedCommandLineArgument() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    String[] unrecognizedArg = {"--unrecognized-argument"};
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, unrecognizedArg);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    assertFalse(
+        "Unrecognized argument '"
+            + unrecognizedArg[0]
+            + "' was found in the arguments passed to FlutterJNI.init",
+        arguments.contains(unrecognizedArg[0]));
+  }
+
+  @Test
+  public void itDoesSetRecognizedCommandLineArgument() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    String[] recognizedArg = {"--enable-impeller=true"};
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, recognizedArg);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    assertTrue(
+        "Recognized argument '"
+            + recognizedArg[0]
+            + "' was not found in the arguments passed to FlutterJNI.init",
+        arguments.contains(recognizedArg[0]));
+  }
+
+  @Test
+  public void ifFlagSetViaManifestAndCommandLineThenCommandLineTakesPrecedence() {
+    String expectedImpellerArgFromMetadata = "--enable-impeller=true";
+    String expectedImpellerArgFromCommandLine = "--enable-impeller=false";
+
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putBoolean("io.flutter.embedding.android.EnableImpeller", true);
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(
+        ctx, new String[] {expectedImpellerArgFromCommandLine});
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedImpellerArgFromMetadata)
+            < arguments.indexOf(expectedImpellerArgFromCommandLine));
+  }
+
+  @Test
+  public void ifAOTSharedLibraryNameSetViaManifestAndCommandLineThenCommandLineTakesPrecedence()
+      throws IOException {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = spy(new FlutterLoader(mockFlutterJNI));
+    File internalStorageDir = ctx.getFilesDir();
+    Path internalStorageDirAsPathObj = internalStorageDir.toPath();
+
+    ctx.getApplicationInfo().nativeLibraryDir =
+        Paths.get("some", "path", "doesnt", "matter").toString();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx);
+
+    // Test paths for library living within internal storage.
+    Path pathWithDirectInternalStoragePath1 = internalStorageDirAsPathObj.resolve("library1.so");
+    Path pathWithDirectInternalStoragePath2 = internalStorageDirAsPathObj.resolve("library2.so");
+
+    String expectedAotSharedLibraryNameFromMetadata =
+        "--aot-shared-library-name="
+            + pathWithDirectInternalStoragePath1.toFile().getCanonicalPath();
+    String expectedAotSharedLibraryNameFromCommandLine =
+        "--aot-shared-library-name="
+            + pathWithDirectInternalStoragePath2.toFile().getCanonicalPath();
+
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    metadata.putString(
+        "io.flutter.embedding.android.AOTSharedLibraryName",
+        pathWithDirectInternalStoragePath1.toFile().getCanonicalPath());
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(
+        ctx,
+        new String[] {expectedAotSharedLibraryNameFromCommandLine, "--enable-opengl-gpu-tracing"});
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    // Verify that the command line argument takes precedence over the manifest metadata.
+    assertTrue(
+        arguments.indexOf(expectedAotSharedLibraryNameFromCommandLine)
+            < arguments.indexOf(expectedAotSharedLibraryNameFromMetadata));
+
+    // Verify other command line arguments are still passed through.
+    assertTrue(
+        "Expected argument --enable-opengl-gpu-tracing was not found in the arguments passed to FlutterJNI.init",
+        arguments.contains("--enable-opengl-gpu-tracing"));
+  }
+
+  private void testFlagFromMetaData(String metadataKey, Object metadataValue, String expectedArg) {
+    testFlagFromMetaData(metadataKey, metadataValue, expectedArg, true);
+  }
+
+  // Test that specified shell argument can be set via manifest metadata as expected.
+  private void testFlagFromMetaData(
+      String metadataKey, Object metadataValue, String expectedArg, boolean shouldBeSet) {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metadata = new Bundle();
+
+    // Place metadata key and value into the metadata bundle used to mock the manifest.
+    if (metadataValue instanceof Boolean) {
+      metadata.putBoolean(metadataKey, (Boolean) metadataValue);
+    } else if (metadataValue instanceof Integer) {
+      metadata.putInt(metadataKey, (Integer) metadataValue);
+    } else if (metadataValue instanceof String) {
+      metadata.putString(metadataKey, (String) metadataValue);
+    } else {
+      throw new IllegalArgumentException(
+          "Unsupported metadataValue type: " + metadataValue.getClass());
+    }
+
+    ctx.getApplicationInfo().metaData = metadata;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+
+    if (shouldBeSet) {
+      assertTrue(
+          "Expected argument '"
+              + expectedArg
+              + "' was not found in the arguments passed to FlutterJNI.init",
+          arguments.contains(expectedArg));
+    } else {
+      assertFalse(
+          "Unexpected argument '"
+              + expectedArg
+              + "' was found in the arguments passed to FlutterJNI.init",
+          arguments.contains(expectedArg));
     }
   }
 }
