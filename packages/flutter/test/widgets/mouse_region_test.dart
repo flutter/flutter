@@ -4,10 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({super.key, this.onHover, this.child, this.onEnter, this.onExit});
@@ -798,7 +800,7 @@ void main() {
     final events = <PointerEvent>[];
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: Transform.scale(
             scale: scaleFactor,
@@ -814,7 +816,7 @@ void main() {
               },
               child: Container(
                 key: key,
-                color: Colors.blue,
+                color: const Color(0xFF0000FF),
                 height: localHeight,
                 width: localWidth,
                 child: const Text('Hi'),
@@ -1037,7 +1039,11 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     // Move to a position out of MouseRegion
-    await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+    final Finder mouseRegionFinder = find.ancestor(
+      of: find.text('not hovering'),
+      matching: find.byType(MouseRegion),
+    );
+    await gesture.moveTo(tester.getBottomRight(mouseRegionFinder) + const Offset(10, -10));
     await tester.pumpAndSettle();
     expect(find.text('not hovering'), findsOneWidget);
 
@@ -2006,12 +2012,15 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
-          child: Draggable<int>(
-            feedback: Container(width: 20, height: 20, color: Colors.blue),
-            childWhenDragging: Container(width: 20, height: 20, color: Colors.yellow),
-            child: ElevatedButton(child: const Text('Drag me'), onPressed: () {}),
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 14),
+            child: Draggable<int>(
+              feedback: Container(width: 20, height: 20, color: const Color(0xFF0000FF)),
+              childWhenDragging: Container(width: 20, height: 20, color: const Color(0xFFFFFF00)),
+              child: GestureDetector(onTap: () {}, child: const Text('Drag me')),
+            ),
           ),
         ),
       ),
@@ -2043,9 +2052,10 @@ void main() {
     var onExit = false;
     var onHover = false;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MouseRegion(
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: MouseRegion(
             onEnter: (_) => onEnter = true,
             onExit: (_) => onExit = true,
             onHover: (_) => onHover = true,
