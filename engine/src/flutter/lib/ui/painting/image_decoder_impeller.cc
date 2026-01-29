@@ -540,15 +540,15 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
                        << "GPU Error submitting image decoding command buffer.";
                  }
                },
-               /*block_on_schedule=*/true)
+               /*block_on_schedule=*/false)
            .ok()) {
     std::string decode_error("Failed to submit image decoding command buffer.");
     FML_DLOG(ERROR) << decode_error;
     return std::make_pair(nullptr, decode_error);
   }
 
-  // Flush the pending command buffer to ensure that its output becomes visible
-  // to the raster thread.
+  // Ensure the upload is enqueued before the image is used. Backend-specific
+  // synchronization is handled via tracking fences when available.
   if (context->AddTrackingFence(result_texture)) {
     command_buffer->WaitUntilScheduled();
   } else {
