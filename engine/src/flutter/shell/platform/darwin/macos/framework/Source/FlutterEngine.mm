@@ -153,14 +153,6 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (void)engineCallbackOnPlatformMessage:(const FlutterPlatformMessage*)message;
 
 /**
- * Invoked right before the engine is restarted.
- *
- * This should reset states to as if the application has just started.  It
- * usually indicates a hot restart (Shift-R in Flutter CLI.)
- */
-- (void)engineCallbackOnPreEngineRestart;
-
-/**
  * Requests that the task be posted back the to the Flutter engine at the target time. The target
  * time is in the clock used by the Flutter engine.
  */
@@ -1289,6 +1281,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
   }
+  [_windowController closeAllWindows];
   [_platformViewController reset];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
