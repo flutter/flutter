@@ -15,12 +15,26 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
+/// The scope of Xcode workspace cleaning.
+enum XcodeCleanScope { workspace, app, skip }
+
 class CleanCommand extends FlutterCommand {
   CleanCommand({bool verbose = false}) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
       help: 'When cleaning Xcode schemes, clean only the specified scheme.',
+    );
+    argParser.addOption(
+      'xcode-clean',
+      defaultsTo: 'workspace',
+      help: 'Controls Xcode workspace cleanup.',
+      allowed: <String>['workspace', 'app', 'skip'],
+      allowedHelp: <String, String>{
+        'workspace': 'Clean all Xcode schemes.',
+        'app': 'Clean only application schemes.',
+        'skip': 'Skip Xcode workspace cleaning.',
+      },
     );
   }
 
@@ -45,8 +59,24 @@ class CleanCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final Xcode? xcode = globals.xcode;
     if (xcode != null && xcode.isInstalledAndMeetsVersionCheck) {
-      await _cleanXcode(flutterProject.ios);
-      await _cleanXcode(flutterProject.macos);
+      final String xcodeCleanArg = (argResults?['xcode-clean'] as String?) ?? 'workspace';
+      final XcodeCleanScope xcodeCleanScope = switch (xcodeCleanArg) {
+        'workspace' => XcodeCleanScope.workspace,
+        'skip' => XcodeCleanScope.skip,
+        'app' => XcodeCleanScope.app,
+        _ => throwToolExit('Invalid value for --xcode-clean.'),
+      };
+
+      if (xcodeCleanScope == XcodeCleanScope.skip) {
+        if (argResults?.wasParsed('scheme') ?? false) {
+          throwToolExit('--scheme cannot be used with --xcode-clean=skip.');
+        } else {
+          globals.printTrace('Skipping Xcode workspace cleaning.');
+        }
+      } else {
+        await _cleanXcode(xcodeProject: flutterProject.ios, xcodeCleanScope: xcodeCleanScope);
+        await _cleanXcode(xcodeProject: flutterProject.macos, xcodeCleanScope: xcodeCleanScope);
+      }
     }
 
     final Directory buildDir = globals.fs.directory(getBuildDirectory());
@@ -72,12 +102,23 @@ class CleanCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
+  Future<void> _cleanXcode({
+    required XcodeBasedProject xcodeProject,
+    required XcodeCleanScope xcodeCleanScope,
+  }) async {
     final Directory? xcodeWorkspace = xcodeProject.xcodeWorkspace;
     if (xcodeWorkspace == null) {
       return;
     }
-    final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
+
+    final String progressMessage = switch (xcodeCleanScope) {
+      XcodeCleanScope.workspace => 'Cleaning Xcode workspace...',
+      XcodeCleanScope.app => 'Cleaning Xcode application schemes...',
+      XcodeCleanScope.skip => throw StateError(
+        'XcodeCleanScope.skip should be handled before calling _cleanXcode.',
+      ),
+    };
+    final Status xcodeStatus = globals.logger.startProgress(progressMessage);
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
@@ -97,12 +138,30 @@ class CleanCommand extends FlutterCommand {
           verbose: _verbose,
         );
       } else {
-        for (final String scheme in projectInfo.schemes) {
-          await xcodeProjectInterpreter.cleanWorkspace(
-            xcodeWorkspace.path,
-            scheme,
-            verbose: _verbose,
+        final List<String> schemesToClean = switch (xcodeCleanScope) {
+          XcodeCleanScope.workspace => projectInfo.schemes,
+          XcodeCleanScope.app => _applicationSchemes(
+            projectInfo: projectInfo,
+            xcodeProject: xcodeProject,
+          ),
+          XcodeCleanScope.skip => throw StateError(
+            'XcodeCleanScope.skip should be handled before calling _cleanXcode.',
+          ),
+        };
+        if (schemesToClean.isEmpty) {
+          globals.printTrace('No Xcode schemes selected for cleaning for the current clean scope.');
+        } else {
+          globals.printTrace(
+            'Cleaning ${schemesToClean.length} Xcode scheme(s): '
+            '${schemesToClean.join(', ')}',
           );
+          for (final scheme in schemesToClean) {
+            await xcodeProjectInterpreter.cleanWorkspace(
+              xcodeWorkspace.path,
+              scheme,
+              verbose: _verbose,
+            );
+          }
         }
       }
     } on Exception catch (error) {
@@ -156,5 +215,40 @@ class CleanCommand extends FlutterCommand {
     } finally {
       deletionStatus.stop();
     }
+  }
+
+  /// Returns schemes that are considered part of the application, and not a dependency.
+  ///
+  /// This is a heuristic that includes:
+  /// - The main scheme matching the host app name.
+  /// - Schemes that are flavors of the main scheme.
+  /// - Schemes that match a target name.
+  ///
+  /// This heuristic may include false positives depending on project structure.
+  List<String> _applicationSchemes({
+    required XcodeProjectInfo projectInfo,
+    required XcodeBasedProject xcodeProject,
+  }) {
+    final String hostProjectName = xcodeProject.hostAppProjectName;
+    final applicationSchemePrefix = '$hostProjectName-';
+    return projectInfo.schemes.where((String scheme) {
+      if (scheme == hostProjectName) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application scheme).');
+        return true;
+      }
+
+      if (scheme.startsWith(applicationSchemePrefix)) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application flavor).');
+        return true;
+      }
+
+      if (projectInfo.targets.contains(scheme)) {
+        globals.printTrace('Including Xcode scheme "$scheme" (application target).');
+        return true;
+      }
+
+      globals.printTrace('Skipping Xcode scheme "$scheme" (non-application scheme).');
+      return false;
+    }).toList();
   }
 }
