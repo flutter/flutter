@@ -16,8 +16,5 @@ String? get impellerBackend {
       return arg.substring(backendFlag.length);
     }
   }
-  if (Platform.isMacOS || Platform.isIOS) {
-    return 'metal';
-  }
-  return 'vulkan';
+  return null;
 }

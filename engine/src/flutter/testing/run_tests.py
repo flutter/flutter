@@ -929,7 +929,30 @@ def gather_dart_tests(
   dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
-  impeller_backends = ['', 'vulkan']
+  opengles_skipped_tests = [
+      'assets_test.dart',
+      'canvas_test.dart',
+      'codec_test.dart',
+      'color_filter_test.dart',
+      'compositing_test.dart',
+      'decode_image_from_pixels_sync_test.dart',
+      'encoding_test.dart',
+      'fragment_shader_test.dart',
+      'gpu_test.dart',
+      'high_bitrate_texture_test.dart',
+      'image_dispose_test.dart',
+      'image_events_test.dart',
+      'image_filter_test.dart',
+      'image_resize_test.dart',
+      'image_shader_test.dart',
+      'image_test.dart',
+      'mask_filter_test.dart',
+      'painting_test.dart',
+      'text_test.dart',
+      'tracing_test.dart',
+  ]
+
+  impeller_backends = ['', 'vulkan', 'opengles']
   if is_mac():
     impeller_backends.append('metal')
   if 'release' not in build_dir:
@@ -941,6 +964,9 @@ def gather_dart_tests(
         _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
           for impeller in impeller_backends:
+            if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
+              _logger.info("Skipping for opengles: '%s'", dart_test_file)
+              continue
             yield gather_dart_test(
                 build_dir, dart_test_file,
                 FlutterTesterOptions(
@@ -953,12 +979,16 @@ def gather_dart_tests(
             )
 
   for dart_test_file in dart_tests:
-    if test_filter is not None and os.path.basename(dart_test_file) not in test_filter:
+    dart_test_basename = os.path.basename(dart_test_file)
+    if test_filter is not None and dart_test_basename not in test_filter:
       _logger.info("Skipping '%s' due to filter.", dart_test_file)
     else:
       _logger.info("Gathering dart test '%s'", dart_test_file)
       for multithreaded in [False, True]:
         for impeller in impeller_backends:
+          if impeller == 'opengles' and dart_test_basename in opengles_skipped_tests:
+            _logger.info("Skipping for opengles: '%s'", dart_test_file)
+            continue
           yield gather_dart_test(
               build_dir, dart_test_file,
               FlutterTesterOptions(multithreaded=multithreaded, impeller_backend=impeller)
@@ -1117,6 +1147,7 @@ def run_engine_tasks_in_parallel(tasks: typing.List[EngineExecutableTask]) -> bo
     queue_listener.stop()
 
   if len(failures) > 0:
+    print_divider('<')
     _logger.error('The following commands failed:')
     for task, failure_exn in failures:
       _logger.error('%s\n  %s\n\n', str(task), str(failure_exn))
