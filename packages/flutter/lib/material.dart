@@ -164,6 +164,7 @@ export 'src/material/slider.dart';
 export 'src/material/slider_parts.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/slider_value_indicator_shape.dart';
+export 'src/material/sliver_expansion_panel_list.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/snack_bar_theme.dart';
 export 'src/material/spell_check_suggestions_toolbar.dart';
