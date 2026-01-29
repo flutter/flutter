@@ -815,16 +815,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
                                           const flutter::Settings& settings,
-                                          BOOL allowHeadlessExecution) {
+                                          BOOL createUIThread) {
   // The current thread will be used as the platform thread. Ensure that the message loop is
   // initialized.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  // For headless execution, we MUST create a separate UI thread because the platform
-  // run loop isn't being actively pumped (like in notification extensions).
-  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled ||
-      allowHeadlessExecution) {
+  if (createUIThread) {
     threadHostType |= flutter::ThreadHost::Type::kUi;
   }
 
@@ -887,9 +884,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   SetEntryPoint(&settings, entrypoint, libraryURI);
 
+  // Determine whether to use a merged platform/UI thread. We need a separate UI thread when:
+  // - Impeller is disabled (merged thread only works with Impeller)
+  // - merged_platform_ui_thread setting is not enabled
+  // - Running in headless mode (e.g., notification extensions) where the platform's
+  //   CFRunLoop is not being actively pumped
+  const bool useMergedThread =
+      settings.enable_impeller &&
+      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled &&
+      !self.allowHeadlessExecution;
+
   NSString* threadLabel = [FlutterEngine generateThreadLabel:self.labelPrefix];
   _threadHost = std::make_shared<flutter::ThreadHost>();
-  *_threadHost = MakeThreadHost(threadLabel, settings, self.allowHeadlessExecution);
+  *_threadHost = MakeThreadHost(threadLabel, settings, /*createUIThread=*/!useMergedThread);
 
   __weak FlutterEngine* weakSelf = self;
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
@@ -911,14 +918,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   fml::RefPtr<fml::TaskRunner> ui_runner;
-  // For headless execution (like notification extensions), we CANNOT use merged platform/UI thread
-  // because the platform's CFRunLoop is not being actively pumped.
-  // Force separate UI thread for headless mode.
-  bool useMergedThread =
-      settings.enable_impeller &&
-      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled &&
-      !self.allowHeadlessExecution;
-
   if (useMergedThread) {
     ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   } else {
