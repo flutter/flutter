@@ -40,6 +40,28 @@ void main() {
     await tester.tap(find.byType(Checkbox));
     expect(log, equals(<dynamic>[false, '-', false]));
   });
+  testWidgets('CheckboxListTile forwards statesController to ListTile', (
+    WidgetTester tester,
+  ) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: CheckboxListTile(
+            value: true,
+            onChanged: (_) {},
+            title: const Text('Checkbox'),
+            statesController: controller,
+          ),
+        ),
+      ),
+    );
+
+    final ListTile tile = tester.widget(find.byType(ListTile));
+    expect(tile.statesController, controller);
+  });
 
   testWidgets('Material2 - CheckboxListTile checkColor test', (WidgetTester tester) async {
     const checkBoxBorderColor = Color(0xff2196f3);
