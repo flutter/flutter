@@ -27,6 +27,7 @@ Widget buildTest({
   ScrollController? controller,
   ScrollPhysics? scrollPhysics,
   Widget? background,
+  bool allowFling = true,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -59,6 +60,7 @@ Widget buildTest({
               reportedDismissUpdateProgress = details.progress;
             },
             background: background,
+            allowFling: allowFling,
             dismissThresholds: startToEndThreshold == null
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
@@ -1147,5 +1149,64 @@ void main() {
     final RenderBox textRenderObjectEnd = tester.renderObject(find.text('I Love Flutter!'));
 
     expect(identical(textRenderObjectBegin, textRenderObjectEnd), true);
+  });
+
+  testWidgets('Horizontal fling respects allowFling property', (WidgetTester tester) async {
+    // Build test with allowFling=false
+    await tester.pumpWidget(buildTest(allowFling: false));
+    expect(dismissedItems, isEmpty);
+
+    // Weak fling from zero offset should not dismiss
+    await dismissItem(
+      tester,
+      0,
+      gestureDirection: AxisDirection.right,
+      mechanism: flingElementFromZero,
+    );
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, equals(<int>[]));
+
+    await dismissItem(
+      tester,
+      0,
+      gestureDirection: AxisDirection.left,
+      mechanism: flingElementFromZero,
+    );
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, equals(<int>[]));
+
+    // Strong fling should also not dismiss when allowFling=false
+    await dismissItem(
+      tester,
+      0,
+      gestureDirection: AxisDirection.right,
+      mechanism: flingElement,
+    );
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, equals(<int>[]));
+
+    // Build test with default property, allowFling=true
+    await tester.pumpWidget(buildTest());
+
+    // Strong fling should dismiss items
+    await dismissItem(
+      tester,
+      0,
+      gestureDirection: AxisDirection.right,
+      mechanism: flingElement,
+    );
+    expect(find.text('0'), findsNothing);
+    expect(dismissedItems, equals(<int>[0]));
+    expect(reportedDismissDirection, DismissDirection.startToEnd);
+
+    await dismissItem(
+      tester,
+      1,
+      gestureDirection: AxisDirection.left,
+      mechanism: flingElement,
+    );
+    expect(find.text('1'), findsNothing);
+    expect(dismissedItems, equals(<int>[0, 1]));
+    expect(reportedDismissDirection, DismissDirection.endToStart);
   });
 }
