@@ -220,8 +220,18 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
       // curve as well.
       HandlePreviousJoin(start_perpendicular);
 
-      Scalar count =
-          std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
+      // We use the scale suggested by the transform basis which is the
+      // same scale that would be used for filling the path. For very
+      // large stroke widths, the polygonization at the size of the path
+      // segments may not necessarily produce a smooth approximation of
+      // the curve at the outer edge of the stroke, but we adjust for this
+      // by inserting a synthetic round join between interpolation points
+      // to smooth out the curve at the outer edge of the stroke (see
+      // RecordCurveSegment below). Note that a round join is always used
+      // for this adjustment regardless of the requested join in the
+      // stroke parameters because it is attempting to smooth the middle
+      // of a curve rather than decorate between 2 path segments.
+      Scalar count = std::ceilf(curve.SubdivisionCount(scale_));
 
       Point prev = curve.p1;
       SeparatedVector2 prev_perpendicular = start_perpendicular;
@@ -247,7 +257,9 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
                           const SeparatedVector2& cur_perpendicular) {
     if (prev_perpendicular.GetAlignment(cur_perpendicular) < trigs_[1].cos) {
       // We only connect 2 curved segments if their change in direction
-      // is faster than a single sample of a round join.
+      // is faster than a single sample of a round join. We always use a
+      // round join here because this is about smoothness of curves rather
+      // than a decoration for specific segments of the path.
       AppendVertices(cur, prev_perpendicular);
       AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
     }
