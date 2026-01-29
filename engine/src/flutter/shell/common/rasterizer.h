@@ -669,6 +669,9 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotDelegate|
   bool MakeRenderContextCurrent() override;
 
+  // |SnapshotDelegate|
+  sk_sp<DlImage> CreateImageFromTexture(int64_t texture_id) override;
+
   // |Stopwatch::Delegate|
   /// Time limit for a smooth frame.
   ///

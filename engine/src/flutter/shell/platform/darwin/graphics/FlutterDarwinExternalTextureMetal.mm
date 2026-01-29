@@ -122,6 +122,32 @@ FLUTTER_ASSERT_ARC
   }
 }
 
+- (sk_sp<flutter::DlImage>)createDlImageWithAiksContext:
+    (nonnull impeller::AiksContext*)aiksContext {
+  // Get current pixel buffer from the texture provider
+  CVPixelBufferRef pixelBuffer = [_externalTexture copyPixelBuffer];
+  if (!pixelBuffer) {
+    // Fall back to last cached pixel buffer if available
+    pixelBuffer = CVPixelBufferRetain(_lastPixelBuffer);
+  }
+  if (!pixelBuffer) {
+    return nullptr;
+  }
+
+  // Create a paint context with the aiks_context for wrapping
+  flutter::Texture::PaintContext context;
+  context.aiks_context = aiksContext;
+
+  // Store pixel format for wrapping
+  _pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
+
+  // Wrap the pixel buffer as a DlImage (zero-copy via CVMetalTextureCache)
+  sk_sp<flutter::DlImage> image = [self wrapExternalPixelBuffer:pixelBuffer context:context];
+
+  CVPixelBufferRelease(pixelBuffer);
+  return image;
+}
+
 #pragma mark - External texture skia wrapper methods.
 
 - (sk_sp<flutter::DlImage>)wrapExternalPixelBuffer:(CVPixelBufferRef)pixelBuffer
