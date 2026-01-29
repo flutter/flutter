@@ -119,6 +119,7 @@ void main() {
     });
 
     testWidgets('can reset all values', (WidgetTester tester) async {
+      addTearDown(tester.binding.resetLayers);
       final initial = DisplaySnapshot(tester.view.display);
 
       tester.view.display.devicePixelRatio = 7;

@@ -146,4 +146,22 @@ void main() {
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(SizedBox).last);
     expect(box.size, equals(const Size(100.0, 100)));
   });
+
+  testWidgets('AnimatedAlign does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedAlign(
+              alignment: Alignment.bottomCenter,
+              duration: Duration(milliseconds: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedAlign)), Size.zero);
+  });
 }

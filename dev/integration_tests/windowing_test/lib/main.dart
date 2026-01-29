@@ -3,25 +3,15 @@
 // found in the LICENSE file.
 
 // ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: implementation_imports
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:flutter_driver/driver_extension.dart';
-
-class _MainRegularWindowControllerDelegate
-    extends RegularWindowControllerDelegate {
-  @override
-  void onWindowDestroyed() {
-    super.onWindowDestroyed();
-
-    exit(0);
-  }
-}
 
 late final RegularWindowController controller;
 final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(
@@ -180,11 +170,11 @@ void main() {
   controller = RegularWindowController(
     preferredSize: Size(640, 480),
     title: 'Integration Test',
-    delegate: _MainRegularWindowControllerDelegate(),
+    delegate: RegularWindowControllerDelegate(),
   );
-  windowCreated.complete();
 
   runWidget(RegularWindow(controller: controller, child: MyApp()));
+  windowCreated.complete();
 }
 
 class MyApp extends StatelessWidget {
