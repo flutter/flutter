@@ -103,6 +103,12 @@ class HostWindow {
   // Returns |true| if this window is fullscreen, otherwise |false|.
   virtual bool GetFullscreen() const;
 
+  // Starts dragging the window.
+  virtual void BeginMoveDrag(int button);
+
+  // Starts resizing the window.
+  virtual void BeginResizeDrag(int button, int edge);
+
   // Given a window identifier, returns the window content size of the
   // window.
   static ActualWindowSize GetWindowContentSize(HWND hwnd);

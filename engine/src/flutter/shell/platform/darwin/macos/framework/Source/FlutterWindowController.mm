@@ -383,4 +383,12 @@ bool InternalFlutter_Window_IsActivated(void* window) {
   return w.isKeyWindow;
 }
 
+void InternalFlutter_Window_BeginMoveDrag(void* window, int button) {
+  // FIXME: Make window follow cursor until button is released
+}
+
+void InternalFlutter_Window_BeginResizeDrag(void* window, int button, int edge) {
+  // FIXME: Make window resize with cursor until button is released
+}
+
 // NOLINTEND(google-objc-function-naming)

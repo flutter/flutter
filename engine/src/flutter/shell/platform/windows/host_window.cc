@@ -721,6 +721,14 @@ bool HostWindow::GetFullscreen() const {
   return is_fullscreen_;
 }
 
+void HostWindow::BeginMoveDrag(int button) {
+  // FIXME: Make window follow cursor until button is released
+}
+
+void HostWindow::BeginResizeDrag(int button, int edge) {
+  // FIXME: Make window resize with cursor until button is released
+}
+
 ActualWindowSize HostWindow::GetWindowContentSize(HWND hwnd) {
   RECT rect;
   GetClientRect(hwnd, &rect);
