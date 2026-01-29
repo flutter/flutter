@@ -5323,6 +5323,8 @@ base class ImageShader extends Shader {
   external void _dispose();
 }
 
+typedef _UniformFloatInfo = ({int index, int size});
+
 /// An instance of [FragmentProgram] creates [Shader] objects (as used by
 /// [Paint.shader]).
 ///
@@ -5409,7 +5411,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
           return true;
         }
 
-        slot._shaderIndex = program._getUniformFloatIndex(slot.name, slot.index);
+        final _UniformFloatInfo info = program._getUniformFloatInfo(slot.name);
+        slot._shaderIndex = info.index + slot.index;
+
         return false;
       });
 
@@ -5428,7 +5432,12 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   bool _hasUniform(String name) {
-    return _uniformInfo.any((dynamic entry) => (entry! as Map<String, Object>)['name'] == name);
+    return _uniformInfo.any((dynamic entryDynamic) {
+      final entry = entryDynamic! as Map<String, Object>;
+      return entry['name'] == name ||
+          (entry['type'] == 'Struct' &&
+              (entry['struct_field_names']! as List<dynamic>).contains(name));
+    });
   }
 
   int _getImageSamplerIndex(String name) {
@@ -5453,35 +5462,46 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return index;
   }
 
-  int _getUniformFloatIndex(String name, int index, [int? expectedSize]) {
-    if (index < 0) {
-      throw ArgumentError('Index `$index` out of bounds for `$name`.');
-    }
-
+  _UniformFloatInfo _getUniformFloatInfo(String name) {
     var offset = 0;
+    var sizeInFloats = 0;
     var found = false;
     const sizeOfFloat = 4;
     for (final Object? entryDynamic in _uniformInfo) {
       final entry = entryDynamic! as Map<String, Object>;
-      final int sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
-      if (entry['name'] == name) {
-        if (index + 1 > sizeInFloats) {
-          throw ArgumentError('Index `$index` out of bounds for `$name`.');
-        }
-        if (expectedSize != null && sizeInFloats != expectedSize) {
-          throw ArgumentError('Uniform `$name` has size $sizeInFloats, not size $expectedSize.');
-        }
-        found = true;
+      if (found) {
         break;
       }
-      offset += sizeInFloats;
+
+      if (entry['type'] == 'Struct') {
+        final elementNames = entry['struct_field_names']! as List<dynamic>;
+        final elementSizes = entry['struct_field_bytes']! as List<dynamic>;
+
+        for (var i = 0; i < elementNames.length; ++i) {
+          final elementName = elementNames[i]! as String;
+          final elementSize = elementSizes[i]! as int;
+          sizeInFloats = elementSize ~/ sizeOfFloat;
+          if (elementName == name) {
+            found = true;
+            break;
+          }
+          offset += sizeInFloats;
+        }
+      } else {
+        sizeInFloats = (entry['size'] as int? ?? 0) ~/ sizeOfFloat;
+        if (entry['name'] == name) {
+          found = true;
+          break;
+        }
+        offset += sizeInFloats;
+      }
     }
 
     if (!found) {
       throw ArgumentError('No uniform named "$name".');
     }
 
-    return offset + index;
+    return (index: offset, size: sizeInFloats);
   }
 
   @pragma('vm:entry-point')
@@ -5682,10 +5702,15 @@ base class FragmentShader extends Shader {
   }
 
   List<UniformFloatSlot> _getSlotsForUniform(String name, int size) {
-    final int baseShaderIndex = _program._getUniformFloatIndex(name, 0, size);
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    if (info.size != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.size}, not size $size.');
+    }
+
     final slots = List<UniformFloatSlot>.generate(
       size,
-      (i) => UniformFloatSlot._(this, name, baseShaderIndex, i),
+      (i) => UniformFloatSlot._(this, name, info.index, i),
     );
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
@@ -5765,8 +5790,12 @@ base class FragmentShader extends Shader {
   /// ```
   UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getUniformFloatIndex(name, index);
-    final result = UniformFloatSlot._(this, name, index, shaderIndex);
+
+    final _UniformFloatInfo info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.size, message: 'Index `$index` out of bounds for `$name`.');
+
+    final result = UniformFloatSlot._(this, name, index, info.index + index);
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.add(WeakReference<UniformFloatSlot>(result));
     return result;

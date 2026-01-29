@@ -101,7 +101,7 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformFloat offset underflow', () async {
       expect(
@@ -114,12 +114,12 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec2', () async {
       final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
       slot.set(6.0, 7.0);
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec2 wrong size', () async {
       expect(
@@ -142,12 +142,12 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec3', () async {
       final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
       slot.set(0.8, 0.1, 0.3);
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec3 wrong size', () async {
       expect(
@@ -170,12 +170,12 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec4', () async {
       final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
       slot.set(11.0, 22.0, 19.0, 96.0);
-    }, skip: !_isMacMetal());
+    });
 
     test('FragmentProgram getUniformVec4 wrong size', () async {
       expect(
@@ -188,7 +188,7 @@ void main() async {
           ),
         ),
       );
-    }, skip: !_isMacMetal());
+    });
   });
 
   test('FragmentProgram getImageSampler', () async {
@@ -796,11 +796,6 @@ void _runImpellerTest(String name, Future<void> Function() callback) {
     }
     await callback();
   });
-}
-
-// TODO(walley892): remove this function and associated test skips, https://github.com/flutter/flutter/issues/181562
-bool _isMacMetal() {
-  return Platform.isMacOS && Platform.executableArguments.contains('--impeller-backend=metal');
 }
 
 // Expect that all of the shaders in this folder render green.
