@@ -326,6 +326,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Switch)).dx, 20.0); // contentPadding.end = 20
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
+
   testWidgets('SwitchListTile forwards statesController to ListTile', (WidgetTester tester) async {
     final controller = WidgetStatesController();
     addTearDown(controller.dispose);
