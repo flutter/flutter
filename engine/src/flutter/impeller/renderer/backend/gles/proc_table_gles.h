@@ -51,9 +51,21 @@ struct AutoErrorCheck {
   }
 };
 
+template <typename Type>
+struct ArgLogger {
+  static void log(std::stringstream& stream, Type arg) { stream << arg; }
+};
+
+template <typename R, typename... Args>
+struct ArgLogger<R (*)(Args...)> {
+  static void log(std::stringstream& stream, R (*val)(Args...)) {
+    stream << reinterpret_cast<void*>(val);
+  }
+};
+
 template <class Type>
 void BuildGLArgumentsStream(std::stringstream& stream, Type arg) {
-  stream << arg;
+  ArgLogger<Type>::log(stream, arg);
 }
 
 constexpr void BuildGLArgumentsStream(std::stringstream& stream) {}

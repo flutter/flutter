@@ -143,9 +143,9 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
 
   if (gl->GetDescription()->HasDebugExtension()) {
     gl->DebugMessageCallbackKHR(
-        [](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
-           GLenum /* severity */, GLsizei /* length */, const GLchar* message,
-           const void* /* user_param */) {
+        +[](GLenum /* source */, GLenum message_type, GLuint /* message_id */,
+            GLenum /* severity */, GLsizei /* length */, const GLchar* message,
+            const void* /* user_param */) {
           switch (message_type) {
             case GL_DEBUG_TYPE_ERROR_KHR:
               FML_LOG(ERROR) << "GL Error: " << message;
