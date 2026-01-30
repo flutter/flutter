@@ -2855,7 +2855,7 @@ class _DayItemState extends State<_DayItem> {
     final TextDirection textDirection = Directionality.of(context);
     final Color highlightColor = widget.highlightColor;
 
-    Decoration? decoration;
+    ShapeDecoration? decoration;
     TextStyle? itemStyle = textTheme.bodyMedium;
 
     T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
