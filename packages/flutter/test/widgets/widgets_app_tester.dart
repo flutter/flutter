@@ -14,7 +14,7 @@ import 'package:flutter/widgets.dart';
 /// app-level widgets (like [Directionality], [MediaQuery], etc.) that
 /// [WidgetsApp] provides, without the overhead of [MaterialApp] or [CupertinoApp].
 ///
-/// The [pageRouteBuilder] creates a [Navigator] which provides an [Overlay],
+/// The [PageRouteBuilder] creates a [Navigator] which provides an [Overlay],
 /// so widgets that need overlay support (like [Draggable], [Tooltip], etc.)
 /// will work correctly when placed in [home].
 ///
@@ -98,11 +98,12 @@ class TestWidgetsApp extends StatelessWidget {
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
           settings: settings,
-          pageBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
           transitionsBuilder: transitionsBuilder,
         );
       },
