@@ -1751,6 +1751,7 @@ targets:
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
 
@@ -6332,7 +6333,7 @@ targets:
       subshard: "2_9"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
