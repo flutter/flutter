@@ -1149,10 +1149,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    _isPaused =
-        !TickerMode.of(context) ||
-        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
-        !(MediaQuery.maybeAutoPlayAnimatedImagesOf(context) ?? true);
+    final bool tickerEnabled = TickerMode.of(context);
+    final bool animationsDisabled = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final bool autoPlay = MediaQuery.maybeAutoPlayAnimatedImagesOf(context) ?? true;
+    _isPaused = !tickerEnabled || animationsDisabled || !autoPlay;
 
     if (_isPaused && _frameNumber != null) {
       _stopListeningToStream(keepStreamAlive: true);
