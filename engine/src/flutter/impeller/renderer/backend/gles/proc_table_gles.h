@@ -256,6 +256,7 @@ void(glDepthRange)(GLdouble n, GLdouble f);
 
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
+  PROC(DebugMessageCallbackKHR);            \
   PROC(DiscardFramebufferEXT);              \
   PROC(FramebufferTexture2DMultisampleEXT); \
   PROC(PushDebugGroupKHR);                  \
