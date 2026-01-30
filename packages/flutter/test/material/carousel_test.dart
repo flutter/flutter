@@ -2241,6 +2241,96 @@ void main() {
     expect(find.text('Item 0'), findsOneWidget);
   });
 
+  testWidgets('CarouselView infinite leadingItem wraps correctly when scrolling forwards', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+    final reportedIndices = <int>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            onIndexChanged: (int index) {
+              reportedIndices.add(index);
+            },
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final int initialItem = controller.leadingItem;
+
+    // Scroll forward by dragging left. Each 200px drag moves one item.
+    // We'll scroll through all items and verify the leadingItem wraps correctly.
+    for (var i = 1; i <= 7; i++) {
+      await tester.drag(find.byType(CarouselView), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      // The leadingItem should wrap to [0, itemCount - 1] range.
+      expect(controller.leadingItem, (initialItem + i) % 5);
+    }
+
+    // Verify the onIndexChanged callback was invoked with correct wrapped indices.
+    expect(reportedIndices.length, greaterThanOrEqualTo(7));
+    for (final index in reportedIndices) {
+      expect(index, inInclusiveRange(0, 4));
+    }
+  });
+
+  testWidgets('CarouselView infinite leadingItem wraps correctly when scrolling backwards', (
+    WidgetTester tester,
+  ) async {
+    final controller = CarouselController();
+    addTearDown(controller.dispose);
+    final reportedIndices = <int>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CarouselView(
+            itemExtent: 200,
+            itemSnapping: true,
+            infinite: true,
+            controller: controller,
+            onIndexChanged: (int index) {
+              reportedIndices.add(index);
+            },
+            children: List<Widget>.generate(5, (int index) {
+              return Center(child: Text('Item $index'));
+            }),
+          ),
+        ),
+      ),
+    );
+
+    final int initialItem = controller.leadingItem;
+
+    // Scroll backward by dragging right. Each 200px drag moves one item backwards.
+    // We'll scroll backward through items and verify the leadingItem wraps correctly.
+    for (var i = 1; i <= 7; i++) {
+      await tester.drag(find.byType(CarouselView), const Offset(200, 0));
+      await tester.pumpAndSettle();
+      // When scrolling backwards, wrap negative indices to positive.
+      // (initialItem - i) % 5 handles wrapping for negative values in Dart.
+      final int expectedItem = ((initialItem - i) % 5 + 5) % 5;
+      expect(controller.leadingItem, expectedItem);
+    }
+
+    // Verify the onIndexChanged callback was invoked with correct wrapped indices.
+    expect(reportedIndices.length, greaterThanOrEqualTo(7));
+    for (final index in reportedIndices) {
+      expect(index, inInclusiveRange(0, 4));
+    }
+  });
+
   group('CarouselView onIndexChanged callback', () {
     Widget buildCarousel({
       required CarouselController controller,
