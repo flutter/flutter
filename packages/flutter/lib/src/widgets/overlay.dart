@@ -2032,12 +2032,18 @@ class _OverlayPortalState extends State<OverlayPortal> {
     }
 
     final _OverlayEntryLocation overlayLocation = _getLocation(zOrderIndex, widget.overlayLocation);
+    final MediaQueryData overlayData = MediaQuery.of(overlayLocation._childModel.context);
+    final MediaQueryData data = MediaQuery.of(context).copyWith(
+      padding: overlayData.padding,
+      viewInsets: overlayData.viewInsets,
+      viewPadding: overlayData.viewPadding,
+    );
     return _OverlayPortal(
       overlayLocation: overlayLocation,
       overlayChild: _DeferredLayout(
         childIdentifier: this,
         child: MediaQuery(
-          data: MediaQuery.of(overlayLocation._childModel.context),
+          data: data,
           child: Builder(builder: widget.overlayChildBuilder),
         ),
       ),
