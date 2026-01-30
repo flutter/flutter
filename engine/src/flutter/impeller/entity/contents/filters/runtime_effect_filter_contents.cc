@@ -11,7 +11,11 @@
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
+#include "impeller/geometry/point.h"
 #include "impeller/geometry/size.h"
+
+extern float fudge_x;
+extern float fudge_y;
 
 namespace impeller {
 
@@ -90,7 +94,11 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
             return texture_contents.Render(renderer, entity, pass);
           },
           [maybe_input_coverage](const Entity& entity) -> std::optional<Rect> {
-            return maybe_input_coverage;
+            FML_LOG(ERROR) << "Doof: " << maybe_input_coverage.value();
+            auto clip_rect_origin = Vector2(10, 10);
+            // return maybe_input_coverage;
+            return Rect::MakeXYWH(-clip_rect_origin.x, -clip_rect_origin.y,
+                                  2048, 1536);
           });
 
       Entity entity;
