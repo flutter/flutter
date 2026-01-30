@@ -84,10 +84,19 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       texture_contents.SetStencilEnabled(false);
       texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
 
+      auto anonymous_contents = AnonymousContents::Make(
+          [&texture_contents](const ContentContext& renderer,
+                              const Entity& entity, RenderPass& pass) -> bool {
+            return texture_contents.Render(renderer, entity, pass);
+          },
+          [maybe_input_coverage](const Entity& entity) -> std::optional<Rect> {
+            return maybe_input_coverage;
+          });
+
       Entity entity;
       // In order to maintain precise coordinates in the fragment shader we need
       // to eliminate the padding typically given to RenderToSnapshot results.
-      input_snapshot = texture_contents.RenderToSnapshot(
+      input_snapshot = anonymous_contents->RenderToSnapshot(
           renderer, entity, {.coverage_expansion = 0});
       if (!input_snapshot.has_value()) {
         return std::nullopt;
