@@ -3904,20 +3904,29 @@ class _ClampTransform implements _ColorTransform {
   }
 }
 
+// sRGB standard constants for transfer functions.
+// See https://en.wikipedia.org/wiki/SRGB.
+const double _kSrgbGamma = 2.4;
+const double _kSrgbLinearThreshold = 0.04045;
+const double _kSrgbLinearSlope = 12.92;
+const double _kSrgbEncodedOffset = 0.055;
+const double _kSrgbEncodedDivisor = 1.055;
+const double _kSrgbLinearToEncodedThreshold = 0.0031308;
+
 // sRGB electro-optical transfer function (gamma decode to linear).
 double _srgbEOTF(double v) {
-  if (v <= 0.04045) {
-    return v / 12.92;
+  if (v <= _kSrgbLinearThreshold) {
+    return v / _kSrgbLinearSlope;
   }
-  return math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+  return math.pow((v + _kSrgbEncodedOffset) / _kSrgbEncodedDivisor, _kSrgbGamma).toDouble();
 }
 
 // sRGB opto-electronic transfer function (linear to gamma encode).
 double _srgbOETF(double v) {
-  if (v <= 0.0031308) {
-    return v * 12.92;
+  if (v <= _kSrgbLinearToEncodedThreshold) {
+    return v * _kSrgbLinearSlope;
   }
-  return 1.055 * math.pow(v, 1.0 / 2.4).toDouble() - 0.055;
+  return _kSrgbEncodedDivisor * math.pow(v, 1.0 / _kSrgbGamma).toDouble() - _kSrgbEncodedOffset;
 }
 
 // Extended versions that handle negative values by mirroring.

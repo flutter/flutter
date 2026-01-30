@@ -11,20 +11,29 @@ namespace flutter {
 
 namespace {
 
+// sRGB standard constants for transfer functions.
+// See https://en.wikipedia.org/wiki/SRGB.
+constexpr double kSrgbGamma = 2.4;
+constexpr double kSrgbLinearThreshold = 0.04045;
+constexpr double kSrgbLinearSlope = 12.92;
+constexpr double kSrgbEncodedOffset = 0.055;
+constexpr double kSrgbEncodedDivisor = 1.055;
+constexpr double kSrgbLinearToEncodedThreshold = 0.0031308;
+
 // sRGB electro-optical transfer function (gamma decode, gamma ~2.2 to linear).
 double srgbEOTF(double v) {
-  if (v <= 0.04045) {
-    return v / 12.92;
+  if (v <= kSrgbLinearThreshold) {
+    return v / kSrgbLinearSlope;
   }
-  return std::pow((v + 0.055) / 1.055, 2.4);
+  return std::pow((v + kSrgbEncodedOffset) / kSrgbEncodedDivisor, kSrgbGamma);
 }
 
 // sRGB opto-electronic transfer function (linear to gamma encode).
 double srgbOETF(double v) {
-  if (v <= 0.0031308) {
-    return v * 12.92;
+  if (v <= kSrgbLinearToEncodedThreshold) {
+    return v * kSrgbLinearSlope;
   }
-  return 1.055 * std::pow(v, 1.0 / 2.4) - 0.055;
+  return kSrgbEncodedDivisor * std::pow(v, 1.0 / kSrgbGamma) - kSrgbEncodedOffset;
 }
 
 // sRGB EOTF extended to handle negative values (for extended sRGB).
