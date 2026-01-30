@@ -694,8 +694,8 @@ void main() {
   testWidgets(
     'Check back gesture with a persistent bottom sheet showing',
     (WidgetTester tester) async {
-      final GlobalKey containerKey1 = GlobalKey();
-      final GlobalKey containerKey2 = GlobalKey();
+      final GlobalKey<ScaffoldState> containerKey1 = GlobalKey();
+      final GlobalKey<PersistentBottomSheetTestState> containerKey2 = GlobalKey();
       final routes = <String, WidgetBuilder>{
         '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
         '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
@@ -727,7 +727,7 @@ void main() {
       expect(find.text('Sheet'), isOnstage);
 
       // Show the bottom sheet.
-      final sheet = containerKey2.currentState! as PersistentBottomSheetTestState;
+      final PersistentBottomSheetTestState sheet = containerKey2.currentState!;
       sheet.showBottomSheet();
 
       await tester.pump(const Duration(seconds: 1));
