@@ -1115,7 +1115,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   late bool _invertColors;
   int? _frameNumber;
   bool _wasSynchronouslyLoaded = false;
-  late DisposableBuildContext<State<Image>> _scrollAwareContext;
+  late DisposableBuildContext _scrollAwareContext;
   Object? _lastException;
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
@@ -1129,7 +1129,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _scrollAwareContext = DisposableBuildContext<State<Image>>(this);
+    _scrollAwareContext = DisposableBuildContext(this);
   }
 
   @override

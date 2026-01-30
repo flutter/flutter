@@ -14,7 +14,7 @@ void main() {
     final TestWidgetState state = key.currentState!;
     expect(state.mounted, true);
 
-    final DisposableBuildContext context = DisposableBuildContext(state);
+    final context = DisposableBuildContext(state);
     expect(context.context, state.context);
 
     await tester.pumpWidget(const TestWidget(null));
@@ -37,10 +37,7 @@ void main() {
     final TestWidgetState state = key.currentState!;
 
     await expectLater(
-      await memoryEvents(
-        () => DisposableBuildContext<TestWidgetState>(state).dispose(),
-        DisposableBuildContext<TestWidgetState>,
-      ),
+      await memoryEvents(() => DisposableBuildContext(state).dispose(), DisposableBuildContext),
       areCreateAndDispose,
     );
   });
