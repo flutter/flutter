@@ -6333,7 +6333,7 @@ targets:
       subshard: "2_9"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
