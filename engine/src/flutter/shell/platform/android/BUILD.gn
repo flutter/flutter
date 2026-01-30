@@ -319,7 +319,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/systemchannels/SpellCheckChannel.java",
   "io/flutter/embedding/engine/systemchannels/SystemChannel.java",
   "io/flutter/embedding/engine/systemchannels/TextInputChannel.java",
-  "io/flutter/plugin/common/ActivityLifecycleListener.java",
   "io/flutter/plugin/common/BasicMessageChannel.java",
   "io/flutter/plugin/common/BinaryCodec.java",
   "io/flutter/plugin/common/BinaryMessenger.java",

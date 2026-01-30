@@ -90,7 +90,7 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformFloat offset overflow', () async {
+    test('FragmentProgram getUniformFloat offset overflow', () async {
       expect(
         () => shader.getUniformFloat('iVec2Uniform', 2),
         throwsA(
@@ -103,7 +103,7 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformFloat offset underflow', () async {
+    test('FragmentProgram getUniformFloat offset underflow', () async {
       expect(
         () => shader.getUniformFloat('iVec2Uniform', -1),
         throwsA(
@@ -116,12 +116,12 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec2', () async {
+    test('FragmentProgram getUniformVec2', () async {
       final UniformVec2Slot slot = shader.getUniformVec2('iVec2Uniform');
       slot.set(6.0, 7.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec2 wrong size', () async {
+    test('FragmentProgram getUniformVec2 wrong size', () async {
       expect(
         () => shader.getUniformVec2('iVec3Uniform'),
         throwsA(
@@ -144,12 +144,12 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec3', () async {
+    test('FragmentProgram getUniformVec3', () async {
       final UniformVec3Slot slot = shader.getUniformVec3('iVec3Uniform');
       slot.set(0.8, 0.1, 0.3);
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec3 wrong size', () async {
+    test('FragmentProgram getUniformVec3 wrong size', () async {
       expect(
         () => shader.getUniformVec3('iVec2Uniform'),
         throwsA(
@@ -172,12 +172,12 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec4', () async {
+    test('FragmentProgram getUniformVec4', () async {
       final UniformVec4Slot slot = shader.getUniformVec4('iVec4Uniform');
       slot.set(11.0, 22.0, 19.0, 96.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformVec4 wrong size', () async {
+    test('FragmentProgram getUniformVec4 wrong size', () async {
       expect(
         () => shader.getUniformVec4('iVec3Uniform'),
         throwsA(
@@ -190,7 +190,7 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformArray float', () async {
+    test('FragmentProgram getUniformArray float', () async {
       final UniformArray<UniformFloatSlot> slots = shader.getUniformFloatArray(
         'iFloatArrayUniform',
       );
@@ -199,7 +199,7 @@ void main() async {
       slots[1].set(1.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformArray not found', () async {
+    test('FragmentProgram getUniformArray not found', () async {
       expect(
         () => shader.getUniformFloatArray('unknown'),
         throwsA(
@@ -212,13 +212,13 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec2', () async {
+    test('FragmentProgram getUniformArrayVec2', () async {
       final UniformArray<UniformVec2Slot> slots = shader.getUniformVec2Array('iVec2ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec2 wrong type', () async {
+    test('FragmentProgram getUniformArrayVec2 wrong type', () async {
       expect(
         () => shader.getUniformVec2Array('iVec3ArrayUniform'),
         throwsA(
@@ -231,13 +231,13 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec3', () async {
+    test('FragmentProgram getUniformArrayVec3', () async {
       final UniformArray<UniformVec3Slot> slots = shader.getUniformVec3Array('iVec3ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec3 wrong type', () async {
+    test('FragmentProgram getUniformArrayVec3 wrong type', () async {
       expect(
         () => shader.getUniformVec3Array('iFloatArrayUniform'),
         throwsA(
@@ -250,13 +250,13 @@ void main() async {
       );
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec4', () async {
+    test('FragmentProgram getUniformArrayVec4', () async {
       final UniformArray<UniformVec4Slot> slots = shader.getUniformVec4Array('iVec4ArrayUniform');
       expect(slots.length, 3);
       slots[0].set(1.0, 1.0, 1.0, 1.0);
     });
 
-    _runSkiaTest('FragmentProgram getUniformArrayVec4 wrong type', () async {
+    test('FragmentProgram getUniformArrayVec4 wrong type', () async {
       expect(
         () => shader.getUniformVec4Array('iFloatArrayUniform'),
         throwsA(
@@ -695,39 +695,31 @@ void main() async {
     shader.dispose();
   });
 
-  test(
-    'FragmentShader shader with array uniforms renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
+  test('FragmentShader shader with array uniforms renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_arrays.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
-      for (var i = 0; i < 20; i++) {
-        shader.setFloat(i, i.toDouble());
-      }
+    final FragmentShader shader = program.fragmentShader();
+    for (var i = 0; i < 20; i++) {
+      shader.setFloat(i, i.toDouble());
+    }
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
-  test(
-    'FragmentShader shader with mat2 uniform renders correctly',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
+  test('FragmentShader shader with mat2 uniform renders correctly', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_mat2.frag.iplr');
 
-      final FragmentShader shader = program.fragmentShader();
+    final FragmentShader shader = program.fragmentShader();
 
-      shader.setFloat(0, 4.0); // m00
-      shader.setFloat(1, 8.0); // m01
-      shader.setFloat(2, 16.0); // m10
-      shader.setFloat(3, 32.0); // m11
+    shader.setFloat(0, 4.0); // m00
+    shader.setFloat(1, 8.0); // m01
+    shader.setFloat(2, 16.0); // m10
+    shader.setFloat(3, 32.0); // m11
 
-      await _expectShaderRendersGreen(shader);
-      shader.dispose();
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+    shader.dispose();
+  });
 
   _runImpellerTest(
     'ImageFilter.shader errors if shader does not have correct uniform layout',
@@ -760,24 +752,22 @@ void main() async {
     },
   );
 
-  _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
-    // TODO(gaaclarke): This test was disabled for a long time and has been
-    // atrophied. Fix it or remove it.
-    print('Atrophied test is disabled.');
-    return;
+  _runImpellerTest(
+    'Shader Compiler appropriately pads vec3 uniform arrays',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
+      final FragmentShader shader = program.fragmentShader();
 
-    // ignore: dead_code
-    final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
-    final FragmentShader shader = program.fragmentShader();
+      // Set the last vec3 in the uniform array to green. The shader will read this
+      // value, and if the uniforms were padded correctly will render green.
+      shader.setFloat(9, 0); // color_array[3].x
+      shader.setFloat(10, 1.0); // color_array[3].y
+      shader.setFloat(11, 0); // color_array[3].z
 
-    // Set the last vec3 in the uniform array to green. The shader will read this
-    // value, and if the uniforms were padded correctly will render green.
-    shader.setFloat(12, 0);
-    shader.setFloat(13, 1.0);
-    shader.setFloat(14, 0);
-
-    await _expectShaderRendersGreen(shader);
-  });
+      await _expectShaderRendersGreen(shader);
+    },
+    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
+  );
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
@@ -870,14 +860,14 @@ void _runSkiaTest(String name, Future<void> Function() callback) {
   });
 }
 
-void _runImpellerTest(String name, Future<void> Function() callback) {
+void _runImpellerTest(String name, Future<void> Function() callback, {Object? skip}) {
   test(name, () async {
     if (!impellerEnabled) {
       print('Skipped for Skia.');
       return;
     }
     await callback();
-  });
+  }, skip: skip);
 }
 
 // Expect that all of the shaders in this folder render green.
@@ -902,8 +892,17 @@ Future<void> _expectShaderRendersColor(Shader shader, Color color) async {
     shader: shader,
     imageDimension: _shaderImageDimension,
   ))!;
-  for (final int c in renderedBytes.buffer.asUint32List()) {
-    expect(toHexString(c), toHexString(color.value));
+
+  expect(renderedBytes.lengthInBytes % 4, 0);
+  for (var byteOffset = 0; byteOffset < renderedBytes.lengthInBytes; byteOffset += 4) {
+    final pixelColor = Color.fromARGB(
+      renderedBytes.getUint8(byteOffset + 3),
+      renderedBytes.getUint8(byteOffset),
+      renderedBytes.getUint8(byteOffset + 1),
+      renderedBytes.getUint8(byteOffset + 2),
+    );
+
+    expect(pixelColor, color);
   }
 }
 
@@ -966,8 +965,6 @@ const double epsilon = 0.5 / 255.0;
 
 // Maps an int value from 0-255 to a double value of 0.0 to 1.0.
 double toFloat(int v) => v.toDouble() / 255.0;
-
-String toHexString(int color) => '#${color.toRadixString(16)}';
 
 // 10x10 image where the left half is blue and the right half is
 // green.
