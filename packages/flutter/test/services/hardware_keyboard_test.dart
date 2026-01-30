@@ -596,6 +596,315 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  // Regression test for keyboard assertion crash during app startup.
+  // This tests the fix for allowing KeyDownEvent when the key is already
+  // marked as pressed by syncKeyboardState().
+  testWidgets(
+    'KeyDownEvent is allowed when key is already pressed from syncKeyboardState',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final events = <KeyEvent>[];
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            events.add(event);
+          },
+        ),
+      );
+
+      // Simulate the scenario where syncKeyboardState() has already marked
+      // a key as pressed (e.g., user held Shift during app startup).
+      // First, manually sync the keyboard state by simulating a key press.
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        contains(PhysicalKeyboardKey.shiftLeft),
+      );
+      expect(events.length, 1);
+      expect(events[0], isA<KeyDownEvent>());
+
+      // Now simulate receiving another KeyDownEvent for the same key.
+      // This simulates the race condition where syncKeyboardState() recorded
+      // the key as pressed, and then we receive the actual KeyDownEvent.
+      // This should NOT throw an assertion error.
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+
+      // The key should still be in pressed state
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        contains(PhysicalKeyboardKey.shiftLeft),
+      );
+
+      // Clean up
+      await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        isEmpty,
+      );
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
+
+  testWidgets(
+    'Multiple keys pressed during startup are handled correctly',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final events = <KeyEvent>[];
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            events.add(event);
+          },
+        ),
+      );
+
+      // Simulate multiple keys being held during app startup
+      await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+      await simulateKeyDownEvent(LogicalKeyboardKey.altLeft, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        containsAll(<PhysicalKeyboardKey>[
+          PhysicalKeyboardKey.controlLeft,
+          PhysicalKeyboardKey.shiftLeft,
+          PhysicalKeyboardKey.altLeft,
+        ]),
+      );
+
+      // Simulate receiving duplicate KeyDownEvents for already-pressed keys
+      // This should not throw assertion errors
+      await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+
+      // All keys should still be in pressed state
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        containsAll(<PhysicalKeyboardKey>[
+          PhysicalKeyboardKey.controlLeft,
+          PhysicalKeyboardKey.shiftLeft,
+          PhysicalKeyboardKey.altLeft,
+        ]),
+      );
+
+      // Clean up - release all keys
+      await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+      await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+      await simulateKeyUpEvent(LogicalKeyboardKey.altLeft, platform: 'windows');
+
+      expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
+
+  testWidgets(
+    'Synthesized events skip assertion checks entirely',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final events = <KeyEvent>[];
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            events.add(event);
+          },
+        ),
+      );
+
+      // Dispatch a synthesized key down event even when key is already pressed
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        contains(PhysicalKeyboardKey.keyA),
+      );
+
+      // Dispatch a synthesized event - should be accepted without assertions
+      expect(
+        ServicesBinding.instance.keyEventManager.handleKeyData(
+          ui.KeyData(
+            timeStamp: Duration.zero,
+            type: ui.KeyEventType.down,
+            logical: LogicalKeyboardKey.keyA.keyId,
+            physical: PhysicalKeyboardKey.keyA.usbHidUsage,
+            character: 'a',
+            synthesized: true,
+          ),
+        ),
+        false,
+      );
+
+      // Key should still be pressed
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        contains(PhysicalKeyboardKey.keyA),
+      );
+
+      // Clean up
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: 'windows');
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
+
+  testWidgets(
+    'Regular KeyDownEvent for unpressed key still triggers in debug mode',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {},
+        ),
+      );
+
+      // This is the normal case - key down for an unpressed key should work fine
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyB, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        contains(PhysicalKeyboardKey.keyB),
+      );
+
+      // Clean up
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyB, platform: 'windows');
+
+      expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
+
+  testWidgets(
+    'KeyDownEvent after syncKeyboardState during app initialization',
+    (WidgetTester tester) async {
+      // This test simulates the real-world scenario that caused the bug:
+      // 1. User holds a key (e.g., Shift) while app is starting
+      // 2. syncKeyboardState() queries the engine and marks Shift as pressed
+      // 3. Then the actual KeyDownEvent for Shift arrives
+      // 4. Previously this would crash with an assertion error
+
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final events = <KeyEvent>[];
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {
+            events.add(event);
+          },
+        ),
+      );
+
+      // Simulate syncKeyboardState() marking a key as pressed
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyC, platform: 'windows');
+      final int initialEventCount = events.length;
+
+      expect(
+        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
+        isTrue,
+      );
+
+      // Now the actual KeyDownEvent arrives - this should be accepted
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyC, platform: 'windows');
+
+      // The key should remain in pressed state
+      expect(
+        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
+        isTrue,
+      );
+
+      // We should have received the duplicate event
+      expect(events.length, greaterThan(initialEventCount));
+
+      // Finally, key up should work normally
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyC, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
+        isFalse,
+      );
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
+
+  testWidgets(
+    'Modifier keys held during startup work correctly',
+    (WidgetTester tester) async {
+      // Test specifically for modifier keys (Shift, Ctrl, Alt, Meta)
+      // which are commonly held during app startup
+
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        KeyboardListener(
+          autofocus: true,
+          focusNode: focusNode,
+          child: Container(),
+          onKeyEvent: (KeyEvent event) {},
+        ),
+      );
+
+      // Simulate Ctrl+Shift being held during startup
+      await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+
+      expect(HardwareKeyboard.instance.isControlPressed, isTrue);
+      expect(HardwareKeyboard.instance.isShiftPressed, isTrue);
+
+      // Simulate duplicate events arriving after syncKeyboardState
+      await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+      await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+
+      // Modifiers should still be pressed
+      expect(HardwareKeyboard.instance.isControlPressed, isTrue);
+      expect(HardwareKeyboard.instance.isShiftPressed, isTrue);
+
+      // Now press a regular key with modifiers held
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'windows');
+
+      expect(
+        HardwareKeyboard.instance.physicalKeysPressed,
+        containsAll(<PhysicalKeyboardKey>[
+          PhysicalKeyboardKey.controlLeft,
+          PhysicalKeyboardKey.shiftLeft,
+          PhysicalKeyboardKey.keyA,
+        ]),
+      );
+
+      // Clean up - release all keys
+      await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: 'windows');
+      await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
+      await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: 'windows');
+
+      expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
+      expect(HardwareKeyboard.instance.isControlPressed, isFalse);
+      expect(HardwareKeyboard.instance.isShiftPressed, isFalse);
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
 }
 
 Future<void> _runWhileOverridingOnError(
