@@ -21,7 +21,6 @@ import 'framework.dart';
 ///   2. They call [dispose] from [State.dispose].
 ///
 /// This object will not hold on to the [State] after disposal.
-@optionalTypeArgs
 class DisposableBuildContext {
   /// Creates an object that provides access to a [BuildContext] without leaking
   /// a [State].
