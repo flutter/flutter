@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   test('debugChildrenHaveDuplicateKeys control test', () {
     const key = Key('key');
@@ -272,18 +274,7 @@ void main() {
 
   testWidgets('debugCreator of layers should not be null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      TestWidgetsApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(

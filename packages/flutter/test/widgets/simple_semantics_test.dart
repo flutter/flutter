@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Simple tree is simple', (WidgetTester tester) async {
@@ -37,21 +38,10 @@ void main() {
     final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      TestWidgetsApp(
         home: Center(
           child: Semantics(label: 'Hello!', child: const SizedBox(width: 10.0, height: 10.0)),
         ),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
       ),
     );
 

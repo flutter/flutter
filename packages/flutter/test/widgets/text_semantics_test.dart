@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
@@ -200,19 +201,8 @@ void main() {
     const text = 'Flutter 2050';
 
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        home: const _DummySelectionContainer(child: Text(text, locale: locale)),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
+      const TestWidgetsApp(
+        home: _DummySelectionContainer(child: Text(text, locale: locale)),
       ),
     );
     await tester.pumpAndSettle();
