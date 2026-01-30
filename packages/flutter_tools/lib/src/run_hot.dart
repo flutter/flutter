@@ -128,12 +128,11 @@ class HotRunner extends ResidentRunner {
 
   final benchmarkData = <String, List<int>>{};
 
+  @visibleForTesting
+  String? get targetPlatformName => _targetPlatformName;
   String? _targetPlatformName;
-  TargetPlatform get _targetPlatform => _targetPlatformName != null
-      ? getTargetPlatformForName(_targetPlatformName!)
-      : throw ArgumentError(
-          'Access to the target platform needs a call to _calculateTargetPlatform first',
-        );
+  final _targetPlatforms = <TargetPlatform>{};
+
   String? _sdkName;
   bool? _emulator;
 
@@ -150,15 +149,22 @@ class HotRunner extends ResidentRunner {
     if (_targetPlatformName != null) {
       return;
     }
-
+    assert(_targetPlatforms.isEmpty);
     switch (flutterDevices.length) {
       case 1:
         final Device device = flutterDevices.first.device!;
-        _targetPlatformName = getNameForTargetPlatform(await device.targetPlatform);
+        final TargetPlatform targetPlatform = await device.targetPlatform;
+        _targetPlatformName = getNameForTargetPlatform(targetPlatform);
+        _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
       case > 1:
         _targetPlatformName = 'multiple';
+        _targetPlatforms.addAll(
+          await Future.wait([
+            for (final flutterDevice in flutterDevices) flutterDevice.device!.targetPlatform,
+          ]),
+        );
         _sdkName = 'multiple';
         _emulator = false;
       default:
@@ -302,7 +308,7 @@ class HotRunner extends ResidentRunner {
     final initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(
       fullRestart: needsFullRestart,
-      targetPlatform: _targetPlatform,
+      targetPlatforms: _targetPlatforms,
     );
 
     _addBenchmarkData(
@@ -485,24 +491,26 @@ class HotRunner extends ResidentRunner {
 
   Future<UpdateFSReport> _updateDevFS({
     bool fullRestart = false,
-    required TargetPlatform targetPlatform,
+    required Set<TargetPlatform> targetPlatforms,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      globals.printTrace('Updating assets');
-      final int result = await assetBundle.build(
-        flutterHookResult: await dartBuilder?.runHooks(
+      for (final targetPlatform in targetPlatforms) {
+        globals.printTrace('Updating assets for ${targetPlatform.osName}');
+        final int result = await assetBundle.build(
+          flutterHookResult: await dartBuilder?.runHooks(
+            targetPlatform: targetPlatform,
+            environment: environment,
+            logger: _logger,
+          ),
+          packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
+          flavor: debuggingOptions.buildInfo.flavor,
           targetPlatform: targetPlatform,
-          environment: environment,
-          logger: _logger,
-        ),
-        packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        flavor: debuggingOptions.buildInfo.flavor,
-        targetPlatform: targetPlatform,
-      );
-      if (result != 0) {
-        return UpdateFSReport();
+        );
+        if (result != 0) {
+          return UpdateFSReport();
+        }
       }
     }
 
@@ -612,7 +620,7 @@ class HotRunner extends ResidentRunner {
     final restartTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS(fullRestart: true, targetPlatform: _targetPlatform);
+      updatedDevFS = await _updateDevFS(fullRestart: true, targetPlatforms: _targetPlatforms);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }
@@ -1027,7 +1035,7 @@ class HotRunner extends ResidentRunner {
     final devFSTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS(targetPlatform: _targetPlatform);
+      updatedDevFS = await _updateDevFS(targetPlatforms: _targetPlatforms);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }

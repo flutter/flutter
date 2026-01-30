@@ -4853,8 +4853,8 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.focused != null) {
       config.isFocused = _properties.focused;
     }
-    if (_properties.accessiblityFocusBlockType != null) {
-      config.accessiblityFocusBlockType = _properties.accessiblityFocusBlockType!;
+    if (_properties.accessibilityFocusBlockType != null) {
+      config.accessibilityFocusBlockType = _properties.accessibilityFocusBlockType!;
     }
     if (_properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = _properties.inMutuallyExclusiveGroup!;
@@ -5131,7 +5131,7 @@ final class _SemanticsParentData {
     required this.explicitChildNodes,
     required this.tagsForChildren,
     required this.localeForChildren,
-    required this.accessiblityFocusBlockType,
+    required this.accessibilityFocusBlockType,
   });
 
   /// Whether [SemanticsNode]s created from this render object semantics subtree
@@ -5154,7 +5154,7 @@ final class _SemanticsParentData {
   /// * **blockNode**: Blocks accessibility focus for the **current node only**.
   ///
   /// Only `blockSubtree` from a parent will be propagated down.
-  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
+  final AccessibilityFocusBlockType? accessibilityFocusBlockType;
 
   /// Any immediate render object semantics that
   /// [_RenderObjectSemantics.contributesToSemanticsTree] should forms a node
@@ -5581,11 +5581,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     final bool blocksUserAction =
         (parentData?.blocksUserActions ?? false) || configProvider.effective.isBlockingUserActions;
 
-    AccessiblityFocusBlockType accessiblityFocusBlockType;
-    if (parentData?.accessiblityFocusBlockType == AccessiblityFocusBlockType.blockSubtree) {
-      accessiblityFocusBlockType = AccessiblityFocusBlockType.blockSubtree;
+    AccessibilityFocusBlockType accessibilityFocusBlockType;
+    if (parentData?.accessibilityFocusBlockType == AccessibilityFocusBlockType.blockSubtree) {
+      accessibilityFocusBlockType = AccessibilityFocusBlockType.blockSubtree;
     } else {
-      accessiblityFocusBlockType = configProvider.effective.accessiblityFocusBlockType;
+      accessibilityFocusBlockType = configProvider.effective.accessibilityFocusBlockType;
     }
 
     // localeForSubtree from the config overrides parentData's inherited locale.
@@ -5599,7 +5599,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           (parentData?.mergeIntoParent ?? false) ||
           configProvider.effective.isMergingSemanticsOfDescendants,
       blocksUserActions: blocksUserAction,
-      accessiblityFocusBlockType: accessiblityFocusBlockType,
+      accessibilityFocusBlockType: accessibilityFocusBlockType,
       localeForChildren: localeForChildren,
       explicitChildNodes: explicitChildNodesForChildren,
       tagsForChildren: tagsForChildren,
@@ -5645,9 +5645,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         tags.forEach(config.addTagForChildren);
       });
     }
-    if (accessiblityFocusBlockType != configProvider.effective.accessiblityFocusBlockType) {
+    if (accessibilityFocusBlockType != configProvider.effective.accessibilityFocusBlockType) {
       configProvider.updateConfig((SemanticsConfiguration config) {
-        config.accessiblityFocusBlockType = accessiblityFocusBlockType;
+        config.accessibilityFocusBlockType = accessibilityFocusBlockType;
       });
     }
 
@@ -5725,7 +5725,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       effectiveChildParentData = _SemanticsParentData(
         mergeIntoParent: childParentData.mergeIntoParent,
         blocksUserActions: childParentData.blocksUserActions,
-        accessiblityFocusBlockType: childParentData.accessiblityFocusBlockType,
+        accessibilityFocusBlockType: childParentData.accessibilityFocusBlockType,
         explicitChildNodes: false,
         tagsForChildren: childParentData.tagsForChildren,
         localeForChildren: childParentData.localeForChildren,

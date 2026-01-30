@@ -16,10 +16,6 @@
 
 @property(nonatomic, weak) FlutterEngine* engine;
 
-@end
-
-@interface FlutterWindowController (Testing)
-
 - (void)closeAllWindows;
 
 @end

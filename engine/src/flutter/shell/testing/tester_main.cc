@@ -31,6 +31,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 #include "flutter/shell/testing/tester_context.h"
+#include "flutter/shell/testing/tester_context_mtl_factory.h"
 #include "flutter/shell/testing/tester_context_vk_factory.h"
 
 #if defined(FML_OS_WIN)
@@ -48,8 +49,14 @@ static absl::NoDestructor<std::unique_ptr<Shell>> g_shell;
 namespace {
 std::unique_ptr<TesterContext> CreateTesterContext(const Settings& settings) {
   std::unique_ptr<TesterContext> tester_context;
+#if TESTER_ENABLE_METAL
+  if (settings.enable_impeller &&
+      settings.requested_rendering_backend == "metal") {
+    tester_context = TesterContextMTLFactory::Create();
+  }
+#endif
 #if TESTER_ENABLE_VULKAN
-  if (settings.enable_impeller) {
+  if (settings.enable_impeller && !tester_context) {
     tester_context =
         TesterContextVKFactory::Create(settings.enable_vulkan_validation);
   }
