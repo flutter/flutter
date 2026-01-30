@@ -5736,6 +5736,28 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         in result.$1.whereType<_RenderObjectSemantics>()) {
       assert(childSemantics.contributesToSemanticsTree);
       if (childSemantics.shouldFormSemanticsNode) {
+        // In general geometry is only dirty during the first build or markNeedsLayout.
+        // In both cases, the renderobject will be added to the list of nodes needing
+        // geometry update.
+        //
+        // This specific case can happen if a parent somwhere above this node decided to
+        // conditionally include this node.
+        //
+        // For example, render object A->B->C, where A is the root and all of them
+        // creates semantics nodes.
+        //
+        // Frame 1: B and C both mark layout dirty, and B suddenly decide not to
+        // inlcude C in the semantics tree.
+        //
+        // In this case, C's geometry will remain dirty because it is considered as
+        // blocked.
+        //
+        // Frame 2: B is marked dirty again and decide C should be included
+        // in the semantics tree. We will run into this situation where C's geometry
+        // is dirty but it is not in the _nodesNeedingSemanticsGeometryUpdate.
+        if (childSemantics.geometryDirty) {
+          renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
+        }
         _children.add(childSemantics);
       } else {
         _children.addAll(childSemantics._children);
