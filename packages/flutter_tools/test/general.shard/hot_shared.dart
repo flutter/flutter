@@ -138,7 +138,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> handleHotRestart() async {}
 
   @override
-  TargetPlatform? get targetPlatform => device._targetPlatform;
+  TargetPlatform get targetPlatform => device._targetPlatform;
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -148,6 +148,7 @@ class TestFlutterDevice extends FlutterDevice {
     required ResidentCompiler generator,
   }) : super(
          device,
+         targetPlatform: TargetPlatform.unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),

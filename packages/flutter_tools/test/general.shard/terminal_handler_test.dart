@@ -1258,6 +1258,7 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
+        targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
         developmentShaderCompiler: const FakeShaderCompiler(),

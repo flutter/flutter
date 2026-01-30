@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -159,27 +160,22 @@ void main() {
   testWithoutContext(
     'includeUnsupportedPlatformLibraryStubs is only valid for Target.dartdevc',
     () {
-      final unsupportedTargetModels = <TargetModel>{
-        TargetModel.flutter,
-        TargetModel.flutterRunner,
-        TargetModel.vm,
-      };
-
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for targets other
       // than DDC is not currently supported as it's limited for use with the widget previewer.
-      for (final target in unsupportedTargetModels) {
+      for (final TargetPlatform target in TargetPlatform.values.where(
+        (e) => e != .web_javascript,
+      )) {
         try {
           ResidentCompiler(
-            'sdkroot',
-            buildMode: BuildMode.debug,
+            targetPlatform: target,
+            buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
             logger: BufferLogger.test(),
             processManager: FakeProcessManager.any(),
             artifacts: Artifacts.test(),
             platform: FakePlatform(),
             fileSystem: MemoryFileSystem.test(),
             shutdownHooks: FakeShutdownHooks(),
-            targetModel: target,
-            includeUnsupportedPlatformLibraryStubs: true,
+            config: Config.test(),
           );
           fail('Unsupported target did not throw.');
         } on StateError catch (e) {
@@ -194,16 +190,15 @@ void main() {
       // Initializing the compiler with includeUnsupportedPlatformLibraryStubs for DDC is
       // supported.
       ResidentCompiler(
-        'sdkroot',
-        buildMode: BuildMode.debug,
+        targetPlatform: .web_javascript,
+        buildInfo: BuildInfo.debug.copyWith(includeUnsupportedPlatformLibraryStubs: true),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
         platform: FakePlatform(),
         fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
-        targetModel: TargetModel.dartdevc,
-        includeUnsupportedPlatformLibraryStubs: true,
+        config: Config.test(),
       );
     },
   );
@@ -224,10 +219,14 @@ void main() {
             '--experimental-emit-debug-metadata',
             '--output-dill',
             'foo.dill',
+            '--packages',
+            '.dart_tool/package_config.json',
             '-Ddart.vm.profile=false',
             '-Ddart.vm.product=false',
             '--enable-asserts',
             '--track-widget-creation',
+            '--initialize-from-dill',
+            'build/72879a0a1c6924a9ff6430cb690ed03a.cache.dill.track.dill',
             '--verbosity=error',
             '--extra-flag',
           ],
@@ -236,7 +235,16 @@ void main() {
       ]);
       final compiler = DefaultResidentCompiler(
         'sdkroot',
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug.copyWith(
+          // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
+          // included in the argument list.
+          includeUnsupportedPlatformLibraryStubs: false,
+          extraFrontEndOptions: [
+            '--include-unsupported-platform-library-stubs',
+            // Include a random extra flag to ensure not all extra options are stripped.
+            '--extra-flag',
+          ],
+        ),
         logger: BufferLogger.test(),
         processManager: processManager,
         artifacts: Artifacts.test(),
@@ -244,15 +252,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
         targetModel: TargetModel.dartdevc,
-        // Don't explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's not
-        // included in the argument list.
-        // ignore: avoid_redundant_argument_values
-        includeUnsupportedPlatformLibraryStubs: false,
-        extraFrontEndOptions: [
-          '--include-unsupported-platform-library-stubs',
-          // Include a random extra flag to ensure not all extra options are stripped.
-          '--extra-flag',
-        ],
+        config: Config.test(),
       );
 
       await runZonedGuarded(
@@ -294,11 +294,15 @@ void main() {
             '--experimental-emit-debug-metadata',
             '--output-dill',
             'foo.dill',
+            '--packages',
+            '.dart_tool/package_config.json',
             '-Ddart.vm.profile=false',
             '-Ddart.vm.product=false',
             '--enable-asserts',
             '--track-widget-creation',
             '--include-unsupported-platform-library-stubs',
+            '--initialize-from-dill',
+            'build/0c26bc4a79e35468a98f2218acd4a6cd.cache.dill.track.dill',
             '--verbosity=error',
             '--extra-flag',
           ],
@@ -307,7 +311,15 @@ void main() {
       ]);
       final compiler = DefaultResidentCompiler(
         'sdkroot',
-        buildMode: BuildMode.debug,
+        buildInfo: BuildInfo.debug.copyWith(
+          // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
+          // argument list.
+          includeUnsupportedPlatformLibraryStubs: true,
+          extraFrontEndOptions: [
+            // Include a random extra flag to ensure not all extra options are stripped.
+            '--extra-flag',
+          ],
+        ),
         logger: BufferLogger.test(),
         processManager: processManager,
         artifacts: Artifacts.test(),
@@ -315,13 +327,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
         targetModel: TargetModel.dartdevc,
-        // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
-        // argument list.
-        includeUnsupportedPlatformLibraryStubs: true,
-        extraFrontEndOptions: [
-          // Include a random extra flag to ensure not all extra options are stripped.
-          '--extra-flag',
-        ],
+        config: Config.test(),
       );
 
       await runZonedGuarded(

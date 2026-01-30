@@ -155,7 +155,12 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
     : _vmServiceUris = vmServiceUris,
-      super(buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler());
+      super(
+        generator: FakeResidentCompiler(),
+        targetPlatform: .unsupported,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+      );
 
   final Stream<Uri>? _vmServiceUris;
 
@@ -277,6 +282,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     ResidentCompiler residentCompiler,
     this.fakeDevFS,
   ) : super(
+        targetPlatform: .unsupported,
         buildInfo: buildInfo,
         generator: residentCompiler,
         developmentShaderCompiler: const FakeShaderCompiler(),
