@@ -3904,58 +3904,124 @@ class _ClampTransform implements _ColorTransform {
   }
 }
 
-class _MatrixColorTransform implements _ColorTransform {
-  /// Row-major.
-  const _MatrixColorTransform(this.values);
+// sRGB standard constants for transfer functions.
+// See https://en.wikipedia.org/wiki/SRGB.
+const double _kSrgbGamma = 2.4;
+const double _kSrgbLinearThreshold = 0.04045;
+const double _kSrgbLinearSlope = 12.92;
+const double _kSrgbEncodedOffset = 0.055;
+const double _kSrgbEncodedDivisor = 1.055;
+const double _kSrgbLinearToEncodedThreshold = 0.0031308;
 
-  final List<double> values;
+/// sRGB electro-optical transfer function (gamma decode to linear).
+double _srgbEOTF(double v) {
+  if (v <= _kSrgbLinearThreshold) {
+    return v / _kSrgbLinearSlope;
+  }
+  return math.pow((v + _kSrgbEncodedOffset) / _kSrgbEncodedDivisor, _kSrgbGamma).toDouble();
+}
+
+/// sRGB opto-electronic transfer function (linear to gamma encode).
+double _srgbOETF(double v) {
+  if (v <= _kSrgbLinearToEncodedThreshold) {
+    return v * _kSrgbLinearSlope;
+  }
+  return _kSrgbEncodedDivisor * math.pow(v, 1.0 / _kSrgbGamma).toDouble() - _kSrgbEncodedOffset;
+}
+
+/// Extended versions that handle negative values by mirroring.
+double _srgbEOTFExtended(double v) {
+  return v < 0.0 ? -_srgbEOTF(-v) : _srgbEOTF(v);
+}
+
+double _srgbOETFExtended(double v) {
+  return v < 0.0 ? -_srgbOETF(-v) : _srgbOETF(v);
+}
+
+/// Display P3 to sRGB 3x3 matrix in linear space.
+/// M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+const List<double> _kP3ToSrgbLinear = <double>[
+  1.2249401,
+  -0.2249402,
+  0.0,
+  -0.0420569,
+  1.0420571,
+  0.0,
+  -0.0196376,
+  -0.0786507,
+  1.0982884,
+];
+
+/// sRGB to Display P3 3x3 matrix in linear space (inverse of [_kP3ToSrgbLinear]).
+const List<double> _kSrgbToP3Linear = <double>[
+  0.8224622,
+  0.1775380,
+  0.0,
+  0.0331942,
+  0.9668058,
+  0.0,
+  0.0170806,
+  0.0723974,
+  0.9105220,
+];
+
+/// Converts Display P3 (gamma-encoded) to extended sRGB (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _P3ToSrgbTransform implements _ColorTransform {
+  const _P3ToSrgbTransform();
 
   @override
   Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kP3ToSrgbLinear[0] * rLin + _kP3ToSrgbLinear[1] * gLin + _kP3ToSrgbLinear[2] * bLin;
+    final double gOut =
+        _kP3ToSrgbLinear[3] * rLin + _kP3ToSrgbLinear[4] * gLin + _kP3ToSrgbLinear[5] * bLin;
+    final double bOut =
+        _kP3ToSrgbLinear[6] * rLin + _kP3ToSrgbLinear[7] * gLin + _kP3ToSrgbLinear[8] * bLin;
+
     return Color.from(
       alpha: color.a,
-      red: values[0] * color.r + values[1] * color.g + values[2] * color.b + values[3],
-      green: values[4] * color.r + values[5] * color.g + values[6] * color.b + values[7],
-      blue: values[8] * color.r + values[9] * color.g + values[10] * color.b + values[11],
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
+      colorSpace: resultColorSpace,
+    );
+  }
+}
+
+/// Converts sRGB (gamma-encoded) to Display P3 (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+class _SrgbToP3Transform implements _ColorTransform {
+  const _SrgbToP3Transform();
+
+  @override
+  Color transform(Color color, ColorSpace resultColorSpace) {
+    final double rLin = _srgbEOTFExtended(color.r);
+    final double gLin = _srgbEOTFExtended(color.g);
+    final double bLin = _srgbEOTFExtended(color.b);
+
+    final double rOut =
+        _kSrgbToP3Linear[0] * rLin + _kSrgbToP3Linear[1] * gLin + _kSrgbToP3Linear[2] * bLin;
+    final double gOut =
+        _kSrgbToP3Linear[3] * rLin + _kSrgbToP3Linear[4] * gLin + _kSrgbToP3Linear[5] * bLin;
+    final double bOut =
+        _kSrgbToP3Linear[6] * rLin + _kSrgbToP3Linear[7] * gLin + _kSrgbToP3Linear[8] * bLin;
+
+    return Color.from(
+      alpha: color.a,
+      red: _srgbOETFExtended(rOut),
+      green: _srgbOETFExtended(gOut),
+      blue: _srgbOETFExtended(bOut),
       colorSpace: resultColorSpace,
     );
   }
 }
 
 _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
-  // The transforms were calculated with the following octave script from known
-  // conversions. These transforms have a white point that matches Apple's.
-  //
-  // p3Colors = [
-  //   1, 0, 0, 0.25;
-  //   0, 1, 0, 0.5;
-  //   0, 0, 1, 0.75;
-  //   1, 1, 1, 1;
-  // ];
-  // srgbColors = [
-  //   1.0930908918380737,  -0.5116420984268188, -0.0003518527664709836, 0.12397786229848862;
-  //   -0.22684034705162048, 1.0182716846466064,  0.00027732315356843174,  0.5073589086532593;
-  //   -0.15007957816123962, -0.31062406301498413, 1.0420056581497192,  0.771118700504303;
-  //   1,       1,       1,       1;
-  // ];
-  //
-  // format long
-  // p3ToSrgb = srgbColors * inv(p3Colors)
-  // srgbToP3 = inv(p3ToSrgb)
-  const srgbToP3 = _MatrixColorTransform(<double>[
-    0.808052267214446, 0.220292047628890, -0.139648846160100,
-    0.145738111193222, //
-    0.096480880462996, 0.916386732581291, -0.086093928394828,
-    0.089490172325882, //
-    -0.127099563510240, -0.068983484963878, 0.735426667591299, 0.233655661600230,
-  ]);
-  const _ColorTransform p3ToSrgb = _MatrixColorTransform(<double>[
-    1.306671048092539, -0.298061942172353, 0.213228303487995,
-    -0.213580156254466, //
-    -0.117390025596251, 1.127722006101976, 0.109727644608938,
-    -0.109450321455370, //
-    0.214813187718391, 0.054268702864647, 1.406898424029350, -0.364892765879631,
-  ]);
   switch (source) {
     case ColorSpace.sRGB:
       switch (destination) {
@@ -3964,7 +4030,7 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
         case ColorSpace.extendedSRGB:
           return const _IdentityColorTransform();
         case ColorSpace.displayP3:
-          return srgbToP3;
+          return const _SrgbToP3Transform();
       }
     case ColorSpace.extendedSRGB:
       switch (destination) {
@@ -3973,14 +4039,14 @@ _ColorTransform _getColorTransform(ColorSpace source, ColorSpace destination) {
         case ColorSpace.extendedSRGB:
           return const _IdentityColorTransform();
         case ColorSpace.displayP3:
-          return const _ClampTransform(srgbToP3);
+          return const _ClampTransform(_SrgbToP3Transform());
       }
     case ColorSpace.displayP3:
       switch (destination) {
         case ColorSpace.sRGB:
-          return const _ClampTransform(p3ToSrgb);
+          return const _ClampTransform(_P3ToSrgbTransform());
         case ColorSpace.extendedSRGB:
-          return p3ToSrgb;
+          return const _P3ToSrgbTransform();
         case ColorSpace.displayP3:
           return const _IdentityColorTransform();
       }
