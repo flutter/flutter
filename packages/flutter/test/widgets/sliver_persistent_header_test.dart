@@ -4,11 +4,12 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'sliver_test_utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   void verifyPaintPosition(GlobalKey key, Offset ideal, [bool? visible]) {
@@ -38,7 +39,7 @@ void main() {
   ) async {
     for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -72,7 +73,7 @@ void main() {
   ) async {
     for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -107,7 +108,7 @@ void main() {
   ) async {
     for (final maxShowOnScreenExtent in <double>[1000, 2000]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -759,7 +760,7 @@ void main() {
   testWidgets('SliverPersistentHeader pointer scrolled floating', (WidgetTester tester) async {
     final GlobalKey headerKey = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: CustomScrollView(
           slivers: <Widget>[
             SliverPersistentHeader(key: headerKey, floating: true, delegate: TestDelegate3()),
@@ -1129,7 +1130,7 @@ class TestDelegate2 extends SliverPersistentHeaderDelegate {
 class TestDelegate3 extends SliverPersistentHeaderDelegate {
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(height: 56, color: Colors.red, child: const Text('Test Title'));
+    return Container(height: 56, color: const Color(0xFFFF0000), child: const Text('Test Title'));
   }
 
   @override
