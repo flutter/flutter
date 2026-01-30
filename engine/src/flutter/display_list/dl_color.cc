@@ -33,7 +33,8 @@ double srgbOETF(double v) {
   if (v <= kSrgbLinearToEncodedThreshold) {
     return v * kSrgbLinearSlope;
   }
-  return kSrgbEncodedDivisor * std::pow(v, 1.0 / kSrgbGamma) - kSrgbEncodedOffset;
+  return kSrgbEncodedDivisor * std::pow(v, 1.0 / kSrgbGamma) -
+         kSrgbEncodedOffset;
 }
 
 // sRGB EOTF extended to handle negative values (for extended sRGB).
@@ -54,13 +55,13 @@ double srgbOETFExtended(double v) {
 // Matrix derived from:
 //   M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
 static constexpr double kP3ToSrgbLinear[9] = {
-     1.2249401, -0.2249402,  0.0,
-    -0.0420569,  1.0420571,  0.0,
-    -0.0196376, -0.0786507,  1.0982884,
+    1.2249401, -0.2249402, 0.0,        -0.0420569, 1.0420571,
+    0.0,       -0.0196376, -0.0786507, 1.0982884,
 };
 
 // Converts a Display P3 color (gamma-encoded) to extended sRGB (gamma-encoded).
-// Steps: P3 gamma decode -> linear P3 -> linear sRGB (via 3x3 matrix) -> sRGB gamma encode.
+// Steps: P3 gamma decode -> linear P3 -> linear sRGB (via 3x3 matrix) -> sRGB
+// gamma encode.
 DlColor p3ToExtendedSrgb(const DlColor& color) {
   // Linearize P3 values (P3 uses same transfer function as sRGB).
   double r_lin = srgbEOTFExtended(static_cast<double>(color.getRedF()));
@@ -68,14 +69,11 @@ DlColor p3ToExtendedSrgb(const DlColor& color) {
   double b_lin = srgbEOTFExtended(static_cast<double>(color.getBlueF()));
 
   // Apply 3x3 P3-to-sRGB matrix in linear space.
-  double r_srgb_lin = kP3ToSrgbLinear[0] * r_lin +
-                      kP3ToSrgbLinear[1] * g_lin +
+  double r_srgb_lin = kP3ToSrgbLinear[0] * r_lin + kP3ToSrgbLinear[1] * g_lin +
                       kP3ToSrgbLinear[2] * b_lin;
-  double g_srgb_lin = kP3ToSrgbLinear[3] * r_lin +
-                      kP3ToSrgbLinear[4] * g_lin +
+  double g_srgb_lin = kP3ToSrgbLinear[3] * r_lin + kP3ToSrgbLinear[4] * g_lin +
                       kP3ToSrgbLinear[5] * b_lin;
-  double b_srgb_lin = kP3ToSrgbLinear[6] * r_lin +
-                      kP3ToSrgbLinear[7] * g_lin +
+  double b_srgb_lin = kP3ToSrgbLinear[6] * r_lin + kP3ToSrgbLinear[7] * g_lin +
                       kP3ToSrgbLinear[8] * b_lin;
 
   // Gamma encode back to sRGB.
@@ -83,10 +81,8 @@ DlColor p3ToExtendedSrgb(const DlColor& color) {
   double g_out = srgbOETFExtended(g_srgb_lin);
   double b_out = srgbOETFExtended(b_srgb_lin);
 
-  return DlColor(color.getAlphaF(),
-                 static_cast<float>(r_out),
-                 static_cast<float>(g_out),
-                 static_cast<float>(b_out),
+  return DlColor(color.getAlphaF(), static_cast<float>(r_out),
+                 static_cast<float>(g_out), static_cast<float>(b_out),
                  DlColorSpace::kExtendedSRGB);
 }
 
@@ -120,8 +116,7 @@ DlColor DlColor::withColorSpace(DlColorSpace color_space) const {
     case DlColorSpace::kDisplayP3:
       switch (color_space) {
         case DlColorSpace::kSRGB:
-          return p3ToExtendedSrgb(*this)
-              .withColorSpace(DlColorSpace::kSRGB);
+          return p3ToExtendedSrgb(*this).withColorSpace(DlColorSpace::kSRGB);
         case DlColorSpace::kExtendedSRGB:
           return p3ToExtendedSrgb(*this);
         case DlColorSpace::kDisplayP3:

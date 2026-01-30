@@ -313,8 +313,8 @@ TEST(DisplayListColor, ColorSpaceP3ToExtendedSRGBLinearLight) {
                   DlColorSpace::kDisplayP3);
   DlColor expected_teal(1.0, -0.3764f, 0.8065f, 0.8372f,
                         DlColorSpace::kExtendedSRGB);
-  EXPECT_TRUE(
-      expected_teal.isClose(p3_teal.withColorSpace(DlColorSpace::kExtendedSRGB)))
+  EXPECT_TRUE(expected_teal.isClose(
+      p3_teal.withColorSpace(DlColorSpace::kExtendedSRGB)))
       << p3_teal.withColorSpace(DlColorSpace::kExtendedSRGB);
 
   // P3 (0, 1, 1) — max teal

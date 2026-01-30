@@ -547,7 +547,7 @@ void main() {
   // is EOTF(decode) -> 3x3 matrix -> OETF(encode).
   test('Display P3 to extended sRGB color conversion', () {
     // P3 #1ECAD3 (30/255, 202/255, 211/255)
-    const Color p3Color = Color.from(
+    const p3Color = Color.from(
       alpha: 1.0,
       red: 30 / 255.0,
       green: 202 / 255.0,
@@ -567,7 +567,7 @@ void main() {
   });
 
   test('Display P3 pure green to extended sRGB', () {
-    const Color p3Green = Color.from(
+    const p3Green = Color.from(
       alpha: 1.0,
       red: 0.0,
       green: 1.0,
@@ -584,13 +584,7 @@ void main() {
   });
 
   test('sRGB to Display P3 round-trip', () {
-    const Color srgbColor = Color.from(
-      alpha: 1.0,
-      red: 0.5,
-      green: 0.3,
-      blue: 0.8,
-      colorSpace: ColorSpace.sRGB,
-    );
+    const srgbColor = Color.from(alpha: 1.0, red: 0.5, green: 0.3, blue: 0.8);
     // sRGB -> P3 -> sRGB should round-trip.
     final Color p3 = srgbColor.withValues(colorSpace: ColorSpace.displayP3);
     final Color backToSrgb = p3.withValues(colorSpace: ColorSpace.extendedSRGB);
