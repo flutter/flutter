@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
@@ -169,8 +171,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             slivers: List<Widget>.generate(20, (int index) {
@@ -182,16 +183,6 @@ void main() {
               );
             }),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -249,8 +240,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -263,16 +253,6 @@ void main() {
               );
             }),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -318,8 +298,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
@@ -335,16 +314,6 @@ void main() {
               }),
             ),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -392,8 +361,7 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             reverse: true,
@@ -406,16 +374,6 @@ void main() {
               );
             }),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -476,8 +434,7 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -491,16 +448,6 @@ void main() {
               );
             }),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -544,8 +491,7 @@ void main() {
       addTearDown(controller.dispose);
       final items = List<String>.generate(20, (int index) => 'Item $index');
       await tester.pumpWidget(
-        WidgetsApp(
-          color: const Color(0xFFFFFFFF),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             center: const ValueKey<String>('Center'),
@@ -564,16 +510,6 @@ void main() {
               );
             }).toList(),
           ),
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
-            );
-          },
         ),
       );
 
@@ -623,8 +559,7 @@ void main() {
 
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {
     await tester.pumpWidget(
-      WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      TestWidgetsApp(
         home: ListView(
           children: const <Widget>[
             SizedBox(height: 600.0, child: Text('The cow as white as milk')),
@@ -632,16 +567,6 @@ void main() {
             SizedBox(height: 600.0, child: Text('The hair as yellow as corn')),
           ],
         ),
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-          return PageRouteBuilder<T>(
-            pageBuilder:
-                (
-                  BuildContext context,
-                  Animation<double> animation,
-                  Animation<double> secondaryAnimation,
-                ) => builder(context),
-          );
-        },
       ),
     );
     expect(find.text('The cow as white as milk'), findsOneWidget);
