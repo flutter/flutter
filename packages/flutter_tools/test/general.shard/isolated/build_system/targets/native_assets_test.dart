@@ -150,6 +150,17 @@ void main() {
             'foo.framework/foo',
           ],
         ),
+        const FakeCommand(
+          command: <Pattern>[
+            'dsymutil',
+            '/build/native_assets/ios/foo.framework/foo',
+            '-o',
+            '/build/native_assets/ios/foo.framework.dSYM',
+          ],
+        ),
+        const FakeCommand(
+          command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/foo.framework/foo'],
+        ),
         // Lookup the original install names of the dylib.
         // There can be different install names for different architectures.
         FakeCommand(

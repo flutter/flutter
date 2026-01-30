@@ -134,6 +134,38 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   };
 }
 
+/// Creates a dSYM bundle for a dylib.
+Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
+  final ProcessResult result = await globals.processManager.run(<String>[
+    'dsymutil',
+    dylibFile.path,
+    '-o',
+    dsymPath,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printError(result.stdout as String);
+    globals.logger.printError(result.stderr as String);
+    throwToolExit('dsymutil failed with exit code ${result.exitCode}');
+  }
+}
+
+/// Strips a dylib.
+///
+/// This is useful for release builds to reduce binary size.
+Future<void> stripDylib(File dylibFile) async {
+  final ProcessResult result = await globals.processManager.run(<String>[
+    'strip',
+    '-x', // Remove local symbols.
+    '-S', // Remove debugging symbol table.
+    dylibFile.path,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printError(result.stdout as String);
+    globals.logger.printError(result.stderr as String);
+    throwToolExit('strip failed with exit code ${result.exitCode}');
+  }
+}
+
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,

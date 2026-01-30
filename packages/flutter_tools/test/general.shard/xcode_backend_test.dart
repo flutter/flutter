@@ -799,6 +799,7 @@ void main() {
       nativeAssetsDir.createSync(recursive: true);
       final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
         ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
       nativeAssetsDir.childFile('random.txt').createSync();
       // In addition to the ffiPackageName framework, create an additional unrelated framework in
       // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -864,13 +865,21 @@ void main() {
               '--delete',
               '--filter',
               '- .DS_Store',
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
               // We should copy $ffiPackageName.framework, but not the unrelated framework path.
               ffiPackageDir.path,
               targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
             ],
           ),
           FakeCommand(
@@ -946,6 +955,7 @@ void main() {
       nativeAssetsDir.createSync(recursive: true);
       final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
         ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
       nativeAssetsDir.childFile('random.txt').createSync();
       // In addition to the ffiPackageName framework, create an additional unrelated framework in
       // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1044,10 +1054,6 @@ void main() {
               '--delete',
               '--filter',
               '- .DS_Store',
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
               // We should copy $ffiPackageName.framework, but not the unrelated framework path.
               ffiPackageDir.path,
               targetBuildDir.childDirectory(frameworksFolderPath).path,
@@ -1065,6 +1071,18 @@ void main() {
                   .childDirectory(frameworksFolderPath)
                   .childFile('$ffiPackageName.framework/$ffiPackageName')
                   .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
             ],
           ),
         ],
@@ -1134,6 +1152,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1190,12 +1209,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1297,6 +1324,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1353,12 +1381,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1462,6 +1498,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1533,10 +1570,6 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
                 ],
@@ -1553,6 +1586,18 @@ void main() {
                       .childDirectory(frameworksFolderPath)
                       .childFile('$ffiPackageName.framework/$ffiPackageName')
                       .path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
             ],
@@ -1622,6 +1667,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1717,12 +1763,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1826,6 +1880,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1922,12 +1977,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
             ],

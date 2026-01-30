@@ -159,6 +159,10 @@ Future<void> copyNativeCodeAssetsMacOS(
       ),
     );
     await lipoDylibs(dylibFile, sources);
+    if (buildMode != BuildMode.debug) {
+      await dsymutilDylib(dylibFile, '${frameworkDir.path}.dSYM');
+      await stripDylib(dylibFile);
+    }
     final Link dylibLink = frameworkDir.childLink(name);
     await dylibLink.create(
       fileSystem.path.relative(
