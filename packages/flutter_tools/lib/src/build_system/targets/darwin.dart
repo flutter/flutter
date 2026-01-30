@@ -18,22 +18,6 @@ abstract class UnpackDarwin extends Target {
   @visibleForOverriding
   FlutterDarwinPlatform get darwinPlatform;
 
-  @override
-  Future<bool> canSkip(Environment environment) async {
-    final String? buildScript = environment.defines[kXcodeBuildScript];
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
-    if (buildScript == kXcodeBuildScriptValueBuild &&
-        xcodeProject.usesSwiftPackageManager &&
-        xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
-      // Skip copying the Flutter framework during the build Run Script if Swift Package Manager
-      // is being used and the FlutterFramework swift package exists. Swift Package Manager now
-      // handles the Flutter framework.
-      return true;
-    }
-    return false;
-  }
-
   /// Copies the [framework] artifact using `rsync` to the [Environment.outputDir].
   /// Throws an error if copy fails.
   @protected

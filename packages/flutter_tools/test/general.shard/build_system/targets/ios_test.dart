@@ -1386,48 +1386,6 @@ void main() {
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       },
     );
-
-    testUsingContext(
-      'can be skipped during build with Swift Package Manager',
-      () async {
-        binary.createSync(recursive: true);
-        final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory(
-          'my_project',
-        );
-        projectDirectory.childFile('pubspec.yaml').createSync(recursive: true);
-        projectDirectory.childDirectory('ios').createSync();
-        projectDirectory
-            .childDirectory('ios')
-            .childDirectory('Flutter')
-            .childDirectory('ephemeral')
-            .childDirectory('Packages')
-            .childDirectory('.packages')
-            .childDirectory('FlutterFramework')
-            .createSync(recursive: true);
-        final environment = Environment.test(
-          fileSystem.currentDirectory,
-          processManager: processManager,
-          artifacts: artifacts,
-          logger: logger,
-          fileSystem: fileSystem,
-          outputDir: outputDir,
-          projectDir: projectDirectory,
-          defines: <String, String>{
-            kIosArchs: 'arm64',
-            kSdkRoot: 'path/to/iPhoneOS.sdk',
-            kCodesignIdentity: 'ABC123',
-            kXcodeBuildScript: 'build',
-          },
-        );
-
-        const Target target = DebugUnpackIOS();
-        expect(await target.canSkip(environment), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-      },
-    );
   });
 
   group('DebugIosLLDBInit', () {
