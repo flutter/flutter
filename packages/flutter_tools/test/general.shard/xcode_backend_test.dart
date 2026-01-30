@@ -993,6 +993,20 @@ void main() {
           ),
           FakeCommand(
             command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
               'rsync',
               '-8',
               '-av',
@@ -1007,20 +1021,7 @@ void main() {
               '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'codesign',
-              '--force',
-              '--verbose',
-              '--sign',
-              codesignIdentity,
-              '--',
-              targetBuildDir
-                  .childDirectory(frameworksFolderPath)
-                  .childFile('App.framework/App')
-                  .path,
-            ],
-          ),
+
           FakeCommand(
             command: <String>[
               'codesign',
@@ -1472,6 +1473,7 @@ void main() {
           final File infoPlist = memoryFileSystem.file('${buildDir.path}/$infoPlistPath');
           infoPlist.createSync(recursive: true);
           const buildMode = 'Debug';
+          const codesignIdentity = '12312313';
           final testContext = TestContext(
             <String>['embed_and_thin', 'macos'],
             <String, String>{
@@ -1486,6 +1488,7 @@ void main() {
               'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
               'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH': flutterSwiftPackageDir.path,
               'SDKROOT': 'macosx',
+              'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
             },
             commands: <FakeCommand>[
               FakeCommand(
@@ -1510,6 +1513,20 @@ void main() {
               ),
               FakeCommand(
                 command: <String>[
+                  'codesign',
+                  '--force',
+                  '--verbose',
+                  '--sign',
+                  codesignIdentity,
+                  '--',
+                  targetBuildDir
+                      .childDirectory(frameworksFolderPath)
+                      .childFile('App.framework/App')
+                      .path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
                   'rsync',
                   '-8',
                   '-av',
@@ -1522,6 +1539,20 @@ void main() {
                   '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'codesign',
+                  '--force',
+                  '--verbose',
+                  '--sign',
+                  codesignIdentity,
+                  '--',
+                  targetBuildDir
+                      .childDirectory(frameworksFolderPath)
+                      .childFile('$ffiPackageName.framework/$ffiPackageName')
+                      .path,
                 ],
               ),
             ],
@@ -1970,6 +2001,20 @@ void main() {
           ),
           FakeCommand(
             command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
               'rsync',
               '-8',
               '-av',
@@ -1984,20 +2029,7 @@ void main() {
               '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'codesign',
-              '--force',
-              '--verbose',
-              '--sign',
-              codesignIdentity,
-              '--',
-              targetBuildDir
-                  .childDirectory(frameworksFolderPath)
-                  .childFile('App.framework/App')
-                  .path,
-            ],
-          ),
+
           FakeCommand(
             command: <String>[
               'codesign',
