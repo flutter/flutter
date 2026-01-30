@@ -512,7 +512,7 @@ const double _kSrgbEncodedOffset = 0.055;
 const double _kSrgbEncodedDivisor = 1.055;
 const double _kSrgbLinearToEncodedThreshold = 0.0031308;
 
-// sRGB electro-optical transfer function (gamma decode to linear).
+/// sRGB electro-optical transfer function (gamma decode to linear).
 double _srgbEOTF(double v) {
   if (v <= _kSrgbLinearThreshold) {
     return v / _kSrgbLinearSlope;
@@ -520,7 +520,7 @@ double _srgbEOTF(double v) {
   return math.pow((v + _kSrgbEncodedOffset) / _kSrgbEncodedDivisor, _kSrgbGamma).toDouble();
 }
 
-// sRGB opto-electronic transfer function (linear to gamma encode).
+/// sRGB opto-electronic transfer function (linear to gamma encode).
 double _srgbOETF(double v) {
   if (v <= _kSrgbLinearToEncodedThreshold) {
     return v * _kSrgbLinearSlope;
@@ -528,7 +528,7 @@ double _srgbOETF(double v) {
   return _kSrgbEncodedDivisor * math.pow(v, 1.0 / _kSrgbGamma).toDouble() - _kSrgbEncodedOffset;
 }
 
-// Extended versions that handle negative values by mirroring.
+/// Extended versions that handle negative values by mirroring.
 double _srgbEOTFExtended(double v) {
   return v < 0.0 ? -_srgbEOTF(-v) : _srgbEOTF(v);
 }
@@ -537,8 +537,8 @@ double _srgbOETFExtended(double v) {
   return v < 0.0 ? -_srgbOETF(-v) : _srgbOETF(v);
 }
 
-// Display P3 to sRGB 3x3 matrix in linear space.
-// M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+/// Display P3 to sRGB 3x3 matrix in linear space.
+/// M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
 const List<double> _kP3ToSrgbLinear = <double>[
   1.2249401,
   -0.2249402,
@@ -551,7 +551,7 @@ const List<double> _kP3ToSrgbLinear = <double>[
   1.0982884,
 ];
 
-// sRGB to Display P3 3x3 matrix in linear space (inverse of above).
+/// sRGB to Display P3 3x3 matrix in linear space (inverse of [_kP3ToSrgbLinear]).
 const List<double> _kSrgbToP3Linear = <double>[
   0.8224622,
   0.1775380,
@@ -564,8 +564,8 @@ const List<double> _kSrgbToP3Linear = <double>[
   0.9105220,
 ];
 
-// Converts Display P3 (gamma-encoded) to extended sRGB (gamma-encoded).
-// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
+/// Converts Display P3 (gamma-encoded) to extended sRGB (gamma-encoded).
+/// Pipeline: EOTF(decode) -> 3x3 matrix -> OETF(encode).
 class _P3ToSrgbTransform implements _ColorTransform {
   const _P3ToSrgbTransform();
 

@@ -11,8 +11,8 @@ namespace flutter {
 
 namespace {
 
-// sRGB standard constants for transfer functions.
-// See https://en.wikipedia.org/wiki/SRGB.
+/// sRGB standard constants for transfer functions.
+/// See https://en.wikipedia.org/wiki/SRGB.
 constexpr double kSrgbGamma = 2.4;
 constexpr double kSrgbLinearThreshold = 0.04045;
 constexpr double kSrgbLinearSlope = 12.92;
@@ -20,7 +20,7 @@ constexpr double kSrgbEncodedOffset = 0.055;
 constexpr double kSrgbEncodedDivisor = 1.055;
 constexpr double kSrgbLinearToEncodedThreshold = 0.0031308;
 
-// sRGB electro-optical transfer function (gamma decode, gamma ~2.2 to linear).
+/// sRGB electro-optical transfer function (gamma decode, gamma ~2.2 to linear).
 double srgbEOTF(double v) {
   if (v <= kSrgbLinearThreshold) {
     return v / kSrgbLinearSlope;
@@ -28,7 +28,7 @@ double srgbEOTF(double v) {
   return std::pow((v + kSrgbEncodedOffset) / kSrgbEncodedDivisor, kSrgbGamma);
 }
 
-// sRGB opto-electronic transfer function (linear to gamma encode).
+/// sRGB opto-electronic transfer function (linear to gamma encode).
 double srgbOETF(double v) {
   if (v <= kSrgbLinearToEncodedThreshold) {
     return v * kSrgbLinearSlope;
@@ -37,31 +37,31 @@ double srgbOETF(double v) {
          kSrgbEncodedOffset;
 }
 
-// sRGB EOTF extended to handle negative values (for extended sRGB).
+/// sRGB EOTF extended to handle negative values (for extended sRGB).
 double srgbEOTFExtended(double v) {
   return v < 0.0 ? -srgbEOTF(-v) : srgbEOTF(v);
 }
 
-// sRGB OETF extended to handle negative values (for extended sRGB).
+/// sRGB OETF extended to handle negative values (for extended sRGB).
 double srgbOETFExtended(double v) {
   return v < 0.0 ? -srgbOETF(-v) : srgbOETF(v);
 }
 
-// Display P3 to sRGB linear 3x3 matrix.
-// Both P3 and sRGB use the same D65 white point.
-// P3 has wider primaries than sRGB, so converting P3 colors to sRGB
-// can produce values outside [0,1] (extended sRGB).
-//
-// Matrix derived from:
-//   M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
+/// Display P3 to sRGB linear 3x3 matrix.
+/// Both P3 and sRGB use the same D65 white point.
+/// P3 has wider primaries than sRGB, so converting P3 colors to sRGB
+/// can produce values outside [0,1] (extended sRGB).
+///
+/// Matrix derived from:
+///   M = sRGB_XYZ_to_RGB * P3_RGB_to_XYZ
 static constexpr double kP3ToSrgbLinear[9] = {
     1.2249401, -0.2249402, 0.0,        -0.0420569, 1.0420571,
     0.0,       -0.0196376, -0.0786507, 1.0982884,
 };
 
-// Converts a Display P3 color (gamma-encoded) to extended sRGB (gamma-encoded).
-// Steps: P3 gamma decode -> linear P3 -> linear sRGB (via 3x3 matrix) -> sRGB
-// gamma encode.
+/// Converts a Display P3 color (gamma-encoded) to extended sRGB
+/// (gamma-encoded). Steps: P3 gamma decode -> linear P3 -> linear sRGB (via 3x3
+/// matrix) -> sRGB gamma encode.
 DlColor p3ToExtendedSrgb(const DlColor& color) {
   // Linearize P3 values (P3 uses same transfer function as sRGB).
   double r_lin = srgbEOTFExtended(static_cast<double>(color.getRedF()));
