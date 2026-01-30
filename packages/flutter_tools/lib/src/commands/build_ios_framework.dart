@@ -317,16 +317,17 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
     for (final frameworkPath in frameworkPaths) {
       // Skip Flutter's own frameworks
-      if (frameworkPath.contains('Flutter.framework') ||
-          frameworkPath.contains('Flutter.xcframework') ||
-          frameworkPath.contains('App.framework') ||
-          frameworkPath.contains('App.xcframework')) {
+      if (frameworkPath.contains('/Flutter.framework') ||
+          frameworkPath.contains('/Flutter.xcframework') ||
+          frameworkPath.contains('/App.framework') ||
+          frameworkPath.contains('/App.xcframework')) {
         continue;
       }
 
-      // Framework path is relative to the Pods directory
+      // Framework paths from CocoaPods virtual groups (e.g. "Development Pods/[plugin]/Frameworks")
+      // may have a "../../../" prefix. Strip it so the path resolves correctly relative to Pods.
       final String absolutePath = globals.fs.path.normalize(
-        globals.fs.path.join(podsRoot.path, frameworkPath),
+        globals.fs.path.join(podsRoot.path, frameworkPath.replaceFirst('../../../', '')),
       );
       final Directory frameworkEntity = globals.fs.directory(absolutePath);
 
@@ -352,16 +353,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
           copyDirectory(frameworkEntity, destination);
         }
       } else if (frameworkName.endsWith('.framework')) {
-        // Create an xcframework from the single framework
-        final Directory xcframeworkOutput = modeDirectory.childDirectory('$binaryName.xcframework');
-        if (!xcframeworkOutput.existsSync()) {
-          globals.logger.printTrace('Creating xcframework from vendored framework: $frameworkName');
-          await BuildFrameworkCommand.produceXCFramework(
-            <Directory>[frameworkEntity],
-            binaryName,
-            modeDirectory,
-            globals.processManager,
-          );
+        final Directory destination = modeDirectory.childDirectory(frameworkName);
+        if (!destination.existsSync()) {
+          globals.logger.printTrace('Copying vendored framework: $frameworkName');
+          copyDirectory(frameworkEntity, destination);
         }
       }
     }

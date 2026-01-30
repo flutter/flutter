@@ -1262,19 +1262,19 @@ void main() {
     },
     "REF1": {
       "isa": "PBXFileReference",
-      "path": "Flutter.framework"
+      "path": "some/path/Flutter.framework"
     },
     "REF2": {
       "isa": "PBXFileReference",
-      "path": "Flutter.xcframework"
+      "path": "some/path/Flutter.xcframework"
     },
     "REF3": {
       "isa": "PBXFileReference",
-      "path": "App.framework"
+      "path": "some/path/App.framework"
     },
     "REF4": {
       "isa": "PBXFileReference",
-      "path": "App.xcframework"
+      "path": "some/path/App.xcframework"
     }
   }
 }
@@ -1282,10 +1282,10 @@ void main() {
 
         // Create the framework directories in Pods (though they should be skipped)
         final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        podsDir.childDirectory('Flutter.framework').createSync(recursive: true);
-        podsDir.childDirectory('Flutter.xcframework').createSync(recursive: true);
-        podsDir.childDirectory('App.framework').createSync(recursive: true);
-        podsDir.childDirectory('App.xcframework').createSync(recursive: true);
+        podsDir.childDirectory('some').childDirectory('path').childDirectory('Flutter.framework').createSync(recursive: true);
+        podsDir.childDirectory('some').childDirectory('path').childDirectory('Flutter.xcframework').createSync(recursive: true);
+        podsDir.childDirectory('some').childDirectory('path').childDirectory('App.framework').createSync(recursive: true);
+        podsDir.childDirectory('some').childDirectory('path').childDirectory('App.xcframework').createSync(recursive: true);
 
         final command = BuildIOSFrameworkCommand(
           logger: logger,
@@ -1366,7 +1366,7 @@ void main() {
     );
 
     testUsingContext(
-      'creates xcframework from .framework using xcodebuild',
+      'copies .framework directly to output',
       () async {
         final File projectFile =
             hostAppRoot
@@ -1396,20 +1396,6 @@ void main() {
               ..createSync(recursive: true);
         framework.childFile('MySDK').writeAsStringSync('binary');
 
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-create-xcframework',
-              '-framework',
-              framework.path,
-              '-output',
-              modeDirectory.childDirectory('MySDK.xcframework').path,
-            ],
-          ),
-        );
-
         final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -1421,7 +1407,12 @@ void main() {
 
         await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
 
-        expect(fakeProcessManager, hasNoRemainingExpectations);
+        // Should copy the framework directly (not create xcframework)
+        expect(modeDirectory.childDirectory('MySDK.framework').existsSync(), isTrue);
+        expect(
+          modeDirectory.childDirectory('MySDK.framework').childFile('MySDK').readAsStringSync(),
+          'binary',
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1604,6 +1595,131 @@ void main() {
               .childFile('Info.plist')
               .readAsStringSync(),
           'existing plist',
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => fakeProcessManager,
+        Logger: () => logger,
+      },
+    );
+
+    testUsingContext(
+      'does not skip frameworks whose names contain Flutter or App as a substring',
+      () async {
+        final File projectFile =
+            hostAppRoot
+                .childDirectory('Pods')
+                .childDirectory('Pods.xcodeproj')
+                .childFile('project.pbxproj')
+              ..createSync(recursive: true);
+        fakePlistParser.setJsonContent(projectFile.path, '''
+{
+  "objects": {
+    "GROUP1": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF1", "REF2"]
+    },
+    "REF1": {
+      "isa": "PBXFileReference",
+      "path": "FairDynamicFlutter.framework"
+    },
+    "REF2": {
+      "isa": "PBXFileReference",
+      "path": "AppAuth.xcframework"
+    }
+  }
+}
+''');
+
+        // Create the frameworks
+        final Directory podsDir = hostAppRoot.childDirectory('Pods');
+        final Directory fairFramework =
+            podsDir.childDirectory('FairDynamicFlutter.framework')
+              ..createSync(recursive: true);
+        fairFramework.childFile('FairDynamicFlutter').writeAsStringSync('binary');
+
+        final Directory appAuthFramework =
+            podsDir.childDirectory('AppAuth.xcframework')
+              ..createSync(recursive: true);
+        appAuthFramework.childFile('Info.plist').writeAsStringSync('plist');
+
+        final command = BuildIOSFrameworkCommand(
+          logger: logger,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: FakeFlutterVersion(),
+          cache: cache,
+          verboseHelp: false,
+        );
+
+        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+
+        // Both should be copied, not skipped
+        expect(modeDirectory.childDirectory('FairDynamicFlutter.framework').existsSync(), isTrue);
+        expect(modeDirectory.childDirectory('AppAuth.xcframework').existsSync(), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => fakeProcessManager,
+        Logger: () => logger,
+      },
+    );
+
+    testUsingContext(
+      'resolves paths with ../../../ prefix from CocoaPods virtual groups',
+      () async {
+        final File projectFile =
+            hostAppRoot
+                .childDirectory('Pods')
+                .childDirectory('Pods.xcodeproj')
+                .childFile('project.pbxproj')
+              ..createSync(recursive: true);
+        fakePlistParser.setJsonContent(projectFile.path, '''
+{
+  "objects": {
+    "GROUP1": {
+      "isa": "PBXGroup",
+      "name": "Frameworks",
+      "children": ["REF1"]
+    },
+    "REF1": {
+      "isa": "PBXFileReference",
+      "path": "../../../SomePlugin/Frameworks/MySDK.xcframework"
+    }
+  }
+}
+''');
+
+        // Create the framework at the resolved path (Pods/SomePlugin/Frameworks/MySDK.xcframework)
+        final Directory podsDir = hostAppRoot.childDirectory('Pods');
+        final Directory xcframework =
+            podsDir
+                .childDirectory('SomePlugin')
+                .childDirectory('Frameworks')
+                .childDirectory('MySDK.xcframework')
+              ..createSync(recursive: true);
+        xcframework.childFile('Info.plist').writeAsStringSync('resolved plist');
+
+        final command = BuildIOSFrameworkCommand(
+          logger: logger,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: FakeFlutterVersion(),
+          cache: cache,
+          verboseHelp: false,
+        );
+
+        await command.copyVendoredFrameworks(modeDirectory, hostAppRoot, fakePlistParser);
+
+        expect(modeDirectory.childDirectory('MySDK.xcframework').existsSync(), isTrue);
+        expect(
+          modeDirectory
+              .childDirectory('MySDK.xcframework')
+              .childFile('Info.plist')
+              .readAsStringSync(),
+          'resolved plist',
         );
       },
       overrides: <Type, Generator>{
