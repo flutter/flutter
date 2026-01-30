@@ -715,6 +715,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
+  flutterArguments.enable_wide_gamut = _project.enableWideGamut;
 
   BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =
@@ -1415,6 +1416,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   FlutterViewController* nextViewController;
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [self updateWindowMetricsForViewController:nextViewController];
+    [nextViewController updateWideGamutForScreen];
   }
 }
 

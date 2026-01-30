@@ -44,11 +44,19 @@
   _isInUseOverride = isInUseOverride;
 }
 
-- (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device {
+- (instancetype)initWithSize:(CGSize)size
+                      device:(id<MTLDevice>)device
+             enableWideGamut:(BOOL)enableWideGamut {
   if (self = [super init]) {
     self->_size = size;
-    self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size]);
-    self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface size:size device:device];
+    self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size
+                                                   enableWideGamut:enableWideGamut]);
+    MTLPixelFormat pixelFormat =
+        enableWideGamut ? MTLPixelFormatBGRA10_XR : MTLPixelFormatBGRA8Unorm;
+    self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface
+                                                          size:size
+                                                        device:device
+                                                   pixelFormat:pixelFormat];
   }
   return self;
 }
@@ -74,9 +82,16 @@
   return (__bridge FlutterSurface*)texture->user_data;
 }
 
-+ (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size {
-  unsigned pixelFormat = kCVPixelFormatType_32BGRA;
-  unsigned bytesPerElement = 4;
++ (IOSurfaceRef)createIOSurfaceWithSize:(CGSize)size enableWideGamut:(BOOL)enableWideGamut {
+  unsigned pixelFormat;
+  unsigned bytesPerElement;
+  if (enableWideGamut) {
+    pixelFormat = kCVPixelFormatType_40ARGBLEWideGamut;
+    bytesPerElement = 8;
+  } else {
+    pixelFormat = kCVPixelFormatType_32BGRA;
+    bytesPerElement = 4;
+  }
 
   size_t bytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, size.width * bytesPerElement);
   size_t totalBytes = IOSurfaceAlignProperty(kIOSurfaceAllocSize, size.height * bytesPerRow);
@@ -90,15 +105,20 @@
   };
 
   IOSurfaceRef res = IOSurfaceCreate((CFDictionaryRef)options);
-  IOSurfaceSetValue(res, kIOSurfaceColorSpace, kCGColorSpaceSRGB);
+  if (enableWideGamut) {
+    IOSurfaceSetValue(res, kIOSurfaceColorSpace, kCGColorSpaceExtendedSRGB);
+  } else {
+    IOSurfaceSetValue(res, kIOSurfaceColorSpace, kCGColorSpaceSRGB);
+  }
   return res;
 }
 
 + (id<MTLTexture>)createTextureForIOSurface:(IOSurfaceRef)surface
                                        size:(CGSize)size
-                                     device:(id<MTLDevice>)device {
+                                     device:(id<MTLDevice>)device
+                                pixelFormat:(MTLPixelFormat)pixelFormat {
   MTLTextureDescriptor* textureDescriptor =
-      [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+      [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
                                                          width:size.width
                                                         height:size.height
                                                      mipmapped:NO];

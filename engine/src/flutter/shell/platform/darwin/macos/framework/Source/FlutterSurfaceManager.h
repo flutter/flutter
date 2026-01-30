@@ -52,7 +52,17 @@
 - (nullable instancetype)initWithDevice:(nonnull id<MTLDevice>)device
                            commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                                   layer:(nonnull CALayer*)containingLayer
-                               delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate;
+                               delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate
+                        enableWideGamut:(BOOL)enableWideGamut;
+
+/**
+ * Updates the wide gamut setting. Flushes cached surfaces and updates
+ * layer contents format for all existing layers. New surfaces will be
+ * created with the updated format.
+ *
+ * Must be called on the platform thread.
+ */
+- (void)setEnableWideGamut:(BOOL)enableWideGamut;
 
 /**
  * Returns a back buffer surface of the given size to which Flutter can render content.
@@ -91,6 +101,11 @@
  * Removes all cached surfaces replacing them with new ones.
  */
 - (void)returnSurfaces:(nonnull NSArray<FlutterSurface*>*)surfaces;
+
+/**
+ * Removes all cached surfaces.
+ */
+- (void)flush;
 
 /**
  * Returns number of surfaces currently in cache. Used for tests.

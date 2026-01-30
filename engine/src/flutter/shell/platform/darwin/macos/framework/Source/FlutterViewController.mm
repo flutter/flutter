@@ -13,6 +13,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterKeyboardManager.h"
@@ -410,6 +411,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     [self launchEngine];
   }
   [self listenForMetaModifiedKeyUpEvents];
+  [self updateWideGamutForScreen];
 }
 
 - (void)viewWillDisappear {
@@ -798,7 +800,21 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
-                                 viewIdentifier:_viewIdentifier];
+                                 viewIdentifier:_viewIdentifier
+                                enableWideGamut:_project.enableWideGamut];
+}
+
+- (void)updateWideGamutForScreen {
+  if (!_project.enableWideGamut) {
+    // Wide gamut is not enabled by the developer or hardware doesn't support it.
+    return;
+  }
+  NSScreen* screen = self.view.window.screen;
+  if (screen == nil) {
+    return;
+  }
+  BOOL screenSupportsP3 = [screen canRepresentDisplayGamut:NSDisplayGamutP3];
+  [self.flutterView setEnableWideGamut:screenSupportsP3];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {

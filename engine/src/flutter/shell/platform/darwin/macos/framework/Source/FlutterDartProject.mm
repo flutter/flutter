@@ -7,9 +7,25 @@
 
 #include <vector>
 
+#import <Metal/Metal.h>
+
 #include "flutter/shell/platform/common/engine_switches.h"
 
 static NSString* const kICUBundlePath = @"icudtl.dat";
+
+static BOOL DoesHardwareSupportWideGamut() {
+  static BOOL result = NO;
+  static dispatch_once_t once_token = 0;
+  dispatch_once(&once_token, ^{
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    // Apple2 covers Apple Silicon Macs (M1+).
+    // Mac2 covers Intel Macs with AMD GPUs that support BGRA10_XR.
+    // Mac1 does not support wide gamut pixel formats.
+    result = [device supportsFamily:MTLGPUFamilyApple2] ||
+             [device supportsFamily:MTLGPUFamilyMac2];
+  });
+  return result;
+}
 static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 
 #pragma mark - Private interface declaration.
@@ -64,6 +80,15 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableImpeller"];
   if (enableImpeller != nil) {
     return enableImpeller.boolValue;
+  }
+  return NO;
+}
+
+- (BOOL)enableWideGamut {
+  NSNumber* enableWideGamut =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
+  if (enableWideGamut != nil) {
+    return enableWideGamut.boolValue && DoesHardwareSupportWideGamut();
   }
   return NO;
 }

@@ -19,6 +19,7 @@
   id<MTLCommandQueue> _commandQueue;
   CALayer* _containingLayer;
   __weak id<FlutterSurfaceManagerDelegate> _delegate;
+  BOOL _enableWideGamut;
 
   // Available (cached) back buffer surfaces. These will be cleared during
   // present and replaced by current frong surfaces.
@@ -65,7 +66,8 @@ static void UpdateContentSubLayers(CALayer* layer,
                                    CGFloat scale,
                                    CGSize surfaceSize,
                                    NSColor* borderColor,
-                                   const std::vector<FlutterRect>& paintRegion) {
+                                   const std::vector<FlutterRect>& paintRegion,
+                                   BOOL enableWideGamut) {
   // Adjust sublayer count to paintRegion count.
   while (layer.sublayers.count > paintRegion.size()) {
     [layer.sublayers.lastObject removeFromSuperlayer];
@@ -73,6 +75,9 @@ static void UpdateContentSubLayers(CALayer* layer,
 
   while (layer.sublayers.count < paintRegion.size()) {
     CALayer* newLayer = [CALayer layer];
+    if (enableWideGamut) {
+      newLayer.contentsFormat = kCAContentsFormatRGBA16Float;
+    }
     [layer addSublayer:newLayer];
   }
 
@@ -104,18 +109,50 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   commandQueue:(id<MTLCommandQueue>)commandQueue
                          layer:(CALayer*)containingLayer
-                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate {
+                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate
+               enableWideGamut:(BOOL)enableWideGamut {
   if (self = [super init]) {
     _device = device;
     _commandQueue = commandQueue;
     _containingLayer = containingLayer;
     _delegate = delegate;
+    _enableWideGamut = enableWideGamut;
+
+    if (enableWideGamut) {
+      _containingLayer.contentsFormat = kCAContentsFormatRGBA16Float;
+    }
 
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
   }
   return self;
+}
+
+- (void)setEnableWideGamut:(BOOL)enableWideGamut {
+  FML_DCHECK([NSThread isMainThread]);
+  if (_enableWideGamut == enableWideGamut) {
+    return;
+  }
+  _enableWideGamut = enableWideGamut;
+
+  NSString* contentsFormat =
+      enableWideGamut ? kCAContentsFormatRGBA16Float : kCAContentsFormatRGBA8Uint;
+  _containingLayer.contentsFormat = contentsFormat;
+
+  // Update all existing layers and their sublayers.
+  for (CALayer* layer in _layers) {
+    layer.contentsFormat = contentsFormat;
+    for (CALayer* sublayer in layer.sublayers) {
+      sublayer.contentsFormat = contentsFormat;
+    }
+  }
+
+  // Flush cached surfaces since they have the wrong pixel format.
+  [_backBufferCache flush];
+
+  // Clear front surfaces — they will be replaced on the next present.
+  [_frontSurfaces removeAllObjects];
 }
 
 - (FlutterBackBufferCache*)backBufferCache {
@@ -133,7 +170,7 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (FlutterSurface*)surfaceForSize:(CGSize)size {
   FlutterSurface* surface = [_backBufferCache removeSurfaceForSize:size];
   if (surface == nil) {
-    surface = [[FlutterSurface alloc] initWithSize:size device:_device];
+    surface = [[FlutterSurface alloc] initWithSize:size device:_device enableWideGamut:_enableWideGamut];
   }
   return surface;
 }
@@ -168,6 +205,9 @@ static void UpdateContentSubLayers(CALayer* layer,
   }
   while (_layers.count < _frontSurfaces.count) {
     CALayer* layer = [CALayer layer];
+    if (_enableWideGamut) {
+      layer.contentsFormat = kCAContentsFormatRGBA16Float;
+    }
     [_containingLayer addSublayer:layer];
     [_layers addObject:layer];
   }
@@ -187,7 +227,7 @@ static void UpdateContentSubLayers(CALayer* layer,
       layer.frame = CGRectZero;
       NSColor* borderColor = enableSurfaceDebugInfo ? GetBorderColorForLayer(i - 1) : nil;
       UpdateContentSubLayers(layer, info.surface.ioSurface, scale, info.surface.size, borderColor,
-                             info.paintRegion);
+                             info.paintRegion, _enableWideGamut);
     }
     layer.zPosition = info.zIndex;
   }
@@ -341,6 +381,12 @@ static const int kSurfaceEvictionAge = 30;
 
   // performSelector:withObject:afterDelay needs to be performed on RunLoop thread
   [self performSelectorOnMainThread:@selector(reschedule) withObject:nil waitUntilDone:NO];
+}
+
+- (void)flush {
+  @synchronized(self) {
+    [_surfaces removeAllObjects];
+  }
 }
 
 - (NSUInteger)count {
