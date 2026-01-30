@@ -810,7 +810,8 @@ class PlatformViewSceneElement extends SceneElement {
 
 /// The state for the current frame.
 class EmbedderFrameContext {
-  /// Picture recorders which were created d the final bounds of the picture in the scene.
+  /// Picture recorders which were created to measure the final bounds of the
+  /// picture in the scene.
   final Map<PictureLayer, LayerPictureRecorder> measuringPictureRecorders =
       <PictureLayer, LayerPictureRecorder>{};
 

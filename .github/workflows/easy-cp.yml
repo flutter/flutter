@@ -9,7 +9,9 @@ on:
     branches: master
     types: [labeled]
 
-permissions: write-all
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   cherrypick_not_merged_remove_label:
@@ -44,7 +46,7 @@ jobs:
         run: |
           echo "COMMIT_SHA=$(echo ${{ github.event.pull_request.merge_commit_sha }})" >> $GITHUB_ENV
       - name: Checkout Flutter Repo
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
         with:
           repository: flutteractionsbot/flutter
           path: flutter

@@ -32,10 +32,11 @@ import '../web/devfs_config.dart';
 import '../web/devfs_proxy.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
+import '../web/web_constants.dart';
 import '../web_template.dart';
 import 'proxy_middleware.dart';
 import 'release_asset_server.dart';
-import 'web_server_utlities.dart';
+import 'web_server_utilities.dart';
 
 // A minimal index for projects that do not yet support web. A meta tag is used
 // to ensure loaded scripts are always parsed as UTF-8.
@@ -78,7 +79,9 @@ class WebAssetServer implements AssetReader {
     required this.webRenderer,
     required this.useLocalCanvasKit,
     required this.fileSystem,
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
+    Map<String, String> webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -180,6 +183,7 @@ class WebAssetServer implements AssetReader {
     DartDevelopmentServiceConfiguration ddsConfig,
     Uri entrypoint,
     ExpressionCompiler? expressionCompiler, {
+    required bool crossOriginIsolation,
     required WebDevServerConfig webDevServerConfig,
     required WebRendererMode webRenderer,
     required bool isWasm,
@@ -194,6 +198,7 @@ class WebAssetServer implements AssetReader {
     required Logger logger,
     required Platform platform,
     bool shouldEnableMiddleware = true,
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -237,6 +242,12 @@ class WebAssetServer implements AssetReader {
     // Allow rendering in a iframe.
     httpServer!.defaultResponseHeaders.remove('x-frame-options', 'SAMEORIGIN');
 
+    if (crossOriginIsolation) {
+      for (final MapEntry<String, String> header in kCrossOriginIsolationHeaders.entries) {
+        httpServer.defaultResponseHeaders.add(header.key, header.value);
+      }
+    }
+
     for (final MapEntry<String, String> header in extraHeaders.entries) {
       httpServer.defaultResponseHeaders.add(header.key, header.value);
     }
@@ -255,6 +266,7 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
+      webDefines: webDefines,
     );
     final int selectedPort = server.selectedPort;
 
@@ -279,7 +291,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: Cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
-        needsCoopCoep: webRenderer == WebRendererMode.skwasm,
+        needsCoopCoep: crossOriginIsolation,
       );
       runZonedGuarded(
         () {
@@ -335,6 +347,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
                 reloadedSourcesUri: server._baseUri.replace(
@@ -351,6 +364,7 @@ class WebAssetServer implements AssetReader {
                   appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
+                  canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
               ).strategy,
@@ -390,6 +404,7 @@ class WebAssetServer implements AssetReader {
 
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
+  final Map<String, String> _webDefines;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -619,6 +634,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
+      webDefines: _webDefines,
     );
   }
 
@@ -641,7 +657,9 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         buildConfig: _buildConfigString,
         flutterJsFile: _flutterJsFile,
         flutterBootstrapJs: _flutterBootstrapJsContent,
+        webDefines: _webDefines,
       ),
+      encoding: utf8,
       headers: <String, String>{HttpHeaders.contentTypeHeader: 'text/html'},
     );
   }

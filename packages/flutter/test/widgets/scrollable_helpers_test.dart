@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'list_tile_test_utils.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
@@ -726,17 +727,17 @@ void main() {
                   child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                       return ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) {
+                        onReorderItem: (int oldIndex, int newIndex) {
                           setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex -= 1;
-                            }
                             final String item = items.removeAt(oldIndex);
                             items.insert(newIndex, item);
                           });
                         },
                         children: <Widget>[
-                          ListTile(key: const ValueKey<String>('Item 1'), title: Text(items.first)),
+                          TestListTile(
+                            key: const ValueKey<String>('Item 1'),
+                            title: Text(items.first),
+                          ),
                         ],
                       );
                     },

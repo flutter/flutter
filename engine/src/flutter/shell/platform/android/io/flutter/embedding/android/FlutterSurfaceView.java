@@ -121,6 +121,11 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     getHolder().addCallback(surfaceHolderCallbackCompat);
   }
 
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    FlutterMeasureSpec.onMeasure(widthMeasureSpec, heightMeasureSpec, this::setMeasuredDimension);
+  }
+
   // This is a work around for TalkBack.
   // If Android decides that our layer is transparent because, e.g. the status-
   // bar is transparent, TalkBack highlighting stops working.

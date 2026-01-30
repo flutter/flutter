@@ -886,4 +886,19 @@ void main() {
       expect(tester.getSize(find.byIcon(icon)), Size.square(scaleFactor * iconSize));
     }
   });
+
+  testWidgets('CupertinoSearchTextField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(child: CupertinoSearchTextField(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoSearchTextField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+  });
 }

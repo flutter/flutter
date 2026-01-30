@@ -59,20 +59,6 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
     });
 
-    test('high contrast in accessibilityFeatures has the correct value', () {
-      final mockHighContrast = MockHighContrastSupport();
-      HighContrastSupport.instance = mockHighContrast;
-
-      final dispatcher = EnginePlatformDispatcher();
-
-      expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
-      mockHighContrast.isEnabled = false;
-      mockHighContrast.invokeListeners(mockHighContrast.isEnabled);
-      expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
-
-      dispatcher.dispose();
-    });
-
     test('AppLifecycleState transitions through all states', () {
       final states = <ui.AppLifecycleState>[];
       void listener(ui.AppLifecycleState state) {
@@ -271,6 +257,7 @@ void testMain() {
       expect(findBrowserTextScaleFactor(), 1.0);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/178271.
     test("calls onTextScaleFactorChanged when the <html> element's font-size changes", () async {
       final DomElement root = domDocument.documentElement!;
       final String oldFontSize = root.style.fontSize;
@@ -281,6 +268,15 @@ void testMain() {
         ui.PlatformDispatcher.instance.onTextScaleFactorChanged = oldCallback;
       });
 
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
       root.style.fontSize = '16px';
 
       var isCalled = false;
@@ -289,18 +285,18 @@ void testMain() {
       };
 
       root.style.fontSize = '20px';
-      await Future<void>.delayed(Duration.zero);
+      await waitForResizeObserver();
       expect(root.style.fontSize, '20px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25); // = 20px / 16px
 
       isCalled = false;
 
       root.style.fontSize = '16px';
-      await Future<void>.delayed(Duration.zero);
+      await waitForResizeObserver();
       expect(root.style.fontSize, '16px');
       expect(isCalled, isTrue);
-      expect(ui.PlatformDispatcher.instance.textScaleFactor, findBrowserTextScaleFactor());
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0); // = 16px / 16px
     });
 
     test('calls onMetricsChanged when the typography measurement element size changes', () async {
@@ -371,6 +367,65 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.letterSpacingOverride, expectedLetterSpacing);
       expect(ui.PlatformDispatcher.instance.wordSpacingOverride, expectedWordSpacing);
       expect(ui.PlatformDispatcher.instance.paragraphSpacingOverride, expectedParagraphSpacing);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/178856.
+    test('updates lineHeightScaleFactorOverride only when line-height is explicitly set', () async {
+      final DomElement root = domDocument.documentElement!;
+      final DomElement style = createDomHTMLStyleElement(null);
+
+      // Wait for next frame.
+      Future<void> waitForResizeObserver() {
+        final completer = Completer<void>();
+        domWindow.requestAnimationFrame((_) {
+          Timer.run(completer.complete);
+        });
+        return completer.future;
+      }
+
+      addTearDown(() {
+        style.text = null;
+        style.remove();
+      });
+
+      style.text = '*{ font-size: 20px !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25); // = 20px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0); // = 16px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 20px !important; line-height: 2 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.25); // = 20px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 2.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0); // = 16px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
+
+      style.text = '*{ font-size: 32px !important; line-height: 3 !important; }';
+      root.append(style);
+      await waitForResizeObserver();
+      expect(root.contains(style), isTrue);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 2.0); // = 32px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, 3.0);
+
+      style.remove();
+      await waitForResizeObserver();
+      expect(root.contains(style), isFalse);
+      expect(ui.PlatformDispatcher.instance.textScaleFactor, 1.0); // = 16px / 16px
+      expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
     test('disposes all its views', () {
@@ -510,6 +565,90 @@ void testMain() {
       await drawFrameCalled.future;
       expect(beginFrameCalled, true);
       expect(drawFrameCalled.isCompleted, true);
+    });
+
+    group('Media query values', () {
+      late EnginePlatformDispatcher dispatcher;
+
+      setUp(() {
+        dispatcher = EnginePlatformDispatcher();
+      });
+
+      tearDown(() {
+        dispatcher.dispose();
+      });
+
+      test('high contrast in accessibilityFeatures has the correct value', () {
+        const String mediaQuery = MediaQueryManager.FORCED_COLORS;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isFalse);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.accessibilityFeatures.highContrast, isTrue);
+      });
+
+      test('configuration.platformBrightness (dark mode) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.DARK_MODE;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.light);
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(dispatcher.configuration.platformBrightness, ui.Brightness.dark);
+      });
+
+      test('reduced motion (disable animations) has the correct value', () {
+        const String mediaQuery = MediaQueryManager.REDUCED_MOTION;
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': false}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isFalse,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isFalse,
+          reason: 'disableAnimations is wrong',
+        );
+
+        mediaQueries.debugTriggerListener(
+          mediaQuery,
+          event: createDomMediaQueryListEvent('change', {'media': mediaQuery, 'matches': true}),
+        );
+
+        expect(
+          dispatcher.accessibilityFeatures.reduceMotion,
+          isTrue,
+          reason: 'reduceMotion is wrong',
+        );
+        expect(
+          dispatcher.accessibilityFeatures.disableAnimations,
+          isTrue,
+          reason: 'disableAnimations is wrong',
+        );
+      });
     });
 
     group('NavigationTarget', () {
@@ -734,31 +873,6 @@ void testMain() {
       });
     });
   }, skip: ui_web.browser.isFirefox);
-}
-
-class MockHighContrastSupport implements HighContrastSupport {
-  bool isEnabled = true;
-
-  final List<HighContrastListener> _listeners = <HighContrastListener>[];
-
-  @override
-  bool get isHighContrastEnabled => isEnabled;
-
-  void invokeListeners(bool val) {
-    for (final HighContrastListener listener in _listeners) {
-      listener(val);
-    }
-  }
-
-  @override
-  void addListener(HighContrastListener listener) {
-    _listeners.add(listener);
-  }
-
-  @override
-  void removeListener(HighContrastListener listener) {
-    _listeners.remove(listener);
-  }
 }
 
 class MockAppLifecycleState extends AppLifecycleState {

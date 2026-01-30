@@ -143,6 +143,7 @@ interface class FlutterTestRunner {
           testTimeRecorder: testTimeRecorder,
           webRenderer: debuggingOptions.webRenderer,
           useWasm: debuggingOptions.webUseWasm,
+          crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
         );
       });
       await testWrapper.main(testArgs);

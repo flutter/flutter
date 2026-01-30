@@ -92,8 +92,7 @@ Scalar Entity::GetShaderClipDepth() const {
 }
 
 Scalar Entity::GetShaderClipDepth(uint32_t clip_depth) {
-  Scalar result = std::clamp(clip_depth * kDepthEpsilon, 0.0f, 1.0f);
-  return std::min(result, 1.0f - kDepthEpsilon);
+  return std::clamp(clip_depth * kDepthEpsilon, 0.0f, 1.0f - kDepthEpsilon);
 }
 
 void Entity::SetBlendMode(BlendMode blend_mode) {

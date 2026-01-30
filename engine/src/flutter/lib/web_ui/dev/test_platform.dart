@@ -534,6 +534,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
       wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
+      enableWimp: ${suite.runConfig.enableWimp},
     },
   });
 </script>

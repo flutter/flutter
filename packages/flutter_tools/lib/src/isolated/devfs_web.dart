@@ -80,11 +80,13 @@ class WebDevFS implements DevFS {
     required this.useLocalCanvasKit,
     required this.rootDirectory,
     this.useDwdsWebSocketConnection = false,
+    required this.webCrossOriginIsolation,
     required this.fileSystem,
     required this.logger,
     required this.platform,
     this.testMode = false,
-  }) {
+    Map<String, String> webDefines = const <String, String>{},
+  }) : _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -112,9 +114,11 @@ class WebDevFS implements DevFS {
   final bool useLocalCanvasKit;
   final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
+  final bool webCrossOriginIsolation;
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
+  final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
 
@@ -220,7 +224,9 @@ class WebDevFS implements DevFS {
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      crossOriginIsolation: webCrossOriginIsolation,
       shouldEnableMiddleware: shouldEnableMiddleware,
+      webDefines: _webDefines,
     );
     return baseUri;
   }

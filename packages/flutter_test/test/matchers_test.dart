@@ -753,8 +753,11 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
@@ -912,9 +915,371 @@ void main() {
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();
     });
+
+    testWidgets('matchesSemantics captures NBSP in failure descriptions', (
+      WidgetTester tester,
+    ) async {
+      final data = SemanticsData(
+        flagsCollection: SemanticsFlags.none,
+        actions: 0,
+        identifier: '',
+        traversalChildIdentifier: '',
+        traversalParentIdentifier: '',
+        attributedLabel: AttributedString('label\u202f0'),
+        attributedHint: AttributedString('hint\u202f0'),
+        attributedValue: AttributedString('value\u202f0'),
+        attributedIncreasedValue: AttributedString('increasedValue\u202f0'),
+        attributedDecreasedValue: AttributedString('decreasedValue\u202f0'),
+        tooltip: 'tooltip\u202f0',
+        textDirection: TextDirection.ltr,
+        rect: Rect.zero,
+        textSelection: null,
+        scrollIndex: null,
+        scrollChildCount: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        platformViewId: 0,
+        maxValueLength: 0,
+        currentValueLength: 0,
+        headingLevel: 0,
+        linkUrl: null,
+        role: ui.SemanticsRole.none,
+        controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
+        locale: null,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
+        maxValue: '',
+        minValue: '',
+      );
+      final node = _FakeSemanticsNode(data);
+
+      // Label
+      expect(
+        () => expect(node, matchesSemantics(label: 'label 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'label was label\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedLabel: AttributedString('label 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r"attributedLabel was: AttributedString('label\u202f0'"),
+          ),
+        ),
+      );
+
+      // Hint
+      expect(
+        () => expect(node, matchesSemantics(hint: 'hint 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'hint was hint\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedHint: AttributedString('hint 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r"attributedHint was: AttributedString('hint\u202f0'"),
+          ),
+        ),
+      );
+
+      // Value
+      expect(
+        () => expect(node, matchesSemantics(value: 'value 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'value was value\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(node, matchesSemantics(attributedValue: AttributedString('value 0'))),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r"attributedValue was: AttributedString('value\u202f0'"),
+          ),
+        ),
+      );
+
+      // Increased Value
+      expect(
+        () => expect(node, matchesSemantics(increasedValue: 'increasedValue 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'increasedValue was increasedValue\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(attributedIncreasedValue: AttributedString('increasedValue 0')),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r"attributedIncreasedValue was: AttributedString('increasedValue\u202f0'"),
+          ),
+        ),
+      );
+
+      // Decreased Value
+      expect(
+        () => expect(node, matchesSemantics(decreasedValue: 'decreasedValue 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'decreasedValue was decreasedValue\u202f0'),
+          ),
+        ),
+      );
+      expect(
+        () => expect(
+          node,
+          matchesSemantics(attributedDecreasedValue: AttributedString('decreasedValue 0')),
+        ),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r"attributedDecreasedValue was: AttributedString('decreasedValue\u202f0'"),
+          ),
+        ),
+      );
+
+      // Tooltip
+      expect(
+        () => expect(node, matchesSemantics(tooltip: 'tooltip 0')),
+        throwsA(
+          isA<TestFailure>().having(
+            (TestFailure e) => e.message,
+            'message',
+            contains(r'tooltip was tooltip\u202f0'),
+          ),
+        ),
+      );
+    });
+
+    testWidgets(
+      'matchesSemantics shows correct error message when actuals have normal space but expects have NBSP',
+      (WidgetTester tester) async {
+        final data = SemanticsData(
+          flagsCollection: SemanticsFlags.none,
+          actions: 0,
+          identifier: '',
+          traversalChildIdentifier: '',
+          traversalParentIdentifier: '',
+          attributedLabel: AttributedString('label 0'),
+          attributedHint: AttributedString('hint 0'),
+          attributedValue: AttributedString('value 0'),
+          attributedIncreasedValue: AttributedString('increasedValue 0'),
+          attributedDecreasedValue: AttributedString('decreasedValue 0'),
+          tooltip: 'tooltip 0',
+          textDirection: TextDirection.ltr,
+          rect: Rect.zero,
+          textSelection: null,
+          scrollIndex: null,
+          scrollChildCount: null,
+          scrollPosition: null,
+          scrollExtentMax: null,
+          scrollExtentMin: null,
+          platformViewId: 0,
+          maxValueLength: 0,
+          currentValueLength: 0,
+          headingLevel: 0,
+          linkUrl: null,
+          role: ui.SemanticsRole.none,
+          controlsNodes: null,
+          validationResult: SemanticsValidationResult.none,
+          inputType: ui.SemanticsInputType.none,
+          locale: null,
+          hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
+          minValue: '',
+          maxValue: '',
+        );
+        final node = _FakeSemanticsNode(data);
+
+        // Label
+        expect(
+          () => expect(node, matchesSemantics(label: 'label\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(contains(r'with label: label\u202f0'), contains(r'label was label 0')),
+            ),
+          ),
+        );
+        expect(
+          () => expect(node, matchesSemantics(attributedLabel: AttributedString('label\u202f0'))),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(r"with attributedLabel: AttributedString('label\u202f0'"),
+                contains(r"attributedLabel was: AttributedString('label 0'"),
+              ),
+            ),
+          ),
+        );
+
+        // Hint
+        expect(
+          () => expect(node, matchesSemantics(hint: 'hint\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(contains(r'with hint: hint\u202f0'), contains(r'hint was hint 0')),
+            ),
+          ),
+        );
+        expect(
+          () => expect(node, matchesSemantics(attributedHint: AttributedString('hint\u202f0'))),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(r"with attributedHint: AttributedString('hint\u202f0'"),
+                contains(r"attributedHint was: AttributedString('hint 0'"),
+              ),
+            ),
+          ),
+        );
+
+        // Value
+        expect(
+          () => expect(node, matchesSemantics(value: 'value\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(contains(r'with value: value\u202f0'), contains(r'value was value 0')),
+            ),
+          ),
+        );
+        expect(
+          () => expect(node, matchesSemantics(attributedValue: AttributedString('value\u202f0'))),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(r"with attributedValue: AttributedString('value\u202f0'"),
+                contains(r"attributedValue was: AttributedString('value 0'"),
+              ),
+            ),
+          ),
+        );
+
+        // Increased Value
+        expect(
+          () => expect(node, matchesSemantics(increasedValue: 'increasedValue\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(r'with increasedValue: increasedValue\u202f0'),
+                contains(r'increasedValue was increasedValue 0'),
+              ),
+            ),
+          ),
+        );
+        expect(
+          () => expect(
+            node,
+            matchesSemantics(attributedIncreasedValue: AttributedString('increasedValue\u202f0')),
+          ),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(
+                  r"with attributedIncreasedValue: AttributedString('increasedValue\u202f0'",
+                ),
+                contains(r"attributedIncreasedValue was: AttributedString('increasedValue 0'"),
+              ),
+            ),
+          ),
+        );
+
+        // Decreased Value
+        expect(
+          () => expect(node, matchesSemantics(decreasedValue: 'decreasedValue\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(r'with decreasedValue: decreasedValue\u202f0'),
+                contains(r'decreasedValue was decreasedValue 0'),
+              ),
+            ),
+          ),
+        );
+        expect(
+          () => expect(
+            node,
+            matchesSemantics(attributedDecreasedValue: AttributedString('decreasedValue\u202f0')),
+          ),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(
+                contains(
+                  r"with attributedDecreasedValue: AttributedString('decreasedValue\u202f0'",
+                ),
+                contains(r"attributedDecreasedValue was: AttributedString('decreasedValue 0'"),
+              ),
+            ),
+          ),
+        );
+
+        // Tooltip
+        expect(
+          () => expect(node, matchesSemantics(tooltip: 'tooltip\u202f0')),
+          throwsA(
+            isA<TestFailure>().having(
+              (TestFailure e) => e.message,
+              'message',
+              allOf(contains(r'with tooltip: tooltip\u202f0'), contains(r'tooltip was tooltip 0')),
+            ),
+          ),
+        );
+      },
+    );
   });
 
-  group('containsSemantics', () {
+  group('isSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
@@ -945,7 +1310,7 @@ void main() {
 
       expect(
         tester.getSemantics(find.byKey(key)),
-        containsSemantics(
+        isSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',
@@ -970,7 +1335,7 @@ void main() {
       expect(
         tester.getSemantics(find.byKey(key)),
         isNot(
-          containsSemantics(
+          isSemantics(
             label: 'foo',
             hint: 'bar',
             value: 'baz',
@@ -1055,14 +1420,17 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1157,14 +1525,17 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1264,8 +1635,11 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1299,14 +1673,17 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final fullNode = _FakeSemanticsNode(fullData);
 
       expect(
         emptyNode,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1319,7 +1696,7 @@ void main() {
 
       expect(
         fullNode,
-        containsSemantics(
+        isSemantics(
           rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           size: const Size(10.0, 10.0),
           elevation: 3.0,
@@ -1349,10 +1726,10 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           label: 'Foo',
           textDirection: TextDirection.ltr,
-          children: <Matcher>[containsSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
+          children: <Matcher>[isSemantics(label: 'Bar', textDirection: TextDirection.ltr)],
         ),
       );
 
@@ -1373,7 +1750,7 @@ void main() {
 
       expect(
         node,
-        containsSemantics(
+        isSemantics(
           label: 'Foo',
           validationResult: SemanticsValidationResult.valid,
           textDirection: TextDirection.ltr,
@@ -1395,9 +1772,9 @@ void main() {
         ),
       );
       final SemanticsNode node = tester.getSemantics(find.byKey(key));
-      // It is important that validationResult is passed as null to containsSemantics,
+      // It is important that validationResult is passed as null to isSemantics,
       // because this is testing that null means "ignore the validation result value".
-      expect(node, containsSemantics(label: 'Foo', textDirection: TextDirection.ltr));
+      expect(node, isSemantics(label: 'Foo', textDirection: TextDirection.ltr));
 
       handle.dispose();
     });
@@ -1433,12 +1810,15 @@ void main() {
         role: ui.SemanticsRole.none,
         controlsNodes: null,
         validationResult: SemanticsValidationResult.none,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.defer,
         inputType: ui.SemanticsInputType.none,
         locale: null,
+        minValue: '0',
+        maxValue: '0',
       );
       final node = _FakeSemanticsNode(data);
 
-      expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
+      expect(node, isSemantics(customActions: <CustomSemanticsAction>[action]));
     });
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
@@ -1472,7 +1852,7 @@ void main() {
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
         tester.getSemantics(find.byKey(key)),
-        containsSemantics(
+        isSemantics(
           label: 'foo',
           hint: 'bar',
           value: 'baz',

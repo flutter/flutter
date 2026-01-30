@@ -130,7 +130,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   using FSExternal = TiledTextureFillExternalFragmentShader;
   if (texture_->GetTextureDescriptor().type ==
       TextureType::kTextureExternalOES) {

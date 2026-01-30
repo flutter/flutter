@@ -522,31 +522,44 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
   }
 }
 
-ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
-                                       Trigs&& trigs,
-                                       const Rect& oval_bounds,
-                                       bool use_center,
-                                       bool supports_triangle_fans)
-    : iteration_(iteration),
-      trigs_(std::move(trigs)),
-      oval_bounds_(oval_bounds),
-      use_center_(use_center),
-      half_width_(-1.0f),
-      cap_(Cap::kButt),
-      supports_triangle_fans_(supports_triangle_fans) {}
+ArcVertexGenerator ArcVertexGenerator::MakeFilled(
+    const Arc::Iteration& iteration,
+    Trigs&& trigs,
+    const Rect& oval_bounds,
+    bool use_center,
+    bool supports_triangle_fans) {
+  return ArcVertexGenerator(iteration, std::move(trigs), oval_bounds,
+                            use_center, supports_triangle_fans, -1.0f,
+                            Cap::kSquare, nullptr);
+}
+
+ArcVertexGenerator ArcVertexGenerator::MakeStroked(
+    const Arc::Iteration& iteration,
+    Trigs&& trigs,
+    const Rect& oval_bounds,
+    Scalar half_width,
+    Cap cap,
+    std::unique_ptr<Trigs> round_cap_trigs) {
+  return ArcVertexGenerator(iteration, std::move(trigs), oval_bounds, false,
+                            false, half_width, cap, std::move(round_cap_trigs));
+}
 
 ArcVertexGenerator::ArcVertexGenerator(const Arc::Iteration& iteration,
                                        Trigs&& trigs,
                                        const Rect& oval_bounds,
+                                       bool use_center,
+                                       bool supports_triangle_fans,
                                        Scalar half_width,
-                                       Cap cap)
+                                       Cap cap,
+                                       std::unique_ptr<Trigs> round_cap_trigs)
     : iteration_(iteration),
       trigs_(std::move(trigs)),
       oval_bounds_(oval_bounds),
-      use_center_(false),
+      use_center_(use_center),
+      supports_triangle_fans_(supports_triangle_fans),
       half_width_(half_width),
       cap_(cap),
-      supports_triangle_fans_(false) {}
+      round_cap_trigs_(std::move(round_cap_trigs)) {}
 
 PrimitiveType ArcVertexGenerator::GetTriangleType() const {
   return (half_width_ < 0 && supports_triangle_fans_)
@@ -557,19 +570,26 @@ PrimitiveType ArcVertexGenerator::GetTriangleType() const {
 size_t ArcVertexGenerator::GetVertexCount() const {
   size_t count = iteration_.GetPointCount();
   if (half_width_ > 0) {
+    // Stroked arc
     FML_DCHECK(!use_center_);
-    FML_DCHECK(cap_ != Cap::kRound);
     count *= 2;
     if (cap_ == Cap::kSquare) {
       count += 4;
+    } else if (cap_ == Cap::kRound) {
+      FML_DCHECK(round_cap_trigs_);
+      // 4 vertices for each Trig in round_cap_trigs_: 2 vertices for each in
+      // the start cap and 2 for each in the end cap. Subtract 4 because the cap
+      // vertices elide the beginning and end vertices of the arc.
+      count += round_cap_trigs_->size() * 4 - 4;
     }
   } else if (supports_triangle_fans_) {
+    // Filled arc using a triangle fan
     if (use_center_) {
       count++;
     }
   } else {
-    // corrugated triangle fan
-    count += (count + 1) / 2;
+    // Filled arc using a triangle strip
+    count = (2 * count) - 1;
   }
   return count;
 }
@@ -579,7 +599,7 @@ void ArcVertexGenerator::GenerateVertices(
   if (half_width_ > 0) {
     FML_DCHECK(!use_center_);
     Tessellator::GenerateStrokedArc(trigs_, iteration_, oval_bounds_,
-                                    half_width_, cap_, proc);
+                                    half_width_, cap_, round_cap_trigs_, proc);
   } else if (supports_triangle_fans_) {
     Tessellator::GenerateFilledArcFan(trigs_, iteration_, oval_bounds_,
                                       use_center_, proc);
@@ -595,7 +615,7 @@ ArcVertexGenerator Tessellator::FilledArc(const Matrix& view_transform,
   size_t divisions = ComputeQuadrantDivisions(
       view_transform.GetMaxBasisLengthXY() * arc.GetOvalSize().MaxDimension());
 
-  return ArcVertexGenerator(
+  return ArcVertexGenerator::MakeFilled(
       arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
       arc.GetOvalBounds(), arc.IncludeCenter(), supports_triangle_fans);
 };
@@ -611,9 +631,15 @@ ArcVertexGenerator Tessellator::StrokedArc(const Matrix& view_transform,
       ComputeQuadrantDivisions(view_transform.GetMaxBasisLengthXY() *
                                (arc.GetOvalSize().MaxDimension() + half_width));
 
-  return ArcVertexGenerator(arc.ComputeIterations(divisions),
-                            GetTrigsForDivisions(divisions),
-                            arc.GetOvalBounds(), half_width, cap);
+  std::unique_ptr<Trigs> round_cap_trigs;
+  if (cap == Cap::kRound) {
+    round_cap_trigs = std::make_unique<Trigs>(GetTrigsForDeviceRadius(
+        view_transform.GetMaxBasisLengthXY() * half_width));
+  }
+
+  return ArcVertexGenerator::MakeStroked(
+      arc.ComputeIterations(divisions), GetTrigsForDivisions(divisions),
+      arc.GetOvalBounds(), half_width, cap, std::move(round_cap_trigs));
 }
 
 EllipticalVertexGenerator Tessellator::RoundCapLine(
@@ -810,45 +836,53 @@ void Tessellator::GenerateFilledArcStrip(const Trigs& trigs,
     origin = center + midpoint * radii;
   }
 
-  proc(origin);
   proc(center + iteration.start * radii);
-  bool insert_origin = false;
   for (size_t i = 0; i < iteration.quadrant_count; i++) {
     auto quadrant = iteration.quadrants[i];
     for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
-      if (insert_origin) {
-        proc(origin);
-      }
-      insert_origin = !insert_origin;
+      proc(origin);
       proc(center + trigs[j] * quadrant.axis * radii);
     }
   }
-  if (insert_origin) {
-    proc(origin);
-  }
+  proc(origin);
   proc(center + iteration.end * radii);
 }
 
-void Tessellator::GenerateStrokedArc(const Trigs& trigs,
-                                     const Arc::Iteration& iteration,
-                                     const Rect& oval_bounds,
-                                     Scalar half_width,
-                                     Cap cap,
-                                     const TessellatedVertexProc& proc) {
+void Tessellator::GenerateStrokedArc(
+    const Trigs& trigs,
+    const Arc::Iteration& iteration,
+    const Rect& oval_bounds,
+    Scalar half_width,
+    Cap cap,
+    const std::unique_ptr<Trigs>& round_cap_trigs,
+    const TessellatedVertexProc& proc) {
   Point center = oval_bounds.GetCenter();
   Size base_radii = oval_bounds.GetSize() * 0.5f;
   Size inner_radii = base_radii - Size(half_width, half_width);
   Size outer_radii = base_radii + Size(half_width, half_width);
 
-  FML_DCHECK(cap != Cap::kRound);
-  if (cap == Cap::kSquare) {
-    Vector2 offset =
-        Vector2{iteration.start.y, -iteration.start.x} * half_width;
-    proc(center + iteration.start * inner_radii + offset);
-    proc(center + iteration.start * outer_radii + offset);
+  // Starting cap
+  switch (cap) {
+    case Cap::kButt:
+      proc(center + iteration.start * inner_radii);
+      proc(center + iteration.start * outer_radii);
+      break;
+    case Cap::kRound:
+      FML_DCHECK(round_cap_trigs);
+      Tessellator::GenerateStartRoundCap(center + iteration.start * base_radii,
+                                         -iteration.start * half_width,
+                                         *round_cap_trigs, proc);
+      break;
+    case Cap::kSquare:
+      Vector2 offset =
+          Vector2{iteration.start.y, -iteration.start.x} * half_width;
+      proc(center + iteration.start * inner_radii + offset);
+      proc(center + iteration.start * outer_radii + offset);
+      proc(center + iteration.start * inner_radii);
+      proc(center + iteration.start * outer_radii);
+      break;
   }
-  proc(center + iteration.start * inner_radii);
-  proc(center + iteration.start * outer_radii);
+
   for (size_t i = 0; i < iteration.quadrant_count; i++) {
     auto quadrant = iteration.quadrants[i];
     for (size_t j = quadrant.start_index; j < quadrant.end_index; j++) {
@@ -856,12 +890,26 @@ void Tessellator::GenerateStrokedArc(const Trigs& trigs,
       proc(center + trigs[j] * quadrant.axis * outer_radii);
     }
   }
-  proc(center + iteration.end * inner_radii);
-  proc(center + iteration.end * outer_radii);
-  if (cap == Cap::kSquare) {
-    Vector2 offset = Vector2{-iteration.end.y, iteration.end.x} * half_width;
-    proc(center + iteration.end * inner_radii + offset);
-    proc(center + iteration.end * outer_radii + offset);
+
+  // Ending cap
+  switch (cap) {
+    case Cap::kButt:
+      proc(center + iteration.end * inner_radii);
+      proc(center + iteration.end * outer_radii);
+      break;
+    case Cap::kRound:
+      FML_DCHECK(round_cap_trigs);
+      Tessellator::GenerateEndRoundCap(center + iteration.end * base_radii,
+                                       -iteration.end * half_width,
+                                       *round_cap_trigs, proc);
+      break;
+    case Cap::kSquare:
+      Vector2 offset = Vector2{-iteration.end.y, iteration.end.x} * half_width;
+      proc(center + iteration.end * inner_radii);
+      proc(center + iteration.end * outer_radii);
+      proc(center + iteration.end * inner_radii + offset);
+      proc(center + iteration.end * outer_radii + offset);
+      break;
   }
 }
 
@@ -880,22 +928,8 @@ void Tessellator::GenerateRoundCapLine(
   along *= radius / along.GetLength();
   auto across = Point(-along.y, along.x);
 
-  for (auto& trig : trigs) {
-    auto relative_along = along * trig.cos;
-    auto relative_across = across * trig.sin;
-    proc(p0 - relative_along + relative_across);
-    proc(p0 - relative_along - relative_across);
-  }
-
-  // The second half of the round caps should be iterated in reverse, but
-  // we can instead iterate forward and swap the sin/cos values as they
-  // should be symmetric.
-  for (auto& trig : trigs) {
-    auto relative_along = along * trig.sin;
-    auto relative_across = across * trig.cos;
-    proc(p1 + relative_along + relative_across);
-    proc(p1 + relative_along - relative_across);
-  }
+  Tessellator::GenerateStartRoundCap(p0, across, trigs, proc);
+  Tessellator::GenerateEndRoundCap(p1, across, trigs, proc);
 }
 
 void Tessellator::GenerateFilledEllipse(
@@ -955,6 +989,37 @@ void Tessellator::GenerateFilledRoundRect(
     auto offset = Point(trig.sin * radii.width, trig.cos * radii.height);
     proc({right + offset.x, bottom + offset.y});
     proc({right + offset.x, top - offset.y});
+  }
+}
+
+void Tessellator::GenerateStartRoundCap(const Point& p,
+                                        const Vector2& perpendicular,
+                                        const Trigs& trigs,
+                                        const TessellatedVertexProc& proc) {
+  Point along(perpendicular.y, -perpendicular.x);
+
+  for (auto& trig : trigs) {
+    auto relative_along = along * trig.cos;
+    auto relative_across = perpendicular * trig.sin;
+    proc(p - relative_along + relative_across);
+    proc(p - relative_along - relative_across);
+  }
+}
+
+void Tessellator::GenerateEndRoundCap(const Point& p,
+                                      const Vector2& perpendicular,
+                                      const Trigs& trigs,
+                                      const TessellatedVertexProc& proc) {
+  Point along(perpendicular.y, -perpendicular.x);
+
+  // The ending round cap should be iterated in reverse, but
+  // we can instead iterate forward and swap the sin/cos values as they
+  // should be symmetric.
+  for (auto& trig : trigs) {
+    auto relative_along = along * trig.sin;
+    auto relative_across = perpendicular * trig.cos;
+    proc(p + relative_along + relative_across);
+    proc(p + relative_along - relative_across);
   }
 }
 

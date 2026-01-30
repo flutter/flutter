@@ -33,7 +33,7 @@ void main() {
     );
     expect(
       Typography.material2018(platform: TargetPlatform.linux).black.titleLarge!.fontFamilyFallback,
-      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+      <String>['Ubuntu', 'Adwaita Sans', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
     );
     expect(
       Typography.material2018(platform: TargetPlatform.windows).black.titleLarge!.fontFamily,
@@ -50,7 +50,7 @@ void main() {
     );
     expect(
       Typography.material2018(platform: TargetPlatform.linux).white.titleLarge!.fontFamilyFallback,
-      <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
+      <String>['Ubuntu', 'Adwaita Sans', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'],
     );
     expect(
       Typography.material2018(platform: TargetPlatform.windows).white.titleLarge!.fontFamily,

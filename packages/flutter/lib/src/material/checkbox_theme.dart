@@ -20,7 +20,7 @@ import 'theme_data.dart';
 /// Defines default property values for descendant [Checkbox] widgets.
 ///
 /// Descendant widgets obtain the current [CheckboxThemeData] object using
-/// `CheckboxTheme.of(context)`. Instances of [CheckboxThemeData] can be
+/// [CheckboxTheme.of]. Instances of [CheckboxThemeData] can be
 /// customized with [CheckboxThemeData.copyWith].
 ///
 /// Typically a [CheckboxThemeData] is specified as part of the overall [Theme]

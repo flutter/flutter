@@ -20,6 +20,8 @@
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/command.h"
+#include "impeller/renderer/pipeline_descriptor.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
@@ -235,6 +237,7 @@ static bool Bind(PassBindingsCacheMTL& pass,
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
+  context_->GetPipelineLibrary()->LogPipelineUsage(pipeline_desc);
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
       PipelineMTL::Cast(*pipeline).GetMTLRenderPipelineState());

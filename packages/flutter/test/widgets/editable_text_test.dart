@@ -9,6 +9,7 @@
 library;
 
 import 'dart:convert' show jsonDecode;
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -135,6 +136,8 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  // TODO(justinmc): Widgets tests should not import Material.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets(
     'Tapping the Live Text button calls onLiveTextInput',
     (WidgetTester tester) async {
@@ -207,9 +210,9 @@ void main() {
       final groupIds = <String>['Group A', 'Group B', 'Group C'];
       final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
       final inputFields = <Widget>[
-        TextFormField(key: keys[0], groupId: groupIds[0]),
-        CupertinoTextField(key: keys[1], groupId: groupIds[1]),
-        TextField(key: keys[2], groupId: groupIds[2]),
+        TestTextField(key: keys[0], groupId: groupIds[0]),
+        TestTextField(key: keys[1], groupId: groupIds[1]),
+        TestTextField(key: keys[2], groupId: groupIds[2]),
       ];
 
       await tester.pumpWidget(
@@ -240,9 +243,9 @@ void main() {
       (WidgetTester tester) async {
         final keys = List<GlobalKey>.generate(3, (_) => GlobalKey());
         final inputFields = <Widget>[
-          TextFormField(key: keys[0]),
-          CupertinoTextField(key: keys[1]),
-          TextField(key: keys[2]),
+          TestTextField(key: keys[0]),
+          TestTextField(key: keys[1]),
+          TestTextField(key: keys[2]),
         ];
 
         await tester.pumpWidget(
@@ -17174,7 +17177,7 @@ void main() {
             SliverMainAxisGroup(
               slivers: <Widget>[
                 SliverToBoxAdapter(child: SizedBox(height: 600)),
-                SliverToBoxAdapter(child: SizedBox(height: 44, child: TextField())),
+                SliverToBoxAdapter(child: SizedBox(height: 44, child: TestTextField())),
                 SliverToBoxAdapter(child: SizedBox(height: 500)),
               ],
             ),
@@ -17182,10 +17185,63 @@ void main() {
         ),
       ),
     );
+
     await tester.pumpWidget(widget);
+    expect(find.byType(EditableText), findsNothing);
     await tester.showKeyboard(find.byType(EditableText, skipOffstage: false));
     await tester.pumpAndSettle();
-    expect(scrollController.offset, 75.0);
+    expect(find.byType(EditableText), findsOneWidget);
+    // Verify scroll offset.
+    final RenderSliverMainAxisGroup groupRenderer = tester.renderObject(
+      find.byType(SliverMainAxisGroup),
+    );
+    final RenderSliver sliverWithTextField = tester.renderObject(
+      find.ancestor(of: find.byType(TestTextField), matching: find.byType(SliverToBoxAdapter)),
+    );
+
+    // Calculate scroll offset of the sliver containing the input field relative to
+    // the parent SliverMainAxisGroup.
+    final double childScrollOffset = groupRenderer.childScrollOffset(sliverWithTextField)!;
+    // The sliver before the input field has a height of 600, so the scroll offset of the sliver
+    // with the input field is 600.
+    expect(childScrollOffset, 600.0);
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+
+    // Calculate offset of EditableText relative to its SliverToBoxAdapter parent.
+    // This value varies depending on the padding added by decorators. TestTextField
+    // does not have any additional padding so this should be 0.0.
+    final double editableOffsetInParentSliver = renderEditable
+        .localToGlobal(Offset.zero, ancestor: sliverWithTextField)
+        .dy;
+    expect(editableOffsetInParentSliver, 0.0);
+
+    // Calculate the height of the caret and selection handle. The input field
+    // should be scrolled so that the bottom of the selection handle is visible.
+    final double lineHeight = renderEditable.preferredLineHeight;
+    final double handleHeight = state.selectionOverlay!.selectionControls!
+        .getHandleSize(lineHeight)
+        .height;
+    final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
+    final Offset anchor = state.selectionOverlay!.selectionControls!.getHandleAnchor(
+      TextSelectionHandleType.collapsed,
+      lineHeight,
+    );
+    final double handleCenter = handleHeight / 2 - anchor.dy;
+    final double bottomSpacing = math.max(
+      handleCenter + interactiveHandleHeight / 2,
+      state.widget.scrollPadding.bottom,
+    );
+
+    final Rect caretRect = renderEditable.getLocalRectForCaret(const TextPosition(offset: 0));
+    final double caretBottomFromEditableTop = caretRect.bottom + bottomSpacing;
+
+    // Calculate the total scroll offset required to bring the bottom of the
+    // selection handle to the bottom of the viewport.
+    final double totalTargetY =
+        childScrollOffset + editableOffsetInParentSliver + caretBottomFromEditableTop;
+    expect(scrollController.offset, totalTargetY - scrollController.position.viewportDimension);
   });
 
   testWidgets(
@@ -17678,6 +17734,172 @@ void main() {
     final ClipboardData? data = await Clipboard.getData('text/plain');
     expect(controller.text, 'Hello world');
     expect(data?.text, 'foo');
+  });
+
+  testWidgets(
+    'Does not crash when editing value changes between consecutive scrolls',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179164.
+      controller.value = TextEditingValue(text: 'text ' * 10000);
+      final Widget editable = EditableText(
+        maxLines: null,
+        style: textStyle,
+        cursorColor: cursorColor,
+        backgroundCursorColor: const Color(0xFF424242), // grey.
+        focusNode: focusNode,
+        selectionControls: testTextSelectionHandleControls,
+        contextMenuBuilder: (context, editableTextState) {
+          return const SizedBox.shrink();
+        },
+        controller: controller,
+      );
+      final entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return Center(child: editable);
+        },
+      );
+      addTearDown(
+        () => entry
+          ..remove()
+          ..dispose(),
+      );
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Overlay(initialEntries: <OverlayEntry>[entry]),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder editableText = find.byType(EditableText);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+      // Long press to select the first word and show the toolbar.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(editableTextState.showToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      // Scroll down so selection is not visible, and toolbar is scheduled to be shown
+      // when the selection is once again visible.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(editableText));
+      await gesture.moveBy(const Offset(0.0, -200.0));
+      await tester.pump();
+      await gesture.up();
+
+      // Scroll again before the post-frame callback from the first scroll is run to invalidate
+      // the data from the first scroll.
+      controller.value = const TextEditingValue(text: 'a different value');
+
+      await gesture.down(tester.getCenter(editableText));
+      await gesture.moveBy(const Offset(0.0, -100.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // This test should reach the end without crashing.
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
+  );
+
+  testWidgets(
+    'toolbar should not reappear when editing value changes during a scroll',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/179164.
+      controller.value = TextEditingValue(text: 'text ' * 10000);
+      final Widget editable = EditableText(
+        maxLines: null,
+        style: textStyle,
+        cursorColor: cursorColor,
+        backgroundCursorColor: const Color(0xFF424242), // grey.
+        focusNode: focusNode,
+        selectionControls: testTextSelectionHandleControls,
+        contextMenuBuilder: (context, editableTextState) {
+          return const SizedBox.shrink();
+        },
+        controller: controller,
+      );
+      final entry = OverlayEntry(
+        builder: (BuildContext context) {
+          return Center(child: editable);
+        },
+      );
+      addTearDown(
+        () => entry
+          ..remove()
+          ..dispose(),
+      );
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Overlay(initialEntries: <OverlayEntry>[entry]),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder editableText = find.byType(EditableText);
+      final EditableTextState editableTextState = tester.state<EditableTextState>(
+        find.byType(EditableText),
+      );
+      // Long press to select the first word and show the toolbar.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(editableTextState.showToolbar(), true);
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, true);
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+
+      // Scroll down so selection is not visible, and toolbar is scheduled to be shown
+      // when the selection is once again visible.
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(editableText));
+      await gesture.moveBy(const Offset(0.0, -200.0));
+      await tester.pump();
+      await gesture.up();
+      // Change the editing value before the post-frame callback from the scroll is run,
+      // this should invalidate the data from the scroll and cause the toolbar to not
+      // reappear.
+      controller.value = const TextEditingValue(text: 'a different value');
+      // Pump and settle to allow postFrameCallbacks to complete.
+      await tester.pumpAndSettle();
+      expect(editableTextState.selectionOverlay?.toolbarIsVisible, false);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    // [intended] only applies to platforms where we supply the context menu.
+    skip: kIsWeb,
+  );
+
+  testWidgets('EditableText does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: const Color(0xFFAABBCC),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(EditableText)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
   });
 }
 

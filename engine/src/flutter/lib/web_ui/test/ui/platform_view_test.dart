@@ -866,23 +866,26 @@ Future<void> testMain() async {
       final ui.FrameInfo frame = await codec.getNextFrame();
       final ui.Image ckImage = frame.image;
 
-      final sb = LayerSceneBuilder();
-      sb.pushOffset(0, 0);
-      final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder, ui.Rect.largest);
-      canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
-      final ui.Picture picture = recorder.endRecording();
-      sb.addPicture(ui.Offset.zero, picture);
-      sb.addPlatformView(0, width: 10, height: 10);
+      ui.Scene testScene() {
+        final sb = LayerSceneBuilder();
+        sb.pushOffset(0, 0);
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, ui.Rect.largest);
+        canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
+        final ui.Picture picture = recorder.endRecording();
+        sb.addPicture(ui.Offset.zero, picture);
+        sb.addPlatformView(0, width: 10, height: 10);
+        return sb.build();
+      }
 
       implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
       implicitView.debugForceResize();
-      await renderScene(sb.build());
+      await renderScene(testScene());
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
       implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
       implicitView.debugForceResize();
-      await renderScene(sb.build());
+      await renderScene(testScene());
       _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
       implicitView.debugPhysicalSizeOverride = null;

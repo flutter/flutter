@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'list_tile_test_utils.dart';
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
@@ -75,7 +76,7 @@ void main() {
           child: Baseline(
             baseline: 100.0,
             baselineType: TextBaseline.alphabetic,
-            child: ListTile(
+            child: TestListTile(
               title: BaselineDetector(() {
                 assert(!debugCheckIntrinsicSizes);
                 calls += 1;

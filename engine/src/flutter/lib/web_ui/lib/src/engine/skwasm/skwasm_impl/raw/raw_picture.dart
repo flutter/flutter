@@ -38,6 +38,9 @@ external CanvasHandle pictureRecorderBeginRecording(
 )
 external PictureHandle pictureRecorderEndRecording(PictureRecorderHandle picture);
 
+@Native<Void Function(PictureHandle)>(symbol: 'picture_ref', isLeaf: true)
+external void pictureRef(PictureHandle handle);
+
 @Native<Void Function(PictureHandle)>(symbol: 'picture_dispose', isLeaf: true)
 external void pictureDispose(PictureHandle handle);
 

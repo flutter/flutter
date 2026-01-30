@@ -181,6 +181,7 @@ static std::optional<uint32_t> ToJsonType(
   FML_UNREACHABLE();
 }
 
+static const char* kFormatVersionKey = "format_version";
 static const char* kStageKey = "stage";
 static const char* kTargetPlatformKey = "target_platform";
 static const char* kEntrypointKey = "entrypoint";
@@ -193,6 +194,7 @@ static const char* kUniformRowsKey = "rows";
 static const char* kUniformColumnsKey = "columns";
 static const char* kUniformBitWidthKey = "bit_width";
 static const char* kUniformArrayElementsKey = "array_elements";
+static const char* kUniformStructElementsKey = "struct_elements";
 
 static std::string RuntimeStageBackendToString(RuntimeStageBackend backend) {
   switch (backend) {
@@ -212,6 +214,7 @@ static std::string RuntimeStageBackendToString(RuntimeStageBackend backend) {
 std::shared_ptr<fml::Mapping> RuntimeStageData::CreateJsonMapping() const {
   // Runtime Stage Data JSON format
   //   {
+  //      "format_version": 1,
   //      "sksl": {
   //        "stage": 0,
   //        "entrypoint": "",
@@ -232,6 +235,8 @@ std::shared_ptr<fml::Mapping> RuntimeStageData::CreateJsonMapping() const {
   //   },
   nlohmann::json root;
 
+  root[kFormatVersionKey] =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
   for (const auto& kvp : data_) {
     nlohmann::json platform_object;
 
@@ -328,10 +333,17 @@ std::unique_ptr<fb::RuntimeStageT> RuntimeStageData::CreateStageFlatbuffer(
       desc->array_elements = uniform.array_elements.value();
     }
 
-    for (const auto& byte_type : uniform.struct_layout) {
-      desc->struct_layout.push_back(static_cast<fb::StructByteType>(byte_type));
+    for (const auto& byte_type : uniform.padding_layout) {
+      desc->padding_layout.push_back(static_cast<fb::PaddingType>(byte_type));
     }
     desc->struct_float_count = uniform.struct_float_count;
+
+    for (const StructField& field : uniform.struct_fields) {
+      auto field_desc = std::make_unique<fb::StructFieldT>(fb::StructFieldT{});
+      field_desc->name = field.name;
+      field_desc->byte_size = field.byte_size;
+      desc->struct_fields.emplace_back(std::move(field_desc));
+    }
 
     runtime_stage->uniforms.emplace_back(std::move(desc));
   }
@@ -370,6 +382,8 @@ RuntimeStageData::CreateMultiStageFlatbuffer() const {
   // The high level object API is used here for writing to the buffer. This is
   // just a convenience.
   auto runtime_stages = std::make_unique<fb::RuntimeStagesT>();
+  runtime_stages->format_version =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
 
   for (const auto& kvp : data_) {
     auto runtime_stage = CreateStageFlatbuffer(kvp.first);

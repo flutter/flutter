@@ -489,4 +489,56 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('Expansible does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ExpansibleController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Expansible(
+            headerBuilder: (_, _) => const Text('X'),
+            bodyBuilder: (_, _) => const Text('Y'),
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Expansible)), Size.zero);
+    controller.expand();
+    await tester.pump();
+  });
+
+  testWidgets('Controller can be toggled', (WidgetTester tester) async {
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Expansible(
+          controller: controller,
+          bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+          headerBuilder: (BuildContext context, Animation<double> animation) =>
+              GestureDetector(onTap: controller.toggle, child: const Text('Header')),
+        ),
+      ),
+    );
+
+    expect(find.text('Body'), findsNothing);
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
+
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
+
+    expect(find.text('Body'), findsNothing);
+    controller.toggle();
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
+  });
 }

@@ -1204,6 +1204,12 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   }
 }
 
+namespace {
+bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
+  return !pixel_format.has_value();
+}
+}  // namespace
+
 std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
 FirstPassDispatcher::TakeBackdropData() {
   std::unordered_map<int64_t, BackdropData> temp;
@@ -1216,7 +1222,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer,
-    bool generate_mips) {
+    bool generate_mips,
+    std::optional<PixelFormat> target_pixel_format) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1227,14 +1234,20 @@ std::shared_ptr<Texture> DisplayListToTexture(
       impeller::RenderTargetAllocator(
           context.GetContext()->GetResourceAllocator());
   impeller::RenderTarget target;
-  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+      PixelFormatSupportsMSAA(target_pixel_format)) {
     target = render_target_allocator.CreateOffscreenMSAA(
         *context.GetContext(),  // context
         size,                   // size
         /*mip_count=*/mip_count,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
+        std::nullopt,                           // stencil_attachment_config
+        nullptr,                                // existing_color_msaa_texture
+        nullptr,             // existing_color_resolve_texture
+        nullptr,             // existing_depth_stencil_texture
+        target_pixel_format  // target_format
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
@@ -1243,7 +1256,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
         /*mip_count=*/mip_count,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
+            kDefaultColorAttachmentConfig,  // color_attachment_config
+        std::nullopt,                       // stencil_attachment_config
+        nullptr,                            // existing_color_texture
+        nullptr,                            // existing_depth_stencil_texture
+        target_pixel_format                 // target_format
     );
   }
   if (!target.IsValid()) {

@@ -852,6 +852,25 @@ void RenderArcFarm(DisplayListBuilder& builder,
   }
   builder.Restore();
 }
+
+void RenderArcFarmForOverlappingCapsTest(DisplayListBuilder& builder,
+                                         const DlPaint& paint) {
+  builder.Save();
+  builder.Translate(40, 30);
+  const Rect arc_bounds = Rect::MakeLTRB(0, 0, 40, 40);
+  for (int stroke_width = 10; stroke_width <= 40; stroke_width += 3) {
+    DlPaint modified_paint = DlPaint(paint);
+    modified_paint.setStrokeWidth(stroke_width);
+    builder.Save();
+    for (int sweep = 160; sweep <= 360; sweep += 20) {
+      builder.DrawArc(arc_bounds, 0, sweep, false, modified_paint);
+      builder.Translate(84, 0);
+    }
+    builder.Restore();
+    builder.Translate(0, 44 + stroke_width);
+  }
+  builder.Restore();
+}
 }  // namespace
 
 TEST_P(AiksTest, FilledArcsRenderCorrectly) {
@@ -861,6 +880,23 @@ TEST_P(AiksTest, FilledArcsRenderCorrectly) {
 
   DlPaint paint;
   paint.setColor(DlColor::kBlue());
+
+  RenderArcFarm(builder, paint,
+                {
+                    .use_center = false,
+                    .full_circles = false,
+                });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TranslucentFilledArcsRenderCorrectly) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
 
   RenderArcFarm(builder, paint,
                 {
@@ -964,6 +1000,21 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithSquareEnds) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndSquareEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kSquare);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -980,6 +1031,21 @@ TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithRoundEnds) {
                     .use_center = false,
                     .full_circles = false,
                 });
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, StrokedArcsRenderCorrectlyWithTranslucencyAndRoundEnds) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setColor(DlColor::kBlue().modulateOpacity(0.5));
+
+  RenderArcFarmForOverlappingCapsTest(builder, paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
@@ -2169,6 +2235,57 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
                      DlPaint().setColor(DlColor::kAqua()));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, PerspectiveRectangle) {
+  int perspective = 58;
+  bool use_clip = true;
+  bool diff_clip = false;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderInt("perspective%", &perspective, 0, 100);
+      ImGui::Checkbox("use clip", &use_clip);
+      if (use_clip) {
+        ImGui::Checkbox("diff clip", &diff_clip);
+      }
+      ImGui::SetWindowPos("Controls", ImVec2(500, 100));
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+
+    Scalar val = perspective * -0.00005f;
+    builder.TransformFullPerspective(
+        // clang-format off
+        1.0f,  0.0f, 0.0f, 400.0f,
+        0.0f,  1.0f, 0.0f, 400.0f,
+        0.0f,  0.0f, 1.0f, 0.0f,
+        0.0f,  val,  0.0f, 2.2f
+        // clang-format on
+    );
+
+    if (use_clip) {
+      Rect clip = DlRect::MakeLTRB(0, 0, 400, 800);
+      DlClipOp clip_op = DlClipOp::kIntersect;
+      if (diff_clip) {
+        clip = clip.Expand(-20);
+        clip_op = DlClipOp::kDifference;
+      }
+      builder.ClipRect(clip, clip_op);
+    }
+
+    DlPaint paint;
+    paint.setColor(DlColor::kBlue());
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 800), paint);
+
+    builder.DrawColor(DlColor::kWhite().withAlphaF(0.5f),
+                      DlBlendMode::kSrcOver);
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

@@ -68,14 +68,15 @@ void HandleMessage(AccessibilityPlugin* plugin, const EncodableValue& message) {
       return;
     }
 
-    const auto* view_id_val = std::get_if<FlutterViewId>(&view_itr->second);
-    if (!view_id_val) {
+    // The viewId may be encoded as either a 32-bit or 64-bit integer.
+    auto const view_id = view_itr->second.TryGetLongValue();
+    if (!view_id) {
       FML_LOG(ERROR)
           << "Announce message 'viewId' property must be a FlutterViewId.";
       return;
     }
 
-    plugin->Announce(*view_id_val, *message);
+    plugin->Announce(*view_id, *message);
   } else {
     FML_LOG(WARNING) << "Accessibility message type '" << *type
                      << "' is not supported.";

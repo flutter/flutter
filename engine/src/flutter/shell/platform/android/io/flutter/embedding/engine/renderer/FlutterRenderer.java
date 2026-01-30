@@ -128,6 +128,18 @@ public class FlutterRenderer implements TextureRegistry {
    * Adds a listener that is invoked whenever this {@code FlutterRenderer} starts and stops painting
    * pixels to an Android {@code View} hierarchy.
    */
+  public void addResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    flutterJNI.addResizingFlutterUiListener(listener);
+  }
+
+  public void removeResizingFlutterUiListener(@NonNull FlutterUiResizeListener listener) {
+    flutterJNI.removeResizingFlutterUiListener(listener);
+  }
+
+  /**
+   * Adds a listener that is invoked whenever this {@code FlutterRenderer} starts and stops painting
+   * pixels to an Android {@code View} hierarchy.
+   */
   public void addIsDisplayingFlutterUiListener(@NonNull FlutterUiDisplayListener listener) {
     flutterJNI.addIsDisplayingFlutterUiListener(listener);
 
@@ -1199,6 +1211,15 @@ public class FlutterRenderer implements TextureRegistry {
             + " x "
             + viewportMetrics.height
             + "\n"
+            + "Size Constraints: "
+            + viewportMetrics.minWidth
+            + ","
+            + viewportMetrics.maxWidth
+            + " x "
+            + viewportMetrics.minHeight
+            + ","
+            + viewportMetrics.maxHeight
+            + "\n"
             + "Padding - L: "
             + viewportMetrics.viewPaddingLeft
             + ", T: "
@@ -1230,7 +1251,16 @@ public class FlutterRenderer implements TextureRegistry {
             + viewportMetrics.displayFeatures.size()
             + "\n"
             + "Display Cutouts: "
-            + viewportMetrics.displayCutouts.size());
+            + viewportMetrics.displayCutouts.size()
+            + "\n"
+            + "Display Corner Radii - TL: "
+            + viewportMetrics.displayCornerRadiusTopLeft
+            + ", TR: "
+            + viewportMetrics.displayCornerRadiusTopRight
+            + ", BR: "
+            + viewportMetrics.displayCornerRadiusBottomRight
+            + ", BL: "
+            + viewportMetrics.displayCornerRadiusBottomLeft);
 
     int totalFeaturesAndCutouts =
         viewportMetrics.displayFeatures.size() + viewportMetrics.displayCutouts.size();
@@ -1272,7 +1302,15 @@ public class FlutterRenderer implements TextureRegistry {
         viewportMetrics.physicalTouchSlop,
         displayFeaturesBounds,
         displayFeaturesType,
-        displayFeaturesState);
+        displayFeaturesState,
+        viewportMetrics.minWidth,
+        viewportMetrics.maxWidth,
+        viewportMetrics.minHeight,
+        viewportMetrics.maxHeight,
+        viewportMetrics.displayCornerRadiusTopLeft,
+        viewportMetrics.displayCornerRadiusTopRight,
+        viewportMetrics.displayCornerRadiusBottomRight,
+        viewportMetrics.displayCornerRadiusBottomLeft);
   }
 
   public Bitmap getBitmap() {
@@ -1333,6 +1371,10 @@ public class FlutterRenderer implements TextureRegistry {
     public float devicePixelRatio = 1.0f;
     public int width = 0;
     public int height = 0;
+    public int minWidth = 0;
+    public int maxWidth = 0;
+    public int minHeight = 0;
+    public int maxHeight = 0;
     // The fields prefixed with viewPadding and viewInset are used to calculate the padding,
     // viewPadding, and viewInsets of ViewConfiguration in Dart. This calculation is performed at
     // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/hooks.dart#L159-L175.
@@ -1349,6 +1391,10 @@ public class FlutterRenderer implements TextureRegistry {
     public int systemGestureInsetBottom = 0;
     public int systemGestureInsetLeft = 0;
     public int physicalTouchSlop = unsetValue;
+    public int displayCornerRadiusTopLeft = unsetValue;
+    public int displayCornerRadiusTopRight = unsetValue;
+    public int displayCornerRadiusBottomRight = unsetValue;
+    public int displayCornerRadiusBottomLeft = unsetValue;
 
     /**
      * Whether this instance contains valid metrics for the Flutter application.
@@ -1356,6 +1402,15 @@ public class FlutterRenderer implements TextureRegistry {
      * @return True if width, height, and devicePixelRatio are > 0; false otherwise.
      */
     boolean validate() {
+      if (width == 0) {
+        Log.d(TAG, "Width is zero. " + minWidth + "," + maxWidth);
+        return minWidth > 0 || maxWidth > 0;
+      }
+
+      if (height == 0) {
+        Log.d(TAG, "Height is zero. " + minHeight + "," + maxHeight);
+        return minHeight > 0 || maxHeight > 0;
+      }
       return width > 0 && height > 0 && devicePixelRatio > 0;
     }
 

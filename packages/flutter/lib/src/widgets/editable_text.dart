@@ -784,7 +784,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// ### Customizing User Input Accessibility Announcements
 ///
 /// To customize user input accessibility announcements triggered by text
-/// changes, use [SemanticsService.announce] to make the desired
+/// changes, use [SemanticsService.sendAnnouncement] to make the desired
 /// accessibility announcement.
 ///
 /// On iOS, the on-screen keyboard may announce the most recent input
@@ -4231,7 +4231,13 @@ class EditableTextState extends State<EditableText>
       _showToolbarOnScreenScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _showToolbarOnScreenScheduled = false;
-        if (!mounted) {
+        if (!mounted || _dataWhenToolbarShowScheduled == null) {
+          return;
+        }
+        if (_dataWhenToolbarShowScheduled!.value != _value) {
+          // Value has changed so we should invalidate any toolbar scheduling.
+          _dataWhenToolbarShowScheduled = null;
+          _disposeScrollNotificationObserver();
           return;
         }
         final Rect deviceRect = _calculateDeviceRect();
