@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart' as vmservice;
 import 'base/bot_detector.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/net.dart';
+
 import 'base/platform.dart';
 import 'base/time.dart';
 import 'build_info.dart';
@@ -84,7 +84,7 @@ class MDNSDeviceDiscovery {
         log.Logger('mdns_dart').level = log.Level.SEVERE;
       }
 
-      final List<InternetAddress> ips = await getLocalInternetAddresses();
+      final ips = <InternetAddress>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6];
       final String hostname = platform.localHostname;
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final String frameworkVersion = flutterVersion.frameworkVersion;
