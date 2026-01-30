@@ -285,10 +285,11 @@ typedef ImageErrorWidgetBuilder =
 /// {@end-tool}
 ///
 /// Multiframe images, such as animated GIFs, are paused when [TickerMode] is
-/// disabled just like any other animation. They also paused when animations are
-/// disabled via [MediaQueryData.disableAnimations], such as for accessibility
+/// disabled, just like any other animation. They are also paused when
+/// animations are disabled via [MediaQueryData.disableAnimations] or when
+/// [MediaQueryData.autoPlayAnimatedImages] is false, such as for accessibility
 /// purposes. If the animation is paused when the image first loads, the first
-/// frame will be displayed and then animation will stop.
+/// frame will be displayed and the animation will remain stopped.
 ///
 /// {@tool snippet}
 //// An example of pausing a multiframe image using [TickerMode].
@@ -1121,8 +1122,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStreamCompleterHandle? _completerHandle;
 
   /// True when animations are disabled and the image should not update, such as
-  /// when [TickerMode] is disabled or [MediaQueryData.disableAnimations] is
-  /// true.
+  /// when [TickerMode] is disabled, [MediaQueryData.disableAnimations] is true,
+  /// or [MediaQueryData.autoPlayAnimatedImages] is false.
   bool _isPaused = false;
 
   @override
@@ -1148,7 +1149,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
 
-    _isPaused = !TickerMode.of(context) || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    _isPaused =
+        !TickerMode.of(context) ||
+        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+        !(MediaQuery.maybeAutoPlayAnimatedImagesOf(context) ?? true);
 
     if (_isPaused && _frameNumber != null) {
       _stopListeningToStream(keepStreamAlive: true);

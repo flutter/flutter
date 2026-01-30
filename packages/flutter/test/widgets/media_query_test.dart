@@ -160,6 +160,7 @@ void main() {
     expect(data.gestureSettings.touchSlop, null);
     expect(data.displayFeatures, isEmpty);
     expect(data.displayCornerRadii, isNull);
+    expect(data.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
@@ -175,6 +176,7 @@ void main() {
       supportsAnnounce: true,
       alwaysUse24HourFormat: true,
       navigationMode: NavigationMode.directional,
+      autoPlayAnimatedImages: false,
     );
 
     final data = MediaQueryData.fromView(tester.view, platformData: platformData);
@@ -211,6 +213,7 @@ void main() {
     expect(data.navigationMode, platformData.navigationMode);
     expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
     expect(data.displayFeatures, tester.view.displayFeatures);
+    expect(data.autoPlayAnimatedImages, platformData.autoPlayAnimatedImages);
   });
 
   testWidgets(
@@ -268,6 +271,10 @@ void main() {
       expect(data.navigationMode, NavigationMode.traditional);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
       expect(data.displayFeatures, tester.view.displayFeatures);
+      expect(
+        data.autoPlayAnimatedImages,
+        tester.platformDispatcher.accessibilityFeatures.autoPlayAnimatedImages,
+      );
     },
   );
 
@@ -286,6 +293,7 @@ void main() {
         supportsAnnounce: true,
         alwaysUse24HourFormat: true,
         navigationMode: NavigationMode.directional,
+        autoPlayAnimatedImages: false,
       );
 
       late MediaQueryData data;
@@ -336,6 +344,7 @@ void main() {
       expect(data.navigationMode, platformData.navigationMode);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
       expect(data.displayFeatures, tester.view.displayFeatures);
+      expect(data.autoPlayAnimatedImages, platformData.autoPlayAnimatedImages);
     },
   );
 
@@ -412,6 +421,10 @@ void main() {
       expect(data.navigationMode, NavigationMode.traditional);
       expect(data.gestureSettings, DeviceGestureSettings.fromView(tester.view));
       expect(data.displayFeatures, tester.view.displayFeatures);
+      expect(
+        data.autoPlayAnimatedImages,
+        tester.platformDispatcher.accessibilityFeatures.autoPlayAnimatedImages,
+      );
     },
   );
 
@@ -597,6 +610,7 @@ void main() {
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
     expect(copied.displayCornerRadii, data.displayCornerRadii);
+    expect(copied.autoPlayAnimatedImages, data.autoPlayAnimatedImages);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -639,6 +653,7 @@ void main() {
       navigationMode: NavigationMode.directional,
       gestureSettings: gestureSettings,
       displayFeatures: customDisplayFeatures,
+      autoPlayAnimatedImages: false,
     );
     expect(copied.size, customSize);
     expect(copied.devicePixelRatio, customDevicePixelRatio);
@@ -659,6 +674,7 @@ void main() {
     expect(copied.navigationMode, NavigationMode.directional);
     expect(copied.gestureSettings, gestureSettings);
     expect(copied.displayFeatures, customDisplayFeatures);
+    expect(copied.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQueryData.applyDisplayCornerRadii applies specified display corner radii', (
@@ -711,6 +727,7 @@ void main() {
     expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
     expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
     expect(updatedData.displayCornerRadii, BorderRadius.circular(99));
+    expect(updatedData.autoPlayAnimatedImages, data.autoPlayAnimatedImages);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -755,6 +772,7 @@ void main() {
     expect(updatedData.wordSpacingOverride, data.wordSpacingOverride);
     expect(updatedData.paragraphSpacingOverride, data.paragraphSpacingOverride);
     expect(updatedData.displayCornerRadii, isNull);
+    expect(updatedData.autoPlayAnimatedImages, data.autoPlayAnimatedImages);
   });
 
   testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -792,6 +810,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -829,6 +848,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removePadding only removes specified padding', (
@@ -868,6 +888,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -902,6 +923,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (
@@ -941,6 +963,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -978,6 +1001,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (
@@ -1017,6 +1041,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -1051,6 +1076,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (
@@ -1090,6 +1116,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -1127,6 +1154,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (
@@ -1166,6 +1194,7 @@ void main() {
           supportsAnnounce: true,
           navigationMode: NavigationMode.directional,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -1200,6 +1229,7 @@ void main() {
     expect(unpadded.supportsAnnounce, true);
     expect(unpadded.navigationMode, NavigationMode.directional);
     expect(unpadded.displayFeatures, displayFeatures);
+    expect(unpadded.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.applyTextStyleOverrides applies the specified text style overrides', (
@@ -1531,6 +1561,7 @@ void main() {
           onOffSwitchLabels: true,
           supportsAnnounce: true,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -1563,6 +1594,7 @@ void main() {
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
     expect(subScreenMediaQuery.supportsAnnounce, true);
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
+    expect(subScreenMediaQuery.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQuery.removePadding only removes specified display features and padding', (
@@ -1610,6 +1642,7 @@ void main() {
           onOffSwitchLabels: true,
           supportsAnnounce: true,
           displayFeatures: displayFeatures,
+          autoPlayAnimatedImages: false,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -1648,6 +1681,7 @@ void main() {
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
     expect(subScreenMediaQuery.supportsAnnounce, true);
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
+    expect(subScreenMediaQuery.autoPlayAnimatedImages, false);
   });
 
   testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (
@@ -1973,6 +2007,14 @@ void main() {
         const _MediaQueryAspectCase(
           MediaQuery.maybeDisplayCornerRadiiOf,
           MediaQueryData(displayCornerRadii: BorderRadius.all(Radius.circular(33))),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.autoPlayAnimatedImagesOf,
+          MediaQueryData(autoPlayAnimatedImages: false),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeAutoPlayAnimatedImagesOf,
+          MediaQueryData(autoPlayAnimatedImages: false),
         ),
       ],
     ),

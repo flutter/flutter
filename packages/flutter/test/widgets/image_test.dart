@@ -930,6 +930,41 @@ void main() {
   );
 
   testWidgets(
+    'MediaQuery.autoPlayAnimatedImages controls stream registration',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final imageStreamCompleter = _TestImageStreamCompleter();
+      final image = Image(
+        excludeFromSemantics: true,
+        image: _TestImageProvider(streamCompleter: imageStreamCompleter),
+      );
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
+      Future<ui.Image> nextFrame() async {
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        return frameInfo.image;
+      }
+
+      expect(imageStreamCompleter.listeners.length, 0);
+      await tester.pumpWidget(image);
+      expect(imageStreamCompleter.listeners.length, 2);
+      await tester.pumpWidget(
+        MediaQuery(data: const MediaQueryData(autoPlayAnimatedImages: false), child: image),
+      );
+      // Despite being paused, the first frame hasn't come in yet, so it's still
+      // listening.
+      expect(imageStreamCompleter.listeners.length, 2);
+
+      // Send the first frame and the listeners will be removed.
+      imageStreamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(imageStreamCompleter.listeners.length, 0);
+    },
+  );
+
+  testWidgets(
     'Verify Image shows correct RenderImage when changing to an already completed provider',
     (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
@@ -1372,6 +1407,106 @@ void main() {
   );
 
   testWidgets(
+    'autoPlayAnimatedImages prevents the image from updating',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
+
+      Future<ui.Image> nextFrame() async {
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        return frameInfo.image;
+      }
+
+      final streamCompleter = _TestImageStreamCompleter();
+      final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+      int? lastFrame;
+      var buildCount = 0;
+
+      Widget buildFrame(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        lastFrame = frame;
+        buildCount++;
+        return child;
+      }
+
+      var autoPlayAnimatedImages = true;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter localSetState) {
+            setState = localSetState;
+            return MediaQuery(
+              data: MediaQueryData(autoPlayAnimatedImages: autoPlayAnimatedImages),
+              child: Image(image: imageProvider, frameBuilder: buildFrame),
+            );
+          },
+        ),
+      );
+
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // When some data comes through for the image, it updates to show the image.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+
+      // When another image frame comes, it updates again.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 1);
+      expect(buildCount, 3);
+
+      // Disable animated images auto play. A rebuild happens of the same frame.
+      setState(() {
+        autoPlayAnimatedImages = false;
+      });
+      await tester.pump();
+      expect(lastFrame, 1);
+      expect(buildCount, 4);
+
+      // A new frame arriving does nothing because animations are disabled.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 1);
+      expect(buildCount, 4);
+
+      // Re-enable animated images auto play. The image updates to show the
+      // frame that was received while disabled.
+      setState(() {
+        autoPlayAnimatedImages = true;
+      });
+      await tester.pump();
+      expect(lastFrame, 2);
+      expect(buildCount, 5);
+
+      // Subsequent frames showing up update the image.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 3);
+      expect(buildCount, 6);
+    },
+  );
+
+  testWidgets(
     'initial load',
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
@@ -1533,8 +1668,15 @@ void main() {
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
                   ),
                 ),
-                _DisableMethod.mediaQuery => MediaQuery(
+                _DisableMethod.mediaQueryDisableAnimation => MediaQuery(
                   data: MediaQueryData(disableAnimations: disableAnimations),
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+                _DisableMethod.mediaQueryAutoPlayAnimatedImages => MediaQuery(
+                  data: MediaQueryData(autoPlayAnimatedImages: !disableAnimations),
                   child: Image(
                     image: imageProvider,
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
@@ -1703,8 +1845,15 @@ void main() {
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
                   ),
                 ),
-                _DisableMethod.mediaQuery => MediaQuery(
+                _DisableMethod.mediaQueryDisableAnimation => MediaQuery(
                   data: const MediaQueryData(disableAnimations: true),
+                  child: Image(
+                    image: imageProvider,
+                    frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
+                  ),
+                ),
+                _DisableMethod.mediaQueryAutoPlayAnimatedImages => MediaQuery(
+                  data: const MediaQueryData(autoPlayAnimatedImages: false),
                   child: Image(
                     image: imageProvider,
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
@@ -1848,8 +1997,12 @@ void main() {
                 enabled: !disableAnimations,
                 child: Image(image: imageProvider),
               ),
-              _DisableMethod.mediaQuery => MediaQuery(
+              _DisableMethod.mediaQueryDisableAnimation => MediaQuery(
                 data: MediaQueryData(disableAnimations: disableAnimations),
+                child: Image(image: imageProvider),
+              ),
+              _DisableMethod.mediaQueryAutoPlayAnimatedImages => MediaQuery(
+                data: MediaQueryData(autoPlayAnimatedImages: !disableAnimations),
                 child: Image(image: imageProvider),
               ),
             };
@@ -1990,6 +2143,76 @@ void main() {
   );
 
   testWidgets(
+    'the first frame is still loaded when autoPlayAnimatedImages is false on first load',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
+    (WidgetTester tester) async {
+      final ui.Codec codec = (await tester.runAsync(() {
+        return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+      }))!;
+
+      Future<ui.Image> nextFrame() async {
+        final ui.FrameInfo frameInfo = (await tester.runAsync(codec.getNextFrame))!;
+        return frameInfo.image;
+      }
+
+      final streamCompleter = _TestImageStreamCompleter();
+      final imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
+      int? lastFrame;
+      var buildCount = 0;
+
+      Widget buildFrame(
+        BuildContext context,
+        Widget child,
+        int? frame,
+        bool wasSynchronouslyLoaded,
+      ) {
+        lastFrame = frame;
+        buildCount++;
+        return child;
+      }
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(autoPlayAnimatedImages: false),
+          child: Image(image: imageProvider, frameBuilder: buildFrame),
+        ),
+      );
+
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, isNull);
+      expect(buildCount, 1);
+
+      // When some data comes through for the image, it updates to show the image,
+      // even though autoPlayAnimatedImages is false.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+
+      // Pumping another frame doesn't do anything.
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+
+      // Subsequent frames arriving don't do anything, because autoPlayAnimatedImages
+      // is false.
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+      streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+      await tester.pump();
+      expect(lastFrame, 0);
+      expect(buildCount, 2);
+    },
+  );
+
+  testWidgets(
     'the first frame is still loaded when TickerMode is disabled on first load',
     experimentalLeakTesting: LeakTesting.settings
         .withIgnoredAll(), // The test leaks by design, see [_TestImageStreamCompleter].
@@ -2035,7 +2258,7 @@ void main() {
       expect(buildCount, 1);
 
       // When some data comes through for the image, it updates to show the image,
-      // even though disableAnimations is true.
+      // even though TickerMode is disabled.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
       expect(lastFrame, 0);
@@ -2046,8 +2269,8 @@ void main() {
       expect(lastFrame, 0);
       expect(buildCount, 2);
 
-      // Subsequent frames arriving don't do anything, because disableAnimations
-      // is true.
+      // Subsequent frames arriving don't do anything, because TickerMode is
+      // disabled.
       streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
       await tester.pump();
       expect(lastFrame, 0);
@@ -2822,6 +3045,42 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
+  testWidgets('Keeps stream alive when auto play animated images is disabled', (
+    WidgetTester tester,
+  ) async {
+    imageCache.maximumSize = 0;
+    final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
+    final provider = _TestImageProvider();
+    provider.complete(image);
+
+    var autoPlayAnimatedImages = true;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter localSetState) {
+          setState = localSetState;
+          return MediaQuery(
+            data: MediaQueryData(autoPlayAnimatedImages: autoPlayAnimatedImages),
+            child: Image(image: provider),
+          );
+        },
+      ),
+    );
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      autoPlayAnimatedImages = false;
+    });
+    await tester.pump();
+    expect(find.byType(Image), findsOneWidget);
+
+    setState(() {
+      autoPlayAnimatedImages = true;
+    });
+    await tester.pump();
+    expect(find.byType(Image), findsOneWidget);
+  });
+
   testWidgets(
     'Load a good image after a bad image was loaded should not call errorBuilder',
     experimentalLeakTesting: LeakTesting.settings
@@ -3309,6 +3568,9 @@ enum _DisableMethod {
   /// Use [TickerMode.enabled].
   tickerMode,
 
-  /// Use [MedaiQueryData.disableAnimations].
-  mediaQuery,
+  /// Use [MediaQueryData.disableAnimations].
+  mediaQueryDisableAnimation,
+
+  /// Use [MediaQueryData.autoPlayAnimatedImages].
+  mediaQueryAutoPlayAnimatedImages,
 }

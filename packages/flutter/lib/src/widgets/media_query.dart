@@ -132,6 +132,9 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.displayCornerRadii].
   displayCornerRadii,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.autoPlayAnimatedImages].
+  autoPlayAnimatedImages,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -238,6 +241,7 @@ class MediaQueryData {
     this.wordSpacingOverride,
     this.paragraphSpacingOverride,
     this.displayCornerRadii,
+    this.autoPlayAnimatedImages = true,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -345,7 +349,10 @@ class MediaQueryData {
       paragraphSpacingOverride =
           platformData?.paragraphSpacingOverride ??
           view.platformDispatcher.paragraphSpacingOverride,
-      displayCornerRadii = _displayCornerRadiiFromView(view);
+      displayCornerRadii = _displayCornerRadiiFromView(view),
+      autoPlayAnimatedImages =
+          platformData?.autoPlayAnimatedImages ??
+          view.platformDispatcher.accessibilityFeatures.autoPlayAnimatedImages;
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
@@ -757,6 +764,17 @@ class MediaQueryData {
   ///    radii in physical pixels.
   final BorderRadius? displayCornerRadii;
 
+  /// Whether the platform allows auto-playing animated images.
+  ///
+  /// This flag is currently only supported on iOS. On other platforms,
+  /// this value is always `true`.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
+  final bool autoPlayAnimatedImages;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -795,6 +813,7 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
     bool? supportsShowingSystemContextMenu,
+    bool? autoPlayAnimatedImages,
   }) {
     assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
@@ -827,6 +846,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      autoPlayAnimatedImages: autoPlayAnimatedImages ?? this.autoPlayAnimatedImages,
     );
   }
 
@@ -874,6 +894,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      autoPlayAnimatedImages: autoPlayAnimatedImages,
     );
   }
 
@@ -909,6 +930,7 @@ class MediaQueryData {
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
       displayCornerRadii: displayCornerRadii,
+      autoPlayAnimatedImages: autoPlayAnimatedImages,
     );
   }
 
@@ -1112,7 +1134,8 @@ class MediaQueryData {
         other.letterSpacingOverride == letterSpacingOverride &&
         other.wordSpacingOverride == wordSpacingOverride &&
         other.paragraphSpacingOverride == paragraphSpacingOverride &&
-        other.displayCornerRadii == displayCornerRadii;
+        other.displayCornerRadii == displayCornerRadii &&
+        other.autoPlayAnimatedImages == autoPlayAnimatedImages;
   }
 
   @override
@@ -1141,6 +1164,7 @@ class MediaQueryData {
       wordSpacingOverride,
       paragraphSpacingOverride,
       displayCornerRadii,
+      autoPlayAnimatedImages,
     ),
   );
 
@@ -1171,6 +1195,7 @@ class MediaQueryData {
       'wordSpacingOverride: $wordSpacingOverride',
       'paragraphSpacingOverride: $paragraphSpacingOverride',
       'displayCornerRadii: $displayCornerRadii',
+      'autoPlayAnimatedImages: $autoPlayAnimatedImages',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -2173,6 +2198,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static BorderRadius? maybeDisplayCornerRadiiOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.displayCornerRadii)?.displayCornerRadii;
 
+  /// Returns [MediaQueryData.autoPlayAnimatedImages] for the nearest [MediaQuery]
+  /// ancestor or false, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.autoPlayAnimatedImages] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool autoPlayAnimatedImagesOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.autoPlayAnimatedImages).autoPlayAnimatedImages;
+
+  /// Returns [MediaQueryData.autoPlayAnimatedImages] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.autoPlayAnimatedImages] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeAutoPlayAnimatedImagesOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.autoPlayAnimatedImages)?.autoPlayAnimatedImages;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -2236,6 +2283,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
             _MediaQueryAspect.displayCornerRadii =>
               data.displayCornerRadii != oldWidget.data.displayCornerRadii,
+            _MediaQueryAspect.autoPlayAnimatedImages =>
+              data.autoPlayAnimatedImages != oldWidget.data.autoPlayAnimatedImages,
           },
     );
   }
