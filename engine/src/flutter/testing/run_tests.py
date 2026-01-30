@@ -929,6 +929,9 @@ def gather_dart_tests(
   dart_vm_service_tests = glob.glob(f'{dart_tests_dir}/vm_service/*_test.dart')
   dart_tests = glob.glob(f'{dart_tests_dir}/*_test.dart')
 
+  impeller_backends = ['', 'vulkan']
+  if is_mac():
+    impeller_backends.append('metal')
   if 'release' not in build_dir:
     for dart_test_file in dart_vm_service_tests:
       dart_test_basename = os.path.basename(dart_test_file)
@@ -937,7 +940,7 @@ def gather_dart_tests(
       else:
         _logger.info("Gathering dart test '%s' with VM service enabled", dart_test_file)
         for multithreaded in [False, True]:
-          for impeller in ['', 'vulkan', 'metal']:
+          for impeller in impeller_backends:
             yield gather_dart_test(
                 build_dir, dart_test_file,
                 FlutterTesterOptions(
@@ -955,7 +958,7 @@ def gather_dart_tests(
     else:
       _logger.info("Gathering dart test '%s'", dart_test_file)
       for multithreaded in [False, True]:
-        for impeller in ['', 'vulkan', 'metal']:
+        for impeller in impeller_backends:
           yield gather_dart_test(
               build_dir, dart_test_file,
               FlutterTesterOptions(multithreaded=multithreaded, impeller_backend=impeller)

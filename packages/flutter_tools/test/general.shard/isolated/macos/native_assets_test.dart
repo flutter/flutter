@@ -296,6 +296,8 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            buildCodeAssets: true,
+            buildDataAssets: true,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(
