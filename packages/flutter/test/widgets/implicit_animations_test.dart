@@ -713,6 +713,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedRotation)), Size.zero);
   });
+
+  testWidgets('AnimatedOpacity does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            child: AnimatedOpacity(opacity: 0.5, duration: Duration(milliseconds: 300)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedOpacity)), Size.zero);
+  });
 }
 
 Future<void> tapTest2and3(
