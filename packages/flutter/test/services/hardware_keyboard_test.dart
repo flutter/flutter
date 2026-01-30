@@ -644,10 +644,7 @@ void main() {
 
       // Clean up
       await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: 'windows');
-      expect(
-        HardwareKeyboard.instance.physicalKeysPressed,
-        isEmpty,
-      );
+      expect(HardwareKeyboard.instance.physicalKeysPressed, isEmpty);
     },
     variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
   );
@@ -730,10 +727,7 @@ void main() {
       // Dispatch a synthesized key down event even when key is already pressed
       await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: 'windows');
 
-      expect(
-        HardwareKeyboard.instance.physicalKeysPressed,
-        contains(PhysicalKeyboardKey.keyA),
-      );
+      expect(HardwareKeyboard.instance.physicalKeysPressed, contains(PhysicalKeyboardKey.keyA));
 
       // Dispatch a synthesized event - should be accepted without assertions
       expect(
@@ -751,10 +745,7 @@ void main() {
       );
 
       // Key should still be pressed
-      expect(
-        HardwareKeyboard.instance.physicalKeysPressed,
-        contains(PhysicalKeyboardKey.keyA),
-      );
+      expect(HardwareKeyboard.instance.physicalKeysPressed, contains(PhysicalKeyboardKey.keyA));
 
       // Clean up
       await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: 'windows');
@@ -780,10 +771,7 @@ void main() {
       // This is the normal case - key down for an unpressed key should work fine
       await simulateKeyDownEvent(LogicalKeyboardKey.keyB, platform: 'windows');
 
-      expect(
-        HardwareKeyboard.instance.physicalKeysPressed,
-        contains(PhysicalKeyboardKey.keyB),
-      );
+      expect(HardwareKeyboard.instance.physicalKeysPressed, contains(PhysicalKeyboardKey.keyB));
 
       // Clean up
       await simulateKeyUpEvent(LogicalKeyboardKey.keyB, platform: 'windows');
@@ -821,19 +809,13 @@ void main() {
       await simulateKeyDownEvent(LogicalKeyboardKey.keyC, platform: 'windows');
       final int initialEventCount = events.length;
 
-      expect(
-        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
-        isTrue,
-      );
+      expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC), isTrue);
 
       // Now the actual KeyDownEvent arrives - this should be accepted
       await simulateKeyDownEvent(LogicalKeyboardKey.keyC, platform: 'windows');
 
       // The key should remain in pressed state
-      expect(
-        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
-        isTrue,
-      );
+      expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC), isTrue);
 
       // We should have received the duplicate event
       expect(events.length, greaterThan(initialEventCount));
@@ -841,10 +823,7 @@ void main() {
       // Finally, key up should work normally
       await simulateKeyUpEvent(LogicalKeyboardKey.keyC, platform: 'windows');
 
-      expect(
-        HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC),
-        isFalse,
-      );
+      expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.keyC), isFalse);
     },
     variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
   );
