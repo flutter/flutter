@@ -345,8 +345,10 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       return result;
     }
     final String text = data.label.isEmpty ? data.value : data.label;
-    final Iterable<Element> elements =
-        collectAllElementsFrom(); //find.text(text).hitTestable().evaluate();
+    final Iterable<Element> elements = _collectElementsByText(
+      WidgetsBinding.instance.rootElement!,
+      text,
+    );
     for (final element in elements) {
       result += await _evaluateElement(node, element, image, byteData, renderView);
     }
@@ -528,133 +530,6 @@ class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
   String get description => 'Text contrast should follow WCAG AAA Evaluations';
 }
 
-/// A Evaluation which verifies that all elements specified by [finder]
-/// meet minimum contrast levels.
-///
-/// See also:
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-class CustomMinimumContrastEvaluation extends AccessibilityEvaluation {
-  /// Creates a custom Evaluation which verifies that all elements specified
-  /// by [finder] meet minimum contrast levels.
-  ///
-  /// An optional description string can be given using the [description] parameter.
-  const CustomMinimumContrastEvaluation({
-    required this.finder,
-    this.minimumRatio = 4.5,
-    this.tolerance = 0.01,
-    String description = 'Contrast should follow custom Evaluations',
-  }) : _description = description;
-
-  /// The minimum contrast ratio allowed.
-  ///
-  /// Defaults to 4.5, the minimum contrast
-  /// ratio for normal text, defined by WCAG.
-  /// See http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
-  final double minimumRatio;
-
-  /// Tolerance for minimum contrast ratio.
-  ///
-  /// Any contrast ratio greater than [minimumRatio] or within a distance of [tolerance]
-  /// from [minimumRatio] passes the test.
-  /// Defaults to 0.01.
-  final double tolerance;
-
-  /// The [Finder] used to find a subset of elements.
-  ///
-  /// [finder] determines which subset of elements will be tested for
-  /// contrast ratio.
-  final Finder finder;
-
-  final String _description;
-
-  @override
-  String get description => _description;
-
-  @override
-  Future<Evaluation> evaluate(WidgetsBinding binding) async {
-    // Collate all evaluations into a final evaluation, then return.
-    var result = const Evaluation.pass();
-    final images = <ui.FlutterView, ui.Image>{};
-    try {
-      // Compute elements to be evaluated.
-      final List<Element> elements = finder.evaluate().toList();
-      final byteDatas = <ui.FlutterView, ByteData>{};
-
-      for (final element in elements) {
-        final ui.FlutterView view = tester.viewOf(
-          find.byElementPredicate((Element e) => e == element),
-        );
-        final RenderView renderView = tester.binding.renderViews.firstWhere(
-          (RenderView r) => r.flutterView == view,
-        );
-        final layer = renderView.debugLayer! as OffsetLayer;
-
-        late final ui.Image image;
-        late final ByteData byteData;
-
-        // Obtain a previously rendered image or render one for a new view.
-        await binding.runAsync(() async {
-          image = images[view] ??= await layer.toImage(
-            renderView.paintBounds,
-            // Needs to be the same pixel ratio otherwise our dimensions
-            // won't match the last transform layer.
-            pixelRatio: 1 / view.devicePixelRatio,
-          );
-          byteData = byteDatas[view] ??= (await image.toByteData())!;
-        });
-
-        result = result + _evaluateElement(element, byteData, image);
-      }
-    } finally {
-      for (final ui.Image image in images.values) {
-        image.dispose();
-      }
-    }
-    return result;
-  }
-
-  // How to evaluate a single element.
-  Evaluation _evaluateElement(Element element, ByteData byteData, ui.Image image) {
-    final renderObject = element.renderObject! as RenderBox;
-
-    final Rect originalPaintBounds = renderObject.paintBounds;
-
-    final Rect inflatedPaintBounds = originalPaintBounds.inflate(4.0);
-
-    final paintBounds = Rect.fromPoints(
-      renderObject.localToGlobal(inflatedPaintBounds.topLeft),
-      renderObject.localToGlobal(inflatedPaintBounds.bottomRight),
-    );
-
-    final Map<Color, int> colorHistogram = _colorsWithinRect(
-      byteData,
-      paintBounds,
-      image.width,
-      image.height,
-    );
-
-    if (colorHistogram.isEmpty) {
-      return const Evaluation.pass();
-    }
-
-    final report = _ContrastReport(colorHistogram);
-    final double contrastRatio = report.contrastRatio();
-
-    if (contrastRatio >= minimumRatio - tolerance) {
-      return const Evaluation.pass();
-    } else {
-      return Evaluation.fail(
-        '$element:\nExpected contrast ratio of at least '
-        '$minimumRatio but found ${contrastRatio.toStringAsFixed(2)} \n'
-        'The computed light color was: ${report.lightColor}, '
-        'The computed dark color was: ${report.darkColor}\n'
-        '$description',
-      );
-    }
-  }
-}
-
 /// A class that reports the contrast ratio of a part of the screen.
 ///
 /// Commonly used in accessibility testing to obtain the contrast ratio of
@@ -750,58 +625,13 @@ Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, in
   });
 }
 
-/// A Evaluation which requires tappable semantic nodes a minimum size of
-/// 48 by 48.
-///
-/// See also:
-///
-///  * [Android tap target Evaluations](https://support.google.com/accessibility/android/answer/7101858?hl=en).
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-///  * [iOSTapTargetEvaluation], which checks that tappable nodes have a minimum
-///    size of 44 by 44 pixels.
-const AccessibilityEvaluation androidTapTargetEvaluation = MinimumTapTargetEvaluation(
-  size: Size(48.0, 48.0),
-  link: 'https://support.google.com/accessibility/android/answer/7101858?hl=en',
-);
-
-/// A Evaluation which requires tappable semantic nodes a minimum size of
-/// 44 by 44.
-///
-/// See also:
-///
-///  * [iOS human interface Evaluations](https://developer.apple.com/design/human-interface-Evaluations/ios/visual-design/adaptivity-and-layout/).
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-///  * [androidTapTargetEvaluation], which checks that tappable nodes have a
-///    minimum size of 48 by 48 pixels.
-const AccessibilityEvaluation iOSTapTargetEvaluation = MinimumTapTargetEvaluation(
-  size: Size(44.0, 44.0),
-  link:
-      'https://developer.apple.com/design/human-interface-Evaluations/ios/visual-design/adaptivity-and-layout/',
-);
-
-/// A Evaluation which requires text contrast to meet minimum values.
-///
-/// This Evaluation traverses the semantics tree looking for nodes with values or
-/// labels that corresponds to a Text or Editable text widget. Given the
-/// background pixels for the area around this widget, it performs a very naive
-/// partitioning of the colors into "light" and "dark" and then chooses the most
-/// frequently occurring color in each partition as a representative of the
-/// foreground and background colors. The contrast ratio is calculated from
-/// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
-///
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-const AccessibilityEvaluation textContrastEvaluation = MinimumTextContrastEvaluation();
-
-/// A Evaluation which enforces that all nodes with a tap or long press action
-/// also have a label.
-///
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-const AccessibilityEvaluation labeledTapTargetEvaluation = LabeledTapTargetEvaluation._();
-
-Iterable<Element> collectAllElementsFrom(Element root) {
-  return [];
+Iterable<Element> _collectElementsByText(Element root, String text) {
+  final result = <Element>[];
+  root.visitChildren((Element child) {
+    if (child.widget is Text && (child.widget as Text).data == text) {
+      result.add(child);
+    }
+    result.addAll(_collectElementsByText(child, text));
+  });
+  return result;
 }
