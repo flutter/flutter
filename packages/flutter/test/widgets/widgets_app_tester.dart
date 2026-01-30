@@ -66,8 +66,8 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   /// When a named route is pushed with [Navigator.pushNamed], the route name is
   /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [PageRouteBuilder] that performs
-  /// a fade transition to the new route.
+  /// [WidgetBuilder] is used to construct a [PageRouteBuilder] with zero-duration
+  /// transitions by default.
   ///
   /// Defaults to an empty map.
   final Map<String, WidgetBuilder> routes;
@@ -79,7 +79,8 @@ class TestWidgetsApp extends StatelessWidget {
 
   /// The transition builder used for page route animations.
   ///
-  /// Defaults to a simple [FadeTransition].
+  /// Defaults to no transition (returns child directly) for simpler testing.
+  /// Override this if you need to test specific transition animations.
   final RouteTransitionsBuilder transitionsBuilder;
 
   static Widget _defaultTransitionsBuilder(
@@ -87,7 +88,7 @@ class TestWidgetsApp extends StatelessWidget {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
-  ) => FadeTransition(opacity: animation, child: child);
+  ) => child;
 
   @override
   Widget build(BuildContext context) {

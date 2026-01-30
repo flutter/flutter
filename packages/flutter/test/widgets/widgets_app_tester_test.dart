@@ -279,7 +279,7 @@ void main() {
       expect(find.text('Details Page - Tap to go back'), findsNothing);
     });
 
-    testWidgets('uses default FadeTransition for route transitions', (WidgetTester tester) async {
+    testWidgets('uses no transition by default for simpler testing', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
           home: Builder(
@@ -299,10 +299,11 @@ void main() {
       );
 
       await tester.tap(find.text('Home Page'));
+      // Single pump is sufficient with zero-duration transitions.
       await tester.pump();
 
-      // During animation, FadeTransition should be present.
-      expect(find.byType(FadeTransition), findsWidgets);
+      // Route should be immediately visible without needing pumpAndSettle.
+      expect(find.text('Details Page'), findsOneWidget);
     });
 
     testWidgets('custom transitionsBuilder is used', (WidgetTester tester) async {
@@ -336,8 +337,9 @@ void main() {
       await tester.tap(find.text('Home Page'));
       await tester.pump();
 
-      // During animation, ScaleTransition should be present instead of FadeTransition.
+      // Custom transitionsBuilder wraps the route with ScaleTransition.
       expect(find.byType(ScaleTransition), findsWidgets);
+      expect(find.text('Details Page'), findsOneWidget);
     });
 
     testWidgets('multiple routes can be defined', (WidgetTester tester) async {
