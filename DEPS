@@ -250,7 +250,7 @@ deps = {
    Var('llvm_git') + '/llvm-project/libc' + '@' + '5af39a19a1ad51ce93972cdab206dcd3ff9b6afa',
 
   'engine/src/flutter/third_party/glfw':
-   Var('flutter_git') + '/third_party/glfw' + '@' + 'dd8a678a66f1967372e5a5e3deac41ebf65ee127',
+   Var('flutter_git') + '/third_party/glfw' + '@' + '9352d8fe93cd443be18157abe81f16500549aec0',
 
   'engine/src/flutter/third_party/shaderc':
    Var('chromium_git') + '/external/github.com/google/shaderc' + '@' + '37e25539ce199ecaf19fb7f7d27818716d36686d',
