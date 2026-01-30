@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 import 'states.dart';
+import 'widgets_app_tester.dart';
 
 class ItemWidget extends StatefulWidget {
   const ItemWidget({super.key, required this.value});
@@ -27,10 +28,6 @@ class _ItemWidgetState extends State<ItemWidget> {
   Widget build(BuildContext context) {
     return Text('${widget.value}: $randomInt');
   }
-}
-
-Widget textFieldBoilerplate({required Widget child}) {
-  return TestWidgetsApp(home: Center(child: child));
 }
 
 Widget primaryScrollControllerBoilerplate({
@@ -96,20 +93,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -126,17 +125,19 @@ void main() {
 
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 42),
-          itemCount: 42,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 42),
+            itemCount: 42,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -146,16 +147,18 @@ void main() {
 
   testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          itemCount: 42,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            itemCount: 42,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -168,17 +171,19 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: PageView.builder(
-          itemCount: 5,
-          controller: controller,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 2) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: PageView.builder(
+            itemCount: 5,
+            controller: controller,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 2) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -188,19 +193,21 @@ void main() {
 
   testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          itemCount: 42,
-          separatorBuilder: (BuildContext context, int index) {
-            return const Text('separator');
-          },
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 5) {
-              return null;
-            }
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            itemCount: 42,
+            separatorBuilder: (BuildContext context, int index) {
+              return const Text('separator');
+            },
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 5) {
+                return null;
+              }
 
-            return const Text('item');
-          },
+              return const Text('item');
+            },
+          ),
         ),
       ),
     );
@@ -218,21 +225,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -256,20 +265,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.custom(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.custom(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
@@ -293,22 +304,24 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          padding: EdgeInsets.zero,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -332,21 +345,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -370,22 +385,24 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -409,21 +426,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.count(
-          padding: EdgeInsets.zero,
-          crossAxisCount: 2,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.count(
+            padding: EdgeInsets.zero,
+            crossAxisCount: 2,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -447,21 +466,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.extent(
-          padding: EdgeInsets.zero,
-          maxCrossAxisExtent: 300,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.extent(
+            padding: EdgeInsets.zero,
+            maxCrossAxisExtent: 300,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -485,21 +506,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.custom(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.custom(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
@@ -523,19 +546,21 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -559,20 +584,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -596,19 +623,21 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.custom(
-          padding: EdgeInsets.zero,
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.custom(
+            padding: EdgeInsets.zero,
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
@@ -632,21 +661,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: ListView.separated(
-          padding: EdgeInsets.zero,
-          itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: focusNodes.length,
+            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -670,20 +701,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -707,21 +740,23 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.builder(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemCount: focusNodes.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            itemCount: focusNodes.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -745,20 +780,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.count(
-          padding: EdgeInsets.zero,
-          crossAxisCount: 2,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.count(
+            padding: EdgeInsets.zero,
+            crossAxisCount: 2,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -782,20 +819,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.extent(
-          padding: EdgeInsets.zero,
-          maxCrossAxisExtent: 300,
-          children: focusNodes.map((FocusNode focusNode) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNode,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }).toList(),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.extent(
+            padding: EdgeInsets.zero,
+            maxCrossAxisExtent: 300,
+            children: focusNodes.map((FocusNode focusNode) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -819,20 +858,22 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: GridView.custom(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            return Container(
-              height: 50,
-              color: green,
-              child: TestTextField(
-                focusNode: focusNodes[index],
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            );
-          }, childCount: focusNodes.length),
+      TestWidgetsApp(
+        home: Center(
+          child: GridView.custom(
+            padding: EdgeInsets.zero,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+            childrenDelegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              return Container(
+                height: 50,
+                color: green,
+                child: TestTextField(
+                  focusNode: focusNodes[index],
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              );
+            }, childCount: focusNodes.length),
+          ),
         ),
       ),
     );
@@ -928,24 +969,26 @@ void main() {
     });
 
     await tester.pumpWidget(
-      textFieldBoilerplate(
-        child: CustomScrollView(
-          dragStartBehavior: DragStartBehavior.down,
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          slivers: <Widget>[
-            SliverList.list(
-              children: focusNodes.map((FocusNode focusNode) {
-                return Container(
-                  height: 50,
-                  color: green,
-                  child: TestTextField(
-                    focusNode: focusNode,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+      TestWidgetsApp(
+        home: Center(
+          child: CustomScrollView(
+            dragStartBehavior: DragStartBehavior.down,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: <Widget>[
+              SliverList.list(
+                children: focusNodes.map((FocusNode focusNode) {
+                  return Container(
+                    height: 50,
+                    color: green,
+                    child: TestTextField(
+                      focusNode: focusNode,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );
