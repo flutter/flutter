@@ -6950,7 +6950,6 @@ targets:
       task_name: windows_startup_test
 
   - name: Windows windowing_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/177715
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
