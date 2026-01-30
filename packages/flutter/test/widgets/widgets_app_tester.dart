@@ -53,14 +53,14 @@ class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
   const TestWidgetsApp({
     super.key,
-    required this.home,
+    this.home,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.transitionsBuilder = _defaultTransitionsBuilder,
   });
 
   /// The widget to display within the app.
-  final Widget home;
+  final Widget? home;
 
   /// The application's top-level routing table.
   ///
