@@ -14,7 +14,7 @@ import 'package:flutter/widgets.dart';
 /// app-level widgets (like [Directionality], [MediaQuery], etc.) that
 /// [WidgetsApp] provides, without the overhead of [MaterialApp] or [CupertinoApp].
 ///
-/// The [PageRouteBuilder] creates a [Navigator] which provides an [Overlay],
+/// The [pageRouteBuilder] creates a [Navigator] which provides an [Overlay],
 /// so widgets that need overlay support (like [Draggable], [Tooltip], etc.)
 /// will work correctly when placed in [home].
 ///
