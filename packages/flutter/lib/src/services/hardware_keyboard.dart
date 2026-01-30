@@ -516,13 +516,15 @@ class HardwareKeyboard {
           "simulated events follow Flutter's event model as documented in "
           '`HardwareKeyboard`. This was the event: ';
       if (event is KeyDownEvent) {
-        // Allow KeyDownEvent if the key was already marked as pressed during
-        // syncKeyboardState(). This can happen when a key is held during app
-        // startup - syncKeyboardState() records it as pressed, then the actual
-        // KeyDownEvent arrives. In this case, trust the event and update state.
+        // A KeyDownEvent may be received for a key that is already marked as
+        // pressed. This is primarily expected during app startup when
+        // `syncKeyboardState()` queries the engine for pressed keys and marks
+        // them as pressed, followed by the actual KeyDownEvent arriving from
+        // the platform. While this relaxes the assertion unconditionally (which
+        // could theoretically hide duplicate event bugs), the race condition at
+        // startup is legitimate and cannot be easily distinguished from other
+        // cases. We trust the incoming event and allow the state to be updated.
         if (_pressedKeys.containsKey(event.physicalKey)) {
-          // The key is already in pressed state from syncKeyboardState.
-          // This is acceptable during the initialization window.
           return true;
         }
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
