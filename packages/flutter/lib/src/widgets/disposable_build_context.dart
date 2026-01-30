@@ -22,14 +22,14 @@ import 'framework.dart';
 ///
 /// This object will not hold on to the [State] after disposal.
 @optionalTypeArgs
-class DisposableBuildContext<T extends State> {
+class DisposableBuildContext {
   /// Creates an object that provides access to a [BuildContext] without leaking
   /// a [State].
   ///
   /// Creators must call [dispose] when the [State] is disposed.
   ///
   /// [State.mounted] must be true.
-  DisposableBuildContext(T this._state)
+  DisposableBuildContext(State this._state)
     : assert(
         _state.mounted,
         'A DisposableBuildContext was given a BuildContext for an Element that is not mounted.',
@@ -37,7 +37,7 @@ class DisposableBuildContext<T extends State> {
     assert(debugMaybeDispatchCreated('widgets', 'DisposableBuildContext', this));
   }
 
-  T? _state;
+  State? _state;
 
   /// Provides safe access to the build context.
   ///
