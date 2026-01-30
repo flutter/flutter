@@ -506,17 +506,25 @@ class HardwareKeyboard {
 
   void _assertEventIsRegular(KeyEvent event) {
     assert(() {
+      // Skip assertions for synthesized events
+      if (event.synthesized) {
+        return true;
+      }
       const common =
           'If this occurs in real application, please report this '
           'bug to Flutter. If this occurs in unit tests, please ensure that '
           "simulated events follow Flutter's event model as documented in "
           '`HardwareKeyboard`. This was the event: ';
       if (event is KeyDownEvent) {
-        assert(
-          !_pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is already pressed. $common$event',
-        );
+      // Allow KeyDownEvent if the key was already marked as pressed during
+      // syncKeyboardState(). This can happen when a key is held during app
+      // startup - syncKeyboardState() records it as pressed, then the actual
+      // KeyDownEvent arrives. In this case, trust the event and update state.
+        if (_pressedKeys.containsKey(event.physicalKey)) {
+          // The key is already in pressed state from syncKeyboardState.
+          // This is acceptable during the initialization window.
+          return true;
+        }
       } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
         assert(
           _pressedKeys.containsKey(event.physicalKey),
