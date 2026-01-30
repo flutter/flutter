@@ -15,7 +15,10 @@ import '../convert.dart';
 
 import '../runner/flutter_command.dart';
 
-const _noRunningAppsFoundMessage = 'No running Flutter apps found.';
+const String _noRunningAppsFoundMessage =
+    'No running Flutter apps found.\n'
+    'Note: Flutter running-apps only detects apps running with the '
+    '"--enable-local-discovery" flag (debug/profile mode only).';
 
 /// Command to list running Flutter applications.
 class RunningAppsCommand extends FlutterCommand {
@@ -57,10 +60,6 @@ class RunningAppsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Use mDNS to discover running Flutter apps, the multicast_dns package is
-    // used instead of mdns_dart as the discovery functionality is insufficient
-    // in the mdns_dart package, only discovering a maximum of one service.
-
     _logger.printStatus('Searching for running Flutter apps...');
 
     final apps = <Map<String, String>>[];
@@ -113,7 +112,7 @@ class RunningAppsCommand extends FlutterCommand {
           })(),
         );
       }
-      await Future.wait(pendingLookups);
+      await pendingLookups.wait;
     } finally {
       _mdnsClient.stop();
     }
@@ -151,7 +150,7 @@ class RunningAppsCommand extends FlutterCommand {
         final String deviceId = app[_kDeviceId] ?? 'Unknown';
         final String platform = app[_kTargetPlatform] ?? 'Unknown';
         final String vmServiceUri = app[_kWsUri] ?? 'Unknown';
-        final String age = getProcessAge(app[_kEpoch], _systemClock);
+        final String age = processAge(app[_kEpoch], _systemClock);
 
         // If the device name and ID are effectively the same (e.g. "macos" and "macos"),
         // only show the name to avoid redundancy like "macos (macos)".
@@ -185,7 +184,7 @@ class RunningAppsCommand extends FlutterCommand {
 
 /// Formats the elapsed time since the given epoch.
 @visibleForTesting
-String getProcessAge(String? epochString, SystemClock systemClock) {
+String processAge(String? epochString, SystemClock systemClock) {
   // TODO(jwren): Consider using [DurationAgo] from `lib/src/base/utils.dart`.
   // We need to decide on the width and precision, possibly modifying the utility
   // to support a shorter form (e.g. "5m" versus "5 minutes ago").

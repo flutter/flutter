@@ -394,7 +394,7 @@ void main() {
     expect(result, true);
   });
 
-  group('getLocalInternetAddresses', () {
+  group('localInternetAddresses', () {
     tearDown(() {
       io.resetNetworkInterfaceLister();
     });
@@ -417,7 +417,7 @@ void main() {
         ];
       });
 
-      final List<io.InternetAddress> addresses = await getLocalInternetAddresses();
+      final List<io.InternetAddress> addresses = await localInternetAddresses;
       expect(addresses, hasLength(2));
       expect(addresses.map((a) => a.address), containsAll(<String>['1.2.3.4', '2001:db8::1']));
       expect(addresses.map((a) => a.address), isNot(contains('127.0.0.1')));
@@ -433,13 +433,13 @@ void main() {
         return <io.NetworkInterface>[];
       });
 
-      final List<io.InternetAddress> addresses = await getLocalInternetAddresses();
+      final List<io.InternetAddress> addresses = await localInternetAddresses;
       expect(addresses, hasLength(2));
       expect(addresses.map((a) => a.address), containsAll(<String>['127.0.0.1', '::1']));
     });
   });
 
-  group('getLocalIpAddress', () {
+  group('localIpAddress', () {
     tearDown(() {
       io.resetNetworkInterfaceLister();
     });
@@ -460,7 +460,7 @@ void main() {
         ];
       });
 
-      final io.InternetAddress address = await getLocalIpAddress();
+      final io.InternetAddress address = await localIpAddress;
       expect(address.type, io.InternetAddressType.IPv4);
       expect(address.address, '1.2.3.4');
     });
@@ -480,7 +480,7 @@ void main() {
         ];
       });
 
-      final io.InternetAddress address = await getLocalIpAddress();
+      final io.InternetAddress address = await localIpAddress;
       expect(address.type, io.InternetAddressType.IPv4);
       expect(address.isLoopback, true);
     });

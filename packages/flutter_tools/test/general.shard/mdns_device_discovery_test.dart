@@ -34,7 +34,7 @@ void main() {
 
       expect(discovery.advertised, isFalse);
     });
-    test('does not advertise when BOT=true even if BotDetector returns false', () async {
+    test('advertises even if BOT=true when BotDetector returns false', () async {
       // Simulate BotDetector saying "False" (e.g. because FLUTTER_ANALYTICS_LOG_FILE is set)
       final botDetector = FakeBotDetector(false);
       final fakePlatform = FakePlatform(environment: <String, String>{'BOT': 'true'});
@@ -45,16 +45,35 @@ void main() {
 
       await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
 
+      expect(discovery.advertised, isTrue);
+    });
+
+    test('does not advertise when enable-local-discovery is false', () async {
+      final botDetector = FakeBotDetector(false);
+      final FakeMDNSDeviceDiscovery discovery = createDiscovery(
+        botDetector,
+        enableLocalDiscovery: false,
+      );
+
+      await discovery.advertise(appName: 'app', vmServiceUri: Uri.parse('ws://localhost:1234'));
+
       expect(discovery.advertised, isFalse);
     });
   });
 }
 
-FakeMDNSDeviceDiscovery createDiscovery(FakeBotDetector botDetector, {Platform? platform}) {
+FakeMDNSDeviceDiscovery createDiscovery(
+  FakeBotDetector botDetector, {
+  Platform? platform,
+  bool enableLocalDiscovery = true,
+}) {
   return FakeMDNSDeviceDiscovery(
     device: FakeDevice(),
     vmService: FakeVmService(),
-    debuggingOptions: DebuggingOptions.enabled(build_info.BuildInfo.debug),
+    debuggingOptions: DebuggingOptions.enabled(
+      build_info.BuildInfo.debug,
+      enableLocalDiscovery: enableLocalDiscovery,
+    ),
     logger: BufferLogger.test(),
     platform: platform ?? FakePlatform(),
     flutterVersion: FakeFlutterVersion(),
@@ -98,7 +117,8 @@ class FakeMDNSDeviceDiscovery extends MDNSDeviceDiscovery {
     // If the logger contains "Running on CI/Bot...", then it obeyed the check.
 
     final testLogger = logger as BufferLogger;
-    if (testLogger.traceText.contains('Running on CI/Bot, not starting mDNS server.')) {
+    if (testLogger.traceText.contains('Running on CI/Bot, not starting mDNS server.') ||
+        testLogger.traceText.contains('mDNS local discovery is disabled.')) {
       advertised = false;
     } else {
       advertised = true;

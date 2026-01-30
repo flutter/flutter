@@ -44,7 +44,14 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['running-apps']);
 
-    expect(testLogger.statusText, contains('No running Flutter apps found.'));
+    expect(
+      testLogger.statusText,
+      contains(
+        'No running Flutter apps found.\n'
+        'Note: Flutter running-apps only detects apps running with the '
+        '"--enable-local-discovery" flag (debug/profile mode only).',
+      ),
+    );
   });
 
   testUsingContext('running-apps finds one app', () async {
@@ -287,38 +294,40 @@ epoch=1000''',
     expect(testLogger.statusText, contains('ws://127.0.0.1:1234/ws'));
   });
 
-  testWithoutContext('getProcessAge', () {
+  testWithoutContext('processAge', () {
+    const kSecondMs = 1000;
+    const int kMinuteMs = kSecondMs * 60;
+    const int kHourMs = kMinuteMs * 60;
+    const int kDayMs = kHourMs * 24;
+
     const kNowMs = 10_000_000;
-    const kFiveSecondsMs = 5_000;
-    const kFiftyNineSecondsMs = 59_000;
-    const kOneMinuteMs = 60_000;
-    const kFiftyNineMinutesMs = 3_540_000; // 59 * 60 * 1000
-    const kOneHourMs = 3_600_000;
-    const kTwentyThreeHoursMs = 82_800_000; // 23 * 60 * 60 * 1000
-    const kOneDayMs = 86_400_000;
-    const kTwoDaysMs = 172_800_000;
+    const int kFiveSecondsMs = 5 * kSecondMs;
+    const int kFiftyNineSecondsMs = 59 * kSecondMs;
+    const int kFiftyNineMinutesMs = 59 * kMinuteMs;
+    const int kTwentyThreeHoursMs = 23 * kHourMs;
+    const int kTwoDaysMs = 2 * kDayMs;
 
     final now = DateTime.fromMillisecondsSinceEpoch(kNowMs);
     final clock = SystemClock.fixed(now);
 
-    expect(getProcessAge(null, clock), 'unknown age');
-    expect(getProcessAge('not an int', clock), 'unknown age');
+    expect(processAge(null, clock), 'unknown age');
+    expect(processAge('not an int', clock), 'unknown age');
 
     // Seconds
-    expect(getProcessAge('${kNowMs - kFiveSecondsMs}', clock), '5s');
-    expect(getProcessAge('${kNowMs - kFiftyNineSecondsMs}', clock), '59s');
+    expect(processAge('${kNowMs - kFiveSecondsMs}', clock), '5s');
+    expect(processAge('${kNowMs - kFiftyNineSecondsMs}', clock), '59s');
 
     // Minutes
-    expect(getProcessAge('${kNowMs - kOneMinuteMs}', clock), '1m');
-    expect(getProcessAge('${kNowMs - kFiftyNineMinutesMs}', clock), '59m');
+    expect(processAge('${kNowMs - kMinuteMs}', clock), '1m');
+    expect(processAge('${kNowMs - kFiftyNineMinutesMs}', clock), '59m');
 
     // Hours
-    expect(getProcessAge('${kNowMs - kOneHourMs}', clock), '1h');
-    expect(getProcessAge('${kNowMs - kTwentyThreeHoursMs}', clock), '23h');
+    expect(processAge('${kNowMs - kHourMs}', clock), '1h');
+    expect(processAge('${kNowMs - kTwentyThreeHoursMs}', clock), '23h');
 
     // Days
-    expect(getProcessAge('${kNowMs - kOneDayMs}', clock), '1d');
-    expect(getProcessAge('${kNowMs - kTwoDaysMs}', clock), '2d');
+    expect(processAge('${kNowMs - kDayMs}', clock), '1d');
+    expect(processAge('${kNowMs - kTwoDaysMs}', clock), '2d');
   });
 }
 

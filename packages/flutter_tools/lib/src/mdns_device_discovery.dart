@@ -20,7 +20,6 @@ import 'version.dart';
 
 /// Discovers devices via mDNS and advertises the current Flutter application to them.
 class MDNSDeviceDiscovery {
-  /// Creates a new [MDNSDeviceDiscovery] instance.
   MDNSDeviceDiscovery({
     required this.device,
     required this.vmService,
@@ -68,9 +67,12 @@ class MDNSDeviceDiscovery {
         return;
       }
 
-      if (await botDetector.isRunningOnBot ||
-          platform.environment['BOT'] == 'true' ||
-          platform.environment['CI'] == 'true') {
+      if (!debuggingOptions.enableLocalDiscovery) {
+        logger.printTrace('mDNS local discovery is disabled.');
+        return;
+      }
+
+      if (await botDetector.isRunningOnBot) {
         logger.printTrace('Running on CI/Bot, not starting mDNS server.');
         return;
       }

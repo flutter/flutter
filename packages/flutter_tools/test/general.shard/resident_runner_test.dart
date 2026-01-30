@@ -109,6 +109,13 @@ void main() {
         requests: <VmServiceExpectation>[listViews, listViews],
         httpAddress: Uri.parse('http://localhost:12345'),
       );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableLocalDiscovery: true),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
       final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
       final futureAppStart = Completer<void>.sync();
       await residentRunner.attach(
@@ -119,6 +126,30 @@ void main() {
       expect(
         testLogger.traceText,
         contains('mDNS service started for FakeDevice with appName "my_test_app"'),
+      );
+    }, overrides: <Type, Generator>{AssetBundleFactory: () => FakeAssetBundleFactory()}),
+  );
+
+  testUsingContext(
+    'ResidentRunner does not advertise via mDNS by default',
+    () => testbed.run(() async {
+      globals.fs.file('pubspec.yaml').writeAsStringSync('name: my_test_app\n');
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, listViews],
+        httpAddress: Uri.parse('http://localhost:12345'),
+      );
+      // ResidentRunner initialized in setUp with defaults (enableLocalDiscovery: false)
+
+      final futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+      final futureAppStart = Completer<void>.sync();
+      await residentRunner.attach(
+        appStartedCompleter: futureAppStart,
+        connectionInfoCompleter: futureConnectionInfo,
+      );
+
+      expect(
+        testLogger.traceText,
+        isNot(contains('mDNS service started for FakeDevice with appName "my_test_app"')),
       );
     }, overrides: <Type, Generator>{AssetBundleFactory: () => FakeAssetBundleFactory()}),
   );
@@ -150,7 +181,7 @@ void main() {
       residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice, flutterDevice2],
         stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableLocalDiscovery: true),
         target: 'main.dart',
         analytics: fakeAnalytics,
       );

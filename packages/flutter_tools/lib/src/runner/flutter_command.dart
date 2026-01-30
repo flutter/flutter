@@ -1283,6 +1283,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableLocalDiscoveryFlag() {
+    argParser.addFlag(
+      'enable-local-discovery',
+      help:
+          'Whether to advertise the application on the local network (via mDNS) '
+          'for discovery by "flutter running-apps".',
+    );
+  }
+
   void addMachineOutputFlag({required bool verboseHelp}) {
     argParser.addFlag(
       FlutterGlobalOptions.kMachineFlag,

@@ -234,7 +234,7 @@ bool isIPv6Address(String address) {
 /// Finds all non-loopback IPv4 and IPv6 addresses of the local machine.
 ///
 /// If no non-loopback addresses are found, returns loopback addresses.
-Future<List<InternetAddress>> getLocalInternetAddresses() async {
+Future<List<InternetAddress>> get localInternetAddresses async {
   final addresses = <InternetAddress>[];
   try {
     final List<NetworkInterface> interfaces = await listNetworkInterfaces();
@@ -261,8 +261,8 @@ Future<List<InternetAddress>> getLocalInternetAddresses() async {
 ///
 /// This address is often used to tell other network devices how to reach
 /// the service running on this machine.
-Future<InternetAddress> getLocalIpAddress() async {
-  final List<InternetAddress> addresses = await getLocalInternetAddresses();
+Future<InternetAddress> get localIpAddress async {
+  final List<InternetAddress> addresses = await localInternetAddresses;
   return addresses.firstWhere(
     (InternetAddress addr) => addr.type == InternetAddressType.IPv4,
     orElse: () => InternetAddress.loopbackIPv4,

@@ -1273,21 +1273,23 @@ abstract class ResidentRunner extends ResidentHandlers {
       await device.vmService!.getFlutterViews();
 
       // Start mDNS service
-      final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
-        device: device.device!,
-        vmService: device.vmService!.service,
-        debuggingOptions: debuggingOptions,
-        logger: globals.logger,
-        platform: globals.platform,
-        flutterVersion: globals.flutterVersion,
-        systemClock: globals.systemClock,
-        botDetector: globals.botDetector,
-      );
-      _mdnsDiscoveries.add(mdnsDeviceDiscovery);
-      await mdnsDeviceDiscovery.advertise(
-        appName: appName,
-        vmServiceUri: device.vmService!.httpAddress,
-      );
+      if (debuggingOptions.enableLocalDiscovery) {
+        final mdnsDeviceDiscovery = MDNSDeviceDiscovery(
+          device: device.device!,
+          vmService: device.vmService!.service,
+          debuggingOptions: debuggingOptions,
+          logger: globals.logger,
+          platform: globals.platform,
+          flutterVersion: globals.flutterVersion,
+          systemClock: globals.systemClock,
+          botDetector: globals.botDetector,
+        );
+        _mdnsDiscoveries.add(mdnsDeviceDiscovery);
+        await mdnsDeviceDiscovery.advertise(
+          appName: appName,
+          vmServiceUri: device.vmService!.httpAddress,
+        );
+      }
 
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
@@ -1348,9 +1350,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   Future<void> cleanupAtFinish() async {
     final discoveries = List<MDNSDeviceDiscovery>.of(_mdnsDiscoveries);
     _mdnsDiscoveries.clear();
-    for (final discovery in discoveries) {
-      await discovery.stop();
-    }
+    await discoveries.map((MDNSDeviceDiscovery discovery) => discovery.stop()).wait;
   }
 
   @mustCallSuper
