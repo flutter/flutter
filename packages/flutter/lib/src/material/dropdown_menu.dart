@@ -1298,7 +1298,9 @@ class _DropdownMenuState<T extends Object> extends State<DropdownMenu<T>> {
       crossAxisUnconstrained: false,
       onClose: () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _effectiveTextFieldFocusNode.hasFocus && !_controller.isOpen) {
+          if (mounted &&
+            _effectiveTextFieldFocusNode.hasFocus &&
+            !_controller.isOpen) {
             _effectiveTextFieldFocusNode.unfocus();
           }
         });

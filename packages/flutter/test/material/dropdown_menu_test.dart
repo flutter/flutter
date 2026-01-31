@@ -5608,7 +5608,6 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: DropdownMenu<TestMenu>(
-              clearOnBlur: false,
               controller: controller,
               focusNode: focusNode,
               initialSelection: TestMenu.mainMenu0,
@@ -5753,7 +5752,6 @@ void main() {
               children: <Widget>[
                 DropdownMenu<TestMenu>(
                   clearOnBlur: true,
-                  enableSearch: true,
                   controller: controller,
                   focusNode: focusNode,
                   initialSelection: TestMenu.mainMenu0,
