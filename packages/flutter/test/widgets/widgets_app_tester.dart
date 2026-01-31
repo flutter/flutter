@@ -53,11 +53,18 @@ class TestWidgetsApp extends StatelessWidget {
   /// Creates a minimal [WidgetsApp] for testing.
   const TestWidgetsApp({
     super.key,
+    this.navigatorKey,
     this.home,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.transitionsBuilder = _defaultTransitionsBuilder,
   });
+
+  /// A key to use when building the [Navigator].
+  ///
+  /// If provided, this key can be used to access the [NavigatorState]
+  /// directly for navigation operations in tests.
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   /// The widget to display within the app.
   final Widget? home;
@@ -94,6 +101,7 @@ class TestWidgetsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: color,
+      navigatorKey: navigatorKey,
       home: home,
       routes: routes,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {

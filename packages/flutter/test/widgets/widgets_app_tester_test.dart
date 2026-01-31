@@ -386,5 +386,35 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Page 2 Content'), findsOneWidget);
     });
+
+    testWidgets('navigatorKey provides access to NavigatorState', (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: navigatorKey,
+          home: const Text('Home Page'),
+          routes: <String, WidgetBuilder>{
+            '/details': (BuildContext context) => const Text('Details Page'),
+          },
+        ),
+      );
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page'), findsNothing);
+
+      // Use navigatorKey to navigate directly.
+      navigatorKey.currentState!.pushNamed('/details');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Details Page'), findsOneWidget);
+
+      // Use navigatorKey to pop.
+      navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Details Page'), findsNothing);
+    });
   });
 }
