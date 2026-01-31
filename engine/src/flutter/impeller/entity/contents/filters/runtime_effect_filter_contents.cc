@@ -71,6 +71,8 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
   // this branch for the unit test `ComposePaintRuntimeOuter`, but do it for
   // `ComposeBackdropRuntimeOuterBlurInner`.
   if (input_snapshot->ShouldRasterizeForRuntimeEffects()) {
+    Vector2 entity_offset =
+        Vector2(entity.GetTransform().m[12], entity.GetTransform().m[13]);
     Matrix inverse = input_snapshot->transform.Invert();
     Quad quad = inverse.Transform(Quad{
         coverage.GetLeftTop(),     //
@@ -93,12 +95,11 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
                               const Entity& entity, RenderPass& pass) -> bool {
             return texture_contents.Render(renderer, entity, pass);
           },
-          [maybe_input_coverage](const Entity& entity) -> std::optional<Rect> {
+          [maybe_input_coverage,
+           entity_offset](const Entity& entity) -> std::optional<Rect> {
             FML_LOG(ERROR) << "Doof: " << maybe_input_coverage.value();
-            auto clip_rect_origin = Vector2(10, 10);
             // return maybe_input_coverage;
-            return Rect::MakeXYWH(-clip_rect_origin.x, -clip_rect_origin.y,
-                                  2048, 1536);
+            return Rect::MakeXYWH(entity_offset.x, entity_offset.y, 2048, 1536);
           });
 
       Entity entity;
