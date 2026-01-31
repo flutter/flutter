@@ -728,6 +728,25 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedOpacity)), Size.zero);
   });
+
+  testWidgets('AnimatedDefaultTextStyle does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedDefaultTextStyle(
+              style: TextStyle(fontStyle: FontStyle.italic),
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedDefaultTextStyle)), Size.zero);
+  });
 }
 
 Future<void> tapTest2and3(
