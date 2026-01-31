@@ -424,11 +424,13 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
   Scalar sigma = 5.0;
+  Scalar clip_x = 20.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
+      ImGui::SliderFloat("clip_x", &clip_x, 0, 50);
       ImGui::End();
     }
     DisplayListBuilder builder;
@@ -452,7 +454,7 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
                                                       /*inner=*/blur_filter);
 
-    builder.ClipRect(DlRect::MakeXYWH(20, 20, 300, 300));
+    builder.ClipRect(DlRect::MakeXYWH(clip_x, 20, 300, 300));
 
     DlPaint paint;
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
