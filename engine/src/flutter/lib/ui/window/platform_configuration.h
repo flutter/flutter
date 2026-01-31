@@ -49,6 +49,9 @@ enum class AccessibilityFeatureFlag : int32_t {
   kHighContrast = 1 << 5,
   kOnOffSwitchLabels = 1 << 6,
   kNoAnnounce = 1 << 7,
+  kNoAutoPlayAnimatedImages = 1 << 8,
+  kNoAutoPlayVideos = 1 << 9,
+  kDeterministicCursor = 1 << 10,
 };
 
 //--------------------------------------------------------------------------

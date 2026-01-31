@@ -412,8 +412,8 @@ class RotationTransition extends MatrixTransition {
 /// Animates its own size and clips and aligns its child.
 ///
 /// [SizeTransition] acts as a [ClipRect] that animates either its width or its
-/// height, depending upon the value of [axis]. The alignment of the child along
-/// the [axis] is specified by the [axisAlignment].
+/// height, depending upon the value of [axis]. The alignment of the child is
+/// specified by the [alignment].
 ///
 /// Like most widgets, [SizeTransition] will conform to the constraints it is
 /// given, so be sure to put it in a context where it can change size. For
@@ -446,17 +446,27 @@ class RotationTransition extends MatrixTransition {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
-  /// defaults to zero, which centers the child along the main axis during the
-  /// transition.
+  /// The [axis] argument defaults to [Axis.vertical]. The [alignment] defaults
+  /// to [Alignment.center], which centers the child within the parent during
+  /// the transition.
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
     required Animation<double> sizeFactor,
-    this.axisAlignment = 0.0,
+    @Deprecated(
+      'Use alignment instead. '
+      'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
+      'This feature was deprecated after v3.41.0-1.0.pre.',
+    )
+    this.axisAlignment,
+    this.alignment,
     this.fixedCrossAxisSizeFactor,
     this.child,
   }) : assert(fixedCrossAxisSizeFactor == null || fixedCrossAxisSizeFactor >= 0.0),
+       assert(
+         axisAlignment == null || alignment == null,
+         'Cannot provide both axisAlignment and alignment as axisAlignment has been deprecated and superseded by alignment.',
+       ),
        super(listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
@@ -484,7 +494,19 @@ class SizeTransition extends AnimatedWidget {
   /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
   ///
   /// A value of 0.0 (the default) indicates the center for either [axis] value.
-  final double axisAlignment;
+  ///
+  /// This property has been deprecated and superseded by [alignment]. Existing usages can be migrated to [alignment] as follows:
+  /// - If [axis] is [Axis.horizontal], replace with `Alignment(axisAlignment ?? 0.0, -1.0)`.
+  /// - If [axis] is [Axis.vertical], replace with `Alignment(-1.0, axisAlignment ?? 0.0)`.
+  @Deprecated(
+    'Use alignment instead. '
+    'This property provides full control over both axes, which is an improvement over the old axisAlignment. '
+    'This feature was deprecated after v3.41.0-1.0.pre.',
+  )
+  final double? axisAlignment;
+
+  /// The alignment of the child within the parent during the transition.
+  final AlignmentGeometry? alignment;
 
   /// The factor by which to multiply the cross axis size of the child.
   ///
@@ -503,10 +525,12 @@ class SizeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     return ClipRect(
       child: Align(
-        alignment: switch (axis) {
-          Axis.horizontal => AlignmentDirectional(axisAlignment, -1.0),
-          Axis.vertical => AlignmentDirectional(-1.0, axisAlignment),
-        },
+        alignment:
+            alignment ??
+            switch (axis) {
+              Axis.horizontal => AlignmentDirectional(axisAlignment ?? 0.0, -1.0),
+              Axis.vertical => AlignmentDirectional(-1.0, axisAlignment ?? 0.0),
+            },
         heightFactor: axis == Axis.vertical
             ? math.max(sizeFactor.value, 0.0)
             : fixedCrossAxisSizeFactor,

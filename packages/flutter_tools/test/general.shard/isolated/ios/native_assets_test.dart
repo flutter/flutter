@@ -62,6 +62,19 @@ void main() {
               'x64/libbar.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'dsymutil',
+                '/build/native_assets/ios/bar.framework/bar',
+                '-o',
+                '/build/native_assets/ios/bar.framework.dSYM',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/bar.framework/bar'],
+            ),
+          ],
           FakeCommand(
             command: const <Pattern>['otool', '-D', '/build/native_assets/ios/bar.framework/bar'],
             stdout: <String>[
@@ -81,6 +94,19 @@ void main() {
               'x64/libbuz.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'dsymutil',
+                '/build/native_assets/ios/buz.framework/buz',
+                '-o',
+                '/build/native_assets/ios/buz.framework.dSYM',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/buz.framework/buz'],
+            ),
+          ],
           FakeCommand(
             command: const <Pattern>['otool', '-D', '/build/native_assets/ios/buz.framework/buz'],
             stdout: <String>[
@@ -191,6 +217,8 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          buildCodeAssets: true,
+          buildDataAssets: true,
         );
         await installCodeAssets(
           dartHookResult: dartHookResult,

@@ -2913,6 +2913,28 @@ void main() {
   );
 
   testUsingContext(
+    'plugin includes only setting.gradle.kts',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/181565.
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--org=com.example',
+        '--platforms=android',
+        projectDir.path,
+      ]);
+
+      expect(projectDir.childDirectory('android').childFile('settings.gradle.kts'), exists);
+      expect(projectDir.childDirectory('android').childFile('settings.gradle'), isNot(exists));
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
+  );
+
+  testUsingContext(
     'plugin includes native Swift unit tests',
     () async {
       final command = CreateCommand();
@@ -4256,6 +4278,25 @@ void main() {
       throwsToolExit(message: 'The web platform is not supported in plugin_ffi template.'),
     );
   });
+
+  testUsingContext('plugin_ffi template shows deprecation warning', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--platforms=android',
+      projectDir.path,
+    ]);
+    expect(logger.warningText, contains('The "plugin_ffi" template is deprecated'));
+    expect(logger.warningText, contains('Use the "package_ffi" template instead.'));
+    expect(
+      logger.warningText,
+      contains('https://docs.flutter.dev/platform-integration/bind-native-code'),
+    );
+  }, overrides: {Logger: () => logger});
 
   testUsingContext(
     'should show warning when disabled platforms are selected while creating an FFI plugin',

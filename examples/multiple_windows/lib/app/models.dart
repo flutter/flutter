@@ -7,6 +7,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
 
 class KeyedWindow {
   KeyedWindow({
@@ -61,11 +62,17 @@ class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
   }
 }
 
+class TooltipSettings {}
+
 /// Settings that control the behavior of newly created windows.
 class WindowSettings {
   WindowSettings({
     this.regularSize = const Size(800, 600),
     this.dialogSize = const Size(400, 400),
+    this.positioner = const WindowPositioner(
+      parentAnchor: WindowPositionerAnchor.right,
+      childAnchor: WindowPositionerAnchor.left,
+    ),
   });
 
   /// The initial size for newly created regular windows.
@@ -73,6 +80,9 @@ class WindowSettings {
 
   /// The initial size of the dialog window.
   Size dialogSize;
+
+  /// The positioner used to determine where new tooltips and popups are placed.
+  WindowPositioner positioner;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.
@@ -109,4 +119,18 @@ class CallbackDialogWindowControllerDelegate
   }
 
   final VoidCallback onDestroyed;
+}
+
+String anchorToString(WindowPositionerAnchor anchor) {
+  return switch (anchor) {
+    WindowPositionerAnchor.center => 'Center',
+    WindowPositionerAnchor.top => 'Top',
+    WindowPositionerAnchor.bottom => 'Bottom',
+    WindowPositionerAnchor.left => 'Left',
+    WindowPositionerAnchor.right => 'Right',
+    WindowPositionerAnchor.topLeft => 'Top Left',
+    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
+    WindowPositionerAnchor.topRight => 'Top Right',
+    WindowPositionerAnchor.bottomRight => 'Bottom Right',
+  };
 }

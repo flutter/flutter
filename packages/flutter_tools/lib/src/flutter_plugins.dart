@@ -1307,6 +1307,7 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
+            artifacts: globals.artifacts!,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,

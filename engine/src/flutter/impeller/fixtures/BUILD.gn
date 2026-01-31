@@ -88,6 +88,7 @@ impellerc("runtime_stages") {
   mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
+    "all_supported_uniforms.frag",
     "runtime_stage_example.frag",
     "runtime_stage_filter_example.frag",
     "interop_runtime_stage_cs.frag",
@@ -99,6 +100,7 @@ impellerc("runtime_stages") {
     "uniforms_and_sampler_1.frag",
     "uniforms_and_sampler_2.frag",
     "runtime_stage_border.frag",
+    "runtime_stage_vector_array.frag",
   ]
   sl_file_extension = "iplr"
 
@@ -119,6 +121,10 @@ test_fixtures("file_fixtures") {
     "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     "airplane.jpg",
+    "array_assignment.frag",
+    "array_initializer_with_constants.frag",
+    "array_initializer_with_variables.frag",
+    "array_initialization_without_initializer.frag",
     "bay_bridge.jpg",
     "blend_mode_dst.png",
     "blend_mode_src.png",
@@ -158,6 +164,7 @@ test_fixtures("file_fixtures") {
     "types.h",
     "wtf.otf",
     "texture_lookup.frag",
+    "mat2_test.frag",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]
