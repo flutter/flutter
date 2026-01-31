@@ -307,7 +307,7 @@ TEST(FlutterSurfaceManager, WideGamutSurfaceHasCorrectPixelFormat) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture = surface.asFlutterMetalTexture;
   id<MTLTexture> metalTexture = (__bridge id)texture.texture;
-  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
   texture.destruction_callback(texture.user_data);
 }
 
@@ -372,7 +372,7 @@ TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectPixelFormat) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   IOSurfaceRef ioSurface = surface.ioSurface;
   uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
-  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_40ARGBLEWideGamut);
+  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_64RGBAHalf);
 }
 
 TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectPixelFormat) {
@@ -458,7 +458,7 @@ TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
   auto wideSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
   auto wideTexture = wideSurface.asFlutterMetalTexture;
   id<MTLTexture> wideMetalTexture = (__bridge id)wideTexture.texture;
-  EXPECT_EQ(wideMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+  EXPECT_EQ(wideMetalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
 
   // Present and get it cached.
   [wideManager presentSurfaces:@[ CreatePresentInfo(wideSurface) ] atTime:0 notify:nil];
@@ -468,7 +468,7 @@ TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
   auto recycledSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
   auto recycledTexture = recycledSurface.asFlutterMetalTexture;
   id<MTLTexture> recycledMetalTexture = (__bridge id)recycledTexture.texture;
-  EXPECT_EQ(recycledMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+  EXPECT_EQ(recycledMetalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
   recycledTexture.destruction_callback(recycledTexture.user_data);
 }
 
@@ -498,7 +498,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
   auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture2 = surface2.asFlutterMetalTexture;
   id<MTLTexture> metalTexture2 = (__bridge id)texture2.texture;
-  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatBGRA10_XR);
+  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatRGBA16Float);
   texture2.destruction_callback(texture2.user_data);
 }
 
@@ -510,7 +510,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromWideToStandardGamut) {
   auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture1 = surface1.asFlutterMetalTexture;
   id<MTLTexture> metalTexture1 = (__bridge id)texture1.texture;
-  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatBGRA10_XR);
+  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatRGBA16Float);
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
   texture1.destruction_callback(texture1.user_data);
 

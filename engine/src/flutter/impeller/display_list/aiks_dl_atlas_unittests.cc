@@ -165,7 +165,7 @@ TEST_P(AiksTest, DrawAtlasWithColorAdvancedAndTransform) {
 TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
   DisplayListBuilder builder;
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kB10G10R10A10XR);
+            PixelFormat::kR16G16B16A16Float);
 
   // Draws the image as four squares stiched together.
   auto [texture_coordinates, transforms, atlas] = CreateTestData(this);

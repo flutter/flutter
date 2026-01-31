@@ -567,7 +567,7 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
   // Making sure this test is run on a wide gamut enabled backend
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kB10G10R10A10XR);
+            PixelFormat::kR16G16B16A16Float);
 
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);

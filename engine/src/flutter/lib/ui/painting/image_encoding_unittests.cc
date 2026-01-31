@@ -511,16 +511,16 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   EXPECT_TRUE(did_call);
 }
 
-TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
+TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageF16) {
   sk_sp<MockDlImage> image(new MockDlImage());
   EXPECT_CALL(*image, GetSize)  //
       .WillRepeatedly(Return(DlISize(100, 100)));
   impeller::TextureDescriptor desc;
-  desc.format = impeller::PixelFormat::kB10G10R10XR;
+  desc.format = impeller::PixelFormat::kR16G16B16A16Float;
   auto texture = std::make_shared<MockTexture>(desc);
   EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
-  buffer.reserve(100 * 100 * 4);
+  buffer.reserve(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
   bool did_call = false;
   MockSnapshotDelegate snapshot_delegate;
@@ -534,18 +534,18 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
         ASSERT_TRUE(image.value());
         EXPECT_EQ(100, image.value()->width());
         EXPECT_EQ(100, image.value()->height());
-        EXPECT_EQ(kBGR_101010x_XR_SkColorType, image.value()->colorType());
+        EXPECT_EQ(kRGBA_F16_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
       },
       snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);
 }
 
-TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
+TEST(ImageEncodingImpellerTest, PngEncodingF16) {
   int width = 100;
   int height = 100;
   SkImageInfo info = SkImageInfo::Make(
-      width, height, kBGR_101010x_XR_SkColorType, kUnpremul_SkAlphaType);
+      width, height, kRGBA_F16_SkColorType, kUnpremul_SkAlphaType);
 
   auto surface = SkSurfaces::Raster(info);
   SkCanvas* canvas = surface->getCanvas();

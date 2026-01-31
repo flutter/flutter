@@ -411,7 +411,6 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     [self launchEngine];
   }
   [self listenForMetaModifiedKeyUpEvents];
-  [self updateWideGamutForScreen];
 }
 
 - (void)viewWillDisappear {
@@ -797,16 +796,17 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 
 - (nonnull FlutterView*)createFlutterViewWithMTLDevice:(id<MTLDevice>)device
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
+  FlutterDartProject* project = _project ?: self.engine.project;
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
                                        delegate:self
                                  viewIdentifier:_viewIdentifier
-                                enableWideGamut:_project.enableWideGamut];
+                                enableWideGamut:project.enableWideGamut];
 }
 
 - (void)updateWideGamutForScreen {
-  if (!_project.enableWideGamut) {
-    // Wide gamut is not enabled by the developer or hardware doesn't support it.
+  FlutterDartProject* project = _project ?: self.engine.project;
+  if (!project.enableWideGamut) {
     return;
   }
   NSScreen* screen = self.view.window.screen;

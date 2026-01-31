@@ -1259,6 +1259,10 @@ MakeRenderTargetFromBackingStoreImpeller(
     FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture.";
     return nullptr;
   }
+
+  aiks_context->GetContext()->UpdateOffscreenLayerPixelFormat(
+      resolve_tex->GetTextureDescriptor().format);
+
   resolve_tex->SetLabel("ImpellerBackingStoreResolve");
 
   impeller::TextureDescriptor msaa_tex_desc;

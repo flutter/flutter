@@ -181,7 +181,7 @@ static void PrintWideGamutWarningOnce() {
     if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
-      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
+      layer.pixelFormat = MTLPixelFormatRGBA16Float;
     } else if (_isWideGamutEnabled && !self.isWideGamutSupported) {
       PrintWideGamutWarningOnce();
     }

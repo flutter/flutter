@@ -30,7 +30,11 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
+
+#import <CoreVideo/CoreVideo.h>
+#import <IOSurface/IOSurface.h>
 
 @class FlutterEngineRegistrar;
 
@@ -460,6 +464,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // A method channel for miscellaneous platform functionality.
   FlutterMethodChannel* _platformChannel;
 
+  // A method channel for taking screenshots via the rasterizer.
+  FlutterMethodChannel* _screenshotChannel;
+
   // Whether the application is currently the active application.
   BOOL _active;
 
@@ -494,6 +501,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
 }
 
 @synthesize windowController = _windowController;
+@synthesize project = _project;
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
@@ -1395,6 +1403,82 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                                             codec:[FlutterJSONMethodCodec sharedInstance]];
   [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [weakSelf handleMethodCall:call result:result];
+  }];
+
+  _screenshotChannel =
+      [FlutterMethodChannel methodChannelWithName:@"flutter/screenshot"
+                                  binaryMessenger:self.binaryMessenger
+                                            codec:[FlutterStandardMethodCodec sharedInstance]];
+  [_screenshotChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    FlutterEngine* strongSelf = weakSelf;
+    if (!strongSelf) {
+      return result([FlutterError errorWithCode:@"invalid_state"
+                                        message:@"Engine deallocated."
+                                        details:nil]);
+    }
+
+    FlutterViewController* viewController =
+        [strongSelf viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+    if (!viewController) {
+      return result([FlutterError errorWithCode:@"failure"
+                                        message:@"No view controller."
+                                        details:nil]);
+    }
+
+    NSArray<FlutterSurface*>* frontSurfaces = viewController.flutterView.surfaceManager.frontSurfaces;
+    if (frontSurfaces.count == 0) {
+      return result([FlutterError errorWithCode:@"failure"
+                                        message:@"No front surfaces."
+                                        details:nil]);
+    }
+
+    // Use the first front surface (the main backing store).
+    FlutterSurface* surface = frontSurfaces.firstObject;
+    IOSurfaceRef ioSurface = surface.ioSurface;
+
+    size_t width = IOSurfaceGetWidth(ioSurface);
+    size_t height = IOSurfaceGetHeight(ioSurface);
+    size_t bytesPerRow = IOSurfaceGetBytesPerRow(ioSurface);
+    size_t bytesPerElement = IOSurfaceGetBytesPerElement(ioSurface);
+    uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
+
+    NSString* formatString;
+    switch (pixelFormat) {
+      case kCVPixelFormatType_64RGBAHalf:
+        formatString = @"MTLPixelFormatRGBA16Float";
+        break;
+      case kCVPixelFormatType_40ARGBLEWideGamut:
+        formatString = @"MTLPixelFormatBGRA10_XR";
+        break;
+      case kCVPixelFormatType_32BGRA:
+        formatString = @"MTLPixelFormatBGRA8Unorm";
+        break;
+      default:
+        formatString = [NSString stringWithFormat:@"Unknown(%u)", pixelFormat];
+        break;
+    }
+
+    IOSurfaceLock(ioSurface, kIOSurfaceLockReadOnly, nil);
+    void* baseAddress = IOSurfaceGetBaseAddress(ioSurface);
+
+    // Copy pixel data row by row into a tightly-packed buffer.
+    size_t packedBytesPerRow = width * bytesPerElement;
+    NSMutableData* packedData = [NSMutableData dataWithLength:packedBytesPerRow * height];
+    uint8_t* dest = (uint8_t*)packedData.mutableBytes;
+    for (size_t row = 0; row < height; row++) {
+      memcpy(dest + row * packedBytesPerRow,
+             (uint8_t*)baseAddress + row * bytesPerRow,
+             packedBytesPerRow);
+    }
+
+    IOSurfaceUnlock(ioSurface, kIOSurfaceLockReadOnly, nil);
+
+    return result(@[
+      @(width),
+      @(height),
+      formatString,
+      [FlutterStandardTypedData typedDataWithBytes:packedData],
+    ]);
   }];
 }
 

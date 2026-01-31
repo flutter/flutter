@@ -546,18 +546,18 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
 
   ASSERT_TRUE(wide_result.ok());
   ASSERT_EQ(wide_result->image_info.format,
-            impeller::PixelFormat::kB10G10R10XR);
+            impeller::PixelFormat::kR16G16B16A16Float);
 
-  const uint32_t* pixel_ptr = reinterpret_cast<const uint32_t*>(
+  const uint16_t* pixel_ptr = reinterpret_cast<const uint16_t*>(
       wide_result->device_buffer->OnGetContents());
   bool found_deep_red = false;
   for (int i = 0; i < wide_result->image_info.size.width *
                           wide_result->image_info.size.height;
        ++i) {
-    uint32_t pixel = *pixel_ptr++;
-    float blue = DecodeBGR10((pixel >> 0) & 0x3ff);
-    float green = DecodeBGR10((pixel >> 10) & 0x3ff);
-    float red = DecodeBGR10((pixel >> 20) & 0x3ff);
+    float red = HalfToFloat(pixel_ptr[0]);
+    float green = HalfToFloat(pixel_ptr[1]);
+    float blue = HalfToFloat(pixel_ptr[2]);
+    pixel_ptr += 4;  // RGBA16F = 4 x uint16_t per pixel
     if (fabsf(red - 1.0931f) < 0.01f && fabsf(green - -0.2268f) < 0.01f &&
         fabsf(blue - -0.1501f) < 0.01f) {
       found_deep_red = true;
