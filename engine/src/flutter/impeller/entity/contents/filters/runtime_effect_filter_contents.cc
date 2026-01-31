@@ -14,9 +14,6 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/size.h"
 
-extern float fudge_x;
-extern float fudge_y;
-
 namespace impeller {
 
 void RuntimeEffectFilterContents::SetRuntimeStage(
@@ -97,9 +94,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
           },
           [maybe_input_coverage,
            entity_offset](const Entity& entity) -> std::optional<Rect> {
-            FML_LOG(ERROR) << "Doof: " << maybe_input_coverage.value();
-            // return maybe_input_coverage;
-            return Rect::MakeXYWH(entity_offset.x, entity_offset.y, 2048, 1536);
+            Rect coverage = maybe_input_coverage.value();
+            return Rect::MakeLTRB(entity_offset.x, entity_offset.y,
+                                  coverage.GetRight(), coverage.GetBottom());
           });
 
       Entity entity;

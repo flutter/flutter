@@ -16,9 +16,6 @@
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
-float fudge_x = 0;
-float fudge_y = 0;
-
 namespace impeller {
 namespace testing {
 
@@ -432,8 +429,6 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
-      ImGui::SliderFloat("fudge_x", &fudge_x, -20, 20);
-      ImGui::SliderFloat("fudge_y", &fudge_y, -20, 20);
       ImGui::End();
     }
     DisplayListBuilder builder;
@@ -457,7 +452,7 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     auto backdrop_filter = DlImageFilter::MakeCompose(/*outer=*/runtime_filter,
                                                       /*inner=*/blur_filter);
 
-    builder.ClipRect(DlRect::MakeXYWH(10, 10, 300, 300));
+    builder.ClipRect(DlRect::MakeXYWH(20, 20, 300, 300));
 
     DlPaint paint;
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
