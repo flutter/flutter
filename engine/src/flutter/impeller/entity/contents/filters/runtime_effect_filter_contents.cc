@@ -87,6 +87,9 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
       texture_contents.SetStencilEnabled(false);
       texture_contents.SetSamplerDescriptor(input_snapshot->sampler_descriptor);
 
+      // Use an AnonymousContents to restore the padding around the input that
+      // may have been cut out with a clip rect to maintain the correct
+      // coordinates for the fragment shader to perform.
       auto anonymous_contents = AnonymousContents::Make(
           [&texture_contents](const ContentContext& renderer,
                               const Entity& entity, RenderPass& pass) -> bool {
