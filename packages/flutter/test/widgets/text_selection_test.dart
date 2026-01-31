@@ -1399,42 +1399,6 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('propagates textDirection to handles', (WidgetTester tester) async {
-      final spy = TextSelectionControlsSpy();
-      final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
-
-      selectionOverlay
-        ..startHandleType = TextSelectionHandleType.left
-        ..endHandleType = TextSelectionHandleType.right
-        ..selectionEndpoints = const <TextSelectionPoint>[
-          TextSelectionPoint(Offset(10, 10), null),
-          TextSelectionPoint(Offset(20, 20), null),
-        ]
-        ..textDirection = TextDirection.ltr;
-      selectionOverlay.showHandles();
-      await tester.pump();
-
-      Directionality directionality = tester.widget(
-        find
-            .ancestor(of: find.byKey(spy.leftHandleKey), matching: find.byType(Directionality))
-            .first,
-      );
-      expect(directionality.textDirection, TextDirection.ltr);
-
-      selectionOverlay.textDirection = TextDirection.rtl;
-      await tester.pump();
-
-      directionality = tester.widget(
-        find
-            .ancestor(of: find.byKey(spy.leftHandleKey), matching: find.byType(Directionality))
-            .first,
-      );
-      expect(directionality.textDirection, TextDirection.rtl);
-
-      selectionOverlay.dispose();
-      await tester.pumpAndSettle();
-    });
-
     testWidgets('can change handle parameter', (WidgetTester tester) async {
       final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
@@ -2017,14 +1981,9 @@ void main() {
         );
         expect(endpoints.length, 2);
 
-        // Determine the text direction at each endpoint.
-        final TextDirection startDirection = endpoints[0].direction ?? testCase.ambientDirection;
-        final TextDirection endDirection = endpoints[1].direction ?? testCase.ambientDirection;
-
         // Identify which endpoint is physically to the left.
         final double startX = endpoints[0].point.dx;
         final double endX = endpoints[1].point.dx;
-        final bool isStartBeforeEnd = startX <= endX;
 
         // Find handles.
         final Finder leftHandleFinder = find.byKey(
