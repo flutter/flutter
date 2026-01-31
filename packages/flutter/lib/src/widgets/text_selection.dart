@@ -116,7 +116,7 @@ abstract class TextSelectionControls {
   /// often visually "points to" that location.
   ///
   /// {@template flutter.widgets.TextSelectionControls.getHandleAnchor.cursorWidth}
-  /// The [cursorWidth] argument is the thickness of the cursor, which may be
+  /// The [cursorWidth] argument is the thickness of the cursor, which can be
   /// used to offset the anchor point. Defaults to 2.0.
   /// {@endtemplate}
   Offset getHandleAnchor(
@@ -1312,7 +1312,7 @@ class SelectionOverlay {
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   ///
-  /// This value is used for calculating the position of the text selection
+  /// This value is used to calculate the position of the text selection
   /// handles.
   ///
   /// Changing the value while the handles are visible causes them to rebuild.
