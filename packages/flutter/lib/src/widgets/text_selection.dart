@@ -29,6 +29,7 @@ import 'inherited_theme.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
+import 'selectable_region.dart';
 import 'tap_region.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
@@ -585,10 +586,8 @@ class TextSelectionOverlay {
       // Update selection handle metrics.
       ..startHandleType = startHandleType
       ..lineHeightAtStart = _getStartGlyphHeight()
-      ..startHandleDirection = startHandleDirection
       ..endHandleType = endHandleType
       ..lineHeightAtEnd = _getEndGlyphHeight()
-      ..endHandleDirection = endHandleDirection
       // Update selection toolbar metrics.
       ..selectionEndpoints = endpoints
       ..toolbarLocation = renderObject.lastSecondaryTapDownPosition
@@ -1176,28 +1175,6 @@ class SelectionOverlay {
       return;
     }
     _textDirection = value;
-    markNeedsBuild();
-  }
-
-  /// The text direction of the start selection handle.
-  TextDirection? get startHandleDirection => _startHandleDirection;
-  TextDirection? _startHandleDirection;
-  set startHandleDirection(TextDirection? value) {
-    if (_startHandleDirection == value) {
-      return;
-    }
-    _startHandleDirection = value;
-    markNeedsBuild();
-  }
-
-  /// The text direction of the end selection handle.
-  TextDirection? get endHandleDirection => _endHandleDirection;
-  TextDirection? _endHandleDirection;
-  set endHandleDirection(TextDirection? value) {
-    if (_endHandleDirection == value) {
-      return;
-    }
-    _endHandleDirection = value;
     markNeedsBuild();
   }
 
@@ -1831,22 +1808,7 @@ class SelectionOverlay {
     _magnifierInfo.dispose();
   }
 
-  TextDirection _resolveTextDirection(
-    BuildContext context,
-    TextDirection? handleDirection,
-    int endpointIndex,
-  ) {
-    return handleDirection ??
-        (_selectionEndpoints.length > endpointIndex
-            ? _selectionEndpoints[endpointIndex].direction
-            : null) ??
-        _textDirection ??
-        Directionality.maybeOf(context) ??
-        TextDirection.ltr;
-  }
-
   Widget _buildStartHandle(BuildContext context) {
-    final TextDirection direction = _resolveTextDirection(context, startHandleDirection, 0);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1857,7 +1819,6 @@ class SelectionOverlay {
     } else {
       handle = _SelectionHandleOverlay(
         type: _startHandleType,
-        textDirection: direction,
         handleLayerLink: startHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleStartHandleDragStart,
@@ -1869,16 +1830,13 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TextFieldTapRegion(
-      child: Directionality(
-        textDirection: direction,
-        child: ExcludeSemantics(child: handle),
-      ),
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
     );
   }
 
   Widget _buildEndHandle(BuildContext context) {
-    final TextDirection direction = _resolveTextDirection(context, endHandleDirection, 1);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1892,7 +1850,6 @@ class SelectionOverlay {
     } else {
       handle = _SelectionHandleOverlay(
         type: _endHandleType,
-        textDirection: direction,
         handleLayerLink: endHandleLayerLink,
         onSelectionHandleTapped: onSelectionHandleTapped,
         onSelectionHandleDragStart: _handleEndHandleDragStart,
@@ -1904,11 +1861,9 @@ class SelectionOverlay {
         dragStartBehavior: dragStartBehavior,
       );
     }
-    return TextFieldTapRegion(
-      child: Directionality(
-        textDirection: direction,
-        child: ExcludeSemantics(child: handle),
-      ),
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(child: ExcludeSemantics(child: handle)),
     );
   }
 
@@ -2072,7 +2027,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
   /// Create selection overlay.
   const _SelectionHandleOverlay({
     required this.type,
-    this.textDirection,
     required this.handleLayerLink,
     this.onSelectionHandleTapped,
     this.onSelectionHandleDragStart,
@@ -2093,7 +2047,6 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final ValueListenable<bool>? visibility;
   final double preferredLineHeight;
   final TextSelectionHandleType type;
-  final TextDirection? textDirection;
   final DragStartBehavior dragStartBehavior;
 
   @override

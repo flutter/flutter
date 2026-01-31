@@ -2625,6 +2625,11 @@ class EditableTextState extends State<EditableText>
 
   Orientation? _lastOrientation;
 
+  // Tracks the last known text direction to detect when it changes.
+  // When the direction changes (e.g., switching between LTR and RTL layout),
+  // we need to update the selection overlay to ensure handles are positioned correctly.
+  TextDirection? _lastKnownTextDirection;
+
   bool get _stylusHandwritingEnabled {
     // During the deprecation period, respect scribbleEnabled being explicitly
     // set.
@@ -3400,6 +3405,20 @@ class EditableTextState extends State<EditableText>
         _textInputConnection!.updateStyle(_getTextInputStyle(context));
       }, debugLabel: 'EditableText.updateStyle');
     }
+
+    // Update selection overlay when text direction changes (e.g., switching
+    // between LTR and RTL layout) to ensure handles are positioned correctly.
+    final TextDirection currentTextDirection = _textDirection;
+    if (_lastKnownTextDirection != null && _lastKnownTextDirection != currentTextDirection) {
+      // Schedule the update after the current frame to ensure the render object
+      // has been updated with the new direction.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _selectionOverlay?.updateForScroll();
+        }
+      }, debugLabel: 'EditableText.updateSelectionOverlayDirection');
+    }
+    _lastKnownTextDirection = currentTextDirection;
 
     if (defaultTargetPlatform != TargetPlatform.iOS &&
         defaultTargetPlatform != TargetPlatform.android) {
