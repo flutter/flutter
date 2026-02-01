@@ -14,7 +14,9 @@ class CupertinoMenuAnchorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('CupertinoMenuAnchor Example')),
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('CupertinoMenuAnchor Example'),
+        ),
         child: CupertinoMenuAnchorExample(),
       ),
     );
@@ -25,10 +27,12 @@ class CupertinoMenuAnchorExample extends StatefulWidget {
   const CupertinoMenuAnchorExample({super.key});
 
   @override
-  State<CupertinoMenuAnchorExample> createState() => _CupertinoMenuAnchorExampleState();
+  State<CupertinoMenuAnchorExample> createState() =>
+      _CupertinoMenuAnchorExampleState();
 }
 
-class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample> {
+class _CupertinoMenuAnchorExampleState
+    extends State<CupertinoMenuAnchorExample> {
   // Optional: Create a focus node to allow focus traversal between the menu
   // button and the menu overlay.
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
@@ -49,7 +53,7 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CupertinoMenuAnchor(
-            onAnimationStatusChange: (AnimationStatus status) {
+            onAnimationStatusChanged: (AnimationStatus status) {
               _status = status;
             },
             childFocusNode: _buttonFocusNode,
@@ -69,15 +73,16 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
                     _pressedItem = 'Colorful Item';
                   });
                 },
-                decoration: const WidgetStateProperty<BoxDecoration>.fromMap(
-                  <WidgetStatesConstraint, BoxDecoration>{
-                    WidgetState.dragged: BoxDecoration(color: Color(0xAEE48500)),
-                    WidgetState.pressed: BoxDecoration(color: Color(0xA6E3002A)),
-                    WidgetState.hovered: BoxDecoration(color: Color(0xA90069DA)),
-                    WidgetState.focused: BoxDecoration(color: Color(0x9B00C8BE)),
-                    WidgetState.any: BoxDecoration(color: Color(0x00000000)),
-                  },
-                ),
+                decoration: const WidgetStateProperty<BoxDecoration>.fromMap(<
+                  WidgetStatesConstraint,
+                  BoxDecoration
+                >{
+                  WidgetState.dragged: BoxDecoration(color: Color(0xAEE48500)),
+                  WidgetState.pressed: BoxDecoration(color: Color(0xA6E3002A)),
+                  WidgetState.hovered: BoxDecoration(color: Color(0xA90069DA)),
+                  WidgetState.focused: BoxDecoration(color: Color(0x9B00C8BE)),
+                  WidgetState.any: BoxDecoration(color: Color(0x00000000)),
+                }),
                 child: const Text('Colorful Item'),
               ),
               CupertinoMenuItem(
@@ -91,23 +96,32 @@ class _CupertinoMenuAnchorExampleState extends State<CupertinoMenuAnchorExample>
                 },
               ),
             ],
-            builder: (BuildContext context, MenuController controller, Widget? child) {
-              return CupertinoButton(
-                sizeStyle: CupertinoButtonSize.medium,
-                focusNode: _buttonFocusNode,
-                onPressed: () {
-                  if (_status.isForwardOrCompleted) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+            builder:
+                (
+                  BuildContext context,
+                  MenuController controller,
+                  Widget? child,
+                ) {
+                  return CupertinoButton(
+                    sizeStyle: CupertinoButtonSize.medium,
+                    focusNode: _buttonFocusNode,
+                    onPressed: () {
+                      if (_status.isForwardOrCompleted) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: Text(
+                      _status.isForwardOrCompleted ? 'Close Menu' : 'Open Menu',
+                    ),
+                  );
                 },
-                child: Text(_status.isForwardOrCompleted ? 'Close Menu' : 'Open Menu'),
-              );
-            },
           ),
           Text(
-            _pressedItem.isEmpty ? 'No items pressed' : 'You Pressed: $_pressedItem',
+            _pressedItem.isEmpty
+                ? 'No items pressed'
+                : 'You Pressed: $_pressedItem',
             style: CupertinoTheme.of(context).textTheme.textStyle,
           ),
         ],

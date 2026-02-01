@@ -21,6 +21,12 @@ import 'colors.dart';
 import 'dialog.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// late BuildContext context;
+// AnimationStatus animationStatus = AnimationStatus.dismissed;
+// late double Function(double value, {required double to}) _roundToDivisible;
+// late TextScaler textScaler;
+
 // Dismiss is handled by RawMenuAnchor
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
@@ -67,7 +73,7 @@ const double _kCupertinoMobileBaseFontSize = 17.0;
 /// The equation to calculate the normalized text scale is:
 ///
 /// ```dart
-/// final normalizedScale = MediaQuery.textScalerOf(context).scale(baseFontSize) - baseFontSize
+/// final normalizedScale = textScaler.scale(17.0) - 17.0;
 /// ```
 ///
 /// The returned value is positive when the text scale factor is larger than the
@@ -309,7 +315,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// when the menu popup is mounted and the menu status changes _from_
 /// [AnimationStatus.dismissed]. The [onClose] callback is invoked when the menu
 /// popup is unmounted and the menu status changes _to_
-/// [AnimationStatus.dismissed]. The [onAnimationStatusChange] callback is
+/// [AnimationStatus.dismissed]. The [onAnimationStatusChanged] callback is
 /// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
 /// ## Usage
@@ -366,7 +372,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.controller,
     this.onOpen,
     this.onClose,
-    this.onAnimationStatusChange,
+    this.onAnimationStatusChanged,
     this.constraints,
     this.constrainCrossAxis = false,
     this.consumeOutsideTaps = false,
@@ -436,7 +442,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// {@end-tool}
   ///
   /// Defaults to null.
-  final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChange;
+  final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChanged;
 
   /// The constraints to apply to the menu scrollable.
   final BoxConstraints? constraints;
@@ -677,7 +683,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
       _animationStatus = status;
     });
 
-    widget.onAnimationStatusChange?.call(status);
+    widget.onAnimationStatusChanged?.call(status);
   }
 
   void _handleSwipeDistanceChange(double distance) {

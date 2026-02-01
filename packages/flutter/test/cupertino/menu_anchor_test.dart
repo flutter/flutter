@@ -2103,13 +2103,6 @@ void main() {
   });
 
   group('Layout', () {
-    final alignments = <AlignmentGeometry>[
-      for (double x = -2; x <= 2; x += 1)
-        for (double y = -2; y <= 2; y += 1) Alignment(x, y),
-      for (double x = -2; x <= 2; x += 1)
-        for (double y = -2; y <= 2; y += 1) AlignmentDirectional(x, y),
-    ];
-
     /// Returns the rects of the menu's contents. If [clipped] is true, the
     /// rect is taken after UnconstrainedBox clips its contents.
     List<Rect> collectOverlays({bool clipped = true}) {
