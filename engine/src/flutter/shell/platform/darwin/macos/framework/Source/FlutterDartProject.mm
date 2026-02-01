@@ -19,7 +19,7 @@ static BOOL DoesHardwareSupportWideGamut() {
   dispatch_once(&once_token, ^{
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     // Apple2 covers Apple Silicon Macs (M1+).
-    // Mac2 covers Intel Macs with AMD GPUs that support BGRA10_XR.
+    // Mac2 covers Intel Macs with AMD GPUs that support wide gamut pixel formats.
     // Mac1 does not support wide gamut pixel formats.
     result = [device supportsFamily:MTLGPUFamilyApple2] || [device supportsFamily:MTLGPUFamilyMac2];
   });

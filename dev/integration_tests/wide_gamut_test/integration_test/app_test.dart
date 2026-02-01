@@ -6,15 +6,15 @@ import 'dart:convert' show base64Decode;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:wide_gamut_test/main.dart' as app;
 
 /// Half-float has ~0.001 step size near 1.0, so 0.002 catches any real error.
-final double _defaultEpsilon = 0.002;
+const double _defaultEpsilon = 0.002;
 
 double _decodeHalf(int x) {
   if (x == 0x7c00) {
@@ -123,12 +123,12 @@ class _HasColor extends Matcher {
   }
 }
 
-final MethodChannel _screenshotChannel = MethodChannel('flutter/screenshot');
+const MethodChannel _screenshotChannel = MethodChannel('flutter/screenshot');
 
 /// Precache the Display P3 test image so it is fully decoded before we take a
 /// screenshot. Must be called after [pumpAndSettle] so a [BuildContext] exists.
 Future<void> _precacheP3Image(WidgetTester tester) async {
-  final context = tester.element(find.byType(app.MyApp));
+  final BuildContext context = tester.element(find.byType(app.MyApp));
   await tester.runAsync(() => precacheImage(MemoryImage(base64Decode(app.displayP3Logo)), context));
 }
 

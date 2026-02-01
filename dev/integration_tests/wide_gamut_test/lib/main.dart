@@ -160,7 +160,7 @@ void run(Setup setup) {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp(this._setup, {super.key});
+  const MyApp(this._setup, {super.key});
 
   final Setup _setup;
 
