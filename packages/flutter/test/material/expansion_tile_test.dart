@@ -2161,10 +2161,7 @@ void main() {
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
     final WidgetStatesController controller = WidgetStatesController();
-    addTearDown(() async {
-      controller.dispose();
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2187,7 +2184,5 @@ void main() {
 
     final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
     expect(listTile.statesController, isNull);
-
-    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
