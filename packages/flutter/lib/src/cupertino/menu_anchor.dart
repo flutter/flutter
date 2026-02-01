@@ -2217,12 +2217,13 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
        _trailingAlignment = trailingMidpointAlignment,
        _constraints = constraints;
 
-  // Values were obtained from the iOS 18.5 simulator.
   static const double _defaultHorizontalWidth = 16;
 
   // The leading and trailing widths scale roughly linearly with the normalized
-  // text scale once quantized, deviating by no more than 1 physical pixel. This
-  // was observed on iOS and iPadOS 18.5 simulators of various sizes.
+  // text scale once quantized, deviating by no more than 1 physical pixel.
+  //
+  // This behavior was observed on several iOS and iPadOS 18.5 simulators using
+  // the debug view.
   static const double _leadingWidthSlope = -311 / 1000;
   static const double _leadingWidthYIntercept = 10;
 
