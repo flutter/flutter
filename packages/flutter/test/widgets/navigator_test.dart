@@ -16,6 +16,7 @@ import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
+import 'utils.dart';
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
@@ -4100,8 +4101,8 @@ void main() {
         return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
-              const ZeroDurationPage(child: Text('page1')),
-              if (secondPage) const ZeroDurationPage(child: Text('page2')),
+              const TestPageWithZeroTransitionDuration(child: Text('page1')),
+              if (secondPage) const TestPageWithZeroTransitionDuration(child: Text('page2')),
             ],
             onPopPage: (Route<dynamic> route, dynamic result) => false,
           ),
@@ -6553,55 +6554,6 @@ class BuilderPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(settings: this, pageBuilder: pageBuilder);
   }
-}
-
-class ZeroDurationPage extends Page<void> {
-  const ZeroDurationPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return ZeroDurationPageRoute(page: this);
-  }
-}
-
-class ZeroDurationPageRoute extends PageRoute<void> {
-  ZeroDurationPageRoute({required ZeroDurationPage page})
-    : super(settings: page, allowSnapshotting: false);
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-
-  ZeroDurationPage get _page => settings as ZeroDurationPage;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return _page.child;
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
-  }
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
 }
 
 class _MockNavigatorObserver implements NavigatorObserver {

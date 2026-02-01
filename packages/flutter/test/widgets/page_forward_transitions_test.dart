@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'utils.dart';
+
 class TestTransition extends AnimatedWidget {
   const TestTransition({
     super.key,
@@ -26,35 +28,8 @@ class TestTransition extends AnimatedWidget {
   }
 }
 
-class TestRoute<T> extends PageRoute<T> {
-  TestRoute({required this.child, required RouteSettings settings, this.barrierColor})
-    : super(settings: settings);
-
-  final Widget child;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  final Color? barrierColor;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return child;
-  }
-}
-
 void main() {
+  const kTestRouteTransitionDuration = Duration(milliseconds: 150);
   const kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
   const kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
@@ -93,6 +68,7 @@ void main() {
           switch (settings.name) {
             case '/':
               return TestRoute<void>(
+                transitionDuration: kTestRouteTransitionDuration,
                 settings: settings,
                 child: Builder(
                   key: insideKey,
@@ -116,11 +92,23 @@ void main() {
                 ),
               );
             case '/2':
-              return TestRoute<void>(settings: settings, child: const Text('E'));
+              return TestRoute<void>(
+                transitionDuration: kTestRouteTransitionDuration,
+                settings: settings,
+                child: const Text('E'),
+              );
             case '/3':
-              return TestRoute<void>(settings: settings, child: const Text('F'));
+              return TestRoute<void>(
+                transitionDuration: kTestRouteTransitionDuration,
+                settings: settings,
+                child: const Text('F'),
+              );
             case '/4':
-              return TestRoute<void>(settings: settings, child: const Text('G'));
+              return TestRoute<void>(
+                transitionDuration: kTestRouteTransitionDuration,
+                settings: settings,
+                child: const Text('G'),
+              );
           }
           return null;
         },
@@ -208,8 +196,13 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
-          '/' => TestRoute<void>(settings: settings, child: const Text('A')),
+          '/' => TestRoute<void>(
+            transitionDuration: kTestRouteTransitionDuration,
+            settings: settings,
+            child: const Text('A'),
+          ),
           '/1' => TestRoute<void>(
+            transitionDuration: kTestRouteTransitionDuration,
             settings: settings,
             barrierColor: const Color(0xFFFFFF00),
             child: const Text('B'),
