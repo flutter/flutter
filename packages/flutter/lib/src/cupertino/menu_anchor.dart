@@ -1997,7 +1997,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
             : MouseCursor.defer;
       });
 
-  // Obtained from the iOS 18.5 simulator debug view.
+  // Measured from the iOS 18.5 simulator debug view.
   static const Color _defaultTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
@@ -2016,7 +2016,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
-  // Obtained from the iOS 18.5 simulator debug view.
+  // Measured from the iOS 18.5 simulator debug view.
   static const int _defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
