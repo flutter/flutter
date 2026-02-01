@@ -130,7 +130,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/editable_text_shortcuts_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
-    'packages/flutter/test/widgets/obscured_animated_image_test.dart',
     'packages/flutter/test/widgets/inherited_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
