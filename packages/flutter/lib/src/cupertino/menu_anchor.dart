@@ -1575,7 +1575,11 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
   }
 }
 
-/// A horizontal divider used to separate [CupertinoMenuEntry]s.
+/// A horizontal divider placed between each menu item in a
+/// [CupertinoMenuAnchor] on iOS 18 and before.
+///
+/// To create a menu item that does not show an automatic divider, implement
+/// [CupertinoMenuEntry] and return true from [CupertinoMenuEntry.isDivider].
 ///
 /// The default thickness of the divider is 1 physical pixel.
 class _CupertinoMenuImplicitDivider extends StatelessWidget {
