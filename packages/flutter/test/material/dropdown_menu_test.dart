@@ -5937,7 +5937,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(controller.text, 'Item 0');
     });
-  
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/180121.
   testWidgets('Allow null entry to clear selection', (WidgetTester tester) async {
     final controller = TextEditingController();
