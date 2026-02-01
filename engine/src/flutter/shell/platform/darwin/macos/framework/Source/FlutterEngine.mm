@@ -29,8 +29,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 
 #import <CoreVideo/CoreVideo.h>
@@ -1425,7 +1425,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                                         details:nil]);
     }
 
-    NSArray<FlutterSurface*>* frontSurfaces = viewController.flutterView.surfaceManager.frontSurfaces;
+    NSArray<FlutterSurface*>* frontSurfaces =
+        viewController.flutterView.surfaceManager.frontSurfaces;
     if (frontSurfaces.count == 0) {
       return result([FlutterError errorWithCode:@"failure"
                                         message:@"No front surfaces."
@@ -1466,8 +1467,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSMutableData* packedData = [NSMutableData dataWithLength:packedBytesPerRow * height];
     uint8_t* dest = (uint8_t*)packedData.mutableBytes;
     for (size_t row = 0; row < height; row++) {
-      memcpy(dest + row * packedBytesPerRow,
-             (uint8_t*)baseAddress + row * bytesPerRow,
+      memcpy(dest + row * packedBytesPerRow, (uint8_t*)baseAddress + row * bytesPerRow,
              packedBytesPerRow);
     }
 

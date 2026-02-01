@@ -154,8 +154,8 @@ enum Setup {
 }
 
 void run(Setup setup) {
-  // Use UniqueKey to force fresh State on each run (needed for integration tests
-  // where runApp is called multiple times with different setups).
+  // Use UniqueKey to force fresh State on each run. Needed for integration
+  // tests where runApp is called multiple times with different setups.
   runApp(MyApp(setup, key: UniqueKey()));
 }
 

@@ -13,7 +13,7 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:wide_gamut_test/main.dart' as app;
 
-// Half-float has ~0.001 step size near 1.0, so 0.002 catches any real error.
+/// Half-float has ~0.001 step size near 1.0, so 0.002 catches any real error.
 final double _defaultEpsilon = 0.002;
 
 double _decodeHalf(int x) {
@@ -200,7 +200,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
-      // Gradients need larger epsilon due to pixel sampling between gradient stops
+
+      // Gradients need larger epsilon due to pixel sampling between gradient stops.
       expect(result, _HasColor(_deepRed, epsilon: 0.02));
     });
 
@@ -225,7 +226,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
-      // Sweep gradient endpoint may not be sampled exactly at a pixel center
+      // Sweep gradient endpoint may not be sampled exactly at a pixel center.
       expect(result, _HasColor(_deepRed, epsilon: 0.02));
     });
   });

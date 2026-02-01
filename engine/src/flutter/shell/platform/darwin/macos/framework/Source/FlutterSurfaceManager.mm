@@ -170,7 +170,9 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (FlutterSurface*)surfaceForSize:(CGSize)size {
   FlutterSurface* surface = [_backBufferCache removeSurfaceForSize:size];
   if (surface == nil) {
-    surface = [[FlutterSurface alloc] initWithSize:size device:_device enableWideGamut:_enableWideGamut];
+    surface = [[FlutterSurface alloc] initWithSize:size
+                                            device:_device
+                                   enableWideGamut:_enableWideGamut];
   }
   return surface;
 }

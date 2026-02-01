@@ -272,16 +272,14 @@ FLUTTER_ASSERT_ARC
 
 - (void)testOverlayViewWideGamutSetsRGBA16Float {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0
-                                            pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatRGBA16Float];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
   XCTAssertEqual(layer.pixelFormat, MTLPixelFormatRGBA16Float);
 }
 
 - (void)testOverlayViewWideGamutSetsExtendedSRGBColorSpace {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0
-                                            pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatRGBA16Float];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
   CGColorSpaceRef colorSpace = layer.colorspace;
   XCTAssertNotNil((__bridge id)colorSpace);
@@ -292,24 +290,21 @@ FLUTTER_ASSERT_ARC
 
 - (void)testOverlayViewStandardGamutKeepsBGRA8Unorm {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0
-                                            pixelFormat:MTLPixelFormatBGRA8Unorm];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
   XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA8Unorm);
 }
 
 - (void)testOverlayViewStandardGamutDoesNotSetExtendedColorSpace {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0
-                                            pixelFormat:MTLPixelFormatBGRA8Unorm];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA8Unorm];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
   XCTAssertNil((__bridge id)layer.colorspace);
 }
 
 - (void)testOverlayViewContentsScaleIsSet {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:3.0
-                                            pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatRGBA16Float];
   XCTAssertEqual(overlay.layer.contentsScale, 3.0);
   XCTAssertEqual(overlay.layer.rasterizationScale, 3.0);
 }

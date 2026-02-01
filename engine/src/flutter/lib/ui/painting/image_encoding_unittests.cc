@@ -544,8 +544,8 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageF16) {
 TEST(ImageEncodingImpellerTest, PngEncodingF16) {
   int width = 100;
   int height = 100;
-  SkImageInfo info = SkImageInfo::Make(
-      width, height, kRGBA_F16_SkColorType, kUnpremul_SkAlphaType);
+  SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_F16_SkColorType,
+                                       kUnpremul_SkAlphaType);
 
   auto surface = SkSurfaces::Raster(info);
   SkCanvas* canvas = surface->getCanvas();

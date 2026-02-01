@@ -21,8 +21,7 @@ static BOOL DoesHardwareSupportWideGamut() {
     // Apple2 covers Apple Silicon Macs (M1+).
     // Mac2 covers Intel Macs with AMD GPUs that support BGRA10_XR.
     // Mac1 does not support wide gamut pixel formats.
-    result = [device supportsFamily:MTLGPUFamilyApple2] ||
-             [device supportsFamily:MTLGPUFamilyMac2];
+    result = [device supportsFamily:MTLGPUFamilyApple2] || [device supportsFamily:MTLGPUFamilyMac2];
   });
   return result;
 }

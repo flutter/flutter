@@ -40,8 +40,7 @@
 
 namespace flutter::testing {
 
-static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView,
-                                                    BOOL enableWideGamut = NO) {
+static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView, BOOL enableWideGamut = NO) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   CALayer* layer = reinterpret_cast<CALayer*>(testView.layer);
@@ -327,8 +326,7 @@ TEST(FlutterSurfaceManager, WideGamutLayerHasCorrectContentsFormat) {
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
 
   // Verify containing layer has correct contentsFormat.
-  EXPECT_TRUE(
-      [testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
 
   // Present a surface and verify the sublayer also has correct contentsFormat.
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
@@ -348,7 +346,10 @@ TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectColorSpace) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   IOSurfaceRef ioSurface = surface.ioSurface;
   CFTypeRef colorSpace = IOSurfaceCopyValue(ioSurface, kIOSurfaceColorSpace);
-  ASSERT_NE(colorSpace, nullptr);
+  if (colorSpace == nullptr) {
+    GTEST_FAIL() << "IOSurfaceCopyValue returned nullptr for kIOSurfaceColorSpace";
+    return;
+  }
   EXPECT_TRUE(CFEqual(colorSpace, kCGColorSpaceExtendedSRGB));
   CFRelease(colorSpace);
 }
@@ -360,7 +361,10 @@ TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectColorSpace) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   IOSurfaceRef ioSurface = surface.ioSurface;
   CFTypeRef colorSpace = IOSurfaceCopyValue(ioSurface, kIOSurfaceColorSpace);
-  ASSERT_NE(colorSpace, nullptr);
+  if (colorSpace == nullptr) {
+    GTEST_FAIL() << "IOSurfaceCopyValue returned nullptr for kIOSurfaceColorSpace";
+    return;
+  }
   EXPECT_TRUE(CFEqual(colorSpace, kCGColorSpaceSRGB));
   CFRelease(colorSpace);
 }
@@ -410,8 +414,7 @@ TEST(FlutterSurfaceManager, StandardGamutLayerDoesNotSetContentsFormat) {
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
 
   // Containing layer should not have RGBA16Float contents format.
-  EXPECT_FALSE(
-      [testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_FALSE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
 
   // Present a surface and verify sublayers also don't have RGBA16Float.
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
@@ -488,8 +491,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
   [surfaceManager setEnableWideGamut:YES];
 
   // Verify containing layer format was updated.
-  EXPECT_TRUE(
-      [testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
 
   // Verify cache was flushed.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
@@ -518,8 +520,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromWideToStandardGamut) {
   [surfaceManager setEnableWideGamut:NO];
 
   // Verify containing layer format was updated.
-  EXPECT_TRUE(
-      [testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA8Uint]);
+  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA8Uint]);
 
   // Verify cache was flushed.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);

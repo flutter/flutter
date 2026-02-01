@@ -30,10 +30,10 @@ TEST(FlutterView, ShouldInheritContentsScaleReturnsYes) {
   id<MTLCommandQueue> queue = [device newCommandQueue];
   TestFlutterViewDelegate* delegate = [[TestFlutterViewDelegate alloc] init];
   FlutterView* view = [[FlutterView alloc] initWithMTLDevice:device
-                                                 commandQueue:queue
-                                                     delegate:delegate
-                                               viewIdentifier:kImplicitViewId
-                                              enableWideGamut:NO];
+                                                commandQueue:queue
+                                                    delegate:delegate
+                                              viewIdentifier:kImplicitViewId
+                                             enableWideGamut:NO];
   EXPECT_EQ([view layer:view.layer shouldInheritContentsScale:3.0 fromWindow:view.window], YES);
 }
 
