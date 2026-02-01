@@ -1,13 +1,16 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+//
+/// @docImport 'package:flutter/material.dart';
+library;
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -128,13 +131,13 @@ enum _CupertinoMenuWidth {
   // Determines the appropriate menu width based on screen width and
   // accessibility mode.
   //
-  // A screen width threshold of 768 points is used to differentiate
-  // between mobile and tablet devices.
+  // A screen width threshold of 768 points is used to differentiate between
+  // mobile and tablet devices.
   factory _CupertinoMenuWidth.fromScreenWidth({
     required double screenWidth,
     required bool isAccessibilityModeEnabled,
   }) {
-    final bool isMobile = screenWidth < _kMenuWidthMobileWidthThreshold;
+    final bool isMobile = screenWidth < _kTabletWidthThreshold;
     return switch ((isMobile, isAccessibilityModeEnabled)) {
       (false, false) => _CupertinoMenuWidth.iPadOS,
       (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
@@ -143,8 +146,8 @@ enum _CupertinoMenuWidth {
     };
   }
 
-  static const double _kMenuWidthMobileWidthThreshold = 768;
   final double points;
+  static const double _kTabletWidthThreshold = 768.0;
 }
 
 // TODO(davidhicks980): DynamicType should be moved to text_theme.dart when all
@@ -158,95 +161,79 @@ enum _CupertinoMenuWidth {
 // Note: SF Display doesn't have tracking values on HID guidelines, so the
 // tracking values for SF Pro were used
 enum _DynamicTypeStyle {
-  body(
-    xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
-    small: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
-    medium: TextStyle(fontSize: 16, height: 21 / 16, letterSpacing: -0.31, fontFamily: _kBodyFont),
-    large: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
-    xLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.44, fontFamily: _kBodyFont),
-    xxLarge: TextStyle(fontSize: 21, height: 26 / 21, letterSpacing: -0.36, fontFamily: _kBodyFont),
-    xxxLarge: TextStyle(
-      fontSize: 23,
-      height: 29 / 23,
-      letterSpacing: -0.10,
-      fontFamily: _kDisplayFont,
-    ),
-    ax1: TextStyle(fontSize: 28, height: 34 / 28, letterSpacing: 0.38, fontFamily: _kDisplayFont),
-    ax2: TextStyle(fontSize: 33, height: 40 / 33, letterSpacing: 0.40, fontFamily: _kDisplayFont),
-    ax3: TextStyle(fontSize: 40, height: 48 / 40, letterSpacing: 0.37, fontFamily: _kDisplayFont),
-    ax4: TextStyle(fontSize: 47, height: 56 / 47, letterSpacing: 0.37, fontFamily: _kDisplayFont),
-    ax5: TextStyle(fontSize: 53, height: 62 / 53, letterSpacing: 0.31, fontFamily: _kDisplayFont),
-  ),
-  subhead(
-    xSmall: TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: 0, fontFamily: _kBodyFont),
-    small: TextStyle(fontSize: 13, height: 18 / 13, letterSpacing: -0.08, fontFamily: _kBodyFont),
-    medium: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
-    large: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
-    xLarge: TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
-    xxLarge: TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.45, fontFamily: _kBodyFont),
-    xxxLarge: TextStyle(
-      fontSize: 21,
-      height: 28 / 21,
-      letterSpacing: -0.36,
-      fontFamily: _kBodyFont,
-    ),
-    ax1: TextStyle(fontSize: 25, height: 31 / 25, letterSpacing: 0.15, fontFamily: _kDisplayFont),
-    ax2: TextStyle(fontSize: 30, height: 37 / 30, letterSpacing: 0.40, fontFamily: _kDisplayFont),
-    ax3: TextStyle(fontSize: 36, height: 43 / 36, letterSpacing: 0.37, fontFamily: _kDisplayFont),
-    ax4: TextStyle(fontSize: 42, height: 50 / 42, letterSpacing: 0.37, fontFamily: _kDisplayFont),
-    ax5: TextStyle(fontSize: 49, height: 58 / 49, letterSpacing: 0.33, fontFamily: _kDisplayFont),
-  );
+  body(<TextStyle>[
+    TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 16, height: 21 / 16, letterSpacing: -0.31, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.44, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 21, height: 26 / 21, letterSpacing: -0.36, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 23, height: 29 / 23, letterSpacing: -0.10, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 28, height: 34 / 28, letterSpacing: 0.38, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 33, height: 40 / 33, letterSpacing: 0.40, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 40, height: 48 / 40, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 47, height: 56 / 47, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 53, height: 62 / 53, letterSpacing: 0.31, fontFamily: _kDisplayFont),
+  ]),
 
-  const _DynamicTypeStyle({
-    required this.xSmall,
-    required this.small,
-    required this.medium,
-    required this.large,
-    required this.xLarge,
-    required this.xxLarge,
-    required this.xxxLarge,
-    required this.ax1,
-    required this.ax2,
-    required this.ax3,
-    required this.ax4,
-    required this.ax5,
-  });
+  subhead(<TextStyle>[
+    TextStyle(fontSize: 12, height: 16 / 12, letterSpacing: 0, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 13, height: 18 / 13, letterSpacing: -0.08, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 17, height: 22 / 17, letterSpacing: -0.43, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 19, height: 24 / 19, letterSpacing: -0.45, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 21, height: 28 / 21, letterSpacing: -0.36, fontFamily: _kBodyFont),
+    TextStyle(fontSize: 25, height: 31 / 25, letterSpacing: 0.15, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 30, height: 37 / 30, letterSpacing: 0.40, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 36, height: 43 / 36, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 42, height: 50 / 42, letterSpacing: 0.37, fontFamily: _kDisplayFont),
+    TextStyle(fontSize: 49, height: 58 / 49, letterSpacing: 0.33, fontFamily: _kDisplayFont),
+  ]);
 
-  final TextStyle xSmall;
-  final TextStyle small;
-  final TextStyle medium;
-  final TextStyle large;
-  final TextStyle xLarge;
-  final TextStyle xxLarge;
-  final TextStyle xxxLarge;
-  final TextStyle ax1;
-  final TextStyle ax2;
-  final TextStyle ax3;
-  final TextStyle ax4;
-  final TextStyle ax5;
+  const _DynamicTypeStyle(this.styles);
 
-  double _interpolateUnits(double units, int minimum, int maximum) {
-    final double t = (units - minimum) / (maximum - minimum);
-    return ui.lerpDouble(0, 1, t)!;
-  }
+  // A list of text style for iOS's various scales, which are: xSmall, small,
+  // medium, large, xLarge, xxLarge, xxxLarge, ax1, ax2, ax3, ax4, ax5.
+  final List<TextStyle> styles;
 
   TextStyle resolveTextStyle(TextScaler textScaler) {
+    // Assert the length here instead of in the constructor since .length isn't
+    // accessible there.
+    assert(styles.length == _kScaleCount);
     final double units = _normalizeTextScale(textScaler);
-    return switch (units) {
-      <= -3 => xSmall,
-      < -2 => TextStyle.lerp(xSmall, small, _interpolateUnits(units, -3, -2))!,
-      < -1 => TextStyle.lerp(small, medium, _interpolateUnits(units, -2, -1))!,
-      < 0 => TextStyle.lerp(medium, large, _interpolateUnits(units, -1, 0))!,
-      < 2 => TextStyle.lerp(large, xLarge, _interpolateUnits(units, 0, 2))!,
-      < 4 => TextStyle.lerp(xLarge, xxLarge, _interpolateUnits(units, 2, 4))!,
-      < 6 => TextStyle.lerp(xxLarge, xxxLarge, _interpolateUnits(units, 4, 6))!,
-      < 11 => TextStyle.lerp(xxxLarge, ax1, _interpolateUnits(units, 6, 11))!,
-      < 16 => TextStyle.lerp(ax1, ax2, _interpolateUnits(units, 11, 16))!,
-      < 23 => TextStyle.lerp(ax2, ax3, _interpolateUnits(units, 16, 23))!,
-      < 30 => TextStyle.lerp(ax3, ax4, _interpolateUnits(units, 23, 30))!,
-      < 36 => TextStyle.lerp(ax4, ax5, _interpolateUnits(units, 30, 36))!,
-      _ => ax5,
-    };
+    for (var i = 0; i < styles.length; i++) {
+      final int bodyUnits = _normalizedBodyScales[i];
+      if (units > bodyUnits) {
+        continue;
+      }
+
+      if (units == bodyUnits) {
+        return styles[i];
+      }
+
+      if (i == 0) {
+        return styles.first;
+      }
+
+      return TextStyle.lerp(
+        styles[i - 1],
+        styles[i],
+        _interpolateUnits(units, _normalizedBodyScales[i - 1], bodyUnits),
+      )!;
+    }
+
+    return styles.last;
+  }
+
+  static const int _kScaleCount = 12;
+  static final List<int> _normalizedBodyScales = UnmodifiableListView<int>(<int>[
+    for (final TextStyle style in _DynamicTypeStyle.body.styles)
+      (style.fontSize! - _kCupertinoMobileBaseFontSize).toInt(),
+  ]);
+  static double _interpolateUnits(double units, int minimum, int maximum) {
+    final double t = (units - minimum) / (maximum - minimum);
+    return ui.lerpDouble(0, 1, t)!;
   }
 }
 
@@ -311,11 +298,9 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// with an alignment.
 ///
 /// The [CupertinoMenuAnchor] is typically used to wrap a button that opens a
-/// menu when pressed. The menu position is determined by the [alignment] of the
-/// anchor attachment point and the [menuAlignment] of the menu attachment
-/// point. The [alignmentOffset] can be used to move the menu position relative
-/// to the alignment point. If the menu is opened with an explicit position,
-/// then the [alignment] and [alignmentOffset] are ignored.
+/// menu when pressed. The menu is displayed as a popup overlay that is positioned
+/// relative to the anchor rectangle, and will automatically reposition itself to remain
+/// fully visible within the screen bounds.
 ///
 /// A [MenuController] must be used to open and close the menu, and can be
 /// obtained from the [builder] callback, or provided to [controller] parameter.
@@ -330,7 +315,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// ## Usage
 /// {@tool snippet}
 ///
-/// This sample code shows a [CupertinoMenuAnchor] containing one
+/// This sample creates a [CupertinoMenuAnchor] containing one
 /// [CupertinoMenuItem]. The menu item prints `Item 1 pressed!` when pressed.
 ///
 /// ```dart
@@ -382,9 +367,6 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.onOpen,
     this.onClose,
     this.onAnimationStatusChange,
-    this.alignment,
-    this.alignmentOffset,
-    this.menuAlignment,
     this.constraints,
     this.constrainCrossAxis = false,
     this.consumeOutsideTaps = false,
@@ -402,43 +384,59 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// other widgets.
   final MenuController? controller;
 
-  /// A callback invoked when the menu is opened while having an
-  /// [AnimationStatus] of [AnimationStatus.dismissed] or [AnimationStatus.reverse].
+  /// A callback that is invoked when the menu begins opening.
+  ///
+  /// Defaults to null.
   final VoidCallback? onOpen;
 
-  /// A callback invoked when the menu is closed while having an
-  /// [AnimationStatus] of [AnimationStatus.complete] or [AnimationStatus.forward].
+  /// A callback that is invoked when the menu finishes closing.
+  ///
+  /// Defaults to null.
   final VoidCallback? onClose;
 
-  /// A callback that is invoked when the status of the menu changes.
+  /// An optional callback that is invoked when the [AnimationStatus] of the
+  /// menu changes during open and close animations.
   ///
-  /// Unlike [onOpen] and [onClose], this callback is invoked for all
-  /// [AnimationStatus] changes.
+  /// This callback provides a way to determine when the menu is opening or
+  /// closing. This is necessary because the [MenuController.isOpen] property
+  /// remains true throughout the opening, opened, and closing phases, and
+  /// therefore cannot be used on its own to determine the current animation
+  /// direction.
+  ///
+  /// {@tool snippet}
+  /// This example shows how to use the [onAnimationStatusChanged] callback to
+  /// create a [MenuAnchor] that will toggle between opening and closing.
+  ///
+  /// ```dart
+  /// CupertinoMenuAnchor(
+  ///   onAnimationStatusChanged: (AnimationStatus status) {
+  ///     // Typically, animationStatus would be stored in a State object.
+  ///     animationStatus = status;
+  ///   },
+  ///   menuChildren: <Widget>[
+  ///     CupertinoMenuItem(
+  ///       onPressed: () {},
+  ///       child: const Text('Menu Item')
+  ///     ),
+  ///   ],
+  ///   builder: (BuildContext context, MenuController controller, Widget? child) {
+  ///     return CupertinoButton(
+  ///       onPressed: () {
+  ///         if (animationStatus.isForwardOrCompleted) {
+  ///           controller.close();
+  ///         } else {
+  ///           controller.open();
+  ///         }
+  ///       },
+  ///       child: const Icon(Icons.more_vert),
+  ///     );
+  ///   },
+  /// );
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Defaults to null.
   final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChange;
-
-  /// The point on the anchor surface that attaches to the menu.
-  ///
-  /// This value is ignored if the menu is opened with an explicit position.
-  final AlignmentGeometry? alignment;
-
-  /// The offset of the menu relative to the alignment origin determined by
-  /// [alignment] and the ambient [Directionality].
-  ///
-  /// Use this for adjustments of the menu placement.
-  ///
-  /// Increasing [Offset.dy] values of [alignmentOffset] move the menu position
-  /// down.
-  ///
-  /// If the [alignment] is an [AlignmentDirectional] and the text direction is
-  /// [TextDirection.rtl], a larger [Offset.dx] component of [alignmentOffset]
-  /// moves the menu position to the left. Otherwise, a larger [Offset.dx] moves
-  /// the menu position to the right.
-  ///
-  /// This value is ignored if the menu is opened with an explicit position.
-  final ui.Offset? alignmentOffset;
-
-  /// The point on the menu surface that attaches to the anchor.
-  final AlignmentGeometry? menuAlignment;
 
   /// The constraints to apply to the menu scrollable.
   final BoxConstraints? constraints;
@@ -505,7 +503,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// the menu width will shrink to fit within the overlay bounds minus the
   /// [overlayPadding].
   ///
-  /// Defaults to EdgeInsets.all(8).
+  /// Defaults to `EdgeInsets.all(8)`.
   final EdgeInsetsGeometry overlayPadding;
 
   /// A list of menu items to display in the menu.
@@ -560,9 +558,6 @@ class CupertinoMenuAnchor extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<FocusNode?>('childFocusNode', childFocusNode));
     properties.add(DiagnosticsProperty<BoxConstraints?>('constraints', constraints));
-    properties.add(DiagnosticsProperty<AlignmentGeometry?>('menuAlignment', menuAlignment));
-    properties.add(DiagnosticsProperty<AlignmentGeometry?>('alignment', alignment));
-    properties.add(DiagnosticsProperty<Offset?>('alignmentOffset', alignmentOffset));
     properties.add(
       FlagProperty(
         'constrainCrossAxis',
@@ -610,8 +605,8 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   late final AnimationController _animationController;
   final FocusScopeNode _menuScopeNode = FocusScopeNode(debugLabel: 'Menu Scope');
   final ValueNotifier<double> _swipeDistanceNotifier = ValueNotifier<double>(0);
-
   bool? _hasLeadingWidget;
+
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
   bool get isOpening => _animationStatus.isForwardOrCompleted;
@@ -697,8 +692,6 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   }
 
   void _handleAnchorSwipeStart() {
-    // If widget.anchorPressActivationDuration becomes zero while a press is
-    // active, do not open the menu.
     if (isOpening || !widget.enableLongPressToOpen) {
       return;
     }
@@ -752,17 +745,14 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
             constrainCrossAxis: widget.constrainCrossAxis,
             visibilityAnimation: _animationController.view,
             swipeDistanceListenable: _swipeDistanceNotifier,
-            alignmentOffset: widget.alignmentOffset ?? Offset.zero,
             constraints: widget.constraints,
             consumeOutsideTaps: widget.consumeOutsideTaps,
-            alignment: widget.alignment,
-            menuAlignment: widget.menuAlignment,
             overlaySize: info.overlaySize,
             anchorRect: info.anchorRect,
             anchorPosition: info.position,
             tapRegionGroupId: info.tapRegionGroupId,
             focusScopeNode: _menuScopeNode,
-            overlayInsets: widget.overlayPadding,
+            overlayPadding: widget.overlayPadding,
             children: widget.menuChildren,
           ),
         ),
@@ -819,13 +809,10 @@ class _MenuOverlay extends StatefulWidget {
     required this.constrainCrossAxis,
     required this.constraints,
     required this.overlaySize,
-    required this.overlayInsets,
+    required this.overlayPadding,
     required this.anchorRect,
     required this.anchorPosition,
     required this.tapRegionGroupId,
-    required this.alignmentOffset,
-    required this.alignment,
-    required this.menuAlignment,
     required this.visibilityAnimation,
     required this.swipeDistanceListenable,
   });
@@ -836,13 +823,10 @@ class _MenuOverlay extends StatefulWidget {
   final bool constrainCrossAxis;
   final BoxConstraints? constraints;
   final Size overlaySize;
-  final EdgeInsetsGeometry overlayInsets;
+  final EdgeInsetsGeometry overlayPadding;
   final Rect anchorRect;
   final Offset? anchorPosition;
   final Object tapRegionGroupId;
-  final Offset alignmentOffset;
-  final AlignmentGeometry? alignment;
-  final AlignmentGeometry? menuAlignment;
   final Animation<double> visibilityAnimation;
   final ValueListenable<double> swipeDistanceListenable;
 
@@ -918,9 +902,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
     if (oldWidget.anchorRect != widget.anchorRect ||
         oldWidget.anchorPosition != widget.anchorPosition ||
-        oldWidget.alignmentOffset != widget.alignmentOffset ||
-        oldWidget.alignment != widget.alignment ||
-        oldWidget.menuAlignment != widget.menuAlignment ||
         oldWidget.overlaySize != widget.overlaySize) {
       _resolvePosition();
     }
@@ -977,7 +958,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
         continue;
       }
 
-      children.add(const _CupertinoMenuDivider());
+      children.add(const _CupertinoMenuImplicitDivider());
     }
 
     _children = children;
@@ -1034,47 +1015,28 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
     // Slightly favor placing the menu below the anchor when it is near the vertical
     // center of the screen.
-    final double defaultVerticalAlignment = yMidpointRatio < 0.55 ? 1 : -1;
-    final double defaultHorizontalAlignment = switch (xMidpointRatio) {
+    final double dy = yMidpointRatio < 0.55 ? 1 : -1;
+    final double dx = switch (xMidpointRatio) {
       < 0.4 => -1.0, // Left
       > 0.6 => 1.0, // Right
       _ => 0.0, // Center
     };
 
-    _menuAlignment =
-        widget.menuAlignment?.resolve(_textDirection) ??
-        Alignment(defaultHorizontalAlignment, -defaultVerticalAlignment);
-
-    _attachmentPoint = widget.anchorRect.topLeft;
+    _menuAlignment = Alignment(dx, -dy);
+    final Offset transformOrigin;
     if (widget.anchorPosition != null) {
-      // If an anchorPosition is provided, then the alignment and the
-      // alignmentOffset are ignored. The anchorPosition already provides the
-      // exact point on the anchor surface that attaches to the menu, so no
-      // further adjustment is needed.
-      _attachmentPoint += widget.anchorPosition!;
+      _attachmentPoint = widget.anchorRect.topLeft + widget.anchorPosition!;
+      transformOrigin = _attachmentPoint;
     } else {
-      final Alignment anchorAlignment =
-          widget.alignment?.resolve(_textDirection) ??
-          Alignment(defaultHorizontalAlignment, defaultVerticalAlignment);
-
-      _attachmentPoint += anchorAlignment.alongSize(widget.anchorRect.size);
-      if (widget.alignment is AlignmentDirectional) {
-        _attachmentPoint += switch (_textDirection!) {
-          ui.TextDirection.ltr => widget.alignmentOffset,
-          ui.TextDirection.rtl => Offset(-widget.alignmentOffset.dx, widget.alignmentOffset.dy),
-        };
-      } else {
-        _attachmentPoint += widget.alignmentOffset;
-      }
+      _attachmentPoint = Alignment(dx, dy).withinRect(widget.anchorRect);
+      transformOrigin = Alignment(0, dy).withinRect(widget.anchorRect);
     }
 
-    final double yAttachmentPointRatio = _attachmentPoint.dy / widget.overlaySize.height;
-    final double xAttachmentPointRatio = _attachmentPoint.dx / widget.overlaySize.width;
-    // The alignment of the menu growth point relative to the screen.
-    _attachmentPointAlignment = Alignment(
-      xAttachmentPointRatio * 2 - 1,
-      yAttachmentPointRatio * 2 - 1,
-    );
+    final double xOriginRatio = transformOrigin.dx / widget.overlaySize.width;
+    final double yOriginRatio = transformOrigin.dy / widget.overlaySize.height;
+
+    // The alignment of the menu growth point relative to the overlay.
+    _attachmentPointAlignment = Alignment(xOriginRatio * 2 - 1, yOriginRatio * 2 - 1);
   }
 
   void _handleOutsideTap(PointerDownEvent event) {
@@ -1175,24 +1137,22 @@ class _MenuOverlayState extends State<_MenuOverlay>
               descendantsAreTraversable: true,
               canRequestFocus: true,
               // A custom shadow painter is used to make the underlying colors
-              // appear more vibrant. This is achieved by removing the shadow
-              // underlying the popup surface using a save layer combined with a
-              // clear blend mode.
+              // appear more vibrant.
               child: CustomPaint(
                 painter: _ShadowPainter(
                   brightness: CupertinoTheme.maybeBrightnessOf(context) ?? ui.Brightness.light,
                   repaint: _fadeAnimation,
                 ),
+                // The FadeTransition widget needs to wrap Semantics so
+                // that the semantics widget senses that the menu is the
+                // same opacity as the menu items. Otherwise, "a menu
+                // cannot be empty" error is thrown due to the menu items
+                // being transparent while the menu semantics are still
+                // present.
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   alwaysIncludeSemantics: true,
                   child: CupertinoPopupSurface(
-                    // The FadeTransition widget needs to wrap Semantics so
-                    // that the semantics widget senses that the menu is the
-                    // same opacity as the menu items. Otherwise, "a menu
-                    // cannot be empty" error is thrown due to the menu items
-                    // being transparent while the menu semantics are still
-                    // present.
                     child: AnimatedBuilder(
                       animation: _sizeAnimation,
                       child: Semantics(
@@ -1257,7 +1217,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
                 anchorRect: anchorRect,
                 attachmentPoint: _attachmentPoint,
                 menuAlignment: _menuAlignment,
-                padding: widget.overlayInsets.resolve(_textDirection),
+                overlayPadding: widget.overlayPadding.resolve(_textDirection),
                 heightFactor: value,
                 avoidBounds: displayFeatures != null ? avoidBounds(displayFeatures) : <Rect>{},
               ),
@@ -1283,7 +1243,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
 
 class _ShadowPainter extends CustomPainter {
   const _ShadowPainter({required this.brightness, required this.repaint}) : super(repaint: repaint);
-
   static const Radius radius = Radius.circular(13);
   static const double lightShadowOpacity = 0.12;
   static const double darkShadowOpacity = 0.24;
@@ -1295,23 +1254,28 @@ class _ShadowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     assert(shadowOpacity >= 0 && shadowOpacity <= 1);
     final center = Offset(size.width / 2, size.height / 2);
-    final menuRect = RSuperellipse.fromRectAndRadius(
-      Rect.fromCenter(center: center, width: size.width, height: size.height),
-      radius,
-    );
+    final rect = Rect.fromCenter(center: center, width: size.width, height: size.height);
+    final roundedRect = RSuperellipse.fromRectAndRadius(rect, radius);
     final double opacityMultiplier = switch (brightness) {
       ui.Brightness.light => lightShadowOpacity,
       ui.Brightness.dark => darkShadowOpacity,
     };
+
+    final double blurSigma = shadowOpacity * 50;
     final shadowPaint = Paint()
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowOpacity * 50)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma)
       ..color = ui.Color.fromRGBO(0, 0, 10, shadowOpacity * shadowOpacity * opacityMultiplier);
-    final clearPaint = Paint()..blendMode = BlendMode.clear;
+
+    final maskPath = Path()
+      ..fillType = ui.PathFillType.evenOdd
+      // Extra large rect to ensure the shadow is fully visible.
+      ..addRect(rect.inflate(200))
+      ..addRRect(RRect.fromRectAndRadius(rect, radius));
 
     canvas
-      ..saveLayer(Rect.largest, Paint())
-      ..drawRSuperellipse(menuRect.inflate(50), shadowPaint)
-      ..drawRSuperellipse(menuRect, clearPaint)
+      ..save()
+      ..clipPath(maskPath)
+      ..drawRSuperellipse(roundedRect.inflate(50), shadowPaint)
       ..restore();
   }
 
@@ -1327,7 +1291,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MenuLayoutDelegate({
     required this.anchorRect,
     required this.menuAlignment,
-    required this.padding,
+    required this.overlayPadding,
     required this.attachmentPoint,
     required this.heightFactor,
     required this.avoidBounds,
@@ -1345,7 +1309,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   // Unsafe bounds used when constraining and positioning the menu.
   //
   // Used to prevent the menu from being obstructed by system UI.
-  final EdgeInsets padding;
+  final EdgeInsets overlayPadding;
 
   // The factor by which to multiply the height of the child.
   final double heightFactor;
@@ -1356,7 +1320,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus padding.
-    return BoxConstraints.loose(constraints.biggest).deflate(padding);
+    return BoxConstraints.loose(constraints.biggest).deflate(overlayPadding);
   }
 
   @override
@@ -1386,16 +1350,16 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     double x = position.dx;
     double y = position.dy;
 
-    bool overLeftEdge(double x) => x < screen.left;
-    bool overRightEdge(double x) => x > screen.right - childSize.width;
-    bool overTopEdge(double y) => y < screen.top;
-    bool overBottomEdge(double y) => y > screen.bottom - childSize.height;
+    bool overLeftEdge(double x) => x < screen.left + overlayPadding.left;
+    bool overRightEdge(double x) => x > screen.right - childSize.width - overlayPadding.right;
+    bool overTopEdge(double y) => y < screen.top + overlayPadding.top;
+    bool overBottomEdge(double y) => y > screen.bottom - childSize.height - overlayPadding.bottom;
 
     // Layout horizontally first to determine if the menu can be placed on
     // either side of the anchor without overlapping.
     bool hasHorizontalAnchorOverlap = childSize.width >= screen.width;
     if (hasHorizontalAnchorOverlap) {
-      x = screen.left;
+      x = screen.left + overlayPadding.left;
     } else {
       if (overLeftEdge(x)) {
         // Flip the X position across the horizontal midpoint of the anchor so
@@ -1403,7 +1367,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
         final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
         hasHorizontalAnchorOverlap = overRightEdge(flipX);
         if (hasHorizontalAnchorOverlap || overLeftEdge(flipX)) {
-          x = screen.left;
+          x = screen.left + overlayPadding.left;
         } else {
           x = flipX;
         }
@@ -1413,7 +1377,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
         final double flipX = anchor.center.dx * 2 - position.dx - childSize.width;
         hasHorizontalAnchorOverlap = overLeftEdge(flipX);
         if (hasHorizontalAnchorOverlap || overRightEdge(flipX)) {
-          x = screen.right - childSize.width;
+          x = screen.right - childSize.width - overlayPadding.right;
         } else {
           x = flipX;
         }
@@ -1422,7 +1386,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
 
     if (childSize.height >= screen.height) {
       // Menu is too big to fit on screen. Fit as much as possible.
-      return Offset(x, screen.top);
+      return Offset(x, screen.top + overlayPadding.top);
     }
 
     // Behavior in this scenario could not be determined on iOS 18.5
@@ -1450,7 +1414,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
       // the menu is below the anchor.
       final double flipY = anchor.center.dy * 2 - position.dy - childSize.height;
       if (overTopEdge(flipY) || overBottomEdge(flipY)) {
-        y = screen.top;
+        y = screen.top + overlayPadding.top;
       } else {
         y = flipY;
       }
@@ -1459,7 +1423,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
       // the menu is above the anchor.
       final double flipY = anchor.center.dy * 2 - position.dy - childSize.height;
       if (overTopEdge(flipY) || overBottomEdge(flipY)) {
-        y = screen.bottom - childSize.height;
+        y = screen.bottom - childSize.height - overlayPadding.bottom;
       } else {
         y = flipY;
       }
@@ -1507,7 +1471,7 @@ class _MenuLayoutDelegate extends SingleChildLayoutDelegate {
     return menuAlignment != oldDelegate.menuAlignment ||
         attachmentPoint != oldDelegate.attachmentPoint ||
         anchorRect != oldDelegate.anchorRect ||
-        padding != oldDelegate.padding ||
+        overlayPadding != oldDelegate.overlayPadding ||
         heightFactor != oldDelegate.heightFactor ||
         !setEquals(avoidBounds, oldDelegate.avoidBounds);
   }
@@ -1611,17 +1575,14 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
   }
 }
 
-/// A horizontal divider used to separate [CupertinoMenuItem]s.
+/// A horizontal divider used to separate [CupertinoMenuEntry]s.
 ///
 /// The default thickness of the divider is 1 physical pixel.
-///
-// This is class may be made public in the future, but is currently private to
-// avoid API churn.
-class _CupertinoMenuDivider extends StatelessWidget {
-  /// Draws a [_CupertinoMenuDivider] below a [child].
-  const _CupertinoMenuDivider();
+class _CupertinoMenuImplicitDivider extends StatelessWidget {
+  /// Draws a [_CupertinoMenuImplicitDivider] below a [child].
+  const _CupertinoMenuImplicitDivider();
 
-  /// The default color applied to the [_CupertinoMenuDivider] with
+  /// The default color applied to the [_CupertinoMenuImplicitDivider] with
   /// [ui.BlendMode.overlay].
   ///
   /// On all platforms except web, this color is applied to the divider before
@@ -1640,7 +1601,7 @@ class _CupertinoMenuDivider extends StatelessWidget {
     darkColor: Color.fromRGBO(255, 255, 255, 0.25),
   );
 
-  /// The default color applied to the [_CupertinoMenuDivider], atop the
+  /// The default color applied to the [_CupertinoMenuImplicitDivider], atop the
   /// [overlayColor], with [BlendMode.srcOver].
   ///
   /// This color is used to make the divider more opaque.
@@ -2253,6 +2214,9 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   // Values were obtained from the iOS 18.5 simulator.
   static const double _defaultHorizontalWidth = 16;
 
+  // The leading and trailing widths scale roughly linearly with the normalized
+  // text scale once quantized, deviating by no more than 1 physical pixel. This
+  // was observed on iOS and iPadOS 18.5 simulators of various sizes.
   static const double _leadingWidthSlope = -311 / 1000;
   static const double _leadingWidthYIntercept = 10;
 
@@ -2278,16 +2242,12 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final BoxConstraints? _constraints;
 
-  // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
-  // Expected values deviate by no more than 1 physical pixel.
   double _resolveLeadingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
     final double value = _leadingWidthSlope * units + _leadingWidthYIntercept;
     return _roundToDivisible(value + lineHeight, to: 1 / pixelRatio);
   }
 
-  // Tested across all iOS dynamic type sizes on iOS and iPadOS 18.5 simulators.
-  // Expected values deviate by no more than 1 physical pixel.
   double _resolveTrailingWidth(TextScaler textScaler, double pixelRatio, double lineHeight) {
     final double units = _normalizeTextScale(textScaler);
     final double value = _trailingWidthSlope * units + _trailingWidthYIntercept;
