@@ -35,6 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
 // Indicates whether this engine has **ever** been manually registered to a scene.
 @property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
+// Indicates whether this engine is running in an extension context (e.g., notification service
+// extension) where the platform's CFRunLoop is not being actively pumped. When YES, the engine
+// will use a separate UI thread instead of merging with the platform thread.
+@property(nonatomic, assign) BOOL isRunningInExtension;
+
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 

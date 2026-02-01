@@ -119,6 +119,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, readonly, copy) NSString* labelPrefix;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
+@property(nonatomic, assign) BOOL isRunningInExtension;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
@@ -887,12 +888,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // Determine whether to use a merged platform/UI thread. We need a separate UI thread when:
   // - Impeller is disabled (merged thread only works with Impeller)
   // - merged_platform_ui_thread setting is not enabled
-  // - Running in headless mode (e.g., notification extensions) where the platform's
+  // - Running in an extension (e.g., notification service extension) where the platform's
   //   CFRunLoop is not being actively pumped
   const bool useMergedThread =
       settings.enable_impeller &&
       settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled &&
-      !self.allowHeadlessExecution;
+      !self.isRunningInExtension;
 
   NSString* threadLabel = [FlutterEngine generateThreadLabel:self.labelPrefix];
   _threadHost = std::make_shared<flutter::ThreadHost>();
