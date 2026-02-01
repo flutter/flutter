@@ -10,9 +10,9 @@
 library;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -516,7 +516,7 @@ void main() {
     Offset firstLocation, secondLocation;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -3370,7 +3370,7 @@ void main() {
   testWidgets('Drag and drop can contribute semantics', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           scrollDirection: Axis.horizontal,
           addSemanticIndexes: false,
