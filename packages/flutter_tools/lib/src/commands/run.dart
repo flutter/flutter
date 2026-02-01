@@ -285,6 +285,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   Future<DebuggingOptions> createDebuggingOptions({
     WebDevServerConfig? webDevServerConfig,
     String? webChromeBinary,
+    bool webNoLaunchChrome = false,
   }) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
@@ -315,6 +316,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         webCrossOriginIsolation: webCrossOriginIsolation,
         webChromeBinary: webChromeBinary,
+        webNoLaunchChrome: webNoLaunchChrome,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
@@ -369,6 +371,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         webChromeBinary: webChromeBinary,
+        webNoLaunchChrome: webNoLaunchChrome,
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
