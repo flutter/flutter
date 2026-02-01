@@ -2160,22 +2160,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
-    final controller = WidgetStatesController();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: ExpansionTile(title: const Text('Tile'), statesController: controller),
-        ),
-      ),
-    );
-
-    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
-    expect(listTile.statesController, controller);
-  });
-
-  testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
-    final controller = WidgetStatesController();
+    final WidgetStatesController controller = WidgetStatesController();
     addTearDown(() async {
       controller.dispose();
       await tester.pumpWidget(const SizedBox.shrink());
@@ -2191,5 +2176,18 @@ void main() {
 
     final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
     expect(listTile.statesController, controller);
+  });
+
+  testWidgets('ExpansionTile forwards null statesController to ListTile', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Tile'))),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 }
