@@ -275,7 +275,7 @@ abstract interface class CupertinoMenuEntry {
   /// Whether this menu item is a divider.
   ///
   /// When true, a divider will not be drawn above or below this menu item.
-  /// Otherwise, all adjacent menu items will have dividers drawn between them.
+  /// Otherwise, adjacent menu items will be separated by a divider.
   bool get isDivider;
 }
 
