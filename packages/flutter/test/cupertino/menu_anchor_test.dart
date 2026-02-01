@@ -4232,7 +4232,7 @@ void main() {
           final RenderParagraph paragraph = findDescendantParagraph(tester, find.text(longText))!;
           final double childLineHeight = lineHeight(_DynamicTypeStyle.body.ax1);
 
-          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(paragraph.maxLines, equals(100));
           expect(tester.getSize(find.text(longText)).height, closeTo(childLineHeight * 100, 1));
         });
 
@@ -4332,7 +4332,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final RenderParagraph paragraph = findDescendantParagraph(tester, find.byKey(Tag.a.key))!;
-          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultMaxLines));
+          expect(paragraph.maxLines, equals(2));
           expect(paragraph.size.height, closeTo(58, 1)); // 2 lines of text
           expect(tester.getSize(find.byType(CupertinoMenuItem)).height, closeTo(87, 1));
         });
@@ -4361,7 +4361,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final RenderParagraph paragraph = findDescendantParagraph(tester, find.byKey(Tag.a.key))!;
-          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(paragraph.maxLines, equals(100));
           expect(paragraph.size.height, closeTo(3400, 1)); // 100 lines of text
           expect(tester.getSize(find.byType(CupertinoMenuItem)).height, closeTo(3433, 1));
         });
@@ -5145,7 +5145,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final RenderParagraph paragraph = findDescendantParagraph(tester, find.text(longText))!;
-          expect(paragraph.maxLines, equals(CupertinoMenuItem.defaultAccessibilityModeMaxLines));
+          expect(paragraph.maxLines, equals(100));
           expect(tester.getSize(find.text(longText)).height, closeTo(3100, 1));
         });
 

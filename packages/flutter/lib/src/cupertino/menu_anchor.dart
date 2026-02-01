@@ -1789,7 +1789,7 @@ class _CupertinoDividerPainter extends CustomPainter {
 /// ## Visuals
 /// The [decoration] parameter can be used to change the background color of the
 /// menu item when hovered, focused, pressed, or swiped. If these parameters are
-/// not set, the menu item will use [CupertinoMenuItem._defaultDecoration].
+/// not set, the menu item will use [CupertinoMenuItem.defaultDecoration].
 ///
 /// The [isDestructiveAction] parameter should be set to true if the menu item
 /// will perform a destructive action, and will color the text of the menu item
@@ -1891,7 +1891,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
   /// The decoration to paint behind the menu item.
   ///
-  /// If null, defaults to [CupertinoMenuItem._defaultDecoration].
+  /// If null, defaults to [CupertinoMenuItem.defaultDecoration].
   final WidgetStateProperty<BoxDecoration>? decoration;
 
   /// The mouse cursor to display on hover.
@@ -1942,30 +1942,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   @override
   bool get isDivider => false;
 
-  /// The default mouse cursor for a [CupertinoMenuItem].
-  static final WidgetStateProperty<MouseCursor> _defaultCursor =
-      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-        return !states.contains(WidgetState.disabled) && kIsWeb
-            ? SystemMouseCursors.click
-            : MouseCursor.defer;
-      });
-
-  // Obtained from the iOS 18.5 simulator debug view.
-  static const Color _defaultTextColor = CupertinoDynamicColor.withBrightness(
-    color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
-    darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
-  );
-
-  /// The default [Color] applied to a [CupertinoMenuItem]'s [subtitle]
-  /// widget, if a subtitle is provided.
-  // A custom blend mode is applied to the subtitle to mimic the visual effect
-  // of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
-  // not match the reported color on the iOS 18.5 simulator.
-  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
-    color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
-    darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
-  );
-
   /// The decoration of a [CupertinoMenuItem] when pressed.
   // Pressed colors were sampled from the iOS simulator and are based on the
   // following:
@@ -1978,7 +1954,7 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   // Blend mode is used to mimic the visual effect of the iOS
   // menu item. As a result, the default pressed color does not match the
   // reported colors on the iOS 18.5 simulator.
-  static const WidgetStateProperty<BoxDecoration> _defaultDecoration =
+  static const WidgetStateProperty<BoxDecoration> defaultDecoration =
       WidgetStateProperty<BoxDecoration>.fromMap(<WidgetStatesConstraint, BoxDecoration>{
         WidgetState.dragged: BoxDecoration(
           color: CupertinoDynamicColor.withBrightness(
@@ -2007,23 +1983,66 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         WidgetState.any: BoxDecoration(),
       });
 
+  /// The default mouse cursor for a [CupertinoMenuItem].
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
+
+  // Obtained from the iOS 18.5 simulator debug view.
+  static const Color _defaultTextColor = CupertinoDynamicColor.withBrightness(
+    color: Color.from(alpha: 0.96, red: 0, green: 0, blue: 0),
+    darkColor: Color.from(alpha: 0.96, red: 1, green: 1, blue: 1),
+  );
+
+  /// The default [Color] applied to a [CupertinoMenuItem]'s [subtitle]
+  /// widget, if a subtitle is provided.
+  // A custom blend mode is applied to the subtitle to mimic the visual effect
+  // of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
+  // not match the reported color on the iOS 18.5 simulator.
+  static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
+    color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
+    darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
+  );
+
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
   // Observed on the iOS and iPadOS 18.5 simulators.
-  static const int defaultMaxLines = 2;
+  static const int _defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is greater than
   /// 1.25.
   ///
   // Observed on the iOS and iPadOS 18.5 simulators.
-  static const int defaultAccessibilityModeMaxLines = 100;
+  static const int _defaultAccessibilityModeMaxLines = 100;
 
   /// The base font size multiplier for the [trailing] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
   static const double _trailingIconFontSizeMultiplier = 1.24;
+
+  static const TextStyle _leadingWidgetDefaultTextStyle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+  );
+  static const IconThemeData _leadingWidgetDefaultIconTheme = IconThemeData(
+    size: 15,
+    weight: 600,
+    applyTextScaling: true,
+  );
+
+  static const TextStyle _trailingWidgetDefaultTextStyle = TextStyle(
+    fontSize: 17 * _trailingIconFontSizeMultiplier,
+  );
+
+  static const IconThemeData _trailingWidgetDefaultIconTheme = IconThemeData(
+    size: 17 * _trailingIconFontSizeMultiplier,
+    applyTextScaling: true,
+  );
 
   /// Resolves the title [TextStyle] in response to
   /// [CupertinoThemeData.brightness], [isDestructiveAction], and [enabled].
@@ -2087,31 +2106,15 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
     if (leading != null) {
       leadingWidget = DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        child: IconTheme.merge(
-          data: const IconThemeData(size: 15, weight: 600, applyTextScaling: true),
-          child: leading!,
-        ),
+        style: _leadingWidgetDefaultTextStyle,
+        child: IconTheme.merge(data: _leadingWidgetDefaultIconTheme, child: leading!),
       );
     }
 
     if (trailing != null && !isAccessibilityModeEnabled) {
-      final Widget child = DefaultTextStyle.merge(
-        style: const TextStyle(fontSize: 17),
-        child: IconTheme.merge(
-          data: const IconThemeData(size: 17, applyTextScaling: true),
-          child: trailing!,
-        ),
-      );
-      trailingWidget = Builder(
-        builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScaler.scale(_trailingIconFontSizeMultiplier)),
-            ),
-            child: child,
-          );
-        },
+      trailingWidget = DefaultTextStyle.merge(
+        style: _trailingWidgetDefaultTextStyle,
+        child: IconTheme.merge(data: _trailingWidgetDefaultIconTheme, child: trailing!),
       );
     }
 
@@ -2126,11 +2129,13 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         onFocusChange: onFocusChange,
         autofocus: autofocus,
         focusNode: focusNode,
-        decoration: decoration ?? _defaultDecoration,
+        decoration: decoration ?? defaultDecoration,
         statesController: statesController,
         behavior: behavior,
         child: DefaultTextStyle.merge(
-          maxLines: isAccessibilityModeEnabled ? defaultAccessibilityModeMaxLines : defaultMaxLines,
+          maxLines: isAccessibilityModeEnabled
+              ? _defaultAccessibilityModeMaxLines
+              : _defaultMaxLines,
           overflow: TextOverflow.ellipsis,
           softWrap: true,
           style: TextStyle(color: defaultTextStyle.color),
