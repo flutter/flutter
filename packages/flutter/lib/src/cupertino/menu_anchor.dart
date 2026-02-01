@@ -1164,7 +1164,6 @@ class _MenuOverlayState extends State<_MenuOverlay>
                       child: Semantics(
                         explicitChildNodes: true,
                         scopesRoute: true,
-                        namesRoute: true,
                         child: ConstrainedBox(
                           constraints: constraints,
                           child: SingleChildScrollView(
