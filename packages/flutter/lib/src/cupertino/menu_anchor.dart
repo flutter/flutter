@@ -2020,27 +2020,21 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   // Observed on the iOS and iPadOS 18.5 simulators.
   static const int _defaultAccessibilityModeMaxLines = 100;
 
-  /// The base font size multiplier for the [trailing] widget when
-  /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
-  /// equal to 1.25.
-  static const double _trailingIconFontSizeMultiplier = 1.24;
-
-  static const TextStyle _leadingWidgetDefaultTextStyle = TextStyle(
+  // Observed on the iOS and iPadOS 18.5 simulators.
+  static const TextStyle _leadingDefaultTextStyle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w600,
   );
-  static const IconThemeData _leadingWidgetDefaultIconTheme = IconThemeData(
+  static const IconThemeData _leadingDefaultIconTheme = IconThemeData(
     size: 15,
     weight: 600,
     applyTextScaling: true,
   );
 
-  static const TextStyle _trailingWidgetDefaultTextStyle = TextStyle(
-    fontSize: 17 * _trailingIconFontSizeMultiplier,
-  );
+  static const TextStyle _trailingDefaultTextStyle = TextStyle(fontSize: 21);
 
-  static const IconThemeData _trailingWidgetDefaultIconTheme = IconThemeData(
-    size: 17 * _trailingIconFontSizeMultiplier,
+  static const IconThemeData _trailingDefaultIconTheme = IconThemeData(
+    size: 21,
     applyTextScaling: true,
   );
 
@@ -2103,18 +2097,17 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
     final bool isAccessibilityModeEnabled = _isAccessibilityModeEnabled(context);
     Widget? leadingWidget;
     Widget? trailingWidget;
-
     if (leading != null) {
       leadingWidget = DefaultTextStyle.merge(
-        style: _leadingWidgetDefaultTextStyle,
-        child: IconTheme.merge(data: _leadingWidgetDefaultIconTheme, child: leading!),
+        style: _leadingDefaultTextStyle,
+        child: IconTheme.merge(data: _leadingDefaultIconTheme, child: leading!),
       );
     }
 
     if (trailing != null && !isAccessibilityModeEnabled) {
       trailingWidget = DefaultTextStyle.merge(
-        style: _trailingWidgetDefaultTextStyle,
-        child: IconTheme.merge(data: _trailingWidgetDefaultIconTheme, child: trailing!),
+        style: _trailingDefaultTextStyle,
+        child: IconTheme.merge(data: _trailingDefaultIconTheme, child: trailing!),
       );
     }
 
