@@ -1295,22 +1295,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 child: WidgetInspector(
                   exitWidgetSelectionButtonBuilder:
                       (context, {required key, required onPressed, required semanticsLabel}) =>
-                          Container(key: key, child: const Text(exitLabel)),
+                          const Text(exitLabel),
                   moveExitWidgetSelectionButtonBuilder:
                       (
                         context, {
                         required onPressed,
                         required semanticsLabel,
                         bool? usesDefaultAlignment,
-                      }) => const SizedBox(child: Text(moveLabel)),
+                      }) => const Text(moveLabel),
                   tapBehaviorButtonBuilder:
                       (
                         context, {
                         required onPressed,
                         required selectionOnTapEnabled,
                         required semanticsLabel,
-                      }) => const SizedBox(child: Text(tapLabel)),
-                  child: const SizedBox(width: 100, height: 100),
+                      }) => const Text(tapLabel),
+                  child: const SizedBox(),
                 ),
               ),
             ),
