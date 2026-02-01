@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 // Import the sample app.
-import 'package:flutter_api_samples/cupertino/menu_anchor/menu_anchor.0.dart' as example;
+import 'package:flutter_api_samples/cupertino/menu_anchor/menu_anchor.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -17,7 +18,9 @@ void main() {
     expect(find.byIcon(CupertinoIcons.delete), findsOneWidget);
   });
 
-  testWidgets('Selecting each item updates the pressed label', (WidgetTester tester) async {
+  testWidgets('Selecting each item updates the pressed label', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoMenuAnchorApp());
 
     // Regular Item
@@ -48,7 +51,9 @@ void main() {
     expect(find.text('You Pressed: Destructive Item'), findsOneWidget);
   });
 
-  testWidgets('Tapping the button toggles menu open/close', (WidgetTester tester) async {
+  testWidgets('Tapping the button toggles menu open/close', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.CupertinoMenuAnchorApp());
 
     await tester.tap(find.text('Open Menu'));
