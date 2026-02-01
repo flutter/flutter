@@ -52,6 +52,8 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required bool buildCodeAssets,
+  required bool buildDataAssets,
 }) async {
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
   final Directory buildDir = fileSystem.directory(buildUri);
@@ -66,8 +68,8 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   }
 
   final supportedAssetTypes = <SupportedAssetTypes>[
-    if (featureFlags.isNativeAssetsEnabled) SupportedAssetTypes.codeAssets,
-    if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
+    if (featureFlags.isNativeAssetsEnabled && buildCodeAssets) SupportedAssetTypes.codeAssets,
+    if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
