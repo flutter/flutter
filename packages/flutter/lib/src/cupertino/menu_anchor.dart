@@ -1728,54 +1728,54 @@ class _CupertinoDividerPainter extends CustomPainter {
 ///
 /// {@tool snippet}
 ///
-/// This sample code shows a [CupertinoMenuItem] that prints `Item 1 pressed!`
+/// This sample code shows a [CupertinoMenuItem] that prints "Item 1 pressed!"
 /// when pressed.
 ///
 /// ```dart
-///  CupertinoMenuAnchor(
-///    menuChildren: <Widget>[
-///      CupertinoMenuItem(
-///        trailing: const Icon(CupertinoIcons.add),
-///        onPressed: () {
-///          print('Item 1 pressed!');
-///        },
-///        child: const Text('Item 1'),
-///      )
-///    ],
-///    builder: (
-///      BuildContext context,
-///      MenuController controller,
-///      Widget? child,
-///    ) {
-///      return CupertinoButton.filled(
-///        onPressed: () {
-///          if (controller.isOpen) {
-///            controller.close();
-///          } else {
-///            controller.open();
-///          }
-///        },
-///        child: const Text('Open'),
-///      );
-///    },
-///  );
+/// CupertinoMenuAnchor(
+///   menuChildren: <Widget>[
+///     CupertinoMenuItem(
+///       trailing: const Icon(CupertinoIcons.add),
+///       onPressed: () {
+///         print('Item 1 pressed!');
+///       },
+///       child: const Text('Item 1'),
+///     )
+///   ],
+///   builder: (
+///     BuildContext context,
+///     MenuController controller,
+///     Widget? child,
+///   ) {
+///     return CupertinoButton.filled(
+///       onPressed: () {
+///         if (controller.isOpen) {
+///           controller.close();
+///         } else {
+///           controller.open();
+///         }
+///       },
+///       child: const Text('Open'),
+///     );
+///   },
+/// );
 /// ```
 /// {@end-tool}
 ///
 /// ## Layout
 /// The menu item is unconstrained by default and will grow to fit the size of
 /// its container. To constrain the size of a [CupertinoMenuItem], the
-/// [constraints] parameter can be set. When set, the [constraints] are applied
-/// **above** [padding]. This means that [padding] will only affect the size of
-/// this menu item if this item's minimum constraints are less than the sum of
-/// its [padding] and the size of its contents.
+/// [constraints] parameter can be set. When set, the [constraints] apply to the
+/// total area occupied by the content and its [padding]. This means that
+/// [padding] will only affect the size of this menu item if this item's minimum
+/// constraints are less than the sum of its [padding] and the size of its
+/// contents.
 ///
 /// The [leading] and [trailing] widgets display before and after the [child]
 /// widget, respectively. The [leadingWidth] and [trailingWidth] parameters
 /// control the horizontal space that these widgets occupy. The
 /// [leadingMidpointAlignment] and [trailingMidpointAlignment] parameters control the alignment
 /// of the leading and trailing widgets within their respective spaces.
-///
 ///
 /// ## Input
 /// In order to respond to user input, an [onPressed] callback must be provided.
@@ -2016,21 +2016,19 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
-  // Observed on the iOS and iPadOS 18.5 simulators.
+  // Obtained from the iOS 18.5 simulator debug view.
   static const int _defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is greater than
   /// 1.25.
-  ///
-  // Observed on the iOS and iPadOS 18.5 simulators.
   static const int _defaultAccessibilityModeMaxLines = 100;
 
-  // Observed on the iOS and iPadOS 18.5 simulators.
   static const TextStyle _leadingDefaultTextStyle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w600,
   );
+
   static const IconThemeData _leadingDefaultIconTheme = IconThemeData(
     size: 15,
     weight: 600,
