@@ -27,7 +27,7 @@ void main() {
     var moveCount = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -88,7 +88,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1197,7 +1197,7 @@ void main() {
     var onDraggableCanceledCalled = false;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -1254,7 +1254,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -1927,7 +1927,7 @@ void main() {
     var onDragEndCalled = false;
     late DraggableDetails onDragEndDraggableDetails;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -1988,7 +1988,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2075,7 +2075,7 @@ void main() {
     var onDragCompletedCalled = false;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -2132,7 +2132,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2148,7 +2148,7 @@ void main() {
     final acceptedDoublesDetails = <DragTargetDetails<double>>[];
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             const Draggable<int>(data: 1, feedback: Text('IntDragging'), child: Text('IntSource')),
@@ -2227,7 +2227,7 @@ void main() {
     expect(acceptedIntsDetails, isEmpty);
     expect(acceptedDoubles, equals(<double>[1.0]));
     expect(acceptedDoublesDetails, hasLength(1));
-    expect(acceptedDoublesDetails.first.offset, const Offset(112.0, 122.0));
+    expect(acceptedDoublesDetails.first.offset, const Offset(316.0, 71.0));
     expect(find.text('IntDragging'), findsNothing);
     expect(find.text('DoubleDragging'), findsNothing);
 
@@ -2260,7 +2260,7 @@ void main() {
 
     expect(acceptedInts, equals(<int>[1]));
     expect(acceptedIntsDetails, hasLength(1));
-    expect(acceptedIntsDetails.first.offset, const Offset(184.0, 122.0));
+    expect(acceptedIntsDetails.first.offset, const Offset(337.0, 71.0));
     expect(acceptedDoubles, isEmpty);
     expect(acceptedDoublesDetails, isEmpty);
     expect(find.text('IntDragging'), findsNothing);
@@ -2276,7 +2276,7 @@ void main() {
     final acceptedExtendedDragTargetDataDetails = <DragTargetDetails<ExtendedDragTargetData>>[];
     final dragTargetData = DragTargetData();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<DragTargetData>(
@@ -2330,7 +2330,7 @@ void main() {
 
       expect(acceptedDragTargetDatas, equals(<DragTargetData>[dragTargetData]));
       expect(acceptedDragTargetDataDetails, hasLength(1));
-      expect(acceptedDragTargetDataDetails.first.offset, const Offset(256.0, 74.0));
+      expect(acceptedDragTargetDataDetails.first.offset, const Offset(358.0, 57.0));
       expect(acceptedExtendedDragTargetDatas, isEmpty);
       expect(acceptedExtendedDragTargetDataDetails, isEmpty);
 
@@ -2345,7 +2345,7 @@ void main() {
     final acceptedDetails = <DragTargetDetails<int>>[];
 
     Widget build(int maxSimultaneousDrags) {
-      return MaterialApp(
+      return TestWidgetsApp(
         home: Column(
           children: <Widget>[
             Draggable<int>(
@@ -2439,7 +2439,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
@@ -2449,8 +2449,8 @@ void main() {
 
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
-    expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[0].offset, const Offset(358.0, 57.0));
+    expect(acceptedDetails[1].offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2460,8 +2460,8 @@ void main() {
 
     expect(accepted, equals(<int>[1, 1]));
     expect(acceptedDetails, hasLength(2));
-    expect(acceptedDetails[0].offset, const Offset(256.0, 74.0));
-    expect(acceptedDetails[1].offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails[0].offset, const Offset(358.0, 57.0));
+    expect(acceptedDetails[1].offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2686,7 +2686,7 @@ void main() {
     final acceptedDetails = <DragTargetDetails<int>>[];
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             const Draggable<int>(data: 1, feedback: Text('Dragging'), child: Text('Source')),
@@ -2719,7 +2719,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             DragTarget<int>(
@@ -2755,7 +2755,7 @@ void main() {
 
     expect(accepted, equals(<int>[1]));
     expect(acceptedDetails, hasLength(1));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 26.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 43.0));
     expect(find.text('Source'), findsNothing);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
@@ -2791,7 +2791,7 @@ void main() {
     late DraggableDetails onDragEndDraggableDetails;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             LongPressDraggable<int>(
@@ -2880,7 +2880,7 @@ void main() {
     var onDragCompletedCalled = false;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
             LongPressDraggable<int>(
@@ -2945,7 +2945,7 @@ void main() {
     await tester.pump();
 
     expect(accepted, equals(<int>[1]));
-    expect(acceptedDetails.first.offset, const Offset(256.0, 74.0));
+    expect(acceptedDetails.first.offset, const Offset(358.0, 57.0));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
