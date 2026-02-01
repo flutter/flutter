@@ -490,7 +490,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// When a menu is opened via long-press, the menu can be swiped in the same
   /// gesture to select and activate menu items.
   ///
-  /// If the widget built by [builder] is disabled, [longPressToOpenDuration]
+  /// If the widget built by [builder] is disabled, [enableLongPressToOpen]
   /// should be set to false to prevent the menu from opening on long-press.
   ///
   /// Defaults to false, which disables the behavior.
@@ -1778,11 +1778,11 @@ class _CupertinoDividerPainter extends CustomPainter {
 ///
 /// ## Input
 /// In order to respond to user input, an [onPressed] callback must be provided.
-/// If absent, the [enabled] property will be false and user input callbacks
-/// ([onFocusChange], [onHover], and [onPressed]) will be ignored. The
-/// [behavior] parameter can be used to control whether hit tests can travel
-/// behind the menu item, and the [mouseCursor] parameter can be used to change
-/// the cursor that appears when the user hovers over the menu.
+/// If absent, user input callbacks ([onFocusChange], [onHover], and
+/// [onPressed]) will be ignored. The [behavior] parameter can be used to
+/// control whether hit tests can travel behind the menu item, and the
+/// [mouseCursor] parameter can be used to change the cursor that appears when
+/// the user hovers over the menu.
 ///
 /// The [requestCloseOnActivate] parameter can be set to false to prevent the
 /// menu from closing when the item is activated. By default, the menu will
