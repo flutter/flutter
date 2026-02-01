@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
+import 'utils.dart';
 import 'widgets_app_tester.dart';
 
 void main() {
@@ -3116,9 +3117,9 @@ void main() {
                 key: childNavigatorKey,
                 onGenerateRoute: (RouteSettings settings) {
                   if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
+                    return TestRoute<void>(
                       settings: settings,
-                      builder: (BuildContext context) => const Draggable<int>(
+                      child: const Draggable<int>(
                         data: 1,
                         feedback: Text('Dragging'),
                         rootOverlay: true,
@@ -3178,9 +3179,9 @@ void main() {
                 key: childNavigatorKey,
                 onGenerateRoute: (RouteSettings settings) {
                   if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
+                    return TestRoute<void>(
                       settings: settings,
-                      builder: (BuildContext context) => const LongPressDraggable<int>(
+                      child: const LongPressDraggable<int>(
                         data: 1,
                         feedback: Text('Dragging'),
                         rootOverlay: true,
