@@ -10,10 +10,9 @@
 library;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -3601,8 +3600,9 @@ void main() {
       Transform.scale(
         scale: 0.5,
         child: const TestWidgetsApp(
-          home: Scaffold(
-            body: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
           ),
         ),
       ),
@@ -3631,8 +3631,9 @@ void main() {
       Transform.scale(
         scale: 0.5,
         child: TestWidgetsApp(
-          home: Scaffold(
-            body: Draggable<int>(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Draggable<int>(
               data: 42,
               feedback: Text('Text', key: feedbackKey),
               child: Text('Text', key: sourceKey),
@@ -3660,8 +3661,9 @@ void main() {
       Transform.rotate(
         angle: 1, // ~57 degrees
         child: const TestWidgetsApp(
-          home: Scaffold(
-            body: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
           ),
         ),
       ),
@@ -3696,8 +3698,13 @@ void main() {
         valueListenable: mountedNotifier,
         builder: (_, bool value, _) => value
             ? const TestWidgetsApp(
-                home: Scaffold(
-                  body: Draggable<int>(data: 42, feedback: Text('Feedback'), child: Text('Source')),
+                home: Align(
+                  alignment: Alignment.topLeft,
+                  child: Draggable<int>(
+                    data: 42,
+                    feedback: Text('Feedback'),
+                    child: Text('Source'),
+                  ),
                 ),
               )
             : Container(),
