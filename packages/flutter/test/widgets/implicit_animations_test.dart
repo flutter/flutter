@@ -747,6 +747,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedDefaultTextStyle)), Size.zero);
   });
+
+  testWidgets('AnimatedPhysicalModel does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedPhysicalModel(
+              color: Colors.teal,
+              shadowColor: Colors.tealAccent,
+              duration: Duration(milliseconds: 300),
+              child: Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPhysicalModel)), Size.zero);
+  });
 }
 
 Future<void> tapTest2and3(
