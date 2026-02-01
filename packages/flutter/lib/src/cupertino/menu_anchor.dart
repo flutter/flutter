@@ -354,7 +354,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// {@tool dartpad}
 /// This example demonstrates a basic [CupertinoMenuAnchor] that wraps a button.
 ///
-/// ** See code in examples/api/lib/cupertino/menu_anchor/cupertino_menu_anchor.0.dart **
+/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1804,7 +1804,7 @@ class _CupertinoDividerPainter extends CustomPainter {
 /// {@tool dartpad}
 /// This example shows basic usage of a [CupertinoMenuItem] that wraps a button.
 ///
-/// ** See code in examples/api/lib/cupertino/menu_anchor/cupertino_menu_anchor.0.dart **
+/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
 /// {@end-tool}
 ///
 /// See also:
