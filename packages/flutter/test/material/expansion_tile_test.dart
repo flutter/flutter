@@ -2160,7 +2160,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
-    final WidgetStatesController controller = WidgetStatesController();
+    final controller = WidgetStatesController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
