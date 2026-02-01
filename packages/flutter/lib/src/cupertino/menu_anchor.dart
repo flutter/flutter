@@ -2220,7 +2220,9 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   static const double _defaultHorizontalWidth = 16;
 
   // The leading and trailing widths scale roughly linearly with the normalized
-  // text scale once quantized, deviating by no more than 1 physical pixel.
+  // text scale once quantized to the nearest physical pixel. Each linear
+  // regression will return a value within 1 physical pixel of the observed
+  // value at each text scale factor.
   //
   // This behavior was observed on several iOS and iPadOS 18.5 simulators using
   // the debug view.
