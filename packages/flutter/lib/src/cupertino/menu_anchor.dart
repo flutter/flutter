@@ -1,7 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-//
+
 /// @docImport 'package:flutter/material.dart';
 library;
 
@@ -2434,8 +2434,8 @@ class _RenderAlignMidpoint extends RenderPositionedBox {
     assert(hasSize);
     final childParentData = child!.parentData! as BoxParentData;
     final ui.Offset offset = resolvedAlignment.alongSize(size) - child!.size.center(Offset.zero);
-    final double dx = offset.dx.clamp(0.0, size.width - child!.size.width);
-    final double dy = offset.dy.clamp(0.0, size.height - child!.size.height);
+    final double dx = ui.clampDouble(offset.dx, 0.0, size.width - child!.size.width);
+    final double dy = ui.clampDouble(offset.dy, 0.0, size.height - child!.size.height);
 
     childParentData.offset = Offset(dx, dy);
   }
