@@ -125,9 +125,9 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       violations.add(
         Violation(
           node,
-        '$node: expected tap target size of at least $size, '
-        'but found $candidateSize\n'
-        'See also: $link',
+          '$node: expected tap target size of at least $size, '
+          'but found $candidateSize\n'
+          'See also: $link',
         ),
       );
     }
@@ -204,8 +204,8 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
       violations.add(
         Violation(
           node,
-        '$node: expected tappable node to have semantic label, '
-        'but none was found.',
+          '$node: expected tappable node to have semantic label, '
+          'but none was found.',
         ),
       );
     }
