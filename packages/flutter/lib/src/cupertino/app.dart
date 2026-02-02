@@ -527,7 +527,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
   // _CupertinoLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates {
     return <LocalizationsDelegate<dynamic>>[
-      if (widget.localizationsDelegates != null) ...widget.localizationsDelegates!,
+      ...?widget.localizationsDelegates,
       DefaultCupertinoLocalizations.delegate,
     ];
   }
