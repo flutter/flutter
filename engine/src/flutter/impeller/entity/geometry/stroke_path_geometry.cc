@@ -221,17 +221,18 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
       HandlePreviousJoin(start_perpendicular);
 
       // We use the scale suggested by the transform basis which is the
-      // same scale that would be used for filling the path. For very
-      // large stroke widths, the polygonization at the size of the path
-      // segments may not necessarily produce a smooth approximation of
-      // the curve at the outer edge of the stroke, but we adjust for this
-      // by inserting a synthetic round join between interpolation points
-      // to smooth out the curve at the outer edge of the stroke (see
-      // RecordCurveSegment below). Note that a round join is always used
-      // for this adjustment regardless of the requested join in the
-      // stroke parameters because it is attempting to smooth the middle
-      // of a curve rather than decorate between 2 path segments.
-      Scalar count = std::ceilf(curve.SubdivisionCount(scale_));
+      // same scale that would be used for filling the path. But we also
+      // need to adjust the scale for the magnification of the curve
+      // features that occurs when we draw with a wide pen and the outer
+      // curves of that stroked path are larger than the base curve itself.
+      // So, we scale by both the transform basis and (half) the stroke
+      // width, but we also make sure that we aren't reducing the scale
+      // in the uncommon case that someone is drawing at a large scale
+      // with a very tiny stroke width. To accomplish this, we multiply
+      // the scale basis by half the stroke width, but make sure the width
+      // is at least 1.0 so that we don't reduce the natural transform scale.
+      Scalar stroke_scale = scale_ * std::max(1.0f, half_stroke_width_);
+      Scalar count = std::ceilf(curve.SubdivisionCount(stroke_scale));
 
       Point prev = curve.p1;
       SeparatedVector2 prev_perpendicular = start_perpendicular;
