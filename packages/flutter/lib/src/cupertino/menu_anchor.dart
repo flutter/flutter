@@ -1989,7 +1989,6 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
         WidgetState.any: BoxDecoration(),
       });
 
-  /// The default mouse cursor for a [CupertinoMenuItem].
   static final WidgetStateProperty<MouseCursor> _defaultCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
         return !states.contains(WidgetState.disabled) && kIsWeb
@@ -2005,9 +2004,10 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
 
   /// The default [Color] applied to a [CupertinoMenuItem]'s [subtitle]
   /// widget, if a subtitle is provided.
-  // A custom blend mode is applied to the subtitle to mimic the visual effect
-  // of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
-  // not match the reported color on the iOS 18.5 simulator.
+  ///
+  /// A custom blend mode is applied to the subtitle to mimic the visual effect
+  /// of the iOS menu subtitle. As a result, the defaultSubtitleStyle color does
+  /// not match the reported color on the iOS 18.5 simulator.
   static const Color _defaultSubtitleTextColor = CupertinoDynamicColor.withBrightness(
     color: Color.from(alpha: 0.55, red: 0, green: 0, blue: 0),
     darkColor: Color.from(alpha: 0.4, red: 1, green: 1, blue: 1),
@@ -2016,7 +2016,8 @@ class CupertinoMenuItem extends StatelessWidget implements CupertinoMenuEntry {
   /// The maximum number of lines for the [child] widget when
   /// [MediaQuery.textScalerOf] returns a [TextScaler] that is less than or
   /// equal to 1.25.
-  // Measured from the iOS 18.5 simulator debug view.
+  ///
+  /// Measured from the iOS 18.5 simulator debug view.
   static const int _defaultMaxLines = 2;
 
   /// The maximum number of lines for the [child] widget when
