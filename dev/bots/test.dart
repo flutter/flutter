@@ -177,6 +177,7 @@ Future<void> _runGeneralToolTests() async {
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
+    forceSingleCore: true,
 
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
