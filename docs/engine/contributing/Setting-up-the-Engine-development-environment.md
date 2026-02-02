@@ -87,7 +87,7 @@ On Mac, you can simply use Xcode (e.g., `open out/host_debug_unopt/flutter_engin
 
 VSCode can provide some IDE features using the [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools). It will provide basic support on install without needing any additional configuration. There will probably be some issues, like header not found errors and incorrect jump to definitions.
 
-Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference). This will likely resolve the basic issues mentioned above.
+Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/customize-cpp-settings). This will likely resolve the basic issues mentioned above.
 
 The easiest way to do this is create a [multi-root workspace](https://code.visualstudio.com/docs/editor/workspaces/workspaces#_multiroot-workspaces) that includes the Flutter SDK. For example, something like this:
 
