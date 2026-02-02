@@ -359,6 +359,92 @@ void main() {
       expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsNWidgets(2));
       semanticsHandle.dispose();
     });
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier string in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier('custom-identifier'), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier named "custom-identifier"',
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'bySemanticsIdentifier contains given semantics identifier RegExp in the error message',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+        late TestFailure failure;
+        try {
+          expect(find.bySemanticsIdentifier(RegExp(r'^item-')), findsOneWidget);
+        } on TestFailure catch (e) {
+          failure = e;
+        }
+
+        expect(failure, isNotNull);
+        expect(
+          failure.message,
+          contains(
+            'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics identifier matching the pattern "^item-"',
+          ),
+        );
+      },
+    );
+
+    testWidgets('bySemanticsLabel contains given label string in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel('label'), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label named "label"',
+        ),
+      );
+    });
+
+    testWidgets('bySemanticsLabel contains given label RegExp in the error message', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.bySemanticsLabel(RegExp(r'^item-')), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: _ElementPredicateWidgetFinder:<Found 0 widgets with a semantics label matching the pattern "^item-"',
+        ),
+      );
+    });
   });
 
   group('byTooltip', () {

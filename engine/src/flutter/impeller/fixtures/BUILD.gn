@@ -162,6 +162,7 @@ test_fixtures("file_fixtures") {
     "types.h",
     "wtf.otf",
     "texture_lookup.frag",
+    "mat2_test.frag",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]

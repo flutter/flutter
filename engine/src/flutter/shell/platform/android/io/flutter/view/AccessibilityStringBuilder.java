@@ -41,10 +41,6 @@ public class AccessibilityStringBuilder {
     String locale;
   }
 
-  private static class UrlStringAttribute extends StringAttribute {
-    String url;
-  }
-
   AccessibilityStringBuilder() {}
 
   private String string;
