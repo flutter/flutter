@@ -119,7 +119,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @property(nonatomic, readonly, copy) NSString* labelPrefix;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly, assign) BOOL restorationEnabled;
-@property(nonatomic, assign) BOOL isRunningInExtension;
 
 @property(nonatomic, strong) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, strong) FlutterEnginePluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
