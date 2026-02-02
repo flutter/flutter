@@ -4784,11 +4784,13 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(errorDetails, isNotEmpty);
-    expect(
-      errorDetails.first.exceptionAsString(),
-      contains('ListTile background color or ink splashes may be invisible'),
-    );
-    expect(errorDetails.first.exceptionAsString(), contains('ColoredBox'));
+    final message = errorDetails.first.toString();
+    expect(message, contains('ListTile background color or ink splashes may be invisible'));
+    expect(message, contains('The ListTile is wrapped in a ColoredBox'));
+    expect(message, contains('ListTile:'));
+    expect(message, contains('tileColor:'));
+    expect(message, contains('ColoredBox:'));
+    expect(message, contains('color:'));
   });
 
   testWidgets('ListTile throw exception when wrapped in ColoredBox with non-transparent color', (
@@ -4816,11 +4818,13 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(errorDetails, isNotEmpty);
-    expect(
-      errorDetails.first.exceptionAsString(),
-      contains('ListTile background color or ink splashes may be invisible'),
-    );
-    expect(errorDetails.first.exceptionAsString(), contains('ColoredBox'));
+    final message = errorDetails.first.toString();
+    expect(message, contains('ListTile background color or ink splashes may be invisible'));
+    expect(message, contains('The ListTile is wrapped in a ColoredBox'));
+    expect(message, contains('ListTile:'));
+    expect(message, contains('tileColor:'));
+    expect(message, contains('ColoredBox:'));
+    expect(message, contains('color:'));
   });
 
   testWidgets('ListTile throw exception when wrapped in DecoratedBox with non-transparent color', (
@@ -4848,11 +4852,13 @@ void main() {
     FlutterError.onError = oldHandler;
 
     expect(errorDetails, isNotEmpty);
-    expect(
-      errorDetails.first.exceptionAsString(),
-      contains('ListTile background color or ink splashes may be invisible'),
-    );
-    expect(errorDetails.first.exceptionAsString(), contains('DecoratedBox'));
+    final message = errorDetails.first.toString();
+    expect(message, contains('ListTile background color or ink splashes may be invisible'));
+    expect(message, contains('The ListTile is wrapped in a DecoratedBox'));
+    expect(message, contains('ListTile:'));
+    expect(message, contains('tileColor:'));
+    expect(message, contains('DecoratedBox:'));
+    expect(message, contains('bg'));
   });
 
   testWidgets('ListTile does not throw exception when parent has no/transparent color', (

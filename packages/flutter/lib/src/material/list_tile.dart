@@ -808,17 +808,6 @@ class ListTile extends StatelessWidget {
     return dense ?? tileTheme.dense ?? theme.listTileTheme.dense ?? false;
   }
 
-  Color _tileBackgroundColor(
-    ThemeData theme,
-    ListTileThemeData tileTheme,
-    ListTileThemeData defaults,
-  ) {
-    final Color? color = selected
-        ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
-        : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
-    return color ?? defaults.tileColor!;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -830,8 +819,17 @@ class ListTile extends StatelessWidget {
     final ListTileThemeData defaults = theme.useMaterial3
         ? _LisTileDefaultsM3(context)
         : _LisTileDefaultsM2(context, listTileStyle);
-    final Color tileBackgroundColor = _tileBackgroundColor(theme, tileTheme, defaults);
-    if (onTap != null || onLongPress != null || tileBackgroundColor.alpha > 0) {
+
+    final Color backgroundColor =
+        tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor ?? defaults.tileColor!;
+    final Color selectedBackgroundColor =
+        selectedTileColor ??
+        tileTheme.selectedTileColor ??
+        theme.listTileTheme.selectedTileColor ??
+        defaults.tileColor!;
+    final effectiveTileColor = selected ? selectedBackgroundColor : backgroundColor;
+    final bool hasOpaqueBackground = backgroundColor.alpha > 0 || selectedBackgroundColor.alpha > 0;
+    if (onTap != null || onLongPress != null || hasOpaqueBackground) {
       assert(_debugCheckBackgroundIsHidden(context));
     }
     final states = <WidgetState>{
@@ -1001,7 +999,7 @@ class ListTile extends StatelessWidget {
         child: Ink(
           decoration: ShapeDecoration(
             shape: shape ?? tileTheme.shape ?? const Border(),
-            color: tileBackgroundColor,
+            color: effectiveTileColor,
           ),
           child: SafeArea(
             top: false,
@@ -1164,6 +1162,14 @@ class ListTile extends StatelessWidget {
                 'or remove the background color from the intermediate ${intermediateWidget.runtimeType}.',
               ),
             ]),
+            informationCollector: () => <DiagnosticsNode>[
+              DiagnosticsProperty<ListTile>('ListTile', this, expandableValue: true),
+              DiagnosticsProperty<Widget>(
+                '${intermediateWidget.runtimeType}',
+                intermediateWidget,
+                expandableValue: true,
+              ),
+            ],
           ),
         );
       }
