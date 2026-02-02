@@ -89,7 +89,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 
   List<Violation> _traverse(ui.FlutterView view, SemanticsNode node) {
-    var violations = <Violation>[];
+    final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
       violations.addAll(_traverse(view, child));
       return true;
@@ -188,7 +188,7 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   }
 
   List<Violation> _traverse(SemanticsNode node) {
-    var violations = <Violation>[];
+    final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
       violations.addAll(_traverse(child));
       return true;
@@ -256,7 +256,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 
   @override
   Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
-    var violations = <Violation>[];
+    final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
@@ -281,7 +281,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     ByteData byteData,
     RenderView renderView,
   ) async {
-    var violations = <Violation>[];
+    final violations = <Violation>[];
 
     // Skip disabled nodes, as they not required to pass contrast check.
     final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
@@ -399,7 +399,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     final report = _ContrastReport(colorHistogram);
 
     final double contrastRatio = report.contrastRatio();
-    final double targetContrastRatio = this._targetContrastRatio(fontSize, bold: isBold);
+    final double targetContrastRatio = _targetContrastRatio(fontSize, bold: isBold);
 
     if (contrastRatio - targetContrastRatio >= _tolerance) {
       return <Violation>[];
