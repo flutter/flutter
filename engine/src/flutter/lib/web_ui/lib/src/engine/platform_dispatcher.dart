@@ -1784,6 +1784,7 @@ class ViewConfiguration {
     this.padding = ui.ViewPadding.zero as ViewPadding,
     this.gestureSettings = const ui.GestureSettings(),
     this.displayFeatures = const <ui.DisplayFeature>[],
+    this.displayCornerRadii,
   });
 
   ViewConfiguration copyWith({
@@ -1796,6 +1797,7 @@ class ViewConfiguration {
     ViewPadding? padding,
     ui.GestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
+    ui.DisplayCornerRadii? displayCornerRadii,
   }) {
     return ViewConfiguration(
       view: view ?? this.view,
@@ -1807,6 +1809,7 @@ class ViewConfiguration {
       padding: padding ?? this.padding,
       gestureSettings: gestureSettings ?? this.gestureSettings,
       displayFeatures: displayFeatures ?? this.displayFeatures,
+      displayCornerRadii: displayCornerRadii ?? this.displayCornerRadii,
     );
   }
 
@@ -1819,6 +1822,7 @@ class ViewConfiguration {
   final ViewPadding padding;
   final ui.GestureSettings gestureSettings;
   final List<ui.DisplayFeature> displayFeatures;
+  final ui.DisplayCornerRadii? displayCornerRadii;
 
   @override
   String toString() {

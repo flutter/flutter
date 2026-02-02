@@ -129,6 +129,9 @@ enum _MediaQueryAspect {
 
   /// Specifies the aspect corresponding to [MediaQueryData.paragraphSpacingOverride].
   paragraphSpacingOverride,
+
+  /// Specifies the aspect corresponding to [MediaQueryData.displayCornerRadii].
+  displayCornerRadii,
 }
 
 /// Information about a piece of media (e.g., a window).
@@ -234,6 +237,7 @@ class MediaQueryData {
     this.letterSpacingOverride,
     this.wordSpacingOverride,
     this.paragraphSpacingOverride,
+    this.displayCornerRadii,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
        assert(
@@ -340,10 +344,25 @@ class MediaQueryData {
           platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
       paragraphSpacingOverride =
           platformData?.paragraphSpacingOverride ??
-          view.platformDispatcher.paragraphSpacingOverride;
+          view.platformDispatcher.paragraphSpacingOverride,
+      displayCornerRadii = _displayCornerRadiiFromView(view);
 
   static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
+  }
+
+  static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
+    final ui.DisplayCornerRadii? displayCornerRadii = view.displayCornerRadii;
+    if (displayCornerRadii == null) {
+      return null;
+    }
+    final double devicePixelRatio = view.devicePixelRatio;
+    return BorderRadius.only(
+      topLeft: Radius.circular(displayCornerRadii.topLeft / devicePixelRatio),
+      topRight: Radius.circular(displayCornerRadii.topRight / devicePixelRatio),
+      bottomRight: Radius.circular(displayCornerRadii.bottomRight / devicePixelRatio),
+      bottomLeft: Radius.circular(displayCornerRadii.bottomLeft / devicePixelRatio),
+    );
   }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -727,6 +746,17 @@ class MediaQueryData {
   /// for text paragraph spacing.
   final double? paragraphSpacingOverride;
 
+  /// The radii of the display corners in logical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterView.displayCornerRadii], which returns the display corner
+  ///    radii in physical pixels.
+  final BorderRadius? displayCornerRadii;
+
   /// The orientation of the media (e.g., whether the device is in landscape or
   /// portrait mode).
   Orientation get orientation {
@@ -796,6 +826,7 @@ class MediaQueryData {
       letterSpacingOverride: letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
     );
   }
 
@@ -842,6 +873,42 @@ class MediaQueryData {
       letterSpacingOverride: letterSpacingOverride,
       wordSpacingOverride: wordSpacingOverride,
       paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
+    );
+  }
+
+  /// Creates a copy of this media query data but with the `displayCornerRadii`
+  /// replaced with the given value.
+  ///
+  /// If the argument is null (the default), then this [MediaQueryData]
+  /// is returned with the `displayCornerRadii` set to null.
+  MediaQueryData applyDisplayCornerRadii(BorderRadius? displayCornerRadii) {
+    return MediaQueryData(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+      textScaler: textScaler,
+      platformBrightness: platformBrightness,
+      padding: padding,
+      viewPadding: viewPadding,
+      viewInsets: viewInsets,
+      systemGestureInsets: systemGestureInsets,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
+      invertColors: invertColors,
+      highContrast: highContrast,
+      onOffSwitchLabels: onOffSwitchLabels,
+      disableAnimations: disableAnimations,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
+      supportsAnnounce: supportsAnnounce,
+      navigationMode: navigationMode,
+      gestureSettings: gestureSettings,
+      displayFeatures: displayFeatures,
+      supportsShowingSystemContextMenu: supportsShowingSystemContextMenu,
+      lineHeightScaleFactorOverride: lineHeightScaleFactorOverride,
+      letterSpacingOverride: letterSpacingOverride,
+      wordSpacingOverride: wordSpacingOverride,
+      paragraphSpacingOverride: paragraphSpacingOverride,
+      displayCornerRadii: displayCornerRadii,
     );
   }
 
@@ -1044,7 +1111,8 @@ class MediaQueryData {
         other.lineHeightScaleFactorOverride == lineHeightScaleFactorOverride &&
         other.letterSpacingOverride == letterSpacingOverride &&
         other.wordSpacingOverride == wordSpacingOverride &&
-        other.paragraphSpacingOverride == paragraphSpacingOverride;
+        other.paragraphSpacingOverride == paragraphSpacingOverride &&
+        other.displayCornerRadii == displayCornerRadii;
   }
 
   @override
@@ -1072,6 +1140,7 @@ class MediaQueryData {
       letterSpacingOverride,
       wordSpacingOverride,
       paragraphSpacingOverride,
+      displayCornerRadii,
     ),
   );
 
@@ -1101,6 +1170,7 @@ class MediaQueryData {
       'letterSpacingOverride: $letterSpacingOverride',
       'wordSpacingOverride: $wordSpacingOverride',
       'paragraphSpacingOverride: $paragraphSpacingOverride',
+      'displayCornerRadii: $displayCornerRadii',
     ];
     return '${objectRuntimeType(this, 'MediaQueryData')}(${properties.join(', ')})';
   }
@@ -2081,6 +2151,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static double? maybeParagraphSpacingOverrideOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.paragraphSpacingOverride)?.paragraphSpacingOverride;
 
+  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
+  /// ancestor or throws an exception, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static BorderRadius? displayCornerRadiiOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.displayCornerRadii).displayCornerRadii;
+
+  /// Returns [MediaQueryData.displayCornerRadii] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.displayCornerRadii] property of the ancestor [MediaQuery]
+  /// changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static BorderRadius? maybeDisplayCornerRadiiOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.displayCornerRadii)?.displayCornerRadii;
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
@@ -2142,6 +2234,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.wordSpacingOverride != oldWidget.data.wordSpacingOverride,
             _MediaQueryAspect.paragraphSpacingOverride =>
               data.paragraphSpacingOverride != oldWidget.data.paragraphSpacingOverride,
+            _MediaQueryAspect.displayCornerRadii =>
+              data.displayCornerRadii != oldWidget.data.displayCornerRadii,
           },
     );
   }
