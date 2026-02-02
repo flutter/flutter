@@ -35,50 +35,22 @@ class DartBuild extends Target {
 
     final TargetPlatform targetPlatform =
         specifiedTargetPlatform ?? _getTargetPlatformFromEnvironment(environment, name);
-
-    final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: environment.logger,
-    );
     final Uri projectUri = environment.projectDir.uri;
-    final String? runPackageName = packageConfig.packages
-        .where((Package p) => p.root == projectUri)
-        .firstOrNull
-        ?.name;
-    if (runPackageName == null) {
-      throw StateError(
-        'Could not determine run package name. '
-        'Project path "${projectUri.toFilePath()}" did not occur as package '
-        'root in package config "${environment.packageConfigPath}". '
-        'Please report a reproduction on '
-        'https://github.com/flutter/flutter/issues/169475.',
-      );
-    }
-    final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final bool includeDevDependencies = !buildMode.isRelease;
     final FlutterNativeAssetsBuildRunner buildRunner =
-        _buildRunner ??
-        FlutterNativeAssetsBuildRunnerImpl(
-          environment.packageConfigPath,
-          packageConfig,
-          fileSystem,
-          environment.logger,
-          runPackageName,
-          includeDevDependencies: includeDevDependencies,
-          pubspecPath,
-        );
+        _buildRunner ?? await createFlutterNativeAssetsBuildRunner(environment);
     result = await runFlutterSpecificHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      buildCodeAssets: true,
+      buildDataAssets: true,
     );
     final File dartHookResultJsonFile = environment.buildDir.childFile(dartHookResultFilename);
     if (!dartHookResultJsonFile.parent.existsSync()) {
@@ -220,4 +192,47 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
     throw MissingDefineException(kTargetPlatform, name);
   }
   return getTargetPlatformForName(targetPlatformEnvironment);
+}
+
+Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
+  Environment environment,
+) async {
+  final FileSystem fileSystem = environment.fileSystem;
+  final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
+  final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+    packageConfigFile,
+    logger: environment.logger,
+  );
+  final Uri projectUri = environment.projectDir.uri;
+  final String? runPackageName = packageConfig.packages
+      .where((Package p) => p.root == projectUri)
+      .firstOrNull
+      ?.name;
+  if (runPackageName == null) {
+    throw StateError(
+      'Could not determine run package name. '
+      'Project path "${projectUri.toFilePath()}" did not occur as package '
+      'root in package config "${environment.packageConfigPath}". '
+      'Please report a reproduction on '
+      'https://github.com/flutter/flutter/issues/169475.',
+    );
+  }
+  final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
+  final String? buildModeEnvironment = environment.defines[kBuildMode];
+  // If the build mode is not present in the environment, we assume that we are
+  // running in a test or a task that does not require a build mode.
+  // We infer the build mode to be debug in that case.
+  final BuildMode buildMode = buildModeEnvironment == null
+      ? BuildMode.debug
+      : BuildMode.fromCliName(buildModeEnvironment);
+  final bool includeDevDependencies = !buildMode.isRelease;
+  return FlutterNativeAssetsBuildRunnerImpl(
+    environment.packageConfigPath,
+    packageConfig,
+    fileSystem,
+    environment.logger,
+    runPackageName,
+    includeDevDependencies: includeDevDependencies,
+    pubspecPath,
+  );
 }
