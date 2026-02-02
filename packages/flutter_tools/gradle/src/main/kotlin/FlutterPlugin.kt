@@ -4,6 +4,7 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -548,6 +549,12 @@ class FlutterPlugin : Plugin<Project> {
                 extension.defaultConfig.ndk {
                     abiFilters.clear()
                     abiFilters.addAll(PLATFORM_ABI_LIST)
+                }
+                val androidComponents = projectToAddTasksTo.extensions.getByType(AndroidComponentsExtension::class.java)
+                androidComponents.onVariants(
+                    androidComponents.selector().all()
+                ) { variant ->
+                    variant.components.first()
                 }
             }
         }

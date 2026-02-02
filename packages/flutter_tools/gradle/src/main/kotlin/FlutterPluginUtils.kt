@@ -399,9 +399,8 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension {
-        return project.extensions.getByType(ApplicationExtension::class.java)
-    }
+    internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
+        project.extensions.getByType(ApplicationExtension::class.java)
 
     // Avoid new usages this class is not part of the public AGP DSL.
     private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
