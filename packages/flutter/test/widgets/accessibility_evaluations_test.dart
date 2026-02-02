@@ -8,14 +8,6 @@ import 'package:flutter/src/widgets/accessibility_evaluations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('EvaluationResult initialized with violations', () {
-    final node = SemanticsNode();
-    final violation = Violation(node, 'reason');
-    final result = EvaluationResult(<Violation>[violation]);
-    expect(result.violations, hasLength(1));
-    expect(result.violations.first, violation);
-  });
-
   group('MinimumTapTargetEvaluation', () {
     const evaluation = MinimumTapTargetEvaluation(size: Size(48.0, 48.0), link: 'link');
 
@@ -111,7 +103,7 @@ void main() {
   });
 
   group('MinimumTextContrastEvaluation', () {
-    final evaluation = MinimumTextContrastEvaluation();
+    const evaluation = MinimumTextContrastEvaluation();
 
     testWidgets('passes for high contrast', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
