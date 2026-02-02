@@ -31,6 +31,7 @@ import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
 import 'tooltip.dart';
+import 'windowing_configuration.dart';
 
 // Examples can assume:
 // typedef GlobalWidgetsLocalizations = DefaultWidgetsLocalizations;
@@ -1177,7 +1178,10 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: HeroControllerScope(controller: _heroController, child: result),
+      child: WindowingConfiguration(
+        enableWindowing: widget.useWindowing,
+        child: HeroControllerScope(controller: _heroController, child: result),
+      ),
     );
   }
 }
