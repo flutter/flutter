@@ -282,7 +282,9 @@ class FrameTimingSummarizer {
 /// [data] must be sorted in ascending order.
 T _findPercentile<T>(List<T> data, double p) {
   assert(p >= 0 && p <= 1);
-  return data[((data.length - 1) * p).round()];
+  assert(data.isNotEmpty, 'data list must not be empty');
+  final int index = ((data.length - 1) * p).round().clamp(0, data.length - 1);
+  return data[index];
 }
 
 /// Returns the number of elements in [data] that exceed [threshold].

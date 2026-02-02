@@ -300,7 +300,7 @@ abstract class Emulator {
     ];
 
     // Calculate column widths
-    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final indices = List<int>.generate(table[0].length, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
     for (final row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();

@@ -716,7 +716,9 @@ class _ContrastReport {
     }
 
     // If there is only single color, it is reported as both dark and light.
-    return _ContrastReport._(lightColor?.key ?? darkColor!.key, darkColor?.key ?? lightColor!.key);
+    final Color? light = lightColor?.key ?? darkColor?.key;
+    final Color? dark = darkColor?.key ?? lightColor?.key;
+    return _ContrastReport._(light ?? const Color(0x00000000), dark ?? const Color(0x00000000));
   }
 
   const _ContrastReport._(this.lightColor, this.darkColor);
