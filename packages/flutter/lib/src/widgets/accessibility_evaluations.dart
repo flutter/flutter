@@ -8,10 +8,24 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../foundation/_features.dart';
 import 'binding.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'text.dart';
+
+const String _kAccessibilityEvaluationsDisabledErrorMessage = '''
+Accessibility evaluations APIs are not enabled.
+
+Accessibility evaluations APIs are currently experimental. Do not use accessibility evaluations APIs in
+production applications or plugins published to pub.dev.
+
+To try experimental accessibility evaluations APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the accessibility evaluations feature flag.
+
+See: https://github.com/flutter/flutter/issues/32057.
+''';
 
 /// {@template flutter.widgets.accessibility_evaluations.internal}
 /// Do not use in production, Flutter will make breaking changes to this API, even in patch versions
@@ -51,7 +65,14 @@ abstract class AccessibilityEvaluation {
   const AccessibilityEvaluation();
 
   /// Evaluate whether the current state of the `tester` conforms to the rule.
-  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+    if (!isAccessibilityEvaluationsEnabled) {
+      throw UnsupportedError(_kAccessibilityEvaluationsDisabledErrorMessage);
+    }
+    return _evaluate(binding);
+  }
+
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding);
 }
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
@@ -77,7 +98,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   static const double _kMinimumGapToBoundary = 0.001;
 
   @override
-  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
       violations.addAll(
@@ -177,7 +198,7 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   const LabeledTapTargetEvaluation();
 
   @override
-  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
@@ -255,7 +276,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   static const double _tolerance = -0.01;
 
   @override
-  Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
+  Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;

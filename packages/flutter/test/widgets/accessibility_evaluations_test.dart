@@ -4,11 +4,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/src/widgets/accessibility_evaluations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('MinimumTapTargetEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility-evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
+
     const evaluation = MinimumTapTargetEvaluation(size: Size(48.0, 48.0), link: 'link');
 
     testWidgets('passes for valid targets', (WidgetTester tester) async {
@@ -67,6 +78,15 @@ void main() {
   });
 
   group('LabeledTapTargetEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility-evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
     const evaluation = LabeledTapTargetEvaluation();
 
     testWidgets('passes for labeled targets', (WidgetTester tester) async {
@@ -103,6 +123,15 @@ void main() {
   });
 
   group('MinimumTextContrastEvaluation', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility-evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
     const evaluation = MinimumTextContrastEvaluation();
 
     testWidgets('passes for high contrast', (WidgetTester tester) async {
@@ -121,9 +150,9 @@ void main() {
           ),
         ),
       );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(
-        () => evaluation.evaluate(tester.binding),
-      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
       expect(result!.violations, isEmpty);
       handle.dispose();
     });
@@ -144,9 +173,9 @@ void main() {
           ),
         ),
       );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(
-        () => evaluation.evaluate(tester.binding),
-      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
       expect(result!.violations, hasLength(1));
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 4.5'));
       handle.dispose();
@@ -154,6 +183,15 @@ void main() {
   });
 
   group('MinimumTextContrastEvaluationAAA', () {
+    late final Set<String> originalFeatureFlags;
+    setUpAll(() {
+      originalFeatureFlags = {...debugEnabledFeatureFlags};
+      debugEnabledFeatureFlags.add('accessibility-evaluations');
+    });
+    tearDownAll(() {
+      debugEnabledFeatureFlags.clear();
+      debugEnabledFeatureFlags.addAll(originalFeatureFlags);
+    });
     const evaluation = MinimumTextContrastEvaluationAAA();
 
     testWidgets('passes for very high contrast', (WidgetTester tester) async {
@@ -172,9 +210,9 @@ void main() {
           ),
         ),
       );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(
-        () => evaluation.evaluate(tester.binding),
-      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
       expect(result!.violations, isEmpty);
       handle.dispose();
     });
@@ -197,9 +235,9 @@ void main() {
           ),
         ),
       );
-      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(
-        () => evaluation.evaluate(tester.binding),
-      );
+      final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
+        return await evaluation.evaluate(tester.binding);
+      });
       expect(result!.violations, isNotEmpty);
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 7.0'));
       handle.dispose();
