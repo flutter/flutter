@@ -136,10 +136,11 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else if (is_wide_gamut) {
-    // Always use RGBA F16 for wide gamut images to preserve full precision.
-    // BGR_101010x_XR (10-bit) loses precision for out-of-gamut colors.
+    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
+                                 ? kBGR_101010x_XR_SkColorType
+                                 : kRGBA_F16_SkColorType;
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
-        .makeColorType(kRGBA_F16_SkColorType)
+        .makeColorType(color_type)
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else {

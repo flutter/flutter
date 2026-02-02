@@ -14,7 +14,17 @@ import 'package:integration_test/integration_test.dart';
 import 'package:wide_gamut_test/main.dart' as app;
 
 /// Half-float has ~0.001 step size near 1.0, so 0.002 catches any real error.
-const double _defaultEpsilon = 0.002;
+/// BGRA10_XR has ~0.002 step size, so 0.01 is needed for 10-bit formats.
+const double _defaultEpsilon = 0.01;
+
+// See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
+double _decodeBGR10(int x) {
+  const max = 1.25098;
+  const min = -0.752941;
+  const intercept = min;
+  const double slope = (max - min) / 1024.0;
+  return (x * slope) + intercept;
+}
 
 double _decodeHalf(int x) {
   if (x == 0x7c00) {
@@ -77,13 +87,48 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   return (foundColor, closestColor);
 }
 
+(bool, List<double>) _findBGRA10Color(
+  Uint8List bytes,
+  int width,
+  int height,
+  List<double> color, {
+  required double epsilon,
+}) {
+  final byteData = ByteData.sublistView(bytes);
+  expect(bytes.lengthInBytes, width * height * 8);
+  expect(bytes.lengthInBytes, byteData.lengthInBytes);
+  var foundColor = false;
+  double minDistance = double.infinity;
+  var closestColor = <double>[0, 0, 0];
+  for (var i = 0; i < bytes.lengthInBytes; i += 8) {
+    final int pixel = byteData.getUint64(i, Endian.host);
+    final double blue = _decodeBGR10((pixel >> 6) & 0x3ff);
+    final double green = _decodeBGR10((pixel >> 22) & 0x3ff);
+    final double red = _decodeBGR10((pixel >> 38) & 0x3ff);
+    if (_isAlmost(red, color[0], epsilon) &&
+        _isAlmost(green, color[1], epsilon) &&
+        _isAlmost(blue, color[2], epsilon)) {
+      foundColor = true;
+    }
+    final double currentDistance = _distanceSquared(red, green, blue, color);
+    if (currentDistance < minDistance) {
+      minDistance = currentDistance;
+      closestColor = <double>[red, green, blue];
+    }
+  }
+  return (foundColor, closestColor);
+}
+
 (bool, List<double>) _findColor(List<dynamic> result, List<double> color, {double? epsilon}) {
   epsilon ??= _defaultEpsilon;
   expect(result, isNotNull);
   expect(result.length, 4);
   final [int width, int height, String format, Uint8List bytes] = result;
-  expect(format, 'MTLPixelFormatRGBA16Float');
-  return _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon);
+  return switch (format) {
+    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(bytes, width, height, color, epsilon: epsilon),
+    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon),
+    _ => (false, <double>[0, 0, 0]),
+  };
 }
 
 class _HasColor extends Matcher {

@@ -233,12 +233,12 @@ FLUTTER_ASSERT_ARC
   return view;
 }
 
-- (void)testWideGamutViewSetsRGBA16FloatPixelFormat {
+- (void)testWideGamutViewSetsBGRA10XRPixelFormat {
   FlutterView* view = [self createViewInWindowWithWideGamut:YES];
-  // On a wide gamut capable device, the pixel format should be RGBA16Float.
+  // On a wide gamut capable device, the pixel format should be BGRA10_XR.
   // On non-wide-gamut devices, it falls back to BGRA8Unorm.
   if ([view isWideGamutSupported]) {
-    XCTAssertEqual(view.pixelFormat, MTLPixelFormatRGBA16Float);
+    XCTAssertEqual(view.pixelFormat, MTLPixelFormatBGRA10_XR);
   } else {
     XCTAssertEqual(view.pixelFormat, MTLPixelFormatBGRA8Unorm);
   }
@@ -270,16 +270,16 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - FlutterOverlayView Wide Gamut Tests
 
-- (void)testOverlayViewWideGamutSetsRGBA16Float {
+- (void)testOverlayViewWideGamutSetsBGRA10XR {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
-  XCTAssertEqual(layer.pixelFormat, MTLPixelFormatRGBA16Float);
+  XCTAssertEqual(layer.pixelFormat, MTLPixelFormatBGRA10_XR);
 }
 
 - (void)testOverlayViewWideGamutSetsExtendedSRGBColorSpace {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:2.0 pixelFormat:MTLPixelFormatBGRA10_XR];
   CAMetalLayer* layer = (CAMetalLayer*)overlay.layer;
   CGColorSpaceRef colorSpace = layer.colorspace;
   XCTAssertNotNil((__bridge id)colorSpace);
@@ -304,7 +304,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testOverlayViewContentsScaleIsSet {
   FlutterOverlayView* overlay =
-      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatRGBA16Float];
+      [[FlutterOverlayView alloc] initWithContentsScale:3.0 pixelFormat:MTLPixelFormatBGRA10_XR];
   XCTAssertEqual(overlay.layer.contentsScale, 3.0);
   XCTAssertEqual(overlay.layer.rasterizationScale, 3.0);
 }
