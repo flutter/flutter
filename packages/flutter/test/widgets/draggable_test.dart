@@ -532,7 +532,8 @@ void main() {
             ),
             DragTarget<int>(
               builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const Text('Target');
+                // Ensure the drag target is big enough with the default text font size provided by WidgetsApp.
+                return const SizedBox(height: 100.0, child: Text('Target'));
               },
               onAccept: (int? data) {
                 events.add('drop');
@@ -3380,7 +3381,10 @@ void main() {
                 return const Text('Target');
               },
             ),
-            Container(width: 400.0),
+            // Use a wide enough container, so that the ListView is scrollable with WidgetsApp.
+            // Since WidgetsApp uses a smaller default font size, the content might not scroll otherwise.
+            // The width value is chosen so that the content is scrollable while keeping all items visible.
+            const SizedBox(width: 680.0),
             const Draggable<int>(
               data: 1,
               feedback: Text('H'),
@@ -3422,52 +3426,38 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 4,
+                          id: 8,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.scrollLeft,
+                            SemanticsAction.scrollToOffset,
+                          ],
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 9,
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.scrollLeft,
-                                SemanticsAction.scrollToOffset,
-                              ],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 5,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'Target',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 6,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'H',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 7,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'V',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 8,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'N',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                              ],
+                              id: 4,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'Target',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 5,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'H',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 6,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'V',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 7,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'N',
+                              textDirection: TextDirection.ltr,
                             ),
                           ],
                         ),
@@ -3505,44 +3495,32 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 3,
-                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
                         TestSemantics(
-                          id: 4,
+                          id: 8,
+                          actions: <SemanticsAction>[SemanticsAction.scrollToOffset],
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             TestSemantics(
-                              id: 9,
-                              actions: <SemanticsAction>[SemanticsAction.scrollToOffset],
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  id: 5,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'Target',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 6,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'H',
-                                  textDirection: TextDirection.ltr,
-                                ),
-                                TestSemantics(
-                                  id: 7,
-                                  tags: <SemanticsTag>[
-                                    const SemanticsTag('RenderViewport.twoPane'),
-                                  ],
-                                  label: 'V',
-                                  textDirection: TextDirection.ltr,
-                                ),
-
-                                /// N is moved offscreen.
-                              ],
+                              id: 4,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'Target',
+                              textDirection: TextDirection.ltr,
                             ),
+                            TestSemantics(
+                              id: 5,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'H',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              id: 6,
+                              tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                              label: 'V',
+                              textDirection: TextDirection.ltr,
+                            ),
+
+                            /// N is moved offscreen.
                           ],
                         ),
                       ],
