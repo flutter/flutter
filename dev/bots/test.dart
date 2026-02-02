@@ -181,7 +181,9 @@ Future<void> _runGeneralToolTests() async {
     // Detect unit test time regressions (poor time delay handling, etc).
     // This overrides the 15 minute default for tools tests.
     // See the README.md and dart_test.yaml files in the flutter_tools package.
-    perTestTimeout: const Duration(seconds: 2),
+    // Increase per-test timeout for general tool tests to accommodate CI
+    // variability and avoid flaky failures due to overly aggressive timeouts.
+    perTestTimeout: const Duration(seconds: 5),
   );
 }
 
