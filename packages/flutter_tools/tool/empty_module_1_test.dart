@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // Test for completely empty file scenario
 // empty_module_1 has no lines recorded (0 total lines, 0 tested lines)
 

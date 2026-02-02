@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // Test file demonstrating the divide by zero fixes:
 // 1. Returning '0.00' instead of attempting to divide by zero
 // 2. Treating empty libraries as 0% in comparisons without crashing

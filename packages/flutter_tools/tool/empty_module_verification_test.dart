@@ -1,5 +1,9 @@
 // Test to verify empty_module handling and overall coverage result
 
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:test/test.dart';
 import 'test_helpers.dart';
 
@@ -77,7 +81,7 @@ void main() {
 
       print('✓ Test 2 PASSED: Overall result calculation');
       print('  Per-Library Coverage:');
-      for (final output in outputs) {
+      for (final String output in outputs) {
         print('    $output');
       }
       print('  Overall: $overallPercent%');
