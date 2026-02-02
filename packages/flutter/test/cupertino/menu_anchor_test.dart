@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5942,6 +5943,156 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.isOpen, isFalse);
+    });
+
+    testWidgets('respects closeOnActivate property', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                requestCloseOnActivate: false,
+                onPressed: () {},
+                child: Text(Tag.a.text),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Taps the CupertinoMenuItem which should close the menu
+      await tester.tap(find.text(Tag.a.text));
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isTrue);
+
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              CupertinoMenuItem(key: UniqueKey(), onPressed: () {}, child: Text(Tag.a.text)),
+            ],
+          ),
+        ),
+      );
+      // Taps the CupertinoMenuItem which should close the menu
+      await tester.tap(find.byType(CupertinoMenuItem));
+      await tester.pumpAndSettle();
+
+      expect(controller.isOpen, isFalse);
+    });
+
+    testWidgets('Focus node can be changed', (WidgetTester tester) async {
+      final focusNode1 = FocusNode(debugLabel: 'Node 1');
+      final focusNode2 = FocusNode(debugLabel: 'Node 2');
+      addTearDown(focusNode1.dispose);
+      addTearDown(focusNode2.dispose);
+
+      Widget buildApp(FocusNode? focusNode) {
+        return App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: focusNode)],
+            child: const AnchorButton(Tag.anchor),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(focusNode1));
+      controller.open();
+      await tester.pumpAndSettle();
+
+      focusNode1.requestFocus();
+      await tester.pump();
+
+      expect(focusNode1.hasPrimaryFocus, isTrue);
+      expect(focusNode2.hasPrimaryFocus, isFalse);
+
+      await tester.pumpWidget(buildApp(focusNode2));
+      await tester.pump();
+
+      focusNode2.requestFocus();
+      await tester.pump();
+
+      expect(focusNode1.hasPrimaryFocus, isFalse);
+      expect(focusNode2.hasPrimaryFocus, isTrue);
+
+      await tester.pumpWidget(buildApp(null));
+      await tester.pump();
+
+      expect(focusNode1.hasPrimaryFocus, isFalse);
+      expect(focusNode2.hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets('Autofocus works', (WidgetTester tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        App(
+          CupertinoMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[MenuItem.tag(Tag.a, autofocus: true, focusNode: focusNode)],
+            child: const AnchorButton(Tag.anchor),
+          ),
+        ),
+      );
+
+      controller.open();
+      // Wait for focus effect to resolve (microtasks)
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Changing DeviceGestureSettings does not throw', (WidgetTester tester) async {
+      // There is no simple way to verify that the touch slop is being respected other than
+      // attempting a gesture that would be affected by it. This test ensures that no exceptions
+      // are thrown when the touch slop is changed during a gesture.
+      await tester.pumpWidget(
+        App(
+          MediaQuery(
+            data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 30.0)),
+            child: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              child: const AnchorButton(Tag.anchor),
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pumpAndSettle();
+
+      // Simulate a tap down at the center of the widget.
+      final Offset center = tester.getCenter(find.byType(CupertinoMenuItem));
+      final TestGesture gesture = await tester.startGesture(center);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.pumpWidget(
+        App(
+          MediaQuery(
+            data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 100.0)),
+            child: CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              child: const AnchorButton(Tag.anchor),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
     });
   });
 
