@@ -544,34 +544,27 @@ class TextSelectionOverlay {
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
     assert(endpoints.isNotEmpty);
 
-    final TextDirection startHandleDirection = endpoints[0].direction ?? renderObject.textDirection;
-    final TextSelectionPoint? endPoint = endpoints.length > 1 ? endpoints[1] : null;
-    final TextDirection endHandleDirection =
-        (endPoint?.direction ?? endpoints[0].direction) ?? renderObject.textDirection;
+    late final TextSelectionHandleType startHandleType;
+    late final TextSelectionHandleType endHandleType;
 
-    final TextSelectionHandleType startHandleType;
-    final TextSelectionHandleType endHandleType;
     if (_selection.isCollapsed) {
       startHandleType = TextSelectionHandleType.collapsed;
       endHandleType = TextSelectionHandleType.collapsed;
     } else {
-      // Robust Role + Direction mapping.
-      // - Start + LTR: handle is attached to the left edge and points inward/right
-      //   (TextSelectionHandleType.left).
-      // - Start + RTL: handle is attached to the right edge and points inward/left
-      //   (TextSelectionHandleType.right).
-      // - End + LTR: handle is attached to the right edge and points inward/left
-      //   (TextSelectionHandleType.right).
-      // - End + RTL: handle is attached to the left edge and points inward/right
-      //   (TextSelectionHandleType.left).
-      // This ensures inward-pointing brackets ( SELECTION ) that are stable
-      // across line breaks, matching native Android behavior.
-      startHandleType = (startHandleDirection == TextDirection.rtl)
-          ? TextSelectionHandleType.right
-          : TextSelectionHandleType.left;
-      endHandleType = (endHandleDirection == TextDirection.rtl)
-          ? TextSelectionHandleType.left
-          : TextSelectionHandleType.right;
+      assert(endpoints.length == 2);
+      final TextDirection startHandleDirection =
+          endpoints.first.direction ?? renderObject.textDirection;
+      final TextDirection endHandleDirection =
+          endpoints.last.direction ?? renderObject.textDirection;
+
+      startHandleType = switch (startHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.left,
+        TextDirection.rtl => TextSelectionHandleType.right,
+      };
+      endHandleType = switch (endHandleDirection) {
+        TextDirection.ltr => TextSelectionHandleType.right,
+        TextDirection.rtl => TextSelectionHandleType.left,
+      };
     }
 
     _selectionOverlay
@@ -582,8 +575,7 @@ class TextSelectionOverlay {
       ..lineHeightAtEnd = _getEndGlyphHeight()
       // Update selection toolbar metrics.
       ..selectionEndpoints = endpoints
-      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition
-      ..textDirection = renderObject.textDirection;
+      ..toolbarLocation = renderObject.lastSecondaryTapDownPosition;
   }
 
   /// Causes the overlay to update its rendering.
@@ -608,22 +600,6 @@ class TextSelectionOverlay {
   ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
   ///     is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
-
-  /// The text direction of the text being selected.
-  ///
-  /// This is used to determine the direction of the selection handles.
-  ///
-  /// Changing the value while the handles are visible causes them to rebuild.
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
-    if (_textDirection == value) {
-      return;
-    }
-    _textDirection = value;
-    _selectionOverlay.textDirection = value; // Propagate to the internal SelectionOverlay
-    _selectionOverlay.markNeedsBuild();
-  }
 
   /// {@macro flutter.widgets.SelectionOverlay.magnifierIsVisible}
   bool get magnifierIsVisible => _selectionOverlay.magnifierIsVisible;
