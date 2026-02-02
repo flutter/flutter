@@ -5,6 +5,7 @@
 package com.flutter.gradle
 
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -385,10 +386,21 @@ object FlutterPluginUtils {
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 
+    /**
+     * Returns BaseExtension for the project. Used for compatibility.
+     *
+     * From BaseExtension docs:
+     * "Don't use this extension directly Instead, use one of the following:
+     *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
+     */
     internal fun getAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
+    }
+
+    internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension {
+        return project.extensions.getByType(ApplicationExtension::class.java)
     }
 
     // Avoid new usages this class is not part of the public AGP DSL.
