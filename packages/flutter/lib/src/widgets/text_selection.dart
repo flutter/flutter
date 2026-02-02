@@ -1973,16 +1973,19 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
 
   @override
   Widget build(BuildContext context) {
-    return TextFieldTapRegion(
-      child: Directionality(
-        textDirection: Directionality.of(this.context),
-        child: FadeTransition(
-          opacity: _opacity,
-          child: CompositedTransformFollower(
-            link: widget.layerLink,
-            showWhenUnlinked: false,
-            offset: widget.offset,
-            child: widget.child,
+    return TapRegion(
+      groupId: SelectableRegion,
+      child: TextFieldTapRegion(
+        child: Directionality(
+          textDirection: Directionality.of(this.context),
+          child: FadeTransition(
+            opacity: _opacity,
+            child: CompositedTransformFollower(
+              link: widget.layerLink,
+              showWhenUnlinked: false,
+              offset: widget.offset,
+              child: widget.child,
+            ),
           ),
         ),
       ),
