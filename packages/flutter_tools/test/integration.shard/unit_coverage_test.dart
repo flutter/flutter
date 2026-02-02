@@ -95,7 +95,7 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final result = await const LocalProcessManager().run(<String>[
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
@@ -127,7 +127,7 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final result = await const LocalProcessManager().run(<String>[
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
@@ -170,14 +170,14 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final result = await const LocalProcessManager().run(<String>[
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
     ]);
 
     final output = result.stdout.toString();
-    final lines = output.split('\n');
+    final List<String> lines = output.split('\n');
 
     // Find indices of each file in output
     final int emptyIndex = lines.indexWhere((String line) => line.contains('lib/empty.dart'));
