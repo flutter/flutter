@@ -21,12 +21,6 @@ import 'colors.dart';
 import 'dialog.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// late BuildContext context;
-// AnimationStatus animationStatus = AnimationStatus.dismissed;
-// late double Function(double value, {required double to}) _roundToDivisible;
-// late TextScaler textScaler;
-
 // Dismiss is handled by RawMenuAnchor
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
@@ -69,12 +63,6 @@ const double _kCupertinoMobileBaseFontSize = 17.0;
 ///
 /// Normalizing to the base font size simplifies storage of nonlinear layout
 /// spacing that depends on the text scale factor.
-///
-/// The equation to calculate the normalized text scale is:
-///
-/// ```dart
-/// final normalizedScale = textScaler.scale(17.0) - 17.0;
-/// ```
 ///
 /// The returned value is positive when the text scale factor is larger than the
 /// base font size, negative when smaller, and zero when equal.
@@ -306,39 +294,6 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// popup is unmounted and the menu status changes _to_
 /// [AnimationStatus.dismissed]. The [onAnimationStatusChanged] callback is
 /// invoked every time the [AnimationStatus] of the menu animation changes.
-///
-/// ## Usage
-/// {@tool snippet}
-///
-/// This snippet creates a [CupertinoMenuAnchor] containing one
-/// [CupertinoMenuItem]. The menu item prints `Item 1 pressed!` when pressed.
-///
-/// ```dart
-///  CupertinoMenuAnchor(
-///    menuChildren: <Widget>[
-///      CupertinoMenuItem(
-///        trailing: const Icon(CupertinoIcons.add),
-///        onPressed: () {
-///          print('Item 1 pressed!');
-///        },
-///        child: const Text('Item 1'),
-///      )
-///    ],
-///    builder: (BuildContext context, MenuController controller, Widget? child) {
-///      return CupertinoButton.filled(
-///        onPressed: () {
-///          if (controller.isOpen) {
-///            controller.close();
-///          } else {
-///            controller.open();
-///          }
-///        },
-///        child: const Text('Open'),
-///      );
-///    },
-///  );
-/// ```
-/// {@end-tool}
 ///
 /// {@tool dartpad}
 /// This example demonstrates a [CupertinoMenuAnchor] that wraps a button and
