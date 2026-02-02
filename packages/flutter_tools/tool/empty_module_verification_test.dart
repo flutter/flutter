@@ -1,12 +1,7 @@
 // Test to verify empty_module handling and overall coverage result
 
 import 'package:test/test.dart';
-
-class Coverage {
-  String? library;
-  int totalLines = 0;
-  int testedLines = 0;
-}
+import 'test_helpers.dart';
 
 void main() {
   group('Verification: Empty Module and Overall Result', () {
@@ -20,7 +15,8 @@ void main() {
           ? '0.00'
           : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-      final String output = '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
+      final String output =
+          '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
 
       expect(coverage.library, equals('empty_module'));
       expect(coveragePercent, equals('0.00'));
@@ -45,7 +41,9 @@ void main() {
       // Sort
       coverages.sort((Coverage left, Coverage right) {
         final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-        final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
+        final double rightPercent = right.totalLines == 0
+            ? 0
+            : right.testedLines / right.totalLines;
         return leftPercent.compareTo(rightPercent);
       });
 
@@ -62,7 +60,9 @@ void main() {
             ? '0.00'
             : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-        outputs.add('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
+        outputs.add(
+          '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
+        );
       }
 
       // Calculate overall
@@ -101,7 +101,9 @@ void main() {
 
       coverages.sort((Coverage left, Coverage right) {
         final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-        final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
+        final double rightPercent = right.totalLines == 0
+            ? 0
+            : right.testedLines / right.totalLines;
         return leftPercent.compareTo(rightPercent);
       });
 
@@ -114,7 +116,9 @@ void main() {
       print('  Sorted order:');
       for (int i = 0; i < coverages.length; i++) {
         final coverage = coverages[i];
-        final percent = coverage.totalLines == 0 ? 0.0 : (coverage.testedLines / coverage.totalLines) * 100;
+        final percent = coverage.totalLines == 0
+            ? 0.0
+            : (coverage.testedLines / coverage.totalLines) * 100;
         print('    ${i + 1}. ${coverage.library} (${percent.toStringAsFixed(1)}%)');
       }
     });
@@ -142,7 +146,9 @@ void main() {
       // Sort
       coverages.sort((Coverage left, Coverage right) {
         final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-        final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
+        final double rightPercent = right.totalLines == 0
+            ? 0
+            : right.testedLines / right.totalLines;
         return leftPercent.compareTo(rightPercent);
       });
 
@@ -162,7 +168,8 @@ void main() {
             ? '0.00'
             : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-        final String output = '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
+        final String output =
+            '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
         outputs.add(output);
         print('  $output');
       }

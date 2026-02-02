@@ -2,13 +2,7 @@
 
 import 'dart:io';
 import 'package:test/test.dart';
-
-// Mock Coverage class (same as in unit_coverage.dart)
-class Coverage {
-  String? library;
-  int totalLines = 0;
-  int testedLines = 0;
-}
+import 'test_helpers.dart';
 
 void main() {
   group('Coverage Division by Zero Tests', () {
@@ -25,16 +19,15 @@ void main() {
       ];
 
       // This should not throw a divide by zero error
-      expect(
-        () {
-          coverages.sort((Coverage left, Coverage right) {
-            final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-            final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
-            return leftPercent.compareTo(rightPercent);
-          });
-        },
-        returnsNormally,
-      );
+      expect(() {
+        coverages.sort((Coverage left, Coverage right) {
+          final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
+          final double rightPercent = right.totalLines == 0
+              ? 0
+              : right.testedLines / right.totalLines;
+          return leftPercent.compareTo(rightPercent);
+        });
+      }, returnsNormally);
 
       print('✓ Test 1 Passed: Sort handles zero totalLines correctly');
     });
@@ -45,13 +38,11 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-        // This should return '0.00' instead of crashing
-        final String coveragePercent = coverage.totalLines == 0
-          ? '0.00'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+      // This should return '0.00' instead of crashing
+      final String coveragePercent = formatCoveragePercent(coverage);
 
-        expect(coveragePercent, equals('0.00'));
-        print('✓ Test 2 Passed: Per-library coverage returns 0.00 for zero lines');
+      expect(coveragePercent, equals('0.00'));
+      print('✓ Test 2 Passed: Per-library coverage returns 0.00 for zero lines');
     });
 
     test('Test 3: Overall coverage with all zero denominators', () {
@@ -74,13 +65,13 @@ void main() {
         overallDenominator += coverage.totalLines;
       }
 
-        // This should return '0.00' instead of crashing
-        final String overallPercent = overallDenominator == 0
+      // This should return '0.00' instead of crashing
+      final String overallPercent = overallDenominator == 0
           ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
-        expect(overallPercent, equals('0.00'));
-        print('✓ Test 3 Passed: Overall coverage returns 0.00 for zero denominator');
+      expect(overallPercent, equals('0.00'));
+      print('✓ Test 3 Passed: Overall coverage returns 0.00 for zero denominator');
     });
 
     test('Test 4: Normal coverage calculation (non-zero values)', () {
@@ -89,9 +80,7 @@ void main() {
         ..totalLines = 100
         ..testedLines = 75;
 
-      final String coveragePercent = coverage.totalLines == 0
-          ? 'N/A'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+      final String coveragePercent = formatCoveragePercent(coverage);
 
       expect(coveragePercent, equals('75.00'));
       print('✓ Test 4 Passed: Normal coverage calculation works correctly');
@@ -113,16 +102,15 @@ void main() {
           ..testedLines = 80,
       ];
 
-      expect(
-        () {
-          coverages.sort((Coverage left, Coverage right) {
-            final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-            final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
-            return leftPercent.compareTo(rightPercent);
-          });
-        },
-        returnsNormally,
-      );
+      expect(() {
+        coverages.sort((Coverage left, Coverage right) {
+          final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
+          final double rightPercent = right.totalLines == 0
+              ? 0
+              : right.testedLines / right.totalLines;
+          return leftPercent.compareTo(rightPercent);
+        });
+      }, returnsNormally);
 
       // Verify sort order: zero percent first, then 50%, then 80%
       expect(coverages[0].library, equals('lib_zero'));
@@ -152,7 +140,7 @@ void main() {
       }
 
       final String overallPercent = overallDenominator == 0
-          ? 'N/A'
+          ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
       // (80 + 40) / (100 + 50) * 100 = 120 / 150 * 100 = 80.00

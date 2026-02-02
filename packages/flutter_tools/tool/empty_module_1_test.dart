@@ -2,12 +2,7 @@
 // empty_module_1 has no lines recorded (0 total lines, 0 tested lines)
 
 import 'package:test/test.dart';
-
-class Coverage {
-  String? library;
-  int totalLines = 0;
-  int testedLines = 0;
-}
+import 'test_helpers.dart';
 
 void main() {
   group('Empty File Test: empty_module_1 with No Lines', () {

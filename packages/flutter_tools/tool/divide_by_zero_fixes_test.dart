@@ -3,16 +3,11 @@
 // 2. Treating it as 0% in comparisons without crashing
 
 import 'package:test/test.dart';
-
-class Coverage {
-  String? library;
-  int totalLines = 0;
-  int testedLines = 0;
-}
+import 'test_helpers.dart';
 
 void main() {
-  group('Fix 1: Returning N/A Instead of Divide by Zero', () {
-    test('Empty library returns N/A string for percentage display', () {
+  group('Fix 1: Returning 0.00 Instead Of Divide by Zero', () {
+    test('Empty library returns 0.00 string for percentage display', () {
       final coverage = Coverage()
         ..library = 'empty_lib'
         ..totalLines = 0
@@ -27,7 +22,7 @@ void main() {
       print('✓ Fix 1.1: Empty library returns "0.00%" instead of crashing');
     });
 
-    test('Multiple empty libraries all return N/A', () {
+    test('Multiple empty libraries all return 0.00', () {
       final coverages = <Coverage>[
         Coverage()
           ..library = 'empty_lib_1'
@@ -51,7 +46,7 @@ void main() {
       print('✓ Fix 1.2: Multiple empty libraries return 0.00');
     });
 
-    test('Overall coverage returns N/A when all libraries are empty', () {
+    test('Overall coverage returns 0.00 when all libraries are empty', () {
       double overallNumerator = 0;
       double overallDenominator = 0;
 
@@ -80,7 +75,7 @@ void main() {
       print('✓ Fix 1.3: Overall coverage returns 0.00 when denominator is zero');
     });
 
-    test('Output format shows N/A for empty libraries', () {
+    test('Output format shows 0.00 for empty libraries', () {
       final coverage = Coverage()
         ..library = 'my_empty_module'
         ..totalLines = 0

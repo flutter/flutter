@@ -4,12 +4,7 @@
 import 'dart:io';
 import 'package:test/test.dart';
 
-// Mock Coverage class (same as in unit_coverage.dart)
-class Coverage {
-  String? library;
-  int totalLines = 0;
-  int testedLines = 0;
-}
+import 'test_helpers.dart';
 
 void main() {
   group('Edge Case: Library with No Lines Recorded', () {
@@ -19,12 +14,10 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-        final String coveragePercent = coverage.totalLines == 0
-          ? '0.00'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+      final String coveragePercent = formatCoveragePercent(coverage);
 
-        expect(coveragePercent, equals('0.00'));
-        print('✓ Test 1 Passed: Single empty library returns 0.00');
+      expect(coveragePercent, equals('0.00'));
+      print('✓ Test 1 Passed: Single empty library returns 0.00');
     });
 
     test('Test 2: Multiple libraries, one with no lines', () {
@@ -41,9 +34,7 @@ void main() {
 
       final List<String> results = [];
       for (final coverage in coverages) {
-        final String coveragePercent = coverage.totalLines == 0
-          ? '0.00'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+        final String coveragePercent = formatCoveragePercent(coverage);
         results.add('${coverage.library}: $coveragePercent%');
       }
 
@@ -68,16 +59,15 @@ void main() {
           ..testedLines = 0,
       ];
 
-      expect(
-        () {
-          coverages.sort((Coverage left, Coverage right) {
-            final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-            final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
-            return leftPercent.compareTo(rightPercent);
-          });
-        },
-        returnsNormally,
-      );
+      expect(() {
+        coverages.sort((Coverage left, Coverage right) {
+          final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
+          final double rightPercent = right.totalLines == 0
+              ? 0
+              : right.testedLines / right.totalLines;
+          return leftPercent.compareTo(rightPercent);
+        });
+      }, returnsNormally);
 
       // Verify sort order: both empty (0%) come before 60%
       expect(coverages[0].library, equals('empty_lib_1'));
@@ -110,12 +100,12 @@ void main() {
         overallDenominator += coverage.totalLines;
       }
 
-        final String overallPercent = overallDenominator == 0
+      final String overallPercent = overallDenominator == 0
           ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
-        expect(overallPercent, equals('0.00'));
-        print('✓ Test 4 Passed: All empty libraries return overall 0.00');
+      expect(overallPercent, equals('0.00'));
+      print('✓ Test 4 Passed: All empty libraries return overall 0.00');
     });
 
     test('Test 5: Overall coverage with some empty libraries', () {
@@ -143,7 +133,7 @@ void main() {
       }
 
       final String overallPercent = overallDenominator == 0
-          ? 'N/A'
+          ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
       // (50 + 150) / (100 + 200) * 100 = 200 / 300 * 100 = 66.67
@@ -157,15 +147,13 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-        final String coveragePercent = coverage.totalLines == 0
-          ? '0.00'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+      final String coveragePercent = formatCoveragePercent(coverage);
 
-        final String output =
+      final String output =
           '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
 
-        expect(output, equals('empty_module: 0.00% | 0 | 0'));
-        print('✓ Test 6 Passed: Output formatting with empty library correct');
+      expect(output, equals('empty_module: 0.00% | 0 | 0'));
+      print('✓ Test 6 Passed: Output formatting with empty library correct');
     });
 
     test('Test 7: Edge case - empty library after sorting', () {
@@ -182,7 +170,9 @@ void main() {
 
       coverages.sort((Coverage left, Coverage right) {
         final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-        final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
+        final double rightPercent = right.totalLines == 0
+            ? 0
+            : right.testedLines / right.totalLines;
         return leftPercent.compareTo(rightPercent);
       });
 
@@ -203,13 +193,15 @@ void main() {
         ..totalLines = 1
         ..testedLines = 1;
 
-        final String emptyPercent = emptyCoverage.totalLines == 0
+      final String emptyPercent = emptyCoverage.totalLines == 0
           ? '0.00'
           : (emptyCoverage.testedLines / emptyCoverage.totalLines * 100).toStringAsFixed(2);
 
       final String singlePercent = singleLineCoverage.totalLines == 0
-          ? 'N/A'
-          : (singleLineCoverage.testedLines / singleLineCoverage.totalLines * 100).toStringAsFixed(2);
+          ? '0.00'
+          : (singleLineCoverage.testedLines / singleLineCoverage.totalLines * 100).toStringAsFixed(
+              2,
+            );
 
       expect(emptyPercent, equals('0.00'));
       expect(singlePercent, equals('100.00'));
@@ -239,16 +231,15 @@ void main() {
       ];
 
       // Test sorting
-      expect(
-        () {
-          coverages.sort((Coverage left, Coverage right) {
-            final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
-            final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
-            return leftPercent.compareTo(rightPercent);
-          });
-        },
-        returnsNormally,
-      );
+      expect(() {
+        coverages.sort((Coverage left, Coverage right) {
+          final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
+          final double rightPercent = right.totalLines == 0
+              ? 0
+              : right.testedLines / right.totalLines;
+          return leftPercent.compareTo(rightPercent);
+        });
+      }, returnsNormally);
 
       // Test per-library output
       double overallNumerator = 0;
@@ -259,14 +250,16 @@ void main() {
         overallNumerator += coverage.testedLines;
         overallDenominator += coverage.totalLines;
         final String coveragePercent = coverage.totalLines == 0
-          ? '0.00'
-          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
-        lines.add('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
+            ? '0.00'
+            : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+        lines.add(
+          '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
+        );
       }
 
       // Test overall calculation
       final String overallPercent = overallDenominator == 0
-          ? 'N/A'
+          ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
       expect(lines.length, equals(4));
