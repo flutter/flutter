@@ -250,17 +250,6 @@ double _computeSquaredDistanceToRect(Offset point, Rect rect) {
 }
 
 /// Returns the nearest multiple of `to` to `value`.
-///
-/// ```dart
-/// print(_roundToDivisible(3.15, to: 0));    // 3.15
-/// print(_roundToDivisible(3.15, to: 1));    // 3
-/// print(_roundToDivisible(3.15, to: 0.1));  // 3.2
-/// print(_roundToDivisible(3.15, to: 0.01)); // 3.15
-/// print(_roundToDivisible(3.15, to: 0.25)); // 3.25
-/// print(_roundToDivisible(3.15, to: 0.5));  // 3.0
-/// print(_roundToDivisible(-3.15, to: 0.5)); // -3.0
-/// print(_roundToDivisible(-3.15, to: 0.1)); // -3.2
-/// ```
 double _roundToDivisible(double value, {required double to}) {
   if (to == 0) {
     return value;
@@ -319,9 +308,9 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
 /// ## Usage
-/// {@tool sample}
+/// {@tool snippet}
 ///
-/// This sample creates a [CupertinoMenuAnchor] containing one
+/// This snippet creates a [CupertinoMenuAnchor] containing one
 /// [CupertinoMenuItem]. The menu item prints `Item 1 pressed!` when pressed.
 ///
 /// ```dart
@@ -409,38 +398,6 @@ class CupertinoMenuAnchor extends StatefulWidget {
   /// remains true throughout the opening, opened, and closing phases, and
   /// therefore cannot be used on its own to determine the current animation
   /// direction.
-  ///
-  /// {@tool snippet}
-  /// This example shows how to use the [onAnimationStatusChanged] callback to
-  /// create a [MenuAnchor] that will toggle between opening and closing.
-  ///
-  /// ```dart
-  /// CupertinoMenuAnchor(
-  ///   onAnimationStatusChanged: (AnimationStatus status) {
-  ///     // Typically, animationStatus would be stored in a State object.
-  ///     animationStatus = status;
-  ///   },
-  ///   menuChildren: <Widget>[
-  ///     CupertinoMenuItem(
-  ///       onPressed: () {},
-  ///       child: const Text('Menu Item')
-  ///     ),
-  ///   ],
-  ///   builder: (BuildContext context, MenuController controller, Widget? child) {
-  ///     return CupertinoButton(
-  ///       onPressed: () {
-  ///         if (animationStatus.isForwardOrCompleted) {
-  ///           controller.close();
-  ///         } else {
-  ///           controller.open();
-  ///         }
-  ///       },
-  ///       child: const Icon(Icons.more_vert),
-  ///     );
-  ///   },
-  /// );
-  /// ```
-  /// {@end-tool}
   ///
   /// Defaults to null.
   final CupertinoMenuAnimationStatusChangedCallback? onAnimationStatusChanged;
@@ -1725,42 +1682,6 @@ class _CupertinoDividerPainter extends CustomPainter {
 }
 
 /// A menu item for use in a [CupertinoMenuAnchor].
-///
-/// {@tool snippet}
-///
-/// This sample code shows a [CupertinoMenuItem] that prints "Item 1 pressed!"
-/// when pressed.
-///
-/// ```dart
-/// CupertinoMenuAnchor(
-///   menuChildren: <Widget>[
-///     CupertinoMenuItem(
-///       trailing: const Icon(CupertinoIcons.add),
-///       onPressed: () {
-///         print('Item 1 pressed!');
-///       },
-///       child: const Text('Item 1'),
-///     )
-///   ],
-///   builder: (
-///     BuildContext context,
-///     MenuController controller,
-///     Widget? child,
-///   ) {
-///     return CupertinoButton.filled(
-///       onPressed: () {
-///         if (controller.isOpen) {
-///           controller.close();
-///         } else {
-///           controller.open();
-///         }
-///       },
-///       child: const Text('Open'),
-///     );
-///   },
-/// );
-/// ```
-/// {@end-tool}
 ///
 /// ## Layout
 /// The menu item is unconstrained by default and will grow to fit the size of
