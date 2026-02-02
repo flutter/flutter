@@ -1344,7 +1344,7 @@ class SimpleDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[if (title != null) titleWidget!, if (children != null) contentWidget!],
+        children: <Widget>[?titleWidget, ?contentWidget],
       ),
     );
 
