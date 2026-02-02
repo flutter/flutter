@@ -4,8 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a menu with three
-/// [CupertinoMenuItem]s and one [CupertinoMenuDivider].
+/// Flutter code sample for a basic [CupertinoMenuAnchor].
 void main() => runApp(const CupertinoMenuAnchorApp());
 
 class CupertinoMenuAnchorApp extends StatelessWidget {
@@ -14,12 +13,7 @@ class CupertinoMenuAnchorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          middle: Text('CupertinoMenuAnchor Example'),
-        ),
-        child: CupertinoMenuAnchorExample(),
-      ),
+      home: CupertinoPageScaffold(child: CupertinoMenuAnchorExample()),
     );
   }
 }
@@ -37,8 +31,7 @@ class _CupertinoMenuAnchorExampleState
   // Optional: Create a focus node to allow focus traversal between the menu
   // button and the menu overlay.
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-  String _pressedItem = '';
-  AnimationStatus _status = AnimationStatus.dismissed;
+  AnimationStatus _animationStatus = AnimationStatus.dismissed;
 
   @override
   void dispose() {
@@ -48,54 +41,22 @@ class _CupertinoMenuAnchorExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        spacing: 20,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          CupertinoMenuAnchor(
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: CupertinoMenuAnchor(
             onAnimationStatusChanged: (AnimationStatus status) {
-              _status = status;
+              // Since we are only checking the animation status when the button
+              // is pressed, we don't need to call setState here.
+              _animationStatus = status;
             },
             childFocusNode: _buttonFocusNode,
             menuChildren: <Widget>[
               CupertinoMenuItem(
-                onPressed: () {
-                  setState(() {
-                    _pressedItem = 'Regular Item';
-                  });
-                },
+                onPressed: () {},
                 subtitle: const Text('Subtitle'),
-                child: const Text('Regular Item'),
-              ),
-              CupertinoMenuItem(
-                onPressed: () {
-                  setState(() {
-                    _pressedItem = 'Colorful Item';
-                  });
-                },
-                decoration: const WidgetStateProperty<BoxDecoration>.fromMap(<
-                  WidgetStatesConstraint,
-                  BoxDecoration
-                >{
-                  WidgetState.dragged: BoxDecoration(color: Color(0xAEE48500)),
-                  WidgetState.pressed: BoxDecoration(color: Color(0xA6E3002A)),
-                  WidgetState.hovered: BoxDecoration(color: Color(0xA90069DA)),
-                  WidgetState.focused: BoxDecoration(color: Color(0x9B00C8BE)),
-                  WidgetState.any: BoxDecoration(color: Color(0x00000000)),
-                }),
-                child: const Text('Colorful Item'),
-              ),
-              const CupertinoMenuDivider(),
-              CupertinoMenuItem(
-                trailing: const Icon(CupertinoIcons.delete),
-                isDestructiveAction: true,
-                child: const Text('Destructive Item'),
-                onPressed: () {
-                  setState(() {
-                    _pressedItem = 'Destructive Item';
-                  });
-                },
+                trailing: const Icon(CupertinoIcons.star),
+                child: const Text('Menu Item'),
               ),
             ],
             builder:
@@ -105,29 +66,21 @@ class _CupertinoMenuAnchorExampleState
                   Widget? child,
                 ) {
                   return CupertinoButton(
-                    sizeStyle: CupertinoButtonSize.medium,
+                    sizeStyle: CupertinoButtonSize.small,
                     focusNode: _buttonFocusNode,
                     onPressed: () {
-                      if (_status.isForwardOrCompleted) {
+                      if (_animationStatus.isForwardOrCompleted) {
                         controller.close();
                       } else {
                         controller.open();
                       }
                     },
-                    child: Text(
-                      _status.isForwardOrCompleted ? 'Close Menu' : 'Open Menu',
-                    ),
+                    child: const Icon(CupertinoIcons.ellipsis_vertical_circle),
                   );
                 },
           ),
-          Text(
-            _pressedItem.isEmpty
-                ? 'No items pressed'
-                : 'You Pressed: $_pressedItem',
-            style: CupertinoTheme.of(context).textTheme.textStyle,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

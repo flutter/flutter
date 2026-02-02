@@ -295,11 +295,19 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// [AnimationStatus.dismissed]. The [onAnimationStatusChanged] callback is
 /// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
+/// ## Usage
+/// {@tool sample}
+/// This example demonstrates a simple [CupertinoMenuAnchor] that wraps
+/// a button.
+///
+/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
+/// {@end-tool}
+///
 /// {@tool dartpad}
 /// This example demonstrates a [CupertinoMenuAnchor] that wraps a button and
 /// shows a menu with three [CupertinoMenuItem]s and one [CupertinoMenuDivider].
 ///
-/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
+/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -1677,10 +1685,18 @@ class _CupertinoDividerPainter extends CustomPainter {
 /// will perform a destructive action, and will color the text of the menu item
 /// [CupertinoColors.systemRed].
 ///
-/// {@tool dartpad}
-/// This example shows basic usage of a [CupertinoMenuItem] that wraps a button.
+/// {@tool sample}
+/// This example demonstrates a simple [CupertinoMenuAnchor] that wraps
+/// a button.
 ///
 /// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates a [CupertinoMenuAnchor] that wraps a button and
+/// shows a menu with three [CupertinoMenuItem]s and one [CupertinoMenuDivider].
+///
+/// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.1.dart **
 /// {@end-tool}
 ///
 /// See also:
