@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart';
+
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
     required this.minExtent,
@@ -252,7 +254,7 @@ void main() {
                   Container(color: Colors.red),
                   ColoredBox(
                     color: Colors.green,
-                    child: TextField(controller: controller),
+                    child: TestTextField(controller: controller),
                   ),
                   Container(color: Colors.red),
                 ],
