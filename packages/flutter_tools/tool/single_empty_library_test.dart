@@ -8,28 +8,11 @@ import 'test_helpers.dart';
 
 void main() {
   group('Single Empty Library Tests', () {
-    test('Single empty library returns 0.00 instead of divide by zero', () {
-      // Create a coverage object with no lines recorded
-      final coverage = Coverage()
-        ..library = 'empty_module'
-        ..totalLines =
-            0 // No lines recorded
-        ..testedLines = 0; // No lines tested
-
-      // The fix: check if totalLines is zero before dividing
-      final String result = formatCoveragePercent(coverage);
-
-      // Verify the result
-      expect(result, equals('0.00'));
-      expect(coverage.totalLines, equals(0));
-      expect(coverage.testedLines, equals(0));
-
-      print('✓ PASSED: Single empty library correctly returns 0.00');
-      print('  Library: ${coverage.library}');
-      print('  Total Lines: ${coverage.totalLines}');
-      print('  Tested Lines: ${coverage.testedLines}');
-      print('  Result: $result');
+    test('placeholder - single empty library consolidated', () {
+      expect(true, isTrue);
     });
+
+    // Placeholder: tests consolidated into `unit_coverage_consolidated_test.dart`.
 
     test('Output formatting for single empty library', () {
       final coverage = Coverage()

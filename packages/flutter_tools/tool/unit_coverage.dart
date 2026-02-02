@@ -14,6 +14,20 @@ void main(List<String> args) {
     return;
   }
   final List<String> lines = File(args.single).readAsLinesSync();
+  final List<Coverage> coverages = parseLcovLines(lines);
+  sortCoveragesByPercent(coverages);
+
+  print('% | tested | total');
+  for (final coverage in coverages) {
+    print(
+      '${coverage.library}: ${formatCoveragePercent(coverage)}% | ${coverage.testedLines} | ${coverage.totalLines}',
+    );
+  }
+
+  print('OVERALL: ${formatOverallPercent(coverages)}%');
+}
+
+List<Coverage> parseLcovLines(List<String> lines) {
   final coverages = <Coverage>[];
   Coverage? currentCoverage;
 
@@ -33,28 +47,36 @@ void main(List<String> args) {
       currentCoverage = null;
     }
   }
+
+  return coverages;
+}
+
+void sortCoveragesByPercent(List<Coverage> coverages) {
   coverages.sort((Coverage left, Coverage right) {
     final double leftPercent = left.totalLines == 0 ? 0 : left.testedLines / left.totalLines;
     final double rightPercent = right.totalLines == 0 ? 0 : right.testedLines / right.totalLines;
     return leftPercent.compareTo(rightPercent);
   });
+}
+
+String formatCoveragePercent(Coverage coverage) {
+  if (coverage.totalLines == 0) {
+    return '0.00';
+  }
+  return (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+}
+
+String formatOverallPercent(List<Coverage> coverages) {
   double overallNumerator = 0;
   double overallDenominator = 0;
-  print('% | tested | total');
   for (final coverage in coverages) {
     overallNumerator += coverage.testedLines;
     overallDenominator += coverage.totalLines;
-    final String coveragePercent = coverage.totalLines == 0
-        ? '0.00'
-        : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
-    print(
-      '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
-    );
   }
-  final String overallPercent = overallDenominator == 0
-      ? '0.00'
-      : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
-  print('OVERALL: $overallPercent%');
+  if (overallDenominator == 0) {
+    return '0.00';
+  }
+  return (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 }
 
 class Coverage {
