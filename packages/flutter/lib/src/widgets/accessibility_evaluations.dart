@@ -28,7 +28,7 @@ class Violation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// The result of evaluating a semantics node by a [AccessibilityEvaluation].
+/// The result of evaluating a semantics node by an [AccessibilityEvaluation].
 @internal
 class EvaluationResult {
   /// Create a passing evaluation.
@@ -52,7 +52,7 @@ abstract class AccessibilityEvaluation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// A Evaluation which enforces that all tappable semantics nodes have a minimum
+/// An evaluation which enforces that all tappable semantics nodes have a minimum
 /// size.
 @internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
@@ -62,13 +62,13 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// The minimum allowed size of a tappable node.
   final Size size;
 
-  /// A link describing the tap target Evaluations for a platform.
+  /// A link describing the tap target evaluations for a platform.
   final String link;
 
-  /// The gap between targets to their parent scrollables to be consider as valid
+  /// The gap between targets to their parent scrollables to be considered valid
   /// tap targets.
   ///
-  /// This avoid cases where a tap target is partially scrolled off-screen that
+  /// This avoids cases where a tap target is partially scrolled off-screen that
   /// result in a smaller tap area.
   static const double _kMinimumGapToBoundary = 0.001;
 
@@ -145,7 +145,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 
   /// Returns whether [SemanticsNode] should be skipped for minimum tap target
-  /// Evaluation.
+  /// evaluation.
   ///
   /// Skips nodes which are link, hidden, or do not have actions.
   bool shouldSkipNode(SemanticsNode node) {
@@ -166,7 +166,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// A Evaluation which enforces that all nodes with a tap or long press action
+/// An evaluation which enforces that all nodes with a tap or long press action
 /// also have a label.
 @internal
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
@@ -215,10 +215,10 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// A Evaluation which verifies that all nodes that contribute semantics via text
+/// An evaluation which verifies that all nodes that contribute semantics via text
 /// meet minimum contrast levels.
 ///
-/// The Evaluations are defined by the Web Content Accessibility Evaluations,
+/// The evaluations are defined by the Web Content Accessibility Guidelines,
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
 @internal
 class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
@@ -406,11 +406,11 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
         '$node:\n'
         'Expected contrast ratio of at least $targetContrastRatio '
         'but found ${contrastRatio.toStringAsFixed(2)} '
-      'for a font size of $fontSize.\n'
-      'The computed colors was:\n'
-      'light - ${report.lightColor}, dark - ${report.darkColor}\n'
-      'See also: '
-      'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
+        'for a font size of $fontSize.\n'
+        'The computed colors were:\n'
+        'light - ${report.lightColor}, dark - ${report.darkColor}\n'
+        'See also: '
+        'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
       ),
     ];
   }
@@ -423,7 +423,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 
   /// Returns if a rectangle of node is off the screen.
   ///
-  /// Allows node to be of screen partially before culling the node.
+  /// Allows node to be off screen partially before culling the node.
   bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
     final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
     return paintBounds.top < -50.0 ||
@@ -447,13 +447,13 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// A Evaluation which verifies that all nodes that contribute semantics via text
+/// An evaluation which verifies that all nodes that contribute semantics via text
 /// meet **WCAG AAA** contrast levels.
 ///
-/// The AAA level is defined by the Web Content Accessibility Evaluations:
+/// The AAA level is defined by the Web Content Accessibility Guidelines:
 /// https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced
 ///
-/// This Evaluation enforces a stricter contrast ratio:
+/// This evaluation enforces a stricter contrast ratio:
 ///  * Normal text must have a contrast ratio of at least 7.0
 ///  * Large or bold text must have a contrast ratio of at least 4.5
 @internal
