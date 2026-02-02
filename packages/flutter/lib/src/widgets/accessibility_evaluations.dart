@@ -9,99 +9,52 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// The result of evaluating a semantics node by a [AccessibilityEvaluation].
-class Evaluation {
-  /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+/// {@template flutter.widgets.accessibility_evaluations.internal}
+/// Do not use in production, Flutter will make breaking changes to this API, even in patch versions
+/// {@endtemplate}
+///
+/// A violation of a semantics node.
+@internal
+class Violation {
+  /// Creates a violation.
+  const Violation(this.node, this.reason);
 
-  /// Create a failing evaluation, with an optional [reason] explaining the
-  /// result.
-  const Evaluation.fail([this.reason]) : passed = false;
+  /// The semantics node that violates the policy.
+  final SemanticsNode node;
 
-  // private constructor for adding cases together.
-  const Evaluation._(this.passed, this.reason);
-
-  /// Whether the given tree or node passed the policy evaluation.
-  final bool passed;
-
-  /// If [passed] is false, contains the reason for failure.
-  final String? reason;
-
-  /// Combines two evaluation results.
-  ///
-  /// The [reason] will be concatenated with a newline, and [passed] will be
-  /// combined with an `&&` operator.
-  Evaluation operator +(Evaluation? other) {
-    if (other == null) {
-      return this;
-    }
-
-    final buffer = StringBuffer();
-    if (reason != null && reason!.isNotEmpty) {
-      buffer.write(reason);
-      buffer.writeln();
-    }
-    if (other.reason != null && other.reason!.isNotEmpty) {
-      buffer.write(other.reason);
-    }
-    return Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
-  }
+  /// The reason for the violation.
+  final String reason;
 }
 
-// Examples can assume:
-// typedef HomePage = Placeholder;
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// The result of evaluating a semantics node by a [AccessibilityEvaluation].
+@internal
+class EvaluationResult {
+  /// Create a passing evaluation.
+  EvaluationResult(this.violations);
 
-/// An accessibility Evaluation describes a recommendation an application should
-/// meet to be considered accessible.
+  /// If [passed] is false, contains the reason for failure.
+  final List<Violation> violations;
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
-/// Use [meetsEvaluation] matcher to test whether a screen meets the
-/// accessibility Evaluation.
-///
-/// {@tool snippet}
-///
-/// This sample demonstrates how to run an accessibility Evaluation in a unit
-/// test against a single screen.
-///
-/// ```dart
-/// testWidgets('HomePage meets androidTapTargetEvaluation', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
-///   await tester.pumpWidget(const MaterialApp(home: HomePage()));
-///   await expectLater(tester, meetsEvaluation(androidTapTargetEvaluation));
-///   handle.dispose();
-/// });
-/// ```
-/// {@end-tool}
-///
-/// See also:
-///  * [androidTapTargetEvaluation], which checks that tappable nodes have a
-///    minimum size of 48 by 48 pixels.
-///  * [iOSTapTargetEvaluation], which checks that tappable nodes have a minimum
-///    size of 44 by 44 pixels.
-///  * [textContrastEvaluation], which provides guidance for text contrast
-///    requirements specified by [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef).
-///  * [labeledTapTargetEvaluation], which enforces that all nodes with a tap or
-///    long press action also have a label.
+/// A class that evaluates a single accessibility rule.
+@internal
 abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
 
   /// Evaluate whether the current state of the `tester` conforms to the rule.
-  FutureOr<Evaluation> evaluate(WidgetsBinding binding);
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
 }
 
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
 /// A Evaluation which enforces that all tappable semantics nodes have a minimum
 /// size.
-///
-/// Each platform defines its own Evaluations for minimum tap areas.
-///
-/// See also:
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-///  * [androidTapTargetEvaluation], which checks that tappable nodes have a
-///    minimum size of 48 by 48 pixels.
-///  * [iOSTapTargetEvaluation], which checks that tappable nodes have a minimum
-///    size of 44 by 44 pixels.
-@visibleForTesting
+@internal
 class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTapTargetEvaluation].
   const MinimumTapTargetEvaluation({required this.size, required this.link});
@@ -120,26 +73,28 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   static const double _kMinimumGapToBoundary = 0.001;
 
   @override
-  FutureOr<Evaluation> evaluate(WidgetsBinding binding) {
-    var result = const Evaluation.pass();
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      result += _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!);
+      violations.addAll(
+        _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!),
+      );
     }
 
-    return result;
+    return EvaluationResult(violations);
   }
 
-  Evaluation _traverse(ui.FlutterView view, SemanticsNode node) {
-    var result = const Evaluation.pass();
+  List<Violation> _traverse(ui.FlutterView view, SemanticsNode node) {
+    var violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      result += _traverse(view, child);
+      violations.addAll(_traverse(view, child));
       return true;
     });
     if (node.isMergedIntoParent) {
-      return result;
+      return violations;
     }
     if (shouldSkipNode(node)) {
-      return result;
+      return violations;
     }
     Rect paintBounds = node.rect;
     SemanticsNode? current = node;
@@ -153,27 +108,30 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       // be partially scrolled offscreen.
       if (current.flagsCollection.hasImplicitScrolling &&
           _isAtBoundary(paintBounds, current.rect)) {
-        return result;
+        return violations;
       }
       current = current.parent;
     }
 
     final Rect viewRect = Offset.zero & view.physicalSize;
     if (_isAtBoundary(paintBounds, viewRect)) {
-      return result;
+      return violations;
     }
 
     // shrink by device pixel ratio.
     final Size candidateSize = paintBounds.size / view.devicePixelRatio;
     if (candidateSize.width < size.width - precisionErrorTolerance ||
         candidateSize.height < size.height - precisionErrorTolerance) {
-      result += Evaluation.fail(
+      violations.add(
+        Violation(
+          node,
         '$node: expected tap target size of at least $size, '
         'but found $candidateSize\n'
         'See also: $link',
+        ),
       );
     }
-    return result;
+    return violations;
   }
 
   static bool _isAtBoundary(Rect child, Rect parent) {
@@ -206,64 +164,63 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 }
 
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
 /// A Evaluation which enforces that all nodes with a tap or long press action
 /// also have a label.
-///
-/// See also:
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
+@internal
 class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
-  const LabeledTapTargetEvaluation._();
+  const LabeledTapTargetEvaluation();
 
   @override
-  FutureOr<Evaluation> evaluate(WidgetsBinding binding) {
-    var result = const Evaluation.pass();
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
-      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
     }
 
-    return result;
+    return EvaluationResult(violations);
   }
 
-  Evaluation _traverse(SemanticsNode node) {
-    var result = const Evaluation.pass();
+  List<Violation> _traverse(SemanticsNode node) {
+    var violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      result += _traverse(child);
+      violations.addAll(_traverse(child));
       return true;
     });
     if (node.isMergedIntoParent ||
         node.isInvisible ||
         node.flagsCollection.isHidden ||
         node.flagsCollection.isTextField) {
-      return result;
+      return violations;
     }
     final SemanticsData data = node.getSemanticsData();
     // Skip node if it has no actions, or is marked as hidden.
     if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap)) {
-      return result;
+      return violations;
     }
     if ((data.label.isEmpty) && (data.tooltip.isEmpty)) {
-      result += Evaluation.fail(
+      violations.add(
+        Violation(
+          node,
         '$node: expected tappable node to have semantic label, '
         'but none was found.',
+        ),
       );
     }
-    return result;
+    return violations;
   }
 }
 
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
 /// A Evaluation which verifies that all nodes that contribute semantics via text
 /// meet minimum contrast levels.
 ///
 /// The Evaluations are defined by the Web Content Accessibility Evaluations,
 /// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
-///
-/// See also:
-///  * [AccessibilityEvaluation], which provides a general overview of
-///    accessibility Evaluations and how to use them.
-///  * [MinimumTextContrastEvaluationAAA], which follows the WCAG AAA level.
-@visibleForTesting
+@internal
 class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   /// Create a new [MinimumTextContrastEvaluation].
   const MinimumTextContrastEvaluation();
@@ -294,8 +251,8 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   static const double _tolerance = -0.01;
 
   @override
-  Future<Evaluation> evaluate(WidgetsBinding binding) async {
-    var result = const Evaluation.pass();
+  Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
+    var violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
@@ -308,19 +265,19 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       final ByteData? byteData = await image.toByteData();
       image.dispose();
 
-      result += await _evaluateNode(root, image, byteData!, renderView);
+      violations.addAll(await _evaluateNode(root, image, byteData!, renderView));
     }
 
-    return result;
+    return EvaluationResult(violations);
   }
 
-  Future<Evaluation> _evaluateNode(
+  Future<List<Violation>> _evaluateNode(
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
   ) async {
-    var result = const Evaluation.pass();
+    var violations = <Violation>[];
 
     // Skip disabled nodes, as they not required to pass contrast check.
     final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
@@ -329,7 +286,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
         node.isMergedIntoParent ||
         node.flagsCollection.isHidden ||
         isDisabled) {
-      return result;
+      return violations;
     }
 
     final SemanticsData data = node.getSemanticsData();
@@ -339,10 +296,10 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       return true;
     });
     for (final child in children) {
-      result += await _evaluateNode(child, image, byteData, renderView);
+      violations.addAll(await _evaluateNode(child, image, byteData, renderView));
     }
-    if (shouldSkipNode(data)) {
-      return result;
+    if (_shouldSkipNode(data)) {
+      return violations;
     }
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = _collectElementsByText(
@@ -350,12 +307,12 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       text,
     );
     for (final element in elements) {
-      result += await _evaluateElement(node, element, image, byteData, renderView);
+      violations.addAll(await _evaluateElement(node, element, image, byteData, renderView));
     }
-    return result;
+    return violations;
   }
 
-  Future<Evaluation> _evaluateElement(
+  Future<List<Violation>> _evaluateElement(
     SemanticsNode node,
     Element element,
     ui.Image image,
@@ -400,7 +357,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     if (intersection.width <= 0 || intersection.height <= 0) {
       // Skip this element since it doesn't correspond to the given semantic
       // node.
-      return const Evaluation.pass();
+      return <Violation>[];
     }
 
     final Widget widget = element.widget;
@@ -419,8 +376,8 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
-      return const Evaluation.pass();
+    if (_isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
+      return <Violation>[];
     }
 
     final Map<Color, int> colorHistogram = _colorsWithinRect(
@@ -432,39 +389,42 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 
     // Node was too far off screen.
     if (colorHistogram.isEmpty) {
-      return const Evaluation.pass();
+      return <Violation>[];
     }
 
     final report = _ContrastReport(colorHistogram);
 
     final double contrastRatio = report.contrastRatio();
-    final double targetContrastRatio = this.targetContrastRatio(fontSize, bold: isBold);
+    final double targetContrastRatio = this._targetContrastRatio(fontSize, bold: isBold);
 
     if (contrastRatio - targetContrastRatio >= _tolerance) {
-      return const Evaluation.pass();
+      return <Violation>[];
     }
-    return Evaluation.fail(
-      '$node:\n'
-      'Expected contrast ratio of at least $targetContrastRatio '
-      'but found ${contrastRatio.toStringAsFixed(2)} '
+    return <Violation>[
+      Violation(
+        node,
+        '$node:\n'
+        'Expected contrast ratio of at least $targetContrastRatio '
+        'but found ${contrastRatio.toStringAsFixed(2)} '
       'for a font size of $fontSize.\n'
       'The computed colors was:\n'
       'light - ${report.lightColor}, dark - ${report.darkColor}\n'
       'See also: '
       'https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html',
-    );
+      ),
+    ];
   }
 
   /// Returns whether node should be skipped.
   ///
   /// Skip routes which might have labels, and nodes without any text.
-  bool shouldSkipNode(SemanticsData data) =>
+  bool _shouldSkipNode(SemanticsData data) =>
       data.flagsCollection.scopesRoute || (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   /// Returns if a rectangle of node is off the screen.
   ///
   /// Allows node to be of screen partially before culling the node.
-  bool isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
     final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
     return paintBounds.top < -50.0 ||
         paintBounds.left < -50.0 ||
@@ -475,7 +435,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double targetContrastRatio(double? fontSize, {required bool bold}) {
+  double _targetContrastRatio(double? fontSize, {required bool bold}) {
     final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
         fontSizeOrDefault >= kLargeTextMinimumSize) {
@@ -483,11 +443,10 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
     }
     return kMinimumRatioNormalText;
   }
-
-  @override
-  String get description => 'Text contrast should follow WCAG Evaluations';
 }
 
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
 /// A Evaluation which verifies that all nodes that contribute semantics via text
 /// meet **WCAG AAA** contrast levels.
 ///
@@ -497,11 +456,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
 /// This Evaluation enforces a stricter contrast ratio:
 ///  * Normal text must have a contrast ratio of at least 7.0
 ///  * Large or bold text must have a contrast ratio of at least 4.5
-///
-/// See also:
-///  * [MinimumTextContrastEvaluation], which follows the WCAG AA level.
-///  * [AccessibilityEvaluation], which provides an overview of Evaluations.
-@visibleForTesting
+@internal
 class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
   /// Create a new [MinimumTextContrastEvaluationAAA].
   const MinimumTextContrastEvaluationAAA();
@@ -517,7 +472,7 @@ class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
   static const double kAAAMinimumRatioNormalText = 7.0;
 
   @override
-  double targetContrastRatio(double? fontSize, {required bool bold}) {
+  double _targetContrastRatio(double? fontSize, {required bool bold}) {
     final double fontSizeOrDefault = fontSize ?? MinimumTextContrastEvaluation._kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= MinimumTextContrastEvaluation.kBoldTextMinimumSize) ||
         fontSizeOrDefault >= MinimumTextContrastEvaluation.kLargeTextMinimumSize) {
@@ -525,9 +480,6 @@ class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
     }
     return kAAAMinimumRatioNormalText;
   }
-
-  @override
-  String get description => 'Text contrast should follow WCAG AAA Evaluations';
 }
 
 /// A class that reports the contrast ratio of a part of the screen.
