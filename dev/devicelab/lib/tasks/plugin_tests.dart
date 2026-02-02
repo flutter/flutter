@@ -390,7 +390,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'windows':
-        final arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
+        final arch = Abi.current() == Abi.windowsArm64 ? 'arm64' : 'x64';
         if (await exec(
               path.join(
                 rootPath,
