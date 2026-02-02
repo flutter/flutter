@@ -9,7 +9,6 @@ import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../globals.dart' as globals show stdio;
-import '../../project.dart';
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {

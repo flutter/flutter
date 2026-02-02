@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../../bin/xcode_backend.dart';
 import '../src/common.dart' hide Context;
 import '../src/fake_process_manager.dart';
-import '../src/io.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
