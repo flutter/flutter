@@ -391,22 +391,23 @@ public class $pluginClass: NSObject, FlutterPlugin {
         }
       case 'windows':
         final arch = Abi.current() == Abi.windowsArm64 ? 'arm64' : 'x64';
-        if (await exec(
-              path.join(
-                rootPath,
-                'build',
-                'windows',
-                arch,
-                'plugins',
-                'plugintest',
-                'Debug',
-                'plugintest_test.exe',
-              ),
-              <String>[],
-              canFail: true,
-            ) !=
-            0) {
-          throw TaskResult.failure('Platform unit tests failed');
+        final String exePath = path.join(
+          rootPath,
+          'build',
+          'windows',
+          arch,
+          'plugins',
+          'plugintest',
+          'Debug',
+          'plugintest_test.exe',
+        );
+        // Diagnostic logging to make CI/devicelab failures easier to triage.
+        print('Windows plugin test: expected exe path: $exePath');
+        if (!File(exePath).existsSync()) {
+          throw TaskResult.failure('Platform unit tests failed: expected executable not found: $exePath');
+        }
+        if (await exec(exePath, <String>[], canFail: true) != 0) {
+          throw TaskResult.failure('Platform unit tests failed: execution returned non-zero exit code for $exePath');
         }
     }
   }
