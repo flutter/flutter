@@ -2923,7 +2923,7 @@ void main() {
     }
 
     Widget entry({required bool isDivider, Widget? child}) {
-      return DebugCupertinoMenuEntryMixin(isDivider: isDivider, child: child ?? const SizedBox());
+      return DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: isDivider, child: child);
     }
 
     testWidgets('Implicit dividers are drawn between menu items when isDivider is false ', (
@@ -3118,14 +3118,13 @@ void main() {
 
     testWidgets('no adjacent borders are drawn', (WidgetTester tester) async {
       await tester.pumpWidget(
-        CupertinoApp(
-          theme: const CupertinoThemeData(brightness: Brightness.light),
-          home: CupertinoMenuAnchor(
+        App(
+          CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: const <Widget>[
-              DebugCupertinoMenuEntryMixin(isDivider: true),
-              CupertinoMenuDivider(),
-              DebugCupertinoMenuEntryMixin(isDivider: true),
+            menuChildren: <Widget>[
+              DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: true),
+              const CupertinoMenuDivider(),
+              DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: true),
             ],
           ),
         ),
