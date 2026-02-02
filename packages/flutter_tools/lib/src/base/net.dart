@@ -268,16 +268,3 @@ Future<InternetAddress> get localIpAddress async {
     orElse: () => InternetAddress.loopbackIPv4,
   );
 }
-
-Future<int> findUnusedPort({String hostname = '0.0.0.0'}) async {
-  ServerSocket? socket;
-  try {
-    // We bind to the specified hostname (e.g., '0.0.0.0') and let the OS
-    // dynamically assign a free port by using port 0.
-    socket = await ServerSocket.bind(hostname, 0);
-    return socket.port;
-  } finally {
-    // Crucially, close the socket immediately to free the port for your service.
-    await socket?.close();
-  }
-}

@@ -231,6 +231,10 @@ class ResidentWebRunner extends ResidentRunner {
     await _stdErrSub?.cancel();
     await _serviceSub?.cancel();
     await _extensionEventSub?.cancel();
+    for (final MDNSDeviceDiscovery discovery in _mdnsDiscoveries) {
+      await discovery.stop();
+    }
+    _mdnsDiscoveries.clear();
 
     if (stopAppDuringCleanup) {
       await flutterDevice!.device!.stopApp(null);

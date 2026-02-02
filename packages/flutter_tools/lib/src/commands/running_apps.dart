@@ -12,8 +12,10 @@ import '../base/logger.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../mdns_device_discovery.dart';
 
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 const String _noRunningAppsFoundMessage =
     'No running Flutter apps found.\n'
@@ -30,21 +32,16 @@ class RunningAppsCommand extends FlutterCommand {
   }) : _mdnsClient = mdnsClient ?? MDnsClient(),
        _systemClock = systemClock,
        _logger = logger {
-    argParser.addFlag('machine', negatable: false, help: 'Print output in JSON format.');
+    argParser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Print output in JSON format.',
+    );
   }
 
   final MDnsClient _mdnsClient;
   final SystemClock _systemClock;
   final Logger _logger;
-
-  static const String _kProjectName = 'project_name';
-  static const String _kDeviceName = 'device_name';
-  static const String _kDeviceId = 'device_id';
-  static const String _kTargetPlatform = 'target_platform';
-  static const String _kMode = 'mode';
-  static const String _kWsUri = 'ws_uri';
-  static const String _kEpoch = 'epoch';
-  static const String _kFlutterDevicesService = '_flutter_devices._tcp';
 
   @override
   final name = 'running-apps';
@@ -62,7 +59,7 @@ class RunningAppsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     _logger.printStatus('Searching for running Flutter apps...');
 
-    final apps = <Map<String, String>>[];
+    final apps = <MDnsObservation>[];
     final seenUris = <String>{};
     try {
       await _mdnsClient.start();
@@ -71,114 +68,114 @@ class RunningAppsCommand extends FlutterCommand {
       // Listen for pointer records (PTR) to find services
       await for (final PtrResourceRecord ptr
           in _mdnsClient
-              .lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(_kFlutterDevicesService))
+              .lookup<PtrResourceRecord>(
+                ResourceRecordQuery.serverPointer(MDNSDeviceDiscovery.kFlutterDevicesService),
+              )
               .timeout(
                 const Duration(seconds: 5),
                 onTimeout: (EventSink<PtrResourceRecord> sink) => sink.close(),
               )) {
-        pendingLookups.add(
-          (() async {
-            try {
-              // For each PTR, look up the TXT records
-              await for (final TxtResourceRecord txt in _mdnsClient.lookup<TxtResourceRecord>(
-                ResourceRecordQuery.text(ptr.domainName),
-              )) {
-                final metadata = <String, String>{};
-                // The multicast_dns package joins the strings of a TXT record with newlines.
-                final List<String> parts = txt.text.split('\n');
-                for (final part in parts) {
-                  final int equalsIndex = part.indexOf('=');
-                  if (equalsIndex != -1) {
-                    // Trim to remove any whitespace that may be around the delimiters.
-                    metadata[part.substring(0, equalsIndex).trim()] = part
-                        .substring(equalsIndex + 1)
-                        .trim();
-                  }
-                }
-                if (metadata.isNotEmpty) {
-                  final String? uri = metadata[_kWsUri];
-                  if (uri != null) {
-                    if (seenUris.contains(uri)) {
-                      continue;
-                    }
-                    seenUris.add(uri);
-                  }
-                  apps.add(metadata);
-                }
-              }
-            } on Exception {
-              // Ignore errors for individual lookups
-            }
-          })(),
-        );
+        pendingLookups.add(_resolveAppMetadata(ptr, seenUris, apps));
       }
       await pendingLookups.wait;
     } finally {
       _mdnsClient.stop();
     }
 
-    if (boolArg('machine')) {
+    if (boolArg(FlutterGlobalOptions.kMachineFlag)) {
       _logger.printStatus(json.encode(apps));
-    } else {
-      if (apps.isEmpty) {
-        _logger.printStatus(_noRunningAppsFoundMessage);
-        return FlutterCommandResult.success();
+      return FlutterCommandResult.success();
+    }
+
+    if (apps.isEmpty) {
+      _logger.printStatus(_noRunningAppsFoundMessage);
+      return FlutterCommandResult.success();
+    }
+
+    // Sort by epoch descending (newest/shortest duration first).
+    apps.sort((MDnsObservation a, MDnsObservation b) {
+      final int? epochA = int.tryParse(a.epoch ?? '');
+      final int? epochB = int.tryParse(b.epoch ?? '');
+      if (epochA == null && epochB == null) {
+        return 0;
       }
-
-      // Sort by epoch descending (newest/shortest duration first).
-      apps.sort((Map<String, String> a, Map<String, String> b) {
-        final int? epochA = int.tryParse(a[_kEpoch] ?? '');
-        final int? epochB = int.tryParse(b[_kEpoch] ?? '');
-        if (epochA == null && epochB == null) {
-          return 0;
-        }
-        if (epochA == null) {
-          return 1; // Put unknown age last
-        }
-        if (epochB == null) {
-          return -1; // Put unknown age last
-        }
-        return epochB.compareTo(epochA);
-      });
-
-      _logger.printStatus('Found ${apps.length} running Flutter ${pluralize('app', apps.length)}:');
-      final table = <List<String>>[];
-      for (final app in apps) {
-        final String projectName = app[_kProjectName] ?? 'Unknown';
-        final String mode = app[_kMode] ?? 'Unknown';
-        final String deviceName = app[_kDeviceName] ?? 'Unknown';
-        final String deviceId = app[_kDeviceId] ?? 'Unknown';
-        final String platform = app[_kTargetPlatform] ?? 'Unknown';
-        final String vmServiceUri = app[_kWsUri] ?? 'Unknown';
-        final String age = processAge(app[_kEpoch], _systemClock);
-
-        // If the device name and ID are effectively the same (e.g. "macos" and "macos"),
-        // only show the name to avoid redundancy like "macos (macos)".
-        final deviceString = (deviceName.toLowerCase() == deviceId.toLowerCase())
-            ? deviceName
-            : '$deviceName ($deviceId)';
-        table.add(<String>['$projectName ($mode)', deviceString, platform, vmServiceUri, age]);
+      if (epochA == null) {
+        return 1; // Put unknown age last
       }
-
-      // TODO(jwren): consider combining this logic with the logic in `flutter devices`,
-      // see https://github.com/flutter/flutter/issues/180949
-      // Calculate column widths
-      final indices = List<int>.generate(table[0].length - 1, (int i) => i);
-      List<int> widths = indices.map<int>((int i) => 0).toList();
-      for (final row in table) {
-        widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+      if (epochB == null) {
+        return -1; // Put unknown age last
       }
+      return epochB.compareTo(epochA);
+    });
 
-      // Join columns into lines of text
-      for (final row in table) {
-        final String rowString = indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
-            .followedBy(<String>[row.last])
-            .join(' • ');
-        _logger.printStatus('  $rowString');
-      }
+    _logger.printStatus('Found ${apps.length} running Flutter ${pluralize('app', apps.length)}:');
+    final table = <List<String>>[];
+    for (final app in apps) {
+      final String projectName = app.projectName ?? 'Unknown';
+      final String mode = app.mode ?? 'Unknown';
+      final String deviceName = app.deviceName ?? 'Unknown';
+      final String deviceId = app.deviceId ?? 'Unknown';
+      final String platform = app.targetPlatform ?? 'Unknown';
+      final String vmServiceUri = app.wsUri ?? 'Unknown';
+      final String age = processAge(app.epoch, _systemClock);
+
+      // If the device name and ID are effectively the same (e.g., "macos" and "macos"),
+      // only show the name to avoid redundancy like "macos (macos)".
+      final deviceString = (deviceName.toLowerCase() == deviceId.toLowerCase())
+          ? deviceName
+          : '$deviceName ($deviceId)';
+      table.add(<String>['$projectName ($mode)', deviceString, platform, vmServiceUri, age]);
+    }
+
+    // TODO(jwren): consider combining this logic with the logic in `flutter devices`,
+    // see https://github.com/flutter/flutter/issues/180949
+    // Calculate column widths
+    final indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    List<int> widths = indices.map<int>((int i) => 0).toList();
+    for (final row in table) {
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+    }
+
+    // Join columns into lines of text
+    for (final row in table) {
+      final String rowString = indices
+          .map<String>((int i) => row[i].padRight(widths[i]))
+          .followedBy(<String>[row.last])
+          .join(' • ');
+      _logger.printStatus('  $rowString');
     }
     return FlutterCommandResult.success();
+  }
+
+  /// Resolves the app's metadata (e.g., project name, device, observatory URI)
+  /// from the TXT records.
+  ///
+  /// The [apps] list is populated with the metadata found.
+  /// The [seenUris] set is used to avoid duplicate entries for the same app.
+  Future<void> _resolveAppMetadata(
+    PtrResourceRecord ptr,
+    Set<String> seenUris,
+    List<MDnsObservation> apps,
+  ) async {
+    try {
+      // For each PTR, look up the TXT records
+      await for (final TxtResourceRecord txt in _mdnsClient.lookup<TxtResourceRecord>(
+        ResourceRecordQuery.text(ptr.domainName),
+      )) {
+        final MDnsObservation? observation = MDnsObservation.parse(txt.text);
+        if (observation != null) {
+          final String? uri = observation.wsUri;
+          if (uri != null) {
+            if (!seenUris.add(uri)) {
+              continue;
+            }
+          }
+          apps.add(observation);
+        }
+      }
+    } on Exception {
+      // Ignore errors for individual lookups
+    }
   }
 }
 

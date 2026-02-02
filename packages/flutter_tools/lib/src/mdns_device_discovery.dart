@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:logging/logging.dart' as log;
 import 'package:mdns_dart/mdns_dart.dart';
@@ -18,7 +19,7 @@ import 'build_info.dart';
 import 'device.dart';
 import 'version.dart';
 
-/// Discovers devices via mDNS and advertises the current Flutter application to them.
+/// Advertises the current Flutter application to other devices via mDNS.
 class MDNSDeviceDiscovery {
   MDNSDeviceDiscovery({
     required this.device,
@@ -31,18 +32,7 @@ class MDNSDeviceDiscovery {
     required this.botDetector,
   });
 
-  static const String _kWsUri = 'ws_uri';
-  static const String _kPid = 'pid';
-  static const String _kHostname = 'hostname';
-  static const String _kTarget = 'target';
-  static const String _kMode = 'mode';
-  static const String _kTargetPlatform = 'target_platform';
-  static const String _kEpoch = 'epoch';
-  static const String _kProjectName = 'project_name';
-  static const String _kDeviceName = 'device_name';
-  static const String _kDeviceId = 'device_id';
-  static const String _kFlutterVersion = 'flutter_version';
-  static const String _kDartVersion = 'dart_version';
+  static const String kFlutterDevicesService = '_flutter_devices._tcp';
 
   final Device device;
   final vmservice.VmService vmService;
@@ -80,11 +70,7 @@ class MDNSDeviceDiscovery {
       // Silence mDNS logs unless verbose logging is enabled.
       // mdns_dart uses the 'mdns_dart' logger.
       log.hierarchicalLoggingEnabled = true;
-      if (logger.isVerbose) {
-        log.Logger('mdns_dart').level = log.Level.ALL;
-      } else {
-        log.Logger('mdns_dart').level = log.Level.SEVERE;
-      }
+      log.Logger('mdns_dart').level = logger.isVerbose ? log.Level.ALL : log.Level.SEVERE;
 
       final ips = <InternetAddress>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6];
       final String hostname = platform.localHostname;
@@ -92,27 +78,28 @@ class MDNSDeviceDiscovery {
       final String frameworkVersion = flutterVersion.frameworkVersion;
       final String dartVersion = flutterVersion.dartSdkVersion;
 
-      final txt = <String>[
-        '$_kWsUri=$vmServiceUri',
-        '$_kPid=$pid',
-        '$_kHostname=$hostname',
-        '$_kTarget=${device.name}',
-        '$_kMode=${debuggingOptions.buildInfo.modeName}',
-        '$_kTargetPlatform=${getNameForTargetPlatform(targetPlatform)}',
-        '$_kEpoch=${systemClock.now().millisecondsSinceEpoch}',
-        '$_kProjectName=$appName',
-        '$_kDeviceName=${device.name}',
-        '$_kDeviceId=${device.id}',
-        '$_kFlutterVersion=$frameworkVersion',
-        '$_kDartVersion=$dartVersion',
-      ];
+      final observation = MDnsObservation(
+        wsUri: vmServiceUri.toString(),
+        pid: pid.toString(),
+        hostname: hostname,
+        deviceName: device.name,
+        targetPlatform: getNameForTargetPlatform(targetPlatform),
+        mode: debuggingOptions.buildInfo.modeName,
+        epoch: systemClock.now().millisecondsSinceEpoch.toString(),
+        projectName: appName,
+        deviceId: device.id,
+        flutterVersion: frameworkVersion,
+        dartVersion: dartVersion,
+      );
+
+      final List<String> txt = observation.toTxtRecord();
 
       // Advertise on all available interfaces (IPv4 and IPv6).
       for (final ip in ips) {
         try {
           final MDNSService mdnsService = await MDNSService.create(
             instance: 'Flutter Tools on $hostname',
-            service: '_flutter_devices._tcp',
+            service: kFlutterDevicesService,
             port: vmServiceUri.port,
             ips: <InternetAddress>[ip],
             txt: txt,
@@ -152,12 +139,120 @@ class MDNSDeviceDiscovery {
     // is modified during iteration.
     final serversToStop = List<MDNSServer>.of(_servers);
     _servers.clear();
-    for (final server in serversToStop) {
-      try {
-        await server.stop();
-      } on Exception catch (e) {
-        logger.printTrace('Error stopping mDNS server: $e');
+    await Future.wait<void>(
+      serversToStop.map(
+        (MDNSServer server) => server.stop().catchError((Object e) {
+          logger.printTrace('Error stopping mDNS server: $e');
+        }, test: (Object error) => error is Exception),
+      ),
+    );
+  }
+}
+
+/// A class representing the metadata discovered from a running Flutter application
+/// via mDNS.
+class MDnsObservation {
+  MDnsObservation({
+    this.hostname,
+    this.projectName,
+    this.deviceName,
+    this.deviceId,
+    this.targetPlatform,
+    this.mode,
+    this.wsUri,
+    this.epoch,
+    this.pid,
+    this.flutterVersion,
+    this.dartVersion,
+  });
+
+  static const String _kProjectName = 'project_name';
+  static const String _kDeviceName = 'device_name';
+  static const String _kDeviceId = 'device_id';
+  static const String _kTargetPlatform = 'target_platform';
+  static const String _kMode = 'mode';
+  static const String _kWsUri = 'ws_uri';
+  static const String _kEpoch = 'epoch';
+  static const String _kPid = 'pid';
+  static const String _kFlutterVersion = 'flutter_version';
+  static const String _kDartVersion = 'dart_version';
+  static const String _kHostname = 'hostname';
+
+  final String? hostname;
+  final String? projectName;
+  final String? deviceName;
+  final String? deviceId;
+  final String? targetPlatform;
+  final String? mode;
+  final String? wsUri;
+  final String? epoch;
+  final String? pid;
+  final String? flutterVersion;
+  final String? dartVersion;
+
+  /// Parses a raw TXT record string into an [MDnsObservation].
+  ///
+  /// Returns `null` if the record is empty or invalid.
+  static MDnsObservation? parse(String txtRecord) {
+    final metadata = <String, String>{};
+    // The multicast_dns package joins the strings of a TXT record with newlines.
+    final Iterable<String> parts = LineSplitter.split(txtRecord);
+    for (final part in parts) {
+      final int equalsIndex = part.indexOf('=');
+      if (equalsIndex != -1) {
+        // Trim to remove any whitespace that may be around the delimiters.
+        metadata[part.substring(0, equalsIndex).trim()] = part.substring(equalsIndex + 1).trim();
       }
     }
+    if (metadata.isEmpty) {
+      return null;
+    }
+
+    return MDnsObservation(
+      hostname: metadata[_kHostname],
+      projectName: metadata[_kProjectName],
+      deviceName: metadata[_kDeviceName],
+      deviceId: metadata[_kDeviceId],
+      targetPlatform: metadata[_kTargetPlatform],
+      mode: metadata[_kMode],
+      wsUri: metadata[_kWsUri],
+      epoch: metadata[_kEpoch],
+      pid: metadata[_kPid],
+      flutterVersion: metadata[_kFlutterVersion],
+      dartVersion: metadata[_kDartVersion],
+    );
+  }
+
+  /// Converts the observation to a list of strings for mDNS TXT record.
+  List<String> toTxtRecord() {
+    return <String>[
+      if (hostname != null) '$_kHostname=$hostname',
+      if (wsUri != null) '$_kWsUri=$wsUri',
+      if (pid != null) '$_kPid=$pid',
+      if (targetPlatform != null) '$_kTargetPlatform=$targetPlatform',
+      if (mode != null) '$_kMode=$mode',
+      if (epoch != null) '$_kEpoch=$epoch',
+      if (projectName != null) '$_kProjectName=$projectName',
+      if (deviceName != null) '$_kDeviceName=$deviceName',
+      if (deviceId != null) '$_kDeviceId=$deviceId',
+      if (flutterVersion != null) '$_kFlutterVersion=$flutterVersion',
+      if (dartVersion != null) '$_kDartVersion=$dartVersion',
+    ];
+  }
+
+  Map<String, String> toJson() {
+    return <String, String>{
+      if (hostname != null) _kHostname: hostname!,
+      if (projectName != null) _kProjectName: projectName!,
+      if (deviceName != null) _kDeviceName: deviceName!,
+      if (deviceId != null) _kDeviceId: deviceId!,
+      if (targetPlatform != null) _kTargetPlatform: targetPlatform!,
+      if (mode != null) _kMode: mode!,
+      if (wsUri != null) _kWsUri: wsUri!,
+      if (epoch != null) _kEpoch: epoch!,
+      if (pid != null) _kPid: pid!,
+      if (flutterVersion != null) _kFlutterVersion: flutterVersion!,
+      if (dartVersion != null) _kDartVersion: dartVersion!,
+    };
   }
 }

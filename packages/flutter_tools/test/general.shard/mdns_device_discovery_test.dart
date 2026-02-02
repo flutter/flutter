@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/build_info.dart' as build_info;
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/mdns_device_discovery.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -71,7 +71,7 @@ FakeMDNSDeviceDiscovery createDiscovery(
     device: FakeDevice(),
     vmService: FakeVmService(),
     debuggingOptions: DebuggingOptions.enabled(
-      build_info.BuildInfo.debug,
+      BuildInfo.debug,
       enableLocalDiscovery: enableLocalDiscovery,
     ),
     logger: BufferLogger.test(),
@@ -109,14 +109,18 @@ class FakeMDNSDeviceDiscovery extends MDNSDeviceDiscovery {
     // The base `advertise` logs "Running on CI/Bot..." if it returns early.
     // We can check the logger.
 
-    await super.advertise(appName: appName, vmServiceUri: vmServiceUri);
+    try {
+      await super.advertise(appName: appName, vmServiceUri: vmServiceUri);
+    } on Object {
+      // Ignore errors from starting mDNS
+    }
 
     // If it didn't return early, it would try to start mDNS.
     // Since we are in a test and haven't mocked MDNSServer, it will likely throw or log error
     // "Error getting local IPs or starting mDNS".
     // If the logger contains "Running on CI/Bot...", then it obeyed the check.
 
-    final testLogger = logger as BufferLogger;
+    final testLogger = (this as dynamic).logger as BufferLogger;
     if (testLogger.traceText.contains('Running on CI/Bot, not starting mDNS server.') ||
         testLogger.traceText.contains('mDNS local discovery is disabled.')) {
       advertised = false;
@@ -134,8 +138,7 @@ class FakeDevice extends Fake implements Device {
   final String id = 'test-device-id';
 
   @override
-  Future<build_info.TargetPlatform> get targetPlatform async =>
-      build_info.TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 }
 
 class FakeVmService extends Fake implements VmService {}
