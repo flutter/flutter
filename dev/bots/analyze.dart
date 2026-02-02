@@ -1529,7 +1529,7 @@ String _bullets(String value) => ' * $value';
 
 Future<void> verifyIssueLinks(String workingDirectory) async {
   const issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
-  const stops = <String>{'\n', ' ', "'", '"', r'\', ')', '>'};
+  const stops = <String>{'\n', '\r', ' ', "'", '"', r'\', ')', '>'};
   assert(
     !stops.contains('.'),
   ); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
