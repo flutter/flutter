@@ -73,4 +73,128 @@ end_of_record
       ]),
     );
   });
+
+  testWithoutContext('Handles empty files (zero lines) without producing NaN', () async {
+    final File coverageFile = tempDir.childFile('info.lcov')
+      ..writeAsStringSync('''
+SF:lib/empty_stub.dart
+end_of_record
+SF:lib/src/artifacts.dart
+DA:15,10
+DA:17,7
+LF:2
+LH:2
+end_of_record
+''');
+
+    final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
+    final String coverageScript = fileSystem.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'tool',
+      'unit_coverage.dart',
+    );
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      dartScript,
+      coverageScript,
+      coverageFile.path,
+    ]);
+
+    final String output = result.stdout.toString();
+    // Empty files should show 0.00% not NaN%
+    expect(output, contains('lib/empty_stub.dart: 0.00%'));
+    // Should not contain NaN anywhere in output
+    expect(output, isNot(contains('NaN')));
+    // Overall should be a valid percentage, not NaN
+    expect(output, contains('OVERALL: 50.00%'));
+  });
+
+  testWithoutContext('Handles projects with only empty files', () async {
+    final File coverageFile = tempDir.childFile('info.lcov')
+      ..writeAsStringSync('''
+SF:lib/empty_file.dart
+end_of_record
+SF:lib/another_empty.dart
+end_of_record
+''');
+
+    final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
+    final String coverageScript = fileSystem.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'tool',
+      'unit_coverage.dart',
+    );
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      dartScript,
+      coverageScript,
+      coverageFile.path,
+    ]);
+
+    final String output = result.stdout.toString();
+    // Each empty file should show 0.00%
+    expect(output, contains('lib/empty_file.dart: 0.00%'));
+    expect(output, contains('lib/another_empty.dart: 0.00%'));
+    // Overall should be 0.00%, not NaN
+    expect(output, contains('OVERALL: 0.00%'));
+    // Should not contain NaN anywhere
+    expect(output, isNot(contains('NaN')));
+  });
+
+  testWithoutContext('Correctly sorts files with mixed coverage including empty files', () async {
+    final File coverageFile = tempDir.childFile('info.lcov')
+      ..writeAsStringSync('''
+SF:lib/well_tested.dart
+DA:1,1
+DA:2,1
+DA:3,1
+DA:4,1
+DA:5,0
+end_of_record
+SF:lib/empty.dart
+end_of_record
+SF:lib/poor.dart
+DA:10,0
+DA:11,0
+DA:12,1
+end_of_record
+''');
+
+    final String dartScript = fileSystem.path.join(getFlutterRoot(), 'bin', 'dart');
+    final String coverageScript = fileSystem.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'tool',
+      'unit_coverage.dart',
+    );
+    final ProcessResult result = await const LocalProcessManager().run(<String>[
+      dartScript,
+      coverageScript,
+      coverageFile.path,
+    ]);
+
+    final String output = result.stdout.toString();
+    final List<String> lines = output.split('\n');
+    
+    // Find indices of each file in output
+    final int emptyIndex = lines.indexWhere((String line) => line.contains('lib/empty.dart'));
+    final int poorIndex = lines.indexWhere((String line) => line.contains('lib/poor.dart'));
+    final int wellTestedIndex = lines.indexWhere((String line) => line.contains('lib/well_tested.dart'));
+    
+    // Verify sorting order: empty (0%) < poor (33.33%) < well_tested (80%)
+    expect(emptyIndex, lessThan(poorIndex), reason: 'empty (0%) should come before poor (33%)');
+    expect(poorIndex, lessThan(wellTestedIndex), reason: 'poor (33%) should come before well_tested (80%)');
+    
+    // Verify percentages
+    expect(output, contains('lib/empty.dart: 0.00%'));
+    expect(output, contains('lib/poor.dart: 33.33%'));
+    expect(output, contains('lib/well_tested.dart: 80.00%'));
+    
+    // Overall should be valid
+    expect(output, isNot(contains('NaN')));
+    expect(output, contains('OVERALL: 37.50%'));
+  });
 }
