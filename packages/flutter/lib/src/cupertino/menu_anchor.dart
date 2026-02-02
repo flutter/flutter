@@ -2225,7 +2225,7 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
   // regression will return a value within 1 physical pixel of the observed
   // value at each text scale factor.
   //
-  // This behavior was observed on several iOS and iPadOS 18.5 simulators using
+  // This behavior was measured on several iOS and iPadOS 18.5 simulators using
   // the debug view.
   static const double _leadingWidthSlope = -311 / 1000;
   static const double _leadingWidthYIntercept = 10;
@@ -2799,6 +2799,32 @@ class _SwipeRegionState extends State<_SwipeRegion> {
   bool get isSwiping => _position != null;
   ui.Offset? _position;
 
+  @override
+  void didUpdateWidget(_SwipeRegion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled != oldWidget.enabled) {
+      if (!widget.enabled) {
+        _position = null;
+        widget.onDistanceChanged(0);
+        _recognizer?.dispose();
+        _recognizer = null;
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _recognizer?.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+  }
+
+  @override
+  void dispose() {
+    assert(_surfaces.isEmpty);
+    _disposeInactiveRecognizer();
+    super.dispose();
+  }
+
   void attachSurface(_RenderSwipeSurface surface) {
     _surfaces.add(surface);
   }
@@ -2835,32 +2861,6 @@ class _SwipeRegionState extends State<_SwipeRegion> {
 
     _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     _recognizer!.addPointer(event);
-  }
-
-  @override
-  void didUpdateWidget(_SwipeRegion oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.enabled != oldWidget.enabled) {
-      if (!widget.enabled) {
-        _position = null;
-        widget.onDistanceChanged(0);
-        _recognizer?.dispose();
-        _recognizer = null;
-      }
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _recognizer?.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
-  }
-
-  @override
-  void dispose() {
-    assert(_surfaces.isEmpty);
-    _disposeInactiveRecognizer();
-    super.dispose();
   }
 
   void _handleSwipeEnd(DragEndDetails position) {
