@@ -224,9 +224,7 @@ class XCResultIssue {
         if (urlValue is String) {
           location = _convertUrlToLocationString(urlValue);
           if (location == null) {
-            warnings.add(
-              '(XCResult) The `url` exists but it failed to be parsed. url: $urlValue',
-            );
+            warnings.add('(XCResult) The `url` exists but it failed to be parsed. url: $urlValue');
           }
         }
       }
