@@ -153,7 +153,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
-    'packages/flutter/test/widgets/draggable_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
     'packages/flutter/test/widgets/selectable_region_context_menu_test.dart',
     'packages/flutter/test/widgets/sliversemantics_test.dart',
