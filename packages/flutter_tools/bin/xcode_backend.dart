@@ -732,21 +732,4 @@ class Context {
   }
 }
 
-enum TargetPlatform {
-  ios(artifactName: 'ios', frameworkName: 'Flutter', infoPlistPath: 'Flutter.framework/Info.plist'),
-  macos(
-    artifactName: 'darwin-x64',
-    frameworkName: 'FlutterMacOS',
-    infoPlistPath: 'FlutterMacOS.framework/Resources/Info.plist',
-  );
-
-  const TargetPlatform({
-    required this.artifactName,
-    required this.frameworkName,
-    required this.infoPlistPath,
-  });
-
-  final String artifactName;
-  final String frameworkName;
-  final String infoPlistPath;
-}
+enum TargetPlatform { ios, macos }
