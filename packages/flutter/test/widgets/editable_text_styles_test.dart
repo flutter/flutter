@@ -106,9 +106,9 @@ void main() {
 
     expect(control.lastStyle, isNotNull);
     expect(control.lastStyle?.fontWeight, FontWeight.normal);
-    control.lastStyle = null; // Reset
+    control.lastStyle = null; // Reset.
 
-    // Update boldText
+    // Update boldText.
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(boldText: true),
@@ -155,7 +155,7 @@ void main() {
     expect(control.lastStyle?.letterSpacing, 1.0);
     control.lastStyle = null;
 
-    // Update letterSpacingOverride
+    // Update letterSpacingOverride.
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(letterSpacingOverride: 5.0),
@@ -202,7 +202,7 @@ void main() {
     expect(control.lastStyle?.wordSpacing, 2.0);
     control.lastStyle = null;
 
-    // Update wordSpacingOverride
+    // Update wordSpacingOverride.
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(wordSpacingOverride: 10.0),
@@ -250,7 +250,7 @@ void main() {
     expect(control.lastStyle!.lineHeight, 20.0);
     control.lastStyle = null;
 
-    // Update lineHeightScaleFactorOverride to 2.0
+    // Update lineHeightScaleFactorOverride to 2.0.
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(lineHeightScaleFactorOverride: 2.0),
