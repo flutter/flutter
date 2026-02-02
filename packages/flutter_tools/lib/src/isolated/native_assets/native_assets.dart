@@ -109,10 +109,12 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     nativeBuildDirectory: nativeBuildDirectory,
   );
 
-  // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
-  // while using it in native_assets_builder is not.
-  for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
-    await buildRunner.setCCompilerConfig(target);
+  if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
+    // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
+    // while using it in native_assets_builder is not.
+    for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
+      await buildRunner.setCCompilerConfig(target);
+    }
   }
 
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
