@@ -1354,6 +1354,7 @@ public class FlutterViewTest {
   public void onMeasure_whenWrapContent_sendsCorrectViewportMetrics() {
     FlutterSurfaceView flutterSurfaceView = spy(new FlutterSurfaceView(ctx));
     FlutterView flutterView = new FlutterView(ctx, flutterSurfaceView);
+    flutterView.isContentSizingEnabled = true;
     FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
     FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
     when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
