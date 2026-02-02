@@ -19,12 +19,12 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-      final String coveragePercent = coverage.totalLines == 0
-          ? 'N/A'
+        final String coveragePercent = coverage.totalLines == 0
+          ? '0.00'
           : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-      expect(coveragePercent, equals('N/A'));
-      print('✓ Test 1 Passed: Single empty library returns N/A');
+        expect(coveragePercent, equals('0.00'));
+        print('✓ Test 1 Passed: Single empty library returns 0.00');
     });
 
     test('Test 2: Multiple libraries, one with no lines', () {
@@ -42,12 +42,12 @@ void main() {
       final List<String> results = [];
       for (final coverage in coverages) {
         final String coveragePercent = coverage.totalLines == 0
-            ? 'N/A'
-            : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+          ? '0.00'
+          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
         results.add('${coverage.library}: $coveragePercent%');
       }
 
-      expect(results[0], equals('empty_lib: N/A%'));
+      expect(results[0], equals('empty_lib: 0.00%'));
       expect(results[1], equals('normal_lib: 50.00%'));
       print('✓ Test 2 Passed: Mixed libraries (one empty) handled correctly');
     });
@@ -110,12 +110,12 @@ void main() {
         overallDenominator += coverage.totalLines;
       }
 
-      final String overallPercent = overallDenominator == 0
-          ? 'N/A'
+        final String overallPercent = overallDenominator == 0
+          ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
-      expect(overallPercent, equals('N/A'));
-      print('✓ Test 4 Passed: All empty libraries return overall N/A');
+        expect(overallPercent, equals('0.00'));
+        print('✓ Test 4 Passed: All empty libraries return overall 0.00');
     });
 
     test('Test 5: Overall coverage with some empty libraries', () {
@@ -157,15 +157,15 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-      final String coveragePercent = coverage.totalLines == 0
-          ? 'N/A'
+        final String coveragePercent = coverage.totalLines == 0
+          ? '0.00'
           : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-      final String output =
+        final String output =
           '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}';
 
-      expect(output, equals('empty_module: N/A% | 0 | 0'));
-      print('✓ Test 6 Passed: Output formatting with empty library correct');
+        expect(output, equals('empty_module: 0.00% | 0 | 0'));
+        print('✓ Test 6 Passed: Output formatting with empty library correct');
     });
 
     test('Test 7: Edge case - empty library after sorting', () {
@@ -203,15 +203,15 @@ void main() {
         ..totalLines = 1
         ..testedLines = 1;
 
-      final String emptyPercent = emptyCoverage.totalLines == 0
-          ? 'N/A'
+        final String emptyPercent = emptyCoverage.totalLines == 0
+          ? '0.00'
           : (emptyCoverage.testedLines / emptyCoverage.totalLines * 100).toStringAsFixed(2);
 
       final String singlePercent = singleLineCoverage.totalLines == 0
           ? 'N/A'
           : (singleLineCoverage.testedLines / singleLineCoverage.totalLines * 100).toStringAsFixed(2);
 
-      expect(emptyPercent, equals('N/A'));
+      expect(emptyPercent, equals('0.00'));
       expect(singlePercent, equals('100.00'));
       print('✓ Test 8 Passed: Empty vs single line library handled correctly');
     });
@@ -259,8 +259,8 @@ void main() {
         overallNumerator += coverage.testedLines;
         overallDenominator += coverage.totalLines;
         final String coveragePercent = coverage.totalLines == 0
-            ? 'N/A'
-            : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+          ? '0.00'
+          : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
         lines.add('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
       }
 

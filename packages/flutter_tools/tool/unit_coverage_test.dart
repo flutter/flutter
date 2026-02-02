@@ -45,13 +45,13 @@ void main() {
         ..totalLines = 0
         ..testedLines = 0;
 
-      // This should return 'N/A' instead of crashing
-      final String coveragePercent = coverage.totalLines == 0
-          ? 'N/A'
+        // This should return '0.00' instead of crashing
+        final String coveragePercent = coverage.totalLines == 0
+          ? '0.00'
           : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
 
-      expect(coveragePercent, equals('N/A'));
-      print('✓ Test 2 Passed: Per-library coverage returns N/A for zero lines');
+        expect(coveragePercent, equals('0.00'));
+        print('✓ Test 2 Passed: Per-library coverage returns 0.00 for zero lines');
     });
 
     test('Test 3: Overall coverage with all zero denominators', () {
@@ -74,13 +74,13 @@ void main() {
         overallDenominator += coverage.totalLines;
       }
 
-      // This should return 'N/A' instead of crashing
-      final String overallPercent = overallDenominator == 0
-          ? 'N/A'
+        // This should return '0.00' instead of crashing
+        final String overallPercent = overallDenominator == 0
+          ? '0.00'
           : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
 
-      expect(overallPercent, equals('N/A'));
-      print('✓ Test 3 Passed: Overall coverage returns N/A for zero denominator');
+        expect(overallPercent, equals('0.00'));
+        print('✓ Test 3 Passed: Overall coverage returns 0.00 for zero denominator');
     });
 
     test('Test 4: Normal coverage calculation (non-zero values)', () {
