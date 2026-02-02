@@ -3,10 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/src/widgets/_window.dart';
 
 /// Flutter code sample for [Dialog].
 
-void main() => runApp(const DialogExampleApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final RegularWindowController controller = RegularWindowController(
+    preferredSize: Size(800, 600),
+  );
+  runWidget(
+    RegularWindow(controller: controller, child: const DialogExampleApp()),
+  );
+}
 
 class DialogExampleApp extends StatelessWidget {
   const DialogExampleApp({super.key});

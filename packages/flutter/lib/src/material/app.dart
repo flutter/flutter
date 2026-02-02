@@ -23,6 +23,7 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'arc.dart';
 import 'button_style.dart';
 import 'colors.dart';
+import 'dialog.dart' show DialogWindowingSupport;
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -1180,7 +1181,11 @@ class _MaterialAppState extends State<MaterialApp> {
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: WindowingConfiguration(
         enableWindowing: widget.useWindowing,
-        child: HeroControllerScope(controller: _heroController, child: result),
+        child: widget.useWindowing
+            ? DialogWindowingSupport(
+                child: HeroControllerScope(controller: _heroController, child: result),
+              )
+            : HeroControllerScope(controller: _heroController, child: result),
       ),
     );
   }
