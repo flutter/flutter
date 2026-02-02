@@ -222,4 +222,102 @@ void main() {
     expect(targetNode.label, text);
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180894
+  testWidgets('Text with semanticsIdentifier creates its own semantic node', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Text('Hello World', semanticsIdentifier: 'my-text-identifier'),
+      ),
+    );
+
+    // The Text widget should create its own semantic node with the identifier
+    final SemanticsNode node = tester.getSemantics(find.text('Hello World'));
+    expect(node.identifier, 'my-text-identifier');
+    expect(node.label, 'Hello World');
+
+    semantics.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180894
+  testWidgets('Text with semanticsIdentifier in Dialog creates its own semantic node', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const Dialog(
+                        child: Text('Dialog Text', semanticsIdentifier: 'dialog-text-identifier'),
+                      );
+                    },
+                  );
+                },
+                child: const Text('Open Dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog
+    await tester.tap(find.text('Open Dialog'));
+    await tester.pumpAndSettle();
+
+    // Find all semantic nodes
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!;
+    final allNodes = <SemanticsNode>[];
+    void collectNodes(SemanticsNode node) {
+      allNodes.add(node);
+      node.visitChildren((SemanticsNode child) {
+        collectNodes(child);
+        return true;
+      });
+    }
+
+    collectNodes(root);
+
+    // Find the dialog node and the text node
+    final SemanticsNode? dialogNode = allNodes
+        .where((SemanticsNode n) => n.hasFlag(SemanticsFlag.scopesRoute))
+        .firstOrNull;
+    final SemanticsNode? textNode = allNodes
+        .where((SemanticsNode n) => n.identifier == 'dialog-text-identifier')
+        .firstOrNull;
+
+    expect(dialogNode, isNotNull, reason: 'Dialog semantic node should exist');
+    expect(textNode, isNotNull, reason: 'Text semantic node should exist with its identifier');
+    expect(textNode!.label, 'Dialog Text');
+
+    // The text identifier should NOT be on the dialog node
+    // (This was the bug - the identifier was being absorbed by the dialog)
+    expect(
+      dialogNode!.identifier,
+      isNot('dialog-text-identifier'),
+      reason: 'Text identifier should not be absorbed by dialog node',
+    );
+
+    // The text node should be a descendant of the dialog, not merged into it
+    expect(
+      textNode.id,
+      isNot(dialogNode.id),
+      reason: 'Text should have its own semantic node, not be merged into dialog',
+    );
+
+    semantics.dispose();
+  });
 }
