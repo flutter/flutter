@@ -106,8 +106,8 @@ end_of_record
     expect(output, contains('lib/empty_stub.dart: 0.00%'));
     // Should not contain NaN anywhere in output
     expect(output, isNot(contains('NaN')));
-    // Overall should be a valid percentage, not NaN
-    expect(output, contains('OVERALL: 50.00%'));
+    // Overall should be a valid percentage: (0+2)/(0+2) = 100.00%
+    expect(output, contains('OVERALL: 100.00%'));
   });
 
   testWithoutContext('Handles projects with only empty files', () async {
@@ -193,8 +193,8 @@ end_of_record
     expect(output, contains('lib/poor.dart: 33.33%'));
     expect(output, contains('lib/well_tested.dart: 80.00%'));
 
-    // Overall should be valid
+    // Overall should be valid: (0+1+4)/(0+3+5) = 5/8 = 62.50%
     expect(output, isNot(contains('NaN')));
-    expect(output, contains('OVERALL: 37.50%'));
+    expect(output, contains('OVERALL: 62.50%'));
   });
 }
