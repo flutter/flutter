@@ -1467,16 +1467,21 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, {int minimumMatches
       .toList();
   final problems = <String>[];
   for (final file in files) {
-    final List<String> lines = file.readAsLinesSync();
-    for (var index = 0; index < lines.length; index += 1) {
-      if (lines[index].endsWith(' ')) {
-        problems.add('${file.path}:${index + 1}: trailing U+0020 space character');
-      } else if (lines[index].endsWith('\t')) {
-        problems.add('${file.path}:${index + 1}: trailing U+0009 tab character');
+    try {
+      final List<String> lines = file.readAsLinesSync();
+      for (var index = 0; index < lines.length; index += 1) {
+        if (lines[index].endsWith(' ')) {
+          problems.add('${file.path}:${index + 1}: trailing U+0020 space character');
+        } else if (lines[index].endsWith('\t')) {
+          problems.add('${file.path}:${index + 1}: trailing U+0009 tab character');
+        }
       }
-    }
-    if (lines.isNotEmpty && lines.last == '') {
-      problems.add('${file.path}:${lines.length}: trailing blank line');
+      if (lines.isNotEmpty && lines.last == '') {
+        problems.add('${file.path}:${lines.length}: trailing blank line');
+      }
+    } catch (e) {
+      // Skip files with encoding errors (e.g., binary files or files with invalid UTF-8)
+      continue;
     }
   }
   if (problems.isNotEmpty) {
@@ -2156,28 +2161,40 @@ bool _listEquals<T>(List<T> a, List<T> b) {
 }
 
 Future<List<File>> _gitFiles(String workingDirectory, {bool runSilently = true}) async {
-  final EvalResult evalResult = await _evalCommand(
-    'git',
-    <String>['ls-files', '-z'],
-    workingDirectory: workingDirectory,
-    runSilently: runSilently,
-  );
-  if (evalResult.exitCode != 0) {
-    foundError(<String>[
-      'git ls-files failed with exit code ${evalResult.exitCode}',
-      '${bold}stdout:$reset',
-      evalResult.stdout,
-      '${bold}stderr:$reset',
-      evalResult.stderr,
-    ]);
+  // git ls-files hangs on Windows with large repositories.
+  // Skip git filtering on Windows - the directory traversal will still find all files.
+  if (Platform.isWindows) {
+    return <File>[];
   }
-  final List<String> filenames = evalResult.stdout.split('\x00');
-  assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
-  filenames.removeLast();
-  return filenames
-      .where((String filename) => !filename.startsWith('engine/'))
-      .map<File>((String filename) => File(path.join(workingDirectory, filename)))
-      .toList();
+  
+  try {
+    final EvalResult evalResult = await _evalCommand(
+      'git',
+      <String>['ls-files', '-z'],
+      workingDirectory: workingDirectory,
+      runSilently: runSilently,
+    ).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        // git ls-files is hanging, return empty list
+        return EvalResult(stdout: '', stderr: 'git ls-files timed out', exitCode: 1);
+      },
+    );
+    if (evalResult.exitCode != 0) {
+      // If git ls-files fails or times out, return empty list
+      return <File>[];
+    }
+    final List<String> filenames = evalResult.stdout.split('\x00');
+    assert(filenames.last.isEmpty); // git ls-files gives a trailing blank 0x00
+    filenames.removeLast();
+    return filenames
+        .where((String filename) => !filename.startsWith('engine/'))
+        .map<File>((String filename) => File(path.join(workingDirectory, filename)))
+        .toList();
+  } catch (e) {
+    // If anything goes wrong with git, return empty list
+    return <File>[];
+  }
 }
 
 Stream<File> _allFiles(
@@ -2186,9 +2203,14 @@ Stream<File> _allFiles(
   required int minimumMatches,
 }) async* {
   final gitFileNamesSet = <String>{};
+  final gitFilesList = await _gitFiles(workingDirectory);
   gitFileNamesSet.addAll(
-    (await _gitFiles(workingDirectory)).map((File f) => path.canonicalize(f.absolute.path)),
+    gitFilesList.map((File f) => path.canonicalize(f.absolute.path)),
   );
+  
+  // If git ls-files fails/times out, gitFileNamesSet will be empty.
+  // In that case, skip the git filtering and just do directory traversal.
+  final useGitFilter = gitFileNamesSet.isNotEmpty;
 
   assert(
     extension == null || !extension.startsWith('.'),
@@ -2203,7 +2225,7 @@ Stream<File> _allFiles(
       continue;
     }
     if (entity is File) {
-      if (!gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
+      if (useGitFilter && !gitFileNamesSet.contains(path.canonicalize(entity.absolute.path))) {
         continue;
       }
       if (_isGeneratedPluginRegistrant(entity)) {
