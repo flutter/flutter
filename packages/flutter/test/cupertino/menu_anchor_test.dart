@@ -2922,17 +2922,13 @@ void main() {
       );
     }
 
+    Widget entry({required bool isDivider, Widget? child}) {
+      return DebugCupertinoMenuEntryMixin(isDivider: isDivider, child: child ?? const SizedBox());
+    }
+
     testWidgets('Implicit dividers are drawn between menu items when isDivider is false ', (
       WidgetTester tester,
     ) async {
-      Widget entry({required bool isDivider, Widget? child}) {
-        return _DebugCupertinoMenuEntryMixin(
-          isDivider: isDivider,
-          // isDivider: trailing,
-          child: child ?? const SizedBox(),
-        );
-      }
-
       await tester.pumpWidget(
         buildApp(<Widget>[
           entry(isDivider: false, child: Text(Tag.a.text)),
@@ -2947,9 +2943,9 @@ void main() {
       // Borders are drawn below menu items.
       List<Widget> children = findMenuChildren(tester);
       expect(children.length, 5);
-      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[4], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[4], isA<DebugCupertinoMenuEntryMixin>());
 
       // First item should never have a leading separator and bottom item should
       // never have a trailing separator.
@@ -2963,9 +2959,9 @@ void main() {
 
       children = findMenuChildren(tester);
       expect(children.length, 4);
-      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[1], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[3], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[1], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[3], isA<DebugCupertinoMenuEntryMixin>());
 
       await tester.pumpWidget(
         buildApp(<Widget>[
@@ -2978,9 +2974,9 @@ void main() {
       children = findMenuChildren(tester);
       // item 1: leading == false so no separator should be drawn before it
       expect(children.length, 3);
-      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[1], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[1], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
 
       await tester.pumpWidget(
         buildApp(<Widget>[
@@ -2993,22 +2989,16 @@ void main() {
       children = findMenuChildren(tester);
       // item 1: trailing == false so no separator should be drawn after it
       expect(children.length, 4);
-      expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<_DebugCupertinoMenuEntryMixin>());
-      expect(children[3], isA<_DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[3], isA<DebugCupertinoMenuEntryMixin>());
+
+      children.clear();
     });
 
     testWidgets(
       'Implicit dividers are drawn between widgets that do not mixin CupertinoMenuEntryMixin',
       (WidgetTester tester) async {
-        Widget entry({required bool isDivider, Widget? child}) {
-          return _DebugCupertinoMenuEntryMixin(
-            isDivider: isDivider,
-            // isDivider: trailing,
-            child: child ?? const SizedBox(),
-          );
-        }
-
         await tester.pumpWidget(
           buildApp(<Widget>[
             entry(isDivider: false, child: Text(Tag.a.text)),
@@ -3023,9 +3013,9 @@ void main() {
         // Borders are drawn below menu items.
         final List<Widget> children = findMenuChildren(tester);
         expect(children.length, 5);
-        expect(children[0], isA<_DebugCupertinoMenuEntryMixin>());
+        expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
         expect(children[2], isA<SizedBox>());
-        expect(children[4], isA<_DebugCupertinoMenuEntryMixin>());
+        expect(children[4], isA<DebugCupertinoMenuEntryMixin>());
       },
     );
 
@@ -3036,7 +3026,7 @@ void main() {
             controller: controller,
             menuChildren: <Widget>[
               CupertinoMenuItem(key: Tag.a.key, child: Text(Tag.a.text)),
-              _DebugCupertinoMenuEntryMixin(hasLeading: hasLeading),
+              DebugCupertinoMenuEntryMixin(hasLeading: hasLeading),
             ],
           ),
         );
@@ -3082,7 +3072,6 @@ void main() {
       );
 
       controller.open();
-      await tester.pump();
       await tester.pumpAndSettle();
 
       final ui.Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
@@ -3134,9 +3123,9 @@ void main() {
           home: CupertinoMenuAnchor(
             controller: controller,
             menuChildren: const <Widget>[
-              _DebugCupertinoMenuEntryMixin(isDivider: true),
+              DebugCupertinoMenuEntryMixin(isDivider: true),
               CupertinoMenuDivider(),
-              _DebugCupertinoMenuEntryMixin(isDivider: true),
+              DebugCupertinoMenuEntryMixin(isDivider: true),
             ],
           ),
         ),
@@ -3381,7 +3370,7 @@ void main() {
         for (final TextScaler size in AccessibilityTextSize.values) {
           await tester.pumpWidget(buildApp(textScaler: size));
 
-          final TextStyle expectedTextStyle = _DynamicTypeStyle.body.resolveTextStyle(size);
+          final TextStyle expectedTextStyle = DynamicTypeStyle.body.resolveTextStyle(size);
           final RenderParagraph textSized = findText()!;
           final TextStyle textStyle = textSized.text.style!;
           expect(textSized.textScaler, equals(size));
@@ -3457,7 +3446,7 @@ void main() {
         for (final TextScaler size in AccessibilityTextSize.values) {
           await tester.pumpWidget(buildApp(textScaler: size));
 
-          final TextStyle expectedTextStyle = _DynamicTypeStyle.subhead.resolveTextStyle(size);
+          final TextStyle expectedTextStyle = DynamicTypeStyle.subhead.resolveTextStyle(size);
           final RenderParagraph textSized = findText()!;
           final TextStyle textStyle = textSized.text.style!;
           expect(textSized.textScaler, equals(size));
@@ -3560,9 +3549,9 @@ void main() {
               child: CupertinoMenuAnchor(
                 controller: controller,
                 menuChildren: <Widget>[
-                  const _DebugCupertinoMenuEntryMixin(),
+                  const DebugCupertinoMenuEntryMixin(),
                   CupertinoMenuItem(child: Text(Tag.a.text)),
-                  const _DebugCupertinoMenuEntryMixin(),
+                  const DebugCupertinoMenuEntryMixin(),
                 ],
               ),
             ),
@@ -4143,7 +4132,7 @@ void main() {
           controller.open();
           await tester.pumpAndSettle();
 
-          final double childLineHeight = lineHeight(_DynamicTypeStyle.body.large);
+          final double childLineHeight = lineHeight(DynamicTypeStyle.body.large);
           final Rect childRect = tester.getRect(find.text(Tag.child.text));
           final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
 
@@ -4170,7 +4159,7 @@ void main() {
           controller.open();
           await tester.pumpAndSettle();
 
-          final double childLineHeight = lineHeight(_DynamicTypeStyle.body.large);
+          final double childLineHeight = lineHeight(DynamicTypeStyle.body.large);
           final Rect childRect = tester.getRect(find.text(Tag.child.text));
           final Rect menuItemRect = tester.getRect(find.byType(CupertinoMenuItem));
 
@@ -4195,7 +4184,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final Size childText = tester.getSize(find.text(longText));
-          final TextStyle childStyle = _DynamicTypeStyle.body.large;
+          final TextStyle childStyle = DynamicTypeStyle.body.large;
           expect(childText.height, closeTo(lineHeight(childStyle) * 2, 1)); // 2 lines of text
         });
 
@@ -4220,7 +4209,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final RenderParagraph paragraph = findDescendantParagraph(tester, find.text(longText))!;
-          final double childLineHeight = lineHeight(_DynamicTypeStyle.body.ax1);
+          final double childLineHeight = lineHeight(DynamicTypeStyle.body.ax1);
 
           expect(paragraph.maxLines, equals(100));
           expect(tester.getSize(find.text(longText)).height, closeTo(childLineHeight * 100, 1));
@@ -4385,35 +4374,35 @@ void main() {
           controller.open();
           await tester.pumpAndSettle();
 
-          final double undersizedLineHeight = lineHeight(_DynamicTypeStyle.body.xSmall);
+          final double undersizedLineHeight = lineHeight(DynamicTypeStyle.body.xSmall);
           Size childSize = tester.getSize(find.text(Tag.child.text));
 
           expect(childSize.height, closeTo(undersizedLineHeight, 0.1));
 
           await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.xSmall));
 
-          final double xSmallLineHeight = lineHeight(_DynamicTypeStyle.body.xSmall);
+          final double xSmallLineHeight = lineHeight(DynamicTypeStyle.body.xSmall);
           childSize = tester.getSize(find.text(Tag.child.text));
 
           expect(childSize.height, closeTo(xSmallLineHeight, 0.1));
 
           await tester.pumpWidget(buildApp());
 
-          final double largeLineHeight = lineHeight(_DynamicTypeStyle.body.large);
+          final double largeLineHeight = lineHeight(DynamicTypeStyle.body.large);
           childSize = tester.getSize(find.text(Tag.child.text));
 
           expect(childSize.height, closeTo(largeLineHeight, 0.1));
 
           await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.ax5));
 
-          final double ax5LineHeight = lineHeight(_DynamicTypeStyle.body.ax5);
+          final double ax5LineHeight = lineHeight(DynamicTypeStyle.body.ax5);
           childSize = tester.getSize(find.text(Tag.child.text));
 
           expect(childSize.height, closeTo(ax5LineHeight * 2, 0.1));
 
           await tester.pumpWidget(buildApp(textScaler: AccessibilityTextSize.oversized));
 
-          final double oversizedLineHeight = lineHeight(_DynamicTypeStyle.body.ax5);
+          final double oversizedLineHeight = lineHeight(DynamicTypeStyle.body.ax5);
           childSize = tester.getSize(find.text(Tag.child.text));
 
           expect(childSize.height, closeTo(oversizedLineHeight * 2, 0.1));
@@ -5073,7 +5062,7 @@ void main() {
           controller.open();
           await tester.pumpAndSettle();
 
-          final double largeSubtitleLineHeight = lineHeight(_DynamicTypeStyle.subhead.large);
+          final double largeSubtitleLineHeight = lineHeight(DynamicTypeStyle.subhead.large);
           final Rect subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
           final Rect childRect = tester.getRect(find.text(Tag.child.text));
 
@@ -5106,7 +5095,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final Size subtitleText = tester.getSize(find.text(longText));
-          final TextStyle subtitleStyle = _DynamicTypeStyle.subhead.large;
+          final TextStyle subtitleStyle = DynamicTypeStyle.subhead.large;
           expect(subtitleText.height, closeTo(lineHeight(subtitleStyle) * 2, 1)); // 2 lines of text
         });
 
@@ -5170,7 +5159,7 @@ void main() {
 
           Rect subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
           Rect childRect = tester.getRect(find.text(Tag.child.text));
-          final double undersizedSubtitleLineHeight = lineHeight(_DynamicTypeStyle.subhead.xSmall);
+          final double undersizedSubtitleLineHeight = lineHeight(DynamicTypeStyle.subhead.xSmall);
           expect(subtitleRect.height, closeTo(undersizedSubtitleLineHeight, 0.1));
           expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
           expect(subtitleRect.left, equals(childRect.left));
@@ -5180,7 +5169,7 @@ void main() {
 
           childRect = tester.getRect(find.text(Tag.child.text));
           subtitleRect = tester.getRect(find.text(Tag.subtitle.text));
-          final double xSmallSubtitleLineHeight = lineHeight(_DynamicTypeStyle.subhead.xSmall);
+          final double xSmallSubtitleLineHeight = lineHeight(DynamicTypeStyle.subhead.xSmall);
           expect(subtitleRect.height, closeTo(xSmallSubtitleLineHeight, 0.1));
           expect(subtitleRect.top, closeTo(childRect.bottom + 1, 0.1));
           expect(subtitleRect.left, equals(childRect.left));
@@ -6492,7 +6481,7 @@ const String _kDisplayFont = 'CupertinoSystemDisplay';
 
 // TODO(davidhicks980): DynamicType should be moved to text_theme.dart when all
 // styles are implemented. https://github.com/flutter/flutter/issues/179828
-enum _DynamicTypeStyle {
+enum DynamicTypeStyle {
   body(
     xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
     small: TextStyle(fontSize: 15, height: 20 / 15, letterSpacing: -0.23, fontFamily: _kBodyFont),
@@ -6532,7 +6521,7 @@ enum _DynamicTypeStyle {
     ax5: TextStyle(fontSize: 49, height: 58 / 49, letterSpacing: 0.33, fontFamily: _kDisplayFont),
   );
 
-  const _DynamicTypeStyle({
+  const DynamicTypeStyle({
     required this.xSmall,
     required this.small,
     required this.medium,
@@ -6585,11 +6574,12 @@ enum _DynamicTypeStyle {
   }
 }
 
-class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements CupertinoMenuEntry {
-  const _DebugCupertinoMenuEntryMixin({
+class DebugCupertinoMenuEntryMixin extends StatelessWidget implements CupertinoMenuEntry {
+  const DebugCupertinoMenuEntryMixin({
+    super.key,
     bool hasLeading = false,
     this.isDivider = false,
-    this.child = const SizedBox.shrink(),
+    this.child,
   }) : _hasLeading = hasLeading;
 
   final bool _hasLeading;
@@ -6602,10 +6592,15 @@ class _DebugCupertinoMenuEntryMixin extends StatelessWidget implements Cupertino
   @override
   final bool isDivider;
 
-  final Widget child;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return child ??
+        Container(
+          height: 30,
+          width: 100,
+          color: isDivider ? CupertinoColors.systemMint : CupertinoColors.systemOrange,
+        );
   }
 }
