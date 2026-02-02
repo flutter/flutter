@@ -48,14 +48,10 @@ FLUTTER_ASSERT_ARC
           restorationEnabled:(BOOL)restorationEnabled {
   NSAssert(allowHeadlessExecution == YES,
            @"Cannot initialize a FlutterHeadlessDartRunner without headless execution.");
-  self = [super initWithName:labelPrefix
+  return [super initWithName:labelPrefix
                      project:projectOrNil
       allowHeadlessExecution:allowHeadlessExecution
           restorationEnabled:restorationEnabled];
-  if (self) {
-    self.isRunningInExtension = YES;
-  }
-  return self;
 }
 
 - (instancetype)init {

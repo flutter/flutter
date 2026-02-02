@@ -445,6 +445,19 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, assign) BOOL isGpuDisabled;
 
+/**
+ * Whether this engine is running in an app extension context (e.g., Notification Service Extension).
+ *
+ * When set to YES, the engine will use a separate UI thread instead of merging with the platform
+ * thread. This is necessary in extension contexts where the platform's CFRunLoop is not being
+ * actively pumped.
+ *
+ * This property must be set before calling `-run` or `-runWithEntrypoint:`.
+ *
+ * Defaults to NO.
+ */
+@property(nonatomic, assign) BOOL isRunningInExtension;
+
 @end
 
 /**
