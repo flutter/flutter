@@ -138,13 +138,13 @@
   "expansionTileExpandedHint": "छोटा करने के लिए दो बार टैप करें",
   "expansionTileCollapsedHint": "बड़ा करने के लिए दो बार टैप करें",
   "expansionTileExpandedTapHint": "छोटा करें",
-  "expansionTileCollapsedTapHint": "ज़्यादा जानकारी के लिए बड़ा करें",
+  "expansionTileCollapsedTapHint": "ज़्यादा जानने के लिए बड़ा करें",
   "expandedHint": "छोटा किया गया",
   "collapsedHint": "बड़ा किया गया",
   "menuDismissLabel": "मेन्यू खारिज करें",
   "lookUpButtonLabel": "लुक अप बटन",
   "searchWebButtonLabel": "वेब पर खोजें",
   "shareButtonLabel": "शेयर करें",
-  "clearButtonTooltip": "टेक्स्ट मिटाएं",
+  "clearButtonTooltip": "टेक्स्ट हटाएं",
   "selectedDateLabel": "चुनी गई"
 }
