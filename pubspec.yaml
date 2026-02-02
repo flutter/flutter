@@ -29,6 +29,7 @@ workspace:
   - dev/integration_tests/flavors
   - dev/integration_tests/flutter_gallery
   # - dev/integration_tests/hook_user_defines  # Intentionally not part of the workspace to test user-defines in its pubspec.
+  - dev/integration_tests/hybrid_android_views
   - dev/integration_tests/ios_add2app_life_cycle/flutterapp
   - dev/integration_tests/ios_app_with_extensions
   - dev/integration_tests/ios_platform_view_tests
@@ -123,7 +124,7 @@ dependencies:
   io: 1.0.5
   isolate: 2.1.1
   js: 0.7.2
-  json_annotation: 4.9.0
+  json_annotation: 4.10.0
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: 3.0.10
   leak_tracker_testing: 3.0.2
@@ -140,7 +141,7 @@ dependencies:
   path: 1.9.1
   path_provider: 2.1.5
   path_provider_android: 2.2.22
-  path_provider_foundation: 2.5.1
+  path_provider_foundation: 2.6.0
   path_provider_linux: 2.2.1
   path_provider_platform_interface: 2.1.2
   path_provider_windows: 2.3.0
@@ -185,7 +186,7 @@ dependencies:
   vector_math: 2.2.0
   video_player: 2.10.1
   video_player_android: 2.9.1
-  video_player_avfoundation: 2.8.10
+  video_player_avfoundation: 2.9.0
   video_player_platform_interface: 6.6.0
   video_player_web: 2.4.0
   vm_service: 15.0.2
@@ -215,4 +216,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: l8e7q7
+# PUBSPEC CHECKSUM: mor64t
