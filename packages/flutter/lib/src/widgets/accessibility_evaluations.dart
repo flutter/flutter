@@ -7,7 +7,11 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+
+import 'binding.dart';
+import 'editable_text.dart';
+import 'framework.dart';
+import 'text.dart';
 
 /// {@template flutter.widgets.accessibility_evaluations.internal}
 /// Do not use in production, Flutter will make breaking changes to this API, even in patch versions
