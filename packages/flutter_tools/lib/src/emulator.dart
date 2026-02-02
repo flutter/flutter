@@ -309,14 +309,13 @@ abstract class Emulator {
     // Join columns into lines of text
     final whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
-        .map<String>((List<String> row) {
-          return indices
-              .map<String>((int i) => row[i].padRight(widths[i]))
-              .followedBy(<String>[row.last])
-              .join(' • ');
-        })
-        .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
-        .toList();
+      .map<String>((List<String> row) {
+        return indices
+          .map<String>((int i) => row[i].padRight(widths[i]))
+          .join(' • ');
+      })
+      .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
+      .toList();
   }
 
   static void printEmulators(List<Emulator> emulators, Logger logger) {
