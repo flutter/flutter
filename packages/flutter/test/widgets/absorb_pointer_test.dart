@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
@@ -28,10 +26,10 @@ void main() {
     testWidgets('does not change semantics when not absorbing', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: AbsorbPointer(
             absorbing: false,
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -53,10 +51,10 @@ void main() {
       final semantics = SemanticsTester(tester);
       final key = UniqueKey();
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: AbsorbPointer(
             ignoringSemantics: true,
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
@@ -67,9 +65,9 @@ void main() {
     testWidgets('ignores user interactions', (WidgetTester tester) async {
       final key = UniqueKey();
       await tester.pumpWidget(
-        TestWidgetsApp(
+        MaterialApp(
           home: AbsorbPointer(
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
+            child: ElevatedButton(key: key, onPressed: () {}, child: const Text('button')),
           ),
         ),
       );
