@@ -95,13 +95,13 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+    final result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
     ]);
 
-    final String output = result.stdout.toString();
+    final output = result.stdout.toString();
     // Empty files should show 0.00% not NaN%
     expect(output, contains('lib/empty_stub.dart: 0.00%'));
     // Should not contain NaN anywhere in output
@@ -127,13 +127,13 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+    final result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
     ]);
 
-    final String output = result.stdout.toString();
+    final output = result.stdout.toString();
     // Each empty file should show 0.00%
     expect(output, contains('lib/empty_file.dart: 0.00%'));
     expect(output, contains('lib/another_empty.dart: 0.00%'));
@@ -170,14 +170,14 @@ end_of_record
       'tool',
       'unit_coverage.dart',
     );
-    final ProcessResult result = await const LocalProcessManager().run(<String>[
+    final result = await const LocalProcessManager().run(<String>[
       dartScript,
       coverageScript,
       coverageFile.path,
     ]);
 
-    final String output = result.stdout.toString();
-    final List<String> lines = output.split('\n');
+    final output = result.stdout.toString();
+    final lines = output.split('\n');
 
     // Find indices of each file in output
     final int emptyIndex = lines.indexWhere((String line) => line.contains('lib/empty.dart'));
