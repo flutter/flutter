@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/rendering/sliver_persistent_header.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('_SliverScrollingPersistentHeader should update stretchConfiguration', (
@@ -12,7 +14,7 @@ void main() {
   ) async {
     for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -46,7 +48,7 @@ void main() {
   ) async {
     for (final stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
@@ -81,7 +83,7 @@ void main() {
   ) async {
     for (final maxShowOnScreenExtent in <double>[1000, 2000]) {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: CustomScrollView(
             slivers: <Widget>[
               SliverPersistentHeader(
