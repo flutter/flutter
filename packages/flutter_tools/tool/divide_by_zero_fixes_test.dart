@@ -1,6 +1,6 @@
 // Test file demonstrating the divide by zero fixes:
-// 1. Returning 'N/A' instead of attempting to divide by zero
-// 2. Treating it as 0% in comparisons without crashing
+// 1. Returning '0.00' instead of attempting to divide by zero
+// 2. Treating empty libraries as 0% in comparisons without crashing
 
 import 'package:test/test.dart';
 import 'test_helpers.dart';
