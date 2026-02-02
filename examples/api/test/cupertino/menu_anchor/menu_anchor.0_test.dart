@@ -19,6 +19,7 @@ void main() {
     expect(find.text('Regular Item'), findsOneWidget);
     expect(find.text('Colorful Item'), findsOneWidget);
     expect(find.text('Destructive Item'), findsOneWidget);
+    expect(find.byType(CupertinoMenuDivider), findsOneWidget);
     expect(find.byIcon(CupertinoIcons.delete), findsOneWidget);
   });
 
@@ -34,6 +35,7 @@ void main() {
     await tester.tap(find.text('Regular Item'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+
     expect(find.text('You Pressed: Regular Item'), findsOneWidget);
 
     // Colorful Item
@@ -43,6 +45,7 @@ void main() {
     await tester.tap(find.text('Colorful Item'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+
     expect(find.text('You Pressed: Colorful Item'), findsOneWidget);
 
     // Destructive Item
@@ -52,10 +55,11 @@ void main() {
     await tester.tap(find.text('Destructive Item'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+
     expect(find.text('You Pressed: Destructive Item'), findsOneWidget);
   });
 
-  testWidgets('Tapping the button toggles menu open/close', (
+  testWidgets('Tapping the button toggles menu open and close', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.CupertinoMenuAnchorApp());

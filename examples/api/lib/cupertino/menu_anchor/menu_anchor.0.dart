@@ -4,8 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-/// Flutter code sample for a [CupertinoMenuAnchor] that shows a menu with 3
-/// items.
+/// Flutter code sample for a [CupertinoMenuAnchor] that shows a menu with three
+/// [CupertinoMenuItem]s and one [CupertinoMenuDivider].
 void main() => runApp(const CupertinoMenuAnchorApp());
 
 class CupertinoMenuAnchorApp extends StatelessWidget {
@@ -86,6 +86,7 @@ class _CupertinoMenuAnchorExampleState
                 }),
                 child: const Text('Colorful Item'),
               ),
+              const CupertinoMenuDivider(),
               CupertinoMenuItem(
                 trailing: const Icon(CupertinoIcons.delete),
                 isDestructiveAction: true,

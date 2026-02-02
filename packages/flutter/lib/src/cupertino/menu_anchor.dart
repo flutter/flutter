@@ -319,7 +319,7 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// invoked every time the [AnimationStatus] of the menu animation changes.
 ///
 /// ## Usage
-/// {@tool snippet}
+/// {@tool sample}
 ///
 /// This sample creates a [CupertinoMenuAnchor] containing one
 /// [CupertinoMenuItem]. The menu item prints `Item 1 pressed!` when pressed.
@@ -352,7 +352,8 @@ typedef CupertinoMenuAnimationStatusChangedCallback = void Function(AnimationSta
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example demonstrates a basic [CupertinoMenuAnchor] that wraps a button.
+/// This example demonstrates a [CupertinoMenuAnchor] that wraps a button and
+/// shows a menu with three [CupertinoMenuItem]s and one [CupertinoMenuDivider].
 ///
 /// ** See code in examples/api/lib/cupertino/menu_anchor/menu_anchor.0.dart **
 /// {@end-tool}
@@ -401,7 +402,7 @@ class CupertinoMenuAnchor extends StatefulWidget {
   final VoidCallback? onClose;
 
   /// An optional callback that is invoked when the [AnimationStatus] of the
-  /// menu changes during open and close animations.
+  /// menu changes.
   ///
   /// This callback provides a way to determine when the menu is opening or
   /// closing. This is necessary because the [MenuController.isOpen] property
@@ -2551,16 +2552,6 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final DeviceGestureSettings? newGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
-    if (_gestureSettings != newGestureSettings) {
-      _gestureSettings = newGestureSettings;
-      _gestures = null;
-    }
-  }
-
-  @override
   void didUpdateWidget(_CupertinoMenuItemInteractionHandler oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
@@ -2683,7 +2674,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
     Actions.invoke(context, const DismissIntent());
   }
 
-  Widget _buildStatefulWrapper(BuildContext context, Set<WidgetState> value, Widget? child) {
+  Widget _buildStatefulAppearance(BuildContext context, Set<WidgetState> value, Widget? child) {
     final MouseCursor cursor = widget.mouseCursor.resolve(value);
     final BoxDecoration decoration = widget.decoration.resolve(value);
     final bool hasBackground = decoration.color != null || decoration.gradient != null;
@@ -2708,22 +2699,24 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 
   @override
   Widget build(BuildContext context) {
-    if (isEnabled) {
-      _gestures ??= <Type, GestureRecognizerFactory>{
-        TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          () => TapGestureRecognizer(),
-          (TapGestureRecognizer instance) {
-            instance
-              ..onTapDown = _handleTapDown
-              ..onTapUp = _handleTapUp
-              ..onTapCancel = _handleTapCancel
-              ..gestureSettings = _gestureSettings;
-          },
-        ),
-      };
-    } else {
+    final DeviceGestureSettings? newGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    if (_gestureSettings != newGestureSettings) {
+      _gestureSettings = newGestureSettings;
       _gestures = null;
     }
+
+    _gestures ??= <Type, GestureRecognizerFactory>{
+      TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        () => TapGestureRecognizer(debugOwner: this),
+        (TapGestureRecognizer instance) {
+          instance
+            ..onTapDown = _handleTapDown
+            ..onTapUp = _handleTapUp
+            ..onTapCancel = _handleTapCancel
+            ..gestureSettings = _gestureSettings;
+        },
+      ),
+    };
 
     return MergeSemantics(
       child: Semantics.fromProperties(
@@ -2743,10 +2736,10 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
               onFocusChange: _handleFocusChange,
               child: ValueListenableBuilder<Set<WidgetState>>(
                 valueListenable: _statesController,
-                builder: _buildStatefulWrapper,
+                builder: _buildStatefulAppearance,
                 child: RawGestureDetector(
                   behavior: widget.behavior,
-                  gestures: _gestures ?? const <Type, GestureRecognizerFactory>{},
+                  gestures: isEnabled ? _gestures! : const <Type, GestureRecognizerFactory>{},
                   child: widget.child,
                 ),
               ),
