@@ -178,21 +178,21 @@ end_of_record
 
     final String output = result.stdout.toString();
     final List<String> lines = output.split('\n');
-    
+
     // Find indices of each file in output
     final int emptyIndex = lines.indexWhere((String line) => line.contains('lib/empty.dart'));
     final int poorIndex = lines.indexWhere((String line) => line.contains('lib/poor.dart'));
     final int wellTestedIndex = lines.indexWhere((String line) => line.contains('lib/well_tested.dart'));
-    
+
     // Verify sorting order: empty (0%) < poor (33.33%) < well_tested (80%)
     expect(emptyIndex, lessThan(poorIndex), reason: 'empty (0%) should come before poor (33%)');
     expect(poorIndex, lessThan(wellTestedIndex), reason: 'poor (33%) should come before well_tested (80%)');
-    
+
     // Verify percentages
     expect(output, contains('lib/empty.dart: 0.00%'));
     expect(output, contains('lib/poor.dart: 33.33%'));
     expect(output, contains('lib/well_tested.dart: 80.00%'));
-    
+
     // Overall should be valid
     expect(output, isNot(contains('NaN')));
     expect(output, contains('OVERALL: 37.50%'));
