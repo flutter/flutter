@@ -506,8 +506,6 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
-        // TODO(reidbaker): Replace URL with constant defined in
-        // https://github.com/flutter/flutter/pull/123916.
         globals.printBox(
           "${globals.logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
@@ -516,7 +514,7 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
           'Then, update the Gradle version specified in ${gradlePropertiesFile.path} '
           'to be compatible with that Java version. '
           'See the link below for more information on compatible Java/Gradle versions:\n'
-          'https://docs.gradle.org/current/userguide/compatibility.html#java\n\n',
+          '${AndroidProject.javaGradleCompatUrl}\n\n',
           title: _boxTitle,
         );
         return GradleBuildStatus.exit;
