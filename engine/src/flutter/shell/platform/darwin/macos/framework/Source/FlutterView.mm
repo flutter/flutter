@@ -38,7 +38,7 @@
                                                        commandQueue:commandQueue
                                                               layer:self.layer
                                                            delegate:self
-                                                    enableWideGamut:enableWideGamut];
+                                                          wideGamut:enableWideGamut];
     _resizeSynchronizer = [[FlutterResizeSynchronizer alloc] init];
   }
   return self;

@@ -48,7 +48,7 @@ static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView, BOOL enab
                                           commandQueue:commandQueue
                                                  layer:layer
                                               delegate:testView
-                                       enableWideGamut:enableWideGamut];
+                                             wideGamut:enableWideGamut];
 }
 
 static FlutterSurfacePresentInfo* CreatePresentInfo(

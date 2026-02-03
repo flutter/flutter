@@ -53,7 +53,7 @@
                            commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                                   layer:(nonnull CALayer*)containingLayer
                                delegate:(nonnull id<FlutterSurfaceManagerDelegate>)delegate
-                        enableWideGamut:(BOOL)enableWideGamut;
+                              wideGamut:(BOOL)wideGamut;
 
 /**
  * Updates the wide gamut setting. Flushes cached surfaces so new surfaces

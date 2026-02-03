@@ -107,13 +107,13 @@ static void UpdateContentSubLayers(CALayer* layer,
                   commandQueue:(id<MTLCommandQueue>)commandQueue
                          layer:(CALayer*)containingLayer
                       delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate
-               enableWideGamut:(BOOL)enableWideGamut {
+                     wideGamut:(BOOL)wideGamut {
   if (self = [super init]) {
     _device = device;
     _commandQueue = commandQueue;
     _containingLayer = containingLayer;
     _delegate = delegate;
-    _enableWideGamut = enableWideGamut;
+    _enableWideGamut = wideGamut;
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
