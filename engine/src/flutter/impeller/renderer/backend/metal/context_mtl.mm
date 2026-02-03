@@ -68,7 +68,8 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
-      .SetSupportsExtendedRangeFormats(DeviceSupportsExtendedRangeFormats(device))
+      .SetSupportsExtendedRangeFormats(
+          DeviceSupportsExtendedRangeFormats(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else

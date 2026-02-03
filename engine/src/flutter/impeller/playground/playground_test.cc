@@ -85,7 +85,8 @@ void PlaygroundTest::SetUp() {
 #if IMPELLER_ENABLE_METAL
   if (switches.enable_wide_gamut && !switches.enable_wide_gamut_f16 &&
       !PlaygroundImplMTL::DeviceSupports10BitFormats()) {
-    GTEST_SKIP() << "Device doesn't support 10-bit formats. Use WideGamutF16 tests.";
+    GTEST_SKIP()
+        << "Device doesn't support 10-bit formats. Use WideGamutF16 tests.";
     return;
   }
 #endif  // IMPELLER_ENABLE_METAL
