@@ -66,8 +66,7 @@ static void UpdateContentSubLayers(CALayer* layer,
                                    CGFloat scale,
                                    CGSize surfaceSize,
                                    NSColor* borderColor,
-                                   const std::vector<FlutterRect>& paintRegion,
-                                   BOOL enableWideGamut) {
+                                   const std::vector<FlutterRect>& paintRegion) {
   // Adjust sublayer count to paintRegion count.
   while (layer.sublayers.count > paintRegion.size()) {
     [layer.sublayers.lastObject removeFromSuperlayer];
@@ -206,7 +205,7 @@ static void UpdateContentSubLayers(CALayer* layer,
       layer.frame = CGRectZero;
       NSColor* borderColor = enableSurfaceDebugInfo ? GetBorderColorForLayer(i - 1) : nil;
       UpdateContentSubLayers(layer, info.surface.ioSurface, scale, info.surface.size, borderColor,
-                             info.paintRegion, _enableWideGamut);
+                             info.paintRegion);
     }
     layer.zPosition = info.zIndex;
   }
