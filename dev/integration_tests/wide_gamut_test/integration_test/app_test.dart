@@ -14,8 +14,10 @@ import 'package:integration_test/integration_test.dart';
 import 'package:wide_gamut_test/main.dart' as app;
 
 /// Half-float has ~0.001 step size near 1.0, so 0.002 catches any real error.
+const double _f16Epsilon = 0.002;
+
 /// BGRA10_XR has ~0.002 step size, so 0.01 is needed for 10-bit formats.
-const double _defaultEpsilon = 0.01;
+const double _bgra10Epsilon = 0.01;
 
 // See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
 double _decodeBGR10(int x) {
@@ -119,14 +121,29 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
   return (foundColor, closestColor);
 }
 
-(bool, List<double>) _findColor(List<dynamic> result, List<double> color, {double? epsilon}) {
-  epsilon ??= _defaultEpsilon;
+(bool, List<double>) _findColor(
+  List<dynamic> result,
+  List<double> color, {
+  double? epsilon,
+}) {
   expect(result, isNotNull);
   expect(result.length, 4);
   final [int width, int height, String format, Uint8List bytes] = result;
   return switch (format) {
-    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(bytes, width, height, color, epsilon: epsilon),
-    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(bytes, width, height, color, epsilon: epsilon),
+    'MTLPixelFormatBGRA10_XR' => _findBGRA10Color(
+      bytes,
+      width,
+      height,
+      color,
+      epsilon: epsilon ?? _bgra10Epsilon,
+    ),
+    'MTLPixelFormatRGBA16Float' => _findRGBAF16Color(
+      bytes,
+      width,
+      height,
+      color,
+      epsilon: epsilon ?? _f16Epsilon,
+    ),
     _ => (false, <double>[0, 0, 0]),
   };
 }
