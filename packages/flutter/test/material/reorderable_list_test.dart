@@ -1785,6 +1785,59 @@ void main() {
       expect(tester.getCenter(find.text('A')).dy, greaterThan(tester.getCenter(find.text('B')).dy));
     });
 
+    testWidgets(
+      'ReorderableListView in Flexible with one item does not assert when dragged to edge',
+      (WidgetTester tester) async {
+        final items = <String>['Item 1'];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: <Widget>[
+                  Flexible(
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return ReorderableListView(
+                          onReorder: (int oldIndex, int newIndex) {
+                            setState(() {
+                              if (newIndex > oldIndex) {
+                                newIndex -= 1;
+                              }
+                              final String item = items.removeAt(oldIndex);
+                              items.insert(newIndex, item);
+                            });
+                          },
+                          children: <Widget>[
+                            ListTile(
+                              key: const ValueKey<String>('Item 1'),
+                              title: Text(items.first),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Offset startLocation = tester.getCenter(find.byKey(const ValueKey<String>('Item 1')));
+        final TestGesture gesture = await tester.startGesture(startLocation);
+        await tester.pump();
+        await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(tester.takeException(), isNull);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      },
+    );
+
     testWidgets('Animation test when placing an item in place', (WidgetTester tester) async {
       const testItemKey = Key('Test item');
       final Widget reorderableListView = ReorderableListView(
