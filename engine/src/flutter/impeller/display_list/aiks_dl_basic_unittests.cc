@@ -781,7 +781,7 @@ DlPath ManuallyConstructCirclePath(Scalar radius) {
 }
 
 void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
-                                         Scalar path_scale,
+                                         Scalar zoom,
                                          Scalar radius,
                                          Scalar stroke_width) {
   DisplayListBuilder builder;
@@ -798,34 +798,39 @@ void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
 
   DlPath path = ManuallyConstructCirclePath(radius);
 
+  constexpr Scalar kLeftX = 300.0f;
+  constexpr Scalar kRightX = 680.0f;
+  constexpr Scalar kTopY = 200.0f;
+  constexpr Scalar kBottomY = 580.0f;
+
   // Upper left quadrant is fill + stroke
   builder.Save();
-  builder.Translate(300.0f, 200.0f);
-  builder.Scale(path_scale, path_scale);
+  builder.Translate(kLeftX, kTopY);
+  builder.Scale(zoom, zoom);
   builder.DrawPath(path, fill_paint);
   builder.DrawPath(path, stroke_paint);
   builder.Restore();
 
   // Upper right quadrant is fill only
   builder.Save();
-  builder.Translate(680.0f, 200.0f);
-  builder.Scale(path_scale, path_scale);
+  builder.Translate(kRightX, kTopY);
+  builder.Scale(zoom, zoom);
   builder.DrawPath(path, fill_paint);
   builder.Restore();
 
   // Lower left quadrant is stroke only
   builder.Save();
-  builder.Translate(300.0f, 580.0f);
-  builder.Scale(path_scale, path_scale);
+  builder.Translate(kLeftX, kBottomY);
+  builder.Scale(zoom, zoom);
   builder.DrawPath(path, stroke_paint);
   builder.Restore();
 
   // Lower right quadrant is a filled circle the size of the radius and
   // the stroke combined for comparison to the stroked outlines.
   builder.Save();
-  builder.Translate(680.0f, 580.0f);
-  builder.DrawCircle({}, (radius + stroke_width * 0.5f) * path_scale,
-                     fill_paint);
+  builder.Translate(kRightX, kBottomY);
+  builder.Scale(zoom, zoom);
+  builder.DrawCircle({}, radius + stroke_width * 0.5f, fill_paint);
   builder.Restore();
 
   ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
@@ -833,13 +838,13 @@ void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
 }  // namespace
 
 TEST_P(AiksTest, ZoomedStrokedPathRendersCorrectly) {
-  DrawStrokedAndFilledCirclesWithZoom(this, /*path_scale=*/80.0f,
-                                      /*radius=*/2.0f, /*stroke_width=*/0.05f);
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/80.0f, /*radius=*/2.0f,
+                                      /*stroke_width=*/0.05f);
 }
 
 TEST_P(AiksTest, StrokedPathWithLargeStrokeWidthRendersCorrectly) {
-  DrawStrokedAndFilledCirclesWithZoom(this, /*path_scale=*/1.0f,
-                                      /*radius=*/1.0f, /*stroke_width=*/5.0f);
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/1.0f, /*radius=*/1.0f,
+                                      /*stroke_width=*/5.0f);
 }
 
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
