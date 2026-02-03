@@ -189,6 +189,10 @@ Future<void> testMain() async {
     });
 
     void runCodecTest(TestCodec testCodec) {
+      // Not all Skia test images are valid - some are expected to fail decoding.
+      const undecodableImages = <String>{
+        'b464333052.jpg',
+      };
       const problematicChromeImages = <String, Set<int>>{
         // Frame 2 cause Chrome to crash.
         // https://issues.chromium.org/456445108
@@ -199,6 +203,10 @@ Future<void> testMain() async {
       };
 
       test('${testCodec.description} can create an image and convert it to byte array', () async {
+        if (undecodableImages.contains(testCodec.testFile)) {
+          return;
+        }
+
         final ui.Codec codec = await testCodec.createCodec();
 
         final Set<int> problematicFrames;
