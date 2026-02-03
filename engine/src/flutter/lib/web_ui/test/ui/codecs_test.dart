@@ -203,10 +203,6 @@ Future<void> testMain() async {
       };
 
       test('${testCodec.description} can create an image and convert it to byte array', () async {
-        if (undecodableImages.contains(testCodec.testFile)) {
-          return;
-        }
-
         final ui.Codec codec = await testCodec.createCodec();
 
         final Set<int> problematicFrames;
@@ -259,7 +255,8 @@ Future<void> testMain() async {
 
         // After all frames are decoded and tested, dispose the codec.
         codec.dispose();
-      });
+      },
+      skip: undecodableImages.contains(testCodec.testFile));
     }
 
     group('Codecs (default browserSupportsImageDecoder)', () {
