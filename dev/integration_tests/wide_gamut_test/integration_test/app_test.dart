@@ -200,7 +200,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
-    const MethodChannel screenshotChannel = MethodChannel('flutter/screenshot');
+    const screenshotChannel = MethodChannel('flutter/screenshot');
     testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
       app.run(app.Setup.image);
       await tester.pumpAndSettle();
