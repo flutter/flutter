@@ -536,6 +536,92 @@ void main() {
     expect(values.start, equals(0));
   });
 
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (ltr)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (rtl)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
