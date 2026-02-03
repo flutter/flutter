@@ -23,16 +23,15 @@ import 'package:flutter/src/widgets/_window.dart';
 import 'arc.dart';
 import 'button_style.dart';
 import 'colors.dart';
-import 'dialog.dart' show DialogWindowingSupport;
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
+import 'material_windowing_manager.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
 import 'tooltip.dart';
-import 'windowing_configuration.dart';
 
 // Examples can assume:
 // typedef GlobalWidgetsLocalizations = DefaultWidgetsLocalizations;
@@ -1179,13 +1178,9 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: WindowingConfiguration(
+      child: MaterialWindowingManager(
         enableWindowing: widget.useWindowing,
-        child: widget.useWindowing
-            ? DialogWindowingSupport(
-                child: HeroControllerScope(controller: _heroController, child: result),
-              )
-            : HeroControllerScope(controller: _heroController, child: result),
+        child: HeroControllerScope(controller: _heroController, child: result),
       ),
     );
   }

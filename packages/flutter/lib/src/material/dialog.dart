@@ -14,8 +14,9 @@ import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerp
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show ViewAnchor, ViewCollection;
 
+import '../widgets/_window.dart'
+    show BaseWindowController, DialogWindowController, DialogWindowControllerDelegate, WindowScope;
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
@@ -23,264 +24,13 @@ import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'material_windowing_manager.dart';
 import 'text_theme.dart';
 import 'theme.dart';
-import 'windowing_configuration.dart';
-import '../widgets/_window.dart'
-    show
-        BaseWindowController,
-        DialogWindow,
-        DialogWindowController,
-        DialogWindowControllerDelegate,
-        WindowScope;
 
 // Examples can assume:
 // enum Department { treasury, state }
 // late BuildContext context;
-
-// Registry for managing active dialog windows when windowing is enabled
-class _DialogWindowRegistry extends ChangeNotifier {
-  final List<_DialogWindowEntry> _windows = <_DialogWindowEntry>[];
-
-  List<_DialogWindowEntry> get windows => List<_DialogWindowEntry>.unmodifiable(_windows);
-
-  void register(_DialogWindowEntry entry) {
-    _windows.add(entry);
-    notifyListeners();
-  }
-
-  void unregister(_DialogWindowEntry entry) {
-    _windows.remove(entry);
-    notifyListeners();
-  }
-
-  static _DialogWindowRegistry? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_DialogWindowRegistryScope>()?._registry;
-  }
-}
-
-class _DialogWindowEntry {
-  _DialogWindowEntry({
-    required this.controller,
-    required this.builder,
-    required this.textDirection,
-    required this.themeData,
-    required this.mediaQueryData,
-    required this.onPop,
-  });
-
-  final DialogWindowController controller;
-  final WidgetBuilder builder;
-  final TextDirection textDirection;
-  final ThemeData themeData;
-  final MediaQueryData mediaQueryData;
-  final VoidCallback onPop;
-}
-
-// Provides a pop callback that dialog content can use
-// Wraps content to provide a Navigator-like interface for popping
-class _DialogPopScope extends StatelessWidget {
-  const _DialogPopScope({required this.onPop, required this.child});
-
-  final VoidCallback onPop;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // Wrap with WillPopScope to handle back button and provide popNavigator function
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (!didPop) {
-          onPop();
-        }
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          // Provide a way for child widgets to pop using Navigator.maybePop(context)
-          // by wrapping in a minimal Navigator
-          return _NavigatorShim(onPop: onPop, child: child);
-        },
-      ),
-    );
-  }
-}
-
-// Creates a minimal Navigator that intercepts pop calls
-class _NavigatorShim extends StatefulWidget {
-  const _NavigatorShim({required this.onPop, required this.child});
-
-  final VoidCallback onPop;
-  final Widget child;
-
-  @override
-  State<_NavigatorShim> createState() => _NavigatorShimState();
-}
-
-class _NavigatorShimState extends State<_NavigatorShim> {
-  @override
-  Widget build(BuildContext context) {
-    // Create a Navigator with a single page that contains the child
-    // This allows Navigator.pop(context) calls from within the dialog to work
-    return Navigator(
-      pages: <Page<void>>[_DialogContentPage(child: widget.child)],
-      onPopPage: (Route<dynamic> route, dynamic result) {
-        // When the page is popped, call our onPop callback
-        widget.onPop();
-        // Return false to prevent the route from being removed from the Navigator
-        // (since we're handling the pop externally by closing the dialog window)
-        return false;
-      },
-    );
-  }
-}
-
-// A simple page for the dialog content
-class _DialogContentPage extends Page<void> {
-  const _DialogContentPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-    );
-  }
-}
-
-// Wrapper that makes dialogs fill the entire window without insets or rounded corners
-class _FullWindowDialogWrapper extends StatelessWidget {
-  const _FullWindowDialogWrapper({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // Override DialogTheme to remove insets, rounded corners, and constraints for window-based dialogs
-    final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
-      insetPadding: EdgeInsets.zero,
-      shape: const RoundedRectangleBorder(), // No rounded corners
-      alignment: Alignment.topLeft, // Align to top-left so it fills from corner
-      // Remove default constraints so dialog can expand to fill available space
-      constraints: const BoxConstraints.expand(),
-    );
-
-    return DialogTheme(
-      data: windowDialogTheme,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: MediaQuery.removeViewPadding(
-          removeLeft: true,
-          removeTop: true,
-          removeRight: true,
-          removeBottom: true,
-          context: context,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _DialogWindowRegistryScope extends InheritedWidget {
-  const _DialogWindowRegistryScope({required _DialogWindowRegistry registry, required super.child})
-    : _registry = registry;
-
-  final _DialogWindowRegistry _registry;
-
-  @override
-  bool updateShouldNotify(_DialogWindowRegistryScope oldWidget) {
-    return _registry != oldWidget._registry;
-  }
-}
-
-/// Provides windowing support for dialogs by managing a registry of active dialog
-/// windows and rendering them through a ViewAnchor.
-///
-/// This widget should wrap the MaterialApp content when windowing is enabled.
-class DialogWindowingSupport extends StatefulWidget {
-  const DialogWindowingSupport({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<DialogWindowingSupport> createState() => _DialogWindowingSupportState();
-}
-
-class _DialogWindowingSupportState extends State<DialogWindowingSupport> {
-  late final _DialogWindowRegistry _registry;
-
-  @override
-  void initState() {
-    super.initState();
-    _registry = _DialogWindowRegistry();
-  }
-
-  @override
-  void dispose() {
-    _registry.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _DialogWindowRegistryScope(
-      registry: _registry,
-      child: ListenableBuilder(
-        listenable: _registry,
-        builder: (BuildContext context, Widget? child) {
-          // Build list of DialogWindow widgets for each registered dialog
-          final List<Widget> dialogViews = _registry.windows.map((_DialogWindowEntry entry) {
-            // Wrap dialog content with MaterialApp settings using values captured when registered
-            final Widget dialogContent = _DialogPopScope(
-              onPop: entry.onPop,
-              child: Builder(
-                builder: (BuildContext innerContext) {
-                  // Wrap the dialog to fill the window without insets or rounded corners
-                  return _FullWindowDialogWrapper(child: entry.builder(innerContext));
-                },
-              ),
-            );
-
-            // Wrap with Directionality, Theme, and other inherited widgets
-            return DialogWindow(
-              controller: entry.controller,
-              child: Directionality(
-                textDirection: entry.textDirection,
-                child: Theme(
-                  data: entry.themeData,
-                  child: MediaQuery(data: entry.mediaQueryData, child: dialogContent),
-                ),
-              ),
-            );
-          }).toList();
-
-          // Use ViewAnchor to render dialog windows alongside the main app
-          return ViewAnchor(
-            view: dialogViews.isNotEmpty ? ViewCollection(views: dialogViews) : null,
-            child: child!,
-          );
-        },
-        child: widget.child,
-      ),
-    );
-  }
-}
 
 const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
@@ -1634,19 +1384,34 @@ Widget _buildMaterialDialogTransitions(
   return child;
 }
 
+class _DialogWindowDelegate extends DialogWindowControllerDelegate {
+  _DialogWindowDelegate(this.route);
+
+  final _DialogWindowRoute<dynamic> route;
+
+  @override
+  void onWindowCloseRequested(DialogWindowController controller) {
+    route.navigator?.pop();
+  }
+
+  @override
+  void onWindowDestroyed() {
+    // Window has been destroyed
+  }
+}
+
 class _DialogWindowRoute<T> extends Route<T> {
   _DialogWindowRoute({
     required this.builder,
     required this.parentController,
     required BuildContext context,
-  }) : _registry = _DialogWindowRegistry.maybeOf(context);
+  }) : _registry = MaterialWindowRegistry.maybeOf(context);
 
   final WidgetBuilder builder;
   final BaseWindowController? parentController;
-  final _DialogWindowRegistry? _registry;
-
+  final MaterialWindowRegistry? _registry;
   DialogWindowController? _controller;
-  _DialogWindowEntry? _entry;
+  MaterialWindowEntry? _entry;
   late final List<OverlayEntry> _overlayEntries;
 
   @override
@@ -1659,11 +1424,7 @@ class _DialogWindowRoute<T> extends Route<T> {
     // Create a minimal transparent overlay entry to satisfy Navigator requirements
     // The actual dialog content is rendered through ViewAnchor, not through this overlay
     _overlayEntries = <OverlayEntry>[
-      OverlayEntry(
-        builder: (BuildContext context) => const SizedBox.shrink(),
-        opaque: false,
-        maintainState: false,
-      ),
+      OverlayEntry(builder: (BuildContext context) => const SizedBox.shrink()),
     ];
 
     // Create the DialogWindowController which creates the native window
@@ -1672,11 +1433,11 @@ class _DialogWindowRoute<T> extends Route<T> {
       title: 'Dialog',
       delegate: _DialogWindowDelegate(this),
     );
-    // Capture inherited widget values from the current context for use in the dialog window
+
     final NavigatorState? nav = navigator;
     final BuildContext? routeContext = nav?.context;
     if (routeContext != null && nav != null) {
-      _entry = _DialogWindowEntry(
+      _entry = MaterialWindowEntry(
         controller: _controller!,
         builder: builder,
         textDirection: Directionality.of(routeContext),
@@ -1710,22 +1471,6 @@ class _DialogWindowRoute<T> extends Route<T> {
     _controller?.dispose();
     _controller = null;
     super.dispose();
-  }
-}
-
-class _DialogWindowDelegate extends DialogWindowControllerDelegate {
-  _DialogWindowDelegate(this.route);
-
-  final _DialogWindowRoute<dynamic> route;
-
-  @override
-  void onWindowCloseRequested(DialogWindowController controller) {
-    route.navigator?.pop();
-  }
-
-  @override
-  void onWindowDestroyed() {
-    // Window has been destroyed
   }
 }
 
@@ -1852,7 +1597,7 @@ Future<T?> showDialog<T>({
     to: Navigator.of(context, rootNavigator: useRootNavigator).context,
   );
 
-  final WindowingConfiguration? windowingConfiguration = WindowingConfiguration.of(context);
+  final MaterialWindowRegistry? windowingConfiguration = MaterialWindowRegistry.maybeOf(context);
   if (windowingConfiguration != null && windowingConfiguration.enableWindowing) {
     return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
       _DialogWindowRoute<T>(
