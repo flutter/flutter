@@ -2358,7 +2358,6 @@ targets:
       task_name: basic_material_app_android__compile
 
   - name: Linux_pixel_7pro android_verified_input_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
