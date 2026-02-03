@@ -45,6 +45,20 @@ before the test runs.
 To run analysis and all the tests for the entire Flutter repository, the same way that LUCI
 runs them, run `dart dev/bots/test.dart` and `dart --enable-asserts dev/bots/analyze.dart`.
 
+### Organizing test files
+
+Avoid creating overly large test files that contain many unrelated test cases.
+Instead, organize tests into smaller files grouped by feature, widget, or behavior.
+
+Splitting large test files has several benefits:
+
+- Readability
+- Navigation
+- Maintainability
+- Reviewability for contributors
+
+When appropriate, configure `dart_test.yaml` to manage test file patterns and improve organization across packages.
+
 ### Locally built engines
 
 If you've built your own flutter engine (see [Setting up the Engine development environment](../../../docs/engine/contributing/Setting-up-the-Engine-development-environment.md)), you
