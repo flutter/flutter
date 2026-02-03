@@ -697,14 +697,6 @@ class AndroidProject extends FlutterProjectPlatform {
         .childFile('GeneratedPluginRegistrant.java');
   }
 
-  File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
-
-  Directory get gradleAppOutV1Directory {
-    return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
-    );
-  }
-
   /// Whether the current flutter project has an Android sub-project.
   @override
   bool existsSync() {
