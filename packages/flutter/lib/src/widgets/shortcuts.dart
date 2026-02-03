@@ -1137,7 +1137,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      debugLabel: '$Shortcuts${widget.debugLabel != null ? ': ${widget.debugLabel}' : ''}',
+      debugLabel: widget.debugLabel != null ? '$Shortcuts: ${widget.debugLabel}' : '$Shortcuts',
       canRequestFocus: false,
       onKeyEvent: _handleOnKeyEvent,
       includeSemantics: widget.includeSemantics,

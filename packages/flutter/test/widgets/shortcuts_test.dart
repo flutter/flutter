@@ -1222,7 +1222,7 @@ void main() {
       );
 
       final FocusNode focusNode = Focus.of(tester.element(find.byType(SizedBox)));
-      expect(focusNode.debugLabel, contains(debugLabel));
+      expect(focusNode.debugLabel, 'Shortcuts: <My Shortcuts Debug Label>');
     });
 
     testWidgets('Shortcuts support multiple intents', (WidgetTester tester) async {
