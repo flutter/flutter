@@ -53,5 +53,6 @@ void main() {
 
     expect(gradleFile, exists);
     expect(result.stdout, isNot(contains(RegExp(r'Running Gradle task'))));
+    expect(result.stdout, isNot(contains(RegExp(r'assembleRelease'))));
   });
 }
