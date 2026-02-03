@@ -190,9 +190,7 @@ Future<void> testMain() async {
 
     void runCodecTest(TestCodec testCodec) {
       // Not all Skia test images are valid - some are expected to fail decoding.
-      const undecodableImages = <String>{
-        'b464333052.jpg',
-      };
+      const undecodableImages = <String>{'b464333052.jpg'};
       const problematicChromeImages = <String, Set<int>>{
         // Frame 2 cause Chrome to crash.
         // https://issues.chromium.org/456445108
@@ -202,61 +200,64 @@ Future<void> testMain() async {
         'interlaced-multiframe-with-blending.png': {2, 3},
       };
 
-      test('${testCodec.description} can create an image and convert it to byte array', () async {
-        final ui.Codec codec = await testCodec.createCodec();
+      test(
+        '${testCodec.description} can create an image and convert it to byte array',
+        () async {
+          final ui.Codec codec = await testCodec.createCodec();
 
-        final Set<int> problematicFrames;
-        if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
-          // Encountered an image with known problematic frames on Chromium.
-          problematicFrames = problematicChromeImages[testCodec.testFile]!;
-        } else {
-          problematicFrames = <int>{};
-        }
+          final Set<int> problematicFrames;
+          if (isChromium && problematicChromeImages.containsKey(testCodec.testFile)) {
+            // Encountered an image with known problematic frames on Chromium.
+            problematicFrames = problematicChromeImages[testCodec.testFile]!;
+          } else {
+            problematicFrames = <int>{};
+          }
 
-        for (var i = 0; i < codec.frameCount; i++) {
-          if (problematicFrames.contains(i)) {
-            printWarning(
-              'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
+          for (var i = 0; i < codec.frameCount; i++) {
+            if (problematicFrames.contains(i)) {
+              printWarning(
+                'Skipping frame $i of ${testCodec.description} due to known Chromium crash bug.',
+              );
+              continue;
+            }
+
+            final ui.Image image;
+            try {
+              final ui.FrameInfo frameInfo = await codec.getNextFrame();
+              image = frameInfo.image;
+            } catch (e) {
+              codec.dispose();
+              throw TestFailure('Failed to get image at frame $i for ${testCodec.description}: $e');
+            }
+
+            expect(image.width, isNonZero);
+            expect(image.height, isNonZero);
+
+            final ByteData? byteData = await image.toByteData();
+            expect(
+              byteData,
+              isNotNull,
+              reason: '${testCodec.description} toByteData() should not be null',
             );
-            continue;
+            expect(
+              byteData!.lengthInBytes,
+              isNonZero,
+              reason: '${testCodec.description} toByteData() should not be empty',
+            );
+            expect(
+              byteData.buffer.asUint8List().any((int byte) => byte > 0),
+              isTrue,
+              reason:
+                  '${testCodec.description} toByteData() should '
+                  'contain nonzero value',
+            );
           }
 
-          final ui.Image image;
-          try {
-            final ui.FrameInfo frameInfo = await codec.getNextFrame();
-            image = frameInfo.image;
-          } catch (e) {
-            codec.dispose();
-            throw TestFailure('Failed to get image at frame $i for ${testCodec.description}: $e');
-          }
-
-          expect(image.width, isNonZero);
-          expect(image.height, isNonZero);
-
-          final ByteData? byteData = await image.toByteData();
-          expect(
-            byteData,
-            isNotNull,
-            reason: '${testCodec.description} toByteData() should not be null',
-          );
-          expect(
-            byteData!.lengthInBytes,
-            isNonZero,
-            reason: '${testCodec.description} toByteData() should not be empty',
-          );
-          expect(
-            byteData.buffer.asUint8List().any((int byte) => byte > 0),
-            isTrue,
-            reason:
-                '${testCodec.description} toByteData() should '
-                'contain nonzero value',
-          );
-        }
-
-        // After all frames are decoded and tested, dispose the codec.
-        codec.dispose();
-      },
-      skip: undecodableImages.contains(testCodec.testFile));
+          // After all frames are decoded and tested, dispose the codec.
+          codec.dispose();
+        },
+        skip: undecodableImages.contains(testCodec.testFile),
+      );
     }
 
     group('Codecs (default browserSupportsImageDecoder)', () {
