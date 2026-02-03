@@ -1405,11 +1405,15 @@ class _DialogWindowRoute<T> extends Route<T> {
     required this.builder,
     required this.parentController,
     required BuildContext context,
-  }) : _registry = MaterialWindowRegistry.maybeOf(context) {
+    required RouteSettings? settings,
+    Size? preferredSize,
+  }) : _registry = MaterialWindowRegistry.maybeOf(context),
+       super(settings: settings) {
     _controller = DialogWindowController(
       parent: parentController,
       title: 'Dialog',
       delegate: _DialogWindowDelegate(this),
+      preferredSize: preferredSize,
     );
   }
 
@@ -1477,6 +1481,11 @@ class _DialogWindowRoute<T> extends Route<T> {
 /// Material entrance and exit animations, modal barrier color, and modal
 /// barrier behavior (dialog is dismissible with a tap on the barrier).
 ///
+/// If [MaterialApp.useWindowing] is `true`, then the dialog is displayed in its
+/// own window using the windowing system, rather than as a modal overlay
+/// within the current window. This will only function on platforms that support
+/// the dialog window type. True dialog windows will lack animations and barriers.
+///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
 /// Content below the dialog is dimmed with a [ModalBarrier]. The widget
 /// returned by the `builder` does not share a context with the location that
@@ -1489,11 +1498,15 @@ class _DialogWindowRoute<T> extends Route<T> {
 ///
 /// The `barrierDismissible` argument is used to indicate whether tapping on the
 /// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
+/// If [MaterialApp.useWindowing] is `true`, then this argument is ignored as
+/// dialogs are displayed in their own windows which do not have a modal barrier.
 ///
 /// The `barrierColor` argument is used to specify the color of the modal
 /// barrier that darkens everything below the dialog. If `null` the `barrierColor`
 /// field from `DialogThemeData` is used. If that is `null` the default color
-/// `Colors.black54` is used.
+/// `Colors.black54` is used. If [MaterialApp.useWindowing] is `true`, then this
+/// argument is ignored as dialogs are displayed in their own windows which do
+/// not have a modal barrier.
 ///
 /// The `useSafeArea` argument is used to indicate if the dialog should only
 /// display in 'safe' areas of the screen not used by the operating system
@@ -1513,12 +1526,18 @@ class _DialogWindowRoute<T> extends Route<T> {
 /// focus beyond the first and the last items of the dialog route. By default,
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
+/// If [MaterialApp.useWindowing] is `true`, then this argument is ignored as
+/// dialogs are displayed in their own windows which manage focus traversal
+/// independently.
 ///
 /// {@template flutter.material.dialog.requestFocus}
 /// The `requestFocus` argument is used to specify whether the dialog should
 /// request focus when shown.
 /// {@endtemplate}
 /// {@macro flutter.widgets.navigator.Route.requestFocus}
+/// If [MaterialApp.useWindowing] is `true`, then this argument is ignored as
+/// dialogs are displayed in their own windows which are focused by the windowing
+/// system.
 ///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
@@ -1604,6 +1623,8 @@ Future<T?> showDialog<T>({
           builder: builder,
           parentController: WindowScope.maybeOf(context),
           context: context,
+          settings: routeSettings,
+          preferredSize: fullscreenDialog ? MediaQuery.sizeOf(context) : null,
         ),
       );
     } catch (e) {
