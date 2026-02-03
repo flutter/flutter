@@ -41,13 +41,13 @@ class _MaterialWindowingManagerState extends State<MaterialWindowingManager> {
         listenable: widget._registry,
         builder: (BuildContext context, Widget? child) {
           final List<Widget> subViews = widget._registry.windows.map((MaterialWindowEntry entry) {
-            switch (entry.controller.runtimeType) {
-              case final DialogWindowController dialog:
-                return _buildDialog(entry, dialog);
-              default:
-                throw UnimplementedError(
-                  'Unsupported window controller type: ${entry.controller.runtimeType}',
-                );
+            final BaseWindowController controller = entry.controller;
+            if (controller is DialogWindowController) {
+              return _buildDialog(entry, controller);
+            } else {
+              throw UnimplementedError(
+                'Unsupported window controller type: ${controller.runtimeType}',
+              );
             }
           }).toList();
 
