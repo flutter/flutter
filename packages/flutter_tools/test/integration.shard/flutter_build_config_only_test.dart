@@ -52,7 +52,7 @@ void main() {
     ], workingDirectory: exampleAppDir.path);
 
     expect(gradleFile, exists);
-    expect(result.stdout, isNot(contains(RegExp(r'Running Gradle task'))));
-    expect(result.stdout, isNot(contains(RegExp(r'assembleRelease'))));
+    expect(result.stdout, isNot(contains('Running Gradle task')));
+    expect(result.stdout, isNot(contains('assembleRelease')));
   });
 }
