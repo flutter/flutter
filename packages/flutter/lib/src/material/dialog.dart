@@ -1405,7 +1405,13 @@ class _DialogWindowRoute<T> extends Route<T> {
     required this.builder,
     required this.parentController,
     required BuildContext context,
-  }) : _registry = MaterialWindowRegistry.maybeOf(context);
+  }) : _registry = MaterialWindowRegistry.maybeOf(context) {
+    _controller = DialogWindowController(
+      parent: parentController,
+      title: 'Dialog',
+      delegate: _DialogWindowDelegate(this),
+    );
+  }
 
   final WidgetBuilder builder;
   final BaseWindowController? parentController;
@@ -1426,13 +1432,6 @@ class _DialogWindowRoute<T> extends Route<T> {
     _overlayEntries = <OverlayEntry>[
       OverlayEntry(builder: (BuildContext context) => const SizedBox.shrink()),
     ];
-
-    // Create the DialogWindowController which creates the native window
-    _controller = DialogWindowController(
-      parent: parentController,
-      title: 'Dialog',
-      delegate: _DialogWindowDelegate(this),
-    );
 
     final NavigatorState? nav = navigator;
     final BuildContext? routeContext = nav?.context;
@@ -1599,13 +1598,17 @@ Future<T?> showDialog<T>({
 
   final MaterialWindowRegistry? windowingConfiguration = MaterialWindowRegistry.maybeOf(context);
   if (windowingConfiguration != null && windowingConfiguration.enableWindowing) {
-    return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
-      _DialogWindowRoute<T>(
-        builder: builder,
-        parentController: WindowScope.maybeOf(context),
-        context: context,
-      ),
-    );
+    try {
+      return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
+        _DialogWindowRoute<T>(
+          builder: builder,
+          parentController: WindowScope.maybeOf(context),
+          context: context,
+        ),
+      );
+    } catch (e) {
+      // Fallback to normal dialog route if windowing is not supported
+    }
   }
 
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
