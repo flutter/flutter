@@ -848,16 +848,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String>? expFlags;
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      expFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,

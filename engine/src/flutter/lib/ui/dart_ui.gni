@@ -26,6 +26,8 @@ dart_ui_files = [
 
 dart_ui_path = "//flutter/lib/ui/ui.dart"
 
+dart_ui_fix_data_file = "//flutter/lib/ui/fix_dart_ui.yaml"
+
 dart_ui_web_files = [
   "$root_out_dir/flutter_web_sdk/lib/ui_web/ui_web/url_strategy.dart",
   "$root_out_dir/flutter_web_sdk/lib/ui_web/ui_web.dart",

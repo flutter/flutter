@@ -799,6 +799,7 @@ void main() {
       nativeAssetsDir.createSync(recursive: true);
       final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
         ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
       nativeAssetsDir.childFile('random.txt').createSync();
       // In addition to the ffiPackageName framework, create an additional unrelated framework in
       // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -864,13 +865,21 @@ void main() {
               '--delete',
               '--filter',
               '- .DS_Store',
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
               // We should copy $ffiPackageName.framework, but not the unrelated framework path.
               ffiPackageDir.path,
               targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
             ],
           ),
           FakeCommand(
@@ -946,6 +955,7 @@ void main() {
       nativeAssetsDir.createSync(recursive: true);
       final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
         ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
       nativeAssetsDir.childFile('random.txt').createSync();
       // In addition to the ffiPackageName framework, create an additional unrelated framework in
       // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -993,6 +1003,20 @@ void main() {
           ),
           FakeCommand(
             command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
               'rsync',
               '-8',
               '-av',
@@ -1007,20 +1031,7 @@ void main() {
               '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'codesign',
-              '--force',
-              '--verbose',
-              '--sign',
-              codesignIdentity,
-              '--',
-              targetBuildDir
-                  .childDirectory(frameworksFolderPath)
-                  .childFile('App.framework/App')
-                  .path,
-            ],
-          ),
+
           FakeCommand(
             command: <String>[
               'codesign',
@@ -1043,10 +1054,6 @@ void main() {
               '--delete',
               '--filter',
               '- .DS_Store',
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
               // We should copy $ffiPackageName.framework, but not the unrelated framework path.
               ffiPackageDir.path,
               targetBuildDir.childDirectory(frameworksFolderPath).path,
@@ -1064,6 +1071,18 @@ void main() {
                   .childDirectory(frameworksFolderPath)
                   .childFile('$ffiPackageName.framework/$ffiPackageName')
                   .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
             ],
           ),
         ],
@@ -1133,6 +1152,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1189,12 +1209,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1296,6 +1324,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1352,12 +1381,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1461,6 +1498,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1472,6 +1510,7 @@ void main() {
           final File infoPlist = memoryFileSystem.file('${buildDir.path}/$infoPlistPath');
           infoPlist.createSync(recursive: true);
           const buildMode = 'Debug';
+          const codesignIdentity = '12312313';
           final testContext = TestContext(
             <String>['embed_and_thin', 'macos'],
             <String, String>{
@@ -1486,6 +1525,7 @@ void main() {
               'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
               'FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH': flutterSwiftPackageDir.path,
               'SDKROOT': 'macosx',
+              'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
             },
             commands: <FakeCommand>[
               FakeCommand(
@@ -1510,18 +1550,54 @@ void main() {
               ),
               FakeCommand(
                 command: <String>[
+                  'codesign',
+                  '--force',
+                  '--verbose',
+                  '--sign',
+                  codesignIdentity,
+                  '--',
+                  targetBuildDir
+                      .childDirectory(frameworksFolderPath)
+                      .childFile('App.framework/App')
+                      .path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
                   'rsync',
                   '-8',
                   '-av',
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'codesign',
+                  '--force',
+                  '--verbose',
+                  '--sign',
+                  codesignIdentity,
+                  '--',
+                  targetBuildDir
+                      .childDirectory(frameworksFolderPath)
+                      .childFile('$ffiPackageName.framework/$ffiPackageName')
+                      .path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
             ],
@@ -1591,6 +1667,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1686,12 +1763,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
               FakeCommand(
@@ -1795,6 +1880,7 @@ void main() {
           final Directory ffiPackageDir = nativeAssetsDir.childDirectory(
             '$ffiPackageName.framework',
           )..createSync();
+          nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
           nativeAssetsDir.childFile('random.txt').createSync();
           // In addition to the ffiPackageName framework, create an additional unrelated framework in
           // the same directory. It should not get copied since it is not referenced in the manifest.
@@ -1891,12 +1977,20 @@ void main() {
                   '--delete',
                   '--filter',
                   '- .DS_Store',
-                  '--filter',
-                  '- native_assets.yaml',
-                  '--filter',
-                  '- native_assets.json',
                   ffiPackageDir.path,
                   targetBuildDir.childDirectory(frameworksFolderPath).path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'rsync',
+                  '-8',
+                  '-av',
+                  '--delete',
+                  '--filter',
+                  '- .DS_Store',
+                  nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+                  '${buildDir.path}/',
                 ],
               ),
             ],
@@ -1970,6 +2064,20 @@ void main() {
           ),
           FakeCommand(
             command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
               'rsync',
               '-8',
               '-av',
@@ -1984,20 +2092,7 @@ void main() {
               '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'codesign',
-              '--force',
-              '--verbose',
-              '--sign',
-              codesignIdentity,
-              '--',
-              targetBuildDir
-                  .childDirectory(frameworksFolderPath)
-                  .childFile('App.framework/App')
-                  .path,
-            ],
-          ),
+
           FakeCommand(
             command: <String>[
               'codesign',
