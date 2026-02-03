@@ -102,7 +102,7 @@ class TestCompiler {
   ///
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
-    this.buildInfo,
+    BuildInfo buildInfo,
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -121,6 +121,7 @@ class TestCompiler {
              ),
            ),
        shouldCopyDillFile = precompiledDillPath == null {
+    this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -144,7 +145,7 @@ class TestCompiler {
   final compilerController = StreamController<_CompilationRequest>();
   final compilationQueue = <_CompilationRequest>[];
   final FlutterProject? flutterProject;
-  final BuildInfo buildInfo;
+  late final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
