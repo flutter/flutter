@@ -34,16 +34,14 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
 
   if (filter_) {
-    auto filter = filter_->makeWithLocalMatrix(context->GetMatrix());
-    if (filter) {
-      // This transform will be applied to every child rect in the subtree
-      context->PushFilterBoundsAdjustment([filter](DlRect rect) {
-        DlIRect filter_out_bounds;
-        filter->map_device_bounds(DlIRect::RoundOut(rect), DlMatrix(),
-                                  filter_out_bounds);
-        return DlRect::Make(filter_out_bounds);
-      });
-    }
+    DlMatrix current_matrix = context->GetMatrix();
+    context->PushFilterBoundsAdjustment(
+        [filter = filter_, current_matrix](DlRect rect) {
+          DlIRect filter_out_bounds;
+          filter->map_device_bounds(DlIRect::RoundOut(rect), current_matrix,
+                                    filter_out_bounds);
+          return DlRect::Make(filter_out_bounds);
+        });
   }
   DiffChildren(context, prev);
   context->SetLayerPaintRegion(this, context->CurrentSubtreeRegion());
