@@ -485,6 +485,12 @@ class ExpansionTile extends StatefulWidget {
   // the default value to true.
   final bool internalAddSemanticForOnTap;
 
+  /// The controller that notifies when the widget's [WidgetState]s change.
+  ///
+  /// This allows listening to and controlling states such as
+  /// [WidgetState.hovered], [WidgetState.focused], [WidgetState.pressed],
+  /// and [WidgetState.disabled] for the tile's header.
+  ///
   /// {@tool snippet}
   /// This example listens for hover and press states on an [ExpansionTile].
   ///
