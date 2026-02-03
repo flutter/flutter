@@ -49,7 +49,7 @@ class Violation {
 /// The result of evaluating a semantics node by an [AccessibilityEvaluation].
 @internal
 class EvaluationResult {
-  /// Create a passing evaluation.
+  /// Creates a passing evaluation.
   EvaluationResult(this.violations);
 
   /// A list of violations found. An empty list means the evaluation passed.
