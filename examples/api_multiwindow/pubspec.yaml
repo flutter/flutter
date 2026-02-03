@@ -3,9 +3,6 @@ name: api_multiwindow
 environment:
   sdk: ^3.9.0-0
 
-# See https://flutter.dev/to/flutter-update-packages
-checksum: f13f5c8f94f6e7e29da1f2c3e5a6b7d8
-
 dependencies:
   flutter:
     sdk: flutter
@@ -18,3 +15,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# PUBSPEC CHECKSUM: 7ggeci
