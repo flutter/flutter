@@ -144,7 +144,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
       color,
       epsilon: epsilon ?? _f16Epsilon,
     ),
-    _ => (false, <double>[0, 0, 0]),
+    _ => throw UnsupportedError('Unsupported pixel format: $format'),
   };
 }
 
@@ -179,55 +179,71 @@ class _HasColor extends Matcher {
   ) {
     final closest = matchState['closest'] as List<double>?;
     if (closest == null) {
-      return mismatchDescription.add('could not find any colors (unsupported pixel format?)');
+      return mismatchDescription.add(
+        'could not find any colors (unsupported pixel format?)',
+      );
     }
     return mismatchDescription.add('closest color to $color was $closest');
   }
 }
 
-const MethodChannel _screenshotChannel = MethodChannel('flutter/screenshot');
-
 /// Precache the Display P3 test image so it is fully decoded before we take a
 /// screenshot. Must be called after [pumpAndSettle] so a [BuildContext] exists.
 Future<void> _precacheP3Image(WidgetTester tester) async {
   final BuildContext context = tester.element(find.byType(app.MyApp));
-  await tester.runAsync(() => precacheImage(MemoryImage(base64Decode(app.displayP3Logo)), context));
+  await tester.runAsync(
+    () => precacheImage(MemoryImage(base64Decode(app.displayP3Logo)), context),
+  );
 }
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
+    const MethodChannel screenshotChannel = MethodChannel('flutter/screenshot');
     testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
       app.run(app.Setup.image);
       await tester.pumpAndSettle();
       await _precacheP3Image(tester);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
     });
-    testWidgets('look for display p3 deepest red (saveLayer)', (WidgetTester tester) async {
+    testWidgets('look for display p3 deepest red (saveLayer)', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.canvasSaveLayer);
       await tester.pumpAndSettle();
       await _precacheP3Image(tester);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
     });
-    testWidgets('p3 deepest red via codec API (ImageDescriptor)', (WidgetTester tester) async {
+    testWidgets('p3 deepest red via codec API (ImageDescriptor)', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.codecImage);
       await tester.pumpAndSettle();
+      // Wait for async _loadCodecImage() to complete and rebuild
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 500)),
+      );
+      await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
     });
     testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
       app.run(app.Setup.none);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, isNot(_HasColor(_deepRed)));
       expect(result, isNot(const _HasColor(<double>[0.0, 1.0, 0.0])));
     });
@@ -237,57 +253,80 @@ void main() {
       await _precacheP3Image(tester);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
       expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
+    testWidgets('draw image with wide gamut works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.drawnImage);
-      await tester.pump();
+      await tester.pumpAndSettle();
+      // Wait for async _drawImage() to complete and rebuild
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 500)),
+      );
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, const _HasColor(<double>[0.0, 1.0, 0.0]));
     });
-    testWidgets('draw container with wide gamut works', (WidgetTester tester) async {
+    testWidgets('draw container with wide gamut works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.container);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed));
     });
 
-    testWidgets('draw wide gamut linear gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut linear gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.linearGradient);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
 
       // Gradients need larger epsilon due to pixel sampling between gradient stops.
       expect(result, _HasColor(_deepRed, epsilon: 0.02));
     });
 
-    testWidgets('draw wide gamut radial gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut radial gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.radialGradient);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut conical gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut conical gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.conicalGradient);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       expect(result, _HasColor(_deepRed, epsilon: 0.05));
     });
 
-    testWidgets('draw wide gamut sweep gradient works', (WidgetTester tester) async {
+    testWidgets('draw wide gamut sweep gradient works', (
+      WidgetTester tester,
+    ) async {
       app.run(app.Setup.sweepGradient);
       await tester.pumpAndSettle();
 
-      final result = await _screenshotChannel.invokeMethod('test') as List<Object?>;
+      final result =
+          await screenshotChannel.invokeMethod('test') as List<Object?>;
       // Sweep gradient endpoint may not be sampled exactly at a pixel center.
       expect(result, _HasColor(_deepRed, epsilon: 0.02));
     });

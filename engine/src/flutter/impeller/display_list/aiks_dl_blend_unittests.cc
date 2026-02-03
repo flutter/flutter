@@ -399,6 +399,38 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  DisplayListBuilder builder;
+  DlPaint paint;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  paint.setColor(DlColor::RGBA(0.9, 1, 0.9, 1.0));
+  builder.DrawPaint(paint);
+  builder.SaveLayer(std::nullopt);
+
+  paint.setBlendMode(DlBlendMode::kPlus);
+  paint.setColor(DlColor::kRed());
+
+  builder.DrawRect(DlRect::MakeXYWH(100, 100, 400, 400), paint);
+  paint.setColor(DlColor::kWhite());
+
+  auto rect = Rect::MakeXYWH(100, 100, 400, 400).Expand(-100, -100);
+  builder.DrawImageRect(
+      DlImageImpeller::Make(texture),
+      DlRect::MakeWH(texture->GetSize().width, texture->GetSize().height),
+      DlRect::MakeLTRB(rect.GetLeft(), rect.GetTop(),  //
+                       rect.GetRight(), rect.GetBottom()),
+      DlImageSampling::kMipmapLinear, &paint);
+  builder.Restore();
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Bug: https://github.com/flutter/flutter/issues/142549
+TEST_P(AiksTest, BlendModePlusAlphaWideGamutF16) {
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kR16G16B16A16Float);
   auto texture = CreateTextureForFixture("airplane.jpg",
                                          /*enable_mipmapping=*/true);
@@ -430,6 +462,42 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::RGBA(0.1, 0.2, 0.1, 1.0));
+  builder.DrawPaint(paint);
+
+  DlPaint save_paint;
+  save_paint.setColorFilter(
+      DlColorFilter::MakeBlend(DlColor::RGBA(1, 0, 0, 1), DlBlendMode::kPlus));
+  builder.SaveLayer(std::nullopt, &save_paint);
+
+  paint.setColor(DlColor::kRed());
+  builder.DrawRect(DlRect::MakeXYWH(100, 100, 400, 400), paint);
+
+  paint.setColor(DlColor::kWhite());
+
+  auto rect = Rect::MakeXYWH(100, 100, 400, 400).Expand(-100, -100);
+  builder.DrawImageRect(
+      DlImageImpeller::Make(texture),
+      DlRect::MakeWH(texture->GetSize().width, texture->GetSize().height),
+      DlRect::MakeLTRB(rect.GetLeft(), rect.GetTop(),  //
+                       rect.GetRight(), rect.GetBottom()),
+      DlImageSampling::kMipmapLinear, &paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Bug: https://github.com/flutter/flutter/issues/142549
+TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamutF16) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kR16G16B16A16Float);
   auto texture = CreateTextureForFixture("airplane.jpg",

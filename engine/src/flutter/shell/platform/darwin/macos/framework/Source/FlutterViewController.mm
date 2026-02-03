@@ -20,6 +20,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #pragma mark - Static types and data.

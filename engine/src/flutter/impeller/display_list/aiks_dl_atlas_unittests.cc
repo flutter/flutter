@@ -165,6 +165,23 @@ TEST_P(AiksTest, DrawAtlasWithColorAdvancedAndTransform) {
 TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
   DisplayListBuilder builder;
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+
+  // Draws the image as four squares stiched together.
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
+  std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kGreen(),
+                                 DlColor::kBlue(), DlColor::kYellow()};
+
+  builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
+                    colors.data(), /*count=*/4, DlBlendMode::kPlus,
+                    DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DrawAtlasPlusWideGamutF16) {
+  DisplayListBuilder builder;
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kR16G16B16A16Float);
 
   // Draws the image as four squares stiched together.

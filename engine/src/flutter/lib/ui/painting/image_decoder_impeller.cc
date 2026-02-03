@@ -7,6 +7,7 @@
 #include <format>
 #include <memory>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
@@ -136,9 +137,19 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else if (is_wide_gamut) {
+    // macOS engine uses F16 (RGBA16Float) for wide gamut surfaces for better
+    // quality. This compile-time path ensures decoded images match the surface
+    // format.
+    //
+    // iOS uses 10-bit for opaque images as it uses less memory (4 bytes vs
+    // 8 bytes per pixel).
+#if FML_OS_MACOSX
+    SkColorType color_type = kRGBA_F16_SkColorType;
+#else
     SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
                                  ? kBGR_101010x_XR_SkColorType
                                  : kRGBA_F16_SkColorType;
+#endif
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)

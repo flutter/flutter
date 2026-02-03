@@ -239,11 +239,11 @@ TaskFunction createWindowingDriverTest() {
   };
 }
 
-TaskFunction createWideGamutTest({required String platform}) {
+TaskFunction createWideGamutTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
     'integration_test/app_test.dart',
-    createPlatforms: <String>[platform],
+    createPlatforms: <String>['ios', 'macos'],
   ).call;
 }
 

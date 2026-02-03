@@ -265,8 +265,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     switch (widget.setup) {
-      case Setup.image || Setup.canvasSaveLayer || Setup.blur:
+      case Setup.image || Setup.blur:
         break;
+      case Setup.canvasSaveLayer:
+        _loadCodecImage().then(
+          (ui.Image? value) => setState(() {
+            _image = value;
+          }),
+        );
       case Setup.codecImage:
         _loadCodecImage().then(
           (ui.Image? value) => setState(() {
@@ -305,7 +311,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case Setup.drawnImage:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
       case Setup.canvasSaveLayer:
-        imageWidget = Image.memory(base64Decode(displayP3Logo));
+        imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
       case Setup.blur:
         imageWidget = Stack(
           children: <Widget>[

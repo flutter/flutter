@@ -11,6 +11,9 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
+// CALayer contents format for wide gamut (Display P3) support on macOS.
+NSString* const kFlutterWideGamutContentsFormat = kCAContentsFormatRGBA16Float;
+
 @implementation FlutterSurfacePresentInfo
 @end
 
@@ -76,7 +79,7 @@ static void UpdateContentSubLayers(CALayer* layer,
   while (layer.sublayers.count < paintRegion.size()) {
     CALayer* newLayer = [CALayer layer];
     if (enableWideGamut) {
-      newLayer.contentsFormat = kCAContentsFormatRGBA16Float;
+      newLayer.contentsFormat = kFlutterWideGamutContentsFormat;
     }
     [layer addSublayer:newLayer];
   }
@@ -119,7 +122,7 @@ static void UpdateContentSubLayers(CALayer* layer,
     _enableWideGamut = enableWideGamut;
 
     if (enableWideGamut) {
-      _containingLayer.contentsFormat = kCAContentsFormatRGBA16Float;
+      _containingLayer.contentsFormat = kFlutterWideGamutContentsFormat;
     }
 
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
@@ -137,7 +140,7 @@ static void UpdateContentSubLayers(CALayer* layer,
   _enableWideGamut = enableWideGamut;
 
   NSString* contentsFormat =
-      enableWideGamut ? kCAContentsFormatRGBA16Float : kCAContentsFormatRGBA8Uint;
+      enableWideGamut ? kFlutterWideGamutContentsFormat : kCAContentsFormatRGBA8Uint;
   _containingLayer.contentsFormat = contentsFormat;
 
   // Update all existing layers and their sublayers.
@@ -208,7 +211,7 @@ static void UpdateContentSubLayers(CALayer* layer,
   while (_layers.count < _frontSurfaces.count) {
     CALayer* layer = [CALayer layer];
     if (_enableWideGamut) {
-      layer.contentsFormat = kCAContentsFormatRGBA16Float;
+      layer.contentsFormat = kFlutterWideGamutContentsFormat;
     }
     [_containingLayer addSublayer:layer];
     [_layers addObject:layer];
@@ -398,9 +401,7 @@ static const int kSurfaceEvictionAge = 30;
 }
 
 - (void)onIdle {
-  @synchronized(self) {
-    [_surfaces removeAllObjects];
-  }
+  [self flush];
 }
 
 - (void)reschedule {

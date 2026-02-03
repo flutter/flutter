@@ -567,6 +567,28 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
   // Making sure this test is run on a wide gamut enabled backend
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kB10G10R10A10XR);
+
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10));
+
+  // Zero height above
+  builder.DrawRect(DlRect::MakeLTRB(100, 250, 500, 250), paint);
+  // Regular rect
+  builder.DrawRect(DlRect::MakeLTRB(100, 300, 500, 600), paint);
+  // Zero width to the right
+  builder.DrawRect(DlRect::MakeLTRB(550, 300, 550, 600), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamutF16) {
+  // Making sure this test is run on a wide gamut enabled backend with F16
+  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kR16G16B16A16Float);
 
   DisplayListBuilder builder;

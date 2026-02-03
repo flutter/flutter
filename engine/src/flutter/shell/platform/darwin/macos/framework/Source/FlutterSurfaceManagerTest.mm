@@ -326,7 +326,7 @@ TEST(FlutterSurfaceManager, WideGamutLayerHasCorrectContentsFormat) {
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
 
   // Verify containing layer has correct contentsFormat.
-  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 
   // Present a surface and verify the sublayer also has correct contentsFormat.
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
@@ -336,7 +336,7 @@ TEST(FlutterSurfaceManager, WideGamutLayerHasCorrectContentsFormat) {
 
   EXPECT_EQ(testView.layer.sublayers.count, 1ul);
   EXPECT_TRUE(
-      [testView.layer.sublayers[0].contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+      [testView.layer.sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 }
 
 TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectColorSpace) {
@@ -414,7 +414,7 @@ TEST(FlutterSurfaceManager, StandardGamutLayerDoesNotSetContentsFormat) {
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
 
   // Containing layer should not have RGBA16Float contents format.
-  EXPECT_FALSE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_FALSE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 
   // Present a surface and verify sublayers also don't have RGBA16Float.
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
@@ -424,7 +424,7 @@ TEST(FlutterSurfaceManager, StandardGamutLayerDoesNotSetContentsFormat) {
 
   EXPECT_EQ(testView.layer.sublayers.count, 1ul);
   EXPECT_FALSE(
-      [testView.layer.sublayers[0].contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+      [testView.layer.sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 }
 
 TEST(FlutterSurfaceManager, WideGamutSublayersFromPaintRegionHaveCorrectContentsFormat) {
@@ -449,8 +449,8 @@ TEST(FlutterSurfaceManager, WideGamutSublayersFromPaintRegionHaveCorrectContents
   EXPECT_EQ(testView.layer.sublayers.count, 2ul);
   NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
   EXPECT_EQ(sublayers.count, 2ul);
-  EXPECT_TRUE([sublayers[0].contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
-  EXPECT_TRUE([sublayers[1].contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_TRUE([sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
+  EXPECT_TRUE([sublayers[1].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 }
 
 TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
@@ -491,7 +491,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
   [surfaceManager setEnableWideGamut:YES];
 
   // Verify containing layer format was updated.
-  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
 
   // Verify cache was flushed.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
@@ -558,9 +558,9 @@ TEST(FlutterSurfaceManager, DynamicSwitchUpdatesExistingLayerFormats) {
 
   // Verify all layers updated.
   for (CALayer* layer in testView.layer.sublayers) {
-    EXPECT_TRUE([layer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+    EXPECT_TRUE([layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
     for (CALayer* sublayer in layer.sublayers) {
-      EXPECT_TRUE([sublayer.contentsFormat isEqualToString:kCAContentsFormatRGBA16Float]);
+      EXPECT_TRUE([sublayer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
     }
   }
 }

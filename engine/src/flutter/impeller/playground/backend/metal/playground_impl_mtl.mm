@@ -29,6 +29,19 @@
 
 namespace impeller {
 
+// static
+bool PlaygroundImplMTL::DeviceSupports10BitFormats() {
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+  if (!device) {
+    return false;
+  }
+  // 10-bit pixel formats (e.g., BGRA10_XR) require Apple3+ family.
+  // Mac2 family only supports F16 wide gamut, not 10-bit formats.
+  // See "Extended range pixel formats" in Metal Feature Set Tables:
+  // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+  return [device supportsFamily:MTLGPUFamilyApple3];
+}
+
 struct PlaygroundImplMTL::Data {
   CAMetalLayer* metal_layer = nil;
 };
@@ -76,12 +89,15 @@ PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
     return;
   }
 
+  std::optional<PixelFormat> wide_gamut_format = std::nullopt;
+  if (switches.enable_wide_gamut_f16) {
+    wide_gamut_format = PixelFormat::kR16G16B16A16Float;
+  } else if (switches.enable_wide_gamut) {
+    wide_gamut_format = PixelFormat::kB10G10R10A10XR;
+  }
   auto context = ContextMTL::Create(
       switches.flags, ShaderLibraryMappingsForPlayground(),
-      is_gpu_disabled_sync_switch_, "Playground Library",
-      switches.enable_wide_gamut
-          ? std::optional<PixelFormat>(PixelFormat::kR16G16B16A16Float)
-          : std::nullopt);
+      is_gpu_disabled_sync_switch_, "Playground Library", wide_gamut_format);
   if (!context) {
     return;
   }

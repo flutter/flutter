@@ -12,6 +12,9 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
+// CALayer contents format for wide gamut (Display P3) support on macOS.
+extern NSString* _Nonnull const kFlutterWideGamutContentsFormat;
+
 /**
  * Surface with additional properties needed for presenting.
  */

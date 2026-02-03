@@ -40,10 +40,13 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
          [device supportsFamily:MTLGPUFamilyMac2];
 }
 
-// See "Extended Range and wide color pixel formats" in the metal feature set
-// tables.
+// See "Extended Range and wide color pixel formats" in the Metal Feature Set
+// Tables: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+// - Apple3+ for iOS devices (supports 10-bit and F16 formats)
+// - Mac2 for macOS devices (supports F16 only, NOT 10-bit formats)
 static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
-  return [device supportsFamily:MTLGPUFamilyApple3];
+  return [device supportsFamily:MTLGPUFamilyApple3] ||
+         [device supportsFamily:MTLGPUFamilyMac2];
 }
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
@@ -65,8 +68,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetDefaultGlyphAtlasFormat(PixelFormat::kA8UNormInt)
       .SetSupportsTriangleFan(false)
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
-      .SetSupportsExtendedRangeFormats(
-          DeviceSupportsExtendedRangeFormats(device))
+      .SetSupportsExtendedRangeFormats(DeviceSupportsExtendedRangeFormats(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else
