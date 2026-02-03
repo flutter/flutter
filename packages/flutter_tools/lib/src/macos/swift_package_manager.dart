@@ -204,11 +204,7 @@ class SwiftPackageManager {
       targets: <SwiftPackageTarget>[
         SwiftPackageTarget.defaultTarget(
           name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
-          dependencies: [SwiftPackageTargetDependency.target(name: frameworkName)],
-        ),
-        SwiftPackageTarget.binaryTarget(
-          name: frameworkName,
-          relativePath: '$frameworkName.xcframework',
+          dependencies: [],
         ),
       ],
       templateRenderer: _templateRenderer,

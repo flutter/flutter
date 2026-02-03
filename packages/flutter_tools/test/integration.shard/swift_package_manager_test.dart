@@ -382,9 +382,8 @@ void main() {
             '-dXcodeBuildScript=prepare',
             '$unpackTarget: Starting due to',
             '-dXcodeBuildScript=build',
-            'Skipping target: $unpackTarget',
           ],
-          unexpectedLines: <String>[],
+          unexpectedLines: <String>['Skipping target: $unpackTarget'],
         );
 
         await SwiftPackageManagerUtils.buildApp(
