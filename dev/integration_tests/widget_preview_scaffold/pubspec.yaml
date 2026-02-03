@@ -37,13 +37,13 @@ dependencies:
   lints: 6.0.0
   matcher: 0.12.18
   material_color_utilities: 0.13.0
-  meta: 1.17.0
+  meta: 1.18.0
   plugin_platform_interface: 2.1.8
   source_span: 1.10.1
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
-  test_api: 0.7.8
+  test_api: 0.7.9
   typed_data: 1.4.0
   unified_analytics: 8.0.10
   url_launcher_android: 6.3.28
@@ -51,21 +51,21 @@ dependencies:
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
   url_launcher_platform_interface: 2.3.2
-  url_launcher_web: 2.4.1
+  url_launcher_web: 2.4.2
   url_launcher_windows: 3.1.5
   vector_math: 2.2.0
   vm_service: 15.0.2
   web: 1.1.1
   web_socket: 1.0.1
   web_socket_channel: 3.0.3
-  webview_flutter: 4.13.0
+  webview_flutter: 4.9.0
   webview_flutter_web: ^0.2.3+4
 
 dev_dependencies:
   flutter_tools:
     path: ../../../packages/flutter_tools/
-  test: 1.28.0
+  test: 1.29.0
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: p85g55
+# PUBSPEC CHECKSUM: 5b2llq

@@ -12,7 +12,7 @@
   "shareButtonLabel": "Споделяне",
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Намерени резултати от търсенето",
+  "noResultsFound": "Няма намерени резултати",
+  "radioButtonUnselectedLabel": "Не е избран"
 }

@@ -115,7 +115,12 @@ class CkResizingCodec extends ResizingCodec {
       scaledHeight,
     );
     final DomImageBitmap bitmap = offscreenCanvas.transferToImageBitmap();
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    SkImage? skImage;
+    if (CanvasKitRenderer.instance.isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(bitmap);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    }
 
     // Resize the canvas to 0x0 to cause the browser to eagerly reclaim its
     // memory.
@@ -137,16 +142,21 @@ ui.Image createCkImageFromImageElement(
   int naturalWidth,
   int naturalHeight,
 ) {
-  final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-    image,
-    SkPartialImageInfo(
-      alphaType: canvasKit.AlphaType.Premul,
-      colorType: canvasKit.ColorType.RGBA_8888,
-      colorSpace: SkColorSpaceSRGB,
-      width: naturalWidth.toDouble(),
-      height: naturalHeight.toDouble(),
-    ),
-  );
+  SkImage? skImage;
+  if (CanvasKitRenderer.instance.isSoftware) {
+    skImage = canvasKit.MakeImageFromCanvasImageSource(image);
+  } else {
+    skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+      image,
+      SkPartialImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: naturalWidth.toDouble(),
+        height: naturalHeight.toDouble(),
+      ),
+    );
+  }
   if (skImage == null) {
     throw ImageCodecException('Failed to create image from Image.decode');
   }
@@ -334,16 +344,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
         debugSource: url,
       );
     } else {
-      final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-      final codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
-
-      try {
-        await codec.decode();
-        return codec;
-      } on ImageCodecException {
-        codec.dispose();
-        return CkAnimatedImage.decodeFromBytes(list, url);
-      }
+      return CkAnimatedImage.decodeFromBytes(list, url);
     }
   }
 }

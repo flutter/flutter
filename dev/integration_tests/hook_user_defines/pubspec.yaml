@@ -20,6 +20,6 @@ dependencies:
   native_toolchain_c: 0.17.4
 
 dev_dependencies:
-  test: 1.28.0
+  test: 1.29.0
 
-# PUBSPEC CHECKSUM: qlfuuh
+# PUBSPEC CHECKSUM: 76vsd6

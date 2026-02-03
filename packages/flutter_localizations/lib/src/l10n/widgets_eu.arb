@@ -12,7 +12,7 @@
   "shareButtonLabel": "Partekatu",
   "pasteButtonLabel": "Itsatsi",
   "selectAllButtonLabel": "Hautatu guztiak",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "Bilaketa-emaitzak aurkitu dira",
+  "noResultsFound": "Ez da aurkitu emaitzarik",
+  "radioButtonUnselectedLabel": "Hautatu gabe"
 }

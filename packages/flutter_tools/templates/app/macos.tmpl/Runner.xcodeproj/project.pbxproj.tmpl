@@ -81,6 +81,10 @@
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
 		{{#withSwiftPackageManager}}
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
+		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = ephemeral/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };
+		{{#withPlatformChannelPluginHook}}
+		78DABEA22ED26510000E7860 /* {{pluginProjectName}} */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = {{pluginProjectName}}; path = ../../../macos/{{pluginProjectName}}; sourceTree = "<group>"; };
+		{{/withPlatformChannelPluginHook}}
 		{{/withSwiftPackageManager}}
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -161,6 +165,10 @@
 			isa = PBXGroup;
 			children = (
 				{{#withSwiftPackageManager}}
+				{{#withPlatformChannelPluginHook}}
+				78DABEA22ED26510000E7860 /* {{pluginProjectName}} */,
+				{{/withPlatformChannelPluginHook}}
+				784666492D4C4C64000A1A5F /* FlutterFramework */,
 				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,
 				{{/withSwiftPackageManager}}
 				335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */,
