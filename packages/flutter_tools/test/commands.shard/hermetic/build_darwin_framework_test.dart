@@ -1282,10 +1282,26 @@ void main() {
 
         // Create the framework directories in Pods (though they should be skipped)
         final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        podsDir.childDirectory('some').childDirectory('path').childDirectory('Flutter.framework').createSync(recursive: true);
-        podsDir.childDirectory('some').childDirectory('path').childDirectory('Flutter.xcframework').createSync(recursive: true);
-        podsDir.childDirectory('some').childDirectory('path').childDirectory('App.framework').createSync(recursive: true);
-        podsDir.childDirectory('some').childDirectory('path').childDirectory('App.xcframework').createSync(recursive: true);
+        podsDir
+            .childDirectory('some')
+            .childDirectory('path')
+            .childDirectory('Flutter.framework')
+            .createSync(recursive: true);
+        podsDir
+            .childDirectory('some')
+            .childDirectory('path')
+            .childDirectory('Flutter.xcframework')
+            .createSync(recursive: true);
+        podsDir
+            .childDirectory('some')
+            .childDirectory('path')
+            .childDirectory('App.framework')
+            .createSync(recursive: true);
+        podsDir
+            .childDirectory('some')
+            .childDirectory('path')
+            .childDirectory('App.xcframework')
+            .createSync(recursive: true);
 
         final command = BuildIOSFrameworkCommand(
           logger: logger,
@@ -1635,14 +1651,12 @@ void main() {
 
         // Create the frameworks
         final Directory podsDir = hostAppRoot.childDirectory('Pods');
-        final Directory fairFramework =
-            podsDir.childDirectory('FairDynamicFlutter.framework')
-              ..createSync(recursive: true);
+        final Directory fairFramework = podsDir.childDirectory('FairDynamicFlutter.framework')
+          ..createSync(recursive: true);
         fairFramework.childFile('FairDynamicFlutter').writeAsStringSync('binary');
 
-        final Directory appAuthFramework =
-            podsDir.childDirectory('AppAuth.xcframework')
-              ..createSync(recursive: true);
+        final Directory appAuthFramework = podsDir.childDirectory('AppAuth.xcframework')
+          ..createSync(recursive: true);
         appAuthFramework.childFile('Info.plist').writeAsStringSync('plist');
 
         final command = BuildIOSFrameworkCommand(
