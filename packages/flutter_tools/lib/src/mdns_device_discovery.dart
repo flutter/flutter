@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:logging/logging.dart' as log;
 import 'package:mdns_dart/mdns_dart.dart';
@@ -16,6 +15,7 @@ import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/time.dart';
 import 'build_info.dart';
+import 'convert.dart';
 import 'device.dart';
 import 'version.dart';
 
