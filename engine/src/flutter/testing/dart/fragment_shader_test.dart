@@ -752,22 +752,18 @@ void main() async {
     },
   );
 
-  _runImpellerTest(
-    'Shader Compiler appropriately pads vec3 uniform arrays',
-    () async {
-      final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
-      final FragmentShader shader = program.fragmentShader();
+  _runImpellerTest('Shader Compiler appropriately pads vec3 uniform arrays', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('vec3_uniform.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
 
-      // Set the last vec3 in the uniform array to green. The shader will read this
-      // value, and if the uniforms were padded correctly will render green.
-      shader.setFloat(9, 0); // color_array[3].x
-      shader.setFloat(10, 1.0); // color_array[3].y
-      shader.setFloat(11, 0); // color_array[3].z
+    // Set the last vec3 in the uniform array to green. The shader will read this
+    // value, and if the uniforms were padded correctly will render green.
+    shader.setFloat(9, 0); // color_array[3].x
+    shader.setFloat(10, 1.0); // color_array[3].y
+    shader.setFloat(11, 0); // color_array[3].z
 
-      await _expectShaderRendersGreen(shader);
-    },
-    skip: Platform.executableArguments.contains('--impeller-backend=metal'),
-  );
+    await _expectShaderRendersGreen(shader);
+  });
 
   _runImpellerTest('ImageFilter.shader can be applied to canvas operations', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
