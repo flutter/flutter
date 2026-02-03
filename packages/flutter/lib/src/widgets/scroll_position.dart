@@ -657,9 +657,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
           return false;
         }
       } else if (hasPixels) {
-        final double overscroll = applyBoundaryConditions(pixels);
-        if (overscroll.abs() > precisionErrorTolerance) {
-          correctPixels(pixels - overscroll);
+        final double clampedPixels = clampDouble(pixels, minScrollExtent, maxScrollExtent);
+        if ((pixels - clampedPixels).abs() > precisionErrorTolerance) {
+          correctPixels(clampedPixels);
           return false;
         }
       }
