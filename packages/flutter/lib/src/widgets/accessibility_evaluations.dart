@@ -52,7 +52,7 @@ class EvaluationResult {
   /// Create a passing evaluation.
   EvaluationResult(this.violations);
 
-  /// If [passed] is false, contains the reason for failure.
+  /// A list of violations found. An empty list means the evaluation passed.
   final List<Violation> violations;
 }
 
