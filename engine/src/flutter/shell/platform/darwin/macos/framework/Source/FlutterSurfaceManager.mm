@@ -19,7 +19,7 @@
   id<MTLCommandQueue> _commandQueue;
   CALayer* _containingLayer;
   __weak id<FlutterSurfaceManagerDelegate> _delegate;
-  BOOL _enableWideGamut;
+  BOOL _wideGamut;
 
   // Available (cached) back buffer surfaces. These will be cleared during
   // present and replaced by current frong surfaces.
@@ -112,7 +112,7 @@ static void UpdateContentSubLayers(CALayer* layer,
     _commandQueue = commandQueue;
     _containingLayer = containingLayer;
     _delegate = delegate;
-    _enableWideGamut = wideGamut;
+    _wideGamut = wideGamut;
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
@@ -122,10 +122,10 @@ static void UpdateContentSubLayers(CALayer* layer,
 
 - (void)setEnableWideGamut:(BOOL)enableWideGamut {
   FML_DCHECK([NSThread isMainThread]);
-  if (_enableWideGamut == enableWideGamut) {
+  if (_wideGamut == enableWideGamut) {
     return;
   }
-  _enableWideGamut = enableWideGamut;
+  _wideGamut = enableWideGamut;
 
   // Flush cached surfaces since they have the wrong pixel format.
   [_backBufferCache flush];
@@ -149,9 +149,7 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (FlutterSurface*)surfaceForSize:(CGSize)size {
   FlutterSurface* surface = [_backBufferCache removeSurfaceForSize:size];
   if (surface == nil) {
-    surface = [[FlutterSurface alloc] initWithSize:size
-                                            device:_device
-                                   enableWideGamut:_enableWideGamut];
+    surface = [[FlutterSurface alloc] initWithSize:size device:_device enableWideGamut:_wideGamut];
   }
   return surface;
 }
@@ -170,8 +168,16 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces {
   FML_DCHECK([NSThread isMainThread]);
 
-  // Release all unused back buffer surfaces and replace them with front surfaces.
-  [_backBufferCache returnSurfaces:_frontSurfaces];
+  // Only return surfaces to the cache if they match the current wide gamut mode.
+  // Surfaces created with a different mode should be discarded to avoid using
+  // wrong pixel format after a wide gamut mode switch.
+  NSMutableArray<FlutterSurface*>* surfacesToReturn = [NSMutableArray array];
+  for (FlutterSurface* surface in _frontSurfaces) {
+    if (surface.isWideGamut == _wideGamut) {
+      [surfacesToReturn addObject:surface];
+    }
+  }
+  [_backBufferCache returnSurfaces:surfacesToReturn];
 
   // Front surfaces will be replaced by currently presented surfaces.
   [_frontSurfaces removeAllObjects];

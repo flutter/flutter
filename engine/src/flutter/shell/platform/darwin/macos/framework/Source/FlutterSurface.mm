@@ -15,6 +15,8 @@
   id<MTLTexture> _texture;
   // Used for testing.
   BOOL _isInUseOverride;
+  // Whether this surface was created with wide gamut enabled.
+  BOOL _isWideGamut;
 }
 @end
 
@@ -36,6 +38,10 @@
   return _isInUseOverride || IOSurfaceIsInUse(_ioSurface);
 }
 
+- (BOOL)isWideGamut {
+  return _isWideGamut;
+}
+
 - (BOOL)isInUseOverride {
   return _isInUseOverride;
 }
@@ -49,6 +55,7 @@
              enableWideGamut:(BOOL)enableWideGamut {
   if (self = [super init]) {
     self->_size = size;
+    self->_isWideGamut = enableWideGamut;
     self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size
                                                    enableWideGamut:enableWideGamut]);
     MTLPixelFormat pixelFormat =

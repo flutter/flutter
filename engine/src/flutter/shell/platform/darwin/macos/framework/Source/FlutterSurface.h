@@ -36,6 +36,8 @@
 @property(readonly, nonatomic) int64_t textureId;
 // Whether the surface is currently in use by the compositor.
 @property(readonly, nonatomic) BOOL isInUse;
+// Whether the surface was created with wide gamut enabled.
+@property(readonly, nonatomic) BOOL isWideGamut;
 
 @end
 
