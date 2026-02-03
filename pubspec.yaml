@@ -115,7 +115,7 @@ dependencies:
   google_mobile_ads: 5.1.0
   googleapis: 14.0.0
   googleapis_auth: 2.0.0
-  hooks: 1.0.0
+  hooks: 1.0.1
   html: 0.15.6
   http: 1.6.0
   http_multi_server: 3.2.2
@@ -216,4 +216,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: ag2v9d
+# PUBSPEC CHECKSUM: 50db3n
