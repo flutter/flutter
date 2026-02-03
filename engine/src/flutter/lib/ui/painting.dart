@@ -5809,7 +5809,7 @@ base class FragmentShader extends Shader {
 
     final slots = List<UniformFloatSlot>.generate(
       size,
-      (i) => UniformFloatSlot._(this, name, info.index, i),
+      (i) => UniformFloatSlot._(this, name, i, info.index + i),
     );
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
