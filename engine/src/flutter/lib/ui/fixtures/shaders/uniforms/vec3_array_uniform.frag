@@ -7,6 +7,10 @@
 // If updating this file, also update
 // engine/src/flutter/lib/web_ui/test/ui/fragment_shader_test.dart
 
+#include <flutter/runtime_effect.glsl>
+
+uniform vec2 u_size;
+
 precision highp float;
 
 uniform vec3[2] color_array;
@@ -14,5 +18,11 @@ uniform vec3[2] color_array;
 out vec4 fragColor;
 
 void main() {
-  fragColor = vec4(mix(color_array[0], color_array[1], 0.5), 1);
+  vec2 uv = FlutterFragCoord().xy / u_size;
+
+  if (uv.x < 0.5) {
+    fragColor = vec4(color_array[0], 1);
+  } else {
+    fragColor = vec4(color_array[1], 1);
+  }
 }

@@ -30,7 +30,6 @@ if (enable_unittests) {
     "uniforms_reordered.frag",
     "uniforms_sorted.frag",
     "uniforms.frag",
-    "vec3_uniform.frag",
   ]
 
   group("general_shaders") {

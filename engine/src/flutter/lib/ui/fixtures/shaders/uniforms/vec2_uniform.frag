@@ -4,15 +4,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// If updating this file, also update
-// engine/src/flutter/lib/web_ui/test/ui/fragment_shader_test.dart
-
 precision highp float;
 
-uniform vec4[2] color_array;
+uniform vec2 color_rg;
 
 out vec4 fragColor;
 
 void main() {
-  fragColor = mix(color_array[0], color_array[1], 0.5);
+  fragColor = vec4(color_rg, 0, 1);
 }
