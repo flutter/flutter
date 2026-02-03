@@ -705,17 +705,24 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
-    // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym') ||
-        result.stdout.contains('libflutter.so.dbg')) {
-      return true;
+    // As long as libflutter.so.sym/dbg and libapp.so.sym/dbg are present for at least
+    // one architecture, assume AGP succeeded in stripping.
+    if (!(result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg'))) {
+      _logger.printTrace(
+        'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
     }
 
-    _logger.printTrace(
-      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
-    );
-    return false;
+    if (!(result.stdout.contains('libapp.so.sym') || result.stdout.contains('libapp.so.dbg'))) {
+      _logger.printTrace(
+        'libapp.so.sym or libapp.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> _performCodeSizeAnalysis(

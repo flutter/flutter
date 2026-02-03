@@ -615,7 +615,7 @@ def to_gn_args(args):
   # Determine whether backtace support should be compiled in.
   if args.backtrace:
     gn_args['enable_backtrace'] = (
-        args.target_os in ['linux', 'mac', 'win'] or
+        is_host_build(args) or args.target_os in ['linux', 'mac', 'win'] or
         args.target_os == 'ios' and runtime_mode == 'debug'
     )
   else:
