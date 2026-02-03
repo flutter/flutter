@@ -267,7 +267,7 @@ void main() {
     expect(
       find.byKey(key),
       paints..rect(
-        rect: const Offset(0.5, -199.5) & const Size(99, 499),
+        rect: const Offset(0.5, 0.5) & const Size(99, 499),
         color: black,
         style: PaintingStyle.stroke,
         strokeWidth: 1.0,
@@ -354,7 +354,7 @@ void main() {
     expect(
       find.byKey(key),
       paints..rect(
-        rect: const Offset(-199.5, 0.5) & const Size(499, 99),
+        rect: const Offset(0.5, 0.5) & const Size(499, 99),
         color: black,
         style: PaintingStyle.stroke,
         strokeWidth: 1.0,
@@ -504,6 +504,111 @@ void main() {
       );
     },
   );
+
+  /// Regression test for https://github.com/flutter/flutter/issues/179801
+  testWidgets('DecoratedSliver works with PinnedHeaderSliver basic scroll', (
+    WidgetTester tester,
+  ) async {
+    const key = Key('DecoratedSliver with border');
+    const black = Color(0xFF000000);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 100,
+            width: 300,
+            child: CustomScrollView(
+              controller: controller,
+              slivers: <Widget>[
+                DecoratedSliver(
+                  key: key,
+                  decoration: BoxDecoration(border: Border.all()),
+                  sliver: const PinnedHeaderSliver(child: SizedBox(height: 50, width: 300)),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(key),
+      paints..rect(
+        rect: const Offset(0.5, 0.5) & const Size(299, 49),
+        color: black,
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+      ),
+    );
+
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(key),
+      paints..rect(
+        rect: const Offset(0.5, 0.5) & const Size(299, 49),
+        color: black,
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+      ),
+    );
+  });
+
+  /// Regression test for https://github.com/flutter/flutter/issues/179801
+  testWidgets('DecoratedSliver works with PinnedHeaderSliver overscroll', (
+    WidgetTester tester,
+  ) async {
+    const key = Key('DecoratedSliver with border');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 500,
+            width: 300,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                DecoratedSliver(
+                  key: key,
+                  decoration: BoxDecoration(border: Border.all()),
+                  sliver: const SliverAppBar(
+                    pinned: true,
+                    stretch: true,
+                    title: SizedBox(height: 50, width: 300),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 45));
+    await tester.pump();
+
+    expect(
+      find.byKey(key),
+      paints..something((methodName, arguments) {
+        if (methodName != #drawRRect) {
+          return false;
+        }
+        final Rect rect = (arguments[0] as RRect).outerRect;
+        expect(rect, rectMoreOrLessEquals(const Rect.fromLTRB(0, 0, 300, 81.08), epsilon: 0.01));
+        return true;
+      }),
+    );
+  });
 }
 
 class TestDecoration extends Decoration {
