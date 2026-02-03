@@ -13,19 +13,20 @@ import Foundation
 /// (`pollFlutterMessagesOnce()`).
 @objc public final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
-  private static var _mainRunLoop: FlutterRunLoop?
+  private static nonisolated(unsafe) var _mainRunLoop: FlutterRunLoop?
 
-  private let runLoop: CFRunLoop = CFRunLoopGetCurrent()
+  private nonisolated(unsafe) let runLoop: CFRunLoop = CFRunLoopGetCurrent()
   private var tasks: [Task] = []
   private let tasksLock = NSLock()
-  private var source: CFRunLoopSource!
-  private var timer: CFRunLoopTimer!
+  private nonisolated(unsafe) var source: CFRunLoopSource!
+  private nonisolated(unsafe) var timer: CFRunLoopTimer!
 
   private struct Task {
-    let block: () -> Void
+    let block: @MainActor () -> Void
     let targetTime: CFAbsoluteTime
   }
 
+  @MainActor
   private override init() {
     super.init()
 
@@ -41,7 +42,7 @@ import Foundation
       cancel: nil,
       perform: { info in
         let runner = Unmanaged<FlutterRunLoop>.fromOpaque(info!).takeUnretainedValue()
-        runner.performExpiredTasks()
+        MainActor.assumeIsolated(runner.performExpiredTasks)
       }
     )
     guard let createdSource = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &sourceContext) else {
@@ -67,7 +68,7 @@ import Foundation
         0,  // order.
         { timer, info in
           let runner = Unmanaged<FlutterRunLoop>.fromOpaque(info!).takeUnretainedValue()
-          runner.performExpiredTasks()
+          MainActor.assumeIsolated(runner.performExpiredTasks)
         },
         &timerContext
       )
@@ -90,8 +91,9 @@ import Foundation
 
   // Ensures that the `FlutterRunLoop` for main thread is initialized. Only
   // needs to be called once and must be called on the main thread.
+  @MainActor
   @objc public static func ensureMainLoopInitialized() {
-    assert(Thread.isMainThread, "Must be called on the main thread.")
+    dispatchPrecondition(condition: .onQueue(.main))
     if _mainRunLoop == nil {
       _mainRunLoop = FlutterRunLoop()
     }
@@ -99,15 +101,16 @@ import Foundation
 
   // The `FlutterRunLoop` for the main thread.
   @objc public static var mainRunLoop: FlutterRunLoop {
-    assert(
-      _mainRunLoop != nil,
-      "Main run loop has not been initialized. Call ensureMainLoopInitialized() first."
-    )
-    return _mainRunLoop!
+    guard let runLoop = _mainRunLoop else {
+      fatalError(
+        "Main run loop has not been initialized. Call ensureMainLoopInitialized() first."
+      );
+    }
+    return runLoop;
   }
 
   // Schedules a block to be executed on the main thread.
-  @objc public func perform(afterDelay delay: TimeInterval, block: @escaping () -> Void) {
+  @objc public func perform(afterDelay delay: TimeInterval, block: @MainActor @escaping () -> Void) {
     tasksLock.lock()
     defer { tasksLock.unlock() }
 
@@ -122,10 +125,11 @@ import Foundation
 
   // Schedules a block to be executed on the main thread after a delay.
   @objc(performBlock:)
-  public func perform(_ block: @escaping () -> Void) {
+  public func perform(_ block: @MainActor @escaping () -> Void) {
     perform(afterDelay: 0, block: block)
   }
 
+  @MainActor
   private func performExpiredTasks() {
     var pendingTasks: [Task] = []
     var expiredTasks: [Task] = []

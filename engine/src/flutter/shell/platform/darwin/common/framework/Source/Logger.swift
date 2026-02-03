@@ -39,16 +39,16 @@ import Foundation
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
 @objc(FlutterLogger) public final class Logger: NSObject {
-  private static var shared = Logger()
+  nonisolated(unsafe) private static var shared = Logger()
   private let outputWriter: OutputWriter
   public let logLevel: LogLevel
 
-  public init(outputWriter: OutputWriter, logLevel: LogLevel) {
+  init(outputWriter: OutputWriter, logLevel: LogLevel) {
     self.outputWriter = outputWriter
     self.logLevel = logLevel
   }
 
-  public override convenience init() {
+  override convenience init() {
     #if os(iOS)
       // On iOS, the user has no access to stdout.
       // Output can be read from the log by the user or the `flutter` tool.
@@ -67,14 +67,14 @@ import Foundation
 }
 
 extension Logger {
-  /// Sets the minimum log level.
-  @objc public static var outputWriter: OutputWriter {
+  /// Sets the OutputWriter.
+  @objc static var outputWriter: OutputWriter {
     get { return shared.outputWriter }
     set(newValue) { shared = Logger(outputWriter: newValue, logLevel: shared.logLevel) }
   }
 
   /// Sets the minimum log level.
-  @objc public static var logLevel: LogLevel {
+  @objc static var logLevel: LogLevel {
     get { return shared.logLevel }
     set(newValue) { shared = Logger(outputWriter: shared.outputWriter, logLevel: newValue) }
   }
