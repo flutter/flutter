@@ -505,6 +505,7 @@ void main() {
     },
   );
 
+  /// Regression test for https://github.com/flutter/flutter/issues/179801
   testWidgets('DecoratedSliver works with PinnedHeaderSliver basic scroll', (
     WidgetTester tester,
   ) async {
@@ -560,6 +561,7 @@ void main() {
     );
   });
 
+  /// Regression test for https://github.com/flutter/flutter/issues/179801
   testWidgets('DecoratedSliver works with PinnedHeaderSliver overscroll', (
     WidgetTester tester,
   ) async {
