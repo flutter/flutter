@@ -267,7 +267,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/cupertino/form_row_test.dart',
     'packages/flutter/test/cupertino/colors_test.dart',
     'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
-    'packages/flutter/test/cupertino/slider_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
