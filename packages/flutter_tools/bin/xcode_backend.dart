@@ -550,16 +550,19 @@ class Context {
         );
       }
 
-      runRsync(
-        extraArgs: <String>['--filter', '- native_assets.yaml', '--filter', '- native_assets.json'],
-        frameworkDirectory.path,
-        xcodeFrameworksDir,
-      );
+      runRsync(frameworkDirectory.path, xcodeFrameworksDir);
       if (codesign && expandedCodeSignIdentity != null) {
         _codesignFramework(
           expandedCodeSignIdentity,
           '$xcodeFrameworksDir/$framework.framework/$framework',
         );
+      }
+
+      final Directory dsymDirectory = directoryFromPath(
+        '$nativeAssetsPath$framework.framework.dSYM',
+      );
+      if (dsymDirectory.existsSync()) {
+        runRsync(dsymDirectory.path, '${environment['BUILT_PRODUCTS_DIR']}/');
       }
     }
   }
