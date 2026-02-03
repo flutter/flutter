@@ -13,14 +13,13 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../mdns_device_discovery.dart';
-
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
 const String _noRunningAppsFoundMessage =
     'No running Flutter apps found.\n'
     'Note: Flutter running-apps only detects apps running with the '
-    '"--enable-local-discovery" flag (debug/profile mode only).';
+    '"--${FlutterCommand.kEnableLocalDiscovery}" flag (debug/profile mode only).';
 
 /// Command to list running Flutter applications.
 class RunningAppsCommand extends FlutterCommand {
@@ -59,7 +58,7 @@ class RunningAppsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     _logger.printStatus('Searching for running Flutter apps...');
 
-    final apps = <MDnsObservation>[];
+    final apps = <MDNSObservation>[];
     final seenUris = <String>{};
     try {
       await _mdnsClient.start();
@@ -93,30 +92,21 @@ class RunningAppsCommand extends FlutterCommand {
     }
 
     // Sort by epoch descending (newest/shortest duration first).
-    apps.sort((MDnsObservation a, MDnsObservation b) {
-      final int? epochA = int.tryParse(a.epoch ?? '');
-      final int? epochB = int.tryParse(b.epoch ?? '');
-      if (epochA == null && epochB == null) {
-        return 0;
-      }
-      if (epochA == null) {
-        return 1; // Put unknown age last
-      }
-      if (epochB == null) {
-        return -1; // Put unknown age last
-      }
+    apps.sort((MDNSObservation a, MDNSObservation b) {
+      final int epochA = a.epoch;
+      final int epochB = b.epoch;
       return epochB.compareTo(epochA);
     });
 
     _logger.printStatus('Found ${apps.length} running Flutter ${pluralize('app', apps.length)}:');
     final table = <List<String>>[];
     for (final app in apps) {
-      final String projectName = app.projectName ?? 'Unknown';
-      final String mode = app.mode ?? 'Unknown';
-      final String deviceName = app.deviceName ?? 'Unknown';
-      final String deviceId = app.deviceId ?? 'Unknown';
-      final String platform = app.targetPlatform ?? 'Unknown';
-      final String vmServiceUri = app.wsUri ?? 'Unknown';
+      final String projectName = app.projectName;
+      final String mode = app.mode;
+      final String deviceName = app.deviceName;
+      final String deviceId = app.deviceId;
+      final String platform = app.targetPlatform;
+      final String vmServiceUri = app.wsUri;
       final String age = processAge(app.epoch, _systemClock);
 
       // If the device name and ID are effectively the same (e.g., "macos" and "macos"),
@@ -155,20 +145,18 @@ class RunningAppsCommand extends FlutterCommand {
   Future<void> _resolveAppMetadata(
     PtrResourceRecord ptr,
     Set<String> seenUris,
-    List<MDnsObservation> apps,
+    List<MDNSObservation> apps,
   ) async {
     try {
       // For each PTR, look up the TXT records
       await for (final TxtResourceRecord txt in _mdnsClient.lookup<TxtResourceRecord>(
         ResourceRecordQuery.text(ptr.domainName),
       )) {
-        final MDnsObservation? observation = MDnsObservation.parse(txt.text);
+        final MDNSObservation? observation = MDNSObservation.parse(txt.text);
         if (observation != null) {
-          final String? uri = observation.wsUri;
-          if (uri != null) {
-            if (!seenUris.add(uri)) {
-              continue;
-            }
+          final String uri = observation.wsUri;
+          if (!seenUris.add(uri)) {
+            continue;
           }
           apps.add(observation);
         }
@@ -181,14 +169,10 @@ class RunningAppsCommand extends FlutterCommand {
 
 /// Formats the elapsed time since the given epoch.
 @visibleForTesting
-String processAge(String? epochString, SystemClock systemClock) {
+String processAge(int? epoch, SystemClock systemClock) {
   // TODO(jwren): Consider using [DurationAgo] from `lib/src/base/utils.dart`.
   // We need to decide on the width and precision, possibly modifying the utility
   // to support a shorter form (e.g. "5m" versus "5 minutes ago").
-  if (epochString == null) {
-    return 'unknown age';
-  }
-  final int? epoch = int.tryParse(epochString);
   if (epoch == null) {
     return 'unknown age';
   }

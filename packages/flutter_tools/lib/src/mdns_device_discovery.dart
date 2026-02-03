@@ -30,7 +30,9 @@ class MDNSDeviceDiscovery {
     required this.flutterVersion,
     required this.systemClock,
     required this.botDetector,
-  });
+  }) {
+    _configureLogging(logger);
+  }
 
   static const String kFlutterDevicesService = '_flutter_devices._tcp';
 
@@ -42,6 +44,19 @@ class MDNSDeviceDiscovery {
   final FlutterVersion flutterVersion;
   final SystemClock systemClock;
   final BotDetector botDetector;
+
+  static bool _loggingConfigured = false;
+
+  static void _configureLogging(Logger logger) {
+    if (_loggingConfigured) {
+      return;
+    }
+    // Silence mDNS logs unless verbose logging is enabled.
+    // package:mdns_dart uses the 'mdns_dart' logger.
+    log.hierarchicalLoggingEnabled = true;
+    log.Logger('mdns_dart').level = logger.isVerbose ? log.Level.ALL : log.Level.SEVERE;
+    _loggingConfigured = true;
+  }
 
   final _servers = <MDNSServer>[];
 
@@ -67,29 +82,24 @@ class MDNSDeviceDiscovery {
         return;
       }
 
-      // Silence mDNS logs unless verbose logging is enabled.
-      // mdns_dart uses the 'mdns_dart' logger.
-      log.hierarchicalLoggingEnabled = true;
-      log.Logger('mdns_dart').level = logger.isVerbose ? log.Level.ALL : log.Level.SEVERE;
-
       final ips = <InternetAddress>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6];
       final String hostname = platform.localHostname;
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final String frameworkVersion = flutterVersion.frameworkVersion;
       final String dartVersion = flutterVersion.dartSdkVersion;
 
-      final observation = MDnsObservation(
+      final observation = MDNSObservation(
         wsUri: vmServiceUri.toString(),
-        pid: pid.toString(),
         hostname: hostname,
         deviceName: device.name,
         targetPlatform: getNameForTargetPlatform(targetPlatform),
         mode: debuggingOptions.buildInfo.modeName,
-        epoch: systemClock.now().millisecondsSinceEpoch.toString(),
+        epoch: systemClock.now().millisecondsSinceEpoch,
         projectName: appName,
         deviceId: device.id,
         flutterVersion: frameworkVersion,
         dartVersion: dartVersion,
+        pid: pid,
       );
 
       final List<String> txt = observation.toTxtRecord();
@@ -135,8 +145,8 @@ class MDNSDeviceDiscovery {
 
   /// Stops the mDNS advertisement.
   Future<void> stop() async {
-    // Create a copy of the list to avoid ConcurrentModificationError as the list
-    // is modified during iteration.
+    // Create a copy of the list so that the original list can be cleared
+    // immediately to prevent re-entrant calls.
     final serversToStop = List<MDNSServer>.of(_servers);
     _servers.clear();
     await Future.wait<void>(
@@ -151,19 +161,19 @@ class MDNSDeviceDiscovery {
 
 /// A class representing the metadata discovered from a running Flutter application
 /// via mDNS.
-class MDnsObservation {
-  MDnsObservation({
-    this.hostname,
-    this.projectName,
-    this.deviceName,
-    this.deviceId,
-    this.targetPlatform,
-    this.mode,
-    this.wsUri,
-    this.epoch,
-    this.pid,
-    this.flutterVersion,
-    this.dartVersion,
+class MDNSObservation {
+  MDNSObservation({
+    required this.hostname,
+    required this.projectName,
+    required this.deviceName,
+    required this.deviceId,
+    required this.targetPlatform,
+    required this.mode,
+    required this.wsUri,
+    required this.epoch,
+    required this.pid,
+    required this.flutterVersion,
+    required this.dartVersion,
   });
 
   static const String _kProjectName = 'project_name';
@@ -178,22 +188,22 @@ class MDnsObservation {
   static const String _kDartVersion = 'dart_version';
   static const String _kHostname = 'hostname';
 
-  final String? hostname;
-  final String? projectName;
-  final String? deviceName;
-  final String? deviceId;
-  final String? targetPlatform;
-  final String? mode;
-  final String? wsUri;
-  final String? epoch;
-  final String? pid;
-  final String? flutterVersion;
-  final String? dartVersion;
+  final String hostname;
+  final String projectName;
+  final String deviceName;
+  final String deviceId;
+  final String targetPlatform;
+  final String mode;
+  final String wsUri;
+  final int epoch;
+  final int pid;
+  final String flutterVersion;
+  final String dartVersion;
 
-  /// Parses a raw TXT record string into an [MDnsObservation].
+  /// Parses a raw TXT record string into an [MDNSObservation].
   ///
   /// Returns `null` if the record is empty or invalid.
-  static MDnsObservation? parse(String txtRecord) {
+  static MDNSObservation? parse(String txtRecord) {
     final metadata = <String, String>{};
     // The multicast_dns package joins the strings of a TXT record with newlines.
     final Iterable<String> parts = LineSplitter.split(txtRecord);
@@ -208,51 +218,77 @@ class MDnsObservation {
       return null;
     }
 
-    return MDnsObservation(
-      hostname: metadata[_kHostname],
-      projectName: metadata[_kProjectName],
-      deviceName: metadata[_kDeviceName],
-      deviceId: metadata[_kDeviceId],
-      targetPlatform: metadata[_kTargetPlatform],
-      mode: metadata[_kMode],
-      wsUri: metadata[_kWsUri],
-      epoch: metadata[_kEpoch],
-      pid: metadata[_kPid],
-      flutterVersion: metadata[_kFlutterVersion],
-      dartVersion: metadata[_kDartVersion],
+    final String? hostname = metadata[_kHostname];
+    final String? projectName = metadata[_kProjectName];
+    final String? deviceName = metadata[_kDeviceName];
+    final String? deviceId = metadata[_kDeviceId];
+    final String? targetPlatform = metadata[_kTargetPlatform];
+    final String? mode = metadata[_kMode];
+    final String? wsUri = metadata[_kWsUri];
+    final int? epoch = int.tryParse(metadata[_kEpoch] ?? '');
+    final int? pid = int.tryParse(metadata[_kPid] ?? '');
+    final String? flutterVersion = metadata[_kFlutterVersion];
+    final String? dartVersion = metadata[_kDartVersion];
+
+    if (hostname == null ||
+        projectName == null ||
+        deviceName == null ||
+        deviceId == null ||
+        targetPlatform == null ||
+        mode == null ||
+        wsUri == null ||
+        epoch == null ||
+        pid == null ||
+        flutterVersion == null ||
+        dartVersion == null) {
+      return null;
+    }
+
+    return MDNSObservation(
+      hostname: hostname,
+      projectName: projectName,
+      deviceName: deviceName,
+      deviceId: deviceId,
+      targetPlatform: targetPlatform,
+      mode: mode,
+      wsUri: wsUri,
+      epoch: epoch,
+      pid: pid,
+      flutterVersion: flutterVersion,
+      dartVersion: dartVersion,
     );
   }
 
   /// Converts the observation to a list of strings for mDNS TXT record.
   List<String> toTxtRecord() {
     return <String>[
-      if (hostname != null) '$_kHostname=$hostname',
-      if (wsUri != null) '$_kWsUri=$wsUri',
-      if (pid != null) '$_kPid=$pid',
-      if (targetPlatform != null) '$_kTargetPlatform=$targetPlatform',
-      if (mode != null) '$_kMode=$mode',
-      if (epoch != null) '$_kEpoch=$epoch',
-      if (projectName != null) '$_kProjectName=$projectName',
-      if (deviceName != null) '$_kDeviceName=$deviceName',
-      if (deviceId != null) '$_kDeviceId=$deviceId',
-      if (flutterVersion != null) '$_kFlutterVersion=$flutterVersion',
-      if (dartVersion != null) '$_kDartVersion=$dartVersion',
+      '$_kHostname=$hostname',
+      '$_kWsUri=$wsUri',
+      '$_kPid=$pid',
+      '$_kTargetPlatform=$targetPlatform',
+      '$_kMode=$mode',
+      '$_kEpoch=$epoch',
+      '$_kProjectName=$projectName',
+      '$_kDeviceName=$deviceName',
+      '$_kDeviceId=$deviceId',
+      '$_kFlutterVersion=$flutterVersion',
+      '$_kDartVersion=$dartVersion',
     ];
   }
 
   Map<String, String> toJson() {
     return <String, String>{
-      if (hostname != null) _kHostname: hostname!,
-      if (projectName != null) _kProjectName: projectName!,
-      if (deviceName != null) _kDeviceName: deviceName!,
-      if (deviceId != null) _kDeviceId: deviceId!,
-      if (targetPlatform != null) _kTargetPlatform: targetPlatform!,
-      if (mode != null) _kMode: mode!,
-      if (wsUri != null) _kWsUri: wsUri!,
-      if (epoch != null) _kEpoch: epoch!,
-      if (pid != null) _kPid: pid!,
-      if (flutterVersion != null) _kFlutterVersion: flutterVersion!,
-      if (dartVersion != null) _kDartVersion: dartVersion!,
+      _kHostname: hostname,
+      _kProjectName: projectName,
+      _kDeviceName: deviceName,
+      _kDeviceId: deviceId,
+      _kTargetPlatform: targetPlatform,
+      _kMode: mode,
+      _kWsUri: wsUri,
+      _kEpoch: epoch.toString(),
+      _kPid: pid.toString(),
+      _kFlutterVersion: flutterVersion,
+      _kDartVersion: dartVersion,
     };
   }
 }

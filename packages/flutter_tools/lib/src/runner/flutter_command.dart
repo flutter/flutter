@@ -260,6 +260,8 @@ abstract class FlutterCommand extends Command<void> {
   var _excludeDebug = false;
   var _excludeRelease = false;
 
+  static const String kEnableLocalDiscovery = 'enable-local-discovery';
+
   /// Grabs the [Analytics] instance from the global context. It is defined
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
@@ -1283,9 +1285,9 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableLocalDiscoveryFlag() {
+  void addEnableLocalDiscoveryFlag({required bool verboseHelp}) {
     argParser.addFlag(
-      'enable-local-discovery',
+      kEnableLocalDiscovery,
       help:
           'Whether to advertise the application on the local network (via mDNS) '
           'for discovery by "flutter running-apps".',

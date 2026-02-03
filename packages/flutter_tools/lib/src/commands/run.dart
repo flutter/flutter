@@ -242,7 +242,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
-    addEnableLocalDiscoveryFlag();
+    addEnableLocalDiscoveryFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -259,7 +259,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableLocalDiscovery => boolArg('enable-local-discovery');
+  bool get enableLocalDiscovery => boolArg(FlutterCommand.kEnableLocalDiscovery);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -434,6 +434,7 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
+
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',

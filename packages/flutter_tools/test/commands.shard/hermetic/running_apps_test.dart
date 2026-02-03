@@ -80,7 +80,12 @@ device_name=macos
 device_id=macos
 target_platform=darwin-arm64
 mode=debug
-ws_uri=ws://127.0.0.1:1234/ws''',
+ws_uri=ws://127.0.0.1:1234/ws
+epoch=1000
+pid=123
+hostname=localhost
+flutter_version=1.0.0
+dart_version=2.0.0''',
           ),
         ],
       },
@@ -140,7 +145,11 @@ device_id=macos
 target_platform=darwin-arm64
 mode=debug
 ws_uri=ws://127.0.0.1:1234/ws
-epoch=1000''',
+epoch=1000
+pid=1001
+hostname=host1
+flutter_version=1.0.0
+dart_version=2.0.0''',
           ),
         ],
         'service2.local': <TxtResourceRecord>[
@@ -154,7 +163,11 @@ device_id=chrome
 target_platform=web-javascript
 mode=release
 ws_uri=ws://127.0.0.1:5678/ws
-epoch=0''',
+epoch=0
+pid=1002
+hostname=host2
+flutter_version=1.0.0
+dart_version=2.0.0''',
           ),
         ],
       },
@@ -225,7 +238,15 @@ epoch=0''',
             text: '''
 project_name=app_one
 ws_uri=ws://127.0.0.1:1234/ws
-epoch=1000''',
+epoch=1000
+pid=2001
+hostname=host_dup
+device_name=dev
+device_id=dev_id
+target_platform=ios
+mode=debug
+flutter_version=1.0.0
+dart_version=2.0.0''',
           ),
         ],
         'service_dup.local': <TxtResourceRecord>[
@@ -236,7 +257,15 @@ epoch=1000''',
             text: '''
 project_name=app_one
 ws_uri=ws://127.0.0.1:1234/ws
-epoch=1000''',
+epoch=1000
+pid=2001
+hostname=host_dup
+device_name=dev
+device_id=dev_id
+target_platform=ios
+mode=debug
+flutter_version=1.0.0
+dart_version=2.0.0''',
           ),
         ],
       },
@@ -276,7 +305,15 @@ epoch=1000''',
             text: '''
  project_name = app_one
  ws_uri = ws://127.0.0.1:1234/ws
- epoch = 1000 ''',
+ epoch = 1000
+ pid = 3001
+ hostname = host_white
+ device_name = dev
+ device_id = dev_id
+ target_platform = android
+ mode = debug
+ flutter_version = 1.0.0
+ dart_version = 2.0.0 ''',
           ),
         ],
       },
@@ -311,23 +348,22 @@ epoch=1000''',
     final clock = SystemClock.fixed(now);
 
     expect(processAge(null, clock), 'unknown age');
-    expect(processAge('not an int', clock), 'unknown age');
 
     // Seconds
-    expect(processAge('${kNowMs - kFiveSecondsMs}', clock), '5s');
-    expect(processAge('${kNowMs - kFiftyNineSecondsMs}', clock), '59s');
+    expect(processAge(kNowMs - kFiveSecondsMs, clock), '5s');
+    expect(processAge(kNowMs - kFiftyNineSecondsMs, clock), '59s');
 
     // Minutes
-    expect(processAge('${kNowMs - kMinuteMs}', clock), '1m');
-    expect(processAge('${kNowMs - kFiftyNineMinutesMs}', clock), '59m');
+    expect(processAge(kNowMs - kMinuteMs, clock), '1m');
+    expect(processAge(kNowMs - kFiftyNineMinutesMs, clock), '59m');
 
     // Hours
-    expect(processAge('${kNowMs - kHourMs}', clock), '1h');
-    expect(processAge('${kNowMs - kTwentyThreeHoursMs}', clock), '23h');
+    expect(processAge(kNowMs - kHourMs, clock), '1h');
+    expect(processAge(kNowMs - kTwentyThreeHoursMs, clock), '23h');
 
     // Days
-    expect(processAge('${kNowMs - kDayMs}', clock), '1d');
-    expect(processAge('${kNowMs - kTwoDaysMs}', clock), '2d');
+    expect(processAge(kNowMs - kDayMs, clock), '1d');
+    expect(processAge(kNowMs - kTwoDaysMs, clock), '2d');
   });
 }
 
