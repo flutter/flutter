@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/src/widgets/accessibility_evaluations.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   group('MinimumTapTargetEvaluation', () {
@@ -25,7 +29,7 @@ void main() {
     testWidgets('passes for valid targets', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SizedBox(
             width: 48.0,
             height: 48.0,
@@ -41,7 +45,7 @@ void main() {
     testWidgets('fails for small targets', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Center(
             child: SizedBox(
               width: 40.0,
@@ -63,7 +67,7 @@ void main() {
     testWidgets('skips hidden nodes', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SizedBox(
             width: 40.0,
             height: 40.0,
@@ -92,7 +96,7 @@ void main() {
     testWidgets('passes for labeled targets', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SizedBox(
             width: 48.0,
             height: 48.0,
@@ -108,7 +112,7 @@ void main() {
     testWidgets('fails for unlabeled targets', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SizedBox(width: 48.0, height: 48.0, child: Semantics(onTap: () {})),
         ),
       );
@@ -137,14 +141,14 @@ void main() {
     testWidgets('passes for high contrast', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        const MaterialApp(
+        const TestWidgetsApp(
           home: SizedBox(
             width: 100,
             height: 100,
             child: ColoredBox(
-              color: Colors.white,
+              color: Color(0xFFFFFFFF),
               child: Center(
-                child: Text('test', style: TextStyle(color: Colors.black, fontSize: 14)),
+                child: Text('test', style: TextStyle(color: Color(0xFF000000), fontSize: 14)),
               ),
             ),
           ),
@@ -160,12 +164,12 @@ void main() {
     testWidgets('fails for low contrast', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        const MaterialApp(
+        const TestWidgetsApp(
           home: SizedBox(
             width: 100,
             height: 100,
             child: ColoredBox(
-              color: Colors.white,
+              color: Color(0xFFFFFFFF),
               child: Center(
                 child: Text('test', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 14)),
               ),
@@ -197,14 +201,14 @@ void main() {
     testWidgets('passes for very high contrast', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        const MaterialApp(
+        const TestWidgetsApp(
           home: SizedBox(
             width: 100,
             height: 100,
             child: ColoredBox(
-              color: Colors.white,
+              color: Color(0xFFFFFFFF),
               child: Center(
-                child: Text('test', style: TextStyle(color: Colors.black, fontSize: 14)),
+                child: Text('test', style: TextStyle(color: Color(0xFF000000), fontSize: 14)),
               ),
             ),
           ),
@@ -222,12 +226,12 @@ void main() {
       // Contrast is ~4.5:1 which passes AA but fails AAA (needs 7:1)
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
-        const MaterialApp(
+        const TestWidgetsApp(
           home: SizedBox(
             width: 100,
             height: 100,
             child: ColoredBox(
-              color: Colors.white,
+              color: Color(0xFFFFFFFF),
               child: Center(
                 child: Text('test', style: TextStyle(color: Color(0xFF767676), fontSize: 14)),
               ),

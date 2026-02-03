@@ -64,7 +64,7 @@ abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
 
-  /// Evaluate whether the current state of the `tester` conforms to the rule.
+  /// Evaluate whether the current state of the `binding` conforms to the rule.
   FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     if (!isAccessibilityEvaluationsEnabled) {
       throw UnsupportedError(_kAccessibilityEvaluationsDisabledErrorMessage);
@@ -571,8 +571,9 @@ class _ContrastReport {
 ///
 /// Given a [ByteData] object [data], which stores the color of each pixel
 /// in row-first order, where each pixel is given in 4 bytes in RGBA order,
-/// and [paintBounds], the rectangle, and [width] and [height],
-//  the dimensions of the [ByteData] returns color histogram.
+/// and [paintBounds], the rectangle, and [width] and [height].
+/// The dimensions of the [ByteData] are [width] and [height].
+/// Returns color histogram.
 Map<Color, int> _colorsWithinRect(ByteData data, Rect paintBounds, int width, int height) {
   final Rect truePaintBounds = paintBounds.intersect(
     Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()),
