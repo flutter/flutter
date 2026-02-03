@@ -443,7 +443,7 @@ Future<void> testMain() async {
     paragraph.paint(canvas, const Offset(50, 50));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multishadows.png', region: region);
-  }, solo: true);
+  });
 
   test('Draw WebParagraph multiple decorations on text', () async {
     final recorder = PictureRecorder();
@@ -989,7 +989,6 @@ Future<void> testMain() async {
 
     {
       final builder = WebParagraphBuilder(paragraphStyle);
-
       builder.pushStyle(style30);
       builder.addText('This is a long text that should be ellipsized at the end');
       builder.pop();

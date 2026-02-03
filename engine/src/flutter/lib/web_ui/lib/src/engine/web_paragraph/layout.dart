@@ -412,6 +412,8 @@ class TextLayout {
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
         ellipsisBlock.spanShiftFromLineStart = blockShiftFromLineStart;
         line.visualBlocks.add(ellipsisBlock);
+        line.trailingSpacesWidth = 0.0;
+        blockShiftFromLineStart += ellipsisBlock.advance.width;
       } else {
         // We place the ellipsis block aat the beginning of the line (for RTL paragraph)
         line.visualBlocks.insert(0, ellipsisBlock);
