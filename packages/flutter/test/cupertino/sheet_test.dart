@@ -1015,11 +1015,11 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
 
-    final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
-    await gesture.moveBy(const Offset(0, 350));
+    final TestGesture gestureOne = await tester.startGesture(const Offset(100, 200));
+    await gestureOne.moveBy(const Offset(0, 350));
     await tester.pump();
 
-    await gesture.up();
+    await gestureOne.up();
     await tester.pumpAndSettle();
 
     expect(find.text('Page 2'), findsNothing);
@@ -1028,12 +1028,15 @@ void main() {
     final Offset contextMenuButton = tester.getCenter(find.text('Button'));
     expect(find.text('Item 0'), findsNothing);
 
-    await tester.startGesture(contextMenuButton);
+    final TestGesture gestureTwo = await tester.startGesture(contextMenuButton);
     await tester.pumpAndSettle();
     expect(find.text('Item 0'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Item 0'));
+    await tester.pumpAndSettle();
+
+    await gestureTwo.up();
     await tester.pumpAndSettle();
 
     expect(find.text('Item 0'), findsNothing);
