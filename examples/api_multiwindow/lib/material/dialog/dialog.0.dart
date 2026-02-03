@@ -72,6 +72,7 @@ class DialogExample extends StatelessWidget {
         TextButton(
           onPressed: () => showDialog<String>(
             context: context,
+            fullscreenDialog: true,
             builder: (BuildContext context) => Dialog.fullscreen(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

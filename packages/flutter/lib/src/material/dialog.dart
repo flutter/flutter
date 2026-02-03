@@ -1405,10 +1405,9 @@ class _DialogWindowRoute<T> extends Route<T> {
     required this.builder,
     required this.parentController,
     required BuildContext context,
-    required RouteSettings? settings,
+    super.settings,
     Size? preferredSize,
-  }) : _registry = MaterialWindowRegistry.maybeOf(context),
-       super(settings: settings) {
+  }) : _registry = MaterialWindowRegistry.maybeOf(context) {
     _controller = DialogWindowController(
       parent: parentController,
       title: 'Dialog',
@@ -1618,13 +1617,14 @@ Future<T?> showDialog<T>({
   final MaterialWindowRegistry? windowingConfiguration = MaterialWindowRegistry.maybeOf(context);
   if (windowingConfiguration != null && windowingConfiguration.enableWindowing) {
     try {
+      final Size? parentSize = WindowScope.maybeContentSizeOf(context);
       return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
         _DialogWindowRoute<T>(
           builder: builder,
           parentController: WindowScope.maybeOf(context),
           context: context,
           settings: routeSettings,
-          preferredSize: fullscreenDialog ? MediaQuery.sizeOf(context) : null,
+          preferredSize: fullscreenDialog ? parentSize : null,
         ),
       );
     } catch (e) {
