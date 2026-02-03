@@ -87,6 +87,8 @@ struct ContentView: View {
 
   var onDismiss: (() -> Void)?
 
+  @State private var isPresented = false
+
   private var anchorSource: Anchor<CGRect>.Source {
     // On iPad, the translate screen is presented in a popover view
     // anchored to the textbox rather than a sheet
@@ -97,19 +99,24 @@ struct ContentView: View {
   }
 
   var body: some View {
-    Color.clear
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .translationPresentation(
-        isPresented: Binding(
-          get: { true },
-          set: { isShown in
-            if !isShown {
-              onDismiss?()
+      Color.clear
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .translationPresentation(
+          isPresented: Binding(
+            get: { isPresented },
+            set: { newValue in
+              isPresented = newValue
+              if !newValue {
+                onDismiss?()
+              }
             }
-          }
-        ),
-        text: termToTranslate,
-        attachmentAnchor: .rect(anchorSource)
-      )
+          ),
+          text: termToTranslate,
+          attachmentAnchor: .rect(anchorSource)
+        )
+        .onAppear {
+          isPresented = true
+      }
   }
 }
+
