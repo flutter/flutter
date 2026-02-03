@@ -5,7 +5,6 @@
 #include "flutter/lib/ui/painting/image_decoder_no_gl_unittests.h"
 #include <memory>
 
-#include "flutter/fml/build_config.h"
 #include "flutter/fml/endianness.h"
 #include "impeller/renderer/capabilities.h"
 #include "include/core/SkColorType.h"
@@ -179,28 +178,6 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
           {100, 100},
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(wide_result.ok());
-  // macOS uses F16 for wide gamut, iOS uses 10-bit for opaque images.
-#if FML_OS_MACOSX
-  ASSERT_EQ(wide_result->image_info.format,
-            impeller::PixelFormat::kR16G16B16A16Float);
-
-  const uint16_t* pixel_ptr = reinterpret_cast<const uint16_t*>(
-      wide_result->device_buffer->OnGetContents());
-  bool found_deep_red = false;
-  for (int i = 0; i < wide_result->image_info.size.width *
-                          wide_result->image_info.size.height;
-       ++i) {
-    float red = HalfToFloat(pixel_ptr[0]);
-    float green = HalfToFloat(pixel_ptr[1]);
-    float blue = HalfToFloat(pixel_ptr[2]);
-    pixel_ptr += 4;
-    if (fabsf(red - 1.0931f) < 0.01f && fabsf(green - -0.2268f) < 0.01f &&
-        fabsf(blue - -0.1501f) < 0.01f) {
-      found_deep_red = true;
-      break;
-    }
-  }
-#else
   ASSERT_EQ(wide_result->image_info.format,
             impeller::PixelFormat::kB10G10R10XR);
 
@@ -220,7 +197,6 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
       break;
     }
   }
-#endif  // FML_OS_MACOSX
 
   ASSERT_TRUE(found_deep_red);
   absl::StatusOr<ImageDecoderImpeller::DecompressResult> narrow_result =

@@ -1445,9 +1445,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
     NSString* formatString;
     switch (pixelFormat) {
-      case kCVPixelFormatType_64RGBAHalf:
-        formatString = @"MTLPixelFormatRGBA16Float";
-        break;
       case kCVPixelFormatType_40ARGBLEWideGamut:
         formatString = @"MTLPixelFormatBGRA10_XR";
         break;

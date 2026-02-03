@@ -18,11 +18,10 @@ static BOOL DoesHardwareSupportWideGamut() {
   static dispatch_once_t once_token = 0;
   dispatch_once(&once_token, ^{
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    // Mac2 covers all macOS devices that support wide gamut:
-    // - Apple Silicon Macs (M1+) support both Mac2 and Apple families
-    // - Intel Macs with AMD GPUs support Mac2
-    // Mac1 (Intel with Intel/Nvidia GPUs) does not support wide gamut.
-    result = [device supportsFamily:MTLGPUFamilyMac2];
+    // Wide gamut on macOS requires Apple3+ GPU family (Apple Silicon M1+).
+    // This uses 10-bit BGRA format (same as iOS) for consistency.
+    // Intel Macs (Mac1/Mac2 family) do not support wide gamut.
+    result = [device supportsFamily:MTLGPUFamilyApple3];
   });
   return result;
 }

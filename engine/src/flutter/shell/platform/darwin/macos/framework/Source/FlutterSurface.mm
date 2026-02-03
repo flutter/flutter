@@ -52,7 +52,7 @@
     self->_ioSurface.Reset([FlutterSurface createIOSurfaceWithSize:size
                                                    enableWideGamut:enableWideGamut]);
     MTLPixelFormat pixelFormat =
-        enableWideGamut ? MTLPixelFormatRGBA16Float : MTLPixelFormatBGRA8Unorm;
+        enableWideGamut ? MTLPixelFormatBGRA10_XR : MTLPixelFormatBGRA8Unorm;
     self->_texture = [FlutterSurface createTextureForIOSurface:_ioSurface
                                                           size:size
                                                         device:device
@@ -86,7 +86,8 @@
   unsigned pixelFormat;
   unsigned bytesPerElement;
   if (enableWideGamut) {
-    pixelFormat = kCVPixelFormatType_64RGBAHalf;
+    // 10-bit wide gamut format (same as iOS)
+    pixelFormat = kCVPixelFormatType_40ARGBLEWideGamut;
     bytesPerElement = 8;
   } else {
     pixelFormat = kCVPixelFormatType_32BGRA;

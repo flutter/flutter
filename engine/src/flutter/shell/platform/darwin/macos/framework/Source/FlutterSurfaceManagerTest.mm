@@ -306,7 +306,7 @@ TEST(FlutterSurfaceManager, WideGamutSurfaceHasCorrectPixelFormat) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture = surface.asFlutterMetalTexture;
   id<MTLTexture> metalTexture = (__bridge id)texture.texture;
-  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
   texture.destruction_callback(texture.user_data);
 }
 
@@ -321,22 +321,17 @@ TEST(FlutterSurfaceManager, StandardGamutSurfaceHasCorrectPixelFormat) {
   texture.destruction_callback(texture.user_data);
 }
 
-TEST(FlutterSurfaceManager, WideGamutLayerHasCorrectContentsFormat) {
+TEST(FlutterSurfaceManager, WideGamutLayerWorksWithoutExplicitContentsFormat) {
   TestView* testView = [[TestView alloc] init];
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
 
-  // Verify containing layer has correct contentsFormat.
-  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-
-  // Present a surface and verify the sublayer also has correct contentsFormat.
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface, CGPointMake(0, 0)) ]
                            atTime:0
                            notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 1ul);
-  EXPECT_TRUE(
-      [testView.layer.sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
+  EXPECT_NE(testView.layer.sublayers[0].contents, nil);
 }
 
 TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectColorSpace) {
@@ -376,7 +371,7 @@ TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectPixelFormat) {
   auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   IOSurfaceRef ioSurface = surface.ioSurface;
   uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
-  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_64RGBAHalf);
+  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_40ARGBLEWideGamut);
 }
 
 TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectPixelFormat) {
@@ -409,50 +404,6 @@ TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectBytesPerElement) {
   EXPECT_EQ(bytesPerElement, 4ul);
 }
 
-TEST(FlutterSurfaceManager, StandardGamutLayerDoesNotSetContentsFormat) {
-  TestView* testView = [[TestView alloc] init];
-  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
-
-  // Containing layer should not have RGBA16Float contents format.
-  EXPECT_FALSE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-
-  // Present a surface and verify sublayers also don't have RGBA16Float.
-  auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface, CGPointMake(0, 0)) ]
-                           atTime:0
-                           notify:nil];
-
-  EXPECT_EQ(testView.layer.sublayers.count, 1ul);
-  EXPECT_FALSE(
-      [testView.layer.sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-}
-
-TEST(FlutterSurfaceManager, WideGamutSublayersFromPaintRegionHaveCorrectContentsFormat) {
-  TestView* testView = [[TestView alloc] init];
-  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
-
-  // Present with two surfaces: a main surface (index 0) and an overlay (index 1)
-  // with paint regions. UpdateContentSubLayers only runs for index > 0.
-  auto mainSurface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  auto overlaySurface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  [surfaceManager presentSurfaces:@[
-    CreatePresentInfo(mainSurface, CGPointMake(0, 0), 0),
-    CreatePresentInfo(overlaySurface, CGPointMake(0, 0), 1,
-                      {
-                          FlutterRect{0, 0, 25, 15},
-                          FlutterRect{25, 0, 50, 15},
-                      })
-  ]
-                           atTime:0
-                           notify:nil];
-
-  EXPECT_EQ(testView.layer.sublayers.count, 2ul);
-  NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
-  EXPECT_EQ(sublayers.count, 2ul);
-  EXPECT_TRUE([sublayers[0].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-  EXPECT_TRUE([sublayers[1].contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-}
-
 TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
   TestView* testView = [[TestView alloc] init];
   // Create a wide gamut surface manager.
@@ -461,7 +412,7 @@ TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
   auto wideSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
   auto wideTexture = wideSurface.asFlutterMetalTexture;
   id<MTLTexture> wideMetalTexture = (__bridge id)wideTexture.texture;
-  EXPECT_EQ(wideMetalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
+  EXPECT_EQ(wideMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
 
   // Present and get it cached.
   [wideManager presentSurfaces:@[ CreatePresentInfo(wideSurface) ] atTime:0 notify:nil];
@@ -471,7 +422,7 @@ TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
   auto recycledSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
   auto recycledTexture = recycledSurface.asFlutterMetalTexture;
   id<MTLTexture> recycledMetalTexture = (__bridge id)recycledTexture.texture;
-  EXPECT_EQ(recycledMetalTexture.pixelFormat, MTLPixelFormatRGBA16Float);
+  EXPECT_EQ(recycledMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
   recycledTexture.destruction_callback(recycledTexture.user_data);
 }
 
@@ -490,9 +441,6 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
   // Switch to wide gamut.
   [surfaceManager setEnableWideGamut:YES];
 
-  // Verify containing layer format was updated.
-  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-
   // Verify cache was flushed.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
 
@@ -500,7 +448,7 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
   auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture2 = surface2.asFlutterMetalTexture;
   id<MTLTexture> metalTexture2 = (__bridge id)texture2.texture;
-  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatRGBA16Float);
+  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatBGRA10_XR);
   texture2.destruction_callback(texture2.user_data);
 }
 
@@ -512,15 +460,12 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromWideToStandardGamut) {
   auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
   auto texture1 = surface1.asFlutterMetalTexture;
   id<MTLTexture> metalTexture1 = (__bridge id)texture1.texture;
-  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatRGBA16Float);
+  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatBGRA10_XR);
   [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
   texture1.destruction_callback(texture1.user_data);
 
   // Switch to standard gamut.
   [surfaceManager setEnableWideGamut:NO];
-
-  // Verify containing layer format was updated.
-  EXPECT_TRUE([testView.layer.contentsFormat isEqualToString:kCAContentsFormatRGBA8Uint]);
 
   // Verify cache was flushed.
   EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
@@ -531,38 +476,6 @@ TEST(FlutterSurfaceManager, DynamicSwitchFromWideToStandardGamut) {
   id<MTLTexture> metalTexture2 = (__bridge id)texture2.texture;
   EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatBGRA8Unorm);
   texture2.destruction_callback(texture2.user_data);
-}
-
-TEST(FlutterSurfaceManager, DynamicSwitchUpdatesExistingLayerFormats) {
-  TestView* testView = [[TestView alloc] init];
-  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
-
-  // Present surfaces to create layers with sublayers.
-  auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
-  auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(40, 20)];
-  [surfaceManager presentSurfaces:@[
-    CreatePresentInfo(surface1, CGPointMake(0, 0), 0),
-    CreatePresentInfo(surface2, CGPointMake(0, 0), 1,
-                      {
-                          FlutterRect{0, 0, 20, 10},
-                          FlutterRect{20, 0, 40, 10},
-                      })
-  ]
-                           atTime:0
-                           notify:nil];
-
-  EXPECT_EQ(testView.layer.sublayers.count, 2ul);
-
-  // Switch to wide gamut.
-  [surfaceManager setEnableWideGamut:YES];
-
-  // Verify all layers updated.
-  for (CALayer* layer in testView.layer.sublayers) {
-    EXPECT_TRUE([layer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-    for (CALayer* sublayer in layer.sublayers) {
-      EXPECT_TRUE([sublayer.contentsFormat isEqualToString:kFlutterWideGamutContentsFormat]);
-    }
-  }
 }
 
 TEST(FlutterSurfaceManager, DynamicSwitchNoOpWhenSameValue) {

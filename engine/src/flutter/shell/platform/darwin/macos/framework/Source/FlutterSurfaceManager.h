@@ -12,9 +12,6 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
-// CALayer contents format for wide gamut (Display P3) support on macOS.
-extern NSString* _Nonnull const kFlutterWideGamutContentsFormat;
-
 /**
  * Surface with additional properties needed for presenting.
  */
@@ -59,9 +56,8 @@ extern NSString* _Nonnull const kFlutterWideGamutContentsFormat;
                         enableWideGamut:(BOOL)enableWideGamut;
 
 /**
- * Updates the wide gamut setting. Flushes cached surfaces and updates
- * layer contents format for all existing layers. New surfaces will be
- * created with the updated format.
+ * Updates the wide gamut setting. Flushes cached surfaces so new surfaces
+ * will be created with the updated pixel format.
  *
  * Must be called on the platform thread.
  */

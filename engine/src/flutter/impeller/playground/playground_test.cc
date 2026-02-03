@@ -8,10 +8,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/playground/playground_test.h"
 
-#if IMPELLER_ENABLE_METAL
-#include "impeller/playground/backend/metal/playground_impl_mtl.h"
-#endif  // IMPELLER_ENABLE_METAL
-
 namespace impeller {
 
 PlaygroundTest::PlaygroundTest()
@@ -57,15 +53,10 @@ void PlaygroundTest::SetUp() {
     return;
   }
 
-  // Test names that contain "WideGamut/" will render with 10-bit wide gamut.
-  // Test names that contain "WideGamutF16/" will render with 16-bit float wide
-  // gamut.
+  // Test names that end with "WideGamut" will render with wide gamut support.
   std::string test_name = flutter::testing::GetCurrentTestName();
   PlaygroundSwitches switches = switches_;
-  switches.enable_wide_gamut_f16 =
-      test_name.find("WideGamutF16/") != std::string::npos;
   switches.enable_wide_gamut =
-      switches.enable_wide_gamut_f16 ||
       test_name.find("WideGamut/") != std::string::npos;
 
   if (switches.enable_wide_gamut && (GetParam() != PlaygroundBackend::kMetal ||
@@ -73,23 +64,6 @@ void PlaygroundTest::SetUp() {
     GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
     return;
   }
-
-  // 10-bit pixel formats (e.g., BGRA10_XR) require Apple3+ GPU.
-  // Mac2 family only supports F16 wide gamut, not 10-bit formats.
-  // Skip non-F16 wide gamut tests on devices that don't support 10-bit.
-  //
-  // Note: 10-bit wide gamut tests (WideGamut/) are only relevant for iOS,
-  // because macOS engine always uses F16 for wide gamut. Whether these tests
-  // can run depends on the testing environment (Apple Silicon with Apple3+).
-  // See: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
-#if IMPELLER_ENABLE_METAL
-  if (switches.enable_wide_gamut && !switches.enable_wide_gamut_f16 &&
-      !PlaygroundImplMTL::DeviceSupports10BitFormats()) {
-    GTEST_SKIP()
-        << "Device doesn't support 10-bit formats. Use WideGamutF16 tests.";
-    return;
-  }
-#endif  // IMPELLER_ENABLE_METAL
 
   switches.flags.antialiased_lines =
       test_name.find("ExperimentAntialiasLines/") != std::string::npos;

@@ -34,7 +34,6 @@ struct PlaygroundSwitches {
   bool use_angle = false;
 
   bool enable_wide_gamut = false;
-  bool enable_wide_gamut_f16 = false;
 
   Flags flags;
 

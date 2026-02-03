@@ -11,9 +11,6 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
-// CALayer contents format for wide gamut (Display P3) support on macOS.
-NSString* const kFlutterWideGamutContentsFormat = kCAContentsFormatRGBA16Float;
-
 @implementation FlutterSurfacePresentInfo
 @end
 
@@ -78,9 +75,6 @@ static void UpdateContentSubLayers(CALayer* layer,
 
   while (layer.sublayers.count < paintRegion.size()) {
     CALayer* newLayer = [CALayer layer];
-    if (enableWideGamut) {
-      newLayer.contentsFormat = kFlutterWideGamutContentsFormat;
-    }
     [layer addSublayer:newLayer];
   }
 
@@ -120,11 +114,6 @@ static void UpdateContentSubLayers(CALayer* layer,
     _containingLayer = containingLayer;
     _delegate = delegate;
     _enableWideGamut = enableWideGamut;
-
-    if (enableWideGamut) {
-      _containingLayer.contentsFormat = kFlutterWideGamutContentsFormat;
-    }
-
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
@@ -138,18 +127,6 @@ static void UpdateContentSubLayers(CALayer* layer,
     return;
   }
   _enableWideGamut = enableWideGamut;
-
-  NSString* contentsFormat =
-      enableWideGamut ? kFlutterWideGamutContentsFormat : kCAContentsFormatRGBA8Uint;
-  _containingLayer.contentsFormat = contentsFormat;
-
-  // Update all existing layers and their sublayers.
-  for (CALayer* layer in _layers) {
-    layer.contentsFormat = contentsFormat;
-    for (CALayer* sublayer in layer.sublayers) {
-      sublayer.contentsFormat = contentsFormat;
-    }
-  }
 
   // Flush cached surfaces since they have the wrong pixel format.
   [_backBufferCache flush];
@@ -210,9 +187,6 @@ static void UpdateContentSubLayers(CALayer* layer,
   }
   while (_layers.count < _frontSurfaces.count) {
     CALayer* layer = [CALayer layer];
-    if (_enableWideGamut) {
-      layer.contentsFormat = kFlutterWideGamutContentsFormat;
-    }
     [_containingLayer addSublayer:layer];
     [_layers addObject:layer];
   }

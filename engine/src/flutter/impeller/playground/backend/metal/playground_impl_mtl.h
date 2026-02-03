@@ -23,16 +23,6 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
 
   ~PlaygroundImplMTL();
 
-  // Returns true if the default Metal device supports 10-bit pixel formats
-  // (e.g., BGRA10_XR). This requires Apple3+ GPU family.
-  // Mac2 family only supports F16, not 10-bit formats.
-  //
-  // Note: 10-bit wide gamut tests are only relevant for iOS, because macOS
-  // engine always uses F16 (RGBA16Float) for wide gamut surfaces.
-  // Whether 10-bit tests can run depends on the testing environment
-  // (e.g., Apple Silicon Mac with Apple3+ GPU can run iOS 10-bit tests).
-  static bool DeviceSupports10BitFormats();
-
   fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 

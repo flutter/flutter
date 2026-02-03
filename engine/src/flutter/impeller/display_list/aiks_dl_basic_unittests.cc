@@ -1733,12 +1733,6 @@ TEST_P(AiksTest, FormatWideGamut) {
             PixelFormat::kB10G10R10A10XR);
 }
 
-// This makes sure the WideGamutF16 named tests use 16-bit float pixel format.
-TEST_P(AiksTest, FormatWideGamutF16) {
-  EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kR16G16B16A16Float);
-}
-
 TEST_P(AiksTest, FormatSRGB) {
   PixelFormat pixel_format =
       GetContext()->GetCapabilities()->GetDefaultColorFormat();
