@@ -5,8 +5,11 @@
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('TapRegionSurface detects outside tap down events', (WidgetTester tester) async {
@@ -1052,7 +1055,7 @@ void main() {
 
     Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
       // Find the RenderBox of the region.
-      final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+      final RenderBox renderBox = tester.firstRenderObject(find.byType(SizedBox).last);
       final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
       await tester.tapAt(outsidePoint);
@@ -1060,20 +1063,32 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(child: tapRegion1),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                tester.element(find.byType(FloatingActionButton)),
-                MaterialPageRoute<void>(
-                  builder: (BuildContext context) => Scaffold(body: Center(child: tapRegion2)),
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Stack(
+              children: <Widget>[
+                Center(child: tapRegion1),
+                Positioned(
+                  right: 16,
+                  bottom: 16,
+                  child: TestButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder<void>(
+                          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                            return Center(child: tapRegion2);
+                          },
+                        ),
+                      );
+                    },
+                    child: const SizedBox.square(dimension: 56),
+                  ),
                 ),
-              );
-            },
-            child: const Icon(Icons.add),
-          ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -1085,16 +1100,16 @@ void main() {
     expect(count1, 1);
     expect(count2, 0);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byType(TestButton));
     await tester.pumpAndSettle();
 
     // Tap outside the second TapRegion to trigger onTapOutside
     await tapOutside(tester, find.byKey(tapRegion2Key));
-    expect(count1, 2); // When the Fab is pressed, the first TapRegion is still active.
+    expect(count1, 2); // When the nav button is pressed, the first TapRegion is still active.
     expect(count2, 1);
 
     // Back to the first page.
-    Navigator.pop(tester.element(find.byType(Scaffold).last));
+    Navigator.pop(tester.element(find.byKey(tapRegion2Key)));
     await tester.pumpAndSettle();
 
     // Tap outside the first TapRegion to trigger onTapOutside
@@ -1132,8 +1147,8 @@ void main() {
     );
 
     Future<void> tapOutside(WidgetTester tester, Finder regionFinder) async {
-      // Find the RenderBox of the region.
-      final RenderBox renderBox = tester.firstRenderObject(find.byType(Scaffold).last);
+      // Find the RenderBox of the container.
+      final RenderBox renderBox = tester.firstRenderObject(find.byType(Center).last);
       final Offset outsidePoint = renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
 
       await tester.tapAt(outsidePoint);
@@ -1141,22 +1156,28 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => Scaffold(body: Center(child: tapRegion1)),
-          '/second': (BuildContext context) => Scaffold(body: Center(child: tapRegion2)),
-        },
-        onGenerateInitialRoutes: (String initialRouteName) {
-          return <Route<void>>[
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => Scaffold(body: Center(child: tapRegion1)),
-            ),
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => Scaffold(body: Center(child: tapRegion2)),
-            ),
-          ];
-        },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Navigator(
+            onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+              return <Route<void>>[
+                PageRouteBuilder<void>(
+                  pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                    return Center(child: tapRegion1);
+                  },
+                ),
+                PageRouteBuilder<void>(
+                  pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                    return Center(child: tapRegion2);
+                  },
+                ),
+              ];
+            },
+            onGenerateRoute: (RouteSettings settings) => null,
+          ),
+        ),
       ),
     );
 
@@ -1169,7 +1190,7 @@ void main() {
     expect(count2, 1); // tapRegion2 should respond.
 
     // Now pop the top route to reveal tapRegion1.
-    Navigator.pop(tester.element(find.byType(Scaffold).last));
+    Navigator.pop(tester.element(find.byType(Center).last));
     await tester.pumpAndSettle();
 
     // Tap outside tapRegion1.
@@ -1188,37 +1209,40 @@ void main() {
     var buttonTapped = false;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: TapRegion(
-              key: tapRegionKey,
-              consumeOutsideTaps: true,
-              onTapOutside: (PointerEvent event) {},
-              behavior: HitTestBehavior.opaque,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    tester.element(find.byType(GestureDetector)),
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => Scaffold(
-                        body: Center(
-                          child: ElevatedButton(
-                            key: buttonKey,
-                            onPressed: () {
-                              buttonTapped = true;
-                            },
-                            child: const Text('Test Button'),
-                          ),
-                        ),
+      TestWidgetsApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: TapRegion(
+                key: tapRegionKey,
+                consumeOutsideTaps: true,
+                onTapOutside: (PointerEvent event) {},
+                behavior: HitTestBehavior.opaque,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder<void>(
+                        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                          return Center(
+                            child: GestureDetector(
+                              key: buttonKey,
+                              onTap: () {
+                                buttonTapped = true;
+                              },
+                              behavior: HitTestBehavior.opaque,
+                              child: const SizedBox(width: 100, height: 50, child: Text('Test Button')),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  );
-                },
-                child: Container(width: 250.0, height: 250.0, color: Colors.blue),
+                    );
+                  },
+                  child: const SizedBox(width: 250.0, height: 250.0),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
