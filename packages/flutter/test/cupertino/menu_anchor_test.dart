@@ -3544,16 +3544,13 @@ void main() {
       testWidgets('allows adjacent borders', (WidgetTester tester) async {
         await tester.pumpWidget(
           App(
-            CupertinoTheme(
-              data: const CupertinoThemeData(brightness: Brightness.dark),
-              child: CupertinoMenuAnchor(
-                controller: controller,
-                menuChildren: <Widget>[
-                  const DebugCupertinoMenuEntryMixin(),
-                  CupertinoMenuItem(child: Text(Tag.a.text)),
-                  const DebugCupertinoMenuEntryMixin(),
-                ],
-              ),
+            CupertinoMenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                DebugCupertinoMenuEntryMixin(key: UniqueKey()),
+                CupertinoMenuItem(child: Text(Tag.a.text)),
+                DebugCupertinoMenuEntryMixin(key: UniqueKey()),
+              ],
             ),
           ),
         );
