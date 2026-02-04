@@ -2,87 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/widgets.dart';
-import '../widgets/_window.dart' show BaseWindowController, DialogWindow, DialogWindowController;
-import 'dialog_theme.dart';
+import '../widgets/_window.dart' show BaseWindowController;
 import 'theme.dart';
 
-/// Manages windows for the Material application and provides the [MaterialWindowRegistry]
-/// to descendant widgets.
-///
-/// This widget is rendered by [MaterialApp] at the root of its tree.
-///
-/// Descendents may access the [MaterialWindowRegistry] via
-/// [MaterialWindowRegistry.maybeOf]. This registry can be used to
-/// register and unregister windows such as dialogs. The registered windows
-/// are rendered alongside the main application using [ViewAnchor].
-class MaterialWindowingManager extends StatefulWidget {
-  /// Creates a Material windowing manager.
-  ///
-  /// The [enableWindowing] and [child] parameters are required.
-  MaterialWindowingManager({super.key, required bool enableWindowing, required this.child})
-    : _registry = MaterialWindowRegistry(enableWindowing: enableWindowing);
+const String _kWindowingDisabledErrorMessage = '''
+Windowing APIs are not enabled.
 
-  /// The child widget.
-  final Widget child;
+Windowing APIs are currently experimental. Do not use windowing APIs in
+production applications or plugins published to pub.dev.
 
-  final MaterialWindowRegistry _registry;
+To try experimental windowing APIs:
+1. Switch to Flutter's main release channel.
+2. Turn on the windowing feature flag.
 
-  @override
-  State<MaterialWindowingManager> createState() => _MaterialWindowingManagerState();
-}
-
-class _MaterialWindowingManagerState extends State<MaterialWindowingManager> {
-  @override
-  Widget build(BuildContext context) {
-    return _MaterialWindowRegistryScope(
-      registry: widget._registry,
-      child: ListenableBuilder(
-        listenable: widget._registry,
-        builder: (BuildContext context, Widget? child) {
-          final List<Widget> subViews = widget._registry.windows.map((MaterialWindowEntry entry) {
-            final BaseWindowController controller = entry.controller;
-            if (controller is DialogWindowController) {
-              return _buildDialog(entry, controller);
-            } else {
-              throw UnimplementedError(
-                'Unsupported window controller type: ${controller.runtimeType}',
-              );
-            }
-          }).toList();
-
-          return ViewAnchor(
-            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
-            child: child!,
-          );
-        },
-        child: widget.child,
-      ),
-    );
-  }
-
-  Widget _buildDialog(MaterialWindowEntry entry, DialogWindowController controller) {
-    final Widget dialogContent = _DialogPopScope(
-      onPop: entry.onPop,
-      child: Builder(
-        builder: (BuildContext innerContext) {
-          return _FullWindowDialogWrapper(child: entry.builder(innerContext));
-        },
-      ),
-    );
-
-    return DialogWindow(
-      controller: controller,
-      child: Directionality(
-        textDirection: entry.textDirection,
-        child: Theme(
-          data: entry.themeData,
-          child: MediaQuery(data: entry.mediaQueryData, child: dialogContent),
-        ),
-      ),
-    );
-  }
-}
+See: https://github.com/flutter/flutter/issues/30701.
+''';
 
 /// Registry for managing windows in a Material application.
 ///
@@ -90,12 +27,32 @@ class _MaterialWindowingManagerState extends State<MaterialWindowingManager> {
 /// and notifies listeners when the list of registered windows changes.
 ///
 /// It also indicates whether windowing features are enabled via [enableWindowing].
+///
+/// {@template flutter.material.windowing.experimental}
+/// Do not use this API in production applications or packages published to
+/// pub.dev. Flutter will make breaking changes to this API, even in patch
+/// versions.
+///
+/// This API throws an [UnsupportedError] error unless Flutter’s windowing
+/// feature is enabled by [isWindowingEnabled].
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+/// {@endtemplate}
+@internal
 class MaterialWindowRegistry extends ChangeNotifier {
   /// Creates a Material window registry.
-  MaterialWindowRegistry({required this.enableWindowing});
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  MaterialWindowRegistry() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
 
   /// Whether windowing features are enabled.
-  final bool enableWindowing;
+  @internal
+  bool get enableWindowing => isWindowingEnabled;
   final List<MaterialWindowEntry> _windows = <MaterialWindowEntry>[];
 
   /// The list of registered windows.
@@ -104,7 +61,14 @@ class MaterialWindowRegistry extends ChangeNotifier {
   /// Registers a window.
   ///
   /// The [entry] parameter specifies the window to register.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   void register(MaterialWindowEntry entry) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     _windows.add(entry);
     notifyListeners();
   }
@@ -112,7 +76,14 @@ class MaterialWindowRegistry extends ChangeNotifier {
   /// Unregisters a window.
   ///
   /// The [entry] parameter specifies the window to unregister.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   void unregister(MaterialWindowEntry entry) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
     _windows.remove(entry);
     notifyListeners();
   }
@@ -120,141 +91,44 @@ class MaterialWindowRegistry extends ChangeNotifier {
   /// Retrieves the [MaterialWindowRegistry] from the given [context].
   ///
   /// Returns null if no registry is found in the widget tree.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   static MaterialWindowRegistry? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_MaterialWindowRegistryScope>()?._registry;
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    return context.dependOnInheritedWidgetOfExactType<MaterialWindowRegistryScope>()?._registry;
   }
 }
 
-class _MaterialWindowRegistryScope extends InheritedWidget {
-  const _MaterialWindowRegistryScope({
+/// An inherited widget that provides access to the [MaterialWindowRegistry].
+////
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+class MaterialWindowRegistryScope extends InheritedWidget {
+  /// Creates a Material window registry scope.
+  ///
+  /// The [registry] parameter specifies the window registry to provide.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  MaterialWindowRegistryScope({
+    super.key,
     required MaterialWindowRegistry registry,
     required super.child,
-  }) : _registry = registry;
+  }) : _registry = registry {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
 
   final MaterialWindowRegistry _registry;
 
   @override
-  bool updateShouldNotify(_MaterialWindowRegistryScope oldWidget) {
+  bool updateShouldNotify(MaterialWindowRegistryScope oldWidget) {
     return _registry != oldWidget._registry;
-  }
-}
-
-// Wrapper that makes dialogs fill the entire window without insets or rounded corners
-class _FullWindowDialogWrapper extends StatelessWidget {
-  const _FullWindowDialogWrapper({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
-      insetPadding: EdgeInsets.zero,
-      shape: const RoundedRectangleBorder(), // No rounded corners
-      alignment: Alignment.topLeft, // Align to top-left so it fills from corner
-      constraints:
-          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space
-    );
-
-    return DialogTheme(
-      data: windowDialogTheme,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: MediaQuery.removeViewPadding(
-          removeLeft: true,
-          removeTop: true,
-          removeRight: true,
-          removeBottom: true,
-          context: context,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// Provides a pop callback that dialog content can use
-// Wraps content to provide a Navigator-like interface for popping
-class _DialogPopScope extends StatelessWidget {
-  const _DialogPopScope({required this.child, this.onPop});
-
-  final Widget child;
-  final VoidCallback? onPop;
-
-  @override
-  Widget build(BuildContext context) {
-    // Wrap with WillPopScope to handle back button and provide popNavigator function
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (!didPop) {
-          onPop?.call();
-        }
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          // Provide a way for child widgets to pop using Navigator.maybePop(context)
-          // by wrapping in a minimal Navigator
-          return _NavigatorShim(onPop: onPop, child: child);
-        },
-      ),
-    );
-  }
-}
-
-// Creates a minimal Navigator that intercepts pop calls
-class _NavigatorShim extends StatefulWidget {
-  const _NavigatorShim({required this.child, this.onPop});
-
-  final VoidCallback? onPop;
-  final Widget child;
-
-  @override
-  State<_NavigatorShim> createState() => _NavigatorShimState();
-}
-
-class _NavigatorShimState extends State<_NavigatorShim> {
-  @override
-  Widget build(BuildContext context) {
-    // Create a Navigator with a single page that contains the child
-    // This allows Navigator.pop(context) calls from within the dialog to work
-    return Navigator(
-      pages: <Page<void>>[_DialogContentPage(child: widget.child)],
-      onPopPage: (Route<dynamic> route, dynamic result) {
-        // When the page is popped, call our onPop callback
-        widget.onPop?.call();
-        // Return false to prevent the route from being removed from the Navigator
-        // (since we're handling the pop externally by closing the dialog window)
-        return false;
-      },
-    );
-  }
-}
-
-// A simple page for the dialog content
-class _DialogContentPage extends Page<void> {
-  const _DialogContentPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-    );
   }
 }
 
@@ -262,6 +136,9 @@ class _DialogContentPage extends Page<void> {
 ///
 /// This class holds the necessary information to build and manage
 /// a window within the Material application.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
 class MaterialWindowEntry {
   /// Creates a Material window entry.
   ///
@@ -277,6 +154,9 @@ class MaterialWindowEntry {
   ///
   /// The [onPop] parameter is a callback that is invoked when the window is
   /// popped from the navigation stack.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   MaterialWindowEntry({
     required this.controller,
     required this.builder,
@@ -284,23 +164,45 @@ class MaterialWindowEntry {
     required this.themeData,
     required this.mediaQueryData,
     this.onPop,
-  });
+  }) {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+  }
 
   /// The controller that manages the window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final BaseWindowController controller;
 
   /// The builder function that builds the content of the window.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final WidgetBuilder builder;
 
   /// The text direction for the window's content.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final TextDirection textDirection;
 
   /// The theme data for the window's content.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final ThemeData themeData;
 
   /// The media query data for the window's content.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final MediaQueryData mediaQueryData;
 
   /// Callback invoked when the window is popped from the navigation stack.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
   final VoidCallback? onPop;
 }

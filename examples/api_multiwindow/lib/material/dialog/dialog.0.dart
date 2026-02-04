@@ -5,15 +5,25 @@
 // ignore_for_file: implementation_imports
 // ignore_for_file: invalid_use_of_internal_member
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
 
 /// Flutter code sample for [Dialog].
 
+class _RegularWindowControllerDelegate extends RegularWindowControllerDelegate {
+  @override
+  void onWindowDestroyed() {
+    exit(0);
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final RegularWindowController controller = RegularWindowController(
     preferredSize: Size(800, 600),
+    delegate: _RegularWindowControllerDelegate(),
   );
   runWidget(
     RegularWindow(controller: controller, child: const DialogExampleApp()),

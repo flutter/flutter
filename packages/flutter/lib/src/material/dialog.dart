@@ -1629,7 +1629,7 @@ Future<T?> showDialog<T>({
           preferredSize: fullscreenDialog ? parentSize : null,
         ),
       );
-    } catch (e) {
+    } on UnsupportedError {
       // Fallback to normal dialog route if windowing is not supported
     }
   }
