@@ -1752,9 +1752,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               isFocused: _hasPrimaryFocus,
               isHovering: _isHovering,
               expands: widget.isVerticallyExpanded,
-              child: widget.padding == null
-                  ? result
-                  : Padding(padding: widget.padding!, child: result),
+              child: _buildAlignedChild(result),
             ),
           ),
         ),
@@ -1769,25 +1767,33 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         autofocus: widget.autofocus,
         focusColor: widget.focusColor ?? Theme.of(context).focusColor,
         enableFeedback: false,
-        child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
+        child: _buildAlignedChild(result),
       );
     }
 
     final bool childHasButtonSemantic =
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
 
-    // When not vertically expanded, force the widget to its default height
-    // using heightFactor: 1.0. This prevents the item from expanding
-    // to fill the parent's available vertical space.
-    if (!widget.isVerticallyExpanded) {
-      result = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: result);
-    }
-
     return Semantics(
       button: !childHasButtonSemantic,
       expanded: _isMenuExpanded,
       child: Actions(actions: _actionMap, child: result),
     );
+  }
+
+  Widget _buildAlignedChild(Widget result) {
+    Widget child = widget.padding == null
+        ? result
+        : Padding(padding: widget.padding!, child: result);
+
+    // When not vertically expanded, force the widget to its default height
+    // using heightFactor: 1.0. This prevents the item from expanding
+    // to fill the parent's available vertical space.
+    if (!widget.isVerticallyExpanded) {
+      child = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: child);
+    }
+
+    return child;
   }
 }
 
