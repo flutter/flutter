@@ -85,6 +85,15 @@ struct _FlView {
   guint cursor_changed_cb_id;
 
   GCancellable* cancellable;
+
+#if FLUTTER_LINUX_GTK4
+  GtkEventControllerMotion* motion_controller;
+  GtkGestureClick* click_gesture;
+  GtkEventControllerScroll* scroll_controller;
+  GtkEventControllerKey* key_controller;
+  GtkGestureZoom* zoom_gesture;
+  GtkGestureRotate* rotate_gesture;
+#endif
 };
 
 enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
@@ -304,13 +313,13 @@ static void sync_modifier_if_needed(FlView* self, GdkEvent* event) {
       fl_engine_get_keyboard_manager(self->engine), event_state, event_time);
 }
 
-#if !FLUTTER_LINUX_GTK4
 static void set_scrolling_position(FlView* self, gdouble x, gdouble y) {
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_scrolling_manager_set_last_mouse_position(
       self->scrolling_manager, x * scale_factor, y * scale_factor);
 }
 
+#if !FLUTTER_LINUX_GTK4
 // Signal handler for GtkWidget::button-press-event
 static gboolean button_press_event_cb(FlView* self,
                                       GdkEventButton* button_event) {
@@ -424,6 +433,194 @@ static gboolean leave_notify_event_cb(FlView* self,
       self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
       x * scale_factor, y * scale_factor);
 }
+#endif  // !FLUTTER_LINUX_GTK4
+
+#if FLUTTER_LINUX_GTK4
+static guint32 get_event_time_or_now(GdkEvent* event) {
+  if (event != nullptr) {
+    return gdk_event_get_time(event);
+  }
+  return static_cast<guint32>(g_get_real_time() / 1000);
+}
+
+static GdkEvent* get_current_event(GtkEventController* controller) {
+  return gtk_event_controller_get_current_event(controller);
+}
+
+static FlutterPointerDeviceKind get_device_kind_or_default(GdkEvent* event) {
+  if (event != nullptr) {
+    return get_device_kind(event);
+  }
+  return kFlutterPointerDeviceKindMouse;
+}
+
+static void motion_event_cb(FlView* self, gdouble x, gdouble y) {
+  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
+      self->motion_controller));
+  if (event == nullptr) {
+    return;
+  }
+
+  sync_modifier_if_needed(self, event);
+
+  // return if touch event
+  auto event_type = gdk_event_get_event_type(event);
+  if (event_type == GDK_TOUCH_BEGIN || event_type == GDK_TOUCH_UPDATE ||
+      event_type == GDK_TOUCH_END || event_type == GDK_TOUCH_CANCEL) {
+    return;
+  }
+
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_pointer_manager_handle_motion(
+      self->pointer_manager, gdk_event_get_time(event),
+      get_device_kind(event), x * scale_factor, y * scale_factor);
+}
+
+static void enter_event_cb(FlView* self, gdouble x, gdouble y) {
+  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
+      self->motion_controller));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_pointer_manager_handle_enter(
+      self->pointer_manager, get_event_time_or_now(event),
+      get_device_kind_or_default(event), x * scale_factor, y * scale_factor);
+}
+
+static void leave_event_cb(FlView* self, gdouble x, gdouble y) {
+  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
+      self->motion_controller));
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_pointer_manager_handle_leave(
+      self->pointer_manager, get_event_time_or_now(event),
+      get_device_kind_or_default(event), x * scale_factor, y * scale_factor);
+}
+
+static void click_pressed_cb(FlView* self,
+                             gint n_press,
+                             gdouble x,
+                             gdouble y) {
+  if (n_press > 1) {
+    return;
+  }
+
+  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
+  if (event == nullptr) {
+    return;
+  }
+
+  guint button = gtk_gesture_single_get_current_button(
+      GTK_GESTURE_SINGLE(self->click_gesture));
+
+  set_scrolling_position(self, x, y);
+  sync_modifier_if_needed(self, event);
+
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_pointer_manager_handle_button_press(
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor, button);
+}
+
+static void click_released_cb(FlView* self,
+                              gint n_press,
+                              gdouble x,
+                              gdouble y) {
+  (void)n_press;
+  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
+  if (event == nullptr) {
+    return;
+  }
+
+  guint button = gtk_gesture_single_get_current_button(
+      GTK_GESTURE_SINGLE(self->click_gesture));
+
+  set_scrolling_position(self, x, y);
+  sync_modifier_if_needed(self, event);
+
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  fl_pointer_manager_handle_button_release(
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor, button);
+}
+
+static gboolean scroll_event_cb(FlView* self, gdouble dx, gdouble dy) {
+  (void)dx;
+  (void)dy;
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->scroll_controller));
+  if (event == nullptr) {
+    return FALSE;
+  }
+
+  fl_scrolling_manager_handle_scroll_event(
+      self->scrolling_manager, event,
+      gtk_widget_get_scale_factor(GTK_WIDGET(self)));
+  return TRUE;
+}
+
+static gboolean handle_key_event(FlView* self,
+                                 GdkEvent* event,
+                                 gboolean is_press,
+                                 guint keyval,
+                                 guint keycode,
+                                 GdkModifierType state) {
+  g_autoptr(FlKeyEvent) key_event = nullptr;
+  if (event != nullptr) {
+    key_event = fl_key_event_new_from_gdk_event(event);
+  } else {
+    key_event = fl_key_event_new(get_event_time_or_now(event), is_press,
+                                 keycode, keyval, state, 0);
+  }
+
+  fl_keyboard_manager_handle_event(
+      fl_engine_get_keyboard_manager(self->engine), key_event,
+      self->cancellable,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        FlView* self = FL_VIEW(user_data);
+
+        g_autoptr(FlKeyEvent) redispatch_event = nullptr;
+        g_autoptr(GError) error = nullptr;
+        if (!fl_keyboard_manager_handle_event_finish(
+                FL_KEYBOARD_MANAGER(object), result, &redispatch_event,
+                &error)) {
+          if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+            return;
+          }
+
+          g_warning("Failed to handle key event: %s", error->message);
+        }
+
+        if (redispatch_event != nullptr) {
+          if (!fl_text_input_handler_filter_keypress(
+                  fl_engine_get_text_input_handler(self->engine),
+                  redispatch_event)) {
+            fl_keyboard_manager_add_redispatched_event(
+                fl_engine_get_keyboard_manager(self->engine), redispatch_event);
+            // TODO(gtk4): Redispatch unhandled events to GTK.
+          }
+        }
+      },
+      self);
+
+  return TRUE;
+}
+
+static gboolean key_pressed_cb(FlView* self,
+                               guint keyval,
+                               guint keycode,
+                               GdkModifierType state) {
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->key_controller));
+  return handle_key_event(self, event, TRUE, keyval, keycode, state);
+}
+
+static gboolean key_released_cb(FlView* self,
+                                guint keyval,
+                                guint keycode,
+                                GdkModifierType state) {
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->key_controller));
+  return handle_key_event(self, event, FALSE, keyval, keycode, state);
+}
+#endif  // FLUTTER_LINUX_GTK4
 
 static void gesture_rotation_begin_cb(FlView* self) {
   fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
@@ -451,7 +648,6 @@ static void gesture_zoom_update_cb(FlView* self, gdouble scale) {
 static void gesture_zoom_end_cb(FlView* self) {
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
-#endif  // !FLUTTER_LINUX_GTK4
 
 static void setup_opengl(FlView* self) {
   g_autoptr(GError) error = nullptr;
@@ -636,6 +832,14 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->scrolling_manager);
   g_clear_object(&self->pointer_manager);
   g_clear_object(&self->touch_manager);
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->motion_controller);
+  g_clear_object(&self->click_gesture);
+  g_clear_object(&self->scroll_controller);
+  g_clear_object(&self->key_controller);
+  g_clear_object(&self->zoom_gesture);
+  g_clear_object(&self->rotate_gesture);
+#endif
   g_clear_object(&self->view_accessible);
   g_clear_object(&self->cancellable);
 
@@ -657,7 +861,7 @@ static void fl_view_realize(GtkWidget* widget) {
 #if !FLUTTER_LINUX_GTK4
 static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
   g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
-      gdk_event_copy(reinterpret_cast<GdkEvent*>(key_event)));
+      reinterpret_cast<GdkEvent*>(key_event));
 
   fl_keyboard_manager_handle_event(
       fl_engine_get_keyboard_manager(self->engine), event, self->cancellable,
@@ -747,6 +951,11 @@ static void setup_engine(FlView* self) {
 
   init_scrolling(self);
   init_touch(self);
+#if FLUTTER_LINUX_GTK4
+  fl_text_input_handler_set_widget(
+      fl_engine_get_text_input_handler(self->engine),
+      GTK_WIDGET(self));
+#endif
 
   self->on_pre_engine_restart_cb_id =
       g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
@@ -758,7 +967,11 @@ static void setup_engine(FlView* self) {
 static void fl_view_init(FlView* self) {
   self->cancellable = g_cancellable_new();
 
+#if FLUTTER_LINUX_GTK4
+  gtk_widget_set_focusable(GTK_WIDGET(self), TRUE);
+#else
   gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
+#endif
 
   self->view_id = -1;
 
@@ -804,13 +1017,13 @@ static void fl_view_init(FlView* self) {
                            self);
   g_signal_connect_swapped(self->event_box, "touch-event",
                            G_CALLBACK(touch_event_cb), self);
-#else
-  // TODO(gtk4): Replace GtkEventBox/event signals with GTK4 controllers.
 #endif  // !FLUTTER_LINUX_GTK4
 
   self->render_area = GTK_DRAWING_AREA(gtk_drawing_area_new());
   gtk_widget_show(GTK_WIDGET(self->render_area));
 #if FLUTTER_LINUX_GTK4
+  gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
+  gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_box_append(GTK_BOX(self), GTK_WIDGET(self->render_area));
 #else
   gtk_container_add(GTK_CONTAINER(self->event_box),
@@ -827,6 +1040,63 @@ static void fl_view_init(FlView* self) {
   g_signal_connect_swapped(self->render_area, "draw", G_CALLBACK(draw_cb),
                            self);
 #endif
+
+#if FLUTTER_LINUX_GTK4
+  self->motion_controller = GTK_EVENT_CONTROLLER_MOTION(
+      gtk_event_controller_motion_new());
+  g_signal_connect_swapped(self->motion_controller, "motion",
+                           G_CALLBACK(motion_event_cb), self);
+  g_signal_connect_swapped(self->motion_controller, "enter",
+                           G_CALLBACK(enter_event_cb), self);
+  g_signal_connect_swapped(self->motion_controller, "leave",
+                           G_CALLBACK(leave_event_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
+                            GTK_EVENT_CONTROLLER(self->motion_controller));
+
+  self->click_gesture = GTK_GESTURE_CLICK(gtk_gesture_click_new());
+  g_signal_connect_swapped(self->click_gesture, "pressed",
+                           G_CALLBACK(click_pressed_cb), self);
+  g_signal_connect_swapped(self->click_gesture, "released",
+                           G_CALLBACK(click_released_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
+                            GTK_EVENT_CONTROLLER(self->click_gesture));
+
+  self->scroll_controller = GTK_EVENT_CONTROLLER_SCROLL(
+      gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES));
+  g_signal_connect_swapped(self->scroll_controller, "scroll",
+                           G_CALLBACK(scroll_event_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
+                            GTK_EVENT_CONTROLLER(self->scroll_controller));
+
+  self->key_controller =
+      GTK_EVENT_CONTROLLER_KEY(gtk_event_controller_key_new());
+  g_signal_connect_swapped(self->key_controller, "key-pressed",
+                           G_CALLBACK(key_pressed_cb), self);
+  g_signal_connect_swapped(self->key_controller, "key-released",
+                           G_CALLBACK(key_released_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self),
+                            GTK_EVENT_CONTROLLER(self->key_controller));
+
+  self->zoom_gesture = GTK_GESTURE_ZOOM(gtk_gesture_zoom_new());
+  g_signal_connect_swapped(self->zoom_gesture, "begin",
+                           G_CALLBACK(gesture_zoom_begin_cb), self);
+  g_signal_connect_swapped(self->zoom_gesture, "scale-changed",
+                           G_CALLBACK(gesture_zoom_update_cb), self);
+  g_signal_connect_swapped(self->zoom_gesture, "end",
+                           G_CALLBACK(gesture_zoom_end_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
+                            GTK_EVENT_CONTROLLER(self->zoom_gesture));
+
+  self->rotate_gesture = GTK_GESTURE_ROTATE(gtk_gesture_rotate_new());
+  g_signal_connect_swapped(self->rotate_gesture, "begin",
+                           G_CALLBACK(gesture_rotation_begin_cb), self);
+  g_signal_connect_swapped(self->rotate_gesture, "angle-changed",
+                           G_CALLBACK(gesture_rotation_update_cb), self);
+  g_signal_connect_swapped(self->rotate_gesture, "end",
+                           G_CALLBACK(gesture_rotation_end_cb), self);
+  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
+                            GTK_EVENT_CONTROLLER(self->rotate_gesture));
+#endif  // FLUTTER_LINUX_GTK4
 }
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
