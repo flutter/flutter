@@ -117,9 +117,7 @@ class MenuStyle with Diagnosticable {
     this.shape,
     this.mouseCursor,
     this.visualDensity,
-    @Deprecated(
-      'This property is ignored. Menu alignment is determined automatically. '
-    )
+    @Deprecated('This property is ignored. Menu alignment is determined automatically. ')
     this.alignment,
   });
 
@@ -201,9 +199,7 @@ class MenuStyle with Diagnosticable {
   /// determined automatically based on menu type:
   /// * MenuBar menus use [AlignmentDirectional.bottomStart]
   /// * Submenus use [AlignmentDirectional.topEnd]
-  @Deprecated(
-    'This property is ignored. Menu alignment is determined automatically. '
-  )
+  @Deprecated('This property is ignored. Menu alignment is determined automatically. ')
   final AlignmentGeometry? alignment;
 
   @override
