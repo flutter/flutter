@@ -292,7 +292,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   List<TextInputFormatter>? get _textInputFormatter {
     return switch (widget.calendarDelegate) {
-      DateInputCalendarDelegate(:final List<TextInputFormatter>? inputFormatters) =>
+      DateInputGregorianCalendarDelegate(:final List<TextInputFormatter>? inputFormatters) =>
         inputFormatters,
       _ => null,
     };

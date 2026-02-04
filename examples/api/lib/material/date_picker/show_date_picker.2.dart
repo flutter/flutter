@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Flutter code sample showing how to use [showDatePicker] with a custom
-/// [DateInputCalendarDelegate] to support configurable text input formats.
+/// [DateInputGregorianCalendarDelegate] to support configurable text input formats.
 
 void main() => runApp(const DatePickerSampleApp());
 
@@ -258,7 +258,7 @@ class DateInputFormatter extends TextInputFormatter {
   }
 }
 
-class ConfigurableDateDelegate extends DateInputCalendarDelegate {
+class ConfigurableDateDelegate extends DateInputGregorianCalendarDelegate {
   const ConfigurableDateDelegate({
     required this.formatType,
     this.separator = DateSeparator.slash,

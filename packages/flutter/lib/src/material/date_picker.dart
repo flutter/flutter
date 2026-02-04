@@ -124,7 +124,7 @@ const double _fontSizeToScale = 14.0;
 ///
 /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
 ///
-/// Use [DateInputCalendarDelegate] to customize how dates are entered and
+/// Use [DateInputGregorianCalendarDelegate] to customize how dates are entered and
 /// formatted in [DatePickerEntryMode.input].
 ///
 /// A custom delegate can define specific date input conventions, such as
@@ -134,7 +134,7 @@ const double _fontSizeToScale = 14.0;
 ///
 /// {@tool dartpad}
 /// This sample shows how to customize the text input behavior of
-/// [showDatePicker] using a [DateInputCalendarDelegate].
+/// [showDatePicker] using a [DateInputGregorianCalendarDelegate].
 ///
 /// ** See code in examples/api/lib/material/date_picker/show_date_picker.2.dart **
 /// {@end-tool}
@@ -3508,7 +3508,7 @@ class _InputDateRangePickerState extends State<_InputDateRangePicker> {
 
   List<TextInputFormatter>? get _textInputFormatter {
     return switch (widget.calendarDelegate) {
-      DateInputCalendarDelegate(:final List<TextInputFormatter>? inputFormatters) =>
+      DateInputGregorianCalendarDelegate(:final List<TextInputFormatter>? inputFormatters) =>
         inputFormatters,
       _ => null,
     };

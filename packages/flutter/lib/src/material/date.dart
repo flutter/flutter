@@ -31,7 +31,7 @@ import 'material_localizations.dart';
 /// See also:
 ///
 ///  * [GregorianCalendarDelegate], the default implementation for the Gregorian calendar.
-///  * [DateInputCalendarDelegate], an interface for delegates that support
+///  * [DateInputGregorianCalendarDelegate], an interface for delegates that support
 ///    customizing date text input and formatting.
 ///  * [CalendarDatePicker], which uses this delegate to manage calendar-specific behavior.
 abstract class CalendarDelegate<T extends DateTime> {
@@ -253,9 +253,9 @@ class GregorianCalendarDelegate extends CalendarDelegate<DateTime> {
 ///
 /// Subclasses must provide the appropriate [inputFormatters] to ensure
 /// that user entry matches the parsing logic in [parseCompactDate].
-abstract class DateInputCalendarDelegate extends GregorianCalendarDelegate {
+abstract class DateInputGregorianCalendarDelegate extends GregorianCalendarDelegate {
   /// Creates a calendar delegate.
-  const DateInputCalendarDelegate();
+  const DateInputGregorianCalendarDelegate();
 
   /// The formatters applied to the text field to guide and validate user input.
   List<TextInputFormatter> get inputFormatters;
