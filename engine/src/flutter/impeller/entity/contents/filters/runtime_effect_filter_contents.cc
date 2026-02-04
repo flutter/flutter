@@ -98,7 +98,8 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
           [maybe_input_coverage,
            entity_offset](const Entity& entity) -> std::optional<Rect> {
             Rect coverage = maybe_input_coverage.value();
-            return coverage.Shift(entity_offset - coverage.GetOrigin());
+            return Rect::MakeLTRB(entity_offset.x, entity_offset.y,
+                                  coverage.GetRight(), coverage.GetBottom());
           });
 
       Entity entity;
