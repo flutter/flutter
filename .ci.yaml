@@ -1751,6 +1751,7 @@ targets:
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
         ]
 
@@ -2357,7 +2358,6 @@ targets:
       task_name: basic_material_app_android__compile
 
   - name: Linux_pixel_7pro android_verified_input_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2663,7 +2663,6 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/179114
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2848,7 +2847,6 @@ targets:
   - name: Linux_mokey hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -6332,7 +6330,7 @@ targets:
       subshard: "2_9"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700"
+      test_timeout_secs: "3600"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6949,7 +6947,6 @@ targets:
       task_name: windows_startup_test
 
   - name: Windows windowing_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/177715
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
