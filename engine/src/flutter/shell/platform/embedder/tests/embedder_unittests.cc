@@ -204,8 +204,10 @@ std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
 TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
-  auto ui_task_runner = CreateNewThread("test_ui_thread");
-  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  auto ui_thread = std::make_unique<fml::Thread>("test_ui_thread");
+  auto ui_task_runner = ui_thread->GetTaskRunner();
+  auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
+  auto platform_task_runner = platform_thread->GetTaskRunner();
   static std::mutex engine_mutex;
   UniqueEngine engine;
 
@@ -267,6 +269,12 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
     platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
   });
   kill_latch.Wait();
+
+  // Shut down the threads before exiting the test.  There may still be
+  // pending tasks queued to the task runners, and they must not run
+  // after the engine goes out of scope.
+  ui_thread.reset();
+  platform_thread.reset();
 }
 
 TEST_F(EmbedderTest, IgnoresStaleTasks) {
