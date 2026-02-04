@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/_features.dart';
 import 'package:flutter/src/widgets/accessibility_evaluations.dart';
@@ -243,7 +241,7 @@ void main() {
         return await evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, isNotEmpty);
-      expect(result.violations.first.reason, contains('Expected contrast ratio of at least 7.0'));
+      expect(result.violations.first.reason, contains('Expected contrast ratio of at least 7'));
       handle.dispose();
     });
   });

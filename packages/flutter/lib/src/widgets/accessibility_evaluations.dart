@@ -288,9 +288,9 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;
       image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
       final ByteData? byteData = await image.toByteData();
-      image.dispose();
 
       violations.addAll(await _evaluateNode(root, image, byteData!, renderView));
+      image.dispose();
     }
 
     return EvaluationResult(violations);
