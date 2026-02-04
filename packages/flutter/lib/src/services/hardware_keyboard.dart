@@ -504,36 +504,56 @@ class HardwareKeyboard {
         isLogicalKeyPressed(LogicalKeyboardKey.metaRight);
   }
 
-  void _assertEventIsRegular(KeyEvent event) {
-    assert(() {
-      const common =
-          'If this occurs in real application, please report this '
-          'bug to Flutter. If this occurs in unit tests, please ensure that '
-          "simulated events follow Flutter's event model as documented in "
-          '`HardwareKeyboard`. This was the event: ';
-      if (event is KeyDownEvent) {
-        assert(
-          !_pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is already pressed. $common$event',
-        );
-      } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
-        assert(
-          _pressedKeys.containsKey(event.physicalKey),
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is not pressed. $common$event',
-        );
-        assert(
-          _pressedKeys[event.physicalKey] == event.logicalKey,
-          'A ${event.runtimeType} is dispatched, but the state shows that the physical '
-          'key is pressed on a different logical key. $common$event '
-          'and the recorded logical key ${_pressedKeys[event.physicalKey]}',
-        );
-      } else {
-        assert(false, 'Unexpected key event class ${event.runtimeType}');
-      }
-      return true;
-    }());
+  // Returns a tuple of (shouldProcess, errorMessage) that represents if the event is
+  // consistent with the current state.
+  //
+  // The `shouldProcess` represents if the event should be processed normally.
+  //
+  // The `errorMessage` represents an error message and is only set in debug mode.
+  //
+  // The `errorMessage` might be non-null even if `shouldProcess` is true,
+  // representing an erroneous event that should still be processed normally.
+  (bool, String?) _eventIsRegular(KeyEvent event) {
+    late final bool shouldProcess;
+    String? errorMessage;
+    if (event is KeyDownEvent) {
+      shouldProcess = !_pressedKeys.containsKey(event.physicalKey);
+      assert(() {
+        if (!shouldProcess) {
+          errorMessage =
+              'Received ${event.runtimeType} for key that is already pressed:\n'
+              'Event: $event\n'
+              'Pressed logical key: ${_pressedKeys[event.physicalKey]}';
+        }
+        return true;
+      }());
+    } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
+      // Only checks physical key here and don't reject based on logical key,
+      // since otherwise the key will never be released.
+      shouldProcess = _pressedKeys.containsKey(event.physicalKey);
+      assert(() {
+        if (!shouldProcess) {
+          errorMessage =
+              'Received ${event.runtimeType} for key that is not pressed:\n'
+              'Event: $event';
+        } else if (_pressedKeys[event.physicalKey] != event.logicalKey) {
+          errorMessage =
+              'Received ${event.runtimeType} for key with mismatched logical key:\n'
+              'Event: $event\n'
+              'Pressed logical key: ${_pressedKeys[event.physicalKey]}';
+        }
+        return true;
+      }());
+    } else {
+      shouldProcess = false;
+      assert(() {
+        errorMessage =
+            'Received unknown KeyEvent subtype:\n'
+            'Event: $event';
+        return true;
+      }());
+    }
+    return (shouldProcess, errorMessage);
   }
 
   List<KeyEventCallback> _handlers = <KeyEventCallback>[];
@@ -652,12 +672,22 @@ class HardwareKeyboard {
 
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
+  ///
+  /// Returns true if any handler handled the event.
   bool handleKeyEvent(KeyEvent event) {
     assert(_keyboardDebug(() => 'Key event received: $event'));
     assert(
       _keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails),
     );
-    _assertEventIsRegular(event);
+    final (bool shouldProcess, String? errorMessage) = _eventIsRegular(event);
+    if (errorMessage != null) {
+      assert(_keyboardDebug(() => errorMessage));
+    }
+    if (!shouldProcess) {
+      // Treat this event as handled since ignoring it is equivalent to
+      // acknowledging that it occurred earlier, resulting in the current state.
+      return true;
+    }
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
     if (event is KeyDownEvent) {
@@ -673,7 +703,8 @@ class HardwareKeyboard {
     } else if (event is KeyUpEvent) {
       _pressedKeys.remove(physicalKey);
     } else if (event is KeyRepeatEvent) {
-      // Empty
+      // Update the logical key in case it has changed.
+      _pressedKeys[physicalKey] = logicalKey;
     }
 
     assert(

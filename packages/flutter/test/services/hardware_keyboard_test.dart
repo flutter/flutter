@@ -9,6 +9,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void expectState(Map<PhysicalKeyboardKey, LogicalKeyboardKey> expectedKeys) {
+  expect(HardwareKeyboard.instance.physicalKeysPressed, equals(expectedKeys.keys.toSet()));
+  expect(HardwareKeyboard.instance.logicalKeysPressed, equals(expectedKeys.values.toSet()));
+}
+
 void main() {
   testWidgets(
     'HardwareKeyboard records pressed keys and enabled locks',
@@ -596,6 +601,66 @@ void main() {
     expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
     expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
   });
+
+  testWidgets(
+    'Irregular key events are ignored',
+    (WidgetTester tester) async {
+      const isProcessed = false;
+      const isIgnored = true;
+
+      // 1. Press keyA.
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isProcessed);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
+      });
+      // Press keyA again, which should be ignored.
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isIgnored);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
+      });
+
+      // 2. Release keyA.
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), isProcessed);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      // Release keyA again, which should be ignored.
+      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), isIgnored);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      // 3. Send a repeat event for keyA, which should be ignored.
+      expect(await simulateKeyRepeatEvent(LogicalKeyboardKey.keyA), isIgnored);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      // 4. Press physical keyA.
+      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isProcessed);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
+      });
+
+      // Send a repeat event with a different logical key, which should be processed.
+      expect(
+        await simulateKeyRepeatEvent(
+          LogicalKeyboardKey.keyB,
+          physicalKey: PhysicalKeyboardKey.keyA,
+        ),
+        isProcessed,
+      );
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyB,
+      });
+
+      // 5. Send a key up event with a different logical key, which should be processed.
+      expect(
+        await simulateKeyUpEvent(
+          LogicalKeyboardKey.keyB,
+          physicalKey: PhysicalKeyboardKey.keyA,
+        ),
+        isProcessed,
+      );
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+    },
+    variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
+  );
 }
 
 Future<void> _runWhileOverridingOnError(
