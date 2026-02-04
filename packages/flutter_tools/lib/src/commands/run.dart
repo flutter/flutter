@@ -714,8 +714,9 @@ class RunCommand extends RunCommandBase {
           'Hot reload on the web is now enabled by default. '
           'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
           'and will be removed in an upcoming release. '
-          'If your web development workflow depends on disabling hot reload, please open an issue '
-          'explaining why at https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml',
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
         );
       }
     }
