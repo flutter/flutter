@@ -1677,12 +1677,11 @@ void main() {
 
     testWidgets(
       'Focus wraps when traversing with arrow keys on web',
+      skip: !isBrowser, // [intended] Web wraps focus regardless of platform.
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.iOS,
         TargetPlatform.macOS,
       }),
-      skip:
-          !kIsWeb, // [intended] Web wraps focus regardless of platform. Observed on Apple Podcasts on Chromium.
       (WidgetTester tester) async {
         final anchorFocusNode = FocusNode();
         final firstItemFocusNode = FocusNode();
@@ -1730,12 +1729,11 @@ void main() {
 
     testWidgets(
       'Focus does not wrap when traversing with arrow keys on Apple platforms',
+      skip: isBrowser, // [intended] Web wraps focus regardless of platform.
       variant: const TargetPlatformVariant(<TargetPlatform>{
         TargetPlatform.iOS,
         TargetPlatform.macOS,
       }),
-      skip:
-          kIsWeb, // [intended] Web wraps focus regardless of platform. Observed on Apple Podcasts on Chromium.
       (WidgetTester tester) async {
         final anchorFocusNode = FocusNode();
         final firstItemFocusNode = FocusNode();
