@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 
 // Vertex shader to draw Flutter window contents.
 static const char* vertex_shader_src =
@@ -363,7 +364,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window) {
+                                            FlGdkSurface* surface) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
   g_mutex_lock(&self->frame_mutex);
@@ -373,9 +374,9 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+  size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+  size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
   while (fl_framebuffer_get_width(self->framebuffer) != width ||
          fl_framebuffer_get_height(self->framebuffer) != height) {
     g_mutex_unlock(&self->frame_mutex);
@@ -386,7 +387,8 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
-    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
+    gdk_cairo_draw_from_gl(cr, surface,
+                           fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
   } else {
     GLint saved_texture_binding;
@@ -398,7 +400,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, self->pixels);
 
-    gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
+    gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
                            0, width, height);
 
     glDeleteTextures(1, &texture_id);
