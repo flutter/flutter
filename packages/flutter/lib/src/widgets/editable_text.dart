@@ -3305,7 +3305,7 @@ class EditableTextState extends State<EditableText>
         if (!mounted || !_hasInputConnection) {
           return;
         }
-        _textInputConnection!.updateStyle(_getTextInputStyle());
+        _textInputConnection!.updateStyle(_getTextInputStyle(context));
       }, debugLabel: 'EditableText.updateStyle');
     }
 
@@ -3423,7 +3423,7 @@ class EditableTextState extends State<EditableText>
           if (!mounted || !_hasInputConnection) {
             return;
           }
-          _textInputConnection!.updateStyle(_getTextInputStyle());
+          _textInputConnection!.updateStyle(_getTextInputStyle(context));
         }, debugLabel: 'EditableText.updateStyle');
       }
     }
@@ -3447,7 +3447,7 @@ class EditableTextState extends State<EditableText>
     }
   }
 
-  TextInputStyle _getTextInputStyle() {
+  TextInputStyle _getTextInputStyle(BuildContext context) {
     final double? letterSpacingOverride = MediaQuery.maybeLetterSpacingOverrideOf(context);
     final double? wordSpacingOverride = MediaQuery.maybeWordSpacingOverrideOf(context);
 
@@ -3986,7 +3986,7 @@ class EditableTextState extends State<EditableText>
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
-        ..updateStyle(_getTextInputStyle())
+        ..updateStyle(_getTextInputStyle(context))
         ..setEditingState(localValue)
         ..show();
       if (_needsAutofill) {
@@ -4050,7 +4050,7 @@ class EditableTextState extends State<EditableText>
 
     newConnection
       ..show()
-      ..updateStyle(_getTextInputStyle())
+      ..updateStyle(_getTextInputStyle(context))
       ..setEditingState(_value);
     _lastKnownRemoteTextEditingValue = _value;
   }
