@@ -823,6 +823,10 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     onCancel: _stop,
   );
 
+  @override
+  @visibleForTesting
+  StreamController<String> get linesController => _linesController;
+
   // We log from two files: the device and the system log.
   Process? _deviceProcess;
   Process? _systemProcess;
@@ -961,23 +965,17 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
         int repeat = int.parse(multi.group(1)!);
         repeat = math.max(0, math.min(100, repeat));
         for (var i = 1; i < repeat; i++) {
-          addToLinesController(_lastLine!);
+          addLogToStream(_lastLine!);
         }
       }
     } else {
       _lastLine = _filterDeviceLine(line);
       if (_lastLine != null) {
-        addToLinesController(_lastLine!);
+        addLogToStream(_lastLine!);
         _lastLineMatched = true;
       } else {
         _lastLineMatched = false;
       }
-    }
-  }
-
-  void addToLinesController(String message) {
-    if (!_linesController.isClosed && !interceptLog(message)) {
-      _linesController.add(message);
     }
   }
 
@@ -991,7 +989,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
       try {
         final Object? decodedJson = jsonDecode(message);
         if (decodedJson is String) {
-          addToLinesController(decodedJson);
+          addLogToStream(decodedJson);
         }
       } on FormatException {
         globals.printError('Logger returned non-JSON response: $message');
@@ -1012,7 +1010,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
 
     final String filteredLine = _filterSystemLog(line);
 
-    addToLinesController(filteredLine);
+    addLogToStream(filteredLine);
   }
 
   void _stop() {

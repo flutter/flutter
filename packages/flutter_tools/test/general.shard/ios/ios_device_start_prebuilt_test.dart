@@ -541,7 +541,7 @@ void main() {
     },
   );
 
-  testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
+  testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final processManager = FakeProcessManager.list(<FakeCommand>[kLaunchReleaseCommand]);
     final fakeAnalytics = FakeAnalytics();
@@ -1923,6 +1923,9 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
   @override
   Stream<String> get logLines => _linesController.stream;
 
+  @override
+  StreamController<String> get linesController => _linesController;
+
   void _onListen() {
     _lineQueue.forEach(_linesController.add);
     _lineQueue.clear();
@@ -1930,9 +1933,7 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
 
   void addLine(String line) {
     if (_linesController.hasListener) {
-      if (interceptLog(line)) {
-        _linesController.add(line);
-      }
+      addLogToStream(line);
     } else {
       _lineQueue.add(line);
     }

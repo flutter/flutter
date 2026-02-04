@@ -577,7 +577,6 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           launchArguments: launchArguments,
           uninstallFirst: debuggingOptions.uninstallFirst,
-          deviceLogReader: deviceLogReader,
         );
       }
 
@@ -592,7 +591,6 @@ class IOSDevice extends Device {
           mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
-          deviceLogReader: deviceLogReader,
         );
         installationResult = result ? 0 : 1;
         deploymentMethod = coreDeviceDeploymentMethod;
@@ -739,7 +737,6 @@ class IOSDevice extends Device {
             launchArguments: launchArguments,
             uninstallFirst: false,
             skipInstall: true,
-            deviceLogReader: deviceLogReader,
           );
           installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
           if (installationResult != 0) {
@@ -976,8 +973,11 @@ class IOSDevice extends Device {
     required List<String> launchArguments,
     required bool uninstallFirst,
     bool skipInstall = false,
-    required DeviceLogReader deviceLogReader,
   }) {
+    final DeviceLogReader deviceLogReader = getLogReader(
+      app: package,
+      usingCISystem: debuggingOptions.usingCISystem,
+    );
     // If the device supports syslog reading, prefer launching the app without
     // attaching the debugger to avoid the overhead of the unnecessary extra running process.
     if (majorSdkVersion >= IOSDeviceLogReader.minimumUniversalLoggingSdkVersion) {
@@ -1030,7 +1030,6 @@ class IOSDevice extends Device {
     required String? mainPath,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
-    required DeviceLogReader deviceLogReader,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       // Release mode
@@ -1063,6 +1062,10 @@ class IOSDevice extends Device {
     final Version? xcodeVersion = globals.xcode?.currentVersion;
     final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
     if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+      final DeviceLogReader deviceLogReader = getLogReader(
+        app: package,
+        usingCISystem: debuggingOptions.usingCISystem,
+      );
       if (deviceLogReader is IOSDeviceLogReader) {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
@@ -1395,6 +1398,10 @@ class LogInterceptor {
 /// Shared logic between iOS device log readers, such as [IOSDeviceLogReader]
 /// for physical iOS devices and _IOSSimulatorLogReader for simulators.
 abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
+  @visibleForOverriding
+  /// [StreamController] for iOS device logs.
+  StreamController<String> get linesController;
+
   /// Interceptors that should be checked with every log.
   final List<LogInterceptor> _logInterceptors = [];
 
@@ -1417,7 +1424,7 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
   /// of the first matched interceptor.
   ///
   /// Returns `true` if the log should be not added to the [StreamController] to be displayed to the user.
-  bool interceptLog(String message) {
+  bool _interceptLog(String message) {
     for (final LogInterceptor interceptor in _logInterceptors) {
       if (message.contains(interceptor.pattern)) {
         interceptor.action();
@@ -1428,6 +1435,17 @@ abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
       }
     }
     return false;
+  }
+
+  /// Adds [message] to the [linesController] if the [StreamController] is open and the log is not
+  /// intercepted.
+  void addLogToStream(String message) {
+    // Sometimes (race condition?) we try to send a log after the controller has
+    // been closed. See https://github.com/flutter/flutter/issues/99021 for more
+    // context.
+    if (!linesController.isClosed && !_interceptLog(message)) {
+      linesController.add(message);
+    }
   }
 }
 
@@ -1532,26 +1550,21 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   // Logging from the dart code has no prefixing metadata.
   final _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
-  @visibleForTesting
-  late final linesController = StreamController<String>.broadcast(
+  late final _linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
 
-  // Sometimes (race condition?) we try to send a log after the controller has
-  // been closed. See https://github.com/flutter/flutter/issues/99021 for more
-  // context.
+  @override
+  @visibleForTesting
+  StreamController<String> get linesController => _linesController;
+
   @visibleForTesting
   void addToLinesController(String message, IOSDeviceLogSource source) {
-    if (!linesController.isClosed) {
-      if (interceptLog(message)) {
-        return;
-      }
-      if (_excludeLog(message, source)) {
-        return;
-      }
-      linesController.add(message);
+    if (_excludeLog(message, source)) {
+      return;
     }
+    addLogToStream(message);
   }
 
   /// Used to track messages prefixed with "flutter:" from the fallback log source.
