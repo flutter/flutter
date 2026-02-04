@@ -6,6 +6,7 @@ assert(is_linux)
 
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/glfw/config.gni")
+import("//flutter/shell/platform/linux/config.gni")
 import("//flutter/testing/testing.gni")
 
 group("linux") {
@@ -81,6 +82,9 @@ config("disable_warnings") {
   cflags_cc = warning_flags
 }
 
+_gtk_config = use_gtk4 ? "//flutter/shell/platform/linux/config:gtk4" : "//flutter/shell/platform/linux/config:gtk"
+_gtk_defines = use_gtk4 ? [ "FLUTTER_LINUX_GTK4" ] : []
+
 source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_binary_messenger_private.h",
@@ -104,7 +108,7 @@ source_set("flutter_linux_sources") {
              "key_mapping.h",
            ]
 
-  configs += [ "//flutter/shell/platform/linux/config:gtk" ]
+  configs += [ _gtk_config ]
 
   public_configs = [ ":disable_warnings" ]
 
@@ -179,7 +183,7 @@ source_set("flutter_linux_sources") {
   defines = [
     "FLUTTER_LINUX_COMPILATION",
     "FLUTTER_ENGINE_NO_PROTOTYPES",
-  ]
+  ] + _gtk_defines
 
   deps = [
     "$dart_src/runtime:dart_api",
@@ -195,7 +199,7 @@ source_set("flutter_linux_sources") {
 
 source_set("flutter_linux") {
   configs += [
-    "//flutter/shell/platform/linux/config:gtk",
+    _gtk_config,
     "//flutter/shell/platform/linux/config:epoxy",
   ]
 
@@ -284,7 +288,7 @@ executable("flutter_linux_unittests") {
   public_configs = [ "//flutter:config" ]
 
   configs += [
-    "//flutter/shell/platform/linux/config:gtk",
+    _gtk_config,
     "//flutter/shell/platform/linux/config:epoxy",
   ]
 
