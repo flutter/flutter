@@ -70,8 +70,13 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
   self->keycode = keycode;
   self->keyval = keyval;
   self->state = state;
+#if FLUTTER_LINUX_GTK4
+  self->group = 0;
+  self->origin = gdk_event_ref(event);
+#else
   self->group = event->key.group;
-  self->origin = event;
+  self->origin = gdk_event_copy(event);
+#endif
 
   return self;
 }
@@ -114,7 +119,11 @@ GdkEvent* fl_key_event_get_origin(FlKeyEvent* self) {
 static void fl_key_event_dispose(GObject* object) {
   FlKeyEvent* self = FL_KEY_EVENT(object);
 
+#if FLUTTER_LINUX_GTK4
+  g_clear_pointer(&self->origin, gdk_event_unref);
+#else
   g_clear_pointer(&self->origin, gdk_event_free);
+#endif
 
   G_OBJECT_CLASS(fl_key_event_parent_class)->dispose(object);
 }

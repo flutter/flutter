@@ -185,9 +185,9 @@ source_set("flutter_linux_sources") {
 
   # Set flag to stop headers being directly included (library users should not do this)
   defines = [
-    "FLUTTER_LINUX_COMPILATION",
-    "FLUTTER_ENGINE_NO_PROTOTYPES",
-  ] + _gtk_defines
+              "FLUTTER_LINUX_COMPILATION",
+              "FLUTTER_ENGINE_NO_PROTOTYPES",
+            ] + _gtk_defines
 
   deps = [
     "$dart_src/runtime:dart_api",
@@ -291,31 +291,31 @@ if (!use_gtk4) {
     "testing/mock_texture_registrar.cc",
   ]
 
-  public_configs = [ "//flutter:config" ]
+    public_configs = [ "//flutter:config" ]
 
-  configs += [
-    _gtk_config,
-    "//flutter/shell/platform/linux/config:epoxy",
-  ]
+    configs += [
+      _gtk_config,
+      "//flutter/shell/platform/linux/config:epoxy",
+    ]
 
-  defines = [
-    "FLUTTER_ENGINE_NO_PROTOTYPES",
+    defines = [
+      "FLUTTER_ENGINE_NO_PROTOTYPES",
 
-    # Set flag to allow public headers to be directly included
-    # (library users should not do this)
-    "FLUTTER_LINUX_COMPILATION",
-  ]
+      # Set flag to allow public headers to be directly included
+      # (library users should not do this)
+      "FLUTTER_LINUX_COMPILATION",
+    ]
 
-  deps = [
-    ":flutter_linux_fixtures",
-    ":flutter_linux_gschemas",
-    ":flutter_linux_sources",
-    "//flutter/runtime:libdart",
-    "//flutter/shell/platform/common:common_cpp_enums",
-    "//flutter/shell/platform/embedder:embedder_headers",
-    "//flutter/shell/platform/embedder:embedder_test_utils",
-    "//flutter/testing",
-  ]
+    deps = [
+      ":flutter_linux_fixtures",
+      ":flutter_linux_gschemas",
+      ":flutter_linux_sources",
+      "//flutter/runtime:libdart",
+      "//flutter/shell/platform/common:common_cpp_enums",
+      "//flutter/shell/platform/embedder:embedder_headers",
+      "//flutter/shell/platform/embedder:embedder_test_utils",
+      "//flutter/testing",
+    ]
   }
 }
 
