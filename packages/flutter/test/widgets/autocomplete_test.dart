@@ -3720,22 +3720,17 @@ void main() {
     await tester.pump();
 
     final double initialSize = tester.getSize(find.byType(Placeholder)).height;
-
     tester.view.padding = const FakeViewPadding(bottom: padding);
     await tester.pump();
 
-    expect(tester.view.padding.bottom, padding);
-
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'ab');
-    await tester.pump();
-
     // The options view has shrunk to the available height.
+    expect(tester.view.padding.bottom, padding);
     expect(tester.getSize(find.byType(Placeholder)).height, closeTo(initialSize - padding, 0.1));
 
     tester.view.viewInsets = const FakeViewPadding(bottom: bottomInsets);
     await tester.pump();
 
+    // The options view has shrunk to the available height.
     expect(tester.view.padding.bottom, padding);
     expect(tester.view.viewInsets.bottom, bottomInsets);
 
@@ -3797,12 +3792,7 @@ void main() {
     await tester.pump();
 
     final double initialSize = tester.getSize(find.byType(Placeholder)).height;
-
     tester.view.padding = const FakeViewPadding(top: padding);
-    await tester.pump();
-
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'ab');
     await tester.pump();
 
     // The options view has shrunk to the available height.
