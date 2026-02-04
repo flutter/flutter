@@ -18,7 +18,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
 import 'arc.dart';
 import 'button_style.dart';
@@ -271,7 +271,6 @@ class MaterialApp extends StatefulWidget {
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
-    this.useWindowing = false,
   }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
@@ -323,7 +322,6 @@ class MaterialApp extends StatefulWidget {
     )
     this.useInheritedMediaQuery = false,
     this.themeAnimationStyle,
-    this.useWindowing = false,
   }) : assert(routerDelegate != null || routerConfig != null),
        navigatorObservers = null,
        navigatorKey = null,
@@ -773,20 +771,6 @@ class MaterialApp extends StatefulWidget {
   ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
-  /// When `true`, this flag configures the application to create true windows
-  /// where applicable, such as when opening a dialog or popup.
-  ///
-  /// If windowing is unavailable on the current platform, this flag has no
-  /// effect.
-  ///
-  /// See also:
-  ///
-  /// * [WindowingOwner], which manages windows.
-  ///
-  /// {@macro flutter.widgets.windowing.experimental}
-  @internal
-  final bool useWindowing;
-
   /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
   @Deprecated(
     'This setting is now ignored. '
@@ -1179,7 +1163,7 @@ class _MaterialAppState extends State<MaterialApp> {
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: MaterialWindowingManager(
-        enableWindowing: widget.useWindowing,
+        enableWindowing: isWindowingEnabled,
         child: HeroControllerScope(controller: _heroController, child: result),
       ),
     );
