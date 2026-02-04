@@ -3697,26 +3697,24 @@ class _MenuPanelState extends State<_MenuPanel> {
       null => false,
     };
 
-    Widget menuPanel = Padding(
-      padding: resolvedPadding,
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(
-          context,
-        ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
-        child: PrimaryScrollController(
-          controller: scrollController,
-          child: Scrollbar(
-            thumbVisibility: displayScrollbar,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              scrollDirection: widget.orientation,
-              child: Flex(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: Directionality.of(context),
-                direction: widget.orientation,
-                mainAxisSize: MainAxisSize.min,
-                children: children,
-              ),
+    Widget menuPanel = ScrollConfiguration(
+      behavior: ScrollConfiguration.of(
+        context,
+      ).copyWith(scrollbars: false, overscroll: false, physics: const ClampingScrollPhysics()),
+      child: PrimaryScrollController(
+        controller: scrollController,
+        child: Scrollbar(
+          thumbVisibility: displayScrollbar,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: widget.orientation,
+            padding: resolvedPadding,
+            child: Flex(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              textDirection: Directionality.of(context),
+              direction: widget.orientation,
+              mainAxisSize: MainAxisSize.min,
+              children: children,
             ),
           ),
         ),
