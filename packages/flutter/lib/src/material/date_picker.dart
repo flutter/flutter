@@ -2974,7 +2974,8 @@ class _DayItemState extends State<_DayItem> {
       dayWidget = InkResponse(
         focusNode: widget.focusNode,
         onTap: () => widget.onChanged(widget.day),
-        radius: _monthItemRowHeight / 2 + 4,
+        customBorder: dayShape,
+        containedInkWell: true,
         statesController: _statesController,
         overlayColor: dayOverlayColor,
         onFocusChange: widget.onFocusChange,
