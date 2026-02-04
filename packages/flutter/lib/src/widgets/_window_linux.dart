@@ -442,14 +442,15 @@ class _FlWindowMonitor extends _GObject {
     void Function()? onClose,
     void Function()? onDestroy,
   }) {
+    void noop() {}
     return _FlWindowMonitor._internal(
       window.instance,
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? () {}),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? () {}),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify ?? () {}),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify ?? () {}),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose ?? () {}),
-      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy ?? () {}),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose ?? noop),
+      ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy ?? noop),
     );
   }
 
