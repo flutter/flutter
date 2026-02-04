@@ -135,6 +135,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
     this.excludeBottomFocus = true,
+    this.onEnd,
   });
 
   /// The child that is visible when [crossFadeState] is
@@ -211,6 +212,12 @@ class AnimatedCrossFade extends StatefulWidget {
   /// cross-fade animation.
   final bool excludeBottomFocus;
 
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback? onEnd;
+
   /// The default layout algorithm used by [AnimatedCrossFade].
   ///
   /// The top child is placed in a stack that sizes itself to match the top
@@ -284,6 +291,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
       });
+      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+        widget.onEnd?.call();
+      }
     });
   }
 

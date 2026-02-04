@@ -106,6 +106,7 @@ bool CompilerTestBase::CanCompileAndReflect(
       entry_point_name);
 
   Reflector::Options reflector_options;
+  reflector_options.target_platform = GetParam();
   reflector_options.header_file_name = ReflectionHeaderName(fixture_name);
   reflector_options.shader_name = "shader_name";
 
