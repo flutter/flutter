@@ -699,10 +699,8 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
-    if (webMode && (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false)) {
-      final bool webEnableHotReload =
-          argParser.options.containsKey(FlutterOptions.kWebExperimentalHotReload) &&
-          boolArg(FlutterOptions.kWebExperimentalHotReload);
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
       if (webEnableHotReload) {
         globals.printWarning(
           'Hot reload on the web is now enabled by default. '

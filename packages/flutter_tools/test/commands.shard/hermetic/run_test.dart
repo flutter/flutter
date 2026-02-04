@@ -1647,12 +1647,9 @@ server:
     setUp(() {
       logger = BufferLogger.test();
 
-      final fakeDevice = FakeDevice(
-        id: 'chrome',
-        name: 'Chrome',
-        targetPlatform: TargetPlatform.web_javascript,
-      );
+      final fakeDevice = FakeDevice();
       testDeviceManager = TestDeviceManager(logger: logger)..devices = <Device>[fakeDevice];
+      testDeviceManager.specifiedDeviceId = fakeDevice.id;
 
       fileSystem = MemoryFileSystem.test();
       fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
@@ -1668,7 +1665,7 @@ server:
         final CommandRunner<void> runner = createTestCommandRunner(
           TestRunCommandThatOnlyValidates(),
         );
-        await runner.run(<String>['run', '-d', 'chrome']);
+        await runner.run(<String>['run']);
         expect(testLogger.warningText, isEmpty);
       },
       overrides: <Type, Generator>{
@@ -1686,7 +1683,7 @@ server:
         final CommandRunner<void> runner = createTestCommandRunner(
           TestRunCommandThatOnlyValidates(),
         );
-        await runner.run(<String>['run', '-d', 'chrome', '--web-experimental-hot-reload']);
+        await runner.run(<String>['run', '--web-experimental-hot-reload']);
         expect(
           testLogger.warningText,
           contains(
@@ -1711,7 +1708,7 @@ server:
         final CommandRunner<void> runner = createTestCommandRunner(
           TestRunCommandThatOnlyValidates(),
         );
-        await runner.run(<String>['run', '-d', 'chrome', '--no-web-experimental-hot-reload']);
+        await runner.run(<String>['run', '--no-web-experimental-hot-reload']);
 
         expect(
           testLogger.warningText,
@@ -1750,8 +1747,6 @@ class TestDeviceManager extends DeviceManager {
 
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    this.id = 'fake_device',
-    this.name = 'FakeDevice',
     bool isLocalEmulator = false,
     TargetPlatform targetPlatform = TargetPlatform.ios,
     String sdkNameAndVersion = '',
@@ -1778,7 +1773,7 @@ class FakeDevice extends Fake implements Device {
   Category get category => Category.mobile;
 
   @override
-  final String id;
+  String get id => 'fake_device';
 
   Never _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
 
@@ -1830,7 +1825,7 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  final String name;
+  String get name => 'FakeDevice';
 
   @override
   String get displayName => name;
