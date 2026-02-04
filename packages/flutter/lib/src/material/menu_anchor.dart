@@ -3857,27 +3857,16 @@ class _Submenu extends StatelessWidget {
       );
 
       // Expand anchorRect for submenus to include parent's padding.
-      // Parent is a vertical menu (dropdown), so always use MenuTheme.
       if (anchor._parent?._orientation == Axis.vertical) {
+        // Resolve parent's padding using the same cascade: widget style -> theme -> defaults.
         final (MenuStyle? parentThemeStyle, MenuStyle parentDefaultStyle) = (
           MenuTheme.of(context).style,
           _MenuDefaultsM3(context),
         );
-        final MenuStyle? parentMenuStyle = anchor._parent!.widget.style;
-        T? parentEffectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
-          return getProperty(parentMenuStyle) ??
-              getProperty(parentThemeStyle) ??
-              getProperty(parentDefaultStyle);
-        }
-
-        T? parentResolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
-          return parentEffectiveValue((MenuStyle? style) {
-            return getProperty(style)?.resolve(<WidgetState>{});
-          });
-        }
-
         final EdgeInsetsGeometry parentPadding =
-            parentResolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ??
+            anchor._parent!.widget.style?.padding?.resolve(<WidgetState>{}) ??
+            parentThemeStyle?.padding?.resolve(<WidgetState>{}) ??
+            parentDefaultStyle.padding?.resolve(<WidgetState>{}) ??
             EdgeInsets.zero;
         final EdgeInsets resolvedParentPadding = parentPadding
             .add(EdgeInsets.fromLTRB(dx, 0, dx, 0))
