@@ -2110,6 +2110,47 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true)},
   );
 
+  testUsingContext(
+    'can re-gen plugin preserving existing CocoaPods structure',
+    () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios'],
+        <String>[
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+          'ios/flutter_project.podspec',
+        ],
+      );
+
+      final Directory iosDir = projectDir.childDirectory('ios');
+      final Directory sourcesDir = iosDir
+          .childDirectory('flutter_project')
+          .childDirectory('Sources')
+          .childDirectory('flutter_project');
+      final File swiftFile = sourcesDir.childFile('FlutterProjectPlugin.swift');
+      final String swiftContent = swiftFile.readAsStringSync();
+
+      final Directory classesDir = iosDir.childDirectory('Classes');
+      classesDir.createSync(recursive: true);
+      classesDir.childFile('FlutterProjectPlugin.swift').writeAsStringSync(swiftContent);
+
+      // Delete SwiftPM structure and re-generate the plugin. It should preserve CocoaPods structure..
+      iosDir.childDirectory('flutter_project').deleteSync(recursive: true);
+
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '--platforms', 'ios'],
+        <String>['ios/Classes/FlutterProjectPlugin.swift', 'ios/flutter_project.podspec'],
+        unexpectedPaths: <String>[
+          'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+          'ios/flutter_project/Package.swift',
+        ],
+      );
+    },
+    overrides: {FeatureFlags: () => TestFeatureFlags()},
+  );
+
   testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
     await _createProject(projectDir, <String>[
       '--no-pub',

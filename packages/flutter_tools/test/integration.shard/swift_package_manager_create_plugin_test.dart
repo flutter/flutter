@@ -40,11 +40,6 @@ void main() {
               .childDirectory('Runner.xcodeproj')
               .childFile('project.pbxproj');
           expect(pbxprojFile.existsSync(), isTrue);
-          // New plugins always use SwiftPM structure, so the example app has SwiftPM integration
-          // in the Xcode project. At runtime, flutter build handles the fallback to CocoaPods.
-          expect(
-            pbxprojFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage'),
-            isTrue,
           String pbxprojFileContents = pbxprojFile.readAsStringSync();
           expect(pbxprojFileContents.contains('FlutterGeneratedPluginSwiftPackage'), isFalse);
           expect(
@@ -68,7 +63,7 @@ void main() {
           expect(xcschemeFile.existsSync(), isTrue);
           expect(
             xcschemeFile.readAsStringSync().contains('Run Prepare Flutter Framework Script'),
-            isTrue,
+            isFalse,
           );
 
           final File podspec = fileSystem
@@ -103,47 +98,6 @@ void main() {
             flutterBin,
             workingDirectoryPath,
           );
-
-          // Convert CocoaPod plugin to support SwiftPM
-          fileSystem
-              .directory(createdCocoaPodsPlugin.pluginPath)
-              .childDirectory(platformName)
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childFile('Package.swift')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-// swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
-import PackageDescription
-let package = Package(
-    name: "${createdCocoaPodsPlugin.pluginName}",
-    products: [
-        .library(name: "${createdCocoaPodsPlugin.pluginName.replaceAll('_', '-')}", targets: ["${createdCocoaPodsPlugin.pluginName}"])
-    ],
-    targets: [
-        .target(
-            name: "${createdCocoaPodsPlugin.pluginName}"
-        )
-    ]
-)
-''');
-          fileSystem
-              .directory(createdCocoaPodsPlugin.pluginPath)
-              .childDirectory(platformName)
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childDirectory('Sources')
-              .childDirectory(createdCocoaPodsPlugin.pluginName)
-              .childFile('${createdCocoaPodsPlugin.className}.swift')
-            ..createSync(recursive: true)
-            ..writeAsStringSync(
-              fileSystem
-                  .directory(createdCocoaPodsPlugin.pluginPath)
-                  .childDirectory(platformName)
-                  .childDirectory('Classes')
-                  .childFile('${createdCocoaPodsPlugin.className}.swift')
-                  .readAsStringSync(),
-            );
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
