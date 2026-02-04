@@ -3440,15 +3440,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       y = desiredPosition.dy;
       // For submenus: shift left when RTL XOR *Start alignment.
       // RTL+End → left, RTL+Start → right, LTR+End → right, LTR+Start → left.
-      final isRtl = textDirection == TextDirection.rtl;
+      final bool isRtl = textDirection == TextDirection.rtl;
       final bool isStartAligned =
           parentOrientation == Axis.vertical &&
           switch (alignment) {
-            final AlignmentDirectional a => a.start < 0,
-            final Alignment a => a.x < 0,
+            AlignmentDirectional a => a.start < 0,
+            Alignment a => a.x < 0,
             _ => false,
           };
-      final shiftLeft = isRtl != isStartAligned;
+      final bool shiftLeft = isRtl != isStartAligned;
       if (shiftLeft) {
         x -= childSize.width;
       }
@@ -3831,12 +3831,7 @@ class _Submenu extends StatelessWidget {
     final VisualDensity visualDensity =
         effectiveValue((MenuStyle? style) => style?.visualDensity) ??
         Theme.of(context).visualDensity;
-    // Alignment is determined by menu type, not by MenuStyle.alignment (which is deprecated).
-    // MenuBar menus open below the button, submenus open to the side.
-    final AlignmentGeometry alignment = switch (anchor._parent?._orientation) {
-      Axis.horizontal || null => AlignmentDirectional.bottomStart,
-      Axis.vertical => AlignmentDirectional.topEnd,
-    };
+    final AlignmentGeometry alignment = effectiveValue((MenuStyle? style) => style?.alignment)!;
     final EdgeInsetsGeometry padding =
         resolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ?? EdgeInsets.zero;
     final Offset densityAdjustment = visualDensity.baseSizeAdjustment;
@@ -3854,7 +3849,7 @@ class _Submenu extends StatelessWidget {
     // outside the parent menu's visual bounds, not just outside the button.
     final Rect anchorRect;
     if (layerLink == null) {
-      var baseRect = Rect.fromLTRB(
+      Rect baseRect = Rect.fromLTRB(
         menuPosition.anchorRect.left + dx,
         menuPosition.anchorRect.top,
         menuPosition.anchorRect.right,
@@ -3862,19 +3857,27 @@ class _Submenu extends StatelessWidget {
       );
 
       // Expand anchorRect for submenus to include parent's padding.
+      // Parent is a vertical menu (dropdown), so always use MenuTheme.
       if (anchor._parent?._orientation == Axis.vertical) {
-        // Resolve parent's padding using the same cascade: widget style -> theme -> defaults.
-        final (
-          MenuStyle? parentThemeStyle,
-          MenuStyle parentDefaultStyle,
-        ) = switch (anchor._parent!._parent?._orientation) {
-          Axis.horizontal || null => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
-          Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
-        };
+        final (MenuStyle? parentThemeStyle, MenuStyle parentDefaultStyle) = (
+          MenuTheme.of(context).style,
+          _MenuDefaultsM3(context),
+        );
+        final MenuStyle? parentMenuStyle = anchor._parent!.widget.style;
+        T? parentEffectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
+          return getProperty(parentMenuStyle) ??
+              getProperty(parentThemeStyle) ??
+              getProperty(parentDefaultStyle);
+        }
+
+        T? parentResolve<T>(WidgetStateProperty<T>? Function(MenuStyle? style) getProperty) {
+          return parentEffectiveValue((MenuStyle? style) {
+            return getProperty(style)?.resolve(<WidgetState>{});
+          });
+        }
+
         final EdgeInsetsGeometry parentPadding =
-            anchor._parent!.widget.style?.padding?.resolve(<WidgetState>{}) ??
-            parentThemeStyle?.padding?.resolve(<WidgetState>{}) ??
-            parentDefaultStyle.padding?.resolve(<WidgetState>{}) ??
+            parentResolve<EdgeInsetsGeometry?>((MenuStyle? style) => style?.padding) ??
             EdgeInsets.zero;
         final EdgeInsets resolvedParentPadding = parentPadding
             .add(EdgeInsets.fromLTRB(dx, 0, dx, 0))
@@ -4055,6 +4058,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
     : super(
       elevation: const MaterialStatePropertyAll<double?>(3.0),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.bottomStart,
     );
 
   static const RoundedRectangleBorder _defaultMenuBorder =
@@ -4259,6 +4263,7 @@ class _MenuDefaultsM3 extends MenuStyle {
     : super(
       elevation: const MaterialStatePropertyAll<double?>(3.0),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
+      alignment: AlignmentDirectional.topEnd,
     );
 
   static const RoundedRectangleBorder _defaultMenuBorder =

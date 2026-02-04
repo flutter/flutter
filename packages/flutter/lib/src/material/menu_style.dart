@@ -117,7 +117,6 @@ class MenuStyle with Diagnosticable {
     this.shape,
     this.mouseCursor,
     this.visualDensity,
-    @Deprecated('This property is ignored. Menu alignment is determined automatically. ')
     this.alignment,
   });
 
@@ -195,11 +194,12 @@ class MenuStyle with Diagnosticable {
   /// Determines the desired alignment of the submenu when opened relative to
   /// the button that opens it.
   ///
-  /// This property is deprecated and its value is ignored. Menu alignment is
-  /// determined automatically based on menu type:
-  /// * MenuBar menus use [AlignmentDirectional.bottomStart]
-  /// * Submenus use [AlignmentDirectional.topEnd]
-  @Deprecated('This property is ignored. Menu alignment is determined automatically. ')
+  /// If there isn't sufficient space to open the menu with the given alignment,
+  /// and there's space on the other side of the button, then the alignment is
+  /// swapped to it's opposite (1 becomes -1, etc.), and the menu will try to
+  /// appear on the other side of the button. If there isn't enough space there
+  /// either, then the menu will be pushed as far over as necessary to display
+  /// as much of itself as possible, possibly overlapping the parent button.
   final AlignmentGeometry? alignment;
 
   @override
