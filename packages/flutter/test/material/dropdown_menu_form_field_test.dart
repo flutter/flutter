@@ -202,6 +202,64 @@ void main() {
     expect(dropdownMenu.trailingIcon, trailingIcon);
   });
 
+  testWidgets('Passes showTrailingIcon to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.showTrailingIcon, true);
+
+    const showTrailingIcon = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            showTrailingIcon: showTrailingIcon,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.showTrailingIcon, showTrailingIcon);
+  });
+
+  testWidgets('Passes trailingIconFocusNode to underlying DropdownMenu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.trailingIconFocusNode, null);
+
+    final trailingIconFocusNode = FocusNode();
+    addTearDown(trailingIconFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            trailingIconFocusNode: trailingIconFocusNode,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.trailingIconFocusNode, trailingIconFocusNode);
+  });
+
   testWidgets('Passes label to underlying InputDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -620,6 +678,33 @@ void main() {
     expect(dropdownMenu.requestFocusOnTap, requestFocusOnTap);
   });
 
+  testWidgets('Passes selectOnly to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.selectOnly, false);
+
+    const selectOnly = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            selectOnly: selectOnly,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.selectOnly, selectOnly);
+  });
+
   testWidgets('Passes expandedInsets to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -849,6 +934,60 @@ void main() {
 
     dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.textInputAction, textInputAction);
+  });
+
+  testWidgets('Passes cursorHeight to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.cursorHeight, null);
+
+    const cursorHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            cursorHeight: cursorHeight,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.cursorHeight, cursorHeight);
+  });
+
+  testWidgets('Passes menuController to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.menuController, null);
+
+    final menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            menuController: menuController,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.menuController, menuController);
   });
 
   testWidgets('Passes restorationId to underlying DropdownMenu', (WidgetTester tester) async {
