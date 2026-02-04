@@ -69,7 +69,7 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* self,
 }
 
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
-                                              GdkEventScroll* scroll_event,
+                                              GdkEvent* event,
                                               gint scale_factor) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
@@ -77,8 +77,6 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
   if (engine == nullptr) {
     return;
   }
-
-  GdkEvent* event = reinterpret_cast<GdkEvent*>(scroll_event);
 
   guint event_time = gdk_event_get_time(event);
   gdouble event_x = 0.0, event_y = 0.0;

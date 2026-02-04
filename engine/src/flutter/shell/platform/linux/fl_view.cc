@@ -364,7 +364,7 @@ static gboolean scroll_event_cb(FlView* self, GdkEventScroll* event) {
   // depend on GTK 3.24.
 
   fl_scrolling_manager_handle_scroll_event(
-      self->scrolling_manager, event,
+      self->scrolling_manager, reinterpret_cast<GdkEvent*>(event),
       gtk_widget_get_scale_factor(GTK_WIDGET(self)));
   return TRUE;
 }
