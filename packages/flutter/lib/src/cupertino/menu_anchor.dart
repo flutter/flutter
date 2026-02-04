@@ -23,9 +23,6 @@ import 'theme.dart';
 
 // Dismiss is handled by RawMenuAnchor
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
-  SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
-  SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-  SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.arrowUp): _FocusUpIntent(),
   SingleActivator(LogicalKeyboardKey.arrowDown): _FocusDownIntent(),
   SingleActivator(LogicalKeyboardKey.home): _FocusFirstIntent(),
@@ -1035,6 +1032,15 @@ class _MenuOverlayState extends State<_MenuOverlay>
     _swipeAnimationController.value = 1 - _swipeCurrentDistance / maxSwipeDistance;
   }
 
+  Widget _buildAlign(BuildContext context, Widget? child) {
+    return Align(
+      heightFactor: _sizeAnimation.value,
+      widthFactor: 1.0,
+      alignment: Alignment.topCenter,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final BoxConstraints constraints;
@@ -1082,6 +1088,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
                   child: CupertinoPopupSurface(
                     child: AnimatedBuilder(
                       animation: _sizeAnimation,
+                      builder: _buildAlign,
                       child: Semantics(
                         explicitChildNodes: true,
                         scopesRoute: true,
@@ -1089,19 +1096,10 @@ class _MenuOverlayState extends State<_MenuOverlay>
                           constraints: constraints,
                           child: SingleChildScrollView(
                             clipBehavior: Clip.none,
-                            primary: true,
                             child: Column(mainAxisSize: MainAxisSize.min, children: _children),
                           ),
                         ),
                       ),
-                      builder: (BuildContext context, Widget? child) {
-                        return Align(
-                          heightFactor: _sizeAnimation.value,
-                          widthFactor: 1.0,
-                          alignment: Alignment.topCenter,
-                          child: child,
-                        );
-                      },
                     ),
                   ),
                 ),
@@ -2369,7 +2367,7 @@ class _CupertinoMenuItemInteractionHandler extends StatefulWidget {
 
 class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItemInteractionHandler>
     implements _SwipeTarget {
-  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+  late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleActivation),
     ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: _handleActivation),
   };
@@ -2620,7 +2618,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
         child: MetaData(
           metaData: this,
           child: Actions(
-            actions: isEnabled ? _actionMap : <Type, Action<Intent>>{},
+            actions: isEnabled ? _actions : <Type, Action<Intent>>{},
             child: Focus(
               autofocus: isEnabled && widget.autofocus,
               focusNode: _focusNode,

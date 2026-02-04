@@ -1624,6 +1624,12 @@ void main() {
   group('Focus', () {
     testWidgets(
       'Focus wraps when traversing with arrow keys on non-Apple platforms',
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.fuchsia,
+        TargetPlatform.linux,
+        TargetPlatform.windows,
+      }),
       (WidgetTester tester) async {
         final anchorFocusNode = FocusNode();
         final firstItemFocusNode = FocusNode();
@@ -1667,16 +1673,16 @@ void main() {
 
         expect(FocusManager.instance.primaryFocus, firstItemFocusNode);
       },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.android,
-        TargetPlatform.fuchsia,
-        TargetPlatform.linux,
-        TargetPlatform.windows,
-      }),
     );
 
     testWidgets(
-      'Focus does not wrap when traversing with arrow keys on Apple platforms',
+      'Focus wraps when traversing with arrow keys on web',
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+      skip:
+          !kIsWeb, // [intended] Web wraps focus regardless of platform. Observed on Apple Podcasts on Chromium.
       (WidgetTester tester) async {
         final anchorFocusNode = FocusNode();
         final firstItemFocusNode = FocusNode();
@@ -1708,6 +1714,58 @@ void main() {
 
         expect(FocusManager.instance.primaryFocus, firstItemFocusNode);
 
+        // Arrow up from first item should wrap to last item
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+
+        expect(FocusManager.instance.primaryFocus, lastItemFocusNode);
+
+        // Arrow down from last item should wrap to first item
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+
+        expect(FocusManager.instance.primaryFocus, firstItemFocusNode);
+      },
+    );
+
+    testWidgets(
+      'Focus does not wrap when traversing with arrow keys on Apple platforms',
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+      skip:
+          kIsWeb, // [intended] Web wraps focus regardless of platform. Observed on Apple Podcasts on Chromium.
+      (WidgetTester tester) async {
+        final anchorFocusNode = FocusNode();
+        final firstItemFocusNode = FocusNode();
+        final lastItemFocusNode = FocusNode();
+        addTearDown(anchorFocusNode.dispose);
+        addTearDown(firstItemFocusNode.dispose);
+        addTearDown(lastItemFocusNode.dispose);
+
+        await tester.pumpWidget(
+          App(
+            CupertinoMenuAnchor(
+              menuChildren: <Widget>[
+                MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
+                MenuItem.tag(Tag.b),
+                MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+              ],
+              child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text(Tag.anchor.text));
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        firstItemFocusNode.requestFocus();
+        await tester.pump();
+
+        expect(FocusManager.instance.primaryFocus, firstItemFocusNode);
+
         // Arrow up from first item should not move focus on Apple platforms
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
@@ -1723,10 +1781,6 @@ void main() {
 
         expect(FocusManager.instance.primaryFocus, lastItemFocusNode);
       },
-      variant: const TargetPlatformVariant(<TargetPlatform>{
-        TargetPlatform.iOS,
-        TargetPlatform.macOS,
-      }),
     );
 
     testWidgets('Menu items can be activated with enter key', (WidgetTester tester) async {
@@ -6272,7 +6326,6 @@ void main() {
       skip: !kIsWeb,
       (WidgetTester tester) async {
         final semantics = SemanticsTester(tester);
-        addTearDown(semantics.dispose);
         await tester.pumpWidget(
           App(
             CupertinoMenuAnchor(
@@ -6370,6 +6423,7 @@ void main() {
             ),
           ),
         );
+        semantics.dispose();
       },
     );
   });
