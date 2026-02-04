@@ -398,6 +398,36 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   @override
+  ui.UniformMat2Slot getUniformMat2(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ui.UniformMat3Slot getUniformMat3(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ui.UniformMat4Slot getUniformMat4(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) {
+    throw UnimplementedError();
+  }
+
+  @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
   }
