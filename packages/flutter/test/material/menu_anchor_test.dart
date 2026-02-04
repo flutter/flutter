@@ -3990,16 +3990,16 @@ void main() {
           home: Material(
             child: Center(
               child: MenuAnchor(
-                menuChildren: <Widget>[
-                  const MenuItemButton(child: Text('Item 1')),
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
-                    menuChildren: const <Widget>[
+                    menuChildren: <Widget>[
                       MenuItemButton(child: Text('Sub Item 1')),
                       MenuItemButton(child: Text('Sub Item 2')),
                     ],
-                    child: const Text('Submenu'),
+                    child: Text('Submenu'),
                   ),
-                  const MenuItemButton(child: Text('Item 2')),
+                  MenuItemButton(child: Text('Item 2')),
                 ],
                 builder: (BuildContext context, MenuController controller, Widget? child) {
                   return FilledButton(
@@ -4060,10 +4060,10 @@ void main() {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 50),
                 child: MenuAnchor(
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuChildren: const <Widget>[
+                      menuChildren: <Widget>[
                         MenuItemButton(child: Text('Sub Item 1')),
                         MenuItemButton(child: Text('Sub Item 2')),
                         MenuItemButton(child: Text('Sub Item 3')),
@@ -4071,9 +4071,9 @@ void main() {
                         MenuItemButton(child: Text('Sub Item 5')),
                         MenuItemButton(child: Text('Sub Item 6')),
                       ],
-                      child: const Text('Submenu'),
+                      child: Text('Submenu'),
                     ),
-                    const MenuItemButton(child: Text('Item 2')),
+                    MenuItemButton(child: Text('Item 2')),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
                     return FilledButton(
@@ -4143,16 +4143,16 @@ void main() {
             child: Material(
               child: Center(
                 child: MenuAnchor(
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuChildren: const <Widget>[
+                      menuChildren: <Widget>[
                         MenuItemButton(child: Text('Sub Item 1')),
                         MenuItemButton(child: Text('Sub Item 2')),
                       ],
-                      child: const Text('Submenu'),
+                      child: Text('Submenu'),
                     ),
-                    const MenuItemButton(child: Text('Item 2')),
+                    MenuItemButton(child: Text('Item 2')),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
                     return FilledButton(
@@ -4206,7 +4206,7 @@ void main() {
     ) async {
       // Position menu on the right side so submenu flips to the left
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double menuPadding = 16.0;
+      const menuPadding = 16.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -4216,19 +4216,19 @@ void main() {
               child: Padding(
                 padding: const EdgeInsets.only(right: 50),
                 child: MenuAnchor(
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuStyle: const MenuStyle(
+                      menuStyle: MenuStyle(
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(menuPadding)),
                       ),
-                      menuChildren: const <Widget>[
+                      menuChildren: <Widget>[
                         MenuItemButton(child: Text('Sub Item 1')),
                         MenuItemButton(child: Text('Sub Item 2')),
                       ],
-                      child: const Text('Submenu'),
+                      child: Text('Submenu'),
                     ),
-                    const MenuItemButton(child: Text('Item 2')),
+                    MenuItemButton(child: Text('Item 2')),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
                     return FilledButton(
@@ -4284,7 +4284,7 @@ void main() {
       // Position menu on the left side with topStart so it tries to open left,
       // then flips to the right
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double menuPadding = 16.0;
+      const menuPadding = 16.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -4294,19 +4294,19 @@ void main() {
               child: Padding(
                 padding: const EdgeInsets.only(left: 50),
                 child: MenuAnchor(
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuStyle: const MenuStyle(
+                      menuStyle: MenuStyle(
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(menuPadding)),
                       ),
-                      menuChildren: const <Widget>[
+                      menuChildren: <Widget>[
                         MenuItemButton(child: Text('Sub Item 1')),
                         MenuItemButton(child: Text('Sub Item 2')),
                       ],
-                      child: const Text('Submenu'),
+                      child: Text('Submenu'),
                     ),
-                    const MenuItemButton(child: Text('Item 2')),
+                    MenuItemButton(child: Text('Item 2')),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
                     return FilledButton(
@@ -4361,8 +4361,8 @@ void main() {
     ) async {
       // Test that submenu position accounts for parent's padding, not its own
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double parentPadding = 24.0;
-      const double submenuPadding = 8.0;
+      const parentPadding = 24.0;
+      const submenuPadding = 8.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -4372,19 +4372,19 @@ void main() {
                 style: const MenuStyle(
                   padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(parentPadding)),
                 ),
-                menuChildren: <Widget>[
-                  const MenuItemButton(child: Text('Item 1')),
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
-                    menuStyle: const MenuStyle(
+                    menuStyle: MenuStyle(
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
                     ),
-                    menuChildren: const <Widget>[
+                    menuChildren: <Widget>[
                       MenuItemButton(child: Text('Sub Item 1')),
                       MenuItemButton(child: Text('Sub Item 2')),
                     ],
-                    child: const Text('Submenu'),
+                    child: Text('Submenu'),
                   ),
-                  const MenuItemButton(child: Text('Item 2')),
+                  MenuItemButton(child: Text('Item 2')),
                 ],
                 builder: (BuildContext context, MenuController controller, Widget? child) {
                   return FilledButton(
@@ -4447,8 +4447,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double parentLeftPadding = 8.0;
-      const double parentRightPadding = 24.0;
+      const parentLeftPadding = 8.0;
+      const parentRightPadding = 24.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -4465,14 +4465,14 @@ void main() {
                     ),
                   ),
                 ),
-                menuChildren: <Widget>[
-                  const MenuItemButton(child: Text('Item 1')),
+                menuChildren: const <Widget>[
+                  MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
-                    menuStyle: const MenuStyle(
+                    menuStyle: MenuStyle(
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
                     ),
-                    menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
-                    child: const Text('Submenu'),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
                   ),
                 ],
                 builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -4512,8 +4512,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double parentLeftPadding = 24.0;
-      const double parentRightPadding = 8.0;
+      const parentLeftPadding = 24.0;
+      const parentRightPadding = 8.0;
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
@@ -4532,14 +4532,14 @@ void main() {
                       ),
                     ),
                   ),
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuStyle: const MenuStyle(
+                      menuStyle: MenuStyle(
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
                       ),
-                      menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
-                      child: const Text('Submenu'),
+                      menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                      child: Text('Submenu'),
                     ),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -4589,13 +4589,13 @@ void main() {
                 style: const MenuStyle(
                   padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.zero),
                 ),
-                menuChildren: <Widget>[
+                menuChildren: const <Widget>[
                   SubmenuButton(
-                    menuStyle: const MenuStyle(
+                    menuStyle: MenuStyle(
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(16)),
                     ),
-                    menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
-                    child: const Text('Submenu'),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
                   ),
                 ],
                 builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -4634,9 +4634,9 @@ void main() {
 
     testWidgets('deeply nested submenus respect each parent padding', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(1200, 600));
-      const double level1Padding = 20.0;
-      const double level2Padding = 12.0;
-      const double level3Padding = 8.0;
+      const level1Padding = 20.0;
+      const level2Padding = 12.0;
+      const level3Padding = 8.0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -4650,23 +4650,23 @@ void main() {
                   style: const MenuStyle(
                     padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(level1Padding)),
                   ),
-                  menuChildren: <Widget>[
+                  menuChildren: const <Widget>[
                     SubmenuButton(
-                      menuStyle: const MenuStyle(
+                      menuStyle: MenuStyle(
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(level2Padding)),
                       ),
                       menuChildren: <Widget>[
                         SubmenuButton(
-                          menuStyle: const MenuStyle(
+                          menuStyle: MenuStyle(
                             padding: WidgetStatePropertyAll<EdgeInsets>(
                               EdgeInsets.all(level3Padding),
                             ),
                           ),
-                          menuChildren: const <Widget>[MenuItemButton(child: Text('Deep Item'))],
-                          child: const Text('Level 2'),
+                          menuChildren: <Widget>[MenuItemButton(child: Text('Deep Item'))],
+                          child: Text('Level 2'),
                         ),
                       ],
-                      child: const Text('Level 1'),
+                      child: Text('Level 1'),
                     ),
                   ],
                   builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -4725,9 +4725,9 @@ void main() {
       WidgetTester tester,
     ) async {
       await changeSurfaceSize(tester, const Size(800, 600));
-      const double parentPadding = 20.0;
-      const double submenuPadding = 8.0;
-      const double alignmentOffsetX = 10.0;
+      const parentPadding = 20.0;
+      const submenuPadding = 8.0;
+      const alignmentOffsetX = 10.0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -4738,14 +4738,14 @@ void main() {
                 style: const MenuStyle(
                   padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(parentPadding)),
                 ),
-                menuChildren: <Widget>[
+                menuChildren: const <Widget>[
                   SubmenuButton(
-                    alignmentOffset: const Offset(alignmentOffsetX, 0),
-                    menuStyle: const MenuStyle(
+                    alignmentOffset: Offset(alignmentOffsetX, 0),
+                    menuStyle: MenuStyle(
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
                     ),
-                    menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
-                    child: const Text('Submenu'),
+                    menuChildren: <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
+                    child: Text('Submenu'),
                   ),
                 ],
                 builder: (BuildContext context, MenuController controller, Widget? child) {
