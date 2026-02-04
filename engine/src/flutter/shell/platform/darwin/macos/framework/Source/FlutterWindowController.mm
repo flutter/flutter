@@ -252,16 +252,16 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 }
 
 - (FlutterViewIdentifier)createDialogWindow:(const FlutterWindowCreationRequest*)request {
-  FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
-                                                                   nibName:nil
-                                                                    bundle:nil];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
 
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
   [window setReleasedWhenClosed:NO];
 
-  window.contentViewController = c;
+  window.contentViewController = controller;
   window.styleMask =
       NSWindowStyleMaskResizable | NSWindowStyleMaskTitled | NSWindowStyleMaskClosable;
   window.collectionBehavior = NSWindowCollectionBehaviorFullScreenAuxiliary;
@@ -272,11 +272,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     [window flutterSetConstraints:request->constraints];
   }
 
-  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
-                                               flutterViewController:c
-                                                     creationRequest:*request];
-  window.delegate = w;
-  [_windows addObject:w];
+  FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
+                                                   flutterViewController:controller
+                                                         creationRequest:*request];
+  window.delegate = owner;
+  [_windows addObject:owner];
 
   NSWindow* parent = nil;
 
@@ -294,6 +294,11 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   if (parent != nil) {
     dispatch_async(dispatch_get_main_queue(), ^{
+      auto modes = CFRunLoopCopyAllModes(CFRunLoopGetCurrent());
+      for (int i = 0; i < CFArrayGetCount(modes); ++i) {
+        auto mode = CFArrayGetValueAtIndex(modes, i);
+        NSLog(@"MODE %@", mode);
+      }
       // beginCriticalSheet blocks with nested run loop until the
       // sheet animation is finished.
       [parent beginCriticalSheet:window
@@ -306,37 +311,37 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     [window makeKeyAndOrderFront:nil];
   }
 
-  return c.viewIdentifier;
+  return controller.viewIdentifier;
 }
 
 - (FlutterViewIdentifier)createTooltipWindow:(const FlutterWindowCreationRequest*)request {
-  FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
-                                                                   nibName:nil
-                                                                    bundle:nil];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
 
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
   [window setReleasedWhenClosed:NO];
 
-  window.contentViewController = c;
+  window.contentViewController = controller;
   window.styleMask = NSWindowStyleMaskBorderless;
   window.hasShadow = NO;
   window.opaque = NO;
   window.backgroundColor = [NSColor clearColor];
 
-  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
-                                               flutterViewController:c
-                                                     creationRequest:*request];
+  FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
+                                                   flutterViewController:controller
+                                                         creationRequest:*request];
 
-  c.flutterView.sizingDelegate = w;
-  [c.flutterView setBackgroundColor:[NSColor clearColor]];
+  controller.flutterView.sizingDelegate = owner;
+  controller.flutterView.backgroundColor = [NSColor clearColor];
   // Resend configure event after setting the sizing delegate.
-  [c.flutterView constraintsDidChange];
-  w.closeWhenParentResignsKey = YES;
+  [controller.flutterView constraintsDidChange];
+  owner.closeWhenParentResignsKey = YES;
 
-  window.delegate = w;
-  [_windows addObject:w];
+  window.delegate = owner;
+  [_windows addObject:owner];
 
   NSWindow* parent = nil;
 
@@ -354,21 +359,21 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.ignoresMouseEvents = YES;
   window.collectionBehavior = NSWindowCollectionBehaviorAuxiliary;
   [parent addChildWindow:window ordered:NSWindowAbove];
-  // window.alphaValue = 0.0;
-  return c.viewIdentifier;
+  window.alphaValue = 0.0;
+  return controller.viewIdentifier;
 }
 
 - (FlutterViewIdentifier)createRegularWindow:(const FlutterWindowCreationRequest*)request {
-  FlutterViewController* c = [[FlutterViewController alloc] initWithEngine:_engine
-                                                                   nibName:nil
-                                                                    bundle:nil];
+  FlutterViewController* controller = [[FlutterViewController alloc] initWithEngine:_engine
+                                                                            nibName:nil
+                                                                             bundle:nil];
 
   NSWindow* window = [[NSWindow alloc] init];
   // If this is not set there will be double free on window close when
   // using ARC.
   [window setReleasedWhenClosed:NO];
 
-  window.contentViewController = c;
+  window.contentViewController = controller;
   window.styleMask = NSWindowStyleMaskResizable | NSWindowStyleMaskTitled |
                      NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
   if (request->has_size) {
@@ -380,13 +385,13 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [window setIsVisible:YES];
   [window makeKeyAndOrderFront:nil];
 
-  FlutterWindowOwner* w = [[FlutterWindowOwner alloc] initWithWindow:window
-                                               flutterViewController:c
-                                                     creationRequest:*request];
-  window.delegate = w;
-  [_windows addObject:w];
+  FlutterWindowOwner* owner = [[FlutterWindowOwner alloc] initWithWindow:window
+                                                   flutterViewController:controller
+                                                         creationRequest:*request];
+  window.delegate = owner;
+  [_windows addObject:owner];
 
-  return c.viewIdentifier;
+  return controller.viewIdentifier;
 }
 
 - (void)destroyWindow:(NSWindow*)window {
@@ -423,10 +428,10 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [_windows removeAllObjects];
 }
 
-static BOOL IsChildParent(NSWindow* child, NSWindow* parent) {
+static BOOL IsChildAncestor(NSWindow* child, NSWindow* ancestor) {
   NSWindow* current = child.parentWindow;
   while (current) {
-    if (current == parent) {
+    if (current == ancestor) {
       return YES;
     }
     current = current.parentWindow;
@@ -438,7 +443,7 @@ static BOOL IsChildParent(NSWindow* child, NSWindow* parent) {
 - (void)windowDidResignKey:(FlutterWindowOwner*)parent {
   for (FlutterWindowOwner* possibleChild in _windows) {
     if (possibleChild.closeWhenParentResignsKey &&
-        IsChildParent(possibleChild.window, parent.window)) {
+        IsChildAncestor(possibleChild.window, parent.window)) {
       [possibleChild windowShouldClose:possibleChild.window];
     }
   }

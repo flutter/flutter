@@ -13,10 +13,6 @@ import Foundation
 /// (`pollFlutterMessagesOnce()`).
 @objc public final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
-  /// Displaying sheet animation (beginSheet) uses a private run loop mode for the animation
-  /// duration. FlutterRunLoop needs to work in this mode in order to render the window content
-  /// correctly during the sheet animation.
-  private static let moveTimerRunLoopMode = CFRunLoopMode("_NSMoveTimerRunLoopMode" as CFString)
 
   private static var _mainRunLoop: FlutterRunLoop?
 
@@ -55,7 +51,6 @@ import Foundation
     source = createdSource
     CFRunLoopAddSource(runLoop, source, .commonModes)
     CFRunLoopAddSource(runLoop, source, Self.flutterRunLoopMode)
-    CFRunLoopAddSource(runLoop, source, Self.moveTimerRunLoopMode)
 
     var timerContext = CFRunLoopTimerContext(
       version: 0,
@@ -83,18 +78,15 @@ import Foundation
     timer = createdTimer
     CFRunLoopAddTimer(runLoop, timer, .commonModes)
     CFRunLoopAddTimer(runLoop, timer, Self.flutterRunLoopMode)
-    CFRunLoopAddTimer(runLoop, timer, Self.moveTimerRunLoopMode)
   }
 
   deinit {
     CFRunLoopTimerInvalidate(timer)
     CFRunLoopRemoveTimer(runLoop, timer, .commonModes)
     CFRunLoopRemoveTimer(runLoop, timer, Self.flutterRunLoopMode)
-    CFRunLoopRemoveTimer(runLoop, timer, Self.moveTimerRunLoopMode)
     CFRunLoopSourceInvalidate(source)
     CFRunLoopRemoveSource(runLoop, source, .commonModes)
     CFRunLoopRemoveSource(runLoop, source, Self.flutterRunLoopMode)
-    CFRunLoopRemoveSource(runLoop, source, Self.moveTimerRunLoopMode)
   }
 
   // Ensures that the `FlutterRunLoop` for main thread is initialized. Only
