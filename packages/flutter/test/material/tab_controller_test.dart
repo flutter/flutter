@@ -96,6 +96,9 @@ void main() {
           length: 3,
           index: index,
           child: const TabBarView(children: <Widget>[Text('A'), Text('B'), Text('C')]),
+          onIndexChanged: (value) {
+
+          },
         ),
       );
     }
@@ -115,4 +118,119 @@ void main() {
     controller = DefaultTabController.of(tester.element(find.text('C')));
     expect(controller.index, 2);
   });
+
+
+  testWidgets('TabController calls onIndexChanged when index is set', (
+      WidgetTester tester,
+      ) async {
+    int? reportedIndex;
+
+    final TabController controller = TabController(
+      length: 3,
+      vsync: const TestVSync(),
+      onIndexChanged: (int index) {
+        reportedIndex = index;
+      },
+    );
+
+    controller.index = 2;
+
+    expect(controller.index, 2);
+    expect(reportedIndex, 2);
+
+    controller.dispose();
+  });
+  testWidgets('TabController calls onIndexChanged before animation starts', (
+      WidgetTester tester,
+      ) async {
+    bool indexChangingAtCallback = false;
+
+    late TabController controller;
+
+    controller = TabController(
+      length: 3,
+      vsync: const TestVSync(),
+      onIndexChanged: (_) {
+        indexChangingAtCallback = controller.indexIsChanging;
+      },
+    );
+
+    controller.animateTo(1);
+
+    expect(indexChangingAtCallback, false);
+    expect(controller.indexIsChanging, true);
+
+    controller.dispose();
+  });
+  testWidgets(
+    'DefaultTabController.controlled calls onIndexChanged on user interaction',
+        (WidgetTester tester) async {
+      int? reportedIndex;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultTabController.controlled(
+            length: 3,
+            index: 0,
+            onIndexChanged: (int index) {
+              reportedIndex = index;
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: const TabBar(
+                  tabs: <Widget>[
+                    Tab(text: 'A'),
+                    Tab(text: 'B'),
+                    Tab(text: 'C'),
+                  ],
+                ),
+              ),
+              body: const TabBarView(
+                children: <Widget>[Text('A'), Text('B'), Text('C')],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('C'));
+      await tester.pump();
+
+      expect(reportedIndex, 2);
+    },
+  );
+  testWidgets(
+    'DefaultTabController.controlled calls onIndexChanged when external index changes',
+        (WidgetTester tester) async {
+      final List<int> reported = <int>[];
+
+      Widget build(int index) {
+        return MaterialApp(
+          home: DefaultTabController.controlled(
+            length: 3,
+            index: index,
+            onIndexChanged: reported.add,
+            child: const TabBarView(
+              children: <Widget>[Text('A'), Text('B'), Text('C')],
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(0));
+      expect(reported, isEmpty);
+
+      await tester.pumpWidget(build(2));
+
+      // animateTo should have been triggered
+      expect(reported, <int>[2]);
+
+      await tester.pumpAndSettle();
+
+      final TabController controller =
+      DefaultTabController.of(tester.element(find.text('C')));
+
+      expect(controller.index, 2);
+    },
+  );
 }
