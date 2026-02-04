@@ -3,8 +3,13 @@
 // found in the LICENSE file.
 
 #include <epoxy/egl.h>
+#if FLUTTER_LINUX_GTK4
+#include <gdk/wayland/gdkwayland.h>
+#include <gdk/x11/gdkx.h>
+#else
 #include <gdk/gdkwayland.h>
 #include <gdk/gdkx.h>
+#endif
 
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 

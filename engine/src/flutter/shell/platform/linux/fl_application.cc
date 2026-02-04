@@ -5,8 +5,10 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_application.h"
 
 #include <gtk/gtk.h>
+#if !FLUTTER_LINUX_GTK4
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 #endif
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -34,7 +36,11 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
 
 // Called when the first frame is received.
 static void first_frame_cb(FlApplication* self, FlView* view) {
+#if FLUTTER_LINUX_GTK4
+  GtkWidget* window = gtk_widget_get_root(GTK_WIDGET(view));
+#else
   GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
+#endif
 
   // Show the main window.
   if (window != nullptr && GTK_IS_WINDOW(window)) {
@@ -61,6 +67,7 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
   // if future cases occur).
   gboolean use_header_bar = TRUE;
 #ifdef GDK_WINDOWING_X11
+#if !FLUTTER_LINUX_GTK4
   GdkScreen* screen = gtk_window_get_screen(GTK_WINDOW(window));
   if (GDK_IS_X11_SCREEN(screen)) {
     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
@@ -68,6 +75,7 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
       use_header_bar = FALSE;
     }
   }
+#endif
 #endif
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());

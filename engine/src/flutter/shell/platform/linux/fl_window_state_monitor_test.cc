@@ -10,6 +10,7 @@
 
 #include "gtest/gtest.h"
 
+#if !FLUTTER_LINUX_GTK4
 TEST(FlWindowStateMonitorTest, GainFocus) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
@@ -44,7 +45,6 @@ TEST(FlWindowStateMonitorTest, GainFocus) {
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
-
 TEST(FlWindowStateMonitorTest, LoseFocus) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
@@ -287,3 +287,5 @@ TEST(FlWindowStateMonitorTest, LeaveWithdrawnFocused) {
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
+
+#endif  // !FLUTTER_LINUX_GTK4

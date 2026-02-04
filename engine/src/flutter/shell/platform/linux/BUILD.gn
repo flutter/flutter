@@ -222,7 +222,8 @@ copy("flutter_linux_gschemas") {
   outputs = [ "$target_gen_dir/assets/{{source_name_part}}/gschemas.compiled" ]
 }
 
-executable("flutter_linux_unittests") {
+if (!use_gtk4) {
+  executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
@@ -311,6 +312,7 @@ executable("flutter_linux_unittests") {
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",
   ]
+  }
 }
 
 shared_library("flutter_linux_gtk") {

@@ -27,7 +27,9 @@ struct _FlWindowStateMonitor {
   GtkWindow* window;
 
   // Current state information.
+#if !FLUTTER_LINUX_GTK4
   GdkWindowState window_state;
+#endif
 
   // Signal connection ID for window-state-changed
   gulong window_state_event_cb_id;
@@ -51,11 +53,13 @@ static void send_lifecycle_state(FlWindowStateMonitor* self,
                                       message, nullptr, nullptr, nullptr);
 }
 
+#if !FLUTTER_LINUX_GTK4
 static gboolean is_hidden(GdkWindowState state) {
   return (state & GDK_WINDOW_STATE_WITHDRAWN) ||
          (state & GDK_WINDOW_STATE_ICONIFIED);
 }
-
+#endif  // !FLUTTER_LINUX_GTK4
+#if !FLUTTER_LINUX_GTK4
 // Signal handler for GtkWindow::window-state-event
 static gboolean window_state_event_cb(FlWindowStateMonitor* self,
                                       GdkEvent* event) {
@@ -81,6 +85,7 @@ static gboolean window_state_event_cb(FlWindowStateMonitor* self,
 
   return FALSE;
 }
+#endif  // !FLUTTER_LINUX_GTK4
 
 static void fl_window_state_monitor_dispose(GObject* object) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(object);
@@ -109,11 +114,16 @@ FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
   self->window = window;
 
   // Listen to window state changes.
+#if !FLUTTER_LINUX_GTK4
   self->window_state_event_cb_id =
       g_signal_connect_swapped(self->window, "window-state-event",
                                G_CALLBACK(window_state_event_cb), self);
   self->window_state =
       gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self->window)));
+#else
+  self->window_state_event_cb_id = 0;
+  // TODO(gtk4): Reconnect lifecycle updates using GdkToplevel state.
+#endif
 
   return self;
 }
