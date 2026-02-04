@@ -153,7 +153,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/slivers_padding_test.dart',
     'packages/flutter/test/widgets/sliver_constraints_test.dart',
     'packages/flutter/test/widgets/autocomplete_test.dart',
-    'packages/flutter/test/widgets/expansible_test.dart',
     'packages/flutter/test/widgets/decorated_sliver_test.dart',
     'packages/flutter/test/widgets/shape_decoration_test.dart',
     'packages/flutter/test/widgets/run_app_test.dart',
@@ -195,7 +194,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/system_context_menu_test.dart',
     'packages/flutter/test/widgets/scrollable_fling_test.dart',
     'packages/flutter/test/widgets/debug_test.dart',
-    'packages/flutter/test/widgets/banner_test.dart',
     'packages/flutter/test/widgets/transformed_scrollable_test.dart',
     'packages/flutter/test/widgets/run_app_async_test.dart',
     'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
@@ -267,7 +265,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/cupertino/form_row_test.dart',
     'packages/flutter/test/cupertino/colors_test.dart',
     'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
-    'packages/flutter/test/cupertino/slider_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
