@@ -976,7 +976,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   void addToLinesController(String message) {
-    if (!_linesController.isClosed && interceptLog(message)) {
+    if (!_linesController.isClosed && !interceptLog(message)) {
       _linesController.add(message);
     }
   }
