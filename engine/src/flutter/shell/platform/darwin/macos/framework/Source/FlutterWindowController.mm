@@ -294,11 +294,6 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 
   if (parent != nil) {
     dispatch_async(dispatch_get_main_queue(), ^{
-      auto modes = CFRunLoopCopyAllModes(CFRunLoopGetCurrent());
-      for (int i = 0; i < CFArrayGetCount(modes); ++i) {
-        auto mode = CFArrayGetValueAtIndex(modes, i);
-        NSLog(@"MODE %@", mode);
-      }
       // beginCriticalSheet blocks with nested run loop until the
       // sheet animation is finished.
       [parent beginCriticalSheet:window
