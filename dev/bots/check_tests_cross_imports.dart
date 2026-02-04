@@ -107,11 +107,9 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/basic_test.dart',
     'packages/flutter/test/widgets/text_test.dart',
     'packages/flutter/test/widgets/reorderable_list_test.dart',
     'packages/flutter/test/widgets/semantics_tester_generate_test_semantics_expression_for_current_semantics_tree_test.dart',
-    'packages/flutter/test/widgets/slivers_appbar_floating_pinned_test.dart',
     'packages/flutter/test/widgets/scrollable_restoration_test.dart',
     'packages/flutter/test/widgets/text_golden_test.dart',
     'packages/flutter/test/widgets/two_dimensional_viewport_test.dart',
@@ -128,7 +126,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/autofill_group_test.dart',
     'packages/flutter/test/widgets/range_maintaining_scroll_physics_test.dart',
     'packages/flutter/test/widgets/scroll_position_test.dart',
-    'packages/flutter/test/widgets/sliver_tree_test.dart',
     'packages/flutter/test/widgets/interactive_viewer_test.dart',
     'packages/flutter/test/widgets/selectable_region_test.dart',
     'packages/flutter/test/widgets/editable_text_scribe_test.dart',
@@ -156,7 +153,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/slivers_padding_test.dart',
     'packages/flutter/test/widgets/sliver_constraints_test.dart',
     'packages/flutter/test/widgets/autocomplete_test.dart',
-    'packages/flutter/test/widgets/expansible_test.dart',
     'packages/flutter/test/widgets/decorated_sliver_test.dart',
     'packages/flutter/test/widgets/shape_decoration_test.dart',
     'packages/flutter/test/widgets/run_app_test.dart',
@@ -173,8 +169,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/dual_transition_builder_test.dart',
     'packages/flutter/test/widgets/icon_test.dart',
-    'packages/flutter/test/widgets/scrollable_helpers_test.dart',
-    'packages/flutter/test/widgets/slivers_appbar_stretch_test.dart',
     'packages/flutter/test/widgets/sliver_cross_axis_group_test.dart',
     'packages/flutter/test/widgets/list_wheel_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_dispose_test.dart',
@@ -201,7 +195,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/scrollable_fling_test.dart',
     'packages/flutter/test/widgets/debug_test.dart',
     'packages/flutter/test/widgets/banner_test.dart',
-    'packages/flutter/test/widgets/sliver_persistent_header_test.dart',
     'packages/flutter/test/widgets/transformed_scrollable_test.dart',
     'packages/flutter/test/widgets/run_app_async_test.dart',
     'packages/flutter/test/widgets/scrollable_in_overlay_test.dart',
@@ -212,7 +205,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/physical_model_test.dart',
     'packages/flutter/test/widgets/spell_check_test.dart',
-    'packages/flutter/test/widgets/slivers_appbar_floating_test.dart',
     'packages/flutter/test/widgets/toggleable_test.dart',
     'packages/flutter/test/widgets/draggable_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
@@ -274,7 +266,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/cupertino/form_row_test.dart',
     'packages/flutter/test/cupertino/colors_test.dart',
     'packages/flutter/test/cupertino/text_form_field_row_restoration_test.dart',
-    'packages/flutter/test/cupertino/slider_test.dart',
   };
 
   static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
