@@ -3951,6 +3951,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Subclasses can override this method to add additional [SemanticsNode]s
   /// to the tree. If new [SemanticsNode]s are instantiated in this method
   /// they must be disposed in [clearSemantics].
+  ///
+  /// This callback can be called during idle phase or during draw frame.
   void assembleSemanticsNode(
     SemanticsNode node,
     SemanticsConfiguration config,
