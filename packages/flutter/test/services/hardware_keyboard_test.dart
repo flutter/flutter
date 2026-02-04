@@ -605,6 +605,13 @@ void main() {
   testWidgets(
     'Irregular key events are ignored',
     (WidgetTester tester) async {
+      // The flags can be a bit confusing, so we define them here for clarity.
+      //
+      // A processed event means the event could have been handled by a handler,
+      // but since we have no handlers, the event turns out to be unhandled.
+      //
+      // On the other hand, an ignored event means the event is irregular and is
+      // not even considered for handling, resulting in a handled status.
       const isProcessed = false;
       const isIgnored = true;
 
