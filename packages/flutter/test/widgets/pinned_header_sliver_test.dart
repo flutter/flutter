@@ -247,58 +247,75 @@ void main() {
     expect(tester.getRect(find.text('PinnedHeaderSliver 2')), rect2);
   });
 
-  testWidgets('PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag', (
-    WidgetTester tester,
-  ) async {
-    final semantics = SemanticsTester(tester);
+  testWidgets(
+    'PinnedHeaderSliver: presence of RenderViewport.excludeFromScrolling tag when pinned',
+    (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(
-      Semantics(
-        textDirection: TextDirection.ltr,
-        child: Localizations(
-          locale: const Locale('en', 'us'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultWidgetsLocalizations.delegate,
-            DefaultMaterialLocalizations.delegate,
-          ],
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: MediaQuery(
-              data: const MediaQueryData(),
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
-                  SliverList.builder(
-                    itemCount: 50,
-                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
-                  ),
-                ],
+      await tester.pumpWidget(
+        Semantics(
+          textDirection: TextDirection.ltr,
+          child: Localizations(
+            locale: const Locale('en', 'us'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultWidgetsLocalizations.delegate,
+              DefaultMaterialLocalizations.delegate,
+            ],
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: MediaQuery(
+                data: const MediaQueryData(),
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 100, child: Text('First child')),
+                    ),
+                    const PinnedHeaderSliver(child: Text('PinnedHeaderSliver')),
+                    SliverList.builder(
+                      itemCount: 50,
+                      itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      isNot(
-        includesNodeWith(
-          tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+      expect(
+        semantics,
+        isNot(
+          includesNodeWith(
+            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
-    await tester.pumpAndSettle();
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
+      await tester.pumpAndSettle();
 
-    expect(
-      semantics,
-      includesNodeWith(
-        tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
-      ),
-    );
+      expect(
+        semantics,
+        isNot(
+          includesNodeWith(
+            tags: {RenderViewport.excludeFromScrolling, RenderViewport.useTwoPaneSemantics},
+          ),
+        ),
+      );
 
-    semantics.dispose();
-  });
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -20));
+      await tester.pumpAndSettle();
+
+      final SemanticsNode? semanticNode = semantics
+          .nodesWith(label: 'PinnedHeaderSliver')
+          .firstOrNull;
+      expect(semanticNode?.parent?.tags, {
+        RenderViewport.excludeFromScrolling,
+        RenderViewport.useTwoPaneSemantics,
+      });
+
+      semantics.dispose();
+    },
+  );
 }
