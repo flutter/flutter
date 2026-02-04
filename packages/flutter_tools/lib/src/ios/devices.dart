@@ -1393,7 +1393,7 @@ class LogInterceptor {
 }
 
 /// Shared logic between iOS device log readers, such as [IOSDeviceLogReader]
-/// for physical iOS devices and [_IOSSimulatorLogReader] for simulators.
+/// for physical iOS devices and _IOSSimulatorLogReader for simulators.
 abstract class SharedIOSDeviceLogReader extends DeviceLogReader {
   /// Interceptors that should be checked with every log.
   final List<LogInterceptor> _logInterceptors = [];
