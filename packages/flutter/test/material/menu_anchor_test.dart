@@ -92,7 +92,6 @@ void main() {
   }
 
   Widget buildTestApp({
-    AlignmentGeometry? alignment,
     Offset alignmentOffset = Offset.zero,
     TextDirection textDirection = TextDirection.ltr,
     bool consumesOutsideTap = false,
@@ -120,7 +119,6 @@ void main() {
                 controller: controller,
                 alignmentOffset: alignmentOffset,
                 consumeOutsideTap: consumesOutsideTap,
-                style: MenuStyle(alignment: alignment),
                 onOpen: () {
                   onOpen?.call(TestMenu.anchorButton);
                 },
@@ -804,6 +802,8 @@ void main() {
     });
 
     testWidgets('menu alignment and offset in LTR', (WidgetTester tester) async {
+      // Note: MenuStyle.alignment is deprecated and ignored.
+      // Menus always use bottomStart alignment (opens below the button).
       await tester.pumpWidget(buildTestApp());
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
@@ -814,38 +814,22 @@ void main() {
           .first;
 
       // Open the menu and make sure things are the right size, in the right place.
+      // Menu opens below the button with bottomStart alignment (default).
       await tester.tap(find.text('Press Me'));
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 62.0, 602.0, 174.0)));
 
-      await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(328.0, 14.0, 602.0, 126.0)));
-
-      await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.center));
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(400.0, 38.0, 674.0, 150.0)));
-
-      await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.bottomEnd));
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(472.0, 62.0, 746.0, 174.0)));
-
-      await tester.pumpWidget(buildTestApp(alignment: AlignmentDirectional.topStart));
-      await tester.pump();
-
+      // Test alignmentOffset still works (this is not deprecated)
       final Rect menuRect = tester.getRect(findMenuScope);
-      await tester.pumpWidget(
-        buildTestApp(
-          alignment: AlignmentDirectional.topStart,
-          alignmentOffset: const Offset(10, 20),
-        ),
-      );
+      await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(10, 20)));
       await tester.pump();
       final Rect offsetMenuRect = tester.getRect(findMenuScope);
       expect(offsetMenuRect.topLeft - menuRect.topLeft, equals(const Offset(10, 20)));
     });
 
     testWidgets('menu alignment and offset in RTL', (WidgetTester tester) async {
+      // Note: MenuStyle.alignment is deprecated and ignored.
+      // Menus always use bottomStart alignment (opens below the button).
       await tester.pumpWidget(buildTestApp(textDirection: TextDirection.rtl));
 
       final Rect buttonRect = tester.getRect(find.byType(ElevatedButton));
@@ -856,40 +840,16 @@ void main() {
           .first;
 
       // Open the menu and make sure things are the right size, in the right place.
+      // Menu opens below the button with bottomStart alignment (default).
+      // In RTL, bottomStart aligns to the right edge of the button.
       await tester.tap(find.text('Press Me'));
       await tester.pump();
       expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 62.0, 472.0, 174.0)));
 
-      await tester.pumpWidget(
-        buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart),
-      );
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(198.0, 14.0, 472.0, 126.0)));
-
-      await tester.pumpWidget(
-        buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.center),
-      );
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(126.0, 38.0, 400.0, 150.0)));
-
-      await tester.pumpWidget(
-        buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.bottomEnd),
-      );
-      await tester.pump();
-      expect(tester.getRect(findMenuScope), equals(const Rect.fromLTRB(54.0, 62.0, 328.0, 174.0)));
-
-      await tester.pumpWidget(
-        buildTestApp(textDirection: TextDirection.rtl, alignment: AlignmentDirectional.topStart),
-      );
-      await tester.pump();
-
+      // Test alignmentOffset still works (this is not deprecated)
       final Rect menuRect = tester.getRect(findMenuScope);
       await tester.pumpWidget(
-        buildTestApp(
-          textDirection: TextDirection.rtl,
-          alignment: AlignmentDirectional.topStart,
-          alignmentOffset: const Offset(10, 20),
-        ),
+        buildTestApp(textDirection: TextDirection.rtl, alignmentOffset: const Offset(10, 20)),
       );
       await tester.pump();
       expect(
@@ -3706,13 +3666,16 @@ void main() {
       await tester.pump();
 
       expect(find.byType(SubmenuButton), findsNWidgets(4));
+      // Note: Submenus are positioned outside their parent's visual bounds
+      // (including padding), so nested submenus are shifted by the parent's
+      // horizontal padding (4px) compared to the old behavior.
       expect(
         collectSubmenuRects(),
         equals(const <Rect>[
           Rect.fromLTRB(0.0, 48.0, 256.0, 112.0),
-          Rect.fromLTRB(266.0, 48.0, 522.0, 112.0),
-          Rect.fromLTRB(522.0, 48.0, 778.0, 112.0),
-          Rect.fromLTRB(256.0, 48.0, 512.0, 112.0),
+          Rect.fromLTRB(270.0, 48.0, 526.0, 112.0),
+          Rect.fromLTRB(526.0, 48.0, 782.0, 112.0),
+          Rect.fromLTRB(260.0, 48.0, 516.0, 112.0),
         ]),
       );
     });
@@ -3785,13 +3748,16 @@ void main() {
       await tester.pump();
 
       expect(find.byType(SubmenuButton), findsNWidgets(4));
+      // Note: Submenus are positioned outside their parent's visual bounds
+      // (including padding), so nested submenus are shifted by the parent's
+      // horizontal padding (4px) compared to the old behavior.
       expect(
         collectSubmenuRects(),
         equals(const <Rect>[
           Rect.fromLTRB(544.0, 48.0, 800.0, 112.0),
-          Rect.fromLTRB(278.0, 48.0, 534.0, 112.0),
-          Rect.fromLTRB(22.0, 48.0, 278.0, 112.0),
-          Rect.fromLTRB(288.0, 48.0, 544.0, 112.0),
+          Rect.fromLTRB(274.0, 48.0, 530.0, 112.0),
+          Rect.fromLTRB(18.0, 48.0, 274.0, 112.0),
+          Rect.fromLTRB(284.0, 48.0, 540.0, 112.0),
         ]),
       );
     });
@@ -3932,7 +3898,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(145.0, 0.0, 655.0, 48.0),
           Rect.fromLTRB(257.0, 48.0, 471.0, 208.0),
-          Rect.fromLTRB(471.0, 96.0, 719.0, 304.0),
+          Rect.fromLTRB(475.0, 96.0, 723.0, 304.0),
         ]),
       );
     });
@@ -3944,7 +3910,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(145.0, 0.0, 655.0, 48.0),
           Rect.fromLTRB(329.0, 48.0, 543.0, 208.0),
-          Rect.fromLTRB(81.0, 96.0, 329.0, 304.0),
+          Rect.fromLTRB(77.0, 96.0, 325.0, 304.0),
         ]),
       );
     });
@@ -3960,7 +3926,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(265.0, 40.0, 467.0, 176.0),
-          Rect.fromLTRB(467.0, 80.0, 707.0, 256.0),
+          Rect.fromLTRB(471.0, 80.0, 711.0, 256.0),
         ]),
       );
     });
@@ -3976,7 +3942,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(161.0, 0.0, 639.0, 40.0),
           Rect.fromLTRB(333.0, 40.0, 535.0, 176.0),
-          Rect.fromLTRB(93.0, 80.0, 333.0, 256.0),
+          Rect.fromLTRB(89.0, 80.0, 329.0, 256.0),
         ]),
       );
     });
@@ -3992,7 +3958,7 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(138.5, 0.0, 661.5, 73.0),
           Rect.fromLTRB(256.5, 60.0, 470.5, 220.0),
-          Rect.fromLTRB(470.5, 108.0, 718.5, 316.0),
+          Rect.fromLTRB(474.5, 108.0, 722.5, 316.0),
         ]),
       );
     });
@@ -4008,14 +3974,15 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(138.5, 0.0, 661.5, 73.0),
           Rect.fromLTRB(329.5, 60.0, 543.5, 220.0),
-          Rect.fromLTRB(81.5, 108.0, 329.5, 316.0),
+          Rect.fromLTRB(77.5, 108.0, 325.5, 316.0),
         ]),
       );
     });
 
-    testWidgets('submenu with topStart alignment opens to the left of anchor', (
-      WidgetTester tester,
-    ) async {
+    // Removed: 'submenu with topStart alignment opens to the left of anchor'
+    // MenuStyle.alignment is deprecated and ignored - submenus always use topEnd alignment.
+
+    testWidgets('submenu opens to the right in LTR', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -4026,75 +3993,6 @@ void main() {
                 menuChildren: <Widget>[
                   const MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
-                    menuStyle: const MenuStyle(alignment: AlignmentDirectional.topStart),
-                    menuChildren: const <Widget>[
-                      MenuItemButton(child: Text('Sub Item 1')),
-                      MenuItemButton(child: Text('Sub Item 2')),
-                    ],
-                    child: const Text('Submenu'),
-                  ),
-                  const MenuItemButton(child: Text('Item 2')),
-                ],
-                builder: (BuildContext context, MenuController controller, Widget? child) {
-                  return FilledButton(
-                    onPressed: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
-                    },
-                    child: const Text('Open Menu'),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Open the main menu
-      await tester.tap(find.text('Open Menu'));
-      await tester.pump();
-
-      // Get the submenu button rect
-      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
-
-      // Open the submenu
-      await tester.tap(find.text('Submenu'));
-      await tester.pump();
-
-      // Find the submenu panel (the one containing 'Sub Item 1')
-      final Finder subItemFinder = find.text('Sub Item 1');
-      expect(subItemFinder, findsOneWidget);
-
-      final Finder submenuPanel = find
-          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
-          .first;
-      final Rect submenuRect = tester.getRect(submenuPanel);
-
-      // The submenu's right edge should be at or to the left of the submenu button's left edge
-      expect(
-        submenuRect.right,
-        lessThanOrEqualTo(submenuButtonRect.left),
-        reason: 'Submenu with topStart alignment should open to the left of the anchor',
-      );
-    });
-
-    testWidgets('submenu with topEnd alignment opens to the right in LTR', (
-      WidgetTester tester,
-    ) async {
-      await changeSurfaceSize(tester, const Size(800, 600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Material(
-            child: Center(
-              child: MenuAnchor(
-                menuChildren: <Widget>[
-                  const MenuItemButton(child: Text('Item 1')),
-                  SubmenuButton(
-                    menuStyle: const MenuStyle(alignment: AlignmentDirectional.topEnd),
                     menuChildren: const <Widget>[
                       MenuItemButton(child: Text('Sub Item 1')),
                       MenuItemButton(child: Text('Sub Item 2')),
@@ -4141,11 +4039,11 @@ void main() {
           .first;
       final Rect submenuRect = tester.getRect(submenuPanel);
 
-      // With topEnd alignment, submenu should open to the right of anchor
+      // Submenus always open to the right in LTR (alignment is automatic)
       expect(
         submenuRect.left,
         greaterThanOrEqualTo(submenuButtonRect.right),
-        reason: 'Submenu with topEnd alignment should open to the right of the anchor',
+        reason: 'Submenu should open to the right of the anchor in LTR',
       );
     });
 
@@ -4232,9 +4130,10 @@ void main() {
       );
     });
 
-    testWidgets('submenu with topStart alignment opens to the right in RTL', (
-      WidgetTester tester,
-    ) async {
+    // Removed: 'submenu with topStart alignment opens to the right in RTL'
+    // MenuStyle.alignment is deprecated and ignored - submenus always use topEnd alignment.
+
+    testWidgets('submenu opens to the left in RTL', (WidgetTester tester) async {
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -4247,7 +4146,6 @@ void main() {
                   menuChildren: <Widget>[
                     const MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
-                      menuStyle: const MenuStyle(alignment: AlignmentDirectional.topStart),
                       menuChildren: const <Widget>[
                         MenuItemButton(child: Text('Sub Item 1')),
                         MenuItemButton(child: Text('Sub Item 2')),
@@ -4295,84 +4193,11 @@ void main() {
           .first;
       final Rect submenuRect = tester.getRect(submenuPanel);
 
-      // In RTL, topStart means right side (start = right in RTL)
-      // Submenu should open to the RIGHT of anchor
-      expect(
-        submenuRect.left,
-        greaterThanOrEqualTo(submenuButtonRect.right),
-        reason: 'Submenu with topStart alignment in RTL should open to the right of the anchor',
-      );
-    });
-
-    testWidgets('submenu with topEnd alignment opens to the left in RTL', (
-      WidgetTester tester,
-    ) async {
-      await changeSurfaceSize(tester, const Size(800, 600));
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Material(
-              child: Center(
-                child: MenuAnchor(
-                  menuChildren: <Widget>[
-                    const MenuItemButton(child: Text('Item 1')),
-                    SubmenuButton(
-                      menuStyle: const MenuStyle(alignment: AlignmentDirectional.topEnd),
-                      menuChildren: const <Widget>[
-                        MenuItemButton(child: Text('Sub Item 1')),
-                        MenuItemButton(child: Text('Sub Item 2')),
-                      ],
-                      child: const Text('Submenu'),
-                    ),
-                    const MenuItemButton(child: Text('Item 2')),
-                  ],
-                  builder: (BuildContext context, MenuController controller, Widget? child) {
-                    return FilledButton(
-                      onPressed: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
-                      child: const Text('Open Menu'),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Open the main menu
-      await tester.tap(find.text('Open Menu'));
-      await tester.pump();
-
-      // Get the submenu button rect
-      final Rect submenuButtonRect = tester.getRect(find.text('Submenu'));
-
-      // Open the submenu
-      await tester.tap(find.text('Submenu'));
-      await tester.pump();
-
-      // Find the submenu panel
-      final Finder subItemFinder = find.text('Sub Item 1');
-      expect(subItemFinder, findsOneWidget);
-
-      final Finder submenuPanel = find
-          .ancestor(of: subItemFinder, matching: find.byType(FocusScope))
-          .first;
-      final Rect submenuRect = tester.getRect(submenuPanel);
-
-      // In RTL, topEnd means left side (end = left in RTL)
-      // Submenu should open to the LEFT of anchor
+      // Submenus always open to the left in RTL (alignment is automatic)
       expect(
         submenuRect.right,
         lessThanOrEqualTo(submenuButtonRect.left),
-        reason: 'Submenu with topEnd alignment in RTL should open to the left of the anchor',
+        reason: 'Submenu should open to the left of the anchor in RTL',
       );
     });
 
@@ -4473,7 +4298,6 @@ void main() {
                     const MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
                       menuStyle: const MenuStyle(
-                        alignment: AlignmentDirectional.topStart,
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(menuPadding)),
                       ),
                       menuChildren: const <Widget>[
@@ -4552,7 +4376,6 @@ void main() {
                   const MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
                     menuStyle: const MenuStyle(
-                      alignment: AlignmentDirectional.topEnd,
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
                     ),
                     menuChildren: const <Widget>[
@@ -4646,7 +4469,6 @@ void main() {
                   const MenuItemButton(child: Text('Item 1')),
                   SubmenuButton(
                     menuStyle: const MenuStyle(
-                      alignment: AlignmentDirectional.topEnd,
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
                     ),
                     menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
@@ -4714,7 +4536,6 @@ void main() {
                     const MenuItemButton(child: Text('Item 1')),
                     SubmenuButton(
                       menuStyle: const MenuStyle(
-                        alignment: AlignmentDirectional.topEnd,
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(8)),
                       ),
                       menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
@@ -4771,7 +4592,6 @@ void main() {
                 menuChildren: <Widget>[
                   SubmenuButton(
                     menuStyle: const MenuStyle(
-                      alignment: AlignmentDirectional.topEnd,
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(16)),
                     ),
                     menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
@@ -4833,13 +4653,11 @@ void main() {
                   menuChildren: <Widget>[
                     SubmenuButton(
                       menuStyle: const MenuStyle(
-                        alignment: AlignmentDirectional.topEnd,
                         padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(level2Padding)),
                       ),
                       menuChildren: <Widget>[
                         SubmenuButton(
                           menuStyle: const MenuStyle(
-                            alignment: AlignmentDirectional.topEnd,
                             padding: WidgetStatePropertyAll<EdgeInsets>(
                               EdgeInsets.all(level3Padding),
                             ),
@@ -4924,7 +4742,6 @@ void main() {
                   SubmenuButton(
                     alignmentOffset: const Offset(alignmentOffsetX, 0),
                     menuStyle: const MenuStyle(
-                      alignment: AlignmentDirectional.topEnd,
                       padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(submenuPadding)),
                     ),
                     menuChildren: const <Widget>[MenuItemButton(child: Text('Sub Item 1'))],
