@@ -4,6 +4,8 @@
 
 #include "fl_compositor_software.h"
 
+#include "flutter/shell/platform/linux/fl_gtk.h"
+
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
 
