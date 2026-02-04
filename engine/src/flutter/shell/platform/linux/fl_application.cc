@@ -76,7 +76,11 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
     gtk_window_set_titlebar(GTK_WINDOW(window), GTK_WIDGET(header_bar));
   }
 
+#if FLUTTER_LINUX_GTK4
+  gtk_window_set_child(GTK_WINDOW(window), GTK_WIDGET(view));
+#else
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+#endif
 
   return GTK_WINDOW(window);
 }
