@@ -658,10 +658,7 @@ void main() {
 
       // 5. Send a key up event with a different logical key, which should be processed.
       expect(
-        await simulateKeyUpEvent(
-          LogicalKeyboardKey.keyB,
-          physicalKey: PhysicalKeyboardKey.keyA,
-        ),
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
         isProcessed,
       );
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
