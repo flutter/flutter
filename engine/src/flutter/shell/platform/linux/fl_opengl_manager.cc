@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include <epoxy/egl.h>
+#if FLUTTER_LINUX_GTK4
+#include <gdk/wayland/gdkwayland.h>
+#include <gdk/x11/gdkx.h>
+#else
 #include <gdk/gdkwayland.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
