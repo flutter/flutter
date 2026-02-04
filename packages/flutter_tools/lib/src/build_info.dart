@@ -61,6 +61,50 @@ class BuildInfo {
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
 
+  BuildInfo copyWith({
+    String? fileSystemScheme,
+    List<String>? fileSystemRoots,
+    List<String>? extraFrontEndOptions,
+    String? packageConfigPath,
+    PackageConfig? packageConfig,
+    String? initializeFromDill,
+    List<String>? dartDefines,
+    bool? includeUnsupportedPlatformLibraryStubs,
+  }) {
+    return BuildInfo(
+      mode,
+      flavor,
+      trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: frontendServerStarterPath,
+      extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      fileSystemRoots: fileSystemRoots ?? this.fileSystemRoots,
+      androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
+      fileSystemScheme: fileSystemScheme ?? this.fileSystemScheme,
+      buildNumber: buildNumber,
+      buildName: buildName,
+      splitDebugInfoPath: splitDebugInfoPath,
+      dartObfuscation: dartObfuscation,
+      dartDefines: dartDefines ?? this.dartDefines,
+      dartExperiments: dartExperiments,
+      performanceMeasurementFile: performanceMeasurementFile,
+      packageConfigPath: packageConfigPath ?? this.packageConfigPath,
+      codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
+      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      packageConfig: packageConfig ?? this.packageConfig,
+      initializeFromDill: initializeFromDill ?? this.initializeFromDill,
+      assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
+      buildNativeAssets: buildNativeAssets,
+      useLocalCanvasKit: useLocalCanvasKit,
+      includeUnsupportedPlatformLibraryStubs:
+          includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
+      webEnableHotReload: webEnableHotReload,
+      treeShakeIcons: treeShakeIcons,
+    );
+  }
+
   final BuildMode mode;
 
   /// Whether the build should subset icon fonts.
