@@ -112,6 +112,7 @@ class TabController extends ChangeNotifier {
     Duration? animationDuration,
     required this.length,
     required TickerProvider vsync,
+    this.onIndexChanged,
   }) : assert(length >= 0),
        assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
        _index = initialIndex,
@@ -134,6 +135,7 @@ class TabController extends ChangeNotifier {
     required AnimationController? animationController,
     required Duration animationDuration,
     required this.length,
+    this.onIndexChanged,
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
@@ -143,8 +145,8 @@ class TabController extends ChangeNotifier {
     }
   }
 
-  /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
-  /// `animationDuration` if they are non-null, and disposes current instance.
+  /// Creates a new [TabController] with `index`, `previousIndex`, `length`,
+  /// `animationDuration` and `onIndexChanged` if they are non-null, and disposes current instance.
   ///
   /// This method is used by [DefaultTabController].
   ///
@@ -157,6 +159,7 @@ class TabController extends ChangeNotifier {
     required int? length,
     required int? previousIndex,
     required Duration? animationDuration,
+    ValueChanged<int>? onIndexChanged,
   }) {
     if (index != null) {
       _animationController!.value = index.toDouble();
@@ -167,6 +170,7 @@ class TabController extends ChangeNotifier {
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
+      onIndexChanged: onIndexChanged ?? this.onIndexChanged,
     );
     _animationController = null;
     dispose();
@@ -198,6 +202,20 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
+  /// Called when the tab index changes as a result of user interaction.
+  ///
+  /// The callback is invoked immediately after the internal [_index] is updated and
+  /// just before the tab change animation starts.
+  ///
+  /// It provides a high-level notification that the logical tab selection
+  /// has changed, without requiring consumers to listen to this controller
+  /// via [ChangeNotifier.addListener].
+  ///
+  /// This is primarily intended for cases where tab selection needs to be
+  /// reflected into external or declarative state in response to user input,
+  /// rather than for tracking animation progress or offset changes.
+  final ValueChanged<int>? onIndexChanged;
+
   void _changeIndex(int value, {Duration? duration, Curve? curve}) {
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
@@ -207,6 +225,7 @@ class TabController extends ChangeNotifier {
     }
     _previousIndex = index;
     _index = value;
+    onIndexChanged?.call(value);
     if (duration != null && duration > Duration.zero) {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
@@ -371,7 +390,8 @@ class DefaultTabController extends StatefulWidget {
     this.animationDuration,
   }) : assert(length >= 0),
        assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
-       index = null;
+       index = null,
+       onIndexChanged = null;
 
   /// Creates a default tab controller whose active tab is controlled externally.
   ///
@@ -393,9 +413,10 @@ class DefaultTabController extends StatefulWidget {
     required int this.index,
     this.animationDuration,
     required this.child,
+    required ValueChanged<int> this.onIndexChanged,
   }) : assert(length >= 0),
-        assert(length == 0 || (index >= 0 && index < length)),
-        initialIndex = 0;
+       assert(length == 0 || (index >= 0 && index < length)),
+       initialIndex = 0;
 
   /// The total number of tabs.
   ///
@@ -422,6 +443,24 @@ class DefaultTabController extends StatefulWidget {
   /// This allows the active tab to be controlled declaratively (for example
   /// from application state) without accessing the [TabController] via context.
   final int? index;
+
+  /// Called when the user requests a change to the active tab.
+  ///
+  /// Use this callback to update an externally controlled tab [index].
+  ///
+  /// The callback is invoked immediately after the internally managed
+  /// [TabController.index] is updated, and just before the tab
+  /// change animation starts.
+  ///
+  /// It indicates that a tab change was initiated by user interaction
+  /// (for example by tapping a tab in a [TabBar] or swiping a
+  /// [TabBarView]), allowing the owner of a controlled
+  /// [DefaultTabController] to synchronize its external state accordingly.
+  ///
+  /// This callback is not intended to replace listening to the underlying
+  /// [TabController] for animation or offset changes; it provides a
+  /// higher-level signal that the logical tab selection has changed.
+  final ValueChanged<int>? onIndexChanged;
 
   /// The widget below this widget in the tree.
   ///
@@ -507,6 +546,7 @@ class _DefaultTabControllerState extends State<DefaultTabController>
       length: widget.length,
       initialIndex: widget.index ?? widget.initialIndex,
       animationDuration: widget.animationDuration,
+      onIndexChanged: widget.onIndexChanged,
     );
   }
 
@@ -542,6 +582,7 @@ class _DefaultTabControllerState extends State<DefaultTabController>
         animationDuration: widget.animationDuration,
         index: newIndex,
         previousIndex: previousIndex,
+        onIndexChanged: widget.onIndexChanged,
       );
     }
 
@@ -551,6 +592,7 @@ class _DefaultTabControllerState extends State<DefaultTabController>
         animationDuration: widget.animationDuration,
         index: widget.index ?? _controller.index,
         previousIndex: _controller.previousIndex,
+        onIndexChanged: widget.onIndexChanged,
       );
     }
     if (oldWidget.index == null || widget.index == null) {
