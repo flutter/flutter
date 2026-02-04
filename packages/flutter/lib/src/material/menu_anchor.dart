@@ -3440,15 +3440,15 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       y = desiredPosition.dy;
       // For submenus: shift left when RTL XOR *Start alignment.
       // RTL+End → left, RTL+Start → right, LTR+End → right, LTR+Start → left.
-      final bool isRtl = textDirection == TextDirection.rtl;
+      final isRtl = textDirection == TextDirection.rtl;
       final bool isStartAligned =
           parentOrientation == Axis.vertical &&
           switch (alignment) {
-            AlignmentDirectional a => a.start < 0,
-            Alignment a => a.x < 0,
+            final AlignmentDirectional a => a.start < 0,
+            final Alignment a => a.x < 0,
             _ => false,
           };
-      final bool shiftLeft = isRtl != isStartAligned;
+      final shiftLeft = isRtl != isStartAligned;
       if (shiftLeft) {
         x -= childSize.width;
       }
@@ -3849,7 +3849,7 @@ class _Submenu extends StatelessWidget {
     // outside the parent menu's visual bounds, not just outside the button.
     final Rect anchorRect;
     if (layerLink == null) {
-      Rect baseRect = Rect.fromLTRB(
+      var baseRect = Rect.fromLTRB(
         menuPosition.anchorRect.left + dx,
         menuPosition.anchorRect.top,
         menuPosition.anchorRect.right,
