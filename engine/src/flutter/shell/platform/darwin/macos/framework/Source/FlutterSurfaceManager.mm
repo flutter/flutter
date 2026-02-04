@@ -168,16 +168,16 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces {
   FML_DCHECK([NSThread isMainThread]);
 
-  // Only return surfaces to the cache if they match the current wide gamut mode.
-  // Surfaces created with a different mode should be discarded to avoid using
-  // wrong pixel format after a wide gamut mode switch.
-  NSMutableArray<FlutterSurface*>* surfacesToReturn = [NSMutableArray array];
-  for (FlutterSurface* surface in _frontSurfaces) {
-    if (surface.isWideGamut == _wideGamut) {
-      [surfacesToReturn addObject:surface];
+  // Check if incoming surfaces match current wide gamut mode.
+  // If not, discard them by returning early - they will be released.
+  for (FlutterSurfacePresentInfo* info in surfaces) {
+    if (info.surface.isWideGamut != _wideGamut) {
+      return;
     }
   }
-  [_backBufferCache returnSurfaces:surfacesToReturn];
+
+  // Release all unused back buffer surfaces and replace them with front surfaces.
+  [_backBufferCache returnSurfaces:_frontSurfaces];
 
   // Front surfaces will be replaced by currently presented surfaces.
   [_frontSurfaces removeAllObjects];
