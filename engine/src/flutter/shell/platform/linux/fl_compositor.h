@@ -8,6 +8,7 @@
 #include <cairo.h>
 #include <gdk/gdk.h>
 
+#include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 G_BEGIN_DECLS
