@@ -52,7 +52,7 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* manager,
  * Inform the scrolling manager of a scroll event.
  */
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
-                                              GdkEventScroll* event,
+                                              GdkEvent* event,
                                               gint scale_factor);
 
 /**
