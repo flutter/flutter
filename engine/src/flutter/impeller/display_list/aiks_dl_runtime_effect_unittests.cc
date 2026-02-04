@@ -446,12 +446,12 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     if (AiksTest::ImGuiBegin("Controls", nullptr,
                              ImGuiWindowFlags_AlwaysAutoResize)) {
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
-      ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 1024.f);
-      ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1024.f);
-      ImGui::SliderFloat("clip_width", &clip_size.x, 0, 1024.f);
-      ImGui::SliderFloat("clip_height", &clip_size.y, 0, 1024.f);
-      ImGui::SliderFloat("circle_x", &circle_origin.x, 0.f, 1024.f);
-      ImGui::SliderFloat("circle_y", &circle_origin.y, 0.f, 1024.f);
+      ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 2048.f);
+      ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1536.f);
+      ImGui::SliderFloat("clip_width", &clip_size.x, 0, 2048.f);
+      ImGui::SliderFloat("clip_height", &clip_size.y, 0, 1536.f);
+      ImGui::SliderFloat("circle_x", &circle_origin.x, 0.f, 2048.f);
+      ImGui::SliderFloat("circle_y", &circle_origin.y, 0.f, 1536.f);
       ImGui::End();
     }
     DisplayListBuilder builder;
