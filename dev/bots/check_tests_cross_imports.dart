@@ -165,7 +165,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/router_test.dart',
     'packages/flutter/test/widgets/scroll_notification_test.dart',
     'packages/flutter/test/widgets/magnifier_test.dart',
-    'packages/flutter/test/widgets/backdrop_filter_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/dual_transition_builder_test.dart',
     'packages/flutter/test/widgets/icon_test.dart',
