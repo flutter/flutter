@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
 import 'package:flutter/widgets.dart';
@@ -57,45 +58,90 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
-    this.transitionsBuilder = _defaultTransitionsBuilder,
+    this.pageRouteBuilder = _defaultPageRouteBuilder,
   });
 
-  /// A key to use when building the [Navigator].
+  /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   ///
-  /// If provided, this key can be used to access the [NavigatorState]
-  /// directly for navigation operations in tests.
+  /// In tests, this allows direct access to the [NavigatorState] for
+  /// programmatic navigation without needing to find the [Navigator] widget:
+  ///
+  /// ```dart
+  /// final navigatorKey = GlobalKey<NavigatorState>();
+  /// await tester.pumpWidget(TestWidgetsApp(
+  ///   navigatorKey: navigatorKey,
+  ///   home: const Text('Home'),
+  /// ));
+  /// navigatorKey.currentState!.pushNamed('/details');
+  /// ```
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  /// The widget to display within the app.
+  /// {@macro flutter.widgets.widgetsApp.home}
+  ///
+  /// In tests, this is where you place the widget under test. The widget
+  /// will have access to [Navigator], [Overlay], and other app-level
+  /// services provided by [WidgetsApp].
   final Widget? home;
 
   /// The application's top-level routing table.
   ///
-  /// When a named route is pushed with [Navigator.pushNamed], the route name is
-  /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [PageRouteBuilder] with zero-duration
-  /// transitions by default.
+  /// {@macro flutter.widgets.widgetsApp.routes}
+  ///
+  /// In tests, routes are built using [pageRouteBuilder], which defaults to
+  /// zero-duration transitions for instant navigation without waiting for
+  /// animations.
   ///
   /// Defaults to an empty map.
   final Map<String, WidgetBuilder> routes;
 
-  /// The primary color for the application.
+  /// {@macro flutter.widgets.widgetsApp.color}
   ///
-  /// Defaults to white.
+  /// In tests, this is typically not relevant as OS-level features are not
+  /// exercised. Defaults to white.
   final Color color;
 
-  /// The transition builder used for page route animations.
+  /// {@macro flutter.widgets.widgetsApp.pageRouteBuilder}
   ///
-  /// Defaults to no transition (returns child directly) for simpler testing.
-  /// Override this if you need to test specific transition animations.
-  final RouteTransitionsBuilder transitionsBuilder;
+  /// Defaults to a [PageRouteBuilder] with no transition animation, allowing
+  /// instant navigation without calling [WidgetTester.pumpAndSettle].
+  ///
+  /// Override this to customize route behavior or test specific transitions:
+  ///
+  /// ```dart
+  /// TestWidgetsApp(
+  ///   pageRouteBuilder: <T>(settings, builder) {
+  ///     return PageRouteBuilder<T>(
+  ///       settings: settings,
+  ///       transitionDuration: const Duration(milliseconds: 300),
+  ///       pageBuilder: (context, _, __) => builder(context),
+  ///       transitionsBuilder: (_, animation, __, child) {
+  ///         return FadeTransition(opacity: animation, child: child);
+  ///       },
+  ///     );
+  ///   },
+  ///   home: const Text('Home'),
+  /// )
+  /// ```
+  final PageRouteFactory pageRouteBuilder;
 
-  static Widget _defaultTransitionsBuilder(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) => child;
+  static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+    return PageRouteBuilder<T>(
+      settings: settings,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => builder(context),
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) => child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,18 +150,7 @@ class TestWidgetsApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       home: home,
       routes: routes,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-        return PageRouteBuilder<T>(
-          settings: settings,
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) => builder(context),
-          transitionsBuilder: transitionsBuilder,
-        );
-      },
+      pageRouteBuilder: pageRouteBuilder,
     );
   }
 }

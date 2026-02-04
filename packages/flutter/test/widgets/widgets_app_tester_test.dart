@@ -306,7 +306,7 @@ void main() {
       expect(find.text('Details Page'), findsOneWidget);
     });
 
-    testWidgets('custom transitionsBuilder is used', (WidgetTester tester) async {
+    testWidgets('custom pageRouteBuilder is used', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
           home: Builder(
@@ -322,22 +322,33 @@ void main() {
           routes: <String, WidgetBuilder>{
             '/details': (BuildContext context) => const Text('Details Page'),
           },
-          transitionsBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-                Widget child,
-              ) {
-                return ScaleTransition(scale: animation, child: child);
-              },
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              settings: settings,
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => builder(context),
+              transitionsBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child,
+                  ) {
+                    return ScaleTransition(scale: animation, child: child);
+                  },
+            );
+          },
         ),
       );
 
       await tester.tap(find.text('Home Page'));
       await tester.pump();
 
-      // Custom transitionsBuilder wraps the route with ScaleTransition.
+      // Custom pageRouteBuilder wraps the route with ScaleTransition.
       expect(find.byType(ScaleTransition), findsWidgets);
       expect(find.text('Details Page'), findsOneWidget);
     });
