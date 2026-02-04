@@ -1019,6 +1019,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
+    this.isVerticallyExpanded = true,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1070,6 +1071,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
+    this.isVerticallyExpanded = false,
     required InputDecoration inputDecoration,
     required bool isEmpty,
   }) : assert(
@@ -1223,14 +1225,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// its own decorations, like [InputDecorator].
   final bool isDense;
 
-  /// Controls whether the dropdown's inner contents expand to fill the
-  /// available space.
+  /// Set the dropdown's inner contents to horizontally fill its parent.
   ///
-  /// When `true`, the inner width and height of the dropdown are expanded
-  /// to match its parent container. By default, the inner width is only as
-  /// wide as its contents, and the height is minimal. Setting this to `true`
-  /// ensures that the dropdown's underline and items align properly within
-  /// its container.
+  /// By default this button's inner width is the minimum size of its contents.
+  /// If [isExpanded] is true, the inner width is expanded to fill its
+  /// surrounding container.
   final bool isExpanded;
 
   /// If null, then the menu item heights will vary according to each menu item's
@@ -1336,6 +1335,27 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// If this property is null, [WidgetStateMouseCursor.adaptiveClickable] will be used.
   final MouseCursor? dropdownMenuItemMouseCursor;
+
+  /// Whether the dropdown's inner contents expand to fill the
+  /// available vertical space.
+  ///
+  /// When true, the inner height of the dropdown is expanded to match its
+  /// parent container. When false, the inner height is determined by the
+  /// height of the selected item (its intrinsic height).
+  ///
+  /// This is particularly useful when the dropdown is used inside a fixed-height
+  /// container, ensuring that the underline and items align properly within
+  /// the allocated space.
+  ///
+  /// Defaults to true for [DropdownButton] to maintain its standard behavior,
+  /// and false for [DropdownButtonFormField] to ensure the input decorator
+  /// handles the vertical constraints correctly by default.
+  ///
+  /// See also:
+  ///
+  ///  * [DropdownButton.isExpanded], which expands the inner width of the
+  ///    dropdown to fill the available horizontal space.
+  final bool isVerticallyExpanded;
 
   final InputDecoration? _inputDecoration;
 
@@ -1731,7 +1751,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               isEmpty: widget._isEmpty,
               isFocused: _hasPrimaryFocus,
               isHovering: _isHovering,
-              expands: widget.isExpanded,
+              expands: widget.isVerticallyExpanded,
               child: widget.padding == null
                   ? result
                   : Padding(padding: widget.padding!, child: result),
@@ -1755,6 +1775,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     final bool childHasButtonSemantic =
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
+
+    // When not vertically expanded, force the widget to its default height
+    // using heightFactor: 1.0. This prevents the item from expanding
+    // to fill the parent's available vertical space.
+    if (!widget.isVerticallyExpanded) {
+      result = Align(alignment: Alignment.topCenter, heightFactor: 1.0, child: result);
+    }
+
     return Semantics(
       button: !childHasButtonSemantic,
       expanded: _isMenuExpanded,
@@ -1828,6 +1856,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     this.barrierDismissible = true,
     this.mouseCursor,
     this.dropdownMenuItemMouseCursor,
+    bool isVerticallyExpanded = false,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(
@@ -1920,6 +1949,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  barrierDismissible: barrierDismissible,
                  mouseCursor: mouseCursor,
                  dropdownMenuItemMouseCursor: dropdownMenuItemMouseCursor,
+                 isVerticallyExpanded: isVerticallyExpanded,
                ),
              ),
            );
