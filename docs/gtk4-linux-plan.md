@@ -32,6 +32,13 @@ Make the Linux desktop embedder use GTK4 by default while keeping a short transi
 - Wire a GTK4 Linux shard into `dev/bots/test.dart` (and `analyze.dart` if needed) so GTK4 is exercised in CI.
 - Keep a temporary GTK3 shard for comparison until GTK4 stabilizes, then remove or demote.
 
+## Test Plan (Proposed)
+- **Engine unit tests (GTK4)**: build with `use_gtk4=true` and run `flutter_linux_unittests`.
+- **Engine unit tests (GTK3)**: keep a parity run with `use_gtk4=false` during transition.
+- **Tooling sanity**: `flutter create --linux-gtk=gtk4` and `--linux-gtk=gtk3` generate and build runner code.
+- **Integration coverage**: run targeted tests in `dev/integration_tests/` (windowing, text input, a11y) against GTK4 builds.
+- **CI shard**: add a Linux GTK4 shard to run the above in LUCI, keeping GTK3 for comparison until stable.
+
 ## Milestones
 1. **Prototype**: GTK4 embedder builds and runs a minimal app (no regressions in windowing/input).
 2. **Template switch**: new Linux apps generate GTK4 runner code by default.
