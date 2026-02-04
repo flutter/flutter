@@ -5729,6 +5729,8 @@ void main() {
       fontSize: 20.0,
       fontFamily: 'Raleway',
       fontWeight: FontWeight.w700,
+      letterSpacing: 1.0,
+      wordSpacing: 2.0,
     );
     var currentTextStyle = textStyle1;
 
@@ -5790,8 +5792,8 @@ void main() {
           'fontWeightIndex': 6,
           'textAlignIndex': 4,
           'textDirectionIndex': 1,
-          'letterSpacing': null,
-          'wordSpacing': null,
+          'letterSpacing': 1.0,
+          'wordSpacing': 2.0,
           'lineHeight': 20.0,
         },
       ),
