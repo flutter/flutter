@@ -987,10 +987,10 @@ Your $application code is in $relativeAppMain.
     // Check if this is an existing plugin with CocoaPods structure (Classes/ directory).
     // If so, preserve backward compatibility by using CocoaPods templates.
     // For new plugins, use SwiftPM structure.
-    final bool hasExistingCocoaPodsStructure =
-        directory.childDirectory('ios').childDirectory('Classes').existsSync() ||
-        directory.childDirectory('macos').childDirectory('Classes').existsSync() ||
-        directory.childDirectory('darwin').childDirectory('Classes').existsSync();
+    final bool hasExistingCocoaPodsStructure = const <String>['ios', 'macos', 'darwin'].any(
+      (String platform) =>
+          directory.childDirectory(platform).childDirectory('Classes').existsSync(),
+    );
 
     final bool useSwiftPackageManagerStructure = !hasExistingCocoaPodsStructure;
 
