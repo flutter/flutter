@@ -372,7 +372,9 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
-      help: 'Enables new module format that supports hot reload.',
+      help:
+          '(deprecated; will be removed in a future release) '
+          'Enables new module format that supports hot reload.',
       defaultsTo: true,
       hide: !verboseHelp,
     );

@@ -1638,6 +1638,99 @@ server:
       Logger: () => BufferLogger.test(),
     },
   );
+
+  group('run --web-experimental-hot-reload flag', () {
+    late BufferLogger logger;
+    late TestDeviceManager testDeviceManager;
+    late FileSystem fileSystem;
+
+    setUp(() {
+      logger = BufferLogger.test();
+
+      final fakeDevice = FakeDevice();
+      testDeviceManager = TestDeviceManager(logger: logger)..devices = <Device>[fakeDevice];
+      testDeviceManager.specifiedDeviceId = fakeDevice.id;
+
+      fileSystem = MemoryFileSystem.test();
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      final Directory libDir = fileSystem.currentDirectory.childDirectory('lib');
+      libDir.createSync();
+      final File mainFile = libDir.childFile('main.dart');
+      mainFile.writeAsStringSync('void main() {}');
+    });
+    testUsingContext(
+      'no warning triggered when web hot reload flag not present',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when web hot reload flag is passed (enabled)',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--web-experimental-hot-reload']);
+        expect(
+          testLogger.warningText,
+          contains(
+            'Hot reload on the web is now enabled by default. '
+            'The "--web-experimental-hot-reload" flag is deprecated '
+            'and will be removed in an upcoming release.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when web hot reload flag is passed (disabled)',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-web-experimental-hot-reload']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'Hot reload on the web is now enabled by default. '
+            'The "--no-web-experimental-hot-reload" flag is deprecated '
+            'and will be removed in an upcoming release. '
+            'If your web development workflow depends on disabling hot reload, '
+            'please open an issue explaining why at '
+            'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+  });
 }
 
 class TestDeviceManager extends DeviceManager {

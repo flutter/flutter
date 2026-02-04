@@ -699,6 +699,26 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
+      if (webEnableHotReload) {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release.',
+        );
+      } else {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release. '
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+        );
+      }
+    }
+
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
