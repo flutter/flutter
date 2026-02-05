@@ -741,7 +741,7 @@ enum DarwinArch {
   /// merged into a universal binary using the `lipo` tool.
   String get dartName {
     return switch (this) {
-      DarwinArch.armv7 => 'armv7',
+      armv7 => 'armv7',
       arm64 => 'arm64',
       x86_64 => 'x64',
     };
