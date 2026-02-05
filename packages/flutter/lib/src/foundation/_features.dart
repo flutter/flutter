@@ -31,7 +31,7 @@ bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 /// If this returns `false`, `@internal` APIs in the following
 /// files will throw an `UnsupportedError`:
 ///
-/// 1. packages/flutter/lib/src/widgets/accessibility_evaluations.dart
+/// 1. packages/flutter/lib/src/widgets/_accessibility_evaluations.dart
 ///
 /// See: https://github.com/flutter/flutter/issues/32057.
 @internal

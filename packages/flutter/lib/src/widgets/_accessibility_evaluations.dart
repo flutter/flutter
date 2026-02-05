@@ -28,7 +28,9 @@ See: https://github.com/flutter/flutter/issues/32057.
 ''';
 
 /// {@template flutter.widgets.accessibility_evaluations.internal}
-/// Do not use in production, Flutter will make breaking changes to this API, even in patch versions
+/// Do not use in production.
+///
+/// Flutter will make breaking changes to this API, even in patch versions.
 /// {@endtemplate}
 ///
 /// A violation of a semantics node.
@@ -129,7 +131,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       if (transform != null) {
         paintBounds = MatrixUtils.transformRect(transform, paintBounds);
       }
-      // skip node if it is touching the edge scrollable, since it might
+      // Skip node if it is touching the edge of the scrollable, since it might
       // be partially scrolled offscreen.
       if (current.flagsCollection.hasImplicitScrolling &&
           _isAtBoundary(paintBounds, current.rect)) {
@@ -143,7 +145,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       return violations;
     }
 
-    // shrink by device pixel ratio.
+    // Shrink by device pixel ratio.
     final Size candidateSize = paintBounds.size / view.devicePixelRatio;
     if (candidateSize.width < size.width - precisionErrorTolerance ||
         candidateSize.height < size.height - precisionErrorTolerance) {
@@ -304,7 +306,7 @@ class MinimumTextContrastEvaluation extends AccessibilityEvaluation {
   ) async {
     final violations = <Violation>[];
 
-    // Skip disabled nodes, as they not required to pass contrast check.
+    // Skip disabled nodes, as they are not required to pass contrast checks.
     final isDisabled = node.flagsCollection.isEnabled == ui.Tristate.isFalse;
 
     if (node.isInvisible ||
@@ -508,9 +510,6 @@ class MinimumTextContrastEvaluationAAA extends MinimumTextContrastEvaluation {
 }
 
 /// A class that reports the contrast ratio of a part of the screen.
-///
-/// Commonly used in accessibility testing to obtain the contrast ratio of
-/// text widgets and other types of widgets.
 class _ContrastReport {
   /// Generates a contrast report given a color histogram.
   ///
@@ -518,7 +517,7 @@ class _ContrastReport {
   /// frequent dark color is calculated. Colors are divided into light and
   /// dark colors based on their lightness as an [HSLColor].
   factory _ContrastReport(Map<Color, int> colorHistogram) {
-    // To determine the lighter and darker color, partition the colors
+    // To determine the lighter and darker colors, partition the colors
     // by HSL lightness and then choose the mode from each group.
     var totalLightness = 0.0;
     var count = 0;
@@ -532,7 +531,7 @@ class _ContrastReport {
     MapEntry<Color, int>? lightColor;
     MapEntry<Color, int>? darkColor;
 
-    // Find the most frequently occurring light and dark color.
+    // Find the most frequently occurring light and dark colors.
     for (final MapEntry<Color, int> entry in colorHistogram.entries) {
       final double lightness = HSLColor.fromColor(entry.key).lightness;
       final int count = entry.value;
@@ -545,7 +544,7 @@ class _ContrastReport {
       }
     }
 
-    // If there is only single color, it is reported as both dark and light.
+    // If there is only a single color, it is reported as both dark and light.
     return _ContrastReport._(lightColor?.key ?? darkColor!.key, darkColor?.key ?? lightColor!.key);
   }
 
