@@ -70,6 +70,9 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
+  /// Whether accessibility evaluations is enabled.
+  bool get isAccessibilityEvaluationsEnabled;
+
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 

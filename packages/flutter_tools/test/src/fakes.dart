@@ -591,6 +591,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
+  final bool isAccessibilityEvaluationsEnabled;
+
+  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -615,6 +618,7 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
+      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
