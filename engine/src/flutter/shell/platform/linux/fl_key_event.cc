@@ -59,11 +59,17 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
                        nullptr);
 
   guint16 keycode = 0;
-  gdk_event_get_keycode(event, &keycode);
   guint keyval = 0;
-  gdk_event_get_keyval(event, &keyval);
   GdkModifierType state = static_cast<GdkModifierType>(0);
+#if FLUTTER_LINUX_GTK4
+  keycode = static_cast<guint16>(gdk_key_event_get_keycode(event));
+  keyval = gdk_key_event_get_keyval(event);
+  state = gdk_event_get_modifier_state(event);
+#else
+  gdk_event_get_keycode(event, &keycode);
+  gdk_event_get_keyval(event, &keyval);
   gdk_event_get_state(event, &state);
+#endif
 
   self->time = gdk_event_get_time(event);
   self->is_press = type == GDK_KEY_PRESS;
@@ -71,7 +77,7 @@ FlKeyEvent* fl_key_event_new_from_gdk_event(GdkEvent* event) {
   self->keyval = keyval;
   self->state = state;
 #if FLUTTER_LINUX_GTK4
-  self->group = 0;
+  self->group = static_cast<guint8>(gdk_key_event_get_layout(event));
   self->origin = gdk_event_ref(event);
 #else
   self->group = event->key.group;
