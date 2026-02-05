@@ -344,9 +344,6 @@ class _SingleTickerCreateMultipleTickerState extends State<_SingleTickerCreateMu
 }
 
 /// A widget that creates and runs a ticker for testing purposes.
-///
-/// This is used instead of Material progress indicators to avoid
-/// cross-library imports in widget tests.
 class _TickerWidget extends StatefulWidget {
   const _TickerWidget();
 
