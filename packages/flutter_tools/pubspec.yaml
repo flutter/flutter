@@ -102,7 +102,7 @@ dependencies:
   shelf_proxy: 1.0.4
   source_map_stack_trace: 2.1.2
   source_maps: 0.10.13
-  source_span: 1.10.1
+  source_span: 1.10.2
   sprintf: 7.0.0
   sse: 4.1.8
   string_scanner: 1.4.1
@@ -128,4 +128,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: nl0tev
+# PUBSPEC CHECKSUM: aseqsm
