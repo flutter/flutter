@@ -2901,8 +2901,8 @@ class _DayItemState extends State<_DayItem> {
     _HighlightPainter? highlightPainter;
 
     if (widget.isSelectedDayStart || widget.isSelectedDayEnd) {
-      // The selected start and end dates gets a circle background
-      // highlight, and a contrasting text color.
+      // The selected start and end dates get a background highlight
+      // matching the day shape, and a contrasting text color.
       itemStyle = itemStyle?.apply(color: dayForegroundColor);
       decoration = ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
@@ -2929,8 +2929,7 @@ class _DayItemState extends State<_DayItem> {
     } else if (widget.isDisabled) {
       itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withOpacity(0.38));
     } else if (widget.isToday) {
-      // The current day gets a different text color and a circle stroke
-      // border.
+      // The current day gets a different text color and a stroke border.
       itemStyle = itemStyle?.apply(color: colorScheme.primary);
       final BorderSide todaySide = (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
         color: colorScheme.primary,
