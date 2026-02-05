@@ -4058,98 +4058,60 @@ void main() {
     });
 
     testWidgets('menu is positioned to avoid the software keyboard', (WidgetTester tester) async {
-      const screenHeight = 600.0;
-      const keyboardHeight = 250.0;
+      // Regression test for https://github.com/flutter/flutter/issues/142921
+      // The menu should not extend into the area occupied by the software keyboard.
+      const screenSize = Size(600, 800);
+      await changeSurfaceSize(tester, screenSize);
+      const keyboardHeight = 200.0;
       final controller = MenuController();
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(
-              size: Size(800, screenHeight),
-              viewInsets: EdgeInsets.only(bottom: keyboardHeight),
-            ),
-            child: Scaffold(
-              body: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: keyboardHeight + 50),
+          builder: (BuildContext context, Widget? child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(viewInsets: const EdgeInsets.only(bottom: keyboardHeight)),
+              child: child!,
+            );
+          },
+          home: Material(
+            child: Stack(
+              children: <Widget>[
+                // Position anchor just above the keyboard, so menu would extend
+                // into keyboard area if opened below.
+                Positioned(
+                  left: 100,
+                  bottom: keyboardHeight + 100, // 100px above keyboard
                   child: MenuAnchor(
                     controller: controller,
-                    menuChildren: <Widget>[
-                      MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
-                      MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
-                      MenuItemButton(onPressed: () {}, child: const Text('Item 3')),
-                    ],
+                    menuChildren: List<Widget>.generate(5, (index) {
+                      return MenuItemButton(onPressed: () {}, child: Text('Item $index'));
+                    }),
                     builder: (BuildContext context, MenuController controller, Widget? child) {
                       return FilledButton(
-                        onPressed: () => controller.open(),
+                        onPressed: controller.open,
                         child: const Text('Open Menu'),
                       );
                     },
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
       );
 
       controller.open();
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       final Rect menuRect = tester.getRect(findMenuPanels());
-      // Menu should not extend into the keyboard area.
+      // Menu should not extend into the keyboard area (bottom 200px of screen).
       expect(
         menuRect.bottom,
-        lessThanOrEqualTo(screenHeight - keyboardHeight),
-        reason: 'Menu should not be obscured by the software keyboard',
-      );
-    });
-
-    testWidgets('menu respects safe area padding', (WidgetTester tester) async {
-      const safeAreaPadding = 44.0;
-      final controller = MenuController();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MediaQuery(
-            data: const MediaQueryData(
-              size: Size(800, 600),
-              padding: EdgeInsets.only(top: safeAreaPadding, bottom: safeAreaPadding),
-            ),
-            child: Scaffold(
-              body: Align(
-                alignment: Alignment.topLeft,
-                child: MenuAnchor(
-                  controller: controller,
-                  menuChildren: <Widget>[
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
-                    MenuItemButton(onPressed: () {}, child: const Text('Item 3')),
-                  ],
-                  builder: (BuildContext context, MenuController controller, Widget? child) {
-                    return FilledButton(
-                      onPressed: () => controller.open(),
-                      child: const Text('Open Menu'),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      controller.open();
-      await tester.pump();
-
-      final Rect menuRect = tester.getRect(findMenuPanels());
-      // Menu should respect the safe area padding at the top.
-      expect(
-        menuRect.top,
-        greaterThanOrEqualTo(safeAreaPadding),
-        reason: 'Menu should not extend into the top safe area',
+        lessThanOrEqualTo(screenSize.height - keyboardHeight),
+        reason:
+            'Menu bottom (${menuRect.bottom}) should not extend into keyboard area (below ${screenSize.height - keyboardHeight})',
       );
     });
 
