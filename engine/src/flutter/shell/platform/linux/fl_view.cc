@@ -776,6 +776,14 @@ static void size_allocate_cb(FlView* self) {
   handle_geometry_changed(self);
 }
 
+#if FLUTTER_LINUX_GTK4
+static void resize_cb(FlView* self, int width, int height) {
+  (void)width;
+  (void)height;
+  handle_geometry_changed(self);
+}
+#endif
+
 static void paint_background(FlView* self, cairo_t* cr) {
   // Don't bother drawing if fully transparent - the widget above this will
   // already be drawn by GTK.
@@ -1084,8 +1092,13 @@ static void fl_view_init(FlView* self) {
 #endif
   g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
                            self);
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect_swapped(self->render_area, "resize", G_CALLBACK(resize_cb),
+                           self);
+#else
   g_signal_connect_swapped(self->render_area, "size-allocate",
                            G_CALLBACK(size_allocate_cb), self);
+#endif
 #if FLUTTER_LINUX_GTK4
   gtk_drawing_area_set_draw_func(self->render_area, draw_cb_gtk4, self,
                                  nullptr);
