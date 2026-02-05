@@ -5,10 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 
-#include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 G_BEGIN_DECLS
+
+#if !FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
 
 /**
  * fl_view_get_accessible:
@@ -19,6 +21,7 @@ G_BEGIN_DECLS
  * Returns: an #FlViewAccessible.
  */
 FlViewAccessible* fl_view_get_accessible(FlView* view);
+#endif
 
 G_END_DECLS
 

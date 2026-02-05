@@ -4,18 +4,24 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
+#if !FLUTTER_LINUX_GTK4
 #include <atk/atk.h>
+#endif
 #if FLUTTER_LINUX_GTK4
 #include <gdk/wayland/gdkwayland.h>
 #else
 #include <gdk/gdkwayland.h>
 #endif
+#if !FLUTTER_LINUX_GTK4
 #include <gtk/gtk-a11y.h>
+#endif
 
 #include <cstring>
 
 #include "flutter/common/constants.h"
+#if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
+#endif
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -25,9 +31,13 @@
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
+#endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
+#if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
+#endif
 #include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
@@ -78,8 +88,10 @@ struct _FlView {
   // Manages touch events.
   FlTouchManager* touch_manager;
 
+#if !FLUTTER_LINUX_GTK4
   // Accessible tree from Flutter, exposed as an AtkPlug.
   FlViewAccessible* view_accessible;
+#endif
 
   // Signal subscripton for cursor changes.
   guint cursor_changed_cb_id;
@@ -160,8 +172,26 @@ static void init_touch(FlView* self) {
 }
 
 static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
+#if FLUTTER_LINUX_GTK4
+  GdkDevice* device = gdk_event_get_device(event);
+#else
   GdkDevice* device = gdk_event_get_source_device(event);
+#endif
   GdkInputSource source = gdk_device_get_source(device);
+#if FLUTTER_LINUX_GTK4
+  switch (source) {
+    case GDK_SOURCE_PEN:
+    case GDK_SOURCE_TABLET_PAD:
+      return kFlutterPointerDeviceKindStylus;
+    case GDK_SOURCE_TOUCHSCREEN:
+      return kFlutterPointerDeviceKindTouch;
+    case GDK_SOURCE_TOUCHPAD:
+    case GDK_SOURCE_TRACKPOINT:
+    case GDK_SOURCE_KEYBOARD:
+    case GDK_SOURCE_MOUSE:
+      return kFlutterPointerDeviceKindMouse;
+  }
+#else
   switch (source) {
     case GDK_SOURCE_PEN:
     case GDK_SOURCE_ERASER:
@@ -176,6 +206,8 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
     case GDK_SOURCE_MOUSE:
       return kFlutterPointerDeviceKindMouse;
   }
+#endif
+  return kFlutterPointerDeviceKindMouse;
 }
 
 // Called when the mouse cursor changes.
@@ -187,8 +219,12 @@ static void cursor_changed_cb(FlView* self) {
   if (surface == nullptr) {
     return;
   }
+#if FLUTTER_LINUX_GTK4
+  g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_name(cursor_name, nullptr);
+#else
   g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_name(
       fl_gtk_surface_get_display(surface), cursor_name);
+#endif
   fl_gtk_surface_set_cursor(surface, cursor);
 }
 
@@ -260,7 +296,12 @@ static void update_semantics_cb(FlView* self,
     return;
   }
 
+#if !FLUTTER_LINUX_GTK4
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
+#else
+  (void)self;
+  (void)update;
+#endif
 }
 
 // Invoked by the engine right before the engine is restarted.
@@ -307,8 +348,12 @@ static void fl_view_plugin_registry_iface_init(
 
 static void sync_modifier_if_needed(FlView* self, GdkEvent* event) {
   guint event_time = gdk_event_get_time(event);
+#if FLUTTER_LINUX_GTK4
+  GdkModifierType event_state = gdk_event_get_modifier_state(event);
+#else
   GdkModifierType event_state = static_cast<GdkModifierType>(0);
   gdk_event_get_state(event, &event_state);
+#endif
   fl_keyboard_manager_sync_modifier_if_needed(
       fl_engine_get_keyboard_manager(self->engine), event_state, event_time);
 }
@@ -840,7 +885,9 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
 #endif
+#if !FLUTTER_LINUX_GTK4
   g_clear_object(&self->view_accessible);
+#endif
   g_clear_object(&self->cancellable);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
@@ -848,7 +895,9 @@ static void fl_view_dispose(GObject* object) {
 
 // Implements GtkWidget::realize.
 static void fl_view_realize(GtkWidget* widget) {
+#if !FLUTTER_LINUX_GTK4
   FlView* self = FL_VIEW(widget);
+#endif
 
   GTK_WIDGET_CLASS(fl_view_parent_class)->realize(widget);
 
@@ -936,16 +985,20 @@ static void fl_view_class_init(FlViewClass* klass) {
       g_signal_new("first-frame", fl_view_get_type(), G_SIGNAL_RUN_LAST, 0,
                    NULL, NULL, NULL, G_TYPE_NONE, 0);
 
+#if !FLUTTER_LINUX_GTK4
   gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
                                        fl_socket_accessible_get_type());
+#endif
 }
 
 // Engine related construction.
 static void setup_engine(FlView* self) {
+#if !FLUTTER_LINUX_GTK4
   self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+#endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
 
@@ -1144,7 +1197,9 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
   self->background_color = gdk_rgba_copy(color);
 }
 
+#if !FLUTTER_LINUX_GTK4
 FlViewAccessible* fl_view_get_accessible(FlView* self) {
   g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
   return self->view_accessible;
 }
+#endif
