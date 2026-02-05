@@ -1023,16 +1023,25 @@ to actually desugar the generator into something that uses an iterator class.
 
 ### Use dot shorthands to reduce redundant information
 
-Use dot shorthands to reduce redundant information. When declaring a variable,
-decide whether you want to infer the variable's type or not *first*, and then based on that,
-decide if you're still able to use a dot shorthand for the initializer.
+Use dot shorthands to reduce redundant information:
 
-<details>
-<summary>Always omit a local variable's obvious type over using dot shorthands.</summary>
+1. [Always omit a local variable's obvious type over using dot shorthands](#always-omit-a-local-variables-obvious-type-over-using-dot-shorthands).
+2. [Prefer using dot shorthands to initialize top-level variables and fields](#prefer-using-dot-shorthands-to-initialize-top-level-variables-and-fields).
+3. [Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter](#consider-using-dot-shorthands-to-omit-obvious-types-when-assigning-to-an-existing-variable-field-or-setter).
+4. [Prefer using dot shorthands to omit obvious types for named argument values](#prefer-using-dot-shorthands-to-omit-obvious-types-for-named-argument-values).
+5. [Don't use dot shorthands for positional argument values](#dont-use-dot-shorthands-for-positional-argument-values).
+6. [Prefer using dot shorthands for implicit returns](#prefer-using-dot-shorthands-for-implicit-returns).
+7. [Prefer using explicit types for explicit returns](#prefer-using-explicit-types-for-explicit-returns).
+8. [Prefer using dot shorthands to omit obvious types for the default values of constructors' initializing formals](#prefer-using-dot-shorthands-to-omit-obvious-types-for-default-values-of-constructors-initializing-formals).
+9. [Prefer using dot shorthands for switch cases to omit obvious types](#prefer-using-dot-shorthands-for-switch-cases-to-omit-obvious-types).
+10. [Prefer using dot shorthands in collection literals if the collection's element type is obvious](#prefer-using-dot-shorthands-in-collection-literals-if-the-collections-element-type-is-obvious).
+
+
+#### Always omit a local variable's obvious type over using dot shorthands
 
 When declaring a variable, decide whether you want to infer the variable's type or not *first*,
 and then based on that, decide if you're still able to use a dot shorthand for the initializer.
-In other words, the rule to omit a variable’s obvious type has higher precedence than the rule
+In other words, the rule to omit a variable's obvious type has higher precedence than the rule
 to use dot shorthands.
 
 ```dart
@@ -1055,10 +1064,8 @@ void foo() {
 }
 ```
 
-</details>
 
-<details>
-<summary>Prefer using dot shorthands to initialize top-level variables and fields.</summary>
+#### Prefer using dot shorthands to initialize top-level variables and fields
 
 Top-level variables and fields must have explicit types, so top-level variables and fields can
 use dot shorthands to initialize their values.
@@ -1091,10 +1098,8 @@ class Foo {
 }
 ```
 
-</details>
 
-<details>
-<summary>Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter.</summary>
+#### Consider using dot shorthands to omit obvious types when assigning to an existing variable, field, or setter
 
 ```dart
 void foo() {
@@ -1132,10 +1137,8 @@ void foo() {
 }
 ```
 
-</details>
 
-<details>
-<summary>Prefer using dot shorthands to omit obvious types for named argument values.</summary>
+#### Prefer using dot shorthands to omit obvious types for named argument values
 
 ```dart
 // ✅ Good. Uses dot shorthands for named argument values
@@ -1162,7 +1165,7 @@ Text('Hello world', textScaler: .new()),
 Text('Hello world', textScaler: TextScaler()),
 ```
 
-A special case is the `EdgeInsetsGeometry` type: it is considered obvious for named arguments like “padding”:
+A special case is the `EdgeInsetsGeometry` type: it is considered obvious for named arguments like "padding":
 
 ```dart
 // ✅ Good. Use dot shorthands for named argument values
@@ -1193,10 +1196,8 @@ Chip(
 ),
 ```
 
-</details>
 
-<details>
-<summary>Don't use dot shorthands for positional argument values.</summary>
+#### Don't use dot shorthands for positional argument values.
 
 ```dart
 // ❌ BAD. Uses dot shorthands for positional argument values.
@@ -1214,10 +1215,8 @@ Curve2DSample(0.5, Offset.zero)
 decodeImageFromList(Uint8List(1024)),
 ```
 
-</details>
 
-<details>
-<summary>Prefer using dot shorthands for implicit returns.</summary>
+#### Prefer using dot shorthands for implicit returns
 
 ```dart
 // ✅ Good. Uses dot shorthands for implicit returns.
@@ -1235,10 +1234,8 @@ Text createText() => doThing((ThingEnum thing) => switch (thing) {
 });
 ```
 
-</details>
 
-<details>
-<summary>Prefer using explicit types for explicit returns.</summary>
+#### Prefer using explicit types for explicit returns
 
 ```dart
 // ✅ Good. Uses explicit types for explicit returns.
@@ -1264,10 +1261,8 @@ Text createText() {
 }
 ```
 
-</details>
 
-<details>
-<summary>Prefer using dot shorthands to omit obvious types for the default values of constructors’ initializing formals.</summary>
+#### Prefer using dot shorthands to omit obvious types for default values of constructors' initializing formals
 
 ```dart
 class Foo {
@@ -1283,9 +1278,8 @@ class Foo {
 }
 ```
 
-</details>
 
-<details><summary>Prefer using dot shorthands for switch cases to omit obvious types.</summary>
+#### Prefer using dot shorthands for switch cases to omit obvious types
 
 ```dart
 void foo() {
@@ -1318,10 +1312,8 @@ void foo() {
 }
 ```
 
-</details>
 
-<details>
-<summary>Prefer using dot shorthands in collection literals if the collection’s element type is obvious.</summary>
+#### Prefer using dot shorthands in collection literals if the collection's element type is obvious
 
 ```dart
 void foo() {
@@ -1345,8 +1337,6 @@ void foo() {
   var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('World')];
 }
 ```
-
-</details>
 
 
 ## Writing tests
