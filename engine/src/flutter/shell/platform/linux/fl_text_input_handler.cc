@@ -216,9 +216,16 @@ static void im_preedit_end_cb(FlTextInputHandler* self) {
 // Signal handler for GtkIMContext::retrieve-surrounding
 static gboolean im_retrieve_surrounding_cb(FlTextInputHandler* self) {
   auto text = self->text_model->GetText();
+  flutter::TextRange selection = self->text_model->selection();
   size_t cursor_offset = self->text_model->GetCursorOffset();
+#if FLUTTER_LINUX_GTK4
+  gtk_im_context_set_surrounding_with_selection(
+      self->im_context, text.c_str(), -1, static_cast<int>(cursor_offset),
+      static_cast<int>(selection.base()));
+#else
   gtk_im_context_set_surrounding(self->im_context, text.c_str(), -1,
                                  cursor_offset);
+#endif
   return TRUE;
 }
 
@@ -338,12 +345,12 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
 
   // Transform the x, y positions of the cursor from local coordinates to
   // Flutter view coordinates.
-  gint x = self->composing_rect.x * self->editabletext_transform[0][0] +
-           self->composing_rect.y * self->editabletext_transform[1][0] +
-           self->editabletext_transform[3][0] + self->composing_rect.width;
-  gint y = self->composing_rect.x * self->editabletext_transform[0][1] +
-           self->composing_rect.y * self->editabletext_transform[1][1] +
-           self->editabletext_transform[3][1] + self->composing_rect.height;
+  double x = self->composing_rect.x * self->editabletext_transform[0][0] +
+             self->composing_rect.y * self->editabletext_transform[1][0] +
+             self->editabletext_transform[3][0] + self->composing_rect.width;
+  double y = self->composing_rect.x * self->editabletext_transform[0][1] +
+             self->composing_rect.y * self->editabletext_transform[1][1] +
+             self->editabletext_transform[3][1] + self->composing_rect.height;
 
   // Transform from Flutter view coordinates to GTK window coordinates.
   GdkRectangle preedit_rect = {};
@@ -352,8 +359,19 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
 #else
   GtkWidget* toplevel = gtk_widget_get_toplevel(self->widget);
 #endif
-  gtk_widget_translate_coordinates(self->widget, toplevel, x, y,
-                                   &preedit_rect.x, &preedit_rect.y);
+#if FLUTTER_LINUX_GTK4
+  double dest_x = 0.0;
+  double dest_y = 0.0;
+  gtk_widget_translate_coordinates(self->widget, toplevel, x, y, &dest_x,
+                                   &dest_y);
+  preedit_rect.x = static_cast<int>(dest_x);
+  preedit_rect.y = static_cast<int>(dest_y);
+#else
+  gtk_widget_translate_coordinates(self->widget, toplevel,
+                                   static_cast<gint>(x),
+                                   static_cast<gint>(y), &preedit_rect.x,
+                                   &preedit_rect.y);
+#endif
 
   // Set the cursor location in window coordinates so that GTK can position
   // any system input method windows.
@@ -507,7 +525,11 @@ gboolean fl_text_input_handler_filter_keypress(FlTextInputHandler* self,
 
   if (gtk_im_context_filter_keypress(
           self->im_context,
+#if FLUTTER_LINUX_GTK4
+          fl_key_event_get_origin(event))) {
+#else
           reinterpret_cast<GdkEventKey*>(fl_key_event_get_origin(event)))) {
+#endif
     return TRUE;
   }
 
