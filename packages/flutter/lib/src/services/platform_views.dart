@@ -1267,14 +1267,12 @@ class TextureAndroidViewController extends AndroidViewController {
     if (response is int) {
       (_internals as _TextureAndroidViewControllerInternals).textureId = response;
     } else {
-      // Fallback to HCPP.
       _internals = _Hybrid2AndroidViewControllerInternals();
     }
   }
 
   @override
   int? get textureId {
-    // If we've fallen back to HCPP, we don't have a texture ID.
     if (_internals.requiresViewComposition) {
       return null;
     }
