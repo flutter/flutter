@@ -61,7 +61,7 @@ class TestWidgetsApp extends StatelessWidget {
     this.pageRouteBuilder = _defaultPageRouteBuilder,
   });
 
-  /// {@macro flutter.widgets.widgetsApp.navigatorKey}
+  /// A key to use when building the [Navigator].
   ///
   /// In tests, this allows direct access to the [NavigatorState] for
   /// programmatic navigation without needing to find the [Navigator] widget:
@@ -74,33 +74,51 @@ class TestWidgetsApp extends StatelessWidget {
   /// ));
   /// navigatorKey.currentState!.pushNamed('/details');
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.navigatorKey], the equivalent property in the full app widget.
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  /// {@macro flutter.widgets.widgetsApp.home}
+  /// The widget displayed when the app launches.
   ///
   /// In tests, this is where you place the widget under test. The widget
   /// will have access to [Navigator], [Overlay], and other app-level
   /// services provided by [WidgetsApp].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.home], the equivalent property in the full app widget.
   final Widget? home;
 
   /// The application's top-level routing table.
   ///
-  /// {@macro flutter.widgets.widgetsApp.routes}
+  /// Maps route names to widget builders. When navigating to a named route,
+  /// the corresponding builder is called to create the route's content.
   ///
   /// In tests, routes are built using [pageRouteBuilder], which defaults to
   /// zero-duration transitions for instant navigation without waiting for
   /// animations.
   ///
   /// Defaults to an empty map.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.routes], the equivalent property in the full app widget.
   final Map<String, WidgetBuilder> routes;
 
-  /// {@macro flutter.widgets.widgetsApp.color}
+  /// The primary color to use for the application in the operating system
+  /// interface.
   ///
   /// In tests, this is typically not relevant as OS-level features are not
   /// exercised. Defaults to white.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.color], the equivalent property in the full app widget.
   final Color color;
 
-  /// {@macro flutter.widgets.widgetsApp.pageRouteBuilder}
+  /// A function that creates page routes for named navigation.
   ///
   /// Defaults to a [PageRouteBuilder] with no transition animation, allowing
   /// instant navigation without calling [WidgetTester.pumpAndSettle].
@@ -122,6 +140,10 @@ class TestWidgetsApp extends StatelessWidget {
   ///   home: const Text('Home'),
   /// )
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.pageRouteBuilder], the equivalent property in the full app widget.
   final PageRouteFactory pageRouteBuilder;
 
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
