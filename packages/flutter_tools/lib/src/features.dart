@@ -100,6 +100,7 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -237,6 +238,17 @@ const windowingFeature = Feature(
   configSetting: 'enable-windowing',
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Whether desktop windowing is enabled.
+///
+/// See: https://github.com/flutter/flutter/issues/30701.
+const accessibilityEvaluationsFeature = Feature(
+  name: 'support for accessibility evaluations',
+  configSetting: 'enable-accessibility-evaluations',
+  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
+  runtimeId: 'accessibility-evaluations',
   master: FeatureChannelSetting(available: true),
 );
 

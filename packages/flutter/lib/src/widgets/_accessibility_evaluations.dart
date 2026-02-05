@@ -22,9 +22,7 @@ production applications or plugins published to pub.dev.
 
 To try experimental accessibility evaluations APIs:
 1. Switch to Flutter's main release channel.
-2. Turn on the accessibility evaluations feature flag.
-
-See: https://github.com/flutter/flutter/issues/32057.
+2. Turn on the accessibility evaluations feature flag. (See flutter config --help)
 ''';
 
 /// {@template flutter.widgets.accessibility_evaluations.internal}
