@@ -10,9 +10,6 @@ void main() {
   testWidgets('pre-test message meets text contrast guideline', (WidgetTester tester) async {
     // The pre-test message is already attached to the render tree by the
     // TestWidgetsFlutterBinding before this test runs, so no pumpWidget is needed.
-    await expectLater(
-      tester,
-      meetsGuideline(textContrastGuideline),
-    );
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
   });
 }
