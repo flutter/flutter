@@ -1844,6 +1844,70 @@ void main() {
     );
     expect(tester.getSize(find.byType(FormField<String>)), Size.zero);
   });
+
+  testWidgets('clearError() clears error but keeps value', (WidgetTester tester) async {
+    final fieldKey = GlobalKey<FormFieldState<String>>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            child: TextFormField(key: fieldKey, initialValue: 'foo', validator: errorText),
+          ),
+        ),
+      ),
+    );
+
+    fieldKey.currentState?.validate();
+    await tester.pump();
+    expect(find.text(errorText('foo')), findsOneWidget);
+
+    fieldKey.currentState?.clearError();
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsNothing);
+
+    // Value is preserved.
+    expect(find.text('foo'), findsOneWidget);
+  });
+
+  testWidgets('clearError() clears all field errors', (WidgetTester tester) async {
+    final formKey = GlobalKey<FormState>();
+    String errorText(String? value) => '$value/error';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(
+            key: formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(initialValue: 'foo', validator: errorText),
+                TextFormField(initialValue: 'bar', validator: errorText),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    formKey.currentState?.validate();
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsOneWidget);
+    expect(find.text(errorText('bar')), findsOneWidget);
+
+    formKey.currentState?.clearError();
+    await tester.pump();
+
+    expect(find.text(errorText('foo')), findsNothing);
+    expect(find.text(errorText('bar')), findsNothing);
+
+    // Values are preserved.
+    expect(find.text('foo'), findsOneWidget);
+    expect(find.text('bar'), findsOneWidget);
+  });
 }
 
 class _PlatformAnnounceScenario {
