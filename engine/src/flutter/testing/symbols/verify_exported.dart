@@ -253,7 +253,7 @@ final class NmEntry {
       '(__DATA,__objc_data)' => true,
       _ => false,
     };
-    if (!isTypeValid && name.startsWith(r'_$s')) {
+    if (!(isTypeValid && name.startsWith(r'_$s'))) {
       return false;
     }
 
