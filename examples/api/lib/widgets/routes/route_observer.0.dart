@@ -63,37 +63,39 @@ class _RouteObserverExampleState extends State<RouteObserverExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              'RouteObserver log:',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300.0),
-              child: ListView.builder(
-                itemCount: log.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (log.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Text(log[index], textAlign: TextAlign.center);
-                },
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                'RouteObserver log:',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) => const NextPage(),
-                  ),
-                );
-              },
-              child: const Text('Go to next page'),
-            ),
-          ],
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300.0),
+                child: ListView.builder(
+                  itemCount: log.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (log.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Text(log[index], textAlign: TextAlign.center);
+                  },
+                ),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => const NextPage(),
+                    ),
+                  );
+                },
+                child: const Text('Go to next page'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -177,6 +177,33 @@ void main() {
         expect(nodesWithPreviews.keys, unorderedMatches(project.librariesWithPreviews));
         expectNPreviewReloadTimingEvents(previewDetector, 2);
       });
+
+      testPreviewDetector('does not detect previews defined in tests', (
+        PreviewDetector previewDetector,
+      ) async {
+        project = await createProject(
+          projectRoot: previewDetector.projectRoot,
+          pathsWithPreviews: <String>[],
+          pathsWithoutPreviews: <String>[],
+        );
+        // The initial mapping should be empty as there's no files containing previews.
+        const expectedInitialMapping = <PreviewPath, LibraryPreviewNode>{};
+
+        final PreviewDependencyGraph mapping = await previewDetector.initialize();
+        expect(mapping.nodesWithPreviews, expectedInitialMapping);
+        expectNPreviewReloadTimingEvents(previewDetector, 0);
+
+        // Add a file containing previews under the test directory. Previews outside of lib/ are
+        // not valid.
+        await waitForNChangesDetected(
+          n: 1,
+          changeOperation: () => project.addPreviewContainingTestFile(path: 'foo.dart'),
+        );
+        final PreviewDependencyGraph nodesWithPreviews =
+            previewDetector.dependencyGraph.nodesWithPreviews;
+        expect(nodesWithPreviews, isEmpty);
+        expectNPreviewReloadTimingEvents(previewDetector, 1);
+      });
     }
 
     testPreviewDetector('can detect changes in the pubspec.yaml', (

@@ -48,6 +48,7 @@ export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';
 export 'src/rendering/image.dart';
+export 'src/rendering/image_filter_config.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/layout_helper.dart';
 export 'src/rendering/list_body.dart';

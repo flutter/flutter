@@ -12,7 +12,7 @@
   "shareButtonLabel": "แชร์",
   "pasteButtonLabel": "วาง",
   "selectAllButtonLabel": "เลือกทั้งหมด",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "พบผลการค้นหา",
+  "noResultsFound": "ไม่พบผลลัพธ์",
+  "radioButtonUnselectedLabel": "ไม่ได้เลือก"
 }

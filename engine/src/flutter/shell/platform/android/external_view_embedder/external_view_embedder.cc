@@ -7,6 +7,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
+#include "fml/make_copyable.h"
 
 namespace flutter {
 
@@ -225,6 +226,11 @@ void AndroidExternalViewEmbedder::PrepareFlutterView(
     DestroySurfaces();
   }
   surface_pool_->SetFrameSize(frame_size);
+
+  task_runners_.GetPlatformTaskRunner()->PostTask(
+      fml::MakeCopyable([jni_facade = jni_facade_, frame_size = frame_size]() {
+        jni_facade->MaybeResizeSurfaceView(frame_size.width, frame_size.height);
+      }));
 
   frame_size_ = frame_size;
   device_pixel_ratio_ = device_pixel_ratio;

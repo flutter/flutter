@@ -43,6 +43,28 @@ public class SettingsChannelTest {
   }
 
   @Test
+  @TargetApi(API_LEVELS.API_34)
+  @Config(minSdk = API_LEVELS.API_34)
+  public void twoDifferentSettingsChannelDoNotShareState() {
+    final DartExecutor executor = mock(DartExecutor.class);
+    executor.onAttachedToJNI();
+    final SettingsChannel settingsChannel1 = new SettingsChannel(executor);
+    final SettingsChannel settingsChannel2 = new SettingsChannel(executor);
+
+    DisplayMetrics metrics1 = mock(DisplayMetrics.class);
+    DisplayMetrics metrics2 = mock(DisplayMetrics.class);
+
+    settingsChannel1.startMessage().setTextScaleFactor(1.0f).setDisplayMetrics(metrics1).send();
+    settingsChannel2.startMessage().setTextScaleFactor(2.0f).setDisplayMetrics(metrics2).send();
+
+    int configId1 = settingsChannel1.configurationQueue.sentQueue.peek().generationNumber;
+    int configId2 = settingsChannel2.configurationQueue.sentQueue.peek().generationNumber;
+
+    assertEquals(metrics1, settingsChannel1.getPastDisplayMetrics(configId1));
+    assertEquals(metrics2, settingsChannel2.getPastDisplayMetrics(configId2));
+  }
+
+  @Test
   public void configurationQueueWorks() {
     final SettingsChannel.ConfigurationQueue queue = new SettingsChannel.ConfigurationQueue();
 

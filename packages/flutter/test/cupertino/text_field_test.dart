@@ -10909,4 +10909,19 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+
+  testWidgets('CupertinoTextField does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(child: CupertinoTextField(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTextField)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    tester.pump();
+  });
 }

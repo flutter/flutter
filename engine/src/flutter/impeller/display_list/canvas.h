@@ -283,31 +283,17 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
-  class RRectLikeBlurShape {
+  class BlurShape {
    public:
-    virtual ~RRectLikeBlurShape() = default;
-    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
-    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+    virtual ~BlurShape() = default;
+    virtual Rect GetBounds() const = 0;
+    virtual std::shared_ptr<SolidBlurContents> BuildBlurContent(
+        Sigma sigma) = 0;
+    virtual const Geometry& BuildDrawGeometry() = 0;
   };
-
-  class RRectBlurShape : public RRectLikeBlurShape {
-   public:
-    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
-    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
-
-   private:
-    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
-  };
-
-  class RSuperellipseBlurShape : public RRectLikeBlurShape {
-   public:
-    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
-    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
-
-   private:
-    std::optional<RoundSuperellipseGeometry>
-        geom_;  // optional stack allocation
-  };
+  class RRectBlurShape;
+  class RSuperellipseBlurShape;
+  class PathBlurShape;
 
   ContentContext& renderer_;
   RenderTarget render_target_;
@@ -395,22 +381,27 @@ class Canvas {
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
+  /// Returns true if this operation is consistent with a DrawShadow-like
+  /// operation.
+  static bool IsShadowBlurDrawOperation(const Paint& paint);
+
   bool AttemptDrawAntialiasedCircle(const Point& center,
                                     Scalar radius,
                                     const Paint& paint);
 
-  bool AttemptDrawBlurredRRect(const Rect& rect,
-                               Size corner_radii,
-                               const Paint& paint);
+  /// Returns the radius common to both width and height of all corners,
+  /// or -1 if the radii are not uniform.
+  static Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
 
-  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
-                                       Size corner_radii,
+  bool AttemptDrawBlurredPathSource(const PathSource& source,
+                                    const Paint& paint);
+
+  bool AttemptDrawBlurredRRect(const RoundRect& round_rect, const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const RoundSuperellipse& rse,
                                        const Paint& paint);
 
-  bool AttemptDrawBlurredRRectLike(const Rect& rect,
-                                   Size corner_radii,
-                                   const Paint& paint,
-                                   RRectLikeBlurShape& shape);
+  bool AttemptDrawBlur(BlurShape& shape, const Paint& paint);
 
   /// For simple DrawImageRect calls, optimize any draws with a color filter
   /// into the corresponding atlas draw.

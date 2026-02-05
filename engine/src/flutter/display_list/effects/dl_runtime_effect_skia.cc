@@ -30,4 +30,8 @@ std::shared_ptr<impeller::RuntimeStage> DlRuntimeEffectSkia::runtime_stage()
   return nullptr;
 }
 
+size_t DlRuntimeEffectSkia::uniform_size() const {
+  return skia_runtime_effect_->uniformSize();
+}
+
 }  // namespace flutter

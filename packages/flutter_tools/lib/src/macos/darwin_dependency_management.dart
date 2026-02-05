@@ -71,7 +71,12 @@ class DarwinDependencyManagement {
       // integrated for Swift Package Manager, pass no plugins to the generator.
       // This will still generate the required Package.swift, but it will have
       // no dependencies.
-      await _swiftPackageManager.generatePluginsSwiftPackage(<Plugin>[], platform, xcodeProject);
+      await _swiftPackageManager.generatePluginsSwiftPackage(
+        <Plugin>[],
+        platform,
+        xcodeProject,
+        flutterAsADependency: false,
+      );
     }
 
     // Skip updating Podfile if project is a module, since it will use a

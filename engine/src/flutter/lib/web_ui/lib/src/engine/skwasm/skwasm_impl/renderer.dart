@@ -14,9 +14,9 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
-  late SkwasmSurface surface;
-
   bool get isMultiThreaded => skwasmIsMultiThreaded();
+
+  bool get isWimp => skwasmIsWimp();
 
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
@@ -64,7 +64,12 @@ class SkwasmRenderer extends Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
-  }) => SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+    ui.Rect? bounds,
+  }) =>
+      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
+      // Fall back to unbounded blur.
+      // https://github.com/flutter/flutter/issues/175899
+      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
 
   @override
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
@@ -319,9 +324,10 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  FutureOr<void> initialize() {
-    surface = SkwasmSurface();
-    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
+  FutureOr<void> initialize() async {
+    rasterizer = OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+    );
     return super.initialize();
   }
 
@@ -447,7 +453,7 @@ class SkwasmRenderer extends Renderer {
         imageSource,
         imageSource.width,
         imageSource.height,
-        surface.handle,
+        (pictureToImageSurface as SkwasmSurface).handle,
       ),
     );
   }
@@ -468,7 +474,12 @@ class SkwasmRenderer extends Renderer {
       ))).toJSAnyShallow;
     }
     return SkwasmImage(
-      imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
+      imageCreateFromTextureSource(
+        textureSource as JSObject,
+        width,
+        height,
+        (pictureToImageSurface as SkwasmSurface).handle,
+      ),
     );
   }
 
@@ -524,6 +535,11 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = SkwasmOffscreenCanvasRasterizer(surface);
+    rasterizer = OffscreenCanvasRasterizer(
+      (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
+    );
   }
+
+  @override
+  Surface get pictureToImageSurface => (rasterizer as OffscreenCanvasRasterizer).offscreenSurface;
 }

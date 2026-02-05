@@ -10,6 +10,7 @@
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/lib/ui/painting/fragment_program.h"
+#include "flutter/lib/ui/painting/image_filter.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -60,7 +61,8 @@ bool ReusableFragmentShader::ValidateSamplers() {
 }
 
 void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
-                                             Dart_Handle image_handle) {
+                                             Dart_Handle image_handle,
+                                             int filterQualityIndex) {
   uint64_t index = tonic::DartConverter<uint64_t>::FromDart(index_handle);
   CanvasImage* image =
       tonic::DartConverter<CanvasImage*>::FromDart(image_handle);
@@ -81,7 +83,7 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
   //               sampling options as a new default parameter for users.
   samplers_[index] = DlColorSource::MakeImage(
       image->image(), DlTileMode::kClamp, DlTileMode::kClamp,
-      DlImageSampling::kNearestNeighbor, nullptr);
+      ImageFilter::SamplingFromIndex(filterQualityIndex), nullptr);
   // This should be true since we already checked the image above, but
   // we check again for sanity.
   FML_DCHECK(samplers_[index]->isUIThreadSafe());

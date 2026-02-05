@@ -87,6 +87,9 @@ class SnapshotDelegate {
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 
+  virtual sk_sp<DlImage> MakeTextureImage(sk_sp<SkImage> image,
+                                          SnapshotPixelFormat pixel_format) = 0;
+
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 
   /// Load and compile and initial PSO for the provided [runtime_stage].

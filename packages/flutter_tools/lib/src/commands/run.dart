@@ -36,6 +36,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
+    usesWebDefineOption();
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
@@ -291,6 +292,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
 
+    final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
+        ? boolArg('cross-origin-isolation')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -306,6 +310,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
@@ -362,6 +367,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
@@ -381,6 +387,30 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webDevServerConfig: webDevServerConfig,
       );
     }
+  }
+
+  Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+
+    // Determine HTTPS config with CLI > file precedence
+    final HttpsConfig? httpsConfig = HttpsConfig.parse(
+      stringArg('web-tls-cert-path') ?? fileConfig.https?.certPath,
+      stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
+    );
+
+    final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+    );
+    return webDevServerConfig;
   }
 }
 
@@ -487,25 +517,7 @@ class RunCommand extends RunCommandBase {
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
-      final String? webPortArg = stringArg('web-port');
-      final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
-
-      final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-
-      final HttpsConfig? httpsConfig = fileConfig.https?.copyWith(
-        certPath: stringArg('web-tls-cert-path'),
-        certKeyPath: stringArg('web-tls-cert-key-path'),
-      );
-
-      final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
-        host: stringArg('web-hostname'),
-        port: webPort,
-        https: httpsConfig,
-        headers: extractWebHeaders(),
-      );
+      final WebDevServerConfig webDevServerConfig = await webDevServerConfigCore();
       return webDevServerConfig;
     }
     return null;
@@ -687,6 +699,26 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
+      if (webEnableHotReload) {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release.',
+        );
+      } else {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release. '
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+        );
+      }
+    }
+
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
@@ -744,6 +776,7 @@ class RunCommand extends RunCommandBase {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
+        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -835,16 +868,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String>? expFlags;
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      expFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,

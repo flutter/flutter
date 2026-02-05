@@ -8,10 +8,10 @@ precision highp float;
 
 layout(location = 0) out vec4 color;
 
-layout(location = 0) uniform sampler2D child1;
-layout(location = 1) uniform float a;
-layout(location = 2) uniform sampler2D child2;
-layout(location = 3) uniform float b;
+uniform sampler2D child1;
+uniform float a;
+uniform sampler2D child2;
+uniform float b;
 
 void main() {
   // child1 is a 10x10 image where the left half is blue and the right

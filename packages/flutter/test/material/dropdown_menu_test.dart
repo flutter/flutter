@@ -506,6 +506,60 @@ void main() {
         paints..rect(color: defaultOverlayColor.withAlpha(0)),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/177363.
+    testWidgets('textStyle property is resolved when item is highlighted', (
+      WidgetTester tester,
+    ) async {
+      const TestMenu selectedItem = TestMenu.mainMenu3;
+      const TestMenu nonSelectedItem = TestMenu.mainMenu2;
+
+      final customButtonStyle = ButtonStyle(
+        textStyle: WidgetStateProperty.resolveWith(
+          (Set<WidgetState> states) => TextStyle(
+            fontWeight: states.contains(WidgetState.focused) ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      );
+
+      final menuEntries = <DropdownMenuEntry<TestMenu>>[];
+      for (final item in menuChildren) {
+        menuEntries.add(
+          DropdownMenuEntry<TestMenu>(
+            value: item.value,
+            label: item.label,
+            style: customButtonStyle,
+          ),
+        );
+      }
+
+      TextStyle? getItemLabelStyle(String label) {
+        final RenderObject paragraph = tester
+            .element<StatelessElement>(
+              find.descendant(of: findMenuItemButton(label), matching: find.text(label)),
+            )
+            .renderObject!;
+        return (paragraph as RenderParagraph).text.style;
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenu<TestMenu>(
+              initialSelection: selectedItem,
+              dropdownMenuEntries: menuEntries,
+            ),
+          ),
+        ),
+      );
+
+      // Open the menu.
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+
+      expect(getItemLabelStyle(selectedItem.label)?.fontWeight, FontWeight.bold);
+      expect(getItemLabelStyle(nonSelectedItem.label)?.fontWeight, FontWeight.normal);
+    });
   });
 
   testWidgets('Inner TextField is disabled when DropdownMenu is disabled', (
@@ -5279,6 +5333,49 @@ void main() {
       shouldFocusPrevious: textInputAction == TextInputAction.previous,
     );
   }, variant: focusVariants);
+
+  // Regression test for https://github.com/flutter/flutter/issues/180121.
+  testWidgets('Allow null entry to clear selection', (WidgetTester tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    const selectNoneLabel = 'Select none';
+    final nullableMenuItems = <DropdownMenuEntry<String?>>[
+      const DropdownMenuEntry<String?>(value: null, label: selectNoneLabel),
+      const DropdownMenuEntry<String?>(value: 'a', label: 'A'),
+      const DropdownMenuEntry<String?>(value: 'b', label: 'B'),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DropdownMenu<String?>(
+                controller: controller,
+                requestFocusOnTap: true,
+                enableFilter: true,
+                dropdownMenuEntries: nullableMenuItems,
+                onSelected: (_) {
+                  setState(() {});
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<String?>));
+    await tester.pump();
+
+    // Select the 'None' item.
+    await tester.tap(findMenuItemButton(selectNoneLabel));
+    await tester.pumpAndSettle();
+
+    expect(controller.text, selectNoneLabel);
+  });
 }
 
 enum TestMenu {

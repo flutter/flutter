@@ -24,6 +24,7 @@ import 'media_query.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
+import 'view.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -449,7 +450,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
         : localizations.noResultsFound;
-    SemanticsService.announce(optionsHint, localizations.textDirection);
+    SemanticsService.sendAnnouncement(View.of(context), optionsHint, localizations.textDirection);
   }
 
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
@@ -474,6 +475,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     _lastFieldText = value.text;
     final int callId = _onChangedCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
+
+    if (!mounted) {
+      return;
+    }
 
     // Makes sure that previous call results do not replace new ones.
     if (callId != _onChangedCallId || !shouldUpdateOptions) {

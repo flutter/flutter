@@ -4,14 +4,13 @@
 
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/inspect/component/cpp/component.h>
+#include <lib/syslog/cpp/log_settings.h>
 #include <lib/trace-provider/provider.h>
 #include <lib/trace/event.h>
 
 #include <cstdlib>
 
 #include "fml/message_loop.h"
-#include "fml/platform/fuchsia/log_interest_listener.h"
-#include "fml/platform/fuchsia/log_state.h"
 #include "lib/async/default.h"
 #include "logging.h"
 #include "platform/utils.h"
@@ -23,11 +22,11 @@
 int main(int argc, char const* argv[]) {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
-  // Setup logging.
-  fml::LogState::Default().SetTags({LOG_TAG});
-  fml::LogInterestListener listener(fml::LogState::Default().TakeClientEnd(),
-                                    async_get_default_dispatcher());
-  listener.AsyncWaitForInterestChanged();
+  // Set up logging.
+  fuchsia_logging::LogSettingsBuilder()
+      .WithTags({LOG_TAG})
+      .WithDispatcher(async_get_default_dispatcher())
+      .BuildAndInitialize();
 
   // Create our component context which is served later.
   auto context = sys::ComponentContext::Create();

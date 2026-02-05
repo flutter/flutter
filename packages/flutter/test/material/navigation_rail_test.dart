@@ -4037,6 +4037,7 @@ void main() {
       const trailingKey = Key('trailing');
       tester.view.physicalSize = const Size(800, 600);
       tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -4091,6 +4092,7 @@ void main() {
     const trailingKey = Key('trailing');
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -6196,10 +6198,14 @@ TestSemantics _expectedSemantics({bool scrollable = false}) {
           TestSemantics(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
-                  TestSemantics(children: destinations),
-                  TestSemantics(label: 'body', textDirection: TextDirection.ltr),
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(children: destinations),
+                      TestSemantics(label: 'body', textDirection: TextDirection.ltr),
+                    ],
+                  ),
                 ],
               ),
             ],

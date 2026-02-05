@@ -13,7 +13,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -71,11 +70,6 @@ public class ProcessTextPlugin
       return;
     }
 
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
-      result.error("error", "Android version not supported", null);
-      return;
-    }
-
     if (resolveInfosById == null) {
       result.error("error", "Can not process text actions before calling queryTextActions", null);
       return;
@@ -106,10 +100,6 @@ public class ProcessTextPlugin
   private void cacheResolveInfos() {
     resolveInfosById = new HashMap<String, ResolveInfo>();
 
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_23) {
-      return;
-    }
-
     Intent intent = new Intent().setAction(Intent.ACTION_PROCESS_TEXT).setType("text/plain");
 
     List<ResolveInfo> infos;
@@ -135,7 +125,6 @@ public class ProcessTextPlugin
    * <p>When an activity does not return a value. the request is completed successfully and returns
    * null.
    */
-  @RequiresApi(API_LEVELS.API_23)
   public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
     // Return early if the result is not related to a request sent by this plugin.
     if (!requestsByCode.containsKey(requestCode)) {

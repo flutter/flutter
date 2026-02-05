@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
 #include "flutter/shell/platform/windows/window_manager.h"
@@ -47,6 +48,7 @@ class WindowManagerTest : public WindowsTest {
   RegularWindowCreationRequest* regular_creation_request() {
     return &regular_creation_request_;
   }
+  FlutterWindowsEngine* engine() { return engine_.get(); }
 
  private:
   std::unique_ptr<FlutterWindowsEngine> engine_;
@@ -372,6 +374,270 @@ TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   InternalFlutterWindows_WindowManager_SetFullscreen(window_handle, &request);
   EXPECT_FALSE(
       InternalFlutterWindows_WindowManager_GetFullscreen(window_handle));
+}
+
+TEST_F(WindowManagerTest, CreateTooltipWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  const int64_t tooltip_view_id =
+      InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+          engine_id(), &creation_request);
+
+  EXPECT_NE(tooltip_view_id, -1);
+  HWND tooltip_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), tooltip_view_id);
+  EXPECT_NE(tooltip_window_handle, nullptr);
+}
+
+TEST_F(WindowManagerTest, TooltipWindowHasNoActivateStyle) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  const int64_t tooltip_view_id =
+      InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+          engine_id(), &creation_request);
+
+  HWND tooltip_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), tooltip_view_id);
+
+  DWORD ex_style = GetWindowLong(tooltip_window_handle, GWL_EXSTYLE);
+  EXPECT_TRUE(ex_style & WS_EX_NOACTIVATE);
+}
+
+TEST_F(WindowManagerTest, TooltipWindowDoesNotStealFocus) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  // Give focus to the parent window
+  SetFocus(parent_window_handle);
+  HWND focused_before = GetFocus();
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  const int64_t tooltip_view_id =
+      InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+          engine_id(), &creation_request);
+
+  HWND tooltip_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), tooltip_view_id);
+
+  // Verify focus remains with the parent window
+  HWND focused_after = GetFocus();
+  EXPECT_EQ(focused_before, focused_after);
+  EXPECT_NE(focused_after, tooltip_window_handle);
+}
+
+TEST_F(WindowManagerTest, TooltipWindowReturnsNoActivateOnMouseClick) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  const int64_t tooltip_view_id =
+      InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+          engine_id(), &creation_request);
+
+  HWND tooltip_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), tooltip_view_id);
+
+  // Send WM_MOUSEACTIVATE message to the tooltip window
+  LRESULT result = SendMessage(tooltip_window_handle, WM_MOUSEACTIVATE,
+                               reinterpret_cast<WPARAM>(parent_window_handle),
+                               MAKELPARAM(HTCLIENT, WM_LBUTTONDOWN));
+
+  // Verify the tooltip returns MA_NOACTIVATE
+  EXPECT_EQ(result, MA_NOACTIVATE);
+}
+
+TEST_F(WindowManagerTest, TooltipWindowUpdatesPositionOnViewSizeChange) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  // Track the child size passed to the callback
+  static int callback_count = 0;
+  static int last_width = 0;
+  static int last_height = 0;
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    callback_count++;
+    last_width = child_size.width;
+    last_height = child_size.height;
+
+    // Use malloc since the caller will use free()
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + callback_count * 5;
+    rect->top = parent_rect.top + callback_count * 5;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .is_sized_to_content = true,
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  // Reset callback tracking
+  callback_count = 0;
+  last_width = 0;
+  last_height = 0;
+
+  const int64_t tooltip_view_id =
+      InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+          engine_id(), &creation_request);
+
+  HWND tooltip_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), tooltip_view_id);
+
+  // Get the view associated with the tooltip window
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(tooltip_window_handle);
+  ASSERT_NE(view, nullptr);
+
+  // Get initial position
+  RECT initial_rect;
+  GetWindowRect(tooltip_window_handle, &initial_rect);
+  int initial_callback_count = callback_count;
+
+  // Simulate a frame being generated with new dimensions
+  // This should trigger DidUpdateViewSize which calls UpdatePosition
+  view->OnFrameGenerated(150, 100);
+
+  // Process any pending tasks to ensure the callback is executed
+  engine()->task_runner()->ProcessTasks();
+
+  // Verify the callback was called again with the new dimensions
+  EXPECT_GT(callback_count, initial_callback_count);
+  EXPECT_EQ(last_width, 150);
+  EXPECT_EQ(last_height, 100);
+
+  // Get new position and verify it changed
+  RECT new_rect;
+  GetWindowRect(tooltip_window_handle, &new_rect);
+
+  // The position should have changed due to our callback logic
+  // (we offset by callback_count * 5)
+  EXPECT_NE(initial_rect.left, new_rect.left);
+  EXPECT_NE(initial_rect.top, new_rect.top);
 }
 
 }  // namespace testing
