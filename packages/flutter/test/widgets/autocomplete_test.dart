@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'editable_text_utils.dart';
 import 'list_tile_test_utils.dart';
 import 'multi_view_testing.dart';
+import 'widgets_app_tester.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -3679,44 +3680,36 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              const SizedBox(height: 200),
-              RawAutocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        onSubmitted: (String value) {
-                          onFieldSubmitted();
-                        },
-                      );
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) => const Placeholder(),
-              ),
-              const SizedBox(height: 200),
-            ],
-          ),
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            const SizedBox(height: 200),
+            RawAutocomplete<String>(
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController textEditingController,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(controller: textEditingController, focusNode: focusNode);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) => const Placeholder(),
+            ),
+            const SizedBox(height: 200),
+          ],
         ),
       ),
     );
 
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'a');
+    await tester.tap(find.byType(TestTextField));
+    await tester.enterText(find.byType(TestTextField), 'a');
     await tester.pump();
 
     final double initialSize = tester.getSize(find.byType(Placeholder)).height;
@@ -3734,8 +3727,8 @@ void main() {
     expect(tester.view.padding.bottom, padding);
     expect(tester.view.viewInsets.bottom, bottomInsets);
 
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'abc');
+    await tester.tap(find.byType(TestTextField));
+    await tester.enterText(find.byType(TestTextField), 'abc');
     await tester.pump();
 
     // The options view has shrunk to the available height.
@@ -3750,45 +3743,37 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              const SizedBox(height: 200),
-              RawAutocomplete<String>(
-                optionsViewOpenDirection: OptionsViewOpenDirection.up,
-                optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
-                fieldViewBuilder:
-                    (
-                      BuildContext context,
-                      TextEditingController textEditingController,
-                      FocusNode focusNode,
-                      VoidCallback onFieldSubmitted,
-                    ) {
-                      return TextField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
-                        onSubmitted: (String value) {
-                          onFieldSubmitted();
-                        },
-                      );
-                    },
-                optionsViewBuilder:
-                    (
-                      BuildContext context,
-                      AutocompleteOnSelected<String> onSelected,
-                      Iterable<String> options,
-                    ) => const Placeholder(),
-              ),
-              const SizedBox(height: 200),
-            ],
-          ),
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            const SizedBox(height: 200),
+            RawAutocomplete<String>(
+              optionsViewOpenDirection: OptionsViewOpenDirection.up,
+              optionsBuilder: (TextEditingValue textEditingValue) => <String>['abcd'],
+              fieldViewBuilder:
+                  (
+                    BuildContext context,
+                    TextEditingController textEditingController,
+                    FocusNode focusNode,
+                    VoidCallback onFieldSubmitted,
+                  ) {
+                    return TestTextField(controller: textEditingController, focusNode: focusNode);
+                  },
+              optionsViewBuilder:
+                  (
+                    BuildContext context,
+                    AutocompleteOnSelected<String> onSelected,
+                    Iterable<String> options,
+                  ) => const Placeholder(),
+            ),
+            const SizedBox(height: 200),
+          ],
         ),
       ),
     );
 
-    await tester.tap(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'a');
+    await tester.tap(find.byType(TestTextField));
+    await tester.enterText(find.byType(TestTextField), 'a');
     await tester.pump();
 
     final double initialSize = tester.getSize(find.byType(Placeholder)).height;
