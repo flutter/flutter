@@ -79,6 +79,8 @@ void main() {
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         ),
+        buildCodeAssets: true,
+        buildDataAssets: true,
       );
       await installCodeAssets(
         dartHookResult: dartHookResult,
@@ -112,6 +114,8 @@ void main() {
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
+          buildCodeAssets: true,
+          buildDataAssets: true,
         ),
         throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
@@ -138,6 +142,8 @@ void main() {
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
         ),
+        buildCodeAssets: true,
+        buildDataAssets: true,
       );
       await installCodeAssets(
         dartHookResult: dartHookResult,
@@ -178,6 +184,8 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: null,
           ),
+          buildCodeAssets: true,
+          buildDataAssets: true,
         ),
         throwsToolExit(message: 'Building native assets failed. See the logs for more details.'),
       );
@@ -228,6 +236,8 @@ void main() {
             ],
           ),
         ),
+        buildCodeAssets: true,
+        buildDataAssets: true,
       );
       expect(
         result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
@@ -278,6 +288,8 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: target,
+        buildCodeAssets: true,
+        buildDataAssets: true,
       );
 
       expect(target.didSetCCompilerConfig, isTrue);
