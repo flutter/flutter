@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import '../widgets/utils.dart';
 import 'tabs_utils.dart';
 
 Widget boilerplate({
@@ -1606,8 +1605,7 @@ void main() {
   });
 
   testWidgets('ensureVisible does not move TabViews', (WidgetTester tester) async {
-    final TickerProvider vsync = TestTickerProvider();
-    final controller = TabController(length: 3, vsync: vsync);
+    final controller = TabController(length: 3, vsync: const TestVSync());
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(

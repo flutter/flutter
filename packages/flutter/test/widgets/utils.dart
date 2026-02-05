@@ -4,7 +4,6 @@
 
 // This file defines basic widgets for use in tests for Widgets in `flutter/widgets`.
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 /// Get a color for use in a widget test.

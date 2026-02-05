@@ -10,8 +10,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 import 'utils.dart';
+import 'widgets_app_tester.dart';
 
 Future<void> pumpTest(
   WidgetTester tester,
@@ -464,7 +466,6 @@ void main() {
         ),
       ),
     );
-    await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
     final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
@@ -1418,21 +1419,15 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
     final key = UniqueKey();
+
+    // Use a WidgetsApp, since the text field requires an overlay.
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView(
+      TestWidgetsApp(
+        home: ListView(
           key: key,
           children: <Widget>[
             Semantics(tagForChildren: const SemanticsTag('tag'), child: const Text('prefix')),
-            EditableText(
-              autofocus: true,
-              controller: controller,
-              focusNode: focusNode,
-              cursorColor: const Color(0xFF000000),
-              backgroundCursorColor: const Color(0xFF000000),
-              style: const TextStyle(),
-            ),
+            TestTextField(autofocus: true, controller: controller, focusNode: focusNode),
           ],
         ),
       ),
