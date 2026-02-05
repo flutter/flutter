@@ -4,7 +4,6 @@
 
 package com.flutter.gradle
 
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -544,17 +543,14 @@ class FlutterPlugin : Plugin<Project> {
          * Clears existing abi configuration and sets ABI's supported by flutter.
          */
         private fun configureAbiWithoutSplits(projectToAddTasksTo: Project) {
+            // Developers can set this value by passing `-P disable-abi-filtering=true`
+            // to flutter build. Where "disable-abi-filtering" comes from
+            // com.flutter.gradle.FlutterPluginUtils.PROP_DISABLE_ABI_FILTERING.
             if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
                 val extension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
                 extension.defaultConfig.ndk {
                     abiFilters.clear()
                     abiFilters.addAll(PLATFORM_ABI_LIST)
-                }
-                val androidComponents = projectToAddTasksTo.extensions.getByType(AndroidComponentsExtension::class.java)
-                androidComponents.onVariants(
-                    androidComponents.selector().all()
-                ) { variant ->
-                    variant.components.first()
                 }
             }
         }
