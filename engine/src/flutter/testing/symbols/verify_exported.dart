@@ -224,8 +224,7 @@ final class NmEntry {
   }
 
   static (int? parsedToken, String rest) _parseLeadingUnsignedInt(String string) {
-    final match = RegExp(r'^\d+').firstMatch(string);
-    final String? digits = match?.group(0);
+    final String? digits = RegExp(r'^\d+').firstMatch(string)?.group(0);
     return digits == null ? (null, string) : (int.parse(digits), string.substring(digits.length));
   }
 
