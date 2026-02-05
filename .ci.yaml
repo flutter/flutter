@@ -5355,6 +5355,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
 
+  - name: Mac wide_gamut_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: wide_gamut_macos
+
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
