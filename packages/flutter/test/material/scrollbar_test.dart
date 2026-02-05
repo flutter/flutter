@@ -156,9 +156,12 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double macOSResult = getScrollOffset(tester);
 
-    expect(macOSResult, lessThan(androidResult)); // macOS is slipperier than Android
-    expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
-    expect(macOSResult, lessThan(iOSResult)); // iOS is slipperier than macOS
+    // Android is slipperier than MacOS, so the scroll offset should be greater.
+    expect(androidResult, greaterThan(macOSResult));
+    // iOS is slipperier than Android, so the scroll offset should be greater.
+    expect(iOSResult, greaterThan(androidResult));
+    // iOS is slipperier than MacOS, so the scroll offset should be greater.
+    expect(iOSResult, greaterThan(macOSResult));
   });
 
   testWidgets("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
