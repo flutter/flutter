@@ -1712,19 +1712,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         ),
 
         // suffixIconGap: 0.0,
-        // InputDecorator does not expose vertical alignment for suffixIcon.
-        // Padding is the only stable way to force top alignment when expanded.
-        suffixIcon: LayoutBuilder(
-          builder: (context, constraints) {
-            final double bottomOffset = widget.isVerticallyExpanded
-                ? (constraints.maxHeight - widget.iconSize).clamp(0, constraints.maxHeight)
-                : 0;
-
-            return Padding(
-              padding: EdgeInsetsDirectional.only(bottom: bottomOffset, end: suffixIconEndMargin),
-              child: effectiveSuffixIcon,
-            );
-          },
+        suffixIcon: Padding(
+          padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
+          child: effectiveSuffixIcon,
         ),
       );
       if (_hasPrimaryFocus) {
