@@ -584,7 +584,12 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final Size fieldSize = layoutInfo.childSize;
     final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
 
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
+final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
+
+final Rect overlayRect = mediaQueryPadding.deflateRect(
+  viewInsets.deflateRect(Offset.zero & layoutInfo.overlaySize),
+);
     final Rect overlayRect = mediaQueryData.padding.deflateRect(
       mediaQueryData.viewInsets.deflateRect(Offset.zero & layoutInfo.overlaySize),
     );
