@@ -4057,6 +4057,102 @@ void main() {
       expect(tester.getRect(findMenuPanels()).top, tester.getRect(find.byKey(contentKey)).bottom);
     });
 
+    testWidgets('menu is positioned to avoid the software keyboard', (WidgetTester tester) async {
+      const screenHeight = 600.0;
+      const keyboardHeight = 250.0;
+      final controller = MenuController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(800, screenHeight),
+              viewInsets: EdgeInsets.only(bottom: keyboardHeight),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: keyboardHeight + 50),
+                  child: MenuAnchor(
+                    controller: controller,
+                    menuChildren: <Widget>[
+                      MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+                      MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
+                      MenuItemButton(onPressed: () {}, child: const Text('Item 3')),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () => controller.open(),
+                        child: const Text('Open Menu'),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      final Rect menuRect = tester.getRect(findMenuPanels());
+      // Menu should not extend into the keyboard area.
+      expect(
+        menuRect.bottom,
+        lessThanOrEqualTo(screenHeight - keyboardHeight),
+        reason: 'Menu should not be obscured by the software keyboard',
+      );
+    });
+
+    testWidgets('menu respects safe area padding', (WidgetTester tester) async {
+      const safeAreaPadding = 44.0;
+      final controller = MenuController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(800, 600),
+              padding: EdgeInsets.only(top: safeAreaPadding, bottom: safeAreaPadding),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: MenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 1')),
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 2')),
+                    MenuItemButton(onPressed: () {}, child: const Text('Item 3')),
+                  ],
+                  builder: (BuildContext context, MenuController controller, Widget? child) {
+                    return FilledButton(
+                      onPressed: () => controller.open(),
+                      child: const Text('Open Menu'),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      final Rect menuRect = tester.getRect(findMenuPanels());
+      // Menu should respect the safe area padding at the top.
+      expect(
+        menuRect.top,
+        greaterThanOrEqualTo(safeAreaPadding),
+        reason: 'Menu should not extend into the top safe area',
+      );
+    });
+
     testWidgets(
       'Menu is correctly offset when a LayerLink is provided and alignmentOffset is set',
       (WidgetTester tester) async {

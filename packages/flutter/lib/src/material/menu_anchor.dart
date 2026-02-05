@@ -3391,6 +3391,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
   // The factor by which the height of the menu is scaled.
   final double heightFactor;
 
+  // Used to ensure the menu is positioned within the safe area and respects
+  // view insets such as the software keyboard.
   final MediaQueryData mediaQueryData;
 
   @override
