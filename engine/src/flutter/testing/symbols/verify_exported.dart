@@ -258,18 +258,21 @@ final class NmEntry {
       return false;
     }
 
-    // Check if the mangled symbol is from either allowed modules. The swift
+    // Check if the mangled symbol is from either allowed module. The swift
     // mangling rules can be found here: https://github.com/swiftlang/swift/blob/main/docs/ABI/Mangling.rst,
     // but for identifying the module name we only have to handle 2 cases for now:
     //  - extension, example: _$sSo19NSJSONSerializationC26InternalFlutterSwiftCommonE10decodeJSONyyp10Foundation4DataVKFZ
     //  - non-extension, example: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+    //
+    //  Each identifier only contains ascii characters, and has a numeric prefix
+    //  which represents number of ascii characters in the identifier.
     const allowedModules = <String>['InternalFlutterSwift', 'InternalFlutterSwiftCommon'];
 
     String rest = name.substring(3); // Trim the leading '_$s'.
     if (rest.startsWith('So')) {
-      // The out-of-module extension case: symbol was introduced as an extension
-      // in the internal modules on an out-of-module Objective-C class (an @objc
-      // extension has to be on a class).
+      // The symbol was introduced as an extension in the internal modules on
+      // an out-of-module Objective-C class (an @objc extension has to be on a
+      // class).
       // example: _$sSo19NSJSONSerializationC26InternalFlutterSwiftCommonE10decodeJSONyyp10Foundation4DataVKFZ
       rest = rest.substring(2); // Trim the leading 'So'.
       rest = _parseLeadingSwiftMangledIdentifier(
@@ -283,7 +286,7 @@ final class NmEntry {
           };
     }
     // Simple case: the mangled name starts with the correct module name.
-    // exmaple2: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+    // exmaple: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
     final (String? moduleName, _) = _parseLeadingSwiftMangledIdentifier(rest);
     return moduleName != null && allowedModules.contains(moduleName);
   }
