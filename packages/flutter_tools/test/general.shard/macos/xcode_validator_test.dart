@@ -79,30 +79,49 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires Xcode 14 or higher'));
+      expect(result.messages.last.message, contains('Flutter requires Xcode 15 or higher'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
-      final ProcessManager processManager = FakeProcessManager.any();
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['/usr/bin/xcode-select', '--print-path'],
+          stdout: '/Library/Developer/CommandLineTools',
+        ),
+        const FakeCommand(command: <String>['which', 'sysctl']),
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        const FakeCommand(command: <String>['xcrun', 'clang']),
+        const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-platform-version'],
+          stdout: '17.0',
+        ),
+      ]);
       final xcode = Xcode.test(
         processManager: processManager,
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(
           processManager: processManager,
-          version: Version(14, 4, null),
+          version: Version(15, 4, null),
         ),
+      );
+      final simulatorUtils = FakeIOSSimulatorUtils(
+        runtimes: <IOSSimulatorRuntime>[
+          IOSSimulatorRuntime.fromJson(<String, String>{'version': '17.0'}),
+        ],
       );
       final validator = XcodeValidator(
         xcode: xcode,
         userMessages: UserMessages(),
-        iosSimulatorUtils: FakeIOSSimulatorUtils(),
+        iosSimulatorUtils: simulatorUtils,
       );
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.hint);
       expect(
         result.messages.last.message,
-        contains('Flutter recommends a minimum Xcode version of 15'),
+        contains('Flutter recommends a minimum Xcode version of 16'),
       );
+      expect(processManager, hasNoRemainingExpectations);
     }, skip: false); // [intended] Skip this test when minimum and required check versions converge.
 
     testWithoutContext('Emits partial status when Xcode EULA not signed', () async {

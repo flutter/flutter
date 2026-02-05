@@ -20,11 +20,11 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(14, null, null);
+Version get xcodeRequiredVersion => Version(15, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => Version(15, null, null);
+Version get xcodeRecommendedVersion => Version(16, null, null);
 
 /// SDK name passed to `xcrun --sdk`.
 ///
