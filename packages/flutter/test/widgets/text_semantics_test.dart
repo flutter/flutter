@@ -201,8 +201,11 @@ void main() {
     const text = 'Flutter 2050';
 
     await tester.pumpWidget(
-      const TestWidgetsApp(
-        home: _DummySelectionContainer(child: Text(text, locale: locale)),
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text(text, locale: locale),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -224,36 +227,4 @@ void main() {
     expect(targetNode.label, text);
     expect(localeStringAttribute.locale.toLanguageTag(), 'de-DE');
   });
-}
-
-// Taken from the selection container API example.
-class _DummySelectionContainer extends StatefulWidget {
-  const _DummySelectionContainer({required this.child});
-
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => _DummySelectionContainerState();
-}
-
-class _DummySelectionContainerState extends State<_DummySelectionContainer> {
-  final _DummySelectionDelegate delegate = _DummySelectionDelegate();
-
-  @override
-  void dispose() {
-    delegate.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SelectionContainer(delegate: delegate, child: widget.child);
-  }
-}
-
-class _DummySelectionDelegate extends MultiSelectableSelectionContainerDelegate {
-  _DummySelectionDelegate();
-
-  @override
-  void ensureChildUpdated(Selectable selectable) {}
 }
