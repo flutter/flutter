@@ -13,9 +13,14 @@ import 'package:path/path.dart' as p;
 // Android binaries (libflutter.so) should only export one symbol "JNI_OnLoad"
 // of type "T".
 //
-// iOS binaries (Flutter.framework/Flutter) should only export Objective-C
-// Symbols from the Flutter namespace. These are either of type
-// "(__DATA,__common)" or "(__DATA,__objc_data)".
+// Ideally, iOS binaries (Flutter.framework/Flutter) should only export
+// Objective-C Symbols from the Flutter namespace, of type "(__DATA,__common)" or
+// "(__DATA,__objc_data)". However, to allow Swift symbols to be exported in
+// an Objective-C bridging header, they must be public or open. The framework
+// uses these types internally and never publishes these types in a public header.
+// Like `_InternalFlutter` Obj-C symbols, we allow `InternalFlutterSwift` and
+// `InternalFlutterSwiftCommon` symbols, as they are clearly marked as internal
+// in the name.
 
 /// Takes the path to the out directory as the first argument, and the path to
 /// the buildtools directory as the second argument.
@@ -109,17 +114,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
           (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
           (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
               entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
-      // Swift's name mangling uses s followed by symbol length followed by symbol.
-      final swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
-      final bool swiftInternalSymbol =
-          (entry.type == '(__TEXT,__text)' ||
-              entry.type == '(__TEXT,__const)' ||
-              entry.type == '(__TEXT,__constg_swiftt)' ||
-              entry.type == '(__DATA_CONST,__const)' ||
-              entry.type == '(__DATA,__data)' ||
-              entry.type == '(__DATA,__objc_data)') &&
-          swiftInternalRegExp.hasMatch(entry.name);
-      return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
+      return !(cSymbol || cInternalSymbol || objcSymbol || entry.isInternalSwiftSymbol);
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -215,7 +210,7 @@ int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
   return failures;
 }
 
-class NmEntry {
+final class NmEntry {
   NmEntry._(this.type, this.name);
 
   final String type;
@@ -226,6 +221,62 @@ class NmEntry {
       final List<String> parts = line.split(' ');
       return NmEntry._(parts[1], parts.last);
     });
+  }
+
+  static (int? parsedToken, String rest) _parseLeadingUnsignedInt(String string) {
+    final match = RegExp(r'^\d+').firstMatch(string);
+    final String? digits = match?.group(0);
+    return digits == null ? (null, string) : (int.parse(digits), string.substring(digits.length));
+  }
+
+  static (String? parsedToken, String rest) _parseLeadingSwiftMangledIdentifier(String string) {
+    final (int? length, String rest) = _parseLeadingUnsignedInt(string);
+    return (length == null || length == 0)
+        ? (null, string)
+        : (rest.substring(0, length), rest.substring(length));
+  }
+
+  // A quick and dirty way to check if the [NmEntry] represents an allowed
+  // swift symbol.
+  //
+  // Only swift symbols introduced in `InternalFlutterSwift` or
+  // `InternalFlutterSwiftCommon` are allowed. See the script documentation.
+  bool get isInternalSwiftSymbol {
+    final bool isTypeValid = switch (type) {
+      '(__TEXT,__text)' ||
+      '(__TEXT,__const)' ||
+      '(__TEXT,__constg_swiftt)' ||
+      '(__DATA_CONST,__const)' ||
+      '(__DATA,__data)' ||
+      '(__DATA,__objc_data)' => true,
+      _ => false,
+    };
+    if (!isTypeValid && name.startsWith(r'_$s')) {
+      return false;
+    }
+    const allowedModules = <String>['InternalFlutterSwift', 'InternalFlutterSwiftCommon'];
+
+    String rest = name.substring(3); // Trim the leading '_$s'.
+    if (rest.startsWith('So')) {
+      // The out-of-module extension case: introduced in the internal modules on an
+      // out-of-module Objective-C class (an @objc extension has to be on a class).
+      // example: _$sSo19NSJSONSerializationC26InternalFlutterSwiftCommonE10decodeJSONyyp10Foundation4DataVKFZ
+      rest = rest.substring(2); // Trim the leading 'So'.
+      rest = _parseLeadingSwiftMangledIdentifier(
+        rest,
+      ).$2; // Trim the leading identifier '19NSJSONSerialization'.
+      return rest.startsWith('C') &&
+          switch (_parseLeadingSwiftMangledIdentifier(rest.substring(1))) {
+            (null, _) => false,
+            (final String moduleName, final String tail) =>
+              allowedModules.contains(moduleName) && tail.startsWith('E'),
+          };
+    }
+    // Simple case: the mangled name starts with the correct module name.
+    // example1: _$s20InternalFlutterSwift12UIPressProxyC3keySo5UIKeyCSgvg
+    // exmaple2: _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+    final (String? moduleName, _) = _parseLeadingSwiftMangledIdentifier(rest);
+    return moduleName != null && allowedModules.contains(moduleName);
   }
 
   @override
