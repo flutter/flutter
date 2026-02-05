@@ -72,19 +72,20 @@ class SkiaFontCollection implements FlutterFontCollection {
 
   @override
   Future<bool> loadFontFromList(Uint8List list, {String? fontFamily}) async {
-    if (fontFamily == null) {
-      fontFamily = _readActualFamilyName(list);
-      if (fontFamily == null) {
-        printWarning('Failed to read font family name. Aborting font load.');
-        return false;
-      }
-    }
-
     // Make sure CanvasKit is actually loaded
     await renderer.initialize();
 
     final SkTypeface? typeface = canvasKit.Typeface.MakeFreeTypeFaceFromData(list.buffer);
+
     if (typeface != null) {
+      if (fontFamily == null) {
+        // Read actual family name from SkTypeface
+        fontFamily = typeface.getFamilyName();
+        if (fontFamily == null) {
+          printWarning('Failed to read font family name. Aborting font load.');
+          return false;
+        }
+      }
       _registeredFonts.add(RegisteredFont(list, fontFamily, typeface));
       _registerWithFontProvider();
     } else {
@@ -195,13 +196,6 @@ class SkiaFontCollection implements FlutterFontCollection {
     }
     _downloadedFontFamilies.add(fontFamily);
     return FontDownloadResult.fromFont(assetName, UnregisteredFont(fontData, url, fontFamily));
-  }
-
-  String? _readActualFamilyName(Uint8List bytes) {
-    final SkFontMgr tmpFontMgr = canvasKit.FontMgr.FromData(<Uint8List>[bytes])!;
-    final String? actualFamily = tmpFontMgr.getFamilyName(0);
-    tmpFontMgr.delete();
-    return actualFamily;
   }
 
   TypefaceFontProvider? _fontProvider;
