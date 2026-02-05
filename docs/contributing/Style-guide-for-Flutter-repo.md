@@ -822,21 +822,19 @@ really is, and tends to encourage "spaghetti" code (where distant components ref
 than "lasagna" code (where each section of the code is cleanly layered and separable).
 
 
-### Avoid using `extension`.
+### Guidelines for `extension`s.
 
-Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built-in API of the class, and discovering
-the documentation and implementation of an extension is more challenging than
-for class members.
+Prefer declaring instance methods over extension methods, where possible.
 
-Prefer instead adding methods directly to relevant classes. If that is not
-possible, create a method that clearly identifies what object(s) it works with
-and is part of.
+Don't use extension methods if the end developer might want to override the
+extension method's implementation. Extension methods cannot be overridden.
 
-(A rare exception can be made for extensions that provide temporary workarounds
-when deprecating features. In those cases, however, the extensions and all their
-members must be deprecated in the PR that adds them, and they must be removed
-in accordance with our deprecation policy.)
+Don't create extension methods with the same name on the same type in separate
+Flutter libraries. This causes collisions if both libraries are imported.
+
+Avoid creating public extension methods on common types from the Dart SDK like
+`Object`, `List`, `Map`, `Future`, etc. This should be done with extreme care to
+avoid polluting the suggestions end developers see in IDEs.
 
 
 ### Avoid using `FutureOr<T>`
