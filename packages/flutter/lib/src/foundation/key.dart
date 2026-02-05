@@ -49,8 +49,10 @@ abstract class Key {
 ///
 ///  * [Widget.key], which discusses how widgets use keys.
 abstract class LocalKey extends Key {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// Abstract const constructor.
+  ///
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const LocalKey() : super.empty();
 }
 
@@ -89,7 +91,7 @@ class ValueKey<T> extends LocalKey {
   /// Creates a key that delegates its [operator==] to the given value.
   const ValueKey(this.value);
 
-  /// The value to which this key delegates its [operator==]
+  /// The value to which this key delegates its [operator==].
   final T value;
 
   @override
