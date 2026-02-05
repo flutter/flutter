@@ -584,13 +584,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final Size fieldSize = layoutInfo.childSize;
     final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
 
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
+    final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
+
+    final Rect overlayRect = mediaQueryPadding.deflateRect(
+      viewInsets.deflateRect(Offset.zero & layoutInfo.overlaySize),
+    );
+
     // This may not work well if the paint transform has rotation in it.
     // MatrixUtils.transformRect returns the bounding rect of the rotated overlay
     // rect.
-    final Rect overlayRectInField = MatrixUtils.transformRect(
-      invertTransform,
-      Offset.zero & layoutInfo.overlaySize,
-    );
+    final Rect overlayRectInField = MatrixUtils.transformRect(invertTransform, overlayRect);
 
     final double spaceAbove = -overlayRectInField.top;
     final double spaceBelow = overlayRectInField.bottom - fieldSize.height;
