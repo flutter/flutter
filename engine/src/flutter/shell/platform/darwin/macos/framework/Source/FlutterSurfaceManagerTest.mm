@@ -40,14 +40,15 @@
 
 namespace flutter::testing {
 
-static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView) {
+static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView, BOOL enableWideGamut = NO) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
   id<MTLCommandQueue> commandQueue = [device newCommandQueue];
   CALayer* layer = reinterpret_cast<CALayer*>(testView.layer);
   return [[FlutterSurfaceManager alloc] initWithDevice:device
                                           commandQueue:commandQueue
                                                  layer:layer
-                                              delegate:testView];
+                                              delegate:testView
+                                             wideGamut:enableWideGamut];
 }
 
 static FlutterSurfacePresentInfo* CreatePresentInfo(
@@ -296,6 +297,202 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
   EXPECT_EQ(testView.layer.sublayers.count, 0ul);
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(0, 0)));
+}
+
+TEST(FlutterSurfaceManager, WideGamutSurfaceHasCorrectPixelFormat) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture = surface.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture = (__bridge id)texture.texture;
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+  texture.destruction_callback(texture.user_data);
+}
+
+TEST(FlutterSurfaceManager, StandardGamutSurfaceHasCorrectPixelFormat) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture = surface.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture = (__bridge id)texture.texture;
+  EXPECT_EQ(metalTexture.pixelFormat, MTLPixelFormatBGRA8Unorm);
+  texture.destruction_callback(texture.user_data);
+}
+
+TEST(FlutterSurfaceManager, WideGamutLayerWorksWithoutExplicitContentsFormat) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface, CGPointMake(0, 0)) ]
+                           atTime:0
+                           notify:nil];
+
+  EXPECT_EQ(testView.layer.sublayers.count, 1ul);
+  EXPECT_NE(testView.layer.sublayers[0].contents, nil);
+}
+
+TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectColorSpace) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  CFTypeRef colorSpace = IOSurfaceCopyValue(ioSurface, kIOSurfaceColorSpace);
+  if (colorSpace == nullptr) {
+    GTEST_FAIL() << "IOSurfaceCopyValue returned nullptr for kIOSurfaceColorSpace";
+    return;
+  }
+  EXPECT_TRUE(CFEqual(colorSpace, kCGColorSpaceExtendedSRGB));
+  CFRelease(colorSpace);
+}
+
+TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectColorSpace) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  CFTypeRef colorSpace = IOSurfaceCopyValue(ioSurface, kIOSurfaceColorSpace);
+  if (colorSpace == nullptr) {
+    GTEST_FAIL() << "IOSurfaceCopyValue returned nullptr for kIOSurfaceColorSpace";
+    return;
+  }
+  EXPECT_TRUE(CFEqual(colorSpace, kCGColorSpaceSRGB));
+  CFRelease(colorSpace);
+}
+
+TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectPixelFormat) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
+  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_40ARGBLEWideGamut);
+}
+
+TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectPixelFormat) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
+  EXPECT_EQ(pixelFormat, (uint32_t)kCVPixelFormatType_32BGRA);
+}
+
+TEST(FlutterSurfaceManager, WideGamutIOSurfaceHasCorrectBytesPerElement) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  size_t bytesPerElement = IOSurfaceGetBytesPerElement(ioSurface);
+  EXPECT_EQ(bytesPerElement, 8ul);
+}
+
+TEST(FlutterSurfaceManager, StandardGamutIOSurfaceHasCorrectBytesPerElement) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  IOSurfaceRef ioSurface = surface.ioSurface;
+  size_t bytesPerElement = IOSurfaceGetBytesPerElement(ioSurface);
+  EXPECT_EQ(bytesPerElement, 4ul);
+}
+
+TEST(FlutterSurfaceManager, SurfaceCacheDoesNotMixGamutModes) {
+  TestView* testView = [[TestView alloc] init];
+  // Create a wide gamut surface manager.
+  FlutterSurfaceManager* wideManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  auto wideSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
+  auto wideTexture = wideSurface.asFlutterMetalTexture;
+  id<MTLTexture> wideMetalTexture = (__bridge id)wideTexture.texture;
+  EXPECT_EQ(wideMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+
+  // Present and get it cached.
+  [wideManager presentSurfaces:@[ CreatePresentInfo(wideSurface) ] atTime:0 notify:nil];
+  wideTexture.destruction_callback(wideTexture.user_data);
+
+  // Request same size again - should get a recycled wide gamut surface.
+  auto recycledSurface = [wideManager surfaceForSize:CGSizeMake(100, 100)];
+  auto recycledTexture = recycledSurface.asFlutterMetalTexture;
+  id<MTLTexture> recycledMetalTexture = (__bridge id)recycledTexture.texture;
+  EXPECT_EQ(recycledMetalTexture.pixelFormat, MTLPixelFormatBGRA10_XR);
+  recycledTexture.destruction_callback(recycledTexture.user_data);
+}
+
+TEST(FlutterSurfaceManager, DynamicSwitchFromStandardToWideGamut) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/NO);
+
+  // Start with standard gamut surface.
+  auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture1 = surface1.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture1 = (__bridge id)texture1.texture;
+  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatBGRA8Unorm);
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+  texture1.destruction_callback(texture1.user_data);
+
+  // Switch to wide gamut.
+  [surfaceManager setEnableWideGamut:YES];
+
+  // Verify cache was flushed.
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
+
+  // New surface should be wide gamut.
+  auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture2 = surface2.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture2 = (__bridge id)texture2.texture;
+  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatBGRA10_XR);
+  texture2.destruction_callback(texture2.user_data);
+}
+
+TEST(FlutterSurfaceManager, DynamicSwitchFromWideToStandardGamut) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  // Start with wide gamut surface.
+  auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture1 = surface1.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture1 = (__bridge id)texture1.texture;
+  EXPECT_EQ(metalTexture1.pixelFormat, MTLPixelFormatBGRA10_XR);
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+  texture1.destruction_callback(texture1.user_data);
+
+  // Switch to standard gamut.
+  [surfaceManager setEnableWideGamut:NO];
+
+  // Verify cache was flushed.
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 0ul);
+
+  // New surface should be standard gamut.
+  auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  auto texture2 = surface2.asFlutterMetalTexture;
+  id<MTLTexture> metalTexture2 = (__bridge id)texture2.texture;
+  EXPECT_EQ(metalTexture2.pixelFormat, MTLPixelFormatBGRA8Unorm);
+  texture2.destruction_callback(texture2.user_data);
+}
+
+TEST(FlutterSurfaceManager, DynamicSwitchNoOpWhenSameValue) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView, /*enableWideGamut=*/YES);
+
+  // Cache a surface.
+  auto surface1 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface1) ] atTime:0 notify:nil];
+
+  auto surface2 = [surfaceManager surfaceForSize:CGSizeMake(100, 100)];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface2) ] atTime:0 notify:nil];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+
+  // Set same value — cache should not be flushed.
+  [surfaceManager setEnableWideGamut:YES];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 }
 
 }  // namespace flutter::testing

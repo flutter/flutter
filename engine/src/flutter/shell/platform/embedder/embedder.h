@@ -2793,6 +2793,10 @@ typedef struct {
   /// `PlatformDispatcher.instance.engineId`. Can be used in native code to
   /// retrieve the engine instance that is running the Dart code.
   int64_t engine_id;
+
+  /// If true, the engine will decode images in wide gamut color spaces
+  /// (Display P3) when supported. If false, images are decoded to sRGB.
+  bool enable_wide_gamut;
 } FlutterProjectArgs;
 
 typedef struct {

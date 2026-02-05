@@ -19,6 +19,7 @@
   id<MTLCommandQueue> _commandQueue;
   CALayer* _containingLayer;
   __weak id<FlutterSurfaceManagerDelegate> _delegate;
+  BOOL _wideGamut;
 
   // Available (cached) back buffer surfaces. These will be cleared during
   // present and replaced by current frong surfaces.
@@ -104,18 +105,33 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   commandQueue:(id<MTLCommandQueue>)commandQueue
                          layer:(CALayer*)containingLayer
-                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate {
+                      delegate:(__weak id<FlutterSurfaceManagerDelegate>)delegate
+                     wideGamut:(BOOL)wideGamut {
   if (self = [super init]) {
     _device = device;
     _commandQueue = commandQueue;
     _containingLayer = containingLayer;
     _delegate = delegate;
-
+    _wideGamut = wideGamut;
     _backBufferCache = [[FlutterBackBufferCache alloc] init];
     _frontSurfaces = [NSMutableArray array];
     _layers = [NSMutableArray array];
   }
   return self;
+}
+
+- (void)setEnableWideGamut:(BOOL)enableWideGamut {
+  FML_DCHECK([NSThread isMainThread]);
+  if (_wideGamut == enableWideGamut) {
+    return;
+  }
+  _wideGamut = enableWideGamut;
+
+  // Flush cached surfaces since they have the wrong pixel format.
+  [_backBufferCache flush];
+
+  // Clear front surfaces — they will be replaced on the next present.
+  [_frontSurfaces removeAllObjects];
 }
 
 - (FlutterBackBufferCache*)backBufferCache {
@@ -133,7 +149,7 @@ static void UpdateContentSubLayers(CALayer* layer,
 - (FlutterSurface*)surfaceForSize:(CGSize)size {
   FlutterSurface* surface = [_backBufferCache removeSurfaceForSize:size];
   if (surface == nil) {
-    surface = [[FlutterSurface alloc] initWithSize:size device:_device];
+    surface = [[FlutterSurface alloc] initWithSize:size device:_device enableWideGamut:_wideGamut];
   }
   return surface;
 }
@@ -151,6 +167,14 @@ static void UpdateContentSubLayers(CALayer* layer,
 
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces {
   FML_DCHECK([NSThread isMainThread]);
+
+  // Check if incoming surfaces match current wide gamut mode.
+  // If not, discard them by returning early - they will be released.
+  for (FlutterSurfacePresentInfo* info in surfaces) {
+    if (info.surface.isWideGamut != _wideGamut) {
+      return;
+    }
+  }
 
   // Release all unused back buffer surfaces and replace them with front surfaces.
   [_backBufferCache returnSurfaces:_frontSurfaces];
@@ -343,6 +367,12 @@ static const int kSurfaceEvictionAge = 30;
   [self performSelectorOnMainThread:@selector(reschedule) withObject:nil waitUntilDone:NO];
 }
 
+- (void)flush {
+  @synchronized(self) {
+    [_surfaces removeAllObjects];
+  }
+}
+
 - (NSUInteger)count {
   @synchronized(self) {
     return _surfaces.count;
@@ -350,9 +380,7 @@ static const int kSurfaceEvictionAge = 30;
 }
 
 - (void)onIdle {
-  @synchronized(self) {
-    [_surfaces removeAllObjects];
-  }
+  [self flush];
 }
 
 - (void)reschedule {

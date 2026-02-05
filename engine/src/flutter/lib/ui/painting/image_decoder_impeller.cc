@@ -136,6 +136,8 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else if (is_wide_gamut) {
+    // Use 10-bit for opaque images (less memory: 4 bytes vs 8 bytes per pixel).
+    // Use F16 for images with alpha channel.
     SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
                                  ? kBGR_101010x_XR_SkColorType
                                  : kRGBA_F16_SkColorType;

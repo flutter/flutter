@@ -25,7 +25,8 @@
 - (instancetype)initWithMTLDevice:(id<MTLDevice>)device
                      commandQueue:(id<MTLCommandQueue>)commandQueue
                          delegate:(id<FlutterViewDelegate>)delegate
-                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
+                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier
+                  enableWideGamut:(BOOL)enableWideGamut {
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
@@ -36,7 +37,8 @@
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithDevice:device
                                                        commandQueue:commandQueue
                                                               layer:self.layer
-                                                           delegate:self];
+                                                           delegate:self
+                                                          wideGamut:enableWideGamut];
     _resizeSynchronizer = [[FlutterResizeSynchronizer alloc] init];
   }
   return self;
@@ -48,6 +50,10 @@
 
 - (FlutterSurfaceManager*)surfaceManager {
   return _surfaceManager;
+}
+
+- (void)setEnableWideGamut:(BOOL)enableWideGamut {
+  [_surfaceManager setEnableWideGamut:enableWideGamut];
 }
 
 - (void)shutDown {
