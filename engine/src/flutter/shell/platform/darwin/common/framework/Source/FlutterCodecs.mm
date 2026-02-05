@@ -4,8 +4,8 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
-#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #include <cstring>
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 
 FLUTTER_ASSERT_ARC
 
