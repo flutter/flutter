@@ -7,6 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart';
+
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
     final formKey = GlobalKey<FormState>();
@@ -62,7 +64,7 @@ void main() {
             child: Center(
               child: Material(
                 child: Form(
-                  child: TextField(
+                  child: TestTextField(
                     onChanged: (String value) {
                       fieldValue = value;
                     },
@@ -80,7 +82,7 @@ void main() {
     expect(fieldValue, isNull);
 
     Future<void> checkText(String testValue) async {
-      await tester.enterText(find.byType(TextField), testValue);
+      await tester.enterText(find.byType(TestTextField), testValue);
       // Pumping is unnecessary because callback happens regardless of frames.
       expect(fieldValue, equals(testValue));
     }
@@ -1815,6 +1817,18 @@ void main() {
         validationResult: SemanticsValidationResult.invalid,
       ),
     );
+  });
+
+  testWidgets('Form does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Form(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Form)), Size.zero);
   });
 
   testWidgets('FormField does not crash at zero area', (WidgetTester tester) async {
