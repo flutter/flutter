@@ -82,8 +82,13 @@ config("disable_warnings") {
   cflags_cc = warning_flags
 }
 
-_gtk_config = use_gtk4 ? "//flutter/shell/platform/linux/config:gtk4" : "//flutter/shell/platform/linux/config:gtk"
-_gtk_defines = use_gtk4 ? [ "FLUTTER_LINUX_GTK4" ] : []
+if (use_gtk4) {
+  _gtk_config = "//flutter/shell/platform/linux/config:gtk4"
+  _gtk_defines = [ "FLUTTER_LINUX_GTK4" ]
+} else {
+  _gtk_config = "//flutter/shell/platform/linux/config:gtk"
+  _gtk_defines = []
+}
 
 source_set("flutter_linux_sources") {
   public = _public_headers + [
@@ -116,8 +121,6 @@ source_set("flutter_linux_sources") {
   sources = [
     "fl_accessibility_channel.cc",
     "fl_accessibility_handler.cc",
-    "fl_accessible_node.cc",
-    "fl_accessible_text_field.cc",
     "fl_application.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
@@ -161,7 +164,6 @@ source_set("flutter_linux_sources") {
     "fl_settings_channel.cc",
     "fl_settings_handler.cc",
     "fl_settings_portal.cc",
-    "fl_socket_accessible.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",
@@ -174,11 +176,19 @@ source_set("flutter_linux_sources") {
     "fl_touch_manager.cc",
     "fl_value.cc",
     "fl_view.cc",
-    "fl_view_accessible.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
     "key_mapping.g.cc",
   ]
+
+  if (!use_gtk4) {
+    sources += [
+      "fl_accessible_node.cc",
+      "fl_accessible_text_field.cc",
+      "fl_socket_accessible.cc",
+      "fl_view_accessible.cc",
+    ]
+  }
 
   # Set flag to stop headers being directly included (library users should not do this)
   defines = [
