@@ -61,7 +61,7 @@ class PaintParagraph extends TextPaint {
               ui.Offset.zero, // We only need sourceRect here so we don't need the offset
               ui.window.devicePixelRatio,
             );
-            _fillBlockDecorations(block, sourceRect);
+            fillDecorations(block, sourceRect);
           default:
             // We only need to draw backgrounds only
             assert(false);
@@ -166,79 +166,6 @@ class PaintParagraph extends TextPaint {
     }
   }
 
-  void _fillBlockDecorations(TextBlock block, ui.Rect sourceRect) {
-    if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
-      return;
-    }
-    paintContext.fillStyle = block.style.getForegroundColor().toCssString();
-
-    final double thickness = calculateThickness(block.style);
-    const DoubleDecorationSpacing = 3.0;
-
-    for (final ui.TextDecoration decoration in [
-      ui.TextDecoration.lineThrough,
-      ui.TextDecoration.underline,
-      ui.TextDecoration.overline,
-    ]) {
-      if (!block.style.decoration!.contains(decoration)) {
-        continue;
-      }
-
-      // TODO(jlavrova): Why using these instead of multiplied values?
-      final double height = block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
-      final double ascent = block.rawFontBoundingBoxAscent;
-      final double position = calculatePosition(decoration, thickness, height, ascent);
-      WebParagraphDebug.log('decoration=$decoration thickness=$thickness position=$position');
-
-      final double width = sourceRect.width;
-      final double x = sourceRect.left;
-      final double y = sourceRect.top + position;
-
-      paintContext.save();
-      paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
-
-      switch (block.style.decorationStyle!) {
-        case ui.TextDecorationStyle.wavy:
-          calculateWaves(x, y, block.style, sourceRect, thickness);
-
-        case ui.TextDecorationStyle.double:
-          final double bottom = y + DoubleDecorationSpacing + thickness;
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.moveTo(x, bottom);
-          paintContext.lineTo(x + width, bottom);
-          paintContext.stroke();
-          WebParagraphDebug.log('double: $x:${x + width}, $y:$bottom');
-
-        case ui.TextDecorationStyle.dashed:
-        case ui.TextDecorationStyle.dotted:
-          final dashes = Float32List(2)
-            ..[0] =
-                thickness * (block.style.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
-            ..[1] = thickness;
-
-          paintContext.setLineDash(dashes);
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.stroke();
-          WebParagraphDebug.log('dashed/dotted: $x:${x + width}, $y');
-
-        case ui.TextDecorationStyle.solid:
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.stroke();
-          WebParagraphDebug.log(
-            'solid: $x:${x + width}, $y ${block.style.decorationColor!.toCssString()}',
-          );
-      }
-      paintContext.restore();
-    }
-  }
-
   @override
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr) {
     final WebTextStyle style = webTextCluster.style;
@@ -262,7 +189,6 @@ class PaintParagraph extends TextPaint {
       'Shadow: x=${shadow.offset.dx} y=${shadow.offset.dy} blur=${shadow.blurRadius} color=${shadow.color.toCssString()}',
     );
 
-    // TODO(jlavrova): calculate the proper shift for the shadow
     webTextCluster.addToContext(paintContext, 0, 0);
   }
 

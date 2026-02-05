@@ -68,8 +68,9 @@ abstract class Painter {
   }
 }
 
-final DomHTMLCanvasElement? _domHtmlCanvasElement = null;
-//domDocument.createElement('canvas') as DomHTMLCanvasElement;
+const DomHTMLCanvasElement? _domHtmlCanvasElement = null;
+// TODO(jlavrova): uncommend the next line if you want to use an alternative approach
+// final DomHTMLCanvasElement? _domHtmlCanvasElement = domDocument.createElement('canvas') as DomHTMLCanvasElement;
 
 class CanvasKitPainter extends Painter {
   CkImage? singleImageCache;
@@ -113,7 +114,8 @@ class CanvasKitPainter extends Painter {
 
   @override
   void drawShadowCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
-    // TODO(jlavrova): calculate the shadow bounds properly
+    // TODO(jlavrova): calculate the shadow bounds without hardcoding the inflation
+    // values. It is good enough for now to demonstrate the shadow effect
     final ui.Rect shadowSourceRect = sourceRect.inflate(100).translate(100, 100);
     final ui.Rect shadowTargetRect = targetRect.inflate(100);
 
@@ -203,35 +205,6 @@ class CanvasKitPainter extends Painter {
         throw Exception('Failed to convert text image bitmap to an SkImage.');
       }
       singleImageCache = CkImage(skImage);
-    }
-
-    canvas.drawImageRect(
-      singleImageCache!,
-      sourceRect,
-      targetRect,
-      ui.Paint()..filterQuality = ui.FilterQuality.none,
-    );
-  }
-
-  void drawParagraph1(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
-    if (!hasSingleImageCache) {
-      // We should have resized the small canvas before calling this method
-      if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
-        assert(
-          false,
-          'resizePaintCanvas needed: '
-          'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
-        );
-      }
-      // Transfer the buffer from the small canvas
-      // This is synchronous and returns the handle immediately
-      final DomImageBitmap bitmap = paintCanvas.transferToImageBitmap();
-
-      final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
-      if (skImage == null) {
-        throw Exception('Failed to convert text image bitmap to an SkImage.');
-      }
-      singleImageCache = CkImage(skImage, imageSource: ImageBitmapImageSource(bitmap));
     }
 
     canvas.drawImageRect(

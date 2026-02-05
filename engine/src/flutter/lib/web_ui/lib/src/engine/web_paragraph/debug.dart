@@ -11,12 +11,12 @@ class WebParagraphDebug {
   static bool apiLogging = false;
 
   static void log(String arg) {
-    //assert(() {
-    if (logging) {
-      print(arg);
-    }
-    //  return true;
-    //}());
+    assert(() {
+      if (logging) {
+        print(arg);
+      }
+      return true;
+    }());
   }
 
   static void apiTrace(String arg) {
@@ -57,13 +57,7 @@ class WebParagraphProfiler {
 
   static void log() {
     for (final MapEntry<String, Duration> entry in durations.entries) {
-      //print('${entry.key}: ${entry.value.inMicroseconds}μs');
-      print(
-        '${entry.key}: ${entry.value.inMilliseconds}ms',
-        //entry.key.contains('/')
-        //    ? '${entry.key}: ${entry.value.inMilliseconds}ms / ${counts[entry.key] ?? 1} = ${(entry.value.inMilliseconds / (counts[entry.key] ?? 1)).toStringAsFixed(3)}ms'
-        //    : '${entry.key}: ${entry.value.inMilliseconds}ms',
-      );
+      print('${entry.key}: ${entry.value.inMilliseconds}ms');
     }
   }
 

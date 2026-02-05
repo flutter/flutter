@@ -1059,7 +1059,7 @@ class EmptyCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    assert(false, 'We should not call "fillOnContext" on an EmptyCluster');
+    assert(false, 'We should not call "addToContext" on an EmptyCluster');
   }
 }
 

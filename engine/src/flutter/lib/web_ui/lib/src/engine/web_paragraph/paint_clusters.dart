@@ -199,7 +199,8 @@ class PaintClusters extends TextPaint {
     webTextCluster.fillOnContext(
       paintContext,
       /*ignore the text cluster shift from the text run*/
-      // TODO(jlavrova): calculate the proper shift for the shadow
+      // TODO(jlavrova): calculate the shadow bounds without hardcoding the inflation
+      // values. It is good enough for now to demonstrate the shadow effect
       x: (isDefaultLtr ? 0 : webTextCluster.advance.width) + 100,
       y: 100,
     );

@@ -141,104 +141,23 @@ abstract class TextPaint {
       switch (direction) {
         case ShadowDirection.left:
           if (shadow.offset.dx < 0) {
-            print('shadow left offset: ${sourceRect.left - 100}');
             return sourceRect.left - 100;
           }
         case ShadowDirection.right:
           if (shadow.offset.dx > 0) {
-            print('shadow right offset: ${sourceRect.right + 100}');
             return sourceRect.right + 100;
           }
         case ShadowDirection.top:
           if (shadow.offset.dy < 0) {
-            print('shadow top offset: ${sourceRect.top - 100}');
             return sourceRect.top - 100;
           }
         case ShadowDirection.bottom:
           if (shadow.offset.dy > 0) {
-            print('shadow bottom offset: ${sourceRect.bottom + 100}');
             return sourceRect.bottom + 100;
           }
       }
     }
     return 0;
-  }
-
-  (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph1(
-    TextLayout layout,
-    ui.Offset offset,
-    double devicePixelRatio,
-  ) {
-    // Calculate the line edges taking in account the formatting shifts, shadows, etc.
-    double minLeft = 0;
-    double maxRight = paragraph.longestLine;
-    for (final TextLine line in layout.lines) {
-      final double left = calculateShadowOffset(
-        layout,
-        line,
-        line.visualBlocks.first,
-        ShadowDirection.left,
-      );
-      final double right = calculateShadowOffset(
-        layout,
-        line,
-        line.visualBlocks.last,
-        ShadowDirection.right,
-      );
-      if (left < minLeft) {
-        minLeft = left;
-      }
-      if (right > maxRight) {
-        maxRight = right;
-      }
-    }
-    double minTop = 0;
-    for (final LineBlock lineBlock in layout.lines.first.visualBlocks) {
-      final double top = calculateShadowOffset(
-        layout,
-        layout.lines.first,
-        lineBlock,
-        ShadowDirection.top,
-      );
-      if (top < minTop) {
-        minTop = top;
-      }
-    }
-    double maxBottom = paragraph.height;
-    for (final LineBlock lineBlock in layout.lines.last.visualBlocks) {
-      final double bottom = calculateShadowOffset(
-        layout,
-        layout.lines.last,
-        lineBlock,
-        ShadowDirection.bottom,
-      );
-      if (bottom > maxBottom) {
-        maxBottom = bottom;
-      }
-    }
-    // Define the paragraph rect (using advances, not selected rects)
-    // Source rect must take in account the scaling
-    final sourceRect = ui.Rect.fromLTWH(
-      minLeft * devicePixelRatio,
-      minTop,
-      ((maxRight - minLeft) * devicePixelRatio).ceilToDouble(),
-      ((maxBottom - minTop) * devicePixelRatio).ceilToDouble(),
-    );
-    // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final zeroRect = ui.Rect.fromLTWH(
-      math.min(0, minLeft).ceilToDouble(),
-      math.min(0, minTop).ceilToDouble(),
-      (maxRight - minLeft).ceilToDouble(),
-      (maxBottom - minTop).ceilToDouble(),
-    );
-    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
-
-    print(
-      'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
-      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
-    );
-
-    return (sourceRect, targetRect);
   }
 
   (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
@@ -355,7 +274,11 @@ abstract class TextPaint {
     paintContext.stroke();
   }
 
+  // TODO(jlavrova): implement decorations entirely on the resulting Canvas
   void fillDecorations(TextBlock block, ui.Rect sourceRect) {
+    if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
+      return;
+    }
     paintContext.fillStyle = block.style.getForegroundColor().toCssString();
 
     final double thickness = calculateThickness(block.style);
@@ -381,7 +304,7 @@ abstract class TextPaint {
       final double x = sourceRect.left;
       final double y = sourceRect.top + position;
 
-      paintContext.reset();
+      paintContext.save();
       paintContext.lineWidth = thickness;
       paintContext.strokeStyle = block.style.decorationColor!.toCssString();
 
@@ -422,6 +345,8 @@ abstract class TextPaint {
             'solid: $x:${x + width}, $y ${block.style.decorationColor!.toCssString()}',
           );
       }
+
+      paintContext.restore();
     }
   }
 
