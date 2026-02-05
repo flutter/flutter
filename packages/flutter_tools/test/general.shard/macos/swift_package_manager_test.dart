@@ -92,6 +92,40 @@ let package = Package(
     ]
 )
 ''');
+
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory.childFile('Package.swift').existsSync(),
+              isTrue,
+            );
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory
+                  .childFile('Package.swift')
+                  .readAsStringSync(),
+              '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+        .target(
+            name: "FlutterFramework"
+        )
+    ]
+)
+''',
+            );
           });
 
           testWithoutContext(

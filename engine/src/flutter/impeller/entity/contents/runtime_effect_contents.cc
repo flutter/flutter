@@ -24,35 +24,48 @@
 
 namespace impeller {
 
-namespace {
-constexpr char kPaddingType = 0;
-constexpr char kFloatType = 1;
-}  // namespace
-
 // static
-BufferView RuntimeEffectContents::EmplaceVulkanUniform(
-    const std::shared_ptr<const std::vector<uint8_t>>& input_data,
+BufferView RuntimeEffectContents::EmplaceUniform(
+    const uint8_t* source_data,
     HostBuffer& data_host_buffer,
-    const RuntimeUniformDescription& uniform,
-    size_t minimum_uniform_alignment) {
-  // TODO(jonahwilliams): rewrite this to emplace directly into
-  // HostBuffer.
-  std::vector<float> uniform_buffer;
-  uniform_buffer.reserve(uniform.struct_layout.size());
-  size_t uniform_byte_index = 0u;
-  for (char byte_type : uniform.struct_layout) {
-    if (byte_type == kPaddingType) {
-      uniform_buffer.push_back(0.f);
-    } else {
-      FML_DCHECK(byte_type == kFloatType);
-      uniform_buffer.push_back(reinterpret_cast<const float*>(
-          input_data->data())[uniform_byte_index++]);
-    }
+    const RuntimeUniformDescription& uniform) {
+  size_t minimum_uniform_alignment =
+      data_host_buffer.GetMinimumUniformAlignment();
+  size_t alignment = std::max(uniform.bit_width / 8, minimum_uniform_alignment);
+
+  if (uniform.padding_layout.empty()) {
+    return data_host_buffer.Emplace(source_data, uniform.GetGPUSize(),
+                                    alignment);
   }
 
+  // If the uniform has a padding layout, we need to repack the data.
+  // We can do this by using the EmplaceProc to write directly to the
+  // HostBuffer.
   return data_host_buffer.Emplace(
-      reinterpret_cast<const void*>(uniform_buffer.data()),
-      sizeof(float) * uniform_buffer.size(), minimum_uniform_alignment);
+      uniform.GetGPUSize(), alignment,
+      [&uniform, source_data](uint8_t* destination) {
+        size_t count = uniform.array_elements.value_or(1);
+        if (count == 0) {
+          // Make sure to run at least once.
+          count = 1;
+        }
+        size_t uniform_byte_index = 0u;
+        size_t struct_float_index = 0u;
+        auto* float_destination = reinterpret_cast<float*>(destination);
+        auto* float_source = reinterpret_cast<const float*>(source_data);
+
+        for (size_t i = 0; i < count; i++) {
+          for (RuntimePaddingType byte_type : uniform.padding_layout) {
+            if (byte_type == RuntimePaddingType::kPadding) {
+              float_destination[struct_float_index++] = 0.f;
+            } else {
+              FML_DCHECK(byte_type == RuntimePaddingType::kFloat);
+              float_destination[struct_float_index++] =
+                  float_source[uniform_byte_index++];
+            }
+          }
+        }
+      });
 }
 
 void RuntimeEffectContents::SetRuntimeStage(
@@ -284,12 +297,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               << "Uniform " << uniform.name
               << " had unexpected type kFloat for Vulkan backend.";
 
-          size_t alignment =
-              std::max(uniform.bit_width / 8,
-                       data_host_buffer.GetMinimumUniformAlignment());
-          BufferView buffer_view =
-              data_host_buffer.Emplace(uniform_data_->data() + buffer_offset,
-                                       uniform.GetSize(), alignment);
+          BufferView buffer_view = EmplaceUniform(
+              uniform_data_->data() + buffer_offset, data_host_buffer, uniform);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
@@ -298,7 +307,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    DescriptorType::kUniformBuffer, uniform_slot,
                                    std::move(metadata), std::move(buffer_view));
           buffer_index++;
-          buffer_offset += uniform.GetSize();
+          buffer_offset += uniform.GetDartSize();
           buffer_location++;
           break;
         }
@@ -309,12 +318,10 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           uniform_slot.binding = uniform.location;
           uniform_slot.name = uniform.name.c_str();
 
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kUniformBuffer, uniform_slot,
-                            nullptr,
-                            EmplaceVulkanUniform(
-                                uniform_data_, data_host_buffer, uniform,
-                                data_host_buffer.GetMinimumUniformAlignment()));
+          pass.BindResource(
+              ShaderStage::kFragment, DescriptorType::kUniformBuffer,
+              uniform_slot, nullptr,
+              EmplaceUniform(uniform_data_->data(), data_host_buffer, uniform));
         }
       }
     }
