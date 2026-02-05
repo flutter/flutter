@@ -1021,6 +1021,334 @@ anyway. It should also be avoided in very large functions.
 It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler
 to actually desugar the generator into something that uses an iterator class.
 
+### Use dot shorthands to reduce redundant information
+
+Use dot shorthands to reduce redundant information. When declaring a variable,
+decide whether you want to infer the variable's type or not *first*, and then based on that,
+decide if you're still able to use a dot shorthand for the initializer.
+
+<details>
+<summary>Always omit a local variable's obvious type over using dot shorthands.</summary>
+
+When declaring a variable, decide whether you want to infer the variable's type or not *first*,
+and then based on that, decide if you're still able to use a dot shorthand for the initializer.
+In other words, the rule to omit a variable’s obvious type has higher precedence than the rule
+to use dot shorthands.
+
+```dart
+void foo() {
+  // ✅ Good. The expression SliverAppBar is obviously typed,
+  // so the local variable's type should be omitted.
+  var appBar = SliverAppBar('Hello');
+
+  // ❌ BAD: Infer the local variable's type instead of using dot shorthands.
+  SliverAppBar appBar = .new();
+
+  // ❌ BAD: The type of an enum value isn't obviously typed.
+  // The expression "Foo.bar" might be an enum value, or it might be a static getter that returns any type.
+  // The local variable's declaration should not use type inference.
+  var alignment = MainAxisAlignment.start;
+
+  // ✅ Good. Use explicit types for a local variable declaration if the expression is not obviousy typed.
+  // You can use dot shorthands to initialize an explicitly typed local variable.
+  MainAxisAlignment alignment = .start;
+}
+```
+
+</details>
+
+<details>
+<summary>Prefer using dot shorthands to initialize top-level variables and fields.</summary>
+
+Top-level variables and fields must have explicit types, so top-level variables and fields can
+use dot shorthands to initialize their values.
+
+```dart
+// ✅ Good. Uses dot shorthands to initialize top-level variables.
+const MainAxisAlignment kGlobalAlignment = .start;
+const SliverAppBar kGlobalAppBar = .new();
+
+// ⚠️ OK but verbose. Consider using dot shorthands.
+const MainAxisAlignment kGlobalAlignment = MainAxisAlignment.start;
+const SliverAppBar kGlobalAppBar = SliverAppBar();
+
+// ❌ BAD. Always use explicit types for public APIs.
+const kGlobalAppBar = SliverAppBar();
+
+class Foo {
+  // ✅ Good. Uses dot shorthands to initialize public APIs.
+  final MainAxisAlignment defaultAlignment = .start;
+  final MainAxisAlignment _privateAlignment = .start;
+  final SliverAppBar defaultAppBar = .new();
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  final MainAxisAlignment defaultAlignment = MainAxisAlignment.start;
+  final MainAxisAlignment _privateAlignment = MainAxisAlignment.start;
+  final SliverAppBar defaultAppBar = SliverAppBar();
+
+  // ❌ BAD. Always use explicit types for public APIs.
+  final defaultAppBar = SliverAppBar();
+}
+```
+
+</details>
+
+<details>
+<summary>Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter.</summary>
+
+```dart
+void foo() {
+  MainAxisAlignment mainAxisAlignment = ...;
+  SliverAppBar sliverAppBar = ...;
+  MutableConfig config = ...;
+
+  // ✅ Good. Uses dot shorthands to assign to an existing local variable.
+  mainAxisAlignment = .start;
+  sliverAppBar = .new();
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  mainAxisAlignment = MainAxisAlignment.start;
+  sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  // Or, consider renaming 'fu' to make the type obvious.
+  fu = .new('Hello');
+
+  // ✅ Good. Uses dot shorthands to assign to an existing field or setter.
+  config.mainAxisAlignment = .start;
+  config.sliverAppBar = .new();
+
+  // ⚠️ OK but the type of config.text is less obvious: config.text might be
+  // a String, Widget, etc. If a reviewer deems this non-obvious, they can
+  // request an explicit type.
+  config.text = .new('Hello');
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  config.mainAxisAlignment = MainAxisAlignment.start;
+  config.sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  config.fu = .new('Hello');
+}
+```
+
+</details>
+
+<details>
+<summary>Prefer using dot shorthands to omit obvious types for named argument values.</summary>
+
+```dart
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Row(
+  mainAxisAlignment: .start,
+  crossAxisAlignment: .start,
+  children: children,
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Row(
+  mainAxisAlignment: MainAxisAlignment.start,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: children,
+),
+
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Text('Hello world', textScaler: .new()),
+
+// ⚠️ OK but consider using dot shorthands.
+Text('Hello world', textScaler: TextScaler()),
+```
+
+A special case is the `EdgeInsetsGeometry` type: it is considered obvious for named arguments like “padding”:
+
+```dart
+// ✅ Good. Use dot shorthands for named argument values
+// to omit types that are obvious. EdgeInsetsGeometry is obvious
+// for a named arguments like "padding".
+Padding(
+  padding: .all(8.0),
+  child: child,
+),
+
+// ✅ Good.
+Chip(
+  label: Text('Hello'),
+  labelPadding: .all(8.0),
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Padding(
+  padding: EdgeInsets.all(8.0),
+  child: child,
+),
+
+// ❌ BAD.
+Chip(
+  label: Text('Hello'),
+  labelPadding: EdgeInsets.all(8.0),
+),
+```
+
+</details>
+
+<details>
+<summary>Don't use dot shorthands for positional argument values.</summary>
+
+```dart
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .zero?
+Curve2DSample(0.5, .zero)
+
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .new?
+decodeImageFromList(.new(1024)),
+
+// ✅ Good.
+Curve2DSample(0.5, Offset.zero)
+
+// ✅ Good.
+decodeImageFromList(Uint8List(1024)),
+```
+
+</details>
+
+<details>
+<summary>Prefer using dot shorthands for implicit returns.</summary>
+
+```dart
+// ✅ Good. Uses dot shorthands for implicit returns.
+MainAxisAligment pickAligment() => .start;
+Text createText() => .new('Hello');
+
+// ⚠️ OK but repetitive. Consider using dot shorthands.
+MainAxisAligment pickAligment() => MainAxisAligment.start;
+Text createText() => Text('Hello');
+
+// ❌ BAD. Avoid implicit returns for complex expressions.
+Text createText() => doThing((ThingEnum thing) => switch (thing) {
+  .thing1 => .new('Hello'),
+  .thing2 => .new('World'),
+});
+```
+
+</details>
+
+<details>
+<summary>Prefer using explicit types for explicit returns.</summary>
+
+```dart
+// ✅ Good. Uses explicit types for explicit returns.
+MainAxisAlignment pickAlignment() {
+  return MainAxisAlignment.start;
+}
+
+// ✅ Good. Uses dot explicit types for explicit returns.
+Text createText() {
+  return Text('Hello');
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+MainAxisAligment pickAligment() {
+  return .start;
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+Text createText() {
+  return .new('Hello');
+}
+```
+
+</details>
+
+<details>
+<summary>Prefer using dot shorthands to omit obvious types for the default values of constructors’ initializing formals.</summary>
+
+```dart
+class Foo {
+  final MainAxisAlignment mainAxisAlignment;
+
+  // ✅ Good. Uses dot shorthands for the default value.
+  Foo({this.mainAxisAlignment = .start});
+  Foo([this.mainAxisAlignment = .start]);
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  Foo({this.mainAxisAlignment = MainAxisAlignment.start});
+  Foo([this.mainAxisAlignment = MainAxisAlignment.start]);
+}
+```
+
+</details>
+
+<details><summary>Prefer using dot shorthands for switch cases to omit obvious types.</summary>
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in switch cases.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    .spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use dot shorthands to omit obvious types.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    MainAxisAlignment.spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use explicit types if the type is not obvious.
+  // Consider renaming "whatIsThis" to make the type obvious.
+  _ = switch (whatIsThis()) {
+    .mystery => true,
+    _ => false,
+  };
+
+  // ✅ Good. Uses explicit types if the type is not obvious.
+  _ = switch (whatIsThis()) {
+    BookGenre.mystery => true,
+    _ => false,
+  };
+}
+```
+
+</details>
+
+<details>
+<summary>Prefer using dot shorthands in collection literals if the collection’s element type is obvious.</summary>
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var alignments = <MainAxisAlignment>[.start, .end];
+  var objects = <AwesomeObject>[.new('Foo'), .new('Bar'), .new('Buzz')];
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  var objects = <AwesomeObject>[AwesomeObject('Foo'), AwesomeObject('World'), AwesomeObject('Buzz')];
+
+  // ❌ BAD. Per Flutter's existing style guide, all list and map literals must
+  // be explicitly typed.
+  var alignments = [MainAxisAlignment.start, MainAxisAlignment.end];
+
+  // ❌ BAD. Per Flutter's existing omit_obvious_local_variable_types lint,
+  // a local variable's type is not obvious if the elements don't all have the
+  // same type.
+  var objects = [DifferentObject('Foo'), AwesomeObject('World')];
+
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('World')];
+}
+```
+
+</details>
+
+
 ## Writing tests
 
 ### Make each test entirely self-contained
