@@ -30,13 +30,23 @@ static void notify_display_update(FlDisplayMonitor* self) {
     return;
   }
 
+#if FLUTTER_LINUX_GTK4
+  GListModel* monitors = gdk_display_get_monitors(self->display);
+  guint n_monitors = g_list_model_get_n_items(monitors);
+#else
   int n_monitors = gdk_display_get_n_monitors(self->display);
+#endif
   g_autofree FlutterEngineDisplay* displays =
       g_new0(FlutterEngineDisplay, n_monitors);
-  for (int i = 0; i < n_monitors; i++) {
+  for (guint i = 0; i < n_monitors; i++) {
     FlutterEngineDisplay* display = &displays[i];
 
+#if FLUTTER_LINUX_GTK4
+    GdkMonitor* monitor =
+        GDK_MONITOR(g_list_model_get_item(monitors, i));
+#else
     GdkMonitor* monitor = gdk_display_get_monitor(self->display, i);
+#endif
     FlutterEngineDisplayId display_id = GPOINTER_TO_INT(
         g_hash_table_lookup(self->display_ids_by_monitor, monitor));
     if (display_id == 0) {
@@ -56,6 +66,10 @@ static void notify_display_update(FlDisplayMonitor* self) {
     display->width = geometry.width;
     display->height = geometry.height;
     display->device_pixel_ratio = gdk_monitor_get_scale_factor(monitor);
+
+#if FLUTTER_LINUX_GTK4
+    g_object_unref(monitor);
+#endif
   }
 
   fl_engine_notify_display_update(engine, displays, n_monitors);
