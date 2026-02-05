@@ -712,6 +712,8 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
+      # TODO(flutter/flutter#181954) Restore the Pixel 9/API 36 device when
+      # it is available in Firebase Test Lab.
       physical_devices: >-
         [
           "--device", "model=shiba,version=34",
