@@ -387,9 +387,15 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
     gdk_cairo_draw_from_gl(cr, surface,
                            fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
   } else {
     GLint saved_texture_binding;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
@@ -400,8 +406,14 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, self->pixels);
 
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
     gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
                            0, width, height);
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
     glDeleteTextures(1, &texture_id);
 
