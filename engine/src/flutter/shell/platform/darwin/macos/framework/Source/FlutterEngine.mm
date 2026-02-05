@@ -1171,12 +1171,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   NSAssert([self viewControllerForIdentifier:viewController.viewIdentifier] == viewController,
            @"The provided view controller is not attached to this engine.");
-  NSView* view = viewController.flutterView;
+  FlutterView* view = viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
   CGSize scaledSize = scaledBounds.size;
-  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+  double pixelRatio = view.layer.contentsScale;
   auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
-  const FlutterWindowMetricsEvent windowMetricsEvent = {
+  FlutterWindowMetricsEvent windowMetricsEvent = {
       .struct_size = sizeof(windowMetricsEvent),
       .width = static_cast<size_t>(scaledSize.width),
       .height = static_cast<size_t>(scaledSize.height),
@@ -1186,6 +1186,20 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       .display_id = static_cast<uint64_t>(displayId),
       .view_id = viewController.viewIdentifier,
   };
+  if (view.sizedToContents) {
+    CGSize maximumContentSize = [view convertSizeToBacking:view.maximumContentSize];
+    CGSize minimumContentSize = [view convertSizeToBacking:view.minimumContentSize];
+    windowMetricsEvent.has_constraints = true;
+    windowMetricsEvent.min_width_constraint = static_cast<size_t>(minimumContentSize.width);
+    windowMetricsEvent.min_height_constraint = static_cast<size_t>(minimumContentSize.height);
+    windowMetricsEvent.max_width_constraint = static_cast<size_t>(maximumContentSize.width);
+    windowMetricsEvent.max_height_constraint = static_cast<size_t>(maximumContentSize.height);
+  } else {
+    windowMetricsEvent.min_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.min_height_constraint = static_cast<size_t>(scaledSize.height);
+    windowMetricsEvent.max_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.max_height_constraint = static_cast<size_t>(scaledSize.height);
+  }
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }
 
