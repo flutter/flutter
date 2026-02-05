@@ -241,9 +241,7 @@ const windowingFeature = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Whether desktop windowing is enabled.
-///
-/// See: https://github.com/flutter/flutter/issues/30701.
+/// Whether accessibility evaluations is enabled.
 const accessibilityEvaluationsFeature = Feature(
   name: 'support for accessibility evaluations',
   configSetting: 'enable-accessibility-evaluations',
