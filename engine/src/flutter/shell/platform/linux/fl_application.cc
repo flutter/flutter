@@ -37,7 +37,8 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
 // Called when the first frame is received.
 static void first_frame_cb(FlApplication* self, FlView* view) {
 #if FLUTTER_LINUX_GTK4
-  GtkWidget* window = gtk_widget_get_root(GTK_WIDGET(view));
+  GtkRoot* root = gtk_widget_get_root(GTK_WIDGET(view));
+  GtkWidget* window = root != nullptr ? GTK_WIDGET(root) : nullptr;
 #else
   GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
 #endif
@@ -80,7 +81,11 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
+#if FLUTTER_LINUX_GTK4
+    gtk_header_bar_set_show_title_buttons(header_bar, TRUE);
+#else
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
+#endif
     gtk_window_set_titlebar(GTK_WINDOW(window), GTK_WIDGET(header_bar));
   }
 

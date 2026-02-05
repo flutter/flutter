@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 
+#if !FLUTTER_LINUX_GTK4
 static constexpr const char* kFlutterLifecycleChannel = "flutter/lifecycle";
 
 static constexpr const char* kAppLifecycleStateResumed =
@@ -16,6 +17,7 @@ static constexpr const char* kAppLifecycleStateInactive =
     "AppLifecycleState.inactive";
 static constexpr const char* kAppLifecycleStateHidden =
     "AppLifecycleState.hidden";
+#endif
 
 struct _FlWindowStateMonitor {
   GObject parent_instance;
@@ -37,6 +39,7 @@ struct _FlWindowStateMonitor {
 
 G_DEFINE_TYPE(FlWindowStateMonitor, fl_window_state_monitor, G_TYPE_OBJECT);
 
+#if !FLUTTER_LINUX_GTK4
 static void send_lifecycle_state(FlWindowStateMonitor* self,
                                  const gchar* lifecycle_state) {
   g_autoptr(FlValue) value = fl_value_new_string(lifecycle_state);
@@ -52,6 +55,7 @@ static void send_lifecycle_state(FlWindowStateMonitor* self,
   fl_binary_messenger_send_on_channel(self->messenger, kFlutterLifecycleChannel,
                                       message, nullptr, nullptr, nullptr);
 }
+#endif
 
 #if !FLUTTER_LINUX_GTK4
 static gboolean is_hidden(GdkWindowState state) {
