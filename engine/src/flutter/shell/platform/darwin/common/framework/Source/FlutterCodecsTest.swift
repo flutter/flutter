@@ -27,43 +27,49 @@ import Testing
     #expect(codec.decode(Data()) == nil)
   }
 
-  @available(macOS 13.0, *)
-  @Test
-  func encodingAssertsOnInvalidInput() async {
-    let result = await #expect(
-      processExitsWith: .signal(SIGABRT),
-      observing: [\.standardErrorContent]
-    ) {
-      let malformedString = NSString(
-        data: Data([0xDF, 0xFF]),
-        encoding: NSUTF16StringEncoding
-      )!
-      FlutterJSONMessageCodec.sharedInstance().encode(malformedString)
-    }
-    if let result {
-      #expect(
-        result.standardErrorContent.contains("failed to convert to UTF8".utf8)
-      )
-    }
-  }
-
-  @available(macOS 13.0, *)
-  @Test
-  func decodingAssertsOnInvalidInput() async {
-    let result = await #expect(
-      processExitsWith: .signal(SIGABRT),
-      observing: [\.standardErrorContent]
-    ) {
-      FlutterJSONMessageCodec.sharedInstance().decode("{{{".data(using: .utf8))
-    }
-    if let result {
-      #expect(
-        result.standardErrorContent.contains(
-          "No string key for value in object around line 1".utf8
+  // Exit tests are only available on Swift 6.2 and later.
+  // These two tests currently do not run on CI.
+  #if compiler(>=6.2)
+    @available(macOS 13.0, *)
+    @Test
+    func encodingAssertsOnInvalidInput() async {
+      let result = await #expect(
+        processExitsWith: .signal(SIGABRT),
+        observing: [\.standardErrorContent]
+      ) {
+        let malformedString = NSString(
+          data: Data([0xDF, 0xFF]),
+          encoding: NSUTF16StringEncoding
+        )!
+        FlutterJSONMessageCodec.sharedInstance().encode(malformedString)
+      }
+      if let result {
+        #expect(
+          result.standardErrorContent.contains("failed to convert to UTF8".utf8)
         )
-      )
+      }
     }
-  }
+
+    @available(macOS 13.0, *)
+    @Test
+    func decodingAssertsOnInvalidInput() async {
+      let result = await #expect(
+        processExitsWith: .signal(SIGABRT),
+        observing: [\.standardErrorContent]
+      ) {
+        FlutterJSONMessageCodec.sharedInstance().decode(
+          "{{{".data(using: .utf8)
+        )
+      }
+      if let result {
+        #expect(
+          result.standardErrorContent.contains(
+            "No string key for value in object around line 1".utf8
+          )
+        )
+      }
+    }
+  #endif  // compiler(>=6.2)
 
   @Test(arguments: [
     NSArray(
