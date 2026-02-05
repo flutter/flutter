@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -560,7 +561,7 @@ void main() {
     const key = Key('DecoratedSliver with border');
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -571,11 +572,14 @@ void main() {
               slivers: <Widget>[
                 DecoratedSliver(
                   key: key,
-                  decoration: BoxDecoration(border: Border.all()),
-                  sliver: const SliverAppBar(
+                  decoration: BoxDecoration(
+                    border: Border.all(strokeAlign: BorderSide.strokeAlignCenter),
+                  ),
+                  sliver: SliverPersistentHeader(
                     pinned: true,
-                    stretch: true,
-                    title: SizedBox(height: 50, width: 300),
+                    delegate: TestDelegate(
+                      stretchConfiguration: OverScrollHeaderStretchConfiguration(),
+                    ),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 1000)),
@@ -592,11 +596,13 @@ void main() {
     expect(
       find.byKey(key),
       paints..something((methodName, arguments) {
-        if (methodName != #drawRRect) {
+        if (methodName != #drawRect) {
           return false;
         }
-        final Rect rect = (arguments[0] as RRect).outerRect;
-        expect(rect, rectMoreOrLessEquals(const Rect.fromLTRB(0, 0, 300, 81.08), epsilon: 0.01));
+        final rect = arguments[0] as Rect;
+
+        // 225.1 is the result of maxExtent (200) + the physics-diminished drag (the 45 pixels from the gesture)
+        expect(rect, rectMoreOrLessEquals(const Rect.fromLTRB(0, 0, 300, 225.1), epsilon: 0.03));
         return true;
       }),
     );
@@ -633,4 +639,25 @@ class TestBoxPainter extends BoxPainter {
     disposed = true;
     super.dispose();
   }
+}
+
+class TestDelegate extends SliverPersistentHeaderDelegate {
+  TestDelegate({this.stretchConfiguration});
+
+  @override
+  double get maxExtent => 200.0;
+
+  @override
+  double get minExtent => 0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return SizedBox(height: maxExtent, width: 300);
+  }
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+
+  @override
+  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
 }
