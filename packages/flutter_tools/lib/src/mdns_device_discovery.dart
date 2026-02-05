@@ -65,7 +65,12 @@ class MDNSDeviceDiscovery {
   /// The advertisement includes metadata about the application, device, and environment.
   Future<void> advertise({required String appName, required Uri? vmServiceUri}) async {
     try {
-      await stop(); // Stop any existing advertisements before starting new ones.
+      if (_servers.isNotEmpty) {
+        throw StateError(
+          'mDNS advertisement is already active. Call stop() before starting a new advertisement.',
+        );
+      }
+
 
       if (vmServiceUri == null) {
         logger.printTrace('VM Service URI not available, not starting mDNS server.');
@@ -218,45 +223,36 @@ class MDNSObservation {
       return null;
     }
 
-    final String? hostname = metadata[_kHostname];
-    final String? projectName = metadata[_kProjectName];
-    final String? deviceName = metadata[_kDeviceName];
-    final String? deviceId = metadata[_kDeviceId];
-    final String? targetPlatform = metadata[_kTargetPlatform];
-    final String? mode = metadata[_kMode];
-    final String? wsUri = metadata[_kWsUri];
     final int? epoch = int.tryParse(metadata[_kEpoch] ?? '');
     final int? pid = int.tryParse(metadata[_kPid] ?? '');
-    final String? flutterVersion = metadata[_kFlutterVersion];
-    final String? dartVersion = metadata[_kDartVersion];
 
-    if (hostname == null ||
-        projectName == null ||
-        deviceName == null ||
-        deviceId == null ||
-        targetPlatform == null ||
-        mode == null ||
-        wsUri == null ||
-        epoch == null ||
-        pid == null ||
-        flutterVersion == null ||
-        dartVersion == null) {
-      return null;
+    if (metadata case {
+      _kHostname: final String hostname,
+      _kProjectName: final String projectName,
+      _kDeviceName: final String deviceName,
+      _kDeviceId: final String deviceId,
+      _kTargetPlatform: final String targetPlatform,
+      _kMode: final String mode,
+      _kWsUri: final String wsUri,
+      _kFlutterVersion: final String flutterVersion,
+      _kDartVersion: final String dartVersion,
+    } when epoch != null && pid != null) {
+      return MDNSObservation(
+        hostname: hostname,
+        projectName: projectName,
+        deviceName: deviceName,
+        deviceId: deviceId,
+        targetPlatform: targetPlatform,
+        mode: mode,
+        wsUri: wsUri,
+        epoch: epoch,
+        pid: pid,
+        flutterVersion: flutterVersion,
+        dartVersion: dartVersion,
+      );
     }
 
-    return MDNSObservation(
-      hostname: hostname,
-      projectName: projectName,
-      deviceName: deviceName,
-      deviceId: deviceId,
-      targetPlatform: targetPlatform,
-      mode: mode,
-      wsUri: wsUri,
-      epoch: epoch,
-      pid: pid,
-      flutterVersion: flutterVersion,
-      dartVersion: dartVersion,
-    );
+    return null;
   }
 
   /// Converts the observation to a list of strings for mDNS TXT record.

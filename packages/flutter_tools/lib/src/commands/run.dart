@@ -224,6 +224,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        RunCommand.kEnableLocalDiscovery,
+        help:
+            'Whether to advertise the application on the local network (via mDNS) '
+            'for discovery by "flutter running-apps".',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -242,7 +248,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
-    addEnableLocalDiscoveryFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -259,7 +264,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableLocalDiscovery => boolArg(FlutterCommand.kEnableLocalDiscovery);
+  bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -501,6 +506,8 @@ class RunCommand extends RunCommandBase {
 
   @override
   final name = 'run';
+
+  static const String kEnableLocalDiscovery = 'enable-local-discovery';
 
   @override
   DeprecationBehavior get deprecationBehavior =>

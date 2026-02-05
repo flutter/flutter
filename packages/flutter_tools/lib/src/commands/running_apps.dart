@@ -15,11 +15,12 @@ import '../convert.dart';
 import '../mdns_device_discovery.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import 'run.dart';
 
 const String _noRunningAppsFoundMessage =
     'No running Flutter apps found.\n'
     'Note: Flutter running-apps only detects apps running with the '
-    '"--${FlutterCommand.kEnableLocalDiscovery}" flag (debug/profile mode only).';
+    '"--${RunCommand.kEnableLocalDiscovery}" flag (debug/profile mode only).';
 
 /// Command to list running Flutter applications.
 class RunningAppsCommand extends FlutterCommand {
