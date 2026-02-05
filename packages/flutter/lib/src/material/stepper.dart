@@ -123,6 +123,11 @@ const double _kStepSize = 24.0;
 const double _kTriangleSqrt = 0.866025; // sqrt(3.0) / 2.0
 const double _kTriangleHeight = _kStepSize * _kTriangleSqrt;
 const double _kMaxStepSize = 80.0;
+const EdgeInsetsDirectional _kDefaultContentPadding = EdgeInsetsDirectional.only(
+  start: 60.0,
+  end: 24.0,
+  bottom: 24.0,
+);
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -782,14 +787,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final double? marginRight = _stepIconMargin?.resolve(TextDirection.ltr).right;
     final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
     final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
-    // Default content padding for vertical stepper.
-    const EdgeInsetsDirectional defaultContentPadding = EdgeInsetsDirectional.only(
-      start: 60.0,
-      end: 24.0,
-      bottom: 24.0,
-    );
-     // Adjust padding to align content with step icon when stepIconMargin is set.
-    final EdgeInsetsGeometry effectiveContentPadding = (widget.contentPadding ?? defaultContentPadding)
+    // Adjust padding to align content with step icon when stepIconMargin is set.
+    final EdgeInsetsGeometry effectiveContentPadding = (widget.contentPadding ?? _kDefaultContentPadding)
       .add(EdgeInsetsDirectional.only(start: marginLeft ?? 0.0));
 
     return Stack(
