@@ -1039,7 +1039,7 @@ class EmptyCluster extends WebCluster {
 
   @override
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    assert(false, 'We should not call fillOnContext method on this object');
+    assert(false, 'We should not call "fillOnContext" on an EmptyCluster');
   }
 
   @override
@@ -1049,7 +1049,7 @@ class EmptyCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    assert(false, 'We should not call addToContext method on this object');
+    assert(false, 'We should not call "fillOnContext" on an EmptyCluster');
   }
 }
 
@@ -1081,7 +1081,7 @@ class PlaceholderCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    assert(false, 'We should not call addToContext method on this object');
+    assert(false, 'We should not call "addToContext" on an PlaceholderCluster');
   }
 }
 

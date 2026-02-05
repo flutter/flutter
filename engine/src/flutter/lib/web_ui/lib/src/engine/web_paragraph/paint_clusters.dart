@@ -85,8 +85,7 @@ class PaintClusters extends TextPaint {
         continue;
       }
       // Placeholders do not need painting, just reserving the space
-      if (block.clusterRange.size == 1 &&
-          layout.allClusters[block.clusterRange.start] is PlaceholderCluster) {
+      if (block is PlaceholderBlock) {
         continue;
       }
 

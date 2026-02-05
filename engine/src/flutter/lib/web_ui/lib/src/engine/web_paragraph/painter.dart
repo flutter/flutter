@@ -38,6 +38,10 @@ abstract class Painter {
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
   void resizePaintCanvas(double devicePixelRatio, double width, double height) {
+    // TODO(jlavrova): we need to investigate different approaches to resizing the canvas.
+    // 1. Do we resize to 0, 0 at the end of each paint so we do not hold on to large buffers?
+    // 2. Do we keep the canvas around (even big ones) and only resize when needed?
+    // 3. Do we have a max size and reuse the canvas up to that size?
     if (currentDevicePixelRatio == devicePixelRatio &&
         paintCanvas.width == (width * devicePixelRatio).ceilToDouble() &&
         paintCanvas.height == (height * devicePixelRatio).ceilToDouble()) {
@@ -65,7 +69,7 @@ abstract class Painter {
 }
 
 final DomHTMLCanvasElement? _domHtmlCanvasElement = null;
-    //domDocument.createElement('canvas') as DomHTMLCanvasElement;
+//domDocument.createElement('canvas') as DomHTMLCanvasElement;
 
 class CanvasKitPainter extends Painter {
   CkImage? singleImageCache;
@@ -151,11 +155,11 @@ class CanvasKitPainter extends Painter {
     if (!hasSingleImageCache) {
       // We should have resized the small canvas before calling this method
       if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
-        WebParagraphDebug.error(
-          '_resizePaintCanvas needed: '
+        assert(
+          false,
+          'resizePaintCanvas needed: '
           'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
         );
-        assert(false);
       }
 
       SkImage? skImage;
@@ -213,11 +217,11 @@ class CanvasKitPainter extends Painter {
     if (!hasSingleImageCache) {
       // We should have resized the small canvas before calling this method
       if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
-        WebParagraphDebug.error(
-          '_resizePaintCanvas needed: '
+        assert(
+          false,
+          'resizePaintCanvas needed: '
           'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
         );
-        assert(false);
       }
       // Transfer the buffer from the small canvas
       // This is synchronous and returns the handle immediately
