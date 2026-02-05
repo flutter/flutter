@@ -772,9 +772,11 @@ static void realize_cb(FlView* self) {
   handle_geometry_changed(self);
 }
 
+#if !FLUTTER_LINUX_GTK4
 static void size_allocate_cb(FlView* self) {
   handle_geometry_changed(self);
 }
+#endif
 
 #if FLUTTER_LINUX_GTK4
 static void resize_cb(FlView* self, int width, int height) {
