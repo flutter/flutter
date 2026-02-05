@@ -1056,7 +1056,7 @@ void foo() {
   // The local variable's declaration should not use type inference.
   var alignment = MainAxisAlignment.start;
 
-  // ✅ Good. Use explicit types for a local variable declaration if the expression is not obviousy typed.
+  // ✅ Good. Use explicit types for a local variable declaration if the expression is not obviously typed.
   // You can use dot shorthands to initialize an explicitly typed local variable.
   MainAxisAlignment alignment = .start;
 }
@@ -1218,11 +1218,11 @@ decodeImageFromList(Uint8List(1024)),
 
 ```dart
 // ✅ Good. Uses dot shorthands for implicit returns.
-MainAxisAligment pickAligment() => .start;
+MainAxisAlignment pickAlignment() => .start;
 Text createText() => .new('Hello');
 
 // ⚠️ OK but repetitive. Consider using dot shorthands.
-MainAxisAligment pickAligment() => MainAxisAligment.start;
+MainAxisAlignment pickAlignment() => MainAxisAlignment.start;
 Text createText() => Text('Hello');
 
 // ❌ BAD. Avoid implicit returns for complex expressions.
@@ -1248,7 +1248,7 @@ Text createText() {
 
 // ⚠️ OK but consider using explicit types, especially if
 // this method is multiple lines.
-MainAxisAligment pickAligment() {
+MainAxisAlignment pickAlignment() {
   return .start;
 }
 
@@ -1320,7 +1320,7 @@ void foo() {
   var objects = <AwesomeObject>[.new('Foo'), .new('Bar'), .new('Buzz')];
 
   // ⚠️ OK but repetitive. Consider using dot shorthands.
-  var objects = <AwesomeObject>[AwesomeObject('Foo'), AwesomeObject('World'), AwesomeObject('Buzz')];
+  var objects = <AwesomeObject>[AwesomeObject('Foo'), AwesomeObject('Bar'), AwesomeObject('Buzz')];
 
   // ❌ BAD. Per Flutter's existing style guide, all list and map literals must
   // be explicitly typed.
@@ -1329,10 +1329,10 @@ void foo() {
   // ❌ BAD. Per Flutter's existing omit_obvious_local_variable_types lint,
   // a local variable's type is not obvious if the elements don't all have the
   // same type.
-  var objects = [DifferentObject('Foo'), AwesomeObject('World')];
+  var objects = [DifferentObject('Foo'), AwesomeObject('Bar')];
 
   // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
-  var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('World')];
+  var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('Bar')];
 }
 ```
 
