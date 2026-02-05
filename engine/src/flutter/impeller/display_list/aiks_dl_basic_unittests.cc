@@ -1822,7 +1822,7 @@ TEST_P(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-// This makes sure the WideGamut named tests use 16bit float pixel format.
+// This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
