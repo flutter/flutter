@@ -9,7 +9,6 @@ library;
 
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -141,7 +140,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  Evaluation _traverse(FlutterView view, SemanticsNode node) {
+  Evaluation _traverse(ui.FlutterView view, SemanticsNode node) {
     var result = const Evaluation.pass();
     node.visitChildren((SemanticsNode child) {
       result += _traverse(view, child);
@@ -596,37 +595,44 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
-    // Compute elements to be evaluated.
-    final List<Element> elements = finder.evaluate().toList();
-    final images = <FlutterView, ui.Image>{};
-    final byteDatas = <FlutterView, ByteData>{};
-
     // Collate all evaluations into a final evaluation, then return.
     var result = const Evaluation.pass();
-    for (final element in elements) {
-      final FlutterView view = tester.viewOf(find.byElementPredicate((Element e) => e == element));
-      final RenderView renderView = tester.binding.renderViews.firstWhere(
-        (RenderView r) => r.flutterView == view,
-      );
-      final layer = renderView.debugLayer! as OffsetLayer;
+    final images = <ui.FlutterView, ui.Image>{};
+    try {
+      // Compute elements to be evaluated.
+      final List<Element> elements = finder.evaluate().toList();
+      final byteDatas = <ui.FlutterView, ByteData>{};
 
-      late final ui.Image image;
-      late final ByteData byteData;
-
-      // Obtain a previously rendered image or render one for a new view.
-      await tester.binding.runAsync(() async {
-        image = images[view] ??= await layer.toImage(
-          renderView.paintBounds,
-          // Needs to be the same pixel ratio otherwise our dimensions
-          // won't match the last transform layer.
-          pixelRatio: 1 / view.devicePixelRatio,
+      for (final element in elements) {
+        final ui.FlutterView view = tester.viewOf(
+          find.byElementPredicate((Element e) => e == element),
         );
-        byteData = byteDatas[view] ??= (await image.toByteData())!;
-      });
+        final RenderView renderView = tester.binding.renderViews.firstWhere(
+          (RenderView r) => r.flutterView == view,
+        );
+        final layer = renderView.debugLayer! as OffsetLayer;
 
-      result = result + _evaluateElement(element, byteData, image);
+        late final ui.Image image;
+        late final ByteData byteData;
+
+        // Obtain a previously rendered image or render one for a new view.
+        await tester.binding.runAsync(() async {
+          image = images[view] ??= await layer.toImage(
+            renderView.paintBounds,
+            // Needs to be the same pixel ratio otherwise our dimensions
+            // won't match the last transform layer.
+            pixelRatio: 1 / view.devicePixelRatio,
+          );
+          byteData = byteDatas[view] ??= (await image.toByteData())!;
+        });
+
+        result = result + _evaluateElement(element, byteData, image);
+      }
+    } finally {
+      for (final ui.Image image in images.values) {
+        image.dispose();
+      }
     }
-
     return result;
   }
 

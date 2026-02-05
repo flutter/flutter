@@ -304,4 +304,16 @@ void main() {
   dynamicColor.opacity;
   dynamicColor.value;
   dynamicColor = dynamicColor.withOpacity(0.55);
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  showCupertinoSheet(
+    context: context,
+    builder: (BuildContext context) => Container(),
+  );
+
+  // Changes made in https://github.com/flutter/flutter/pull/177337
+  CupertinoSheetRoute<void>(
+    context: context,
+    builder: (BuildContext context) => Container(),
+  );
 }

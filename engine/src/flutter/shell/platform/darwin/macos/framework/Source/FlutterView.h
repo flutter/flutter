@@ -41,7 +41,7 @@
                               commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                                   delegate:(nonnull id<FlutterViewDelegate>)delegate
                             viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-    NS_DESIGNATED_INITIALIZER;
+                           enableWideGamut:(BOOL)enableWideGamut NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;
