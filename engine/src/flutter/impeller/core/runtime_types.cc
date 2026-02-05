@@ -4,15 +4,19 @@
 
 #include "impeller/core/runtime_types.h"
 
-#include "flutter/fml/logging.h"
-
 namespace impeller {
 
 size_t RuntimeUniformDescription::GetDartSize() const {
-  // Struct uniforms aren't yet supported, they only exist as Vulkan
-  // collections.
-  FML_DCHECK(type != kStruct);
-  size_t size = dimensions.rows * dimensions.cols * bit_width / 8u;
+  size_t size = 0;
+  if (!padding_layout.empty()) {
+    for (impeller::RuntimePaddingType byte_type : padding_layout) {
+      if (byte_type == RuntimePaddingType::kFloat) {
+        size += sizeof(float);
+      }
+    }
+  } else {
+    size = dimensions.rows * dimensions.cols * bit_width / 8u;
+  }
   if (array_elements.value_or(0) > 0) {
     // Covered by check on the line above.
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
