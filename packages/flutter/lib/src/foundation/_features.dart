@@ -36,7 +36,7 @@ bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 /// See: https://github.com/flutter/flutter/issues/32057.
 @internal
 bool isAccessibilityEvaluationsEnabled = debugEnabledFeatureFlags.contains(
-  'accessibility-evaluations',
+  'accessibility_evaluations',
 );
 
 /// The feature flags this app was built with.

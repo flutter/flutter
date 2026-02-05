@@ -249,7 +249,7 @@ const accessibilityEvaluationsFeature = Feature(
   name: 'support for accessibility evaluations',
   configSetting: 'enable-accessibility-evaluations',
   environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
-  runtimeId: 'accessibility-evaluations',
+  runtimeId: 'accessibility_evaluations',
   master: FeatureChannelSetting(available: true),
 );
 
