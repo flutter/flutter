@@ -6,10 +6,12 @@ import '../../engine.dart';
 
 typedef Entry = ({String group, String name});
 
+/// Debugging utilities for WebParagraph.
 class WebParagraphDebug {
   static bool logging = false;
   static bool apiLogging = false;
 
+  /// Logs a debug message if logging is enabled.
   static void log(String arg) {
     assert(() {
       if (logging) {
@@ -19,6 +21,7 @@ class WebParagraphDebug {
     }());
   }
 
+  /// Logs an API trace message if API logging is enabled.
   static void apiTrace(String arg) {
     assert(() {
       if (apiLogging || logging) {
@@ -28,6 +31,7 @@ class WebParagraphDebug {
     }());
   }
 
+  /// Logs an API warning message.
   static void warning(String arg) {
     assert(() {
       print('WARNING: $arg');
@@ -35,6 +39,7 @@ class WebParagraphDebug {
     }());
   }
 
+  /// Logs an API error message.
   static void error(String arg) {
     assert(() {
       print('ERROR: $arg');
@@ -43,10 +48,12 @@ class WebParagraphDebug {
   }
 }
 
+/// Profiler for WebParagraph related operations.
 class WebParagraphProfiler {
   static Map<String, Duration> durations = {};
   static Map<String, int> counts = {};
 
+  ///
   static void register() {
     Profiler.ensureInitialized();
     engineBenchmarkValueCallback = (String name, double value) {
@@ -55,12 +62,14 @@ class WebParagraphProfiler {
     };
   }
 
+  /// Logs the collected profiling information to the console.
   static void log() {
     for (final MapEntry<String, Duration> entry in durations.entries) {
       print('${entry.key}: ${entry.value.inMilliseconds}ms');
     }
   }
 
+  /// Resets the collected profiling information.
   static void reset() {
     durations = {};
   }

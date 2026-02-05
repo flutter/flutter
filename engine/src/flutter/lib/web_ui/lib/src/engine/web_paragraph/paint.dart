@@ -25,6 +25,7 @@ abstract class TextPaint {
 
   final WebParagraph paragraph;
 
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text cluster
   (ui.Rect sourceRect, ui.Rect targetRect) calculateCluster(
     TextLayout layout,
     LineBlock block,
@@ -77,6 +78,7 @@ abstract class TextPaint {
     return (sourceRect, targetRect);
   }
 
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block
   (ui.Rect sourceRect, ui.Rect targetRect) calculateBlock(
     TextLayout layout,
     TextBlock block,
@@ -116,50 +118,7 @@ abstract class TextPaint {
     return (sourceRect, targetRect);
   }
 
-  double calculateShadowOffset(
-    TextLayout layout,
-    TextLine line,
-    LineBlock block,
-    ShadowDirection direction,
-  ) {
-    if (!block.style.hasElement(StyleElements.shadows) || block.style.shadows == null) {
-      return 0;
-    }
-
-    final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
-      layout,
-      block as TextBlock,
-      ui.Offset(
-        line.advance.left + line.formattingShift + block.shiftFromLineStart,
-        line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-      ),
-      ui.Offset.zero,
-      ui.window.devicePixelRatio,
-    );
-
-    for (final ui.Shadow shadow in block.style.shadows!) {
-      switch (direction) {
-        case ShadowDirection.left:
-          if (shadow.offset.dx < 0) {
-            return sourceRect.left - 100;
-          }
-        case ShadowDirection.right:
-          if (shadow.offset.dx > 0) {
-            return sourceRect.right + 100;
-          }
-        case ShadowDirection.top:
-          if (shadow.offset.dy < 0) {
-            return sourceRect.top - 100;
-          }
-        case ShadowDirection.bottom:
-          if (shadow.offset.dy > 0) {
-            return sourceRect.bottom + 100;
-          }
-      }
-    }
-    return 0;
-  }
-
+  /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
   (ui.Rect sourceRect, ui.Rect targetRect) calculateParagraph(
     TextLayout layout,
     ui.Offset offset,
@@ -199,10 +158,12 @@ abstract class TextPaint {
     return (sourceRect, targetRect);
   }
 
+  /// Calculates the thickness of the decoration line
   double calculateThickness(WebTextStyle textStyle) {
     return (textStyle.fontSize! / 14.0) * (textStyle.decorationThickness ?? 1.0);
   }
 
+  /// Calculates the position of the decoration line
   double calculatePosition(
     ui.TextDecoration decoration,
     double thickness,
@@ -225,6 +186,7 @@ abstract class TextPaint {
     return 0;
   }
 
+  /// Calculates and the position of the decoration line and paints it on Canvas2D
   void calculateWaves(
     double x,
     double y,
@@ -244,7 +206,7 @@ abstract class TextPaint {
       '$thickness $xStart $yStart',
     );
     paintContext.beginPath();
-    //paintContext.moveTo(x, y + quarterWave);
+    paintContext.moveTo(x, yStart);
     while (xStart + quarterWave * 2 < textBounds.width) {
       final x1 = xStart;
       final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
@@ -275,6 +237,7 @@ abstract class TextPaint {
   }
 
   // TODO(jlavrova): implement decorations entirely on the resulting Canvas
+  /// Paints text decorations on Canvas2D
   void fillDecorations(TextBlock block, ui.Rect sourceRect) {
     if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
       return;
@@ -295,8 +258,9 @@ abstract class TextPaint {
       }
 
       // TODO(jlavrova): Why using these instead of multiplied values?
-      final double height = block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
-      final double ascent = block.rawFontBoundingBoxAscent;
+      final double height =
+          block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
+      final double ascent = block.multipliedFontBoundingBoxAscent;
       final double position = calculatePosition(decoration, thickness, height, ascent);
       WebParagraphDebug.log('decoration=$decoration thickness=$thickness position=$position');
 
@@ -350,9 +314,12 @@ abstract class TextPaint {
     }
   }
 
+  /// Paints shadows of a text cluster on Canvas2D
   void fillTextCluster(WebCluster webTextCluster, bool isDefaultLtr);
 
+  /// Paints shadows of a text cluster on Canvas2D
   void fillShadowCluster(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
 
+  /// Paints the entire paragraph on Canvas2D
   void paint(ui.Canvas canvas, TextLayout layout, Painter painter, double x, double y);
 }
