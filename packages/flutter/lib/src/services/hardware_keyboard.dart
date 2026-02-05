@@ -504,56 +504,62 @@ class HardwareKeyboard {
         isLogicalKeyPressed(LogicalKeyboardKey.metaRight);
   }
 
-  // Returns a tuple of (shouldProcess, errorMessage) that represents if the event is
-  // consistent with the current state.
+  // Returns whether the event should be processed.
   //
-  // The `shouldProcess` represents if the event should be processed normally.
+  // Generally, this function returns true if the event is consistent with the
+  // current state of the keyboard. There are exceptions when the event is
+  // inconsistent but the state should be still updated according to the event.
   //
-  // The `errorMessage` represents an error message and is only set in debug mode.
-  //
-  // The `errorMessage` might be non-null even if `shouldProcess` is true,
-  // representing an erroneous event that should still be processed normally.
-  (bool, String?) _eventIsRegular(KeyEvent event) {
-    late final bool shouldProcess;
-    String? errorMessage;
+  // This function will also print debug messages if the event is inconsistent
+  // with the current state.
+  bool _eventShouldProceed(KeyEvent event) {
     if (event is KeyDownEvent) {
-      shouldProcess = !_pressedKeys.containsKey(event.physicalKey);
+      final bool shouldProcess = !_pressedKeys.containsKey(event.physicalKey);
       assert(() {
         if (!shouldProcess) {
-          errorMessage =
-              'Received ${event.runtimeType} for key that is already pressed:\n'
-              'Event: $event\n'
-              'Pressed logical key: ${_pressedKeys[event.physicalKey]}';
+          _keyboardDebug(
+            () =>
+                'Received ${event.runtimeType} for key that is already pressed:\n'
+                'Event: $event\n'
+                'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
+          );
         }
         return true;
       }());
+      return shouldProcess;
     } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
       // Only checks physical key here and don't reject based on logical key,
       // since otherwise the key will never be released.
-      shouldProcess = _pressedKeys.containsKey(event.physicalKey);
+      final bool shouldProcess = _pressedKeys.containsKey(event.physicalKey);
       assert(() {
         if (!shouldProcess) {
-          errorMessage =
-              'Received ${event.runtimeType} for key that is not pressed:\n'
-              'Event: $event';
+          _keyboardDebug(
+            () =>
+                'Received ${event.runtimeType} for key that is not pressed:\n'
+                'Event: $event',
+          );
         } else if (_pressedKeys[event.physicalKey] != event.logicalKey) {
-          errorMessage =
-              'Received ${event.runtimeType} for key with mismatched logical key:\n'
-              'Event: $event\n'
-              'Pressed logical key: ${_pressedKeys[event.physicalKey]}';
+          _keyboardDebug(
+            () =>
+                'Received ${event.runtimeType} for key with mismatched logical key:\n'
+                'Event: $event\n'
+                'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
+          );
         }
         return true;
       }());
+      return shouldProcess;
     } else {
-      shouldProcess = false;
       assert(() {
-        errorMessage =
-            'Received unknown KeyEvent subtype:\n'
-            'Event: $event';
+        _keyboardDebug(
+          () =>
+              'Received unknown KeyEvent subtype:\n'
+              'Event: $event',
+        );
         return true;
       }());
+      return false;
     }
-    return (shouldProcess, errorMessage);
   }
 
   List<KeyEventCallback> _handlers = <KeyEventCallback>[];
@@ -679,11 +685,7 @@ class HardwareKeyboard {
     assert(
       _keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails),
     );
-    final (bool shouldProcess, String? errorMessage) = _eventIsRegular(event);
-    if (errorMessage != null) {
-      assert(_keyboardDebug(() => errorMessage));
-    }
-    if (!shouldProcess) {
+    if (!_eventShouldProceed(event)) {
       // Treat this event as handled since ignoring it is equivalent to
       // acknowledging that it occurred earlier, resulting in the current state.
       return true;
