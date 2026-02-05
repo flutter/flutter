@@ -834,6 +834,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       result = Padding(padding: padding, child: result);
     }
 
+    // TODO(xxxOVALxxx): Support directional navigation mode. In this mode,
+    // arrow keys should not change the value until the user enters an
+    // "editing" state, to allow moving focus.
     final Map<ShortcutActivator, Intent> shortcutMap = switch (MediaQuery.navigationModeOf(
       context,
     )) {
