@@ -2,27 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   /// Verifies that the pre-test message shown by flutter_test
   /// meets the minimum WCAG text contrast accessibility guideline.
   testWidgets('pre-test message meets text contrast guideline', (WidgetTester tester) async {
-    // Pump the pre-test message widget.
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Text(
-            'Test starting...',
-            style: TextStyle(color: Color(0xFF8F7FFF), fontSize: 40.0),
-          ),
-        ),
-      ),
+    // The pre-test message is already attached to the render tree by the
+    // TestWidgetsFlutterBinding before this test runs, so no pumpWidget is needed.
+    await expectLater(
+      tester,
+      meetsGuideline(textContrastGuideline),
     );
-
-    // Verify the widget meets the text contrast accessibility guideline.
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
   });
 }
