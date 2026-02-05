@@ -1527,7 +1527,7 @@ mixin DeltaTextInputClient implements TextInputClient {
 ///  * [TextInputControl.updateStyle], which receives this style information
 ///    in custom text input controls.
 @immutable
-final class TextInputStyle {
+final class TextInputStyle with Diagnosticable {
   /// Creates text styling information for the current input client.
   const TextInputStyle({
     this.fontFamily,
@@ -1613,16 +1613,16 @@ final class TextInputStyle {
   }
 
   @override
-  String toString() {
-    return 'TextInputStyle('
-        'fontFamily: $fontFamily, '
-        'fontSize: $fontSize, '
-        'fontWeight: $fontWeight, '
-        'textDirection: $textDirection, '
-        'textAlign: $textAlign, '
-        'letterSpacing: $letterSpacing, '
-        'wordSpacing: $wordSpacing, '
-        'lineHeight: $lineHeight)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(StringProperty('fontFamily', fontFamily, defaultValue: null));
+    properties.add(DoubleProperty('fontSize', fontSize, defaultValue: null));
+    properties.add(DiagnosticsProperty<FontWeight>('fontWeight', fontWeight, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(DoubleProperty('letterSpacing', letterSpacing, defaultValue: null));
+    properties.add(DoubleProperty('wordSpacing', wordSpacing, defaultValue: null));
+    properties.add(DoubleProperty('lineHeight', lineHeight, defaultValue: null));
   }
 }
 
