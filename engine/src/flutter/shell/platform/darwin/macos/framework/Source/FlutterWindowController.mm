@@ -140,16 +140,19 @@
   _creationRequest.notify_listeners();
 }
 
-- (NSSize)minimumViewSize:(FlutterView*)view {
-  return _creationRequest.has_constraints ? NSMakeSize(_creationRequest.constraints.min_width,
-                                                       _creationRequest.constraints.min_height)
-                                          : NSZeroSize;
+- (std::optional<NSSize>)minimumViewSize:(FlutterView*)view {
+  if (_creationRequest.has_constraints) {
+    return NSMakeSize(_creationRequest.constraints.min_width,
+                      _creationRequest.constraints.min_height);
+  } else {
+    return std::nullopt;
+  }
 }
 
-- (NSSize)maximumViewSize:(FlutterView*)view {
+- (std::optional<NSSize>)maximumViewSize:(FlutterView*)view {
   if (!_creationRequest.has_constraints) {
     // Window is not sized to contents.
-    return NSZeroSize;
+    return std::nullopt;
   }
   NSSize screenSize = self.window.screen.visibleFrame.size;
   double width = screenSize.width;

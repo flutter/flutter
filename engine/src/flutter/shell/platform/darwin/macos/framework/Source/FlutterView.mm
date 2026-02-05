@@ -174,16 +174,27 @@
 }
 
 - (BOOL)sizedToContents {
-  return _sizingDelegate != nil &&
-         !NSEqualSizes([_sizingDelegate maximumViewSize:self], NSZeroSize);
+  return _sizingDelegate != nil && [_sizingDelegate minimumViewSize:self] != std::nullopt;
 }
 
 - (NSSize)minimumContentSize {
-  return _sizingDelegate != nil ? [_sizingDelegate minimumViewSize:self] : self.bounds.size;
+  if (_sizingDelegate != nil) {
+    std::optional<NSSize> minSize = [_sizingDelegate minimumViewSize:self];
+    if (minSize) {
+      return *minSize;
+    }
+  }
+  return self.bounds.size;
 }
 
 - (NSSize)maximumContentSize {
-  return _sizingDelegate != nil ? [_sizingDelegate maximumViewSize:self] : self.bounds.size;
+  if (_sizingDelegate != nil) {
+    std::optional<NSSize> maxSize = [_sizingDelegate maximumViewSize:self];
+    if (maxSize) {
+      return *maxSize;
+    }
+  }
+  return self.bounds.size;
 }
 
 - (void)constraintsDidChange {

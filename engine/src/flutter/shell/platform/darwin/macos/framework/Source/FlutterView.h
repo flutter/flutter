@@ -11,6 +11,7 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurfaceManager.h"
 
 #include <stdint.h>
+#include <optional>
 
 @class FlutterView;
 
@@ -25,16 +26,16 @@
 /**
  * When view should be sized to content, this method should return the minimum
  * logical size of the view.
- * For views that are not sized to content, this method is not called.
+ * For views that are not sized to content, will return std::nullopt;
  */
-- (NSSize)minimumViewSize:(nonnull FlutterView*)view;
+- (std::optional<NSSize>)minimumViewSize:(nonnull FlutterView*)view;
 
 /**
  * When view should be sized to content, this method should return the maximum
  * logical size of the view.
- * For views that are not sized to content, this method should return NSZeroSize.
+ * For views that are not sized to content, this method should return std::nullopt.
  */
-- (NSSize)maximumViewSize:(nonnull FlutterView*)view;
+- (std::optional<NSSize>)maximumViewSize:(nonnull FlutterView*)view;
 
 /**
  * Called when the view's size changes. The container should update its
