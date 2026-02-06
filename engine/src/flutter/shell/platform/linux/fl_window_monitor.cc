@@ -55,6 +55,13 @@ static void title_notify_cb(FlWindowMonitor* self) {
   self->on_title_notify();
 }
 
+#if FLUTTER_LINUX_GTK4
+static gboolean close_request_cb(FlWindowMonitor* self) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_close();
+  return TRUE;
+}
+#else
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
   flutter::IsolateScope scope(self->isolate);
   self->on_close();
@@ -62,6 +69,18 @@ static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
   // Stop default behaviour of destroying the window.
   return TRUE;
 }
+#endif
+
+#if FLUTTER_LINUX_GTK4
+static gboolean close_request_cb(GtkWindow* window, FlWindowMonitor* self) {
+  (void)window;
+  flutter::IsolateScope scope(self->isolate);
+  self->on_close();
+
+  // Stop default behaviour of destroying the window.
+  return TRUE;
+}
+#endif
 
 static void destroy_cb(FlWindowMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
@@ -114,8 +133,17 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
                            G_CALLBACK(is_active_notify_cb), self);
   g_signal_connect_swapped(window, "notify::title", G_CALLBACK(title_notify_cb),
                            self);
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect(window, "close-request", G_CALLBACK(close_request_cb), self);
+#else
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect_swapped(window, "close-request",
+                           G_CALLBACK(close_request_cb), self);
+#else
   g_signal_connect_swapped(window, "delete-event", G_CALLBACK(delete_event_cb),
                            self);
+#endif
+#endif
   g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);
 
   return self;
