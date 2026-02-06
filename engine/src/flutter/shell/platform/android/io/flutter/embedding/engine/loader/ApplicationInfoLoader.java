@@ -42,6 +42,20 @@ public final class ApplicationInfoLoader {
     return metadata.getString(key, null);
   }
 
+  private static String getStringWithFallback(Bundle metadata, String key, String fallbackKey) {
+    if (metadata == null) {
+      return null;
+    }
+
+    String metadataString = metadata.getString(key, null);
+
+    if (metadataString == null) {
+      metadataString = metadata.getString(fallbackKey);
+    }
+
+    return metadataString;
+  }
+
   private static boolean getBoolean(Bundle metadata, String key, boolean defaultValue) {
     if (metadata == null) {
       return defaultValue;
@@ -141,11 +155,21 @@ public final class ApplicationInfoLoader {
   @NonNull
   public static FlutterApplicationInfo load(@NonNull Context applicationContext) {
     ApplicationInfo appInfo = getApplicationInfo(applicationContext);
+
+    // TODO(camsim99): Remove support for DEPRECATED_AOT_SHARED_LIBRARY_NAME and
+    // DEPRECATED_FLUTTER_ASSETS_DIR
+    // when all usage of the deprecated names has been removed.
     return new FlutterApplicationInfo(
-        getString(appInfo.metaData, FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey),
+        getStringWithFallback(
+            appInfo.metaData,
+            FlutterShellArgs.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey,
+            FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey),
         getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metadataKey),
         getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metadataKey),
-        getString(appInfo.metaData, FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey),
+        getStringWithFallback(
+            appInfo.metaData,
+            FlutterShellArgs.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey,
+            FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));
