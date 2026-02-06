@@ -89,6 +89,12 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                ),
+                FakeCommand(command: <Pattern>['strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
                 command: <Pattern>['otool', '-D', dylibPathBar],
                 stdout: <String>[
@@ -107,6 +113,12 @@ void main() {
                   '${isArm64 ? 'arm64' : 'x64'}/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                ),
+                FakeCommand(command: <Pattern>['strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
                 command: <Pattern>['otool', '-D', dylibPathBuz],
                 stdout: <String>[
@@ -173,6 +185,12 @@ void main() {
                   'x64/libbar.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                ),
+                FakeCommand(command: <Pattern>['strip', '-x', '-S', dylibPathBar]),
+              ],
               FakeCommand(
                 command: <Pattern>['otool', '-D', dylibPathBar],
                 stdout: <String>[
@@ -192,6 +210,12 @@ void main() {
                   'x64/libbuz.dylib',
                 ],
               ),
+              if (buildMode == BuildMode.release) ...<FakeCommand>[
+                FakeCommand(
+                  command: <Pattern>['dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                ),
+                FakeCommand(command: <Pattern>['strip', '-x', '-S', dylibPathBuz]),
+              ],
               FakeCommand(
                 command: <Pattern>['otool', '-D', dylibPathBuz],
                 stdout: <String>[
@@ -296,6 +320,8 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            buildCodeAssets: true,
+            buildDataAssets: true,
           );
           final Uri nativeAssetsFileUri = flutterTester
               ? projectUri.resolve(
