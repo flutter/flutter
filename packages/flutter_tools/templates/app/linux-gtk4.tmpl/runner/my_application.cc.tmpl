@@ -30,6 +30,8 @@ static void my_application_activate(GApplication* application) {
   // Use a header bar as the default style for GNOME/GTK4 applications.
   GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
   gtk_header_bar_set_show_title_buttons(header_bar, TRUE);
+  GtkWidget* title_label = gtk_label_new("{{projectName}}");
+  gtk_header_bar_set_title_widget(header_bar, title_label);
   gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   gtk_window_set_title(window, "{{projectName}}");
 
@@ -45,7 +47,8 @@ static void my_application_activate(GApplication* application) {
   // for transparent.
   gdk_rgba_parse(&background_color, "#000000");
   fl_view_set_background_color(view, &background_color);
-  gtk_widget_show(GTK_WIDGET(view));
+  gtk_widget_set_focusable(GTK_WIDGET(view), TRUE);
+  gtk_widget_set_visible(GTK_WIDGET(view), TRUE);
   gtk_window_set_child(window, GTK_WIDGET(view));
 
   // Show the window when Flutter renders.
