@@ -23,6 +23,12 @@ class MockGtk {
               gdk_keymap_lookup_key,
               (GdkKeymap * keymap, const GdkKeymapKey* key));
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
+#if FLUTTER_LINUX_GTK4
+  MOCK_METHOD(GdkToplevelState,
+              gdk_toplevel_get_state,
+              (GdkToplevel * toplevel));
+  MOCK_METHOD(gboolean, gdk_surface_get_mapped, (GdkSurface * surface));
+#endif
   MOCK_METHOD(void, gtk_window_new, (GtkWindow * window, GtkWindowType type));
   MOCK_METHOD(void,
               gtk_window_set_default_size,
