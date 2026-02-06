@@ -21,14 +21,14 @@ end_of_record
 ''';
 
       // Parse the coverage data
-      final lines = zeroLinesData.split('\n');
-      final List<_TestCoverage> coverages = <_TestCoverage>[];
-      _TestCoverage? currentCoverage;
+      final List<String> lines = zeroLinesData.split('\n');
+      final coverages = <_MutableCoverage>[];
+      _MutableCoverage? currentCoverage;
 
       for (final line in lines) {
         if (line.startsWith('SF:')) {
-          final library = line.split('SF:')[1];
-          currentCoverage = _TestCoverage()..library = library;
+          final String library = line.split('SF:')[1];
+          currentCoverage = _MutableCoverage()..library = library;
           coverages.add(currentCoverage);
         }
         if (line.startsWith('DA')) {
@@ -44,7 +44,7 @@ end_of_record
 
       // This should not throw an exception
       expect(() {
-        coverages.sort((_TestCoverage left, _TestCoverage right) {
+        coverages.sort((_MutableCoverage left, _MutableCoverage right) {
           // Avoid divide by zero
           if (left.totalLines == 0 && right.totalLines == 0) {
             return 0;
@@ -63,17 +63,9 @@ end_of_record
     });
 
     test('calculates individual coverage percentage safely', () {
-      const _TestCoverage emptyCoverage = _TestCoverage._(
-        library: 'empty.dart',
-        totalLines: 0,
-        testedLines: 0,
-      );
+      const emptyCoverage = _TestCoverage(library: 'empty.dart', totalLines: 0, testedLines: 0);
 
-      const _TestCoverage normalCoverage = _TestCoverage._(
-        library: 'normal.dart',
-        totalLines: 10,
-        testedLines: 8,
-      );
+      const normalCoverage = _TestCoverage(library: 'normal.dart', totalLines: 10, testedLines: 8);
 
       // Test empty coverage
       final String emptyPercent = emptyCoverage.totalLines == 0
@@ -110,10 +102,10 @@ end_of_record
 
     test('handles mixed coverage data correctly', () {
       final coverages = <_TestCoverage>[
-        const _TestCoverage._(library: 'file1.dart', totalLines: 0, testedLines: 0),
-        const _TestCoverage._(library: 'file2.dart', totalLines: 10, testedLines: 5),
-        const _TestCoverage._(library: 'file3.dart', totalLines: 0, testedLines: 0),
-        const _TestCoverage._(library: 'file4.dart', totalLines: 20, testedLines: 18),
+        const _TestCoverage(library: 'file1.dart', totalLines: 0, testedLines: 0),
+        const _TestCoverage(library: 'file2.dart', totalLines: 10, testedLines: 5),
+        const _TestCoverage(library: 'file3.dart', totalLines: 0, testedLines: 0),
+        const _TestCoverage(library: 'file4.dart', totalLines: 20, testedLines: 18),
       ];
 
       // Should not throw
@@ -143,14 +135,18 @@ end_of_record
   });
 }
 
+/// Immutable coverage data for testing.
 class _TestCoverage {
-  _TestCoverage({this.library = '', this.totalLines = 0, this.testedLines = 0});
+  const _TestCoverage({required this.library, required this.totalLines, required this.testedLines});
 
-  const _TestCoverage._({
-    required this.library,
-    required this.totalLines,
-    required this.testedLines,
-  });
+  final String library;
+  final int totalLines;
+  final int testedLines;
+}
+
+/// Mutable coverage data for parsing.
+class _MutableCoverage {
+  _MutableCoverage() : library = '', totalLines = 0, testedLines = 0;
 
   String library;
   int totalLines;
