@@ -42,8 +42,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
     FlutterEngineDisplay* display = &displays[i];
 
 #if FLUTTER_LINUX_GTK4
-    GdkMonitor* monitor =
-        GDK_MONITOR(g_list_model_get_item(monitors, i));
+    GdkMonitor* monitor = GDK_MONITOR(g_list_model_get_item(monitors, i));
 #else
     GdkMonitor* monitor = gdk_display_get_monitor(self->display, i);
 #endif

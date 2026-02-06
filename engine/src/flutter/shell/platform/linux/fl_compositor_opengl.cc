@@ -420,8 +420,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     cairo_scale(cr, 1.0, -1.0);
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
-    gdk_cairo_draw_from_gl(cr, surface,
-                           fl_framebuffer_get_texture_id(sibling),
+    gdk_cairo_draw_from_gl(cr, surface, fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
 #if FLUTTER_LINUX_GTK4
     G_GNUC_END_IGNORE_DEPRECATIONS

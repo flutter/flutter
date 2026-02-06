@@ -568,8 +568,8 @@ static FlutterPointerDeviceKind get_device_kind_or_default(GdkEvent* event) {
 }
 
 static void motion_event_cb(FlView* self, gdouble x, gdouble y) {
-  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
-      self->motion_controller));
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->motion_controller));
   if (event == nullptr) {
     return;
   }
@@ -585,13 +585,13 @@ static void motion_event_cb(FlView* self, gdouble x, gdouble y) {
 
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_pointer_manager_handle_motion(
-      self->pointer_manager, gdk_event_get_time(event),
-      get_device_kind(event), x * scale_factor, y * scale_factor);
+      self->pointer_manager, gdk_event_get_time(event), get_device_kind(event),
+      x * scale_factor, y * scale_factor);
 }
 
 static void enter_event_cb(FlView* self, gdouble x, gdouble y) {
-  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
-      self->motion_controller));
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->motion_controller));
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_pointer_manager_handle_enter(
       self->pointer_manager, get_event_time_or_now(event),
@@ -599,23 +599,21 @@ static void enter_event_cb(FlView* self, gdouble x, gdouble y) {
 }
 
 static void leave_event_cb(FlView* self, gdouble x, gdouble y) {
-  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(
-      self->motion_controller));
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->motion_controller));
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   fl_pointer_manager_handle_leave(
       self->pointer_manager, get_event_time_or_now(event),
       get_device_kind_or_default(event), x * scale_factor, y * scale_factor);
 }
 
-static void click_pressed_cb(FlView* self,
-                             gint n_press,
-                             gdouble x,
-                             gdouble y) {
+static void click_pressed_cb(FlView* self, gint n_press, gdouble x, gdouble y) {
   if (n_press > 1) {
     return;
   }
 
-  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
   if (event == nullptr) {
     return;
   }
@@ -637,7 +635,8 @@ static void click_released_cb(FlView* self,
                               gdouble x,
                               gdouble y) {
   (void)n_press;
-  GdkEvent* event = get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
+  GdkEvent* event =
+      get_current_event(GTK_EVENT_CONTROLLER(self->click_gesture));
   if (event == nullptr) {
     return;
   }
@@ -908,8 +907,7 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
     }
   }
 
-  gboolean result = fl_compositor_render(
-      self->compositor, cr, surface);
+  gboolean result = fl_compositor_render(self->compositor, cr, surface);
 
   if (self->render_context) {
     gdk_gl_context_clear_current();
@@ -917,8 +915,7 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
 
   if (!result) {
     static bool logged_render_false = false;
-    log_once(&logged_render_false,
-             "draw_cb: compositor render returned false");
+    log_once(&logged_render_false, "draw_cb: compositor render returned false");
   }
 
   return result;
@@ -1019,8 +1016,8 @@ static void fl_view_realize(GtkWidget* widget) {
 
 #if !FLUTTER_LINUX_GTK4
 static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
-  g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
-      reinterpret_cast<GdkEvent*>(key_event));
+  g_autoptr(FlKeyEvent) event =
+      fl_key_event_new_from_gdk_event(reinterpret_cast<GdkEvent*>(key_event));
 
   fl_keyboard_manager_handle_event(
       fl_engine_get_keyboard_manager(self->engine), event, self->cancellable,
@@ -1205,8 +1202,8 @@ static void fl_view_init(FlView* self) {
 #endif
 
 #if FLUTTER_LINUX_GTK4
-  self->motion_controller = GTK_EVENT_CONTROLLER_MOTION(
-      gtk_event_controller_motion_new());
+  self->motion_controller =
+      GTK_EVENT_CONTROLLER_MOTION(gtk_event_controller_motion_new());
   g_signal_connect_swapped(self->motion_controller, "motion",
                            G_CALLBACK(motion_event_cb), self);
   g_signal_connect_swapped(self->motion_controller, "enter",

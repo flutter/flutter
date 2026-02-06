@@ -173,13 +173,11 @@ static void fl_window_state_monitor_dispose(GObject* object) {
     GdkSurface* surface = gtk_native_get_surface(native);
     if (surface != nullptr) {
       if (self->toplevel_state_notify_cb_id != 0) {
-        g_signal_handler_disconnect(surface,
-                                    self->toplevel_state_notify_cb_id);
+        g_signal_handler_disconnect(surface, self->toplevel_state_notify_cb_id);
         self->toplevel_state_notify_cb_id = 0;
       }
       if (self->surface_mapped_notify_cb_id != 0) {
-        g_signal_handler_disconnect(surface,
-                                    self->surface_mapped_notify_cb_id);
+        g_signal_handler_disconnect(surface, self->surface_mapped_notify_cb_id);
         self->surface_mapped_notify_cb_id = 0;
       }
     }

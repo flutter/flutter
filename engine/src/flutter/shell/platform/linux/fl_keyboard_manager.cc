@@ -370,8 +370,7 @@ static void fl_keyboard_manager_init(FlKeyboardManager* self) {
   }
 
 #if FLUTTER_LINUX_GTK4
-  self->display =
-      GDK_DISPLAY(g_object_ref(gdk_display_get_default()));
+  self->display = GDK_DISPLAY(g_object_ref(gdk_display_get_default()));
 #else
   self->keymap = gdk_keymap_get_for_display(gdk_display_get_default());
   self->keymap_keys_changed_cb_id = g_signal_connect_swapped(
