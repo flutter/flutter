@@ -13,6 +13,7 @@ import Foundation
 /// (`pollFlutterMessagesOnce()`).
 @objc public final class FlutterRunLoop: NSObject {
   private static let flutterRunLoopMode = CFRunLoopMode("FlutterRunLoopMode" as CFString)
+
   private static nonisolated(unsafe) var _mainRunLoop: FlutterRunLoop?
 
   private nonisolated(unsafe) let runLoop: CFRunLoop = CFRunLoopGetCurrent()
