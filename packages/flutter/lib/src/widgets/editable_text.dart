@@ -4050,9 +4050,7 @@ class EditableTextState extends State<EditableText>
 
   @override
   void refocus() {
-    print('EditableText.refocus called');
     if (mounted && !_hasFocus) {
-      print('focusNode.requestFocus');
       widget.focusNode.requestFocus();
     }
   }

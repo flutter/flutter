@@ -31,7 +31,7 @@ import 'text_capitalization.dart';
 bool _debugVisibleTextEditing = false;
 
 /// Set this to `true` to print when text input commands are scheduled and run.
-bool _debugPrintTextInputCommands = true;
+bool _debugPrintTextInputCommands = false;
 
 /// The `keyCode` of the "Enter" key.
 const int _kReturnKeyCode = 13;
@@ -459,15 +459,11 @@ class EngineAutofillForm {
 
   void _handleChange(DomHTMLElement domElement, AutofillInfo autofillInfo) {
     final newEditingState = EditingState.fromDomElement(domElement);
-    print('{{{ Autofill input [${autofillInfo.uniqueIdentifier}]: "${newEditingState.text}" }}}');
-
     _sendAutofillEditingState(autofillInfo.uniqueIdentifier, newEditingState);
   }
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String tag, EditingState editingState) {
-    print('Autofill update:');
-    print('  $tag => "${editingState.text}"');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -1533,8 +1529,6 @@ abstract class DefaultTextEditingStrategy
     newEditingState = suppressInteractiveSelectionIfNeeded(newEditingState);
     newEditingState = determineCompositionState(newEditingState);
 
-    print('Input => "${newEditingState.text}"');
-
     TextEditingDeltaState? newTextEditingDeltaState;
     if (inputConfiguration.enableDeltaModel) {
       editingDeltaState.composingOffset = newEditingState.composingBaseOffset;
@@ -2159,7 +2153,6 @@ class TextInputSetEditingState extends TextInputCommand {
 
   @override
   void run(HybridTextEditing textEditing) {
-    print('Framework.setEditingState => "${state.text}"');
     textEditing.strategy.setEditingState(state);
   }
 }
@@ -2383,7 +2376,6 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
   void updateEditingState(int? clientId, EditingState? editingState) {
-    print('--- TextEditingChannel.updateEditingState("${editingState?.text}")');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -2423,7 +2415,6 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.onConnectionClosed' message to the framework.
   void onConnectionClosed(int? clientId) {
-    print('--- TextEditingChannel.onConnectionClosed');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -2435,7 +2426,6 @@ class TextEditingChannel {
 
   /// Sends the 'TextInput.refocus' message to the framework.
   void refocus(int? clientId) {
-    print('--- TextEditingChannel.refocus');
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
@@ -2493,7 +2483,6 @@ class HybridTextEditing {
       return;
     }
     if (target.classList.contains(HybridTextEditing.textEditingClass)) {
-      print('<<<focusin>>>');
       channel.refocus(_clientId);
     }
   }
@@ -2524,7 +2513,7 @@ class HybridTextEditing {
 
   void acceptCommand(TextInputCommand command, ui.VoidCallback callback) {
     if (_debugPrintTextInputCommands) {
-      print('+++ flutter/textinput channel command: ${command.runtimeType}');
+      print('flutter/textinput channel command: ${command.runtimeType}');
     }
     command.run(this);
     callback();

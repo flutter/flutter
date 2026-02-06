@@ -2034,7 +2034,6 @@ class TextInput {
         _scribbleInProgress = false;
         return;
       case 'TextInput.refocus':
-        print('=== TextInput.refocus called');
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
         if (_currentConnection == null &&
@@ -2067,21 +2066,13 @@ class TextInput {
       final TextInputClient client = _currentConnection!._client;
       final AutofillScope? scope = client.currentAutofillScope;
       final editingValue = args[1] as Map<String, dynamic>;
-      print('[framework] TextInputClient.updateEditingStateWithTag:');
       for (final String tag in editingValue.keys) {
         final textEditingValue = TextEditingValue.fromJSON(
           editingValue[tag] as Map<String, dynamic>,
         );
         final AutofillClient? client = scope?.getAutofillClient(tag);
-        print('  ($tag) => "${textEditingValue.text}"');
         if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
-          print('  -> client.autofill(...)');
           client.autofill(textEditingValue);
-        } else {
-          print(
-            '  -> client != null ${client != null}, '
-            'autofill enabled: ${client?.textInputConfiguration.autofillConfiguration.enabled}',
-          );
         }
       }
 

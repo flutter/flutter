@@ -1174,7 +1174,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void _setAppLifecycleState(ui.AppLifecycleState state) {
-    print('[AppLifecycleState] changed to $state');
     invokeOnPlatformMessage(
       'flutter/lifecycle',
       const StringCodec().encodeMessage(state.toString()),
