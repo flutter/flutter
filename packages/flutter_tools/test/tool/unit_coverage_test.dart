@@ -147,30 +147,27 @@ end_of_record
     ];
 
     final List<String> printed = <String>[];
-    runZoned(
-      () {
-        for (final coverage in coverages) {
-          final String coveragePercent = coverage.totalLines == 0
-              ? 'N/A'
-              : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
-          print('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
-        }
-        // overall
-        double overallNumerator = 0;
-        double overallDenominator = 0;
-        for (final c in coverages) {
-          overallNumerator += c.testedLines;
-          overallDenominator += c.totalLines;
-        }
-        final String overallPercent = overallDenominator == 0
+    runZoned(() {
+      for (final coverage in coverages) {
+        final String coveragePercent = coverage.totalLines == 0
             ? 'N/A'
-            : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
-        print('OVERALL: $overallPercent%');
-      },
-      zoneSpecification: ZoneSpecification(
-        print: (self, parent, zone, line) => printed.add(line),
-      ),
-    );
+            : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+        print(
+          '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
+        );
+      }
+      // overall
+      double overallNumerator = 0;
+      double overallDenominator = 0;
+      for (final c in coverages) {
+        overallNumerator += c.testedLines;
+        overallDenominator += c.totalLines;
+      }
+      final String overallPercent = overallDenominator == 0
+          ? 'N/A'
+          : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
+      print('OVERALL: $overallPercent%');
+    }, zoneSpecification: ZoneSpecification(print: (self, parent, zone, line) => printed.add(line)));
 
     // Expect the empty file to have an N/A entry
     expect(printed.any((l) => l.contains('empty.dart: N/A% | 0 | 0')), isTrue);
