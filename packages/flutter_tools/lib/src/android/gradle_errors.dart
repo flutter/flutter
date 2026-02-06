@@ -663,9 +663,9 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
 
 // TODO(jesswon): Remove this constant and its usages once AGP 9 is supported in the ecosystem: https://github.com/flutter/flutter/issues/181383
 const String _kAgp9WarningAndMigrationPrompt = '''
-    Please do not upgrade your Flutter app on Android to AGP 9 as migrating plugins to AGP 9
-    and Flutter apps on AGP 9 using plugins is not yet supported. For more details, see https://github.com/flutter/flutter/issues/181383.
-    \nIf you would still like to migrate to AGP 9:
+Please do not upgrade your Flutter app on Android to AGP 9 as migrating plugins to AGP 9
+and Flutter apps on AGP 9 using plugins is not yet supported. For more details, see https://github.com/flutter/flutter/issues/181383.
+\nTo proceed with the AGP 9 migration despite this warning:
     ''';
 
 /// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when

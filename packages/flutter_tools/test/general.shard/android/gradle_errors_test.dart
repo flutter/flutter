@@ -1654,7 +1654,10 @@ An exception occurred applying plugin request [id: 'kotlin-android']
         testLogger.statusText,
         contains('Please do not upgrade your Flutter app on Android to AGP 9'),
       );
-      expect(testLogger.statusText, contains('If you would still like to migrate to AGP 9:'));
+      expect(
+        testLogger.statusText,
+        contains('To proceed with the AGP 9 migration despite this warning:'),
+      );
       expect(
         testLogger.statusText,
         contains(
@@ -1697,7 +1700,10 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
         testLogger.statusText,
         contains('Please do not upgrade your Flutter app on Android to AGP 9'),
       );
-      expect(testLogger.statusText, contains('If you would still like to migrate to AGP 9:'));
+      expect(
+        testLogger.statusText,
+        contains('To proceed with the AGP 9 migration despite this warning:'),
+      );
       expect(
         testLogger.statusText,
         contains('Starting AGP 9+, only the new DSL interface will be read.'),
