@@ -265,10 +265,18 @@ static void handle_geometry_changed_with_size(FlView* self,
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
   if (width == 0 || height == 0) {
-    static bool logged_zero_allocation = false;
-    log_once(&logged_zero_allocation,
-             "handle_geometry_changed: zero-size allocation");
-    return;
+    // Try to fall back to the toplevel surface size if available.
+    FlGdkSurface* surface = fl_view_get_toplevel_surface(self);
+    if (surface != nullptr) {
+      width = fl_gtk_surface_get_width(surface);
+      height = fl_gtk_surface_get_height(surface);
+    }
+    if (width == 0 || height == 0) {
+      static bool logged_zero_allocation = false;
+      log_once(&logged_zero_allocation,
+               "handle_geometry_changed: zero-size allocation");
+      return;
+    }
   }
 
   // Note we can't detect if a window is moved between monitors - this
@@ -294,6 +302,15 @@ static void handle_geometry_changed_with_size(FlView* self,
   fl_engine_send_window_metrics_event(self->engine, display_id, self->view_id,
                                       width * scale_factor,
                                       height * scale_factor, scale_factor);
+
+  {
+    static bool logged_metrics = false;
+    if (!logged_metrics) {
+      logged_metrics = true;
+      g_warning("handle_geometry_changed: metrics %d x %d (scale %d)", width,
+                height, scale_factor);
+    }
+  }
 }
 
 static void handle_geometry_changed(FlView* self) {
@@ -363,6 +380,12 @@ static void fl_view_present_layers(FlRenderable* renderable,
     static bool logged_first_layers = false;
     log_once(&logged_first_layers,
              "fl_view_present_layers: received first frame layers");
+    static bool logged_layer_size = false;
+    if (!logged_layer_size) {
+      logged_layer_size = true;
+      g_warning("fl_view_present_layers: first layer size %g x %g",
+                layers[0]->size.width, layers[0]->size.height);
+    }
   }
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
@@ -835,6 +858,11 @@ static void size_allocate_cb(FlView* self) {
 
 #if FLUTTER_LINUX_GTK4
 static void resize_cb(FlView* self, int width, int height) {
+  if (width > 0 && height > 0) {
+    static bool logged_resize = false;
+    log_once(&logged_resize,
+             "resize_cb: received non-zero size for render area");
+  }
   handle_geometry_changed_with_size(self, width, height);
 }
 #endif
@@ -861,10 +889,23 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
   FlGdkSurface* surface =
       fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
   if (surface == nullptr) {
+    static bool logged_surface_null = false;
+    log_once(&logged_surface_null, "draw_cb: render area has no surface");
     if (self->render_context) {
       gdk_gl_context_clear_current();
     }
     return FALSE;
+  }
+
+  {
+    static bool logged_surface_size = false;
+    if (!logged_surface_size) {
+      logged_surface_size = true;
+      g_warning("draw_cb: surface size %d x %d (scale %d)",
+                fl_gtk_surface_get_width(surface),
+                fl_gtk_surface_get_height(surface),
+                fl_gtk_surface_get_scale_factor(surface));
+    }
   }
 
   gboolean result = fl_compositor_render(
