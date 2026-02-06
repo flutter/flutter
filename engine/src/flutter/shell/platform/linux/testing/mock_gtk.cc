@@ -38,11 +38,10 @@ struct _FlMockGtk4Surface {
   gboolean mapped;
 };
 
-G_DEFINE_TYPE_WITH_CODE(
-    FlMockGtk4Surface,
-    fl_mock_gtk4_surface,
-    G_TYPE_OBJECT,
-    G_IMPLEMENT_INTERFACE(GDK_TYPE_TOPLEVEL, nullptr))
+G_DEFINE_TYPE_WITH_CODE(FlMockGtk4Surface,
+                        fl_mock_gtk4_surface,
+                        G_TYPE_OBJECT,
+                        G_IMPLEMENT_INTERFACE(GDK_TYPE_TOPLEVEL, nullptr))
 
 enum {
   kPropState = 1,
@@ -59,8 +58,7 @@ static void fl_mock_gtk4_surface_set_property(GObject* object,
   FlMockGtk4Surface* self = FL_MOCK_GTK4_SURFACE(object);
   switch (prop_id) {
     case kPropState:
-      self->state =
-          static_cast<GdkToplevelState>(g_value_get_flags(value));
+      self->state = static_cast<GdkToplevelState>(g_value_get_flags(value));
       break;
     case kPropMapped:
       self->mapped = g_value_get_boolean(value);
