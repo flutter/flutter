@@ -153,12 +153,22 @@ static FlGdkSurface* fl_view_get_toplevel_surface(FlView* self) {
   return toplevel != nullptr ? fl_gtk_widget_get_surface(toplevel) : nullptr;
 }
 
-// Signal handler for GtkWidget::delete-event
+// Signal handler for GtkWidget::delete-event (GTK3 only)
 static gboolean window_delete_event_cb(FlView* self) {
   fl_engine_request_app_exit(self->engine);
   // Stop the event from propagating.
   return TRUE;
 }
+
+#if FLUTTER_LINUX_GTK4
+// Signal handler for GtkWindow::close-request.
+static gboolean window_close_request_cb(GtkWindow* window, FlView* self) {
+  (void)window;
+  fl_engine_request_app_exit(self->engine);
+  // Stop the event from propagating.
+  return TRUE;
+}
+#endif
 
 static void init_scrolling(FlView* self) {
   g_clear_object(&self->scrolling_manager);
@@ -754,8 +764,13 @@ static void realize_cb(FlView* self) {
                                   GTK_WINDOW(toplevel_window));
 
   // Handle requests by the user to close the application.
+#if FLUTTER_LINUX_GTK4
+  g_signal_connect(toplevel_window, "close-request",
+                   G_CALLBACK(window_close_request_cb), self);
+#else
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
+#endif
 
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
@@ -766,6 +781,11 @@ static void realize_cb(FlView* self) {
     g_warning("Failed to start Flutter engine: %s", error->message);
     return;
   }
+
+#if FLUTTER_LINUX_GTK4
+  fl_text_input_handler_set_widget(
+      fl_engine_get_text_input_handler(self->engine), GTK_WIDGET(self));
+#endif
 
   setup_cursor(self);
 
@@ -1014,11 +1034,6 @@ static void setup_engine(FlView* self) {
 
   init_scrolling(self);
   init_touch(self);
-#if FLUTTER_LINUX_GTK4
-  fl_text_input_handler_set_widget(
-      fl_engine_get_text_input_handler(self->engine),
-      GTK_WIDGET(self));
-#endif
 
   self->on_pre_engine_restart_cb_id =
       g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
