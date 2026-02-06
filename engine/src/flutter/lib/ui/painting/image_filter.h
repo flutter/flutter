@@ -29,14 +29,21 @@ class ImageFilter : public RefCountedDartWrappable<ImageFilter> {
   static DlImageSampling SamplingFromIndex(int filterQualityIndex);
   static DlFilterMode FilterModeFromIndex(int index);
 
-  void initBlur(double sigma_x, double sigma_y, int tile_mode_index);
+  void initBlur(double sigma_x,
+                double sigma_y,
+                int tile_mode_index,
+                bool bounded,
+                double bounds_left,
+                double bounds_top,
+                double bounds_right,
+                double bounds_bottom);
   void initDilate(double radius_x, double radius_y);
   void initErode(double radius_x, double radius_y);
   void initMatrix(const tonic::Float64List& matrix4, int filter_quality_index);
   void initColorFilter(ColorFilter* colorFilter);
   void initComposeFilter(ImageFilter* outer, ImageFilter* inner);
   void initShader(ReusableFragmentShader* shader);
-  static bool equals(ImageFilter* a, ImageFilter* b);
+  static bool equals(Dart_Handle a_handle, Dart_Handle b_handle);
 
   const std::shared_ptr<DlImageFilter> filter(DlTileMode mode) const;
 

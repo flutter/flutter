@@ -702,7 +702,11 @@ public class FlutterJNI {
       int minWidth,
       int maxWidth,
       int minHeight,
-      int maxHeight) {
+      int maxHeight,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     Log.d(TAG, "Sending viewport metrics to the engine.");
@@ -730,7 +734,11 @@ public class FlutterJNI {
         minWidth,
         maxWidth,
         minHeight,
-        maxHeight);
+        maxHeight,
+        physicalDisplayCornerRadiusTopLeft,
+        physicalDisplayCornerRadiusTopRight,
+        physicalDisplayCornerRadiusBottomRight,
+        physicalDisplayCornerRadiusBottomLeft);
   }
 
   private native void nativeSetViewportMetrics(
@@ -757,7 +765,11 @@ public class FlutterJNI {
       int physicalWidthMin,
       int physicalWidthMax,
       int physicalHeightMin,
-      int physicalHeightMax);
+      int physicalHeightMax,
+      int physicalDisplayCornerRadiusTopLeft,
+      int physicalDisplayCornerRadiusTopRight,
+      int physicalDisplayCornerRadiusBottomRight,
+      int physicalDisplayCornerRadiusBottomLeft);
 
   // ----- End Render Surface Support -----
 
@@ -830,6 +842,24 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.setLocale(locale);
+    }
+  }
+
+  /**
+   * Invoked by native to notify framework started or stopped compiling accessibility tree.
+   *
+   * <p>The embedding needs to be prepare to receive accessibility tree updates when true, and clean
+   * up when false.
+   *
+   * @param enabled True if the framework is compiling the accessibility tree.
+   */
+  @UiThread
+  public void setSemanticsTreeEnabled(boolean enabled) {
+    ensureRunningOnMainThread();
+    if (accessibilityDelegate != null) {
+      if (!enabled) {
+        accessibilityDelegate.resetSemantics();
+      }
     }
   }
 
@@ -1298,8 +1328,8 @@ public class FlutterJNI {
     platformViewsController.destroyOverlaySurfaces();
   }
 
-  // This will get called on the raster thread.
   @SuppressWarnings("unused")
+  @UiThread
   public void maybeResizeSurfaceView(int width, int height) {
     for (FlutterUiResizeListener listener : flutterUiResizeListeners) {
       listener.resizeEngineView(width, height);
@@ -1486,7 +1516,7 @@ public class FlutterJNI {
       Log.e(
           TAG,
           "getScaledFontSize called with configurationId "
-              + String.valueOf(configurationId)
+              + configurationId
               + ", which can't be found.");
       return -1f;
     }
@@ -1698,6 +1728,13 @@ public class FlutterJNI {
      * <p>Must be called on the main thread
      */
     void setLocale(@NonNull String locale);
+
+    /**
+     * Invoked by native to notify embedder to reset accessibility tree.
+     *
+     * <p>The embedding needs to be prepare to clean up previously stored caches.
+     */
+    void resetSemantics();
   }
 
   public interface AsyncWaitForVsyncDelegate {

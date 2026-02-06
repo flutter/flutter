@@ -159,7 +159,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
     final SnackBarThemeData defaults = Theme.of(context).useMaterial3
         ? _SnackbarDefaultsM3(context)
         : _SnackbarDefaultsM2(context);
-    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+    final SnackBarThemeData snackBarTheme = SnackBarTheme.of(context);
 
     WidgetStateColor resolveForegroundColor() {
       if (widget.textColor != null) {
@@ -309,8 +309,8 @@ class SnackBar extends StatefulWidget {
 
   /// The snack bar's background color.
   ///
-  /// If not specified, it will use [SnackBarThemeData.backgroundColor] of
-  /// [ThemeData.snackBarTheme]. If that is not specified it will default to a
+  /// If not specified, the ambient [SnackBarThemeData.backgroundColor] is used.
+  /// If that is not specified it will default to a
   /// dark variation of [ColorScheme.surface] for light themes, or
   /// [ColorScheme.onSurface] for dark themes.
   final Color? backgroundColor;
@@ -320,9 +320,8 @@ class SnackBar extends StatefulWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// If this property is null, then [SnackBarThemeData.elevation] of
-  /// [ThemeData.snackBarTheme] is used, if that is also null, the default value
-  /// is 6.0.
+  /// If this property is null, then the ambient [SnackBarThemeData.elevation]
+  /// is used, if that is also null, the default value is 6.0.
   final double? elevation;
 
   /// Empty space to surround the snack bar.
@@ -330,8 +329,8 @@ class SnackBar extends StatefulWidget {
   /// This property is only used when [behavior] is [SnackBarBehavior.floating].
   /// It can not be used if [width] is specified.
   ///
-  /// If this property is null, then [SnackBarThemeData.insetPadding] of
-  /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
+  /// If this property is null, then the ambient [SnackBarThemeData.insetPadding]
+  /// is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
   ///
   /// If this property is not null and [hitTestBehavior] is null, then [hitTestBehavior] default is [HitTestBehavior.deferToChild].
@@ -371,17 +370,17 @@ class SnackBar extends StatefulWidget {
   /// available space. This property is only used when [behavior] is
   /// [SnackBarBehavior.floating]. It can not be used if [margin] is specified.
   ///
-  /// If this property is null, then [SnackBarThemeData.width] of
-  /// [ThemeData.snackBarTheme] is used. If that is null, the snack bar will
-  /// take up the full device width less the margin.
+  /// If this property is null, then the ambient [SnackBarThemeData.width]
+  /// is used. If that is null, the snack bar will take up the full device
+  /// width less the margin.
   final double? width;
 
   /// The shape of the snack bar's [Material].
   ///
   /// Defines the snack bar's [Material.shape].
   ///
-  /// If this property is null then [SnackBarThemeData.shape] of
-  /// [ThemeData.snackBarTheme] is used. If that's null then the shape will
+  /// If this property is null, then the ambient [SnackBarThemeData.shape]
+  /// is used. If that's null then the shape will
   /// depend on the [SnackBarBehavior]. For [SnackBarBehavior.fixed], no
   /// overriding shape is specified, so the [SnackBar] is rectangular. For
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
@@ -390,8 +389,9 @@ class SnackBar extends StatefulWidget {
 
   /// Defines how the snack bar area, including margin, will behave during hit testing.
   ///
-  /// If this property is null, and [margin] is not null or [SnackBarThemeData.insetPadding] of
-  /// [ThemeData.snackBarTheme] is not null, then [HitTestBehavior.deferToChild] is used by default.
+  /// If this property is null, and [margin] is not null or the ambient
+  /// [SnackBarThemeData.insetPadding] is not null, then
+  /// [HitTestBehavior.deferToChild] is used by default.
   ///
   /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
   final HitTestBehavior? hitTestBehavior;
@@ -402,9 +402,8 @@ class SnackBar extends StatefulWidget {
   /// location should be adjusted when the scaffold also includes a
   /// [FloatingActionButton] or a [BottomNavigationBar]
   ///
-  /// If this property is null, then [SnackBarThemeData.behavior] of
-  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
-  /// [SnackBarBehavior.fixed].
+  /// If this property is null, then the ambient [SnackBarThemeData.behavior]
+  /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
   ///
   /// If this value is [SnackBarBehavior.floating], the length of the bar
   /// is defined by either [width] or [margin].
@@ -438,9 +437,8 @@ class SnackBar extends StatefulWidget {
   /// An optional color for the close icon, if [showCloseIcon] is
   /// true.
   ///
-  /// If this property is null, then [SnackBarThemeData.closeIconColor] of
-  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
-  /// inverse surface.
+  /// If this property is null, then the ambient [SnackBarThemeData.closeIconColor]
+  /// is used. If that is null, then the default is inverse surface.
   ///
   /// If [closeIconColor] is a [WidgetStateColor], then the icon color will be
   /// resolved against the set of [WidgetState]s that the action text
@@ -486,9 +484,8 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// If this property is null, then [SnackBarThemeData.dismissDirection] of
-  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
-  /// [DismissDirection.down].
+  /// If this property is null, then the ambient [SnackBarThemeData.dismissDirection]
+  /// is used. If that is null, then the default is [DismissDirection.down].
   final DismissDirection? dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -628,7 +625,7 @@ class _SnackBarState extends State<SnackBar> {
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
+    final SnackBarThemeData snackBarTheme = SnackBarTheme.of(context);
     final isThemeDark = theme.brightness == Brightness.dark;
     final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
     final SnackBarThemeData defaults = theme.useMaterial3

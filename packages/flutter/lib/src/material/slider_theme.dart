@@ -112,7 +112,8 @@ class SliderTheme extends InheritedTheme {
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
-/// will be shown. Used with [SliderThemeData.showValueIndicator].
+/// will be shown. Used in [Slider.showValueIndicator] and
+/// [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///

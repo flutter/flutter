@@ -843,7 +843,6 @@ class WebParagraph implements ui.Paragraph {
   final List<ParagraphSpan> spans;
   final String text;
 
-  // TODO(jlavrova): Implement.
   @override
   double alphabeticBaseline = 0;
 
@@ -854,7 +853,6 @@ class WebParagraph implements ui.Paragraph {
   @override
   double height = 0;
 
-  // TODO(jlavrova): Implement. Maybe use the same hack from the HTML renderer?
   @override
   double ideographicBaseline = 0;
 

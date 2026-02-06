@@ -71,6 +71,7 @@ static jfieldID g_jni_shell_holder_field = nullptr;
     "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V")      \
   V(g_set_application_locale_method, setApplicationLocale,                    \
     "(Ljava/lang/String;)V")                                                  \
+  V(g_set_semantics_tree_enabled_method, setSemanticsTreeEnabled, "(Z)V")     \
   V(g_on_display_platform_view_method, onDisplayPlatformView,                 \
     "(IIIIIIILio/flutter/embedding/engine/mutatorsstack/"                     \
     "FlutterMutatorsStack;)V")                                                \
@@ -355,7 +356,11 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalMinWidth,
                                jint physicalMaxWidth,
                                jint physicalMinHeight,
-                               jint physicalMaxHeight) {
+                               jint physicalMaxHeight,
+                               jint physicalDisplayCornerRadiusTopLeft,
+                               jint physicalDisplayCornerRadiusTopRight,
+                               jint physicalDisplayCornerRadiusBottomRight,
+                               jint physicalDisplayCornerRadiusBottomLeft) {
   // Convert java->c++. javaDisplayFeaturesBounds, javaDisplayFeaturesType and
   // javaDisplayFeaturesState cannot be null
   jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
@@ -407,7 +412,15 @@ static void SetViewportMetrics(JNIEnv* env,
       displayFeaturesBounds,  // p_physical_display_features_bounds
       displayFeaturesType,    // p_physical_display_features_type
       displayFeaturesState,   // p_physical_display_features_state
-      0,                      // p_display_id
+      0,                      // p_display_id,
+      static_cast<double>(
+          physicalDisplayCornerRadiusTopLeft),  // p_physical_display_corner_radius_top_left
+      static_cast<double>(
+          physicalDisplayCornerRadiusTopRight),  // p_physical_display_corner_radius_top_right
+      static_cast<double>(
+          physicalDisplayCornerRadiusBottomRight),  // p_physical_display_corner_radius_bottom_right
+      static_cast<double>(
+          physicalDisplayCornerRadiusBottomLeft),  // p_physical_display_corner_radius_bottom_left
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
@@ -804,7 +817,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
@@ -1381,6 +1394,21 @@ void PlatformViewAndroidJNIImpl::FlutterViewSetApplicationLocale(
 
   env->CallVoidMethod(java_object.obj(), g_set_application_locale_method,
                       jlocale.obj());
+
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::FlutterViewSetSemanticsTreeEnabled(
+    bool enabled) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+
+  env->CallVoidMethod(java_object.obj(), g_set_semantics_tree_enabled_method,
+                      enabled);
 
   FML_CHECK(fml::jni::CheckException(env));
 }

@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -172,7 +172,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: ColoredBox(
-            color: Colors.green,
+            color: const Color(0xff00ff00),
             child: IntrinsicHeight(
               child: RichText(
                 text: const TextSpan(

@@ -326,19 +326,13 @@ class CkFragmentProgram implements ui.FragmentProgram {
     return CkFragmentShader(name, effect, this);
   }
 
-  int _getShaderIndex(String name, int index) {
-    var result = 0;
+  UniformData _getUniformFloatInfo(String name) {
     for (final UniformData uniform in uniforms) {
       if (uniform.name == name) {
-        if (index < 0 || index >= uniform.floatCount) {
-          throw IndexError.withLength(index, uniform.floatCount);
-        }
-        result += index;
-        break;
+        return uniform;
       }
-      result += uniform.floatCount;
     }
-    return result;
+    throw ArgumentError('No uniform named "$name".');
   }
 }
 
@@ -425,13 +419,113 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getShaderIndex(name, index);
-    return CkUniformFloatSlot._(this, index, name, shaderIndex);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
+
+    return CkUniformFloatSlot._(this, index, name, info.location + index);
+  }
+
+  @override
+  ui.UniformVec2Slot getUniformVec2(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 2);
+    return _CkUniformVec2Slot._(slots[0], slots[1]);
+  }
+
+  @override
+  ui.UniformVec3Slot getUniformVec3(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 3);
+    return _CkUniformVec3Slot._(slots[0], slots[1], slots[2]);
+  }
+
+  @override
+  ui.UniformVec4Slot getUniformVec4(String name) {
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _CkUniformVec4Slot._(slots[0], slots[1], slots[2], slots[3]);
+  }
+
+  ui.UniformArray<T> _getUniformArray<T extends ui.UniformType>(
+    String name,
+    int elementSize,
+    T Function(List<CkUniformFloatSlot> slots) elementFactory,
+  ) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount % elementSize != 0) {
+      throw ArgumentError(
+        'Uniform size (${info.floatCount}) for "$name" is not a multiple of $elementSize.',
+      );
+    }
+    final int numElements = info.floatCount ~/ elementSize;
+
+    final elements = List<T>.generate(numElements, (i) {
+      final slots = List<CkUniformFloatSlot>.generate(
+        info.floatCount,
+        (j) => CkUniformFloatSlot._(this, j, name, info.location + i * elementSize + j),
+      );
+      return elementFactory(slots);
+    });
+
+    return _CkUniformFloatArray<T>._(elements);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformFloatSlot> getUniformFloatArray(String name) {
+    return _getUniformArray(name, 1, (components) => components.first);
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec2Slot> getUniformVec2Array(String name) {
+    return _getUniformArray<_CkUniformVec2Slot>(
+      name,
+      2, // 2 floats per element
+      (components) => _CkUniformVec2Slot._(
+        components[0],
+        components[1],
+      ), // Create Vec2 from two UniformFloat components
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec3Slot> getUniformVec3Array(String name) {
+    return _getUniformArray<_CkUniformVec3Slot>(
+      name,
+      3, // 3 floats per element
+      (components) =>
+          _CkUniformVec3Slot._(components[0], components[1], components[2]), // Create Vec3
+    );
+  }
+
+  @override
+  ui.UniformArray<ui.UniformVec4Slot> getUniformVec4Array(String name) {
+    return _getUniformArray<_CkUniformVec4Slot>(
+      name,
+      4, // 4 floats per element
+      (components) => _CkUniformVec4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+      ), // Create Vec4
+    );
   }
 
   @override
   ui.ImageSamplerSlot getImageSampler(String name) {
     throw UnsupportedError('getImageSampler is not supported on the web.');
+  }
+
+  List<CkUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
+    return List<CkUniformFloatSlot>.generate(
+      size,
+      (i) => CkUniformFloatSlot._(this, i, name, info.location + i),
+    );
   }
 }
 
@@ -453,4 +547,57 @@ class CkUniformFloatSlot implements ui.UniformFloatSlot {
 
   @override
   final int shaderIndex;
+}
+
+class _CkUniformVec2Slot implements ui.UniformVec2Slot {
+  _CkUniformVec2Slot._(this._xSlot, this._ySlot);
+
+  @override
+  void set(double x, double y) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot;
+}
+
+class _CkUniformVec3Slot implements ui.UniformVec3Slot {
+  _CkUniformVec3Slot._(this._xSlot, this._ySlot, this._zSlot);
+
+  @override
+  void set(double x, double y, double z) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot;
+}
+
+class _CkUniformVec4Slot implements ui.UniformVec4Slot {
+  _CkUniformVec4Slot._(this._xSlot, this._ySlot, this._zSlot, this._wSlot);
+
+  @override
+  void set(double x, double y, double z, double w) {
+    _xSlot.set(x);
+    _ySlot.set(y);
+    _zSlot.set(z);
+    _wSlot.set(w);
+  }
+
+  final CkUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _CkUniformFloatArray<T extends ui.UniformType> implements ui.UniformArray<T> {
+  _CkUniformFloatArray._(this._elements);
+
+  @override
+  T operator [](int index) {
+    return _elements[index];
+  }
+
+  @override
+  int get length => _elements.length;
+
+  final List<T> _elements;
 }

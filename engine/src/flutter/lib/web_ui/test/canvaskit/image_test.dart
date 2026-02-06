@@ -65,7 +65,7 @@ void testMain() {
 
   test('CkImage does not close image source too early', () async {
     final ImageSource imageSource = ImageBitmapImageSource(
-      await domWindow.createImageBitmap(createBlankDomImageData(4, 4)),
+      await createImageBitmap(createBlankDomImageData(4, 4)),
     );
 
     final SkImage skImage1 = canvasKit.MakeAnimatedImageFromEncoded(

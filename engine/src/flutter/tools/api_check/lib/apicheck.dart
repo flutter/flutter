@@ -92,6 +92,22 @@ List<String> getJavaEnumValues({required String sourcePath, required String enum
   return _extractMatchingExpression(lines: lines, regexp: valueExp);
 }
 
+/// Returns all properties in [optionSetName].
+///
+/// Properties are expected to be of the form
+/// `static let fooBar = optionSetName(rawValue: 1 << N)`.
+List<String> getSwiftOptionSetProperties({
+  required String sourcePath,
+  required String optionSetName,
+}) {
+  final List<String> lines = _getBlockStartingWith(
+    source: File(sourcePath).readAsStringSync(),
+    startExp: RegExp('struct $optionSetName: OptionSet {'),
+  );
+  final valueExp = RegExp('^\\s*static let (\\w*) = $optionSetName\\(');
+  return _extractMatchingExpression(lines: lines, regexp: valueExp);
+}
+
 /// Returns all values in [lines] whose line of code matches [regexp].
 ///
 /// The contents of the first match group in [regexp] is returned; therefore

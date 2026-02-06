@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -428,6 +428,36 @@ void main() {
     },
   );
 
+  testWidgets('SizeTransition maintains chosen alignment during animation', (
+    WidgetTester tester,
+  ) async {
+    final controller = AnimationController(vsync: const TestVSync());
+    addTearDown(controller.dispose);
+    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+
+    final Widget widget = SizeTransition(
+      sizeFactor: animation,
+      alignment: Alignment.topLeft,
+      child: const SizedBox.shrink(),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+    var actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
+
+    controller.value = 0.0;
+    await tester.pump();
+    actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
+
+    controller.value = 1.0;
+    await tester.pump();
+    actualAlignment = actualPositionedBox.alignment as Alignment;
+    expect(actualAlignment, Alignment.topLeft);
+  });
+
   testWidgets('MatrixTransition animates', (WidgetTester tester) async {
     final controller = AnimationController(vsync: const TestVSync());
     addTearDown(controller.dispose);
@@ -667,10 +697,7 @@ void main() {
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
         locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
+        delegates: const <LocalizationsDelegate<dynamic>>[DefaultWidgetsLocalizations.delegate],
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(

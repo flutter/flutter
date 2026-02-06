@@ -1043,6 +1043,33 @@ void main() {
     const constraints = TestConstraints(testValue: 6);
     expect(box.computeDryLayout(constraints), const Size.square(6));
   });
+
+  test('RenderBackdropFilter handles mix uses of .filter and .filterConfig', () {
+    final filter1 = ui.ImageFilter.blur();
+    final filter2 = ui.ImageFilter.matrix(Float64List.fromList(Matrix4.identity().storage));
+    final filter3 = ui.ImageFilter.compose(outer: filter1, inner: filter2);
+
+    final backdropFilter = RenderBackdropFilter(filter: filter1);
+
+    expect(backdropFilter.filter, filter1);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter1)));
+
+    backdropFilter.filterConfig = ImageFilterConfig(filter2);
+
+    expect(backdropFilter.filter, filter2);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter2)));
+
+    backdropFilter.filter = filter3;
+
+    expect(backdropFilter.filter, filter3);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter3)));
+
+    const filterConfig1 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+    backdropFilter.filterConfig = filterConfig1;
+
+    expect(backdropFilter.filterConfig, equals(filterConfig1));
+    expect(() => backdropFilter.filter, throwsAssertionError);
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {

@@ -24,6 +24,55 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/177895
+  - title: "Migrate 'axisAlignment' to 'alignment'"
+    date: 2025-11-20
+    element:
+      uris: [ 'widgets.dart' ]
+      constructor: ''
+      inClass: 'SizeTransition'
+    oneOf:
+      - if: "axis == '' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == '' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.vertical' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional(-1.0, {% axisAlignment %})'
+              requiredIf: "axis == 'Axis.vertical' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+      - if: "axis == 'Axis.horizontal' && axisAlignment != ''"
+        changes:
+          - kind: 'addParameter'
+            index: 4
+            name: 'alignment'
+            style: optional_named
+            argumentValue:
+              expression: 'AlignmentDirectional({% axisAlignment %}, -1.0)'
+              requiredIf: "axis == 'Axis.horizontal' && axisAlignment != ''"
+          - kind: 'removeParameter'
+            name: 'axisAlignment'
+    variables:
+      axisAlignment:
+        kind: fragment
+        value: 'arguments[axisAlignment]'
+      axis:
+        kind: fragment
+        value: 'arguments[axis]'
+
   # Changes made in https://github.com/flutter/flutter/pull/177966
   - title: "Migrate animation parameters to 'animationStyle'"
     date: 2025-04-01
