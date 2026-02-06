@@ -75,6 +75,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
   fl_engine_notify_display_update(engine, displays, n_monitors);
 }
 
+#if !FLUTTER_LINUX_GTK4
 static void monitor_added_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
   notify_display_update(self);
 }
@@ -83,6 +84,7 @@ static void monitor_removed_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
   g_hash_table_remove(self->display_ids_by_monitor, monitor);
   notify_display_update(self);
 }
+#endif  // !FLUTTER_LINUX_GTK4
 
 #if FLUTTER_LINUX_GTK4
 static void prune_display_ids_for_current_monitors(FlDisplayMonitor* self) {
