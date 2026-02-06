@@ -825,9 +825,10 @@ than "lasagna" code (where each section of the code is cleanly layered and separ
 ### Guidelines for `extension`s.
 
 [Extension methods][] let you add additional functionality to an existing type.
-Extension methods are resolved statically, and cannot be overridden.
-Furthermore, misusing extension methods can pollute IDE suggestions or cause
-naming collisions.
+When choosing between declaring a regular instance method and an extension
+method, consider the trade-offs. Extension methods are resolved statically and
+cannot be overridden. Furthermore, misusing extension methods can pollute IDE
+suggestions and cause naming collisions.
 
 Don't declare an extension method when declaring a regular method will do.
 
