@@ -794,8 +794,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
     final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
     // Adjust padding to align content with step icon when stepIconMargin is set.
-    final EdgeInsetsGeometry effectiveContentPadding = (widget.contentPadding ?? _kDefaultContentPadding)
-      .add(EdgeInsetsDirectional.only(start: marginLeft ?? 0.0));
+    final EdgeInsetsGeometry effectiveContentPadding =
+        (widget.contentPadding ?? _kDefaultContentPadding).add(
+          EdgeInsetsDirectional.only(start: marginLeft ?? 0.0),
+        );
 
     return Stack(
       children: <Widget>[
