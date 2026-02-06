@@ -182,7 +182,7 @@ abstract class BindingBase {
   static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// Deprecated. Will be removed in a future version of Flutter.
+  /// Deprecated; will be removed in a future version of Flutter.
   ///
   /// This property has been deprecated to prepare for Flutter's upcoming
   /// support for multiple views and multiple windows.
@@ -248,9 +248,10 @@ abstract class BindingBase {
   /// different [ui.PlatformDispatcher] implementation.
   ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
 
-  /// The initialization method. Subclasses override this method to hook into
-  /// the platform and otherwise configure their services. Subclasses must call
-  /// "super.initInstances()".
+  /// The initialization method.
+  ///
+  /// Subclasses override this method to hook into the platform and otherwise
+  /// configure their services. Subclasses must call "super.initInstances()".
   ///
   /// The binding is not fully initialized when this method runs (for
   /// example, other binding mixins may not yet have run their

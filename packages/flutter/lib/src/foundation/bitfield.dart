@@ -13,6 +13,7 @@ import '_bitfield_io.dart' if (dart.library.js_interop) '_bitfield_web.dart' as 
 const int kMaxUnsignedSMI = bitfield.kMaxUnsignedSMI;
 
 /// A BitField over an enum (or other class whose values implement "index").
+///
 /// Only the first 62 values of the enum can be used as indices.
 ///
 /// When compiling to JavaScript, this class is not supported.

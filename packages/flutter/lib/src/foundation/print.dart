@@ -49,6 +49,7 @@ typedef DebugPrintCallback = void Function(String? message, {int? wrapWidth});
 DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
+///
 /// Used by tests.
 void debugPrintSynchronously(String? message, {int? wrapWidth}) {
   if (message != null && wrapWidth != null) {
@@ -63,8 +64,9 @@ void debugPrintSynchronously(String? message, {int? wrapWidth}) {
   }
 }
 
-/// Implementation of [debugPrint] that throttles messages. This avoids dropping
-/// messages on platforms that rate-limit their logging (for example, Android).
+/// Implementation of [debugPrint] that throttles messages.
+///
+/// This avoids dropping messages on platforms that rate-limit their logging (for example, Android).
 ///
 /// If `wrapWidth` is not null, the message is wrapped using [debugWordWrap].
 void debugPrintThrottled(String? message, {int? wrapWidth}) {
