@@ -1,10 +1,62 @@
 # Fix Divide-by-Zero Errors in Coverage Calculation Tool
 
 ## Summary
-This document describes the fixes for divide-by-zero bugs (#4 and #5) found in the Flutter unit coverage analysis tool (`packages/flutter_tools/tool/unit_coverage.dart`).
+This document describes the fixes for divide-by-zero bugs found in the Flutter unit coverage analysis tool (`packages/flutter_tools/tool/unit_coverage.dart`):
+- **Divide by Zero in Coverage Comparison Sorting**
+- **Divide by Zero in Overall Coverage Calculation**
 
-**Author**: Flutter Team  
-**Created**: February 2026  
+**Author**: Flutter Team
+**Created**: February 2026
+
+---
+
+## What is This Tool?
+
+### Tool Name
+**Flutter Unit Coverage Analyzer** (`unit_coverage.dart`)
+
+### Location
+```
+packages/flutter_tools/tool/unit_coverage.dart
+```
+
+### Purpose
+The unit coverage tool analyzes test coverage data from LCOV (Line Coverage) files and produces a **per-library coverage summary report**.
+
+### What It Does
+1. **Reads LCOV coverage data** - Parses standard LCOV format coverage files
+2. **Analyzes per-library coverage** - Calculates coverage percentage for each Dart library
+3. **Sorts by coverage** - Orders libraries by increasing coverage percentage (lowest to highest)
+4. **Generates reports** - Produces human-readable coverage summaries
+
+### Usage
+```bash
+dart tool/unit_coverage lcov.info
+```
+
+**Input**: LCOV coverage file (e.g., `lcov.info`)
+**Output**: Formatted coverage summary table
+
+### Who Uses It?
+- **Flutter developers** - To track test coverage
+- **CI/CD systems** - To monitor code quality metrics
+- **Continuous Integration** - In automated testing pipelines
+- **Code review tools** - To measure PR impact on coverage
+
+### Example Output
+```
+% | tested | total
+lib/src/rendering/box.dart: 85.50% | 342 | 400
+lib/src/widgets/text.dart: 92.30% | 240 | 260
+lib/src/material/button.dart: 78.00% | 156 | 200
+OVERALL: 85.27%
+```
+
+### Why It's Important
+- Ensures Flutter codebase maintains high test coverage
+- Identifies untested code areas
+- Helps developers focus on improving low-coverage modules
+- Prevents regressions in code quality
 
 ---
 
@@ -34,7 +86,7 @@ A developer or CI pipeline runs the unit coverage tool on:
 
 ### Current Implementation Issues
 
-#### Bug #4: Divide by Zero in Coverage Comparison (Line 35-36)
+#### Divide by Zero in Coverage Comparison Sorting
 ```dart
 final double leftPercent = left.testedLines / left.totalLines;
 final double rightPercent = right.testedLines / right.totalLines;
@@ -42,7 +94,7 @@ final double rightPercent = right.testedLines / right.totalLines;
 
 **Problem**: No validation that `totalLines > 0` before division.
 
-#### Bug #5: Divide by Zero in Overall Coverage (Line 53)
+#### Divide by Zero in Overall Coverage Calculation
 ```dart
 print('OVERALL: ${overallNumerator / overallDenominator}');
 ```
@@ -110,7 +162,7 @@ coverages.sort((Coverage left, Coverage right) {
   if (right.totalLines == 0) {
     return 1;   // Empty files sort first
   }
-  
+
   // Safe division when totalLines > 0
   final double leftPercent = left.testedLines / left.totalLines;
   final double rightPercent = right.testedLines / right.totalLines;
@@ -126,12 +178,12 @@ coverages.sort((Coverage left, Coverage right) {
 for (final coverage in coverages) {
   overallNumerator += coverage.testedLines;
   overallDenominator += coverage.totalLines;
-  
+
   // Show 'N/A' for files with no lines
   final String coveragePercent = coverage.totalLines == 0
       ? 'N/A'
       : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
-  
+
   print(
     '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
   );
@@ -233,4 +285,4 @@ Consider documenting in Flutter's tool documentation:
 - Flutter Style Guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md
 - Flutter Testing Guide: https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Running-and-writing-tests.md
 - Unit Coverage Tool: `packages/flutter_tools/tool/unit_coverage.dart`
-- Bug Reports: Bugs #4 and #5 in coverage calculation
+- Related Bugs: Divide by zero errors in coverage calculation
