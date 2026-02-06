@@ -6,6 +6,7 @@ package com.flutter.gradle
 
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -392,12 +393,18 @@ object FlutterPluginUtils {
      * From BaseExtension docs:
      * "Don't use this extension directly Instead, use one of the following:
      *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
+     *
+     *  For ApplicationExtension use `getAndroidApplicationExtension`.
+     *  For LibraryExtension use `getAndroidLibraryExtension`.
      */
     internal fun getAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
+
+    internal fun getAndroidLibraryExtension(project: Project): LibraryExtension =
+        project.extensions.getByType(LibraryExtension::class.java)
 
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)

@@ -315,7 +315,8 @@ class FlutterPlugin : Plugin<Project> {
         val targetPlatforms: List<String> =
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
-        val androidExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+        // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
+        val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
             val jniLibsDir =
@@ -328,7 +329,8 @@ class FlutterPlugin : Plugin<Project> {
         val flutterPlugin = this
 
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
-            configureAbis(projectToAddTasksTo, androidExtension)
+            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
+            configureAbis(projectToAddTasksTo, appExtension)
             val android: AbstractAppExtension =
                 projectToAddTasksTo.extensions.findByName("android") as AbstractAppExtension
             android.applicationVariants.configureEach {
