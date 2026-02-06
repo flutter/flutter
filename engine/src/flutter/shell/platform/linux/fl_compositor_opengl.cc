@@ -375,8 +375,13 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
 
   // If frame not ready, then wait for it.
   gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+#if FLUTTER_LINUX_GTK4
+  size_t width = fl_gtk_surface_get_width(surface);
+  size_t height = fl_gtk_surface_get_height(surface);
+#else
   size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
   size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+#endif
   while (fl_framebuffer_get_width(self->framebuffer) != width ||
          fl_framebuffer_get_height(self->framebuffer) != height) {
     g_mutex_unlock(&self->frame_mutex);
