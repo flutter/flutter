@@ -13,7 +13,7 @@ import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 void main() {
   if (!isWindowingEnabled) {
     const String windowingDisabledErrorMessage = '''
-Skipping dialog_0.dart because Windowing APIs are not enabled.
+Skipping dialog.0.dart because Windowing APIs are not enabled.
 
 Windowing APIs are currently experimental. Do not use windowing APIs in
 production applications or plugins published to pub.dev.

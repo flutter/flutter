@@ -1399,11 +1399,6 @@ class _DialogWindowDelegate extends DialogWindowControllerDelegate {
   void onWindowCloseRequested(DialogWindowController controller) {
     route.navigator?.pop();
   }
-
-  @override
-  void onWindowDestroyed() {
-    // Window has been destroyed
-  }
 }
 
 class _DialogWindowRoute<T> extends Route<T> {
@@ -1436,8 +1431,8 @@ class _DialogWindowRoute<T> extends Route<T> {
   void install() {
     super.install();
 
-    // Create a minimal transparent overlay entry to satisfy Navigator requirements
-    // The actual dialog content is rendered through ViewAnchor, not through this overlay
+    // Create a minimal transparent overlay entry to satisfy Navigator requirements.
+    // The actual dialog content is rendered through ViewAnchor, not through this overlay.
     _overlayEntries = <OverlayEntry>[
       OverlayEntry(builder: (BuildContext context) => const SizedBox.shrink()),
     ];
@@ -1453,7 +1448,7 @@ class _DialogWindowRoute<T> extends Route<T> {
   @override
   TickerFuture didPush() {
     super.didPush();
-    // No animation is needed since the window appears instantly
+    // No animation is needed since the window appears instantly.
     return TickerFuture.complete();
   }
 
@@ -1465,7 +1460,7 @@ class _DialogWindowRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    // Unregister from the registry
+    // Unregister from the registry.
     if (_entry != null) {
       _registry?.unregister(_entry!);
     }

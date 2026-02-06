@@ -1293,6 +1293,37 @@ class _WindowManager extends StatefulWidget {
 }
 
 class _WindowManagerState extends State<_WindowManager> {
+  Widget _buildDialog(WindowEntry entry, DialogWindowController controller) {
+    final TextDirection? textDirection = entry.parentContext != null
+        ? Directionality.of(entry.parentContext!)
+        : null;
+    final ThemeData? themeData = entry.parentContext != null
+        ? Theme.of(entry.parentContext!)
+        : null;
+    final MediaQueryData? mediaQuery = entry.parentContext != null
+        ? MediaQuery.of(entry.parentContext!)
+        : null;
+    final Widget dialogContent = _DialogPopScope(
+      onPop: Navigator.of(entry.parentContext!).pop,
+      child: Builder(
+        builder: (BuildContext innerContext) {
+          return _FullWindowDialogWrapper(child: entry.builder(innerContext));
+        },
+      ),
+    );
+
+    return DialogWindow(
+      controller: controller,
+      child: Directionality(
+        textDirection: textDirection ?? Directionality.of(context),
+        child: Theme(
+          data: themeData ?? Theme.of(context),
+          child: MediaQuery(data: mediaQuery ?? MediaQuery.of(context), child: dialogContent),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!isWindowingEnabled) {
@@ -1324,40 +1355,9 @@ class _WindowManagerState extends State<_WindowManager> {
       ),
     );
   }
-
-  Widget _buildDialog(WindowEntry entry, DialogWindowController controller) {
-    final TextDirection? textDirection = entry.parentContext != null
-        ? Directionality.of(entry.parentContext!)
-        : null;
-    final ThemeData? themeData = entry.parentContext != null
-        ? Theme.of(entry.parentContext!)
-        : null;
-    final MediaQueryData? mediaQuery = entry.parentContext != null
-        ? MediaQuery.of(entry.parentContext!)
-        : null;
-    final Widget dialogContent = _DialogPopScope(
-      onPop: Navigator.of(entry.parentContext!).pop,
-      child: Builder(
-        builder: (BuildContext innerContext) {
-          return _FullWindowDialogWrapper(child: entry.builder(innerContext));
-        },
-      ),
-    );
-
-    return DialogWindow(
-      controller: controller,
-      child: Directionality(
-        textDirection: textDirection ?? Directionality.of(context),
-        child: Theme(
-          data: themeData ?? Theme.of(context),
-          child: MediaQuery(data: mediaQuery ?? MediaQuery.of(context), child: dialogContent),
-        ),
-      ),
-    );
-  }
 }
 
-// Wrapper that makes dialogs fill the entire window without insets or rounded corners
+// Wrapper that makes dialogs fill the entire window without insets or rounded corners.
 class _FullWindowDialogWrapper extends StatelessWidget {
   const _FullWindowDialogWrapper({required this.child});
 
@@ -1367,10 +1367,10 @@ class _FullWindowDialogWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
       insetPadding: EdgeInsets.zero,
-      shape: const RoundedRectangleBorder(), // No rounded corners
-      alignment: Alignment.topLeft, // Align to top-left so it fills from corner
+      shape: const RoundedRectangleBorder(), // No rounded corners.
+      alignment: Alignment.topLeft, // Align to top-left so it fills from corner.
       constraints:
-          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space
+          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space.
     );
 
     return DialogTheme(
@@ -1394,8 +1394,8 @@ class _FullWindowDialogWrapper extends StatelessWidget {
   }
 }
 
-// Provides a pop callback that dialog content can use
-// Wraps content to provide a Navigator-like interface for popping
+// Provides a pop callback that dialog content can use.
+// Wraps content to provide a Navigator-like interface for popping.
 class _DialogPopScope extends StatelessWidget {
   const _DialogPopScope({required this.child, this.onPop});
 
@@ -1404,7 +1404,7 @@ class _DialogPopScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap with PopupScope to handle back button and provide popNavigator function
+    // Wrap with PopupScope to handle back button and provide popNavigator function.
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) {
@@ -1415,7 +1415,7 @@ class _DialogPopScope extends StatelessWidget {
       child: Builder(
         builder: (BuildContext context) {
           // Provide a way for child widgets to pop using Navigator.maybePop(context)
-          // by wrapping in a minimal Navigator
+          // by wrapping in a minimal Navigator.
           return _NavigatorShim(onPop: onPop, child: child);
         },
       ),
@@ -1423,7 +1423,7 @@ class _DialogPopScope extends StatelessWidget {
   }
 }
 
-// Creates a minimal Navigator that intercepts pop calls
+// Creates a minimal Navigator that intercepts pop calls.
 class _NavigatorShim extends StatelessWidget {
   const _NavigatorShim({required this.child, this.onPop});
 
@@ -1433,21 +1433,21 @@ class _NavigatorShim extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Create a Navigator with a single page that contains the child
-    // This allows Navigator.pop(context) calls from within the dialog to work
+    // This allows Navigator.pop(context) calls from within the dialog to work.
     return Navigator(
       pages: <Page<void>>[_DialogContentPage(child: child)],
       onPopPage: (Route<dynamic> route, dynamic result) {
         // When the page is popped, call our onPop callback
         onPop?.call();
         // Return false to prevent the route from being removed from the Navigator
-        // (since we're handling the pop externally by closing the dialog window)
+        // (since we're handling the pop externally by closing the dialog window).
         return false;
       },
     );
   }
 }
 
-// A simple page for the dialog content
+// A simple page for the dialog content.
 class _DialogContentPage extends Page<void> {
   const _DialogContentPage({required this.child});
 

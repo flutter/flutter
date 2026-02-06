@@ -1,17 +1,19 @@
-# api_multiwindow
+# Example of using the Windowing versions API of Flutter's APIs.
 
-A new Flutter project.
+This project demonstrates how the windowing API augments existing Flutter
+APIs, such as the Material API.
 
-## Getting Started
+## Running
 
-This project is a starting point for a Flutter application.
+Each file in the `lib` folder is a self-contained example program. You may run
+each program via:
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter run <lib/path/to/file.dart>
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+For example, to run the Material dialog tests, run:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run lib/material/dialog/dialog.0.dart
+```
