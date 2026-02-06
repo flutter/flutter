@@ -2462,28 +2462,13 @@ class HybridTextEditing {
   /// on the operating system and browser engine.
   HybridTextEditing() {
     if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
+      // In iOS 26, the text field is blurred right before autofill occurs. We need to keep listening
+      // for focus events in order to re-establish the connection with the framework when the text
+      // field is focused again for autofill.
       for (final EngineFlutterView view in EnginePlatformDispatcher.instance.views) {
         _addRefocusListenerToView(view.viewId);
       }
       EnginePlatformDispatcher.instance.viewManager.onViewCreated.listen(_addRefocusListenerToView);
-    }
-  }
-
-  void _addRefocusListenerToView(int viewId) {
-    final EngineFlutterView? view = EnginePlatformDispatcher.instance.viewManager[viewId];
-    view!.dom.textEditingHost.addEventListener('focusin', createDomEventListener(_handleRefocus));
-  }
-
-  void _handleRefocus(DomEvent event) {
-    if (isEditing) {
-      return;
-    }
-    final target = event.target as DomElement?;
-    if (target == null) {
-      return;
-    }
-    if (target.classList.contains(HybridTextEditing.textEditingClass)) {
-      channel.refocus(_clientId);
     }
   }
 
@@ -2547,6 +2532,24 @@ class HybridTextEditing {
     if (isEditing) {
       stopEditing();
       channel.onConnectionClosed(_clientId);
+    }
+  }
+
+  void _addRefocusListenerToView(int viewId) {
+    final EngineFlutterView? view = EnginePlatformDispatcher.instance.viewManager[viewId];
+    view!.dom.textEditingHost.addEventListener('focusin', createDomEventListener(_handleRefocus));
+  }
+
+  void _handleRefocus(DomEvent event) {
+    if (isEditing) {
+      return;
+    }
+    final target = event.target as DomElement?;
+    if (target == null) {
+      return;
+    }
+    if (target.classList.contains(HybridTextEditing.textEditingClass)) {
+      channel.refocus(_clientId);
     }
   }
 }
