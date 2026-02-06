@@ -123,7 +123,7 @@ const double _kStepSize = 24.0;
 const double _kTriangleSqrt = 0.866025; // sqrt(3.0) / 2.0
 const double _kTriangleHeight = _kStepSize * _kTriangleSqrt;
 const double _kMaxStepSize = 80.0;
-const EdgeInsetsDirectional _kDefaultContentPadding = EdgeInsetsDirectional.only(
+const EdgeInsetsDirectional _kDefaultVerticalContentPadding = EdgeInsetsDirectional.only(
   start: 60.0,
   end: 24.0,
   bottom: 24.0,
@@ -793,9 +793,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final double? marginRight = _stepIconMargin?.resolve(TextDirection.ltr).right;
     final double? additionalMarginLeft = marginLeft != null ? marginLeft / 2.0 : null;
     final double? additionalMarginRight = marginRight != null ? marginRight / 2.0 : null;
-    // Adjust padding to align content with step icon when stepIconMargin is set.
-    final EdgeInsetsGeometry effectiveContentPadding =
-        (widget.contentPadding ?? _kDefaultContentPadding).add(
+    // Adjust vertical content padding to align with step icon when stepIconMargin is set.
+    final EdgeInsetsGeometry effectiveVerticalContentPadding =
+        (widget.contentPadding ?? _kDefaultVerticalContentPadding).add(
           EdgeInsetsDirectional.only(start: marginLeft ?? 0.0),
         );
 
@@ -823,7 +823,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Padding(
-            padding: effectiveContentPadding,
+            padding: effectiveVerticalContentPadding,
             child: Column(
               children: <Widget>[
                 ClipRect(clipBehavior: widget.clipBehavior, child: widget.steps[index].content),
