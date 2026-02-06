@@ -128,6 +128,7 @@ const EdgeInsetsDirectional _kDefaultContentPadding = EdgeInsetsDirectional.only
   end: 24.0,
   bottom: 24.0,
 );
+const EdgeInsetsGeometry _kDefaultHeaderPadding = EdgeInsets.symmetric(horizontal: 24.0);
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -434,6 +435,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   double? get _stepIconHeight => widget.stepIconHeight;
 
   double? get _stepIconWidth => widget.stepIconWidth;
+
+  EdgeInsetsGeometry get effectiveHeaderPadding => widget.headerPadding ?? _kDefaultHeaderPadding;
 
   double get _heightFactor {
     return (_isLabel() && _stepIconHeight != null) ? 2.5 : 2.0;
@@ -759,7 +762,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final bool isActive = widget.steps[index].isActive;
     final bool isPreviousActive = index > 0 && widget.steps[index - 1].isActive;
     return Padding(
-      padding: widget.headerPadding ?? const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: effectiveHeaderPadding,
       child: Row(
         children: <Widget>[
           Column(
@@ -934,7 +937,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         Material(
           elevation: widget.elevation ?? 2,
           child: Padding(
-            padding: widget.headerPadding ?? const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: effectiveHeaderPadding,
             child: SizedBox(
               height: _stepIconHeight != null ? _stepIconHeight! * _heightFactor : null,
               child: Row(children: children),
