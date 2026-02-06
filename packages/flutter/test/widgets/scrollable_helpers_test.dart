@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'list_tile_test_utils.dart';
+
+import 'widgets_app_tester.dart';
 
 final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
@@ -105,9 +106,9 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: CustomScrollView(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
             controller: controller,
             physics: const NeverScrollableScrollPhysics(),
             slivers: List<Widget>.generate(20, (int index) {
@@ -170,8 +171,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             slivers: List<Widget>.generate(20, (int index) {
@@ -240,8 +240,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -299,8 +298,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
@@ -363,8 +361,7 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             reverse: true,
@@ -437,8 +434,7 @@ void main() {
       final focusNode = FocusNode(debugLabel: 'SizedBox');
       addTearDown(focusNode.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             scrollDirection: Axis.horizontal,
@@ -495,8 +491,7 @@ void main() {
       addTearDown(controller.dispose);
       final items = List<String>.generate(20, (int index) => 'Item $index');
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
+        TestWidgetsApp(
           home: CustomScrollView(
             controller: controller,
             center: const ValueKey<String>('Center'),
@@ -564,7 +559,7 @@ void main() {
 
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           children: const <Widget>[
             SizedBox(height: 600.0, child: Text('The cow as white as milk')),
@@ -613,9 +608,9 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.fuchsia),
-          home: PrimaryScrollController(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PrimaryScrollController(
             controller: controller,
             child: Focus(
               autofocus: true,
@@ -676,21 +671,20 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Transform.scale(
-              scale: 0.5,
-              child: SizedBox(
-                width: 400,
-                height: 400,
-                child: ListView.builder(
-                  controller: controller,
-                  itemCount: 20,
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(height: 100, child: Center(child: Text('Item $index')));
-                  },
-                ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: 100, child: Center(child: Text('Item $index')));
+                },
               ),
             ),
           ),
@@ -712,57 +706,4 @@ void main() {
     scroller.stopAutoScroll();
     await tester.pumpAndSettle();
   });
-
-  testWidgets(
-    'ReorderableListView in Flexible with one item does not assert when dragged to edge',
-    (WidgetTester tester) async {
-      final items = <String>['Item 1'];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Flexible(
-                  child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return ReorderableListView(
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex -= 1;
-                            }
-                            final String item = items.removeAt(oldIndex);
-                            items.insert(newIndex, item);
-                          });
-                        },
-                        children: <Widget>[
-                          TestListTile(
-                            key: const ValueKey<String>('Item 1'),
-                            title: Text(items.first),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final Offset startLocation = tester.getCenter(find.byKey(const ValueKey<String>('Item 1')));
-      final TestGesture gesture = await tester.startGesture(startLocation);
-      await tester.pump();
-      await gesture.moveTo(tester.getBottomRight(find.byType(Scaffold)) - const Offset(10, 10));
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(tester.takeException(), isNull);
-
-      await gesture.up();
-      await tester.pumpAndSettle();
-    },
-  );
 }

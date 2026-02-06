@@ -341,6 +341,7 @@ class TextFormField extends FormField<String> {
 
 class _TextFormFieldState extends FormFieldState<String> {
   RestorableTextEditingController? _controller;
+  late final String? _initialValue;
 
   TextEditingController get _effectiveController => _textFormField.controller ?? _controller!.value;
 
@@ -382,6 +383,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     } else {
       _textFormField.controller!.addListener(_handleControllerChanged);
     }
+    _initialValue = _textFormField.initialValue ?? _textFormField.controller?.text;
   }
 
   @override
@@ -426,7 +428,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
+    _effectiveController.value = TextEditingValue(text: _initialValue ?? '');
     super.reset();
     _textFormField.onChanged?.call(_effectiveController.text);
   }

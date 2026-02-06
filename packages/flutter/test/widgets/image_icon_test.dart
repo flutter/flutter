@@ -97,4 +97,15 @@ void main() {
     );
     handle.dispose();
   });
+
+  testWidgets('ImageIcon does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: ImageIcon(image))),
+      ),
+    );
+    expect(tester.getSize(find.byType(ImageIcon)), Size.zero);
+    imageCache.clear();
+  });
 }

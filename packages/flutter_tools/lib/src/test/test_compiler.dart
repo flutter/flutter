@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -103,7 +102,7 @@ class TestCompiler {
   ///
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
-    this.buildInfo,
+    BuildInfo buildInfo,
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -114,12 +113,15 @@ class TestCompiler {
              getBuildDirectory(),
              'test_cache',
              getDefaultCachedKernelPath(
+               config: globals.config,
+               fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
              ),
            ),
        shouldCopyDillFile = precompiledDillPath == null {
+    this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -143,7 +145,7 @@ class TestCompiler {
   final compilerController = StreamController<_CompilationRequest>();
   final compilationQueue = <_CompilationRequest>[];
   final FlutterProject? flutterProject;
-  final BuildInfo buildInfo;
+  late final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
@@ -179,23 +181,16 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
     final residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      initializeFromDill: testFilePath,
-      dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packageConfigPath,
-      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      buildInfo: buildInfo,
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
-      fileSystemRoots: buildInfo.fileSystemRoots,
-      fileSystemScheme: buildInfo.fileSystemScheme,
       shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: .tester,
     );
     return residentCompiler;
   }
