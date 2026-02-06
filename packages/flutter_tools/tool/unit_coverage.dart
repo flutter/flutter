@@ -34,6 +34,16 @@ void main(List<String> args) {
     }
   }
   coverages.sort((Coverage left, Coverage right) {
+    // Avoid divide by zero by returning early if both have zero lines
+    if (left.totalLines == 0 && right.totalLines == 0) {
+      return 0;
+    }
+    if (left.totalLines == 0) {
+      return -1;
+    }
+    if (right.totalLines == 0) {
+      return 1;
+    }
     final double leftPercent = left.testedLines / left.totalLines;
     final double rightPercent = right.testedLines / right.totalLines;
     return leftPercent.compareTo(rightPercent);
@@ -44,13 +54,19 @@ void main(List<String> args) {
   for (final coverage in coverages) {
     overallNumerator += coverage.testedLines;
     overallDenominator += coverage.totalLines;
-    final String coveragePercent = (coverage.testedLines / coverage.totalLines * 100)
-        .toStringAsFixed(2);
+    // Avoid divide by zero when calculating individual coverage percentage
+    final String coveragePercent = coverage.totalLines == 0
+        ? 'N/A'
+        : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
     print(
       '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
     );
   }
-  print('OVERALL: ${overallNumerator / overallDenominator}');
+  // Avoid divide by zero when calculating overall coverage percentage
+  final String overallPercent = overallDenominator == 0
+      ? 'N/A'
+      : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
+  print('OVERALL: $overallPercent%');
 }
 
 class Coverage {
