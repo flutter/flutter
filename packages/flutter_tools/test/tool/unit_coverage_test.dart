@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:test/test.dart';
 
 /// Tests for unit_coverage.dart divide-by-zero fixes.
@@ -14,7 +11,8 @@ void main() {
       // This test verifies that the coverage calculation doesn't crash
       // when a library has zero lines.
       // Bug #4: Divide by zero in comparison
-      const String zeroLinesData = '''SF:lib/src/empty_file.dart
+      const zeroLinesData = '''
+SF:lib/src/empty_file.dart
 end_of_record
 SF:lib/src/normal_file.dart
 DA:1,1
@@ -23,7 +21,7 @@ end_of_record
 ''';
 
       // Parse the coverage data
-      final List<String> lines = zeroLinesData.split('\n');
+      final lines = zeroLinesData.split('\n');
       final coverages = <_TestCoverage>[];
       _TestCoverage? currentCoverage;
 
@@ -65,13 +63,13 @@ end_of_record
     });
 
     test('calculates individual coverage percentage safely', () {
-      const _TestCoverage emptyCoverage = _TestCoverage._(
+      const emptyCoverage = _TestCoverage._(
         library: 'empty.dart',
         totalLines: 0,
         testedLines: 0,
       );
 
-      const _TestCoverage normalCoverage = _TestCoverage._(
+      const normalCoverage = _TestCoverage._(
         library: 'normal.dart',
         totalLines: 10,
         testedLines: 8,
@@ -80,15 +78,13 @@ end_of_record
       // Test empty coverage
       final String emptyPercent = emptyCoverage.totalLines == 0
           ? 'N/A'
-          : (emptyCoverage.testedLines / emptyCoverage.totalLines * 100)
-              .toStringAsFixed(2);
+          : (emptyCoverage.testedLines / emptyCoverage.totalLines * 100).toStringAsFixed(2);
       expect(emptyPercent, equals('N/A'));
 
       // Test normal coverage
       final String normalPercent = normalCoverage.totalLines == 0
           ? 'N/A'
-          : (normalCoverage.testedLines / normalCoverage.totalLines * 100)
-              .toStringAsFixed(2);
+          : (normalCoverage.testedLines / normalCoverage.totalLines * 100).toStringAsFixed(2);
       expect(normalPercent, equals('80.00'));
     });
 
@@ -113,12 +109,11 @@ end_of_record
     });
 
     test('handles mixed coverage data correctly', () {
-      final List<_TestCoverage> coverages = <_TestCoverage>[
-        _TestCoverage._(library: 'file1.dart', totalLines: 0, testedLines: 0),
-        _TestCoverage._(library: 'file2.dart', totalLines: 10, testedLines: 5),
-        _TestCoverage._(library: 'file3.dart', totalLines: 0, testedLines: 0),
-        _TestCoverage._(
-            library: 'file4.dart', totalLines: 20, testedLines: 18),
+      final coverages = <_TestCoverage>[
+        const _TestCoverage._(library: 'file1.dart', totalLines: 0, testedLines: 0),
+        const _TestCoverage._(library: 'file2.dart', totalLines: 10, testedLines: 5),
+        const _TestCoverage._(library: 'file3.dart', totalLines: 0, testedLines: 0),
+        const _TestCoverage._(library: 'file4.dart', totalLines: 20, testedLines: 18),
       ];
 
       // Should not throw
@@ -149,7 +144,7 @@ end_of_record
 }
 
 class _TestCoverage {
-  _TestCoverage({
+  const _TestCoverage({
     this.library = '',
     this.totalLines = 0,
     this.testedLines = 0,
@@ -161,7 +156,7 @@ class _TestCoverage {
     required this.testedLines,
   });
 
-  String library;
-  int totalLines;
-  int testedLines;
+  final String library;
+  final int totalLines;
+  final int testedLines;
 }
