@@ -21,11 +21,14 @@ import 'dart:io';
 /// These checks make the tool robust to empty or partially-generated
 /// lcov reports and prevent runtime crashes in CI and developer flows.
 void main(List<String> args) {
-  if (args.isEmpty || args.length > 1) {
-    print('Usage: dart tool/unit_coverage lcov.info');
+  // Support an optional verbose flag: `-v` or `--verbose`.
+  final bool verbose = args.contains('-v') || args.contains('--verbose');
+  final List<String> filteredArgs = args.where((a) => a != '-v' && a != '--verbose').toList();
+  if (filteredArgs.isEmpty || filteredArgs.length > 1) {
+    print('Usage: dart tool/unit_coverage [--verbose] lcov.info');
     return;
   }
-  final List<String> lines = File(args.single).readAsLinesSync();
+  final List<String> lines = File(filteredArgs.single).readAsLinesSync();
   final coverages = <Coverage>[];
   Coverage? currentCoverage;
 
@@ -70,6 +73,9 @@ void main(List<String> args) {
     final String coveragePercent = coverage.totalLines == 0
         ? 'N/A'
         : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+    if (coverage.totalLines == 0 && verbose) {
+      stderr.writeln('Note: ${coverage.library} has zero total lines — showing N/A');
+    }
     print(
       '${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}',
     );
@@ -78,6 +84,9 @@ void main(List<String> args) {
   final String overallPercent = overallDenominator == 0
       ? 'N/A'
       : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
+  if (overallDenominator == 0 && verbose) {
+    stderr.writeln('Note: no coverage data found — showing N/A for overall coverage');
+  }
   print('OVERALL: $overallPercent%');
 }
 

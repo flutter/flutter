@@ -233,6 +233,12 @@ The tool should be tested with:
 - Corrupted or incomplete data
 - Large-scale coverage reports
 
+Edge cases covered:
+- Files with zero total lines (empty/generated/stub files)
+- Completely empty coverage reports (no LF/LH/DA records)
+- Partially malformed LCOV records (missing DA entries for some files)
+- Mixed data sets containing both zero-line and normal files
+
 ---
 
 ## Compatibility & Breaking Changes

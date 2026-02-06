@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'package:test/test.dart';
 
 /// Tests for unit_coverage.dart divide-by-zero fixes.
@@ -137,6 +138,46 @@ end_of_record
       expect(coverages[2].library, equals('file2.dart'));
       expect(coverages[3].library, equals('file4.dart'));
     });
+  });
+
+  test('prints N/A for zero-line files in output', () {
+    final coverages = <_TestCoverage>[
+      const _TestCoverage(library: 'empty.dart', totalLines: 0, testedLines: 0),
+      const _TestCoverage(library: 'normal.dart', totalLines: 4, testedLines: 2),
+    ];
+
+    final List<String> printed = <String>[];
+    runZoned(
+      () {
+        for (final coverage in coverages) {
+          final String coveragePercent = coverage.totalLines == 0
+              ? 'N/A'
+              : (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
+          print('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
+        }
+        // overall
+        double overallNumerator = 0;
+        double overallDenominator = 0;
+        for (final c in coverages) {
+          overallNumerator += c.testedLines;
+          overallDenominator += c.totalLines;
+        }
+        final String overallPercent = overallDenominator == 0
+            ? 'N/A'
+            : (overallNumerator / overallDenominator * 100).toStringAsFixed(2);
+        print('OVERALL: $overallPercent%');
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (self, parent, zone, line) => printed.add(line),
+      ),
+    );
+
+    // Expect the empty file to have an N/A entry
+    expect(printed.any((l) => l.contains('empty.dart: N/A% | 0 | 0')), isTrue);
+    // Expect the normal file to have a numeric percentage
+    expect(printed.any((l) => l.contains('normal.dart: 50.00% | 2 | 4')), isTrue);
+    // Expect overall to be numeric
+    expect(printed.last, equals('OVERALL: 50.00%'));
   });
 }
 
