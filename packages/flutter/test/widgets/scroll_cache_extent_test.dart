@@ -234,4 +234,48 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets('Semantics nodes in cache extent (viewport) are marked as hidden', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          scrollCacheExtent: const ScrollCacheExtent.viewport(2.0),
+          itemCount: 20,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(height: 100, child: Text('Item $index'));
+          },
+        ),
+      ),
+    );
+
+    // Viewport height is 600 by default.
+    // Cache extent is 2.0 * 600 = 1200.
+    // Items 0-5 are visible (0-600).
+    // Items 6-17 are in cache extent (600-1800).
+    // Item 18 starts at 1800, so it is just outside.
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(find.text('Item 6', skipOffstage: false), findsOneWidget);
+    expect(find.text('Item 17', skipOffstage: false), findsOneWidget);
+    expect(find.text('Item 18', skipOffstage: false), findsNothing);
+
+    // Check semantics
+    expect(tester.getSemantics(find.text('Item 5')), matchesSemantics(label: 'Item 5'));
+
+    expect(
+      tester.getSemantics(find.text('Item 6', skipOffstage: false)),
+      matchesSemantics(label: 'Item 6', isHidden: true),
+    );
+    expect(
+      tester.getSemantics(find.text('Item 17', skipOffstage: false)),
+      matchesSemantics(label: 'Item 17', isHidden: true),
+    );
+
+    handle.dispose();
+  });
 }
