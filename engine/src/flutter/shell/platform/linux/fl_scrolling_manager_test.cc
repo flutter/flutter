@@ -45,7 +45,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
   event->y = 8.0;
   event->device = mouse;
   event->direction = GDK_SCROLL_UP;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
@@ -55,7 +56,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[0].scroll_delta_x, 0);
   EXPECT_EQ(pointer_events[0].scroll_delta_y, 53 * -1.0);
   event->direction = GDK_SCROLL_DOWN;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -65,7 +67,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[1].scroll_delta_x, 0);
   EXPECT_EQ(pointer_events[1].scroll_delta_y, 53 * 1.0);
   event->direction = GDK_SCROLL_LEFT;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -75,7 +78,8 @@ TEST(FlScrollingManagerTest, DiscreteDirectional) {
   EXPECT_EQ(pointer_events[2].scroll_delta_x, 53 * -1.0);
   EXPECT_EQ(pointer_events[2].scroll_delta_y, 0);
   event->direction = GDK_SCROLL_RIGHT;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);
@@ -120,7 +124,8 @@ TEST(FlScrollingManagerTest, DiscreteScrolling) {
   event->delta_y = 2.0;
   event->device = mouse;
   event->direction = GDK_SCROLL_SMOOTH;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
@@ -165,7 +170,8 @@ TEST(FlScrollingManagerTest, Panning) {
   event->delta_y = 2.0;
   event->device = touchpad;
   event->direction = GDK_SCROLL_SMOOTH;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
@@ -181,7 +187,8 @@ TEST(FlScrollingManagerTest, Panning) {
   EXPECT_EQ(pointer_events[1].pan_y, 53 * -2.0);
   EXPECT_EQ(pointer_events[1].scale, 1.0);
   EXPECT_EQ(pointer_events[1].rotation, 0.0);
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -193,7 +200,8 @@ TEST(FlScrollingManagerTest, Panning) {
   EXPECT_EQ(pointer_events[2].scale, 1.0);
   EXPECT_EQ(pointer_events[2].rotation, 0.0);
   event->is_stop = true;
-  fl_scrolling_manager_handle_scroll_event(manager, reinterpret_cast<GdkEvent*>(event), 1.0);
+  fl_scrolling_manager_handle_scroll_event(
+      manager, reinterpret_cast<GdkEvent*>(event), 1.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);
