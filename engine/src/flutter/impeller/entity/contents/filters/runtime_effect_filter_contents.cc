@@ -98,6 +98,18 @@ std::optional<Entity> RuntimeEffectFilterContents::RenderFilter(
           [maybe_input_coverage,
            entity_offset](const Entity& entity) -> std::optional<Rect> {
             Rect coverage = maybe_input_coverage.value();
+            // The LT values come from the offset of the clip rect, that creates
+            // the clipping effect on the content that will be rendered from
+            // the fragment shader.  The RB values define the region we'll be
+            // synthesizing and ultimately defines the width and the height of
+            // the rasterized image.  The LT values can be thought of shifting
+            // the window that will be rasterized. Since we are shifting from
+            // the top-left corner, that is effectively pushing the the bottom
+            // right corner lower, outside of the rendering space.  So, we can
+            // clamp those values to the coverage's RB values.  This doesn't
+            // cause the fragment shader's rendering to deform because the
+            // magic width/height values sent to the fragment shader don't take
+            // the rasterized image's size into account.
             return Rect::MakeLTRB(entity_offset.x, entity_offset.y,
                                   coverage.GetRight(), coverage.GetBottom());
           });
