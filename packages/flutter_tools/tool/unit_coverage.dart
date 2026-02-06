@@ -8,6 +8,18 @@ import 'dart:io';
 /// increasing code coverage percentage.
 ///
 /// Usage: `dart tool/unit_coverage lcov.info`
+///
+/// Defensive strategy:
+/// - Validate denominators before any division to avoid divide-by-zero.
+/// - When an individual file has zero total lines, report `"N/A"`
+///   for its percentage instead of attempting a division.
+/// - When the overall denominator is zero (no data), report `"N/A"`
+///   for the overall coverage percentage.
+/// - The sort comparator treats zero-line files specially (placed
+///   before files with measurable coverage) to keep ordering stable.
+///
+/// These checks make the tool robust to empty or partially-generated
+/// lcov reports and prevent runtime crashes in CI and developer flows.
 void main(List<String> args) {
   if (args.isEmpty || args.length > 1) {
     print('Usage: dart tool/unit_coverage lcov.info');

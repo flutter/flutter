@@ -1,18 +1,46 @@
-# PR Description: Fix Divide-by-Zero Errors in Coverage Calculation (Bugs #4 & #5)
+# PR Description: Fix Divide-by-Zero Errors in Coverage Calculation Tool
 
 ## Summary
 Fixes critical divide-by-zero runtime errors in the Flutter unit coverage analysis tool. The tool now gracefully handles edge cases where coverage data is incomplete or contains files with zero lines.
 
-**Type**: Bug Fix  
-**Severity**: High (Runtime Error)  
-**Breaking**: No  
-**Platform**: All  
+**Type**: Bug Fix
+**Severity**: High (Runtime Error)
+**Breaking**: No
+**Platform**: All
 
 ---
 
-## Fixes
-- **Bug #4**: Divide by zero error in coverage comparison sorting
-- **Bug #5**: Divide by zero error in overall coverage percentage calculation
+## Bugs Fixed
+
+### Bug 1: Divide by Zero Error in Coverage Comparison Sorting
+
+**Tool Affected**: Flutter Unit Coverage Analyzer (`packages/flutter_tools/tool/unit_coverage.dart`)
+
+**Description**: When sorting coverage data by percentage, the tool crashed if any library had zero total lines of code. The comparator attempted to divide `testedLines / totalLines` without checking if `totalLines` was zero, resulting in undefined behavior (Infinity or crash).
+
+**Impact**:
+- ❌ CI/CD pipelines fail when coverage files contain empty files
+- ❌ Automated testing breaks on coverage reports from certain build configurations
+- ❌ Flutter developers cannot generate coverage summaries for partial builds
+- ❌ Coverage tracking is blocked until files have content
+
+**Severity**: High - Prevents tool execution
+
+---
+
+### Bug 2: Divide by Zero Error in Overall Coverage Calculation
+
+**Tool Affected**: Flutter Unit Coverage Analyzer (`packages/flutter_tools/tool/unit_coverage.dart`)
+
+**Description**: When calculating individual file coverage percentages and overall coverage percentage, the tool crashed if no coverage data existed (denominator = 0) or individual files had zero lines. The calculation `testedLines / totalLines * 100` and `overallNumerator / overallDenominator * 100` were performed without validation.
+
+**Impact**:
+- ❌ Empty coverage reports cause tool to crash
+- ❌ Projects with generated/stub files fail coverage analysis
+- ❌ Coverage metrics become unreliable and unusable
+- ❌ Team cannot track code quality metrics consistently
+
+**Severity**: High - Prevents tool output
 
 ---
 
@@ -20,8 +48,8 @@ Fixes critical divide-by-zero runtime errors in the Flutter unit coverage analys
 
 ### 1. File: `packages/flutter_tools/tool/unit_coverage.dart`
 
-#### Bug #4 Fix (Lines 35-46)
-**Issue**: Coverage sorting crashed when comparing libraries with zero total lines.
+#### Divide by Zero Error in Coverage Comparison Sorting (Bug 1)
+**Tool**: Flutter Unit Coverage Analyzer
 
 **Before**:
 ```dart
@@ -51,8 +79,8 @@ coverages.sort((Coverage left, Coverage right) {
 });
 ```
 
-#### Bug #5 Fix (Lines 48-60)
-**Issue**: Individual and overall coverage percentages crashed when dividing by zero.
+#### Divide by Zero Error in Overall Coverage Calculation (Bug 2)
+**Tool**: Flutter Unit Coverage Analyzer
 
 **Before**:
 ```dart
@@ -83,9 +111,9 @@ print('OVERALL: $overallPercent%');
 ### 2. File: `packages/flutter_tools/test/tool/unit_coverage_test.dart` (New)
 
 Added comprehensive unit tests covering:
-- ✅ Handling libraries with zero total lines (Bug #4)
+- ✅ Handling libraries with zero total lines (Divide by Zero in Coverage Comparison Sorting)
 - ✅ Safe individual coverage percentage calculation
-- ✅ Safe overall coverage percentage calculation (Bug #5)
+- ✅ Safe overall coverage percentage calculation (Divide by Zero in Overall Coverage Calculation)
 - ✅ Mixed coverage data with empty and normal files
 - ✅ Edge case: no coverage data at all
 
@@ -165,8 +193,8 @@ No migration needed.
 ---
 
 ## Related Issues
-- Bug #4: Divide by zero error in coverage comparison
-- Bug #5: Divide by zero error in overall coverage percentage
+- Divide by Zero Error in Coverage Comparison Sorting
+- Divide by Zero Error in Overall Coverage Calculation
 
 ---
 

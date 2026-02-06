@@ -9,7 +9,8 @@ void main() {
   group('Coverage calculation with edge cases', () {
     test('handles libraries with zero total lines', () {
       // This test verifies that the coverage calculation doesn't crash
-      // when a library has zero lines.
+      // when a library has zero lines and that zero-line libraries are
+      // handled (sorted safely and would display "N/A" when printed).
       // Bug #4: Divide by zero in comparison
       const zeroLinesData = '''
 SF:lib/src/empty_file.dart
@@ -63,17 +64,19 @@ end_of_record
     });
 
     test('calculates individual coverage percentage safely', () {
+      // Verify that files with zero total lines yield the explicit
+      // "N/A" output instead of causing a division-by-zero.
       const emptyCoverage = _TestCoverage(library: 'empty.dart', totalLines: 0, testedLines: 0);
 
       const normalCoverage = _TestCoverage(library: 'normal.dart', totalLines: 10, testedLines: 8);
 
-      // Test empty coverage
+      // Test empty coverage -> expect explicit 'N/A' string
       final String emptyPercent = emptyCoverage.totalLines == 0
           ? 'N/A'
           : (emptyCoverage.testedLines / emptyCoverage.totalLines * 100).toStringAsFixed(2);
       expect(emptyPercent, equals('N/A'));
 
-      // Test normal coverage
+      // Test normal coverage -> numeric percentage formatted to two decimals
       final String normalPercent = normalCoverage.totalLines == 0
           ? 'N/A'
           : (normalCoverage.testedLines / normalCoverage.totalLines * 100).toStringAsFixed(2);
@@ -82,6 +85,8 @@ end_of_record
 
     test('calculates overall coverage percentage safely', () {
       // Bug #5: Divide by zero in overall calculation
+      // Verifies overall percentage prints 'N/A' when there is no data
+      // and prints a numeric percentage when data is present.
       double overallNumerator = 0;
       double overallDenominator = 0;
 
