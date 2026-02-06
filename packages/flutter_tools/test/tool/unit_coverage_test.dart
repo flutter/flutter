@@ -22,12 +22,12 @@ end_of_record
 
       // Parse the coverage data
       final lines = zeroLinesData.split('\n');
-      final coverages = <_TestCoverage>[];
+      final List<_TestCoverage> coverages = <_TestCoverage>[];
       _TestCoverage? currentCoverage;
 
       for (final line in lines) {
         if (line.startsWith('SF:')) {
-          final String library = line.split('SF:')[1];
+          final library = line.split('SF:')[1];
           currentCoverage = _TestCoverage()..library = library;
           coverages.add(currentCoverage);
         }
@@ -63,13 +63,13 @@ end_of_record
     });
 
     test('calculates individual coverage percentage safely', () {
-      const emptyCoverage = _TestCoverage._(
+      const _TestCoverage emptyCoverage = _TestCoverage._(
         library: 'empty.dart',
         totalLines: 0,
         testedLines: 0,
       );
 
-      const normalCoverage = _TestCoverage._(
+      const _TestCoverage normalCoverage = _TestCoverage._(
         library: 'normal.dart',
         totalLines: 10,
         testedLines: 8,
@@ -144,11 +144,7 @@ end_of_record
 }
 
 class _TestCoverage {
-  const _TestCoverage({
-    this.library = '',
-    this.totalLines = 0,
-    this.testedLines = 0,
-  });
+  _TestCoverage({this.library = '', this.totalLines = 0, this.testedLines = 0});
 
   const _TestCoverage._({
     required this.library,
@@ -156,7 +152,7 @@ class _TestCoverage {
     required this.testedLines,
   });
 
-  final String library;
-  final int totalLines;
-  final int testedLines;
+  String library;
+  int totalLines;
+  int testedLines;
 }
