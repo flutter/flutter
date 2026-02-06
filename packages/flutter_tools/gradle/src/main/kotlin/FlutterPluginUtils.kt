@@ -403,8 +403,7 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    internal fun getAndroidLibraryExtension(project: Project): LibraryExtension =
-        project.extensions.getByType(LibraryExtension::class.java)
+    internal fun getAndroidLibraryExtension(project: Project): LibraryExtension = project.extensions.getByType(LibraryExtension::class.java)
 
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
