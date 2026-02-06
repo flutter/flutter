@@ -1881,8 +1881,8 @@ void main() {
       expect(listView.padding, const EdgeInsets.all(24.0));
     });
     testWidgets('Stepper vertical contentPadding includes stepIconMargin start value', (WidgetTester tester) async {
-      const EdgeInsets customIconMargin = EdgeInsets.only(left: 16.0, right: 8.0);
-      const EdgeInsetsDirectional customContentPadding = EdgeInsetsDirectional.only(
+      const customIconMargin = EdgeInsets.only(left: 16.0, right: 8.0);
+      const customContentPadding = EdgeInsetsDirectional.only(
         start: 40.0,
         end: 20.0,
         bottom: 16.0,
@@ -1913,7 +1913,7 @@ void main() {
 
       // The effective padding should be customContentPadding + stepIconMargin.left
       // start: 40.0 + 16.0 = 56.0
-      const EdgeInsets expectedPadding = EdgeInsets.only(
+      const expectedPadding = EdgeInsets.only(
         left: 56.0,  // 40.0 + 16.0 (marginLeft)
         right: 20.0,
         bottom: 16.0,
@@ -1923,7 +1923,7 @@ void main() {
     });
 
     testWidgets('Stepper vertical default contentPadding includes stepIconMargin start value', (WidgetTester tester) async {
-      const EdgeInsets customIconMargin = EdgeInsets.only(left: 10.0);
+      const customIconMargin = EdgeInsets.only(left: 10.0);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -1950,7 +1950,7 @@ void main() {
       // Default padding is start: 60.0, end: 24.0, bottom: 24.0
       // Plus stepIconMargin.left: 10.0
       // Expected start: 60.0 + 10.0 = 70.0
-      const EdgeInsets expectedPadding = EdgeInsets.only(
+      const expectedPadding = EdgeInsets.only(
         left: 70.0,  // 60.0 + 10.0 (marginLeft)
         right: 24.0,
         bottom: 24.0,
@@ -1982,7 +1982,7 @@ void main() {
       final EdgeInsetsGeometry resolvedPadding = paddingWidget.padding;
 
       // Default padding without stepIconMargin
-      const EdgeInsets expectedPadding = EdgeInsets.only(
+      const expectedPadding = EdgeInsets.only(
         left: 60.0,
         right: 24.0,
         bottom: 24.0,
