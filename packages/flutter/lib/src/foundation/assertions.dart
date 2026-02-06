@@ -122,8 +122,6 @@ abstract class StackFilter {
 ///     to a stack frame.
 class RepetitiveStackFrameFilter extends StackFilter {
   /// Creates a new RepetitiveStackFrameFilter.
-  ///
-  /// All parameters are required and must not be null.
   const RepetitiveStackFrameFilter({required this.frames, required this.replacement});
 
   /// The shape of this repetitive stack pattern.
