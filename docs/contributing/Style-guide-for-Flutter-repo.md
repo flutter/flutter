@@ -1029,8 +1029,6 @@ to actually desugar the generator into something that uses an iterator class.
 
 ### Use dot shorthands to reduce redundant information
 
-Use dot shorthands to reduce redundant information:
-
 1. [Always omit a local variable's obvious type over using dot shorthands](#always-omit-a-local-variables-obvious-type-over-using-dot-shorthands).
 2. [Prefer using dot shorthands to initialize top-level variables and fields](#prefer-using-dot-shorthands-to-initialize-top-level-variables-and-fields).
 3. [Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter](#consider-using-dot-shorthands-to-omit-obvious-types-when-assigning-to-an-existing-variable-field-or-setter).
