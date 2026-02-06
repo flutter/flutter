@@ -32,7 +32,8 @@
       "ninja": {
         "config": "wasm_release",
         "targets": [
-          "flutter/web_sdk:flutter_web_sdk_archive"
+          "flutter/web_sdk:flutter_web_sdk_archive",
+          "flutter/third_party/canvaskit:canvaskit_experimental_webparagraph_group"
         ]
       },
       "archives": [
