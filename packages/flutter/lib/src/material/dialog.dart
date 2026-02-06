@@ -14,9 +14,16 @@ import 'dart:ui' show SemanticsHitTestBehavior, SemanticsRole, clampDouble, lerp
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 
 import '../widgets/_window.dart'
-    show BaseWindowController, DialogWindowController, DialogWindowControllerDelegate, WindowScope;
+    show
+        BaseWindowController,
+        DialogWindowController,
+        DialogWindowControllerDelegate,
+        WindowEntry,
+        WindowRegistry,
+        WindowScope;
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
@@ -24,7 +31,6 @@ import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_windowing_manager.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -1407,7 +1413,7 @@ class _DialogWindowRoute<T> extends Route<T> {
     required BuildContext context,
     super.settings,
     Size? preferredSize,
-  }) : _registry = MaterialWindowRegistry.maybeOf(context) {
+  }) : _registry = WindowRegistry.maybeOf(context) {
     _controller = DialogWindowController(
       parent: parentController,
       title: 'Dialog',
@@ -1418,9 +1424,9 @@ class _DialogWindowRoute<T> extends Route<T> {
 
   final WidgetBuilder builder;
   final BaseWindowController? parentController;
-  final MaterialWindowRegistry? _registry;
+  final WindowRegistry? _registry;
   DialogWindowController? _controller;
-  MaterialWindowEntry? _entry;
+  WindowEntry? _entry;
   late final List<OverlayEntry> _overlayEntries;
 
   @override
@@ -1439,14 +1445,7 @@ class _DialogWindowRoute<T> extends Route<T> {
     final NavigatorState? nav = navigator;
     final BuildContext? routeContext = nav?.context;
     if (routeContext != null && nav != null) {
-      _entry = MaterialWindowEntry(
-        controller: _controller!,
-        builder: builder,
-        textDirection: Directionality.of(routeContext),
-        themeData: Theme.of(routeContext),
-        mediaQueryData: MediaQuery.of(routeContext),
-        onPop: () => nav.pop(),
-      );
+      _entry = WindowEntry(controller: _controller!, builder: builder, parentContext: routeContext);
       _registry?.register(_entry!);
     }
   }
@@ -1616,8 +1615,8 @@ Future<T?> showDialog<T>({
     to: Navigator.of(context, rootNavigator: useRootNavigator).context,
   );
 
-  final MaterialWindowRegistry? windowingConfiguration = MaterialWindowRegistry.maybeOf(context);
-  if (windowingConfiguration != null && windowingConfiguration.enableWindowing) {
+  final WindowRegistry? windowingConfiguration = WindowRegistry.maybeOf(context);
+  if (windowingConfiguration != null && isWindowingEnabled) {
     try {
       final Size? parentSize = WindowScope.maybeContentSizeOf(context);
       return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(

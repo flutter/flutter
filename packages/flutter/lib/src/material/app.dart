@@ -19,7 +19,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
-import '../widgets/_window.dart' show BaseWindowController, DialogWindow, DialogWindowController;
+import '../widgets/_window.dart'
+    show
+        BaseWindowController,
+        DialogWindow,
+        DialogWindowController,
+        WindowEntry,
+        WindowRegistry,
+        WindowRegistryScope;
 
 import 'arc.dart';
 import 'button_style.dart';
@@ -28,7 +35,6 @@ import 'dialog_theme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
-import 'material_windowing_manager.dart';
 import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
@@ -1277,11 +1283,10 @@ class _MaterialInspectorButton extends InspectorButton {
 }
 
 class _WindowManager extends StatefulWidget {
-  _WindowManager({required this.child}) : _registry = MaterialWindowRegistry();
+  _WindowManager({required this.child});
 
   final Widget child;
-
-  final MaterialWindowRegistry _registry;
+  final WindowRegistry _registry = WindowRegistry();
 
   @override
   State<_WindowManager> createState() => _WindowManagerState();
@@ -1294,12 +1299,12 @@ class _WindowManagerState extends State<_WindowManager> {
       return widget.child;
     }
 
-    return MaterialWindowRegistryScope(
+    return WindowRegistryScope(
       registry: widget._registry,
       child: ListenableBuilder(
         listenable: widget._registry,
         builder: (BuildContext context, Widget? child) {
-          final List<Widget> subViews = widget._registry.windows.map((MaterialWindowEntry entry) {
+          final List<Widget> subViews = widget._registry.windows.map((WindowEntry entry) {
             final BaseWindowController controller = entry.controller;
             if (controller is DialogWindowController) {
               return _buildDialog(entry, controller);
@@ -1320,9 +1325,18 @@ class _WindowManagerState extends State<_WindowManager> {
     );
   }
 
-  Widget _buildDialog(MaterialWindowEntry entry, DialogWindowController controller) {
+  Widget _buildDialog(WindowEntry entry, DialogWindowController controller) {
+    final TextDirection? textDirection = entry.parentContext != null
+        ? Directionality.of(entry.parentContext!)
+        : null;
+    final ThemeData? themeData = entry.parentContext != null
+        ? Theme.of(entry.parentContext!)
+        : null;
+    final MediaQueryData? mediaQuery = entry.parentContext != null
+        ? MediaQuery.of(entry.parentContext!)
+        : null;
     final Widget dialogContent = _DialogPopScope(
-      onPop: entry.onPop,
+      onPop: Navigator.of(entry.parentContext!).pop,
       child: Builder(
         builder: (BuildContext innerContext) {
           return _FullWindowDialogWrapper(child: entry.builder(innerContext));
@@ -1333,10 +1347,10 @@ class _WindowManagerState extends State<_WindowManager> {
     return DialogWindow(
       controller: controller,
       child: Directionality(
-        textDirection: entry.textDirection,
+        textDirection: textDirection ?? Directionality.of(context),
         child: Theme(
-          data: entry.themeData,
-          child: MediaQuery(data: entry.mediaQueryData, child: dialogContent),
+          data: themeData ?? Theme.of(context),
+          child: MediaQuery(data: mediaQuery ?? MediaQuery.of(context), child: dialogContent),
         ),
       ),
     );
