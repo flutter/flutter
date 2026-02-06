@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_gtk.h"
 
 // Vertex shader to draw Flutter window contents.
+#if FLUTTER_LINUX_GTK4
 static const char* vertex_shader_src =
     "attribute vec2 position;\n"
     "attribute vec2 in_texcoord;\n"
@@ -25,6 +26,19 @@ static const char* vertex_shader_src =
     "  gl_Position = vec4(offset + position * scale, 0, 1);\n"
     "  texcoord = in_texcoord;\n"
     "}\n";
+#else
+static const char* vertex_shader_src =
+    "attribute vec2 position;\n"
+    "attribute vec2 in_texcoord;\n"
+    "uniform vec2 offset;\n"
+    "uniform vec2 scale;\n"
+    "varying vec2 texcoord;\n"
+    "\n"
+    "void main() {\n"
+    "  gl_Position = vec4(offset + position * scale, 0, 1);\n"
+    "  texcoord = in_texcoord;\n"
+    "}\n";
+#endif
 
 // Fragment shader to draw Flutter window contents.
 static const char* fragment_shader_src =
@@ -376,8 +390,16 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   // If frame not ready, then wait for it.
   gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
 #if FLUTTER_LINUX_GTK4
-  size_t width = fl_gtk_surface_get_width(surface);
-  size_t height = fl_gtk_surface_get_height(surface);
+  // In GTK4, the draw surface is the toplevel. Use the Cairo clip
+  // extents to get the drawing area size for this widget.
+  double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
+  cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+  size_t width = static_cast<size_t>(x2 - x1);
+  size_t height = static_cast<size_t>(y2 - y1);
+  if (width == 0 || height == 0) {
+    width = fl_gtk_surface_get_width(surface);
+    height = fl_gtk_surface_get_height(surface);
+  }
 #else
   size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
   size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
@@ -393,6 +415,9 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
 #if FLUTTER_LINUX_GTK4
+    cairo_save(cr);
+    cairo_translate(cr, 0.0, static_cast<double>(height));
+    cairo_scale(cr, 1.0, -1.0);
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
     gdk_cairo_draw_from_gl(cr, surface,
@@ -400,6 +425,7 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
 #if FLUTTER_LINUX_GTK4
     G_GNUC_END_IGNORE_DEPRECATIONS
+    cairo_restore(cr);
 #endif
   } else {
     GLint saved_texture_binding;
@@ -412,12 +438,16 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                  GL_UNSIGNED_BYTE, self->pixels);
 
 #if FLUTTER_LINUX_GTK4
+    cairo_save(cr);
+    cairo_translate(cr, 0.0, static_cast<double>(height));
+    cairo_scale(cr, 1.0, -1.0);
     G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #endif
     gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
                            0, width, height);
 #if FLUTTER_LINUX_GTK4
     G_GNUC_END_IGNORE_DEPRECATIONS
+    cairo_restore(cr);
 #endif
 
     glDeleteTextures(1, &texture_id);
