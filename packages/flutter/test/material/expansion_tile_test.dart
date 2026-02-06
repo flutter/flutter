@@ -453,16 +453,16 @@ void main() {
     final Rect child0Rect = tester.getRect(find.byKey(child0Key));
     final Rect child1Rect = tester.getRect(find.byKey(child1Key));
 
-    // Since expandedAlignment is set to AlignmentDirectional.centerStart, the column of children
-    // should be aligned to the center left of the expanded tile. This provides confirmation
-    // that the expandedCrossAxisAlignment.end is 700.0, where columnRect.left is.
+    // With `textDirection` set to `TextDirection.rtl`, `AlignmentDirectional.centerStart`
+    // resolves to `Alignment.centerRight`. The column of children should be aligned to the
+    // center right of the expanded tile.
     expect(columnRect.right, 800.0);
     // The width of the Column is the width of the largest child. The largest width
     // being 100.0, the offset of the left edge of Column from X-axis should be 700.0.
     expect(columnRect.left, 700.0);
 
-    // Considering the value of expandedCrossAxisAlignment is CrossAxisAlignment.start,
-    // the offset of the left edge of both the children from X-axis should be 700.0.
+    // With `textDirection` set to `TextDirection.rtl`, `CrossAxisAlignment.end` aligns children to the left.
+    // The offset of the left edge of both children from the X-axis should be 700.0.
     expect(child0Rect.left, 700.0);
     expect(child1Rect.left, 700.0);
   });
