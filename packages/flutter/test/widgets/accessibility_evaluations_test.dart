@@ -83,7 +83,7 @@ void main() {
     late final Set<String> originalFeatureFlags;
     setUpAll(() {
       originalFeatureFlags = {...debugEnabledFeatureFlags};
-      debugEnabledFeatureFlags.add('accessibility-evaluations');
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
     });
     tearDownAll(() {
       debugEnabledFeatureFlags.clear();
@@ -128,7 +128,7 @@ void main() {
     late final Set<String> originalFeatureFlags;
     setUpAll(() {
       originalFeatureFlags = {...debugEnabledFeatureFlags};
-      debugEnabledFeatureFlags.add('accessibility-evaluations');
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
     });
     tearDownAll(() {
       debugEnabledFeatureFlags.clear();
@@ -188,7 +188,7 @@ void main() {
     late final Set<String> originalFeatureFlags;
     setUpAll(() {
       originalFeatureFlags = {...debugEnabledFeatureFlags};
-      debugEnabledFeatureFlags.add('accessibility-evaluations');
+      debugEnabledFeatureFlags.add('accessibility_evaluations');
     });
     tearDownAll(() {
       debugEnabledFeatureFlags.clear();
