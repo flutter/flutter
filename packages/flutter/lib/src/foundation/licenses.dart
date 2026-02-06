@@ -49,8 +49,6 @@ class LicenseParagraph {
 /// demand in [LicenseEntryCollector] callbacks passed to
 /// [LicenseRegistry.addLicense].
 abstract class LicenseEntry {
-  /// Abstract const constructor.
-  ///
   /// This constructor enables subclasses to provide const constructors so that
   /// they can be used in const expressions.
   const LicenseEntry();

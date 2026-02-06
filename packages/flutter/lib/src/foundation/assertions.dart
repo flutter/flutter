@@ -99,8 +99,6 @@ class PartialStackFrame {
 /// A class that filters stack frames for additional filtering on
 /// [FlutterError.defaultStackFilter].
 abstract class StackFilter {
-  /// Abstract const constructor.
-  ///
   /// This constructor enables subclasses to provide const constructors so that
   /// they can be used in const expressions.
   const StackFilter();
