@@ -154,11 +154,13 @@ static FlGdkSurface* fl_view_get_toplevel_surface(FlView* self) {
 }
 
 // Signal handler for GtkWidget::delete-event (GTK3 only)
+#if !FLUTTER_LINUX_GTK4
 static gboolean window_delete_event_cb(FlView* self) {
   fl_engine_request_app_exit(self->engine);
   // Stop the event from propagating.
   return TRUE;
 }
+#endif
 
 #if FLUTTER_LINUX_GTK4
 // Signal handler for GtkWindow::close-request.
