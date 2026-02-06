@@ -399,7 +399,10 @@ class Stepper extends StatefulWidget {
   /// For [StepperType.horizontal], defaults to `EdgeInsets.all(24.0)`.
   ///
   /// For [StepperType.vertical], defaults to
-  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`. The `start` padding is also increased by the `left` value of [stepIconMargin] if it is provided.
+  /// For [StepperType.vertical], defaults to
+  /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`.
+  /// The `start` padding is also increased by the `left` value of
+  /// [stepIconMargin] if it is provided.
   final EdgeInsetsGeometry? contentPadding;
 
   @override
