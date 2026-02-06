@@ -8,7 +8,6 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 
-#if !FLUTTER_LINUX_GTK4
 static constexpr const char* kFlutterLifecycleChannel = "flutter/lifecycle";
 
 static constexpr const char* kAppLifecycleStateResumed =
@@ -17,7 +16,6 @@ static constexpr const char* kAppLifecycleStateInactive =
     "AppLifecycleState.inactive";
 static constexpr const char* kAppLifecycleStateHidden =
     "AppLifecycleState.hidden";
-#endif
 
 struct _FlWindowStateMonitor {
   GObject parent_instance;
@@ -35,11 +33,16 @@ struct _FlWindowStateMonitor {
 
   // Signal connection ID for window-state-changed
   gulong window_state_event_cb_id;
+
+#if FLUTTER_LINUX_GTK4
+  gulong toplevel_state_notify_cb_id;
+  gulong surface_mapped_notify_cb_id;
+  gulong realize_cb_id;
+#endif
 };
 
 G_DEFINE_TYPE(FlWindowStateMonitor, fl_window_state_monitor, G_TYPE_OBJECT);
 
-#if !FLUTTER_LINUX_GTK4
 static void send_lifecycle_state(FlWindowStateMonitor* self,
                                  const gchar* lifecycle_state) {
   g_autoptr(FlValue) value = fl_value_new_string(lifecycle_state);
@@ -55,7 +58,6 @@ static void send_lifecycle_state(FlWindowStateMonitor* self,
   fl_binary_messenger_send_on_channel(self->messenger, kFlutterLifecycleChannel,
                                       message, nullptr, nullptr, nullptr);
 }
-#endif
 
 #if !FLUTTER_LINUX_GTK4
 static gboolean is_hidden(GdkWindowState state) {
@@ -63,6 +65,11 @@ static gboolean is_hidden(GdkWindowState state) {
          (state & GDK_WINDOW_STATE_ICONIFIED);
 }
 #endif  // !FLUTTER_LINUX_GTK4
+#if FLUTTER_LINUX_GTK4
+static gboolean is_hidden(GdkToplevelState state, gboolean mapped) {
+  return !mapped || (state & GDK_TOPLEVEL_STATE_MINIMIZED);
+}
+#endif
 #if !FLUTTER_LINUX_GTK4
 // Signal handler for GtkWindow::window-state-event
 static gboolean window_state_event_cb(FlWindowStateMonitor* self,
@@ -91,6 +98,67 @@ static gboolean window_state_event_cb(FlWindowStateMonitor* self,
 }
 #endif  // !FLUTTER_LINUX_GTK4
 
+#if FLUTTER_LINUX_GTK4
+static void update_lifecycle_state_gtk4(FlWindowStateMonitor* self) {
+  GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->window));
+  if (native == nullptr) {
+    return;
+  }
+
+  GdkSurface* surface = gtk_native_get_surface(native);
+  if (surface == nullptr || !GDK_IS_TOPLEVEL(surface)) {
+    return;
+  }
+
+  GdkToplevelState state = gdk_toplevel_get_state(GDK_TOPLEVEL(surface));
+  gboolean mapped = gdk_surface_get_mapped(surface);
+  bool visible = !is_hidden(state, mapped);
+  bool focused = (state & GDK_TOPLEVEL_STATE_FOCUSED);
+
+  const gchar* lifecycle_state;
+  if (visible) {
+    lifecycle_state =
+        focused ? kAppLifecycleStateResumed : kAppLifecycleStateInactive;
+  } else {
+    lifecycle_state = kAppLifecycleStateHidden;
+  }
+
+  send_lifecycle_state(self, lifecycle_state);
+}
+
+static void gtk4_surface_notify_cb(FlWindowStateMonitor* self) {
+  update_lifecycle_state_gtk4(self);
+}
+
+static void gtk4_setup_surface(FlWindowStateMonitor* self) {
+  if (self->toplevel_state_notify_cb_id != 0 ||
+      self->surface_mapped_notify_cb_id != 0) {
+    return;
+  }
+
+  GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->window));
+  if (native == nullptr) {
+    return;
+  }
+
+  GdkSurface* surface = gtk_native_get_surface(native);
+  if (surface == nullptr || !GDK_IS_TOPLEVEL(surface)) {
+    return;
+  }
+
+  self->toplevel_state_notify_cb_id = g_signal_connect_swapped(
+      surface, "notify::state", G_CALLBACK(gtk4_surface_notify_cb), self);
+  self->surface_mapped_notify_cb_id = g_signal_connect_swapped(
+      surface, "notify::mapped", G_CALLBACK(gtk4_surface_notify_cb), self);
+
+  update_lifecycle_state_gtk4(self);
+}
+
+static void gtk4_realize_cb(FlWindowStateMonitor* self) {
+  gtk4_setup_surface(self);
+}
+#endif  // FLUTTER_LINUX_GTK4
+
 static void fl_window_state_monitor_dispose(GObject* object) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(object);
 
@@ -99,6 +167,28 @@ static void fl_window_state_monitor_dispose(GObject* object) {
     g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
     self->window_state_event_cb_id = 0;
   }
+#if FLUTTER_LINUX_GTK4
+  GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->window));
+  if (native != nullptr) {
+    GdkSurface* surface = gtk_native_get_surface(native);
+    if (surface != nullptr) {
+      if (self->toplevel_state_notify_cb_id != 0) {
+        g_signal_handler_disconnect(surface,
+                                    self->toplevel_state_notify_cb_id);
+        self->toplevel_state_notify_cb_id = 0;
+      }
+      if (self->surface_mapped_notify_cb_id != 0) {
+        g_signal_handler_disconnect(surface,
+                                    self->surface_mapped_notify_cb_id);
+        self->surface_mapped_notify_cb_id = 0;
+      }
+    }
+  }
+  if (self->realize_cb_id != 0) {
+    g_signal_handler_disconnect(self->window, self->realize_cb_id);
+    self->realize_cb_id = 0;
+  }
+#endif
 
   G_OBJECT_CLASS(fl_window_state_monitor_parent_class)->dispose(object);
 }
@@ -126,7 +216,11 @@ FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
       gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self->window)));
 #else
   self->window_state_event_cb_id = 0;
-  // TODO(gtk4): Reconnect lifecycle updates using GdkToplevel state.
+  self->toplevel_state_notify_cb_id = 0;
+  self->surface_mapped_notify_cb_id = 0;
+  self->realize_cb_id = g_signal_connect_swapped(
+      self->window, "realize", G_CALLBACK(gtk4_realize_cb), self);
+  gtk4_setup_surface(self);
 #endif
 
   return self;
