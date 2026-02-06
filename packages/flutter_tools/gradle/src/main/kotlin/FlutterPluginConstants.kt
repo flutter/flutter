@@ -55,7 +55,7 @@ object FlutterPluginConstants {
     /**
      * List of supported ABIs as strings.
      *
-     * throws GradleException if not all platforms in `DEFAULT_PLATFORMS` have an entry in `PLATFORM_ARCH_MAP`.
+     * @throws GradleException if not all platforms in `DEFAULT_PLATFORMS` have an entry in `PLATFORM_ARCH_MAP`.
      */
     @JvmStatic val PLATFORM_ABI_LIST: List<String> =
         DEFAULT_PLATFORMS.map { platform ->
