@@ -2110,12 +2110,11 @@ void main() {
       expect(viewport.viewportDimension, const Size(800.0, 600.0));
       tester.view.physicalSize = const Size(300.0, 300.0);
       tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
       await tester.pumpAndSettle();
       viewport = getViewport(tester, childKey);
       expect(viewport.viewportDimension, const Size(300.0, 300.0));
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Rebuilds when delegate changes', (WidgetTester tester) async {

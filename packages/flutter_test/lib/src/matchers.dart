@@ -661,7 +661,7 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// See also:
 ///
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
-///   * [containsSemantics], a similar matcher without default values for flags or actions.
+///   * [isSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
   String? identifier,
   String? traversalParentIdentifier,
@@ -687,6 +687,8 @@ Matcher matchesSemantics({
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -772,6 +774,8 @@ Matcher matchesSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -847,21 +851,14 @@ Matcher matchesSemantics({
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
-/// ## Sample code
-///
-/// ```dart
-/// testWidgets('containsSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
-///   // ...
-///   expect(tester.getSemantics(find.text('hello')), containsSemantics(label: 'hello'));
-///   handle.dispose();
-/// });
-/// ```
-///
 /// See also:
 ///
 ///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
+@Deprecated(
+  'Migrate to isSemantics instead. '
+  'This feature was deprecated after v3.40.0-1.0.pre.',
+)
 Matcher containsSemantics({
   String? identifier,
   String? traversalParentIdentifier,
@@ -887,6 +884,212 @@ Matcher containsSemantics({
   int? currentValueLength,
   SemanticsValidationResult? validationResult,
   ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
+  // Flags
+  bool? hasCheckedState,
+  bool? isChecked,
+  bool? isCheckStateMixed,
+  bool? isSelected,
+  bool? hasSelectedState,
+  bool? isButton,
+  bool? isSlider,
+  bool? isKeyboardKey,
+  bool? isLink,
+  bool? isFocused,
+  bool? isFocusable,
+  bool? isTextField,
+  bool? isReadOnly,
+  bool? hasEnabledState,
+  bool? isEnabled,
+  bool? isInMutuallyExclusiveGroup,
+  bool? isHeader,
+  bool? isObscured,
+  bool? isMultiline,
+  bool? namesRoute,
+  bool? scopesRoute,
+  bool? isHidden,
+  bool? isImage,
+  bool? isLiveRegion,
+  bool? hasToggledState,
+  bool? isToggled,
+  bool? hasImplicitScrolling,
+  bool? hasExpandedState,
+  bool? isExpanded,
+  bool? hasRequiredState,
+  bool? isRequired,
+  // Actions
+  bool? hasTapAction,
+  bool? hasFocusAction,
+  bool? hasLongPressAction,
+  bool? hasScrollLeftAction,
+  bool? hasScrollRightAction,
+  bool? hasScrollUpAction,
+  bool? hasScrollDownAction,
+  bool? hasIncreaseAction,
+  bool? hasDecreaseAction,
+  bool? hasShowOnScreenAction,
+  bool? hasMoveCursorForwardByCharacterAction,
+  bool? hasMoveCursorBackwardByCharacterAction,
+  bool? hasMoveCursorForwardByWordAction,
+  bool? hasMoveCursorBackwardByWordAction,
+  bool? hasSetTextAction,
+  bool? hasSetSelectionAction,
+  bool? hasCopyAction,
+  bool? hasCutAction,
+  bool? hasPasteAction,
+  bool? hasDidGainAccessibilityFocusAction,
+  bool? hasDidLoseAccessibilityFocusAction,
+  bool? hasDismissAction,
+  // Custom actions and overrides
+  String? onTapHint,
+  String? onLongPressHint,
+  List<CustomSemanticsAction>? customActions,
+  List<Matcher>? children,
+}) => isSemantics(
+  identifier: identifier,
+  traversalParentIdentifier: traversalParentIdentifier,
+  traversalChildIdentifier: traversalChildIdentifier,
+  label: label,
+  attributedLabel: attributedLabel,
+  hint: hint,
+  attributedHint: attributedHint,
+  value: value,
+  attributedValue: attributedValue,
+  increasedValue: increasedValue,
+  attributedIncreasedValue: attributedIncreasedValue,
+  decreasedValue: decreasedValue,
+  attributedDecreasedValue: attributedDecreasedValue,
+  tooltip: tooltip,
+  textDirection: textDirection,
+  rect: rect,
+  size: size,
+  elevation: elevation,
+  thickness: thickness,
+  platformViewId: platformViewId,
+  maxValueLength: maxValueLength,
+  currentValueLength: currentValueLength,
+  validationResult: validationResult,
+  inputType: inputType,
+  maxValue: maxValue,
+  minValue: minValue,
+  // Flags
+  hasCheckedState: hasCheckedState,
+  isChecked: isChecked,
+  isCheckStateMixed: isCheckStateMixed,
+  isSelected: isSelected,
+  hasSelectedState: hasSelectedState,
+  isButton: isButton,
+  isSlider: isSlider,
+  isKeyboardKey: isKeyboardKey,
+  isLink: isLink,
+  isFocused: isFocused,
+  isFocusable: isFocusable,
+  isTextField: isTextField,
+  isReadOnly: isReadOnly,
+  hasEnabledState: hasEnabledState,
+  isEnabled: isEnabled,
+  isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup,
+  isHeader: isHeader,
+  isObscured: isObscured,
+  isMultiline: isMultiline,
+  namesRoute: namesRoute,
+  scopesRoute: scopesRoute,
+  isHidden: isHidden,
+  isImage: isImage,
+  isLiveRegion: isLiveRegion,
+  hasToggledState: hasToggledState,
+  isToggled: isToggled,
+  hasImplicitScrolling: hasImplicitScrolling,
+  hasExpandedState: hasExpandedState,
+  isExpanded: isExpanded,
+  hasRequiredState: hasRequiredState,
+  isRequired: isRequired,
+  // Actions
+  hasTapAction: hasTapAction,
+  hasFocusAction: hasFocusAction,
+  hasLongPressAction: hasLongPressAction,
+  hasScrollLeftAction: hasScrollLeftAction,
+  hasScrollRightAction: hasScrollRightAction,
+  hasScrollUpAction: hasScrollUpAction,
+  hasScrollDownAction: hasScrollDownAction,
+  hasIncreaseAction: hasIncreaseAction,
+  hasDecreaseAction: hasDecreaseAction,
+  hasShowOnScreenAction: hasShowOnScreenAction,
+  hasMoveCursorForwardByCharacterAction: hasMoveCursorForwardByCharacterAction,
+  hasMoveCursorBackwardByCharacterAction: hasMoveCursorBackwardByCharacterAction,
+  hasMoveCursorForwardByWordAction: hasMoveCursorForwardByWordAction,
+  hasMoveCursorBackwardByWordAction: hasMoveCursorBackwardByWordAction,
+  hasSetTextAction: hasSetTextAction,
+  hasSetSelectionAction: hasSetSelectionAction,
+  hasCopyAction: hasCopyAction,
+  hasCutAction: hasCutAction,
+  hasPasteAction: hasPasteAction,
+  hasDidGainAccessibilityFocusAction: hasDidGainAccessibilityFocusAction,
+  hasDidLoseAccessibilityFocusAction: hasDidLoseAccessibilityFocusAction,
+  hasDismissAction: hasDismissAction,
+  // Custom actions and overrides
+  onTapHint: onTapHint,
+  onLongPressHint: onLongPressHint,
+  customActions: customActions,
+  children: children,
+);
+
+/// Asserts that a [SemanticsNode] contains the specified information.
+///
+/// There are no default expected values, so no unspecified values will be
+/// validated.
+///
+/// To find a [SemanticsNode] directly, use [CommonFinders.semantics].
+/// These methods will search the semantics tree directly and avoid the edge
+/// cases that [SemanticsController.find] sometimes runs into.
+///
+/// To retrieve the semantics data of a widget, use [SemanticsController.find]
+/// with a [FinderBase] that returns a single widget. Semantics must be enabled
+/// in order to use this method.
+///
+/// ## Sample code
+///
+/// ```dart
+/// testWidgets('isSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), isSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
+/// ```
+///
+/// See also:
+///
+///   * [SemanticsController.find] under [WidgetTester.semantics], the tester method which retrieves semantics.
+///   * [matchesSemantics], a similar matcher with default values for flags and actions.
+Matcher isSemantics({
+  String? identifier,
+  String? traversalParentIdentifier,
+  String? traversalChildIdentifier,
+  String? label,
+  AttributedString? attributedLabel,
+  String? hint,
+  AttributedString? attributedHint,
+  String? value,
+  AttributedString? attributedValue,
+  String? increasedValue,
+  AttributedString? attributedIncreasedValue,
+  String? decreasedValue,
+  AttributedString? attributedDecreasedValue,
+  String? tooltip,
+  TextDirection? textDirection,
+  Rect? rect,
+  Size? size,
+  double? elevation,
+  double? thickness,
+  int? platformViewId,
+  int? maxValueLength,
+  int? currentValueLength,
+  SemanticsValidationResult? validationResult,
+  ui.SemanticsInputType? inputType,
+  String? maxValue,
+  String? minValue,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -972,6 +1175,8 @@ Matcher containsSemantics({
     currentValueLength: currentValueLength,
     validationResult: validationResult,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -1034,6 +1239,37 @@ Matcher containsSemantics({
   );
 }
 
+/// Asserts that a [CapturedAccessibilityAnnouncement] matches the expected message.
+///
+/// The [message] argument matches the [CapturedAccessibilityAnnouncement.message].
+/// The [textDirection] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.textDirection].
+/// The [assertiveness] argument, if non-null, matches the [CapturedAccessibilityAnnouncement.assertiveness].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await SemanticsService.sendAnnouncement(tester.view, 'Hello', TextDirection.ltr);
+/// expect(tester.takeAnnouncements(), contains(isAccessibilityAnnouncement('Hello')));
+/// ```
+///
+/// See also:
+///
+///  * [WidgetTester.takeAnnouncements], which retrieves the announcements in unit tests.
+///  * [SemanticsService.sendAnnouncement], which sends an announcement.
+Matcher isAccessibilityAnnouncement(
+  String message, {
+  TextDirection? textDirection,
+  Assertiveness? assertiveness,
+  int? viewId,
+}) {
+  return _MatchesAccessibilityAnnouncement(
+    expectedMessage: message,
+    expectedTextDirection: textDirection,
+    expectedAssertiveness: assertiveness,
+    expectedViewId: viewId,
+  );
+}
+
 /// Asserts that the currently rendered widget meets the provided accessibility
 /// `guideline`.
 ///
@@ -1043,7 +1279,7 @@ Matcher containsSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// testWidgets('containsSemantics', (WidgetTester tester) async {
+/// testWidgets('isSemantics', (WidgetTester tester) async {
 ///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -2404,6 +2640,8 @@ class _MatchesSemanticsData extends Matcher {
     required this.currentValueLength,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2551,6 +2789,8 @@ class _MatchesSemanticsData extends Matcher {
   final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult? validationResult;
+  final String? maxValue;
+  final String? minValue;
 
   /// There are three possible states for these two maps:
   ///
@@ -2663,6 +2903,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (validationResult != null) {
       description.add(' with validation result: $validationResult');
+    }
+    if (minValue != null) {
+      description.add(' with minValue: $minValue');
+    }
+    if (maxValue != null) {
+      description.add(' with maxValue: $maxValue');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2823,6 +3069,12 @@ class _MatchesSemanticsData extends Matcher {
     if (inputType != null && inputType != data.inputType) {
       return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
+    if (minValue != null && minValue != data.minValue) {
+      return failWithDescription(matchState, 'minValue was: ${data.minValue}');
+    }
+    if (maxValue != null && maxValue != data.maxValue) {
+      return failWithDescription(matchState, 'maxValue was: ${data.maxValue}');
+    }
     if (actions.isNotEmpty) {
       final unexpectedActions = <SemanticsAction>[];
       final missingActions = <SemanticsAction>[];
@@ -2939,6 +3191,46 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createSemanticsActionSummary(List<SemanticsAction> enums) {
     return '[${enums.map((ui.SemanticsAction d) => d.name).join(', ')}]';
+  }
+}
+
+class _MatchesAccessibilityAnnouncement extends Matcher {
+  const _MatchesAccessibilityAnnouncement({
+    required this.expectedMessage,
+    required this.expectedTextDirection,
+    required this.expectedAssertiveness,
+    required this.expectedViewId,
+  });
+
+  final String expectedMessage;
+  final TextDirection? expectedTextDirection;
+  final Assertiveness? expectedAssertiveness;
+  final int? expectedViewId;
+
+  @override
+  bool matches(
+    covariant CapturedAccessibilityAnnouncement event,
+    Map<dynamic, dynamic> matchState,
+  ) {
+    return event.message == expectedMessage &&
+        (expectedTextDirection == null || event.textDirection == expectedTextDirection) &&
+        (expectedAssertiveness == null || event.assertiveness == expectedAssertiveness) &&
+        (expectedViewId == null || event.viewId == expectedViewId);
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('Semantic announcement with message "$expectedMessage"');
+    if (expectedTextDirection != null) {
+      description.add(', textDirection: $expectedTextDirection');
+    }
+    if (expectedAssertiveness != null) {
+      description.add(', assertiveness: $expectedAssertiveness');
+    }
+    if (expectedViewId != null) {
+      description.add(', viewId: $expectedViewId');
+    }
+    return description;
   }
 }
 

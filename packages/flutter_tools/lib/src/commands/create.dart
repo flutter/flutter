@@ -297,6 +297,16 @@ class CreateCommand extends FlutterCommand with CreateBase {
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
     final FlutterTemplateType template = _getProjectType(projectDir);
+
+    if (template == FlutterTemplateType.pluginFfi) {
+      globals.printWarning(
+        'The "plugin_ffi" template is deprecated and will be removed in a future '
+        'version of Flutter. Use the "package_ffi" template instead. '
+        'For more information, see: '
+        'https://docs.flutter.dev/platform-integration/bind-native-code',
+      );
+    }
+
     if (sampleArgument != null) {
       if (template != FlutterTemplateType.app) {
         throwToolExit(

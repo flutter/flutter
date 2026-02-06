@@ -1735,6 +1735,59 @@ abstract class RenderSliver extends RenderObject {
     }
   }
 
+  /// Returns the [Rect] that covers the total paint extent of the sliver.
+  ///
+  /// [Rect] is expressed in the [RenderSliver]'s local coordinate system, which
+  /// is axis-aligned with the [PaintingContext]'s canvas. The coordinate
+  /// system's origin (0,0) corresponds to the `offset` argument passed to the
+  /// [paint] method.
+  @protected
+  Rect getMaxPaintRect() {
+    final SliverGeometry? sliverGeometry = geometry;
+    if (sliverGeometry == null || sliverGeometry == SliverGeometry.zero) {
+      return Rect.zero;
+    }
+
+    double maxPaintExtent = sliverGeometry.maxPaintExtent;
+    if (maxPaintExtent.isInfinite) {
+      maxPaintExtent =
+          constraints.scrollOffset + sliverGeometry.cacheExtent + constraints.cacheOrigin;
+    }
+    final double paintExtent = sliverGeometry.paintExtent;
+    // To ensure the computed [Rect] remains visible when pinned, the leading offset is capped
+    // at the sliver's `scrollExtent - maxScrollObstructionExtent`.
+    final double leadingOffset = clampDouble(
+      constraints.scrollOffset,
+      0.0,
+      sliverGeometry.scrollExtent - sliverGeometry.maxScrollObstructionExtent,
+    );
+    final double crossAxisExtent = sliverGeometry.crossAxisExtent ?? constraints.crossAxisExtent;
+
+    final Rect rect = switch (constraints.axis) {
+      Axis.horizontal => Rect.fromLTWH(-leadingOffset, 0.0, maxPaintExtent, crossAxisExtent),
+      Axis.vertical => Rect.fromLTWH(0.0, -leadingOffset, crossAxisExtent, maxPaintExtent),
+    };
+
+    return switch (applyGrowthDirectionToAxisDirection(
+      constraints.axisDirection,
+      constraints.growthDirection,
+    )) {
+      AxisDirection.right || AxisDirection.down => rect,
+      AxisDirection.left => Rect.fromLTRB(
+        paintExtent - rect.right,
+        rect.top,
+        paintExtent - rect.left,
+        rect.bottom,
+      ),
+      AxisDirection.up => Rect.fromLTRB(
+        rect.left,
+        paintExtent - rect.bottom,
+        rect.right,
+        paintExtent - rect.top,
+      ),
+    };
+  }
+
   void _debugDrawArrow(
     Canvas canvas,
     Paint paint,
