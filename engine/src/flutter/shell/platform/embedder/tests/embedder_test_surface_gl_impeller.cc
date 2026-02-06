@@ -16,20 +16,23 @@ namespace testing {
 using ::testing::Not;
 using ::testing::StartsWith;
 
+namespace {
 EmbedderSurfaceGLSkia::GLDispatchTable StubDispatchTable(
     std::string_view version) {
   impeller::testing::MockGLES::Init(flatbuffers::nullopt, version.data());
+  static constexpr auto dummy_always_true = [] { return true; };
   return EmbedderSurfaceGLSkia::GLDispatchTable{
-      .gl_make_current_callback = [] { return true; },
-      .gl_clear_current_callback = [] { return true; },
+      .gl_make_current_callback = dummy_always_true,
+      .gl_clear_current_callback = dummy_always_true,
       .gl_present_callback = [](const auto) { return true; },
       .gl_fbo_callback = [](const auto) { return 0; },
-      .gl_make_resource_current_callback = [] { return true; },
+      .gl_make_resource_current_callback = dummy_always_true,
       .gl_surface_transformation_callback = [] { return DlMatrix{}; },
       .gl_proc_resolver = impeller::testing::kMockResolverGLES,
       .gl_populate_existing_damage = [](const auto) { return GLFBOInfo{}; },
   };
 }
+}  // namespace
 
 TEST(EmbedderSurfaceGLImpellerTest, GLES3ContextHasGLES3Shaders) {
   const auto gl_dispatch_table = StubDispatchTable("OpenGL ES 3.0");
