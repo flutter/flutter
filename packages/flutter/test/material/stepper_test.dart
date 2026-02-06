@@ -1845,7 +1845,7 @@ void main() {
       );
 
       // Find the Padding widget that wraps the step content and verify the effective padding.
-      const EdgeInsets expected = EdgeInsets.only(left: 48.0, right: 16.0, bottom: 16.0);
+      const expected = EdgeInsets.only(left: 48.0, right: 16.0, bottom: 16.0);
 
       final Iterable<Padding> paddings = tester.widgetList<Padding>(
         find.ancestor(of: find.text('Content 1'), matching: find.byType(Padding)),
