@@ -824,7 +824,9 @@ than "lasagna" code (where each section of the code is cleanly layered and separ
 
 ### Guidelines for `extension`s.
 
-Prefer declaring instance methods over extension methods, where possible.
+[Extension methods][] let you add additional functionality to an existing type.
+
+Don't declare an extension method when declaring a regular method will do.
 
 Don't use extension methods if the end developer might want to override the
 extension method's implementation. Extension methods cannot be overridden.
@@ -835,6 +837,8 @@ Flutter libraries. This causes collisions if both libraries are imported.
 Avoid creating public extension methods on common types from the Dart SDK like
 `Object`, `List`, `Map`, `Future`, etc. This should be done with extreme care to
 avoid polluting the suggestions end developers see in IDEs.
+
+[Extension methods]: https://dart.dev/language/extension-methods
 
 
 ### Avoid using `FutureOr<T>`
