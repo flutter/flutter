@@ -120,6 +120,14 @@ static void fl_renderable_iface_init(FlRenderableInterface* iface);
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
+static void log_once(bool* flag, const char* message) {
+  if (*flag) {
+    return;
+  }
+  *flag = true;
+  g_warning("%s", message);
+}
+
 G_DEFINE_TYPE_WITH_CODE(
     FlView,
     fl_view,
@@ -195,8 +203,8 @@ static gboolean window_delete_event_cb(FlView* self) {
 static gboolean window_close_request_cb(GtkWindow* window, FlView* self) {
   (void)window;
   fl_engine_request_app_exit(self->engine);
-  // Stop the event from propagating.
-  return TRUE;
+  // Allow the default handler to destroy the window if the engine doesn't.
+  return FALSE;
 }
 #endif
 
@@ -297,6 +305,13 @@ static void handle_geometry_changed(FlView* self) {
   gtk_widget_get_allocation(GTK_WIDGET(self), &allocation);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
 
+  if (width == 0 || height == 0) {
+    static bool logged_zero_allocation = false;
+    log_once(&logged_zero_allocation,
+             "handle_geometry_changed: zero-size allocation");
+    return;
+  }
+
   // Note we can't detect if a window is moved between monitors - this
   // information is provided by Wayland but GTK only notifies us if the scale
   // has changed, so moving between two monitors of the same scale doesn't
@@ -372,6 +387,12 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    const FlutterLayer** layers,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
+
+  if (layers_count > 0 && layers[0] != nullptr) {
+    static bool logged_first_layers = false;
+    log_once(&logged_first_layers,
+             "fl_view_present_layers: received first frame layers");
+  }
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
@@ -845,9 +866,7 @@ static void size_allocate_cb(FlView* self) {
 
 #if FLUTTER_LINUX_GTK4
 static void resize_cb(FlView* self, int width, int height) {
-  (void)width;
-  (void)height;
-  handle_geometry_changed(self);
+  handle_geometry_changed_with_size(self, width, height);
 }
 #endif
 
@@ -877,6 +896,12 @@ static gboolean draw_cb(FlView* self, cairo_t* cr) {
 
   if (self->render_context) {
     gdk_gl_context_clear_current();
+  }
+
+  if (!result) {
+    static bool logged_render_false = false;
+    log_once(&logged_render_false,
+             "draw_cb: compositor render returned false");
   }
 
   return result;
