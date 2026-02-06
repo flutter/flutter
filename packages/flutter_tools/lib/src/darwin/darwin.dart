@@ -71,12 +71,10 @@ enum FlutterDarwinPlatform {
 
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
-    switch (this) {
-      case FlutterDarwinPlatform.ios:
-        return Version(13, 0, null);
-      case FlutterDarwinPlatform.macos:
-        return Version(10, 15, null);
-    }
+    return switch (this) {
+      ios => Version(13, 0, null),
+      macos => Version(10, 15, null),
+    };
   }
 
   /// Artifact name for the platform and [mode].
@@ -117,11 +115,9 @@ enum FlutterDarwinPlatform {
 
   /// Returns corresponding [XcodeBasedProject] for the platform.
   XcodeBasedProject xcodeProject(FlutterProject project) {
-    switch (this) {
-      case FlutterDarwinPlatform.ios:
-        return project.ios;
-      case FlutterDarwinPlatform.macos:
-        return project.macos;
-    }
+    return switch (this) {
+      ios => project.ios,
+      macos => project.macos,
+    };
   }
 }
