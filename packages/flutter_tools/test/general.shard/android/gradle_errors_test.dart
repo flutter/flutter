@@ -1652,10 +1652,17 @@ An exception occurred applying plugin request [id: 'kotlin-android']
 
       expect(
         testLogger.statusText,
-        contains('Starting AGP 9+, the default has become built-in Kotlin.'),
+        contains('Please do not upgrade your Flutter app on Android to AGP 9'),
       );
-      expect(testLogger.statusText, contains('This results in a build failure'));
-      expect(testLogger.statusText, contains('when applying the kotlin-android plugin'));
+      expect(
+        testLogger.statusText,
+        contains('If you would still like to migrate to AGP 9:'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('Starting AGP 9+, the default has become built-in Kotlin. This results in a build failure when'),
+      );
+      expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
@@ -1687,14 +1694,22 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
         usesAndroidX: true,
       );
 
+
+      expect(
+        testLogger.statusText,
+        contains('Please do not upgrade your Flutter app on Android to AGP 9'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('If you would still like to migrate to AGP 9:'),
+      );
       expect(
         testLogger.statusText,
         contains('Starting AGP 9+, only the new DSL interface will be read.'),
       );
-      expect(testLogger.statusText, contains('This results in a build failure'));
-      expect(testLogger.statusText, contains('when applying the Flutter Gradle plugin'));
-      expect(testLogger.statusText, contains('If you are not upgrading to AGP 9+'));
-      expect(testLogger.statusText, contains('run `flutter analyze --suggestions`'));
+      expect(testLogger.statusText, contains('This results in a build failure when'));
+      expect(testLogger.statusText, contains('applying the Flutter Gradle plugin'));
+      expect(testLogger.statusText, contains('If you are not upgrading to AGP 9+, run `flutter analyze --suggestions`'));
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
