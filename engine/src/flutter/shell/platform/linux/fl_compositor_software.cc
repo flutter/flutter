@@ -121,6 +121,18 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
       fl_task_runner_wait(self->task_runner, expiry_time);
       g_mutex_lock(&self->frame_mutex);
     }
+//   gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+// #if FLUTTER_LINUX_GTK4
+//   size_t width = fl_gtk_surface_get_width(surface);
+//   size_t height = fl_gtk_surface_get_height(surface);
+// #else
+//   size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+//   size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+// #endif
+//   while (self->width != width || self->height != height) {
+//     g_mutex_unlock(&self->frame_mutex);
+//     fl_task_runner_wait(self->task_runner);
+//     g_mutex_lock(&self->frame_mutex);
   }
 
   cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
