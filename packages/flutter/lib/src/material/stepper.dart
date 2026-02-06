@@ -876,6 +876,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildHorizontal() {
+    // Effective horizontal content padding (custom or default).
+    final EdgeInsetsGeometry effectiveHorizontalContentPadding =
+        widget.contentPadding ?? _kDefaultHorizontalContentPadding;
+
     final children = <Widget>[
       for (int i = 0; i < widget.steps.length; i += 1) ...<Widget>[
         InkResponse(
@@ -953,7 +957,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: ListView(
             controller: widget.controller,
             physics: widget.physics,
-            padding: widget.contentPadding ?? _kDefaultHorizontalContentPadding,
+            padding: effectiveHorizontalContentPadding,
             children: <Widget>[
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
