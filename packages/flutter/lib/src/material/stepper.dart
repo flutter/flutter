@@ -128,6 +128,7 @@ const EdgeInsetsDirectional _kDefaultContentPadding = EdgeInsetsDirectional.only
   end: 24.0,
   bottom: 24.0,
 );
+const EdgeInsets _kDefaultHorizontalContentPadding = EdgeInsets.all(24.0);
 const EdgeInsetsGeometry _kDefaultHeaderPadding = EdgeInsets.symmetric(horizontal: 24.0);
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
@@ -398,7 +399,6 @@ class Stepper extends StatefulWidget {
   ///
   /// For [StepperType.horizontal], defaults to `EdgeInsets.all(24.0)`.
   ///
-  /// For [StepperType.vertical], defaults to
   /// For [StepperType.vertical], defaults to
   /// `EdgeInsetsDirectional.only(start: 60.0, end: 24.0, bottom: 24.0)`.
   /// The `start` padding is also increased by the `left` value of
@@ -953,7 +953,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           child: ListView(
             controller: widget.controller,
             physics: widget.physics,
-            padding: widget.contentPadding ?? const EdgeInsets.all(24.0),
+            padding: widget.contentPadding ?? _kDefaultHorizontalContentPadding,
             children: <Widget>[
               AnimatedSize(
                 curve: Curves.fastOutSlowIn,
