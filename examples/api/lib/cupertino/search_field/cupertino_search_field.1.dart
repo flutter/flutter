@@ -33,7 +33,9 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(middle: Text('CupertinoSearchTextField Sample')),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('CupertinoSearchTextField Sample'),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

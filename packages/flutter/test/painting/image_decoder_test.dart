@@ -12,7 +12,7 @@ import '../image_data.dart';
 import 'painting_utils.dart';
 
 void main() {
-  final PaintingBindingSpy binding = PaintingBindingSpy();
+  final binding = PaintingBindingSpy();
   test('Image decoder control test', () async {
     expect(binding.instantiateImageCodecCalledCount, 0);
     final ui.Image image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));

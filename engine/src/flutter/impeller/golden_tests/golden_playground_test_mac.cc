@@ -12,13 +12,13 @@
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
-#include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "fml/closure.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
@@ -274,12 +274,12 @@ sk_sp<flutter::DlImage> GoldenPlaygroundTest::CreateDlImageForFixture(
   return DlImageImpeller::Make(texture);
 }
 
-RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+absl::StatusOr<RuntimeStage::Map> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
   const std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(asset_name);
   if (!fixture || fixture->GetSize() == 0) {
-    return {};
+    return absl::NotFoundError("Asset not found or empty.");
   }
   return RuntimeStage::DecodeRuntimeStages(fixture);
 }

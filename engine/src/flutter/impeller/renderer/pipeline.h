@@ -13,6 +13,7 @@
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
+#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_stage_compatibility_checker.h"
 
@@ -66,14 +67,14 @@ class Pipeline {
 
   PipelineFuture<T> CreateVariant(
       bool async,
-      std::function<void(T& desc)> descriptor_callback) const;
+      const std::function<void(T& desc)>& descriptor_callback) const;
 
  protected:
   const std::weak_ptr<PipelineLibrary> library_;
 
   const T desc_;
 
-  Pipeline(std::weak_ptr<PipelineLibrary> library, T desc);
+  Pipeline(std::weak_ptr<PipelineLibrary> library, const T& desc);
 
  private:
   Pipeline(const Pipeline&) = delete;
@@ -125,12 +126,16 @@ class GenericRenderPipelineHandle {
 
   virtual ~GenericRenderPipelineHandle() = default;
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet() {
+  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet(
+      PipelineCompileQueue* queue) {
     if (did_wait_) {
       return pipeline_;
     }
     did_wait_ = true;
     if (pipeline_future_.IsValid()) {
+      if (queue != nullptr && pipeline_future_.descriptor.has_value()) {
+        queue->PerformJobEagerly(pipeline_future_.descriptor.value());
+      }
       pipeline_ = pipeline_future_.Get();
     }
     return pipeline_;
@@ -173,7 +178,7 @@ class RenderPipelineHandle : public GenericRenderPipelineHandle {
   explicit RenderPipelineHandle(const Context& context,
                                 std::optional<PipelineDescriptor> desc,
                                 bool async = true)
-      : GenericRenderPipelineHandle(context, desc, async) {}
+      : GenericRenderPipelineHandle(context, std::move(desc), async) {}
 
   explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
       : GenericRenderPipelineHandle(std::move(future)) {}

@@ -29,6 +29,7 @@ import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
+import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import 'run.dart';
 
@@ -304,7 +305,14 @@ class DriveCommand extends RunCommandBase {
       _logger.printError('Screenshot not supported for ${device.displayName}.');
     }
 
-    final bool web = device is WebServerDevice || device is ChromiumDevice;
+    final WebDevServerConfig? webDevServerConfig =
+        // TODO(kevmoo): Not sure why we're not just checking `WebDevice` here
+        (device is WebServerDevice || device is ChromiumDevice)
+        ? await webDevServerConfigCore()
+        : null;
+
+    final web = webDevServerConfig != null;
+
     _flutterDriverFactory ??= FlutterDriverFactory(
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
@@ -324,7 +332,9 @@ class DriveCommand extends RunCommandBase {
     );
     final DriverService driverService = _flutterDriverFactory!.createDriverService(web);
     final BuildInfo buildInfo = await getBuildInfo();
-    final DebuggingOptions debuggingOptions = await createDebuggingOptions(web);
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
     final File? applicationBinary = applicationBinaryPath == null
         ? null
         : _fileSystem.file(applicationBinaryPath);

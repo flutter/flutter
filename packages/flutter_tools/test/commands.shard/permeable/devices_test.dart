@@ -64,7 +64,6 @@ void main() {
               'hotReload': true,
               'hotRestart': true,
               'screenshot': false,
-              'fastStart': false,
               'flutterExit': false,
               'hardwareRendering': false,
               'startPaused': true,
@@ -82,7 +81,7 @@ void main() {
 }
 
 class FakeDeviceManager extends Fake implements DeviceManager {
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   String? specifiedDeviceId;

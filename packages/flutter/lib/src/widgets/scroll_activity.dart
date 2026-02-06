@@ -429,7 +429,7 @@ class ScrollDragController implements Drag {
 
     if (_retainMomentum) {
       // Build momentum only if dragging in the same direction.
-      final bool isFlingingInSameDirection = velocity.sign == carriedVelocity!.sign;
+      final isFlingingInSameDirection = velocity.sign == carriedVelocity!.sign;
       // Build momentum only if the velocity of the last drag was not
       // substantially lower than the carried momentum.
       final bool isVelocityNotSubstantiallyLessThanCarriedMomentum =

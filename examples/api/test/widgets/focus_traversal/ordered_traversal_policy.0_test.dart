@@ -13,20 +13,28 @@ void main() {
     return Focus.of(tester.element(find.text(text))).hasPrimaryFocus;
   }
 
-  testWidgets('The focus updates should follow the focus traversal groups policy', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const example.OrderedTraversalPolicyExampleApp());
+  testWidgets(
+    'The focus updates should follow the focus traversal groups policy',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.OrderedTraversalPolicyExampleApp());
 
-    expect(hasFocus(tester, 'One'), isTrue);
+      expect(hasFocus(tester, 'One'), isTrue);
 
-    const List<String> focusOrder = <String>['Two', 'Three', 'Four', 'Five', 'Six', 'One'];
+      const List<String> focusOrder = <String>[
+        'Two',
+        'Three',
+        'Four',
+        'Five',
+        'Six',
+        'One',
+      ];
 
-    for (final String text in focusOrder) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
+      for (final String text in focusOrder) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
 
-      expect(hasFocus(tester, text), isTrue);
-    }
-  });
+        expect(hasFocus(tester, text), isTrue);
+      }
+    },
+  );
 }

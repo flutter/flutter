@@ -34,5 +34,11 @@
   "searchWebButtonLabel": "Pretraži Web",
   "shareButtonLabel": "Dijeli...",
   "cancelButtonLabel": "Otkaži",
-  "backButtonLabel": "Nazad"
+  "backButtonLabel": "Nazad",
+  "expansionTileExpandedHint": "sužavanje dvostrukim dodirom",
+  "expansionTileCollapsedHint": "proširivanje dvostrukim dodirom",
+  "expansionTileExpandedTapHint": "Sužavanje",
+  "expansionTileCollapsedTapHint": "Proširivanje za više detalja",
+  "expandedHint": "Suženo",
+  "collapsedHint": "Prošireno"
 }

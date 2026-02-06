@@ -470,7 +470,7 @@ class _TestMenusState extends State<_TestMenus> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _shortcutsEntry?.dispose();
-    final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+    final shortcuts = <ShortcutActivator, Intent>{};
     for (final TestMenu item in TestMenu.values) {
       if (item.shortcut == null) {
         continue;
@@ -622,7 +622,7 @@ List<Widget> createTestMenus({
     );
   }
 
-  final List<Widget> result = <Widget>[
+  final result = <Widget>[
     submenuButton(
       TestMenu.mainMenu1,
       menuChildren: <Widget>[

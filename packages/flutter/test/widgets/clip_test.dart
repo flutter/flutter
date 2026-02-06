@@ -8,8 +8,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_border.dart' show TestBorder;
@@ -58,6 +58,11 @@ class NotifyClipper<T> extends CustomClipper<T> {
 }
 
 void main() {
+  const black = Color(0xff000000);
+  const white = Color(0xffffffff);
+  const red = Color(0xffff0000);
+  const blue = Color(0xff0000ff);
+
   testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (
     WidgetTester tester,
   ) async {
@@ -94,7 +99,7 @@ void main() {
   });
 
   test('ClipRRect constructs with the right default values', () {
-    const ClipRRect clipRRect = ClipRRect();
+    const clipRRect = ClipRRect();
     expect(clipRRect.clipBehavior, equals(Clip.antiAlias));
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
@@ -379,7 +384,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -389,13 +394,11 @@ void main() {
                   angle: 1.0, // radians
                   child: ClipRect(
                     child: ColoredBox(
-                      color: Colors.red,
+                      color: red,
                       child: ColoredBox(
-                        color: Colors.white,
+                        color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -421,14 +424,14 @@ void main() {
               left: 0.0,
               width: 100.0,
               height: 100.0,
-              child: ClipRect(child: Container(color: Colors.blue)),
+              child: ClipRect(child: Container(color: blue)),
             ),
             Positioned(
               top: 50.0,
               left: 50.0,
               width: 100.0,
               height: 100.0,
-              child: Transform.rotate(angle: 1.0, child: Container(color: Colors.red)),
+              child: Transform.rotate(angle: 1.0, child: Container(color: red)),
             ),
           ],
         ),
@@ -445,7 +448,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -461,13 +464,11 @@ void main() {
                       bottomRight: Radius.elliptical(15.0, 6.0),
                     ),
                     child: ColoredBox(
-                      color: Colors.red,
+                      color: red,
                       child: ColoredBox(
-                        color: Colors.white,
+                        color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -487,7 +488,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -497,13 +498,11 @@ void main() {
                   angle: 1.0, // radians
                   child: ClipOval(
                     child: ColoredBox(
-                      color: Colors.red,
+                      color: red,
                       child: ColoredBox(
-                        color: Colors.white,
+                        color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -523,7 +522,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -538,13 +537,11 @@ void main() {
                       ),
                     ),
                     child: ColoredBox(
-                      color: Colors.red,
+                      color: red,
                       child: ColoredBox(
-                        color: Colors.white,
+                        color: white,
                         child: RepaintBoundary(
-                          child: Center(
-                            child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                          ),
+                          child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                         ),
                       ),
                     ),
@@ -563,7 +560,7 @@ void main() {
     return Center(
       child: RepaintBoundary(
         child: ColoredBox(
-          color: Colors.white,
+          color: white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
             child: SizedBox(
@@ -573,14 +570,12 @@ void main() {
                 angle: 1.0, // radians
                 child: PhysicalModel(
                   borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-                  color: Colors.red,
+                  color: red,
                   clipBehavior: clipBehavior,
                   child: ColoredBox(
-                    color: Colors.white,
+                    color: white,
                     child: RepaintBoundary(
-                      child: Center(
-                        child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                      ),
+                      child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                     ),
                   ),
                 ),
@@ -625,7 +620,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -635,13 +630,11 @@ void main() {
                   angle: 1.0, // radians
                   child: PhysicalModel(
                     borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-                    color: Colors.red,
+                    color: red,
                     child: ColoredBox(
-                      color: Colors.white,
+                      color: white,
                       child: RepaintBoundary(
-                        child: Center(
-                          child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                        ),
+                        child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                       ),
                     ),
                   ),
@@ -662,7 +655,7 @@ void main() {
     return Center(
       child: RepaintBoundary(
         child: ColoredBox(
-          color: Colors.white,
+          color: white,
           child: Padding(
             padding: const EdgeInsets.all(100.0),
             child: SizedBox(
@@ -677,13 +670,11 @@ void main() {
                     ),
                   ),
                   clipBehavior: clipBehavior,
-                  color: Colors.red,
+                  color: red,
                   child: ColoredBox(
-                    color: Colors.white,
+                    color: white,
                     child: RepaintBoundary(
-                      child: Center(
-                        child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                      ),
+                      child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                     ),
                   ),
                 ),
@@ -726,7 +717,7 @@ void main() {
       Center(
         child: RepaintBoundary(
           child: ColoredBox(
-            color: Colors.white,
+            color: white,
             child: Padding(
               padding: const EdgeInsets.all(100.0),
               child: SizedBox(
@@ -740,13 +731,11 @@ void main() {
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       ),
                     ),
-                    color: Colors.red,
+                    color: red,
                     child: ColoredBox(
-                      color: Colors.white,
+                      color: white,
                       child: RepaintBoundary(
-                        child: Center(
-                          child: Container(color: Colors.black, height: 10.0, width: 10.0),
-                        ),
+                        child: Center(child: Container(color: black, height: 10.0, width: 10.0)),
                       ),
                     ),
                   ),
@@ -764,7 +753,7 @@ void main() {
   });
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
-    final List<String> logs = <String>[];
+    final logs = <String>[];
     final ShapeBorder shape = TestBorder((String message) {
       logs.add(message);
     });
@@ -811,9 +800,7 @@ void main() {
   });
 
   testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
-    final ValueNotifier<Rect> clip = ValueNotifier<Rect>(
-      const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0),
-    );
+    final clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
     addTearDown(clip.dispose);
 
     await tester.pumpWidget(
@@ -851,8 +838,8 @@ void main() {
   });
 
   testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
-    const Radius startRadius = Radius.circular(15.0);
-    const Radius endRadius = Radius.circular(30.0);
+    const startRadius = Radius.circular(15.0);
+    const endRadius = Radius.circular(30.0);
 
     Widget buildClipRRect(TextDirection textDirection) {
       return Directionality(
@@ -866,7 +853,7 @@ void main() {
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-      final bool isRtl = textDirection == TextDirection.rtl;
+      final isRtl = textDirection == TextDirection.rtl;
       expect(
         renderClip.borderRadius.resolve(textDirection).topLeft,
         isRtl ? endRadius : startRadius,
@@ -887,8 +874,8 @@ void main() {
   });
 
   testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
-    const Radius startRadius = Radius.circular(15.0);
-    const Radius endRadius = Radius.circular(30.0);
+    const startRadius = Radius.circular(15.0);
+    const endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;
 
     Widget buildClipRRect(TextDirection textDirection) {
@@ -930,7 +917,7 @@ void main() {
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(buildClipRRect(textDirection));
       final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
-      final bool isRtl = textDirection == TextDirection.rtl;
+      final isRtl = textDirection == TextDirection.rtl;
       expect(renderClip.textDirection, isRtl ? TextDirection.rtl : TextDirection.ltr);
     }
 

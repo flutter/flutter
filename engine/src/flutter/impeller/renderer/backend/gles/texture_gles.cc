@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
+#include <format>
 #include <optional>
 #include <utility>
 
@@ -11,7 +12,6 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -40,6 +40,7 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return false;
   }
   FML_UNREACHABLE();
@@ -86,6 +87,11 @@ struct TexImage2DData {
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR32Float:
+        internal_format = GL_R32F;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
         break;
       case PixelFormat::kR32G32B32A32Float:
         internal_format = GL_RGBA32F;
@@ -255,8 +261,7 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_,
-                            SPrintF("%s %s", label.data(), trailing.data()));
+    reactor_->SetDebugLabel(handle_, std::format("{} {}", label, trailing));
   }
 #endif  // IMPELLER_DEBUG
 }
@@ -402,6 +407,7 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10A10XR:
+    case PixelFormat::kR32Float:
       return std::nullopt;
   }
   FML_UNREACHABLE();

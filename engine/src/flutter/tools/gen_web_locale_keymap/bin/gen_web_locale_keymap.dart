@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 const String kEnvGithubToken = 'GITHUB_TOKEN';
 
 String _renderTemplate(String template, Map<String, String> dictionary) {
-  String result = template;
+  var result = template;
   dictionary.forEach((String key, String value) {
     final String localResult = result.replaceAll('@@@$key@@@', value);
     if (localResult == result) {
@@ -32,14 +32,14 @@ void _writeFileTo(String outputDir, String outputFileName, String body) {
 }
 
 String _readSharedSegment(String path) {
-  const String kSegmentStartMark = '/*@@@ SHARED SEGMENT START @@@*/';
-  const String kSegmentEndMark = '/*@@@ SHARED SEGMENT END @@@*/';
+  const kSegmentStartMark = '/*@@@ SHARED SEGMENT START @@@*/';
+  const kSegmentEndMark = '/*@@@ SHARED SEGMENT END @@@*/';
   final List<String> lines = File(path).readAsStringSync().split('\n');
   // Defining the two variables as `late final` ensures that each mark is found
   // once and only once, otherwise assertion errors will be thrown.
   late final int startLine;
   late final int endLine;
-  for (int lineNo = 0; lineNo < lines.length; lineNo += 1) {
+  for (var lineNo = 0; lineNo < lines.length; lineNo += 1) {
     if (lines[lineNo] == kSegmentStartMark) {
       startLine = lineNo;
     } else if (lines[lineNo] == kSegmentEndMark) {
@@ -110,9 +110,9 @@ String _buildMapString(Iterable<Layout> layouts) {
 }
 
 String _buildTestCasesString(List<Layout> layouts) {
-  final List<String> layoutsString = <String>[];
-  for (final Layout layout in layouts) {
-    final List<String> layoutEntries = <String>[];
+  final layoutsString = <String>[];
+  for (final layout in layouts) {
+    final layoutEntries = <String>[];
     _sortedForEach(planLayout(layout.entries), (String eventCode, int logicalKey) {
       final LayoutEntry entry = layout.entries[eventCode]!;
       layoutEntries.add(
@@ -132,7 +132,7 @@ ${layoutEntries.join('\n')}
 
 Future<void> main(List<String> rawArguments) async {
   final Map<String, String> env = Platform.environment;
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addFlag(
     'force',
     abbr: 'f',
@@ -148,7 +148,7 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  bool enabledAssert = false;
+  var enabledAssert = false;
   assert(() {
     enabledAssert = true;
     return true;

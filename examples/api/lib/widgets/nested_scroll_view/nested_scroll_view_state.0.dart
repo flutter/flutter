@@ -27,7 +27,9 @@ class NestedScrollViewStateExample extends StatelessWidget {
     return NestedScrollView(
       key: globalKey,
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return const <Widget>[SliverAppBar(title: Text('NestedScrollViewState Demo!'))];
+        return const <Widget>[
+          SliverAppBar(title: Text('NestedScrollViewState Demo!')),
+        ];
       },
       body: const CustomScrollView(
         // Body slivers go here!

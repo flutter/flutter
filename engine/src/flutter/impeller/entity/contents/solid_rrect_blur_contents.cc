@@ -27,11 +27,11 @@ bool SolidRRectBlurContents::SetPassInfo(RenderPass& pass,
   frag_info.sInv_minEdge_scale =
       Vector3(pass_context.sInv, pass_context.minEdge, pass_context.scale);
 
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(pass_context.opts));
 
-  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
   return true;
 }
 

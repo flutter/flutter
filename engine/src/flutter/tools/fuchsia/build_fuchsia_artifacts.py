@@ -50,17 +50,7 @@ def IsMac():
 
 
 def GetFuchsiaSDKPath():
-  # host_os references the gn host_os
-  # https://gn.googlesource.com/gn/+/main/docs/reference.md#var_host_os
-  host_os = ''
-  if IsLinux():
-    host_os = 'linux'
-  elif IsMac():
-    host_os = 'mac'
-  else:
-    host_os = 'windows'
-
-  return os.path.join(_src_root_dir, 'fuchsia', 'sdk', host_os)
+  return os.path.join(_src_root_dir, 'third_party', 'fuchsia-sdk', 'sdk')
 
 
 def RemoveDirectoryIfExists(path):
@@ -199,12 +189,10 @@ def CopyBuildToBucket(runtime_mode, arch, optimized, product):
   # Copy the license files from the source directory to be next to the bucket we
   # are about to package.
   bucket_root = os.path.join(_bucket_directory, 'flutter')
-  licenses_root = os.path.join(_src_root_dir, 'flutter/ci/licenses_golden')
-  license_files = ['licenses_flutter', 'licenses_fuchsia', 'licenses_skia']
-  for license in license_files:
-    src_path = os.path.join(licenses_root, license)
-    dst_path = os.path.join(bucket_root, license)
-    CopyPath(src_path, dst_path)
+  CopyPath(
+      os.path.join(_src_root_dir, 'flutter/sky/packages/sky_engine/LICENSE'),
+      os.path.join(bucket_root, 'LICENSE')
+  )
 
 
 def CheckCIPDPackageExists(package_name, tag):

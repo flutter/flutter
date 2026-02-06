@@ -269,7 +269,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     if (message == null) {
       return null;
     }
-    final WriteBuffer buffer = WriteBuffer();
+    final buffer = WriteBuffer();
     writeValue(buffer, message);
     return buffer.done();
   }
@@ -279,7 +279,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     if (message == null) {
       return null;
     }
-    final ReadBuffer buffer = ReadBuffer(message);
+    final buffer = ReadBuffer(message);
     final dynamic result = readValue(buffer);
     if (buffer.hasRemaining) {
       throw const FormatException('Message corrupted');
@@ -341,13 +341,13 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     } else if (value is List) {
       buffer.putUint8(_valueList);
       writeSize(buffer, value.length);
-      for (final dynamic item in value) {
+      for (final Object? item in value) {
         writeValue(buffer, item);
       }
     } else if (value is Map) {
       buffer.putUint8(_valueMap);
       writeSize(buffer, value.length);
-      value.forEach((dynamic key, dynamic value) {
+      value.forEach((dynamic key, Object? value) {
         writeValue(buffer, key);
         writeValue(buffer, value);
       });
@@ -412,14 +412,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       case _valueList:
         final int length = readSize(buffer);
         final theResult = <Object?>[];
-        for (int i = 0; i < length; i++) {
+        for (var i = 0; i < length; i++) {
           theResult.add(readValue(buffer));
         }
         result = theResult;
       case _valueMap:
         final int length = readSize(buffer);
         final theResult = <Object?, Object?>{};
-        for (int i = 0; i < length; i++) {
+        for (var i = 0; i < length; i++) {
           theResult[readValue(buffer)] = readValue(buffer);
         }
         result = theResult;
@@ -490,7 +490,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeMethodCall(MethodCall call) {
-    final WriteBuffer buffer = WriteBuffer();
+    final buffer = WriteBuffer();
     messageCodec.writeValue(buffer, call.method);
     messageCodec.writeValue(buffer, call.arguments);
     return buffer.done();
@@ -498,7 +498,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   MethodCall decodeMethodCall(ByteData? methodCall) {
-    final ReadBuffer buffer = ReadBuffer(methodCall!);
+    final buffer = ReadBuffer(methodCall!);
     final dynamic method = messageCodec.readValue(buffer);
     final dynamic arguments = messageCodec.readValue(buffer);
     if (method is String && !buffer.hasRemaining) {
@@ -510,7 +510,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeSuccessEnvelope(dynamic result) {
-    final WriteBuffer buffer = WriteBuffer();
+    final buffer = WriteBuffer();
     buffer.putUint8(0);
     messageCodec.writeValue(buffer, result);
     return buffer.done();
@@ -518,7 +518,7 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeErrorEnvelope({required String code, String? message, dynamic details}) {
-    final WriteBuffer buffer = WriteBuffer();
+    final buffer = WriteBuffer();
     buffer.putUint8(1);
     messageCodec.writeValue(buffer, code);
     messageCodec.writeValue(buffer, message);
@@ -532,7 +532,7 @@ class StandardMethodCodec implements MethodCodec {
     if (envelope.lengthInBytes == 0) {
       throw const FormatException('Expected envelope, got nothing');
     }
-    final ReadBuffer buffer = ReadBuffer(envelope);
+    final buffer = ReadBuffer(envelope);
     if (buffer.getUint8() == 0) {
       return messageCodec.readValue(buffer);
     }

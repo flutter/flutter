@@ -14,6 +14,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -39,12 +40,11 @@ class XCDeviceEventNotification {
 enum XCDeviceEvent { attach, detach }
 
 enum XCDeviceEventInterface {
-  usb(name: 'usb', connectionInterface: DeviceConnectionInterface.attached),
-  wifi(name: 'wifi', connectionInterface: DeviceConnectionInterface.wireless);
+  usb(connectionInterface: DeviceConnectionInterface.attached),
+  wifi(connectionInterface: DeviceConnectionInterface.wireless);
 
-  const XCDeviceEventInterface({required this.name, required this.connectionInterface});
+  const XCDeviceEventInterface({required this.connectionInterface});
 
-  final String name;
   final DeviceConnectionInterface connectionInterface;
 }
 
@@ -102,10 +102,19 @@ class XCDevice {
     _setupDeviceIdentifierByEventStream();
   }
 
+  Completer<void>? _cancelWirelessDiscoveryCompleter;
+
   void dispose() {
     _stopObservingTetheredIOSDevices();
     _usbDeviceWaitProcess?.kill();
     _wifiDeviceWaitProcess?.kill();
+  }
+
+  void cancelWirelessDiscovery() {
+    if (_cancelWirelessDiscoveryCompleter != null &&
+        !_cancelWirelessDiscoveryCompleter!.isCompleted) {
+      _cancelWirelessDiscoveryCompleter?.complete();
+    }
   }
 
   final ProcessUtils _processUtils;
@@ -279,8 +288,7 @@ class XCDevice {
     final Process process = await _processUtils.start(cmd);
 
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen((String line) {
           String? mappedLine = line;
           if (mapFunction != null) {
@@ -292,8 +300,7 @@ class XCDevice {
           }
         });
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .listen((String line) {
           String? mappedLine = line;
           if (mapFunction != null) {
@@ -450,13 +457,43 @@ class XCDevice {
       return const <IOSDevice>[];
     }
 
-    final coreDeviceMap = <String, IOSCoreDevice>{};
+    var coreDevices = <IOSCoreDevice>[];
     if (_xcode.isDevicectlInstalled) {
-      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
-      for (final device in coreDevices) {
-        if (device.udid == null) {
-          continue;
-        }
+      coreDevices = await _coreDeviceControl.getCoreDevices();
+    }
+
+    return _parseXcdeviceList(allAvailableDevices: allAvailableDevices, coreDevices: coreDevices);
+  }
+
+  Future<List<IOSDevice>> getAvailableIOSDevicesForWirelessDiscovery({Duration? timeout}) async {
+    _cancelWirelessDiscoveryCompleter = Completer<void>();
+    final Completer<void> cancelCompleter = _cancelWirelessDiscoveryCompleter!;
+
+    final List<Object>? allAvailableDevices = await _getAllDevices(
+      timeout: timeout ?? const Duration(seconds: 2),
+    );
+    if (allAvailableDevices == null || cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    var coreDevices = <IOSCoreDevice>[];
+    if (_xcode.isDevicectlInstalled) {
+      coreDevices = await _coreDeviceControl.getCoreDevices(cancelCompleter: cancelCompleter);
+    }
+    if (cancelCompleter.isCompleted) {
+      return const <IOSDevice>[];
+    }
+
+    return _parseXcdeviceList(allAvailableDevices: allAvailableDevices, coreDevices: coreDevices);
+  }
+
+  List<IOSDevice> _parseXcdeviceList({
+    required List<Object> allAvailableDevices,
+    required List<IOSCoreDevice> coreDevices,
+  }) {
+    final coreDeviceMap = <String, IOSCoreDevice>{};
+    for (final device in coreDevices) {
+      if (device.udid != null) {
         coreDeviceMap[device.udid!] = device;
       }
     }
@@ -499,7 +536,7 @@ class XCDevice {
     // ...
 
     final deviceMap = <String, IOSDevice>{};
-    for (final Object device in allAvailableDevices) {
+    for (final device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
         // Only include iPhone, iPad, iPod, or other iOS devices.
         if (!_isIPhoneOSDevice(device)) {
@@ -602,9 +639,17 @@ class XCDevice {
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
+          analytics: globals.analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
+          coreDeviceLauncher: IOSCoreDeviceLauncher(
+            coreDeviceControl: _coreDeviceControl,
+            logger: _logger,
+            xcodeDebug: _xcodeDebug,
+            fileSystem: globals.fs,
+            processUtils: _processUtils,
+          ),
           xcodeDebug: _xcodeDebug,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,

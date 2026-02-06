@@ -68,7 +68,7 @@ void main() {
   }
 
   (Environment, List<List<String>>) macEnv(Logger logger) {
-    final List<List<String>> runHistory = <List<String>>[];
+    final runHistory = <List<String>>[];
     return (
       Environment(
         abi: ffi.Abi.macosArm64,
@@ -101,10 +101,10 @@ void main() {
   }
 
   test('worker pool success', () async {
-    final Logger logger = Logger.test((_) {});
+    final logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
-    final TestWorkerPoolProgressReporter reporter = TestWorkerPoolProgressReporter();
-    final WorkerPool wp = WorkerPool(env, reporter);
+    final reporter = TestWorkerPoolProgressReporter();
+    final wp = WorkerPool(env, reporter);
     final WorkerTask task = SuccessfulTask();
     final bool r = await wp.run(<WorkerTask>{task});
     expect(r, equals(true));
@@ -114,10 +114,10 @@ void main() {
   });
 
   test('worker pool failure', () async {
-    final Logger logger = Logger.test((_) {});
+    final logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
-    final TestWorkerPoolProgressReporter reporter = TestWorkerPoolProgressReporter();
-    final WorkerPool wp = WorkerPool(env, reporter);
+    final reporter = TestWorkerPoolProgressReporter();
+    final wp = WorkerPool(env, reporter);
     final WorkerTask task = FailureTask();
     final bool r = await wp.run(<WorkerTask>{task});
     expect(r, equals(false));

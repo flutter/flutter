@@ -25,10 +25,6 @@ bool Rational::operator==(const Rational& that) const {
   }
 }
 
-bool Rational::operator!=(const Rational& that) const {
-  return !(*this == that);
-}
-
 bool Rational::operator<(const Rational& that) const {
   if (den_ == that.den_) {
     return num_ < that.num_;

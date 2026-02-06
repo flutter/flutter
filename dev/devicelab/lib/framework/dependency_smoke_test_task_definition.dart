@@ -98,7 +98,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
   required Directory tempDir,
   required LocalFileSystem localFileSystem,
 }) async {
-  for (final VersionTuple versions in versionTuples) {
+  for (final versions in versionTuples) {
     final Directory innerTempDir = tempDir.createTempSync(versions.gradleVersion);
     try {
       // Create a new flutter project.
@@ -109,7 +109,7 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
         workingDirectory: innerTempDir.path,
       );
 
-      final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
+      final appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
       final File appGradleBuild = getAndroidBuildFile(
         localFileSystem.path.join(appPath, 'android', 'app'),

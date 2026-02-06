@@ -29,5 +29,11 @@
   "shareButtonLabel": "Partekatu...",
   "clearButtonLabel": "Garbitu",
   "cancelButtonLabel": "Utzi",
-  "backButtonLabel": "Atzera"
+  "backButtonLabel": "Atzera",
+  "expansionTileExpandedHint": "tolesteko, sakatu birritan",
+  "expansionTileCollapsedHint": "zabaltzeko, sakatu birritan",
+  "expansionTileExpandedTapHint": "Tolestu",
+  "expansionTileCollapsedTapHint": "Zabaldu hau xehetasun gehiago lortzeko",
+  "expandedHint": "Tolestuta",
+  "collapsedHint": "Zabalduta"
 }

@@ -43,12 +43,12 @@ canvaskit_wasm_lib("canvaskit") {
   deps = [ "../..:skia" ]
   if (skia_canvaskit_enable_paragraph) {
     deps += [
-      "../../modules/skparagraph:skparagraph",
-      "../../modules/skunicode:skunicode",
+      "../../modules/skparagraph",
+      "../../modules/skunicode",
     ]
   }
   if (skia_canvaskit_enable_bidi) {
-    deps += [ "../../modules/skunicode:skunicode" ]
+    deps += [ "../../modules/skunicode" ]
   }
 
   sources = [

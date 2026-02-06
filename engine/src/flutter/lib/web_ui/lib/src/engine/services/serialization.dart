@@ -15,8 +15,8 @@ import 'buffers.dart';
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
   factory WriteBuffer() {
-    final Uint8Buffer buffer = Uint8Buffer();
-    final ByteData eightBytes = ByteData(8);
+    final buffer = Uint8Buffer();
+    final eightBytes = ByteData(8);
     final Uint8List eightBytesAsList = eightBytes.buffer.asUint8List();
     return WriteBuffer._(buffer, eightBytes, eightBytesAsList);
   }
@@ -100,7 +100,7 @@ class WriteBuffer {
   void _alignTo(int alignment) {
     final int mod = _buffer.length % alignment;
     if (mod != 0) {
-      for (int i = 0; i < alignment - mod; i++) {
+      for (var i = 0; i < alignment - mod; i++) {
         _buffer.add(0);
       }
     }

@@ -51,6 +51,10 @@ template("impeller_shaders_gles") {
     if (is_300) {
       defines += [ "IMPELLER_TARGET_OPENGLES3" ]
     }
+
+    if (defined(invoker.entry_point_prefix)) {
+      entry_point_prefix = invoker.entry_point_prefix
+    }
   }
 
   gles_shaders =
@@ -71,6 +75,9 @@ template("impeller_shaders_gles") {
   shader_archive(gles_lib) {
     shaders = gles_shaders
     deps = [ ":$impellerc_gles" ]
+    if (defined(invoker.entry_point_prefix)) {
+      entry_point_prefix = invoker.entry_point_prefix
+    }
   }
 
   reflect_gles = "reflect_$target_name"

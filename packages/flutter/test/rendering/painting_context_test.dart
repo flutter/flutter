@@ -11,8 +11,8 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('PaintingContext.setIsComplexHint', () {
-    final ContainerLayer layer = ContainerLayer();
-    final PaintingContext context = PaintingContext(layer, Rect.zero);
+    final layer = ContainerLayer();
+    final context = PaintingContext(layer, Rect.zero);
     expect(layer.hasChildren, isFalse);
     context.setIsComplexHint();
     expect(layer.hasChildren, isTrue);
@@ -21,8 +21,8 @@ void main() {
   });
 
   test('PaintingContext.setWillChangeHint', () {
-    final ContainerLayer layer = ContainerLayer();
-    final PaintingContext context = PaintingContext(layer, Rect.zero);
+    final layer = ContainerLayer();
+    final context = PaintingContext(layer, Rect.zero);
     expect(layer.hasChildren, isFalse);
     context.setWillChangeHint();
     expect(layer.hasChildren, isTrue);

@@ -29,5 +29,11 @@
   "shareButtonLabel": "Jaga …",
   "clearButtonLabel": "Kustutamine",
   "cancelButtonLabel": "Tühista",
-  "backButtonLabel": "Tagasi"
+  "backButtonLabel": "Tagasi",
+  "expansionTileExpandedHint": "topeltpuudutage ahendamiseks",
+  "expansionTileCollapsedHint": "topeltpuudutage laiendamiseks",
+  "expansionTileExpandedTapHint": "Ahenda",
+  "expansionTileCollapsedTapHint": "Laiendage lisateabe nägemiseks",
+  "expandedHint": "Ahendatud",
+  "collapsedHint": "Laiendatud"
 }

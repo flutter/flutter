@@ -29,5 +29,11 @@
   "shareButtonLabel": "Delen...",
   "clearButtonLabel": "Wissen",
   "cancelButtonLabel": "Annuleren",
-  "backButtonLabel": "Terug"
+  "backButtonLabel": "Terug",
+  "expansionTileExpandedHint": "dubbeltik om samen te vouwen",
+  "expansionTileCollapsedHint": "dubbeltik om uit te vouwen",
+  "expansionTileExpandedTapHint": "Samenvouwen",
+  "expansionTileCollapsedTapHint": "Uitvouwen voor meer informatie",
+  "expandedHint": "Samengevouwen",
+  "collapsedHint": "Uitgevouwen"
 }

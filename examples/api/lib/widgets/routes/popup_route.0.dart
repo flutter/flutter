@@ -67,10 +67,16 @@ class DismissibleDialog<T> extends PopupRoute<T> {
         child: UnconstrainedBox(
           child: Container(
             padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
             child: Column(
               children: <Widget>[
-                Text('Dismissible Dialog', style: Theme.of(context).textTheme.headlineSmall),
+                Text(
+                  'Dismissible Dialog',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
                 const SizedBox(height: 20),
                 const Text('Tap in the scrim or press escape key to dismiss.'),
               ],

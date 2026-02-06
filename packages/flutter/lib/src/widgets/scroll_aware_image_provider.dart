@@ -43,6 +43,7 @@ import 'scrollable.dart';
 /// The [Image] widget wraps its incoming providers with this provider to avoid
 /// overutilization of resources for images that would never appear on screen or
 /// only be visible for a very brief period.
+@immutable
 @optionalTypeArgs
 class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// Creates a [ScrollAwareImageProvider].
@@ -114,4 +115,20 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
 
   @override
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ScrollAwareImageProvider &&
+        context == other.context &&
+        imageProvider == other.imageProvider;
+  }
+
+  @override
+  int get hashCode => Object.hash(context, imageProvider);
 }

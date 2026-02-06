@@ -75,14 +75,10 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process!.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream = _process!.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> errorStream = _process!.stderr.transform(utf8LineDecoder);
     errorStream.listen(_handleError);
 
-    final Stream<String> inStream = _process!.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> inStream = _process!.stdout.transform(utf8LineDecoder);
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{

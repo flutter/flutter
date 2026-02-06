@@ -16,21 +16,21 @@ Future<void> execute(BenchmarkingBinding binding) async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
-  final Stopwatch wallClockWatch = Stopwatch();
+  final wallClockWatch = Stopwatch();
 
-  int totalOpenFrameElapsedMicroseconds = 0;
-  int totalOpenIterationCount = 0;
-  int totalCloseFrameElapsedMicroseconds = 0;
-  int totalCloseIterationCount = 0;
-  int totalSubsequentFramesElapsedMicroseconds = 0;
-  int totalSubsequentFramesIterationCount = 0;
+  var totalOpenFrameElapsedMicroseconds = 0;
+  var totalOpenIterationCount = 0;
+  var totalCloseFrameElapsedMicroseconds = 0;
+  var totalCloseIterationCount = 0;
+  var totalSubsequentFramesElapsedMicroseconds = 0;
+  var totalSubsequentFramesIterationCount = 0;
 
   await benchmarkWidgets((WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
 
-    bool drawerIsOpen = false;
+    var drawerIsOpen = false;
     wallClockWatch.start();
     while (wallClockWatch.elapsed < kBenchmarkTime) {
       binding.drawFrameWatch.reset();
@@ -57,7 +57,7 @@ Future<void> execute(BenchmarkingBinding binding) async {
     }
   });
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock animation',
     value: wallClockWatch.elapsedMicroseconds / (1000 * 1000),

@@ -1,0 +1,18 @@
+{
+  "reorderItemToStart": "باشلىنىشقا يۆتكەش",
+  "reorderItemToEnd": "ئاخىرىغا يۆتكەش",
+  "reorderItemUp": "يۇقىرىغا يۆتكەش",
+  "reorderItemDown": "ئاستىغا يۆتكەش",
+  "reorderItemLeft": "سولغا يۆتكەش",
+  "reorderItemRight": "ئوڭغا يۆتكەش",
+  "searchResultsFound": "ئىزدەش نەتىجىلىرى تېپىلدى",
+  "noResultsFound": "نەتىجە تېپىلمىدى",
+  "copyButtonLabel": "كۆچۈرۈش",
+  "cutButtonLabel": "كېسىش",
+  "lookUpButtonLabel": "ئىزدەش",
+  "searchWebButtonLabel": "توردا ئىزدەش",
+  "shareButtonLabel": "ھەمبەھرلەش",
+  "pasteButtonLabel": "چاپلاش",
+  "selectAllButtonLabel": "ھەممىنى تاللاش",
+  "radioButtonUnselectedLabel": "تاللانمىدى"
+}

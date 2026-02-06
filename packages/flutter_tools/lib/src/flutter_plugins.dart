@@ -1307,11 +1307,13 @@ Future<void> injectPlugins(
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
+            artifacts: globals.artifacts!,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           logger: globals.logger,
           analytics: globals.analytics,
+          platform: globals.platform,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);

@@ -70,11 +70,11 @@ class PointsPainter extends CustomPainter {
       return;
     }
     final double halfHeight = size.height / 2.0;
-    const double freq = 0.25;
-    const int circleCount = 40;
-    for (int i = 0; i < circleCount; ++i) {
+    const freq = 0.25;
+    const circleCount = 40;
+    for (var i = 0; i < circleCount; ++i) {
       final double radius = 25 * cos(i + (1.0 * 2.0 * 3.1415 * tick) / 60.0) + 25;
-      final Paint paint = Paint()
+      final paint = Paint()
         ..style = PaintingStyle.fill
         ..filterQuality = FilterQuality.low
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius);

@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'list_tile_theme.dart';
-import 'material_state.dart';
 import 'switch.dart';
 import 'switch_theme.dart';
 import 'theme.dart';
@@ -198,6 +197,7 @@ class SwitchListTile extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.autofocus = false,
     this.tileColor,
@@ -213,6 +213,10 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.material,
@@ -260,6 +264,7 @@ class SwitchListTile extends StatelessWidget {
     this.overlayColor,
     this.splashRadius,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.autofocus = false,
     this.applyCupertinoTheme,
@@ -276,6 +281,10 @@ class SwitchListTile extends StatelessWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.enableFeedback,
+    this.horizontalTitleGap,
+    this.minVerticalPadding,
+    this.minLeadingWidth,
+    this.minTileHeight,
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
@@ -373,7 +382,7 @@ class SwitchListTile extends StatelessWidget {
   /// and [inactiveThumbColor] in the default state. If that is also null, then
   /// the value of [SwitchThemeData.thumbColor] is used. If that is also null,
   /// The default value is used.
-  final MaterialStateProperty<Color?>? thumbColor;
+  final WidgetStateProperty<Color?>? thumbColor;
 
   /// The color of this switch's track.
   ///
@@ -386,7 +395,7 @@ class SwitchListTile extends StatelessWidget {
   /// state and [inactiveTrackColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.trackColor] is used. If that is also
   /// null, then the default value is used.
-  final MaterialStateProperty<Color?>? trackColor;
+  final WidgetStateProperty<Color?>? trackColor;
 
   /// {@macro flutter.material.switch.trackOutlineColor}
   ///
@@ -396,7 +405,7 @@ class SwitchListTile extends StatelessWidget {
   /// In Material 3, the outline color defaults to transparent in the selected
   /// state and [ColorScheme.outline] in the unselected state. In Material 2,
   /// the [Switch] track has no outline.
-  final MaterialStateProperty<Color?>? trackOutlineColor;
+  final WidgetStateProperty<Color?>? trackOutlineColor;
 
   /// The icon to use on the thumb of this switch
   ///
@@ -407,7 +416,7 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// If null, then the value of [SwitchThemeData.thumbIcon] is used. If this is
   /// also null, then the [Switch] does not have any icons on the thumb.
-  final MaterialStateProperty<Icon?>? thumbIcon;
+  final WidgetStateProperty<Icon?>? thumbIcon;
 
   /// {@macro flutter.material.switch.materialTapTargetSize}
   ///
@@ -442,7 +451,7 @@ class SwitchListTile extends StatelessWidget {
   /// and [hoverColor] is used in the pressed and hovered state. If that is also
   /// null, the value of [SwitchThemeData.overlayColor] is used. If that is
   /// also null, then the default value is used in the pressed and hovered state.
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.switch.splashRadius}
   ///
@@ -452,6 +461,9 @@ class SwitchListTile extends StatelessWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// Controls the interactive states of the backing [ListTile].
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
@@ -533,6 +545,18 @@ class SwitchListTile extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// {@macro flutter.material.ListTile.horizontalTitleGap}
+  final double? horizontalTitleGap;
+
+  /// {@macro flutter.material.ListTile.minVerticalPadding}
+  final double? minVerticalPadding;
+
+  /// {@macro flutter.material.ListTile.minLeadingWidth}
+  final double? minLeadingWidth;
+
+  /// {@macro flutter.material.ListTile.minTileHeight}
+  final double? minTileHeight;
+
   /// The color for the tile's [Material] when a pointer is hovering over it.
   final Color? hoverColor;
 
@@ -545,6 +569,7 @@ class SwitchListTile extends StatelessWidget {
   // TODO(hangyujin): Remove this flag after fixing related g3 tests and flipping
   // the default value to true.
   final bool internalAddSemanticForOnTap;
+
   @override
   Widget build(BuildContext context) {
     final Widget control;
@@ -618,7 +643,7 @@ class SwitchListTile extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final SwitchThemeData switchTheme = SwitchTheme.of(context);
-    final Set<MaterialState> states = <MaterialState>{if (selected) MaterialState.selected};
+    final states = <WidgetState>{if (selected) WidgetState.selected};
     final Color effectiveActiveColor =
         activeThumbColor ??
         activeColor ??
@@ -647,8 +672,13 @@ class SwitchListTile extends StatelessWidget {
         tileColor: tileColor,
         visualDensity: visualDensity,
         focusNode: focusNode,
+        statesController: statesController,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        horizontalTitleGap: horizontalTitleGap,
+        minVerticalPadding: minVerticalPadding,
+        minLeadingWidth: minLeadingWidth,
+        minTileHeight: minTileHeight,
         hoverColor: hoverColor,
         internalAddSemanticForOnTap: internalAddSemanticForOnTap,
       ),

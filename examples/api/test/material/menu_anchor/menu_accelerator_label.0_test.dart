@@ -4,14 +4,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/material/menu_anchor/menu_accelerator_label.0.dart' as example;
+import 'package:flutter_api_samples/material/menu_anchor/menu_accelerator_label.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can open menu', (WidgetTester tester) async {
     Finder findMenu(String label) {
       return find
-          .ancestor(of: find.text(label, findRichText: true), matching: find.byType(FocusScope))
+          .ancestor(
+            of: find.text(label, findRichText: true),
+            matching: find.byType(FocusScope),
+          )
           .first;
     }
 
@@ -54,11 +58,16 @@ void main() {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
         child: example.MenuAcceleratorApp(),
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(MenuBar)), const Offset(0.0, safeAreaPadding));
+    expect(
+      tester.getTopLeft(find.byType(MenuBar)),
+      const Offset(0.0, safeAreaPadding),
+    );
   });
 }

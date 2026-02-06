@@ -34,7 +34,7 @@ FLUTTER_DARWIN_EXPORT
  * @param frame The rectangle for the newly created `UIView` measured in points.
  * @param viewId A unique identifier for this `UIView`.
  * @param args Parameters for creating the `UIView` sent from the Dart side of the Flutter app.
- *   If `createArgsCodec` is not implemented, or if no creation arguments were sent from the Dart
+ *   If `createArgsCodec` is not implemented, or if no creation arguments were sent from the Dart
  *   code, this will be null. Otherwise this will be the value sent from the Dart code as decoded by
  *   `createArgsCodec`.
  */

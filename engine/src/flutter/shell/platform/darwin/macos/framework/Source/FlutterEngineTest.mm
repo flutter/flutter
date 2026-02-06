@@ -324,6 +324,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -337,10 +338,12 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   int32_t children[] = {1};
   root.children_in_traversal_order = children;
   root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
 
   FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -352,6 +355,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   child1.tooltip = "";
   child1.child_count = 0;
   child1.custom_accessibility_actions_count = 0;
+  child1.identifier = "";
 
   FlutterSemanticsUpdate2 update;
   update.node_count = 2;
@@ -416,6 +420,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.text_selection_base = -1;
   root.text_selection_extent = -1;
@@ -433,6 +438,7 @@ TEST_F(FlutterEngineTest, CanToggleAccessibilityWhenHeadless) {
   FlutterSemanticsNode2 child1;
   child1.id = 1;
   child1.flags2 = &child_flags;
+  // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
   child1.actions = static_cast<FlutterSemanticsAction>(0);
   child1.text_selection_base = -1;
   child1.text_selection_extent = -1;
@@ -738,6 +744,21 @@ TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
 
   [registrar publish:secondValue];
   EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
+}
+
+TEST_F(FlutterEngineTest, RegistrarForwardViewControllerLookUpToEngine) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+
+  EXPECT_EQ([registrar viewController], viewController);
 }
 
 // If a channel overrides a previous channel with the same name, cleaning

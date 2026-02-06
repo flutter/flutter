@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
@@ -365,56 +366,42 @@ void DlDispatcherBase::skew(DlScalar sx, DlScalar sy) {
   GetCanvas().Skew(sx, sy);
 }
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transform2DAffine(DlScalar mxx,
-                                         DlScalar mxy,
-                                         DlScalar mxt,
-                                         DlScalar myx,
-                                         DlScalar myy,
-                                         DlScalar myt) {
+void DlDispatcherBase::transform2DAffine(
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
   AUTO_DEPTH_WATCHER(0u);
 
-  // clang-format off
   transformFullPerspective(
-    mxx, mxy,  0, mxt,
-    myx, myy,  0, myt,
-    0  ,   0,  1,   0,
-    0  ,   0,  0,   1
+      mxx, mxy,  0, mxt,
+      myx, myy,  0, myt,
+      0  ,   0,  1,   0,
+      0  ,   0,  0,   1
   );
-  // clang-format on
 }
+// clang-format on
 
+// clang-format off
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::transformFullPerspective(DlScalar mxx,
-                                                DlScalar mxy,
-                                                DlScalar mxz,
-                                                DlScalar mxt,
-                                                DlScalar myx,
-                                                DlScalar myy,
-                                                DlScalar myz,
-                                                DlScalar myt,
-                                                DlScalar mzx,
-                                                DlScalar mzy,
-                                                DlScalar mzz,
-                                                DlScalar mzt,
-                                                DlScalar mwx,
-                                                DlScalar mwy,
-                                                DlScalar mwz,
-                                                DlScalar mwt) {
+void DlDispatcherBase::transformFullPerspective(
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
   AUTO_DEPTH_WATCHER(0u);
 
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
-  // clang-format off
   auto transform = Matrix{
-    mxx, myx, mzx, mwx,
-    mxy, myy, mzy, mwy,
-    mxz, myz, mzz, mwz,
-    mxt, myt, mzt, mwt
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
   };
-  // clang-format on
   GetCanvas().Transform(transform);
 }
+// clang-format on
 
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::transformReset() {
@@ -853,21 +840,16 @@ void DlDispatcherBase::drawDisplayList(
 }
 
 // |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                    DlScalar x,
-                                    DlScalar y) {
-  // When running with Impeller enabled Skia text blobs are converted to
-  // Impeller text frames in paragraph_skia.cc
-  UNIMPLEMENTED;
-}
-
-// |flutter::DlOpReceiver|
-void DlDispatcherBase::drawTextFrame(
-    const std::shared_ptr<TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void DlDispatcherBase::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                DlScalar x,
+                                DlScalar y) {
   AUTO_DEPTH_WATCHER(1u);
 
+  auto text_frame = text->GetTextFrame();
+
+  // When running with Impeller enabled Skia text blobs are converted to
+  // Impeller text frames in paragraph_skia.cc
+  FML_CHECK(text_frame != nullptr);
   GetCanvas().DrawTextFrame(text_frame,             //
                             impeller::Point{x, y},  //
                             paint_                  //
@@ -1061,44 +1043,52 @@ void FirstPassDispatcher::skew(DlScalar sx, DlScalar sy) {
 }
 
 // clang-format off
-  // 2x3 2D affine subset of a 4x4 transform in row major order
-  void FirstPassDispatcher::transform2DAffine(DlScalar mxx, DlScalar mxy, DlScalar mxt,
-                                              DlScalar myx, DlScalar myy, DlScalar myt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx,  myx,  0.0f, 0.0f,
-        mxy,  myy,  0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        mxt,  myt,  0.0f, 1.0f
-    );
-  }
+// 2x3 2D affine subset of a 4x4 transform in row major order
+void FirstPassDispatcher::transform2DAffine(
+    DlScalar mxx, DlScalar mxy, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+      mxx,  myx,  0.0f, 0.0f,
+      mxy,  myy,  0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      mxt,  myt,  0.0f, 1.0f
+  );
+}
+// clang-format on
 
-  // full 4x4 transform in row major order
-  void FirstPassDispatcher::transformFullPerspective(
-      DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
-      DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
-      DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
-      DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
-    matrix_ = matrix_ * Matrix::MakeColumn(
-        mxx, myx, mzx, mwx,
-        mxy, myy, mzy, mwy,
-        mxz, myz, mzz, mwz,
-        mxt, myt, mzt, mwt
-    );
-  }
+// clang-format off
+// full 4x4 transform in row major order
+void FirstPassDispatcher::transformFullPerspective(
+    DlScalar mxx, DlScalar mxy, DlScalar mxz, DlScalar mxt,
+    DlScalar myx, DlScalar myy, DlScalar myz, DlScalar myt,
+    DlScalar mzx, DlScalar mzy, DlScalar mzz, DlScalar mzt,
+    DlScalar mwx, DlScalar mwy, DlScalar mwz, DlScalar mwt) {
+  matrix_ = matrix_ * Matrix::MakeColumn(
+      mxx, myx, mzx, mwx,
+      mxy, myy, mzy, mwy,
+      mxz, myz, mzz, mwz,
+      mxt, myt, mzt, mwt
+  );
+}
 // clang-format on
 
 void FirstPassDispatcher::transformReset() {
   matrix_ = Matrix();
 }
 
-void FirstPassDispatcher::drawTextFrame(
-    const std::shared_ptr<impeller::TextFrame>& text_frame,
-    DlScalar x,
-    DlScalar y) {
+void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
+                                   DlScalar x,
+                                   DlScalar y) {
   GlyphProperties properties;
+  auto text_frame = text->GetTextFrame();
+  if (text_frame == nullptr) {
+    return;
+  }
+
   if (paint_.style == Paint::Style::kStroke) {
     properties.stroke = paint_.stroke;
   }
+
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
@@ -1214,6 +1204,12 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   }
 }
 
+namespace {
+bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
+  return !pixel_format.has_value();
+}
+}  // namespace
+
 std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
 FirstPassDispatcher::TakeBackdropData() {
   std::unordered_map<int64_t, BackdropData> temp;
@@ -1226,7 +1222,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer,
-    bool generate_mips) {
+    bool generate_mips,
+    std::optional<PixelFormat> target_pixel_format) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1237,14 +1234,20 @@ std::shared_ptr<Texture> DisplayListToTexture(
       impeller::RenderTargetAllocator(
           context.GetContext()->GetResourceAllocator());
   impeller::RenderTarget target;
-  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+      PixelFormatSupportsMSAA(target_pixel_format)) {
     target = render_target_allocator.CreateOffscreenMSAA(
         *context.GetContext(),  // context
         size,                   // size
         /*mip_count=*/mip_count,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
+        std::nullopt,                           // stencil_attachment_config
+        nullptr,                                // existing_color_msaa_texture
+        nullptr,             // existing_color_resolve_texture
+        nullptr,             // existing_depth_stencil_texture
+        target_pixel_format  // target_format
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
@@ -1253,7 +1256,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
         /*mip_count=*/mip_count,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
+            kDefaultColorAttachmentConfig,  // color_attachment_config
+        std::nullopt,                       // stencil_attachment_config
+        nullptr,                            // existing_color_texture
+        nullptr,                            // existing_depth_stencil_texture
+        target_pixel_format                 // target_format
     );
   }
   if (!target.IsValid()) {
@@ -1277,7 +1284,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetContentContext().GetTransientsBuffer().Reset();
+      context.GetContentContext().GetTransientsDataBuffer().Reset();
+      context.GetContentContext().GetTransientsIndexesBuffer().Reset();
     }
     context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
     context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
@@ -1312,7 +1320,7 @@ bool RenderToTarget(ContentContext& context,
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetTransientsBuffer().Reset();
+      context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
   });

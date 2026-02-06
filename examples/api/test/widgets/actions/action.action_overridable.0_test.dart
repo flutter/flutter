@@ -4,7 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_api_samples/widgets/actions/action.action_overridable.0.dart' as example;
+import 'package:flutter_api_samples/widgets/actions/action.action_overridable.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,7 +19,9 @@ void main() {
     );
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(body: Center(child: example.VerificationCodeGenerator())),
+        home: Scaffold(
+          body: Center(child: example.VerificationCodeGenerator()),
+        ),
       ),
     );
 

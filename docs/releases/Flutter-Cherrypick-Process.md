@@ -8,6 +8,8 @@ With branching and branch testability being supported for Flutter & Dart release
 
 ## Automatically Create a Cherry-pick Request
 
+> [NOTE] If you are trying to open a cherry-pick **before** that release has shipped (e.g., you would like to CP into 3.21 beta but the current beta is 3.20) then you will need to follow the manual cherry-pick instructions below.
+
 1. Add the `cp: beta` or `cp: stable` label to the pull request on flutter/flutter master. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links)
 2. Wait about 30 seconds.
 3. If automatic cherry-pick succeeds (no merge conflict), a new pull requested will be created and you will receive an email. Edit the cherry-pick details in the PR description of the generated pull request, and a release engineer will follow up on the request.
@@ -19,7 +21,10 @@ If for some reason, an automated cherry-pick can not be applied, please follow t
 
 If the automated cherry-pick process fails, you will have to create the cherry-pick request manually:
 
-1. Create a cherry-pick pull request to the intended branch. (you can find [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branch info by following the respective links).
+1. Create a cherry-pick pull request to the intended branch.
+
+> **How to find the intended branch:** You can find the current [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) candidate branches by following the respective links. For a pre-release branch, you will need to locate the correct candidate branch yourself. It should follow the pattern `flutter-X.XX-candidate.X` where `X.XX` is the release you are targeting.
+
 2. Edit the title of the cherry-pick request to start with either [beta] or [stable].
 3. Fill out the PR description with the following fields:
   - Impacted Users (Approximately who will hit this issue, ex. all Flutter devs, Windows developers, all end-customers, apps using X framework feature).

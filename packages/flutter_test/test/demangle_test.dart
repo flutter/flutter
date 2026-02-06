@@ -11,7 +11,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 Future<void> main() async {
   // We use AutomatedTestWidgetsFlutterBinding to allow the test binding to set
   // FlutterError.demangleStackTrace and FlutterError.onError without testWidgets.
-  final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
+  final binding = AutomatedTestWidgetsFlutterBinding();
 
   test('FlutterErrorDetails demangles', () async {
     await binding.runTest(() async {
@@ -50,8 +50,8 @@ Future<StackTrace> getMangledStack() {
   // package:test uses package:stack_trace to wrap tests in a Zone that overrides
   // errorCallback, the error callback transforms any StackTrace propagated
   // to futures into a Chain, which has a format different from the vm.
-  final Completer<StackTrace> stackCompleter = Completer<StackTrace>();
-  final Completer<void> completer = Completer<void>();
+  final stackCompleter = Completer<StackTrace>();
+  final completer = Completer<void>();
   completer.future.then(
     (void value) {
       assert(false);

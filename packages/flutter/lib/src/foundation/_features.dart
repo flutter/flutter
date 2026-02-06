@@ -14,6 +14,9 @@ import 'package:meta/meta.dart';
 /// files will throw an `UnsupportedError`:
 ///
 /// 1. packages/flutter/lib/src/widgets/_window.dart
+/// 2. packages/flutter/lib/src/widgets/_window_io.dart
+/// 3. packages/flutter/lib/src/widgets/_window_web.dart
+/// 4. packages/flutter/lib/src/widgets/_window_win32.dart
 ///
 /// See: https://github.com/flutter/flutter/issues/30701.
 @internal
@@ -23,6 +26,6 @@ bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 ///
 /// Do not use this API. Flutter can and will make breaking changes to this API.
 @internal
-Set<String> debugEnabledFeatureFlags = <String>{
+final Set<String> debugEnabledFeatureFlags = <String>{
   ...const String.fromEnvironment('FLUTTER_ENABLED_FEATURE_FLAGS').split(','),
 };

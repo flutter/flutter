@@ -19,14 +19,14 @@ Future<TaskResult> run() async {
   await device.unlock();
   final Directory appDir = dir(path.join(flutterDirectory.path, 'examples/hello_world'));
 
-  bool isUsingValidationLayers = false;
-  bool hasValidationErrors = false;
-  int invalidBackendCount = 0;
-  final Completer<void> didReceiveBackendMessage = Completer<void>();
+  var isUsingValidationLayers = false;
+  var hasValidationErrors = false;
+  var invalidBackendCount = 0;
+  final didReceiveBackendMessage = Completer<void>();
 
   await inDirectory(appDir, () async {
     await flutter('packages', options: <String>['get']);
-    const String validationLayersMessage =
+    const validationLayersMessage =
         'Using the Impeller rendering backend (Vulkan with Validation Layers)';
     final StreamSubscription<String> adb = device.logcat.listen((String data) {
       if (data.contains('Using the Impeller rendering backend')) {

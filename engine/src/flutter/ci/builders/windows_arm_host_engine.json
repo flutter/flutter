@@ -1,6 +1,6 @@
 {
     "luci_flags": {
-        "upload_content_hash": true
+      "upload_content_hash": true
     },
     "builds": [
         {

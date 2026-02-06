@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -12,7 +12,7 @@ void main() {
     runApp(const SizedBox());
     final RenderObject renderObject = tester.renderObject(find.byType(SizedBox));
 
-    RenderObject parent = renderObject;
+    var parent = renderObject;
     while (parent.parent != null) {
       parent = parent.parent!;
     }
@@ -25,10 +25,10 @@ void main() {
   testWidgets('can manually attach RootWidget to build owner', (WidgetTester tester) async {
     expect(find.byType(ColoredBox), findsNothing);
 
-    final RootWidget rootWidget = RootWidget(
+    final rootWidget = RootWidget(
       child: View(
         view: FakeFlutterView(tester.view),
-        child: const ColoredBox(color: Colors.orange),
+        child: const ColoredBox(color: Color(0xfffff3e0)),
       ),
     );
     tester.binding.attachToBuildOwner(rootWidget);

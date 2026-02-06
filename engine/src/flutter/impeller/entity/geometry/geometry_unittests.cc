@@ -1264,7 +1264,7 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
           },
           1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_reference.size(), 80u);
+  EXPECT_EQ(points_reference.size(), 76u);
 
   // Now create a path that doubles back on itself with a cubic.
   flutter::DlPathBuilder path_builder;

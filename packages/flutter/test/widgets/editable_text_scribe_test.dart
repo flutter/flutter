@@ -12,10 +12,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  const TextStyle textStyle = TextStyle();
-  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-  final List<MethodCall> calls = <MethodCall>[];
-  bool isFeatureAvailableReturnValue = true;
+  const textStyle = TextStyle();
+  const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  final calls = <MethodCall>[];
+  var isFeatureAvailableReturnValue = true;
   late TextEditingController controller;
   late FocusNode focusNode;
 
@@ -48,17 +48,14 @@ void main() {
     bool forcePressEnabled = true,
     bool selectionEnabled = true,
   }) async {
-    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final FakeTextSelectionGestureDetectorBuilderDelegate delegate =
-        FakeTextSelectionGestureDetectorBuilderDelegate(
-          editableTextKey: editableTextKey,
-          forcePressEnabled: forcePressEnabled,
-          selectionEnabled: selectionEnabled,
-        );
-
-    final TextSelectionGestureDetectorBuilder provider = TextSelectionGestureDetectorBuilder(
-      delegate: delegate,
+    final editableTextKey = GlobalKey<EditableTextState>();
+    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+      editableTextKey: editableTextKey,
+      forcePressEnabled: forcePressEnabled,
+      selectionEnabled: selectionEnabled,
     );
+
+    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
 
     await tester.pumpWidget(
       MaterialApp(

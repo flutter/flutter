@@ -58,9 +58,9 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
+    final args = call.arguments as Map<dynamic, dynamic>;
+    final id = args['id'] as int;
+    final viewType = args['viewType'] as String;
     final Object? params = args['params'];
 
     if (_findViewById(id) != null) {
@@ -78,8 +78,7 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
       );
     }
 
-    final ui_web.ParameterizedPlatformViewFactory viewFactory =
-        registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
+    final viewFactory = registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
 
     _views.add((
       id: id,
@@ -91,7 +90,7 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
   }
 
   Future<dynamic> _dispose(MethodCall call) async {
-    final int id = call.arguments as int;
+    final id = call.arguments as int;
 
     final FakePlatformView? view = _findViewById(id);
     if (view == null) {

@@ -58,11 +58,11 @@ class Firefox extends Browser {
   /// Starts a new instance of Firefox open to the given [url], which may be a
   /// [Uri] or a [String].
   factory Firefox(Uri url, BrowserInstallation installation, {bool debug = false}) {
-    final Completer<Uri> remoteDebuggerCompleter = Completer<Uri>.sync();
+    final remoteDebuggerCompleter = Completer<Uri>.sync();
     return Firefox._(
       BrowserProcess(() async {
         // Using a profile on opening will prevent popups related to profiles.
-        const String profile = '''
+        const profile = '''
 user_pref("browser.shell.checkDefaultBrowser", false);
 user_pref("dom.disable_open_during_load", false);
 user_pref("dom.max_script_run_time", 0);
@@ -70,7 +70,7 @@ user_pref("trailhead.firstrun.branches", "nofirstrun-empty");
 user_pref("browser.aboutwelcome.enabled", false);
 ''';
 
-        final Directory temporaryProfileDirectory = Directory(
+        final temporaryProfileDirectory = Directory(
           path.join(environment.webUiDartToolDir.path, 'firefox_profile'),
         );
 
@@ -83,7 +83,7 @@ user_pref("browser.aboutwelcome.enabled", false);
         temporaryProfileDirectory.createSync(recursive: true);
         File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
-        final List<String> args = <String>[
+        final args = <String>[
           url.toString(),
           '--profile',
           temporaryProfileDirectory.path,

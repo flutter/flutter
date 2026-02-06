@@ -211,7 +211,7 @@ class InkSplash extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
+    final paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
     if (_repositionToReferenceBox) {
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);

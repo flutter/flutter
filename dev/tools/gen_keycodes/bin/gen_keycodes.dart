@@ -88,7 +88,7 @@ String readDataFile(String fileName) {
 }
 
 bool _assertsEnabled() {
-  bool enabledAsserts = false;
+  var enabledAsserts = false;
   assert(() {
     enabledAsserts = true;
     return true;
@@ -97,7 +97,7 @@ bool _assertsEnabled() {
 }
 
 Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
-  final File codeFile = File(outDir);
+  final codeFile = File(outDir);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
   }
@@ -110,7 +110,7 @@ Future<void> main(List<String> rawArguments) async {
     print('The gen_keycodes script must be run with --enable-asserts.');
     return;
   }
-  final ArgParser argParser = ArgParser();
+  final argParser = ArgParser();
   argParser.addOption(
     'physical-data',
     defaultsTo: path.join(dataRoot, 'physical_key_data.g.json'),
@@ -228,7 +228,7 @@ Future<void> main(List<String> rawArguments) async {
     );
 
     // Write data files
-    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    const encoder = JsonEncoder.withIndent('  ');
     final String physicalJson = encoder.convert(physicalData.toJson());
     File(parsedArguments['physical-data'] as String).writeAsStringSync('$physicalJson\n');
     final String logicalJson = encoder.convert(logicalData.toJson());
@@ -279,7 +279,7 @@ Future<void> main(List<String> rawArguments) async {
     KeyCodesJavaGenerator(physicalData, logicalData),
   );
 
-  final Map<String, PlatformCodeGenerator> platforms = <String, PlatformCodeGenerator>{
+  final platforms = <String, PlatformCodeGenerator>{
     'android': AndroidCodeGenerator(physicalData, logicalData),
     'macos': MacOSCodeGenerator(physicalData, logicalData, layoutGoals),
     'ios': IOSCodeGenerator(physicalData, logicalData),

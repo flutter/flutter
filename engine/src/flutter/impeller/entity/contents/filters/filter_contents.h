@@ -39,12 +39,14 @@ class FilterContents : public Contents {
   enum class MorphType { kDilate, kErode };
 
   /// Creates a gaussian blur that operates in 2 dimensions.
-  /// See also: `MakeDirectionalGaussianBlur`
+  ///
+  /// For definition of parameters, see DlBlurImageFilter.
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
       const FilterInput::Ref& input,
       Sigma sigma_x,
       Sigma sigma_y,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
+      std::optional<Rect> bounds = std::nullopt,
       BlurStyle mask_blur_style = BlurStyle::kNormal,
       const Geometry* mask_geometry = nullptr);
 
@@ -122,11 +124,7 @@ class FilterContents : public Contents {
   std::optional<Snapshot> RenderToSnapshot(
       const ContentContext& renderer,
       const Entity& entity,
-      std::optional<Rect> coverage_limit = std::nullopt,
-      const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true,
-      int32_t mip_count = 1,
-      std::string_view label = "Filter Snapshot") const override;
+      const SnapshotOptions& options) const override;
 
   /// @brief  Determines the coverage of source pixels that will be needed
   ///         to produce results for the specified |output_limit| under the

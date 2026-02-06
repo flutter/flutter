@@ -30,7 +30,7 @@ import 'theme.dart';
 /// [DatePickerDialog] widgets.
 ///
 /// Descendant widgets obtain the current [DatePickerThemeData] object with
-/// [DatePickerTheme.of]. Instances of [DatePickerTheme] can
+/// [DatePickerTheme.of]. Instances of [DatePickerThemeData] can
 /// be customized with [DatePickerThemeData.copyWith].
 ///
 /// Typically a [DatePickerTheme] is specified as part of the overall
@@ -218,13 +218,13 @@ class DatePickerThemeData with Diagnosticable {
   /// ```dart
   /// dayOverlayColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
   ///   if (states.contains(WidgetState.pressed)) {
-  ///     return Colors.blue.withOpacity(0.12);
+  ///     return Colors.blue.withValues(alpha: 0.12);
   ///   }
   ///   if (states.contains(WidgetState.hovered)) {
-  ///     return Colors.blue.withOpacity(0.08);
+  ///     return Colors.blue.withValues(alpha: 0.08);
   ///   }
   ///   if (states.contains(WidgetState.focused)) {
-  ///     return Colors.blue.withOpacity(0.12);
+  ///     return Colors.blue.withValues(alpha: 0.12);
   ///   }
   ///   return null; // Use the default color.
   /// })
@@ -276,8 +276,10 @@ class DatePickerThemeData with Diagnosticable {
   /// [DatePickerDialog.currentDate] label in the grid of the date
   /// picker.
   ///
-  /// The border side's [BorderSide.color] is not used,
-  /// [todayForegroundColor] is used instead.
+  /// If the border side's [BorderSide.color] is transparent (has 0 opacity),
+  /// [todayForegroundColor] is used instead. Otherwise, the border's color
+  /// is used as specified. To omit the border entirely,
+  /// set [todayBorder] to [BorderSide.none].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the day selector shape decoration

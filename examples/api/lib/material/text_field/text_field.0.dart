@@ -15,7 +15,10 @@ class ObscuredTextFieldSample extends StatelessWidget {
       width: 250,
       child: TextField(
         obscureText: true,
-        decoration: InputDecoration(border: OutlineInputBorder(), labelText: 'Password'),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: 'Password',
+        ),
       ),
     );
   }

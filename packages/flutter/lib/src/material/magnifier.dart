@@ -126,7 +126,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes
     // the "above touch point" shift.
-    final Offset basicMagnifierOffset = Offset(
+    final basicMagnifierOffset = Offset(
       Magnifier.kDefaultMagnifierSize.width / 2,
       Magnifier.kDefaultMagnifierSize.height + Magnifier.kStandardVerticalFocalPointShift,
     );
@@ -190,7 +190,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
     // the magnifier. screenBoundsAdjustedMagnifierRect.top == unadjustedMagnifierRect.top for most cases,
     // but when pressed up against the top of the screen, we adjust the focal point by
     // the amount that we shifted from our "natural" position.
-    final Offset focalPointAdjustmentForScreenBoundsAdjustment = Offset(
+    final focalPointAdjustmentForScreenBoundsAdjustment = Offset(
       newRelativeFocalPointX,
       unadjustedMagnifierRect.top - screenBoundsAdjustedMagnifierRect.top,
     );

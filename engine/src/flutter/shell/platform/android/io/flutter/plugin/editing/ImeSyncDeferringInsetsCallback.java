@@ -8,6 +8,7 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.graphics.Insets;
+import android.os.Build;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
@@ -146,15 +147,17 @@ class ImeSyncDeferringInsetsCallback {
         return insets;
       }
 
-      // The IME insets include the height of the navigation bar. If the app isn't laid out behind
-      // the navigation bar, this causes the IME insets to be too large during the animation.
-      // To fix this, we subtract the navigationBars bottom inset if the system UI flags for laying
-      // out behind the navigation bar aren't present.
+      // Pre 15, the IME insets include the height of the navigation bar. If the app
+      // isn't laid out behind the navigation bar, this causes the IME insets to be too large during
+      // the animation.  To fix this, we subtract the navigationBars bottom inset if the system UI
+      // flags for laying out behind the navigation bar aren't present.
       int excludedInsets = 0;
       int systemUiFlags = view.getWindowSystemUiVisibility();
-      if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-          && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-        excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+        if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
+            && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+          excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+        }
       }
 
       WindowInsets.Builder builder = new WindowInsets.Builder(lastWindowInsets);

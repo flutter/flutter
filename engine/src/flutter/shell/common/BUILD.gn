@@ -65,7 +65,7 @@ template("dart_embedder_resources") {
 source_set("platform_message_handler") {
   sources = [ "platform_message_handler.h" ]
   public_configs = [ "//flutter:config" ]
-  deps = [ "//flutter/fml:fml" ]
+  deps = [ "//flutter/fml" ]
 }
 
 source_set("display") {
@@ -77,7 +77,11 @@ source_set("display") {
     "variable_refresh_rate_reporter.h",
   ]
   public_configs = [ "//flutter:config" ]
-  deps = [ "//flutter/fml:fml" ]
+  deps = [ "//flutter/fml" ]
+}
+
+source_set("snapshot_pixel_format") {
+  sources = [ "snapshot_pixel_format.h" ]
 }
 
 source_set("common") {
@@ -132,6 +136,7 @@ source_set("common") {
   public_deps = [
     ":display",
     ":platform_message_handler",
+    ":snapshot_pixel_format",
     "//flutter/shell/version",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
@@ -148,6 +153,7 @@ source_set("common") {
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/shell/common:base64",
+    "//flutter/shell/geometry",
     "//flutter/shell/profiling",
     "//flutter/skia",
   ]

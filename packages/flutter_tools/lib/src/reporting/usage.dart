@@ -379,8 +379,8 @@ class LogToFileAnalytics extends AnalyticsMock {
     final parameters = <String, String>{
       'variableName': variableName,
       'time': '$time',
-      if (category != null) 'category': category,
-      if (label != null) 'label': label,
+      'category': ?category,
+      'label': ?label,
     };
     _sendController.add(parameters);
     logFile.writeAsStringSync('timing $parameters\n', mode: FileMode.append);
@@ -403,14 +403,14 @@ class TestUsage implements Usage {
   final events = <TestUsageEvent>[];
   final exceptions = <dynamic>[];
   final timings = <TestTimingEvent>[];
-  var ensureAnalyticsSentCalls = 0;
+  int ensureAnalyticsSentCalls = 0;
   var _printedWelcome = false;
 
   @override
-  var enabled = true;
+  bool enabled = true;
 
   @override
-  var suppressAnalytics = false;
+  bool suppressAnalytics = false;
 
   @override
   String get clientId => 'test-client';

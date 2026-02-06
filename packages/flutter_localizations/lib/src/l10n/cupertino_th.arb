@@ -29,5 +29,11 @@
   "shareButtonLabel": "แชร์...",
   "clearButtonLabel": "ล้าง",
   "cancelButtonLabel": "ยกเลิก",
-  "backButtonLabel": "กลับ"
+  "backButtonLabel": "กลับ",
+  "expansionTileExpandedHint": "แตะสองครั้งเพื่อยุบ",
+  "expansionTileCollapsedHint": "แตะสองครั้งเพื่อขยาย",
+  "expansionTileExpandedTapHint": "ยุบ",
+  "expansionTileCollapsedTapHint": "ขยายเพื่อดูรายละเอียดเพิ่มเติม",
+  "expandedHint": "ยุบ",
+  "collapsedHint": "ขยาย"
 }

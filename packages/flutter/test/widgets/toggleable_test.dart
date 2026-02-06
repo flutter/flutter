@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Toggleable exists in widget layer', (WidgetTester tester) async {
-    final TestPainter testPainter = TestPainter();
+    final testPainter = TestPainter();
     expect(testPainter, isA<ToggleablePainter>());
     expect(testPainter, isNot(throwsException));
   });

@@ -199,10 +199,6 @@ struct TRect {
            bottom_ == r.bottom_;
   }
 
-  [[nodiscard]] constexpr bool operator!=(const TRect& r) const {
-    return !(*this == r);
-  }
-
   [[nodiscard]] constexpr TRect Scale(Type scale) const {
     return TRect(left_ * scale,   //
                  top_ * scale,    //
@@ -781,8 +777,8 @@ struct TRect {
     if (neighbor.z >= kMinimumHomogenous) {
       auto t = (kMinimumHomogenous - p.z) / (neighbor.z - p.z);
       clipped[index++] = {
-          (t * p.x + (1.0f - t) * neighbor.x) / kMinimumHomogenous,
-          (t * p.y + (1.0f - t) * neighbor.y) / kMinimumHomogenous,
+          ((1.0f - t) * p.x + t * neighbor.x) / kMinimumHomogenous,
+          ((1.0f - t) * p.y + t * neighbor.y) / kMinimumHomogenous,
       };
     }
     return index;

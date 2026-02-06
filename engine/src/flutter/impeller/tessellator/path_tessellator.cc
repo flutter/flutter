@@ -4,6 +4,7 @@
 
 #include "flutter/impeller/tessellator/path_tessellator.h"
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/wangs_formula.h"
 
 namespace {
@@ -310,6 +311,16 @@ void PathTessellator::PathToFilledVertices(const PathSource& source,
   PathFillWriter path_writer(writer, scale);
   PathPruner pruner(path_writer, false);
   source.Dispatch(pruner);
+  pruner.PathEnd();
+}
+
+void PathTessellator::PathToTransformedFilledVertices(const PathSource& source,
+                                                      VertexWriter& writer,
+                                                      const Matrix& matrix) {
+  PathFillWriter path_writer(writer, matrix.GetMaxBasisLengthXY());
+  PathPruner pruner(path_writer, false);
+  PathTransformer transformer(pruner, matrix);
+  source.Dispatch(transformer);
   pruner.PathEnd();
 }
 

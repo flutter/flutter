@@ -29,7 +29,6 @@ import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'text_theme.dart';
@@ -430,9 +429,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value must be non-negative.
   ///
-  /// If this property is null, then [AppBarTheme.elevation] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, the
-  /// default value is 4.
+  /// If this property is null, then the ambient [AppBarThemeData.elevation]
+  /// is used. If that is also null, the default value is 4.
   /// {@endtemplate}
   ///
   /// See also:
@@ -450,9 +448,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The elevation that will be used if this app bar has something
   /// scrolled underneath it.
   ///
-  /// If non-null then it [AppBarTheme.scrolledUnderElevation] of
-  /// [ThemeData.appBarTheme] will be used. If that is also null then [elevation]
-  /// will be used.
+  /// If this property is null, then the ambient [AppBarThemeData.scrolledUnderElevation]
+  /// is used. If that is also null then [elevation] is used.
   ///
   /// The value must be non-negative.
   ///
@@ -478,9 +475,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.shadowColor}
   /// The color of the shadow below the app bar.
   ///
-  /// If this property is null, then [AppBarTheme.shadowColor] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, the default value
-  /// is fully opaque black.
+  /// If this property is null, then the ambient [AppBarThemeData.shadowColor]
+  /// is used. If that is also null, the default value is fully opaque black.
   /// {@endtemplate}
   ///
   /// See also:
@@ -503,8 +499,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@template flutter.material.appbar.shape}
   /// The shape of the app bar's [Material] as well as its shadow.
   ///
-  /// If this property is null, then [AppBarTheme.shape] of
-  /// [ThemeData.appBarTheme] is used. Both properties default to null.
+  /// If this property is null, then the ambient [AppBarThemeData.shape]
+  /// is used. Both properties default to null.
   /// If both properties are null then the shape of the app bar's [Material]
   /// is just a simple rectangle.
   ///
@@ -603,9 +599,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// themed differently than the icon that appears in the app bar's [leading]
   /// widget.
   ///
-  /// If this property is null, then [AppBarTheme.actionsIconTheme] of
-  /// [ThemeData.appBarTheme] is used. If that is also null, then the value of
-  /// [iconTheme] is used.
+  /// If this property is null, then the ambient [AppBarThemeData.actionsIconTheme]
+  /// is used. If that is also null, then the value of [iconTheme] is used.
   /// {@endtemplate}
   ///
   /// See also:
@@ -633,6 +628,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// {@template flutter.material.appbar.excludeHeaderSemantics}
   /// Whether the title should be wrapped with header [Semantics].
+  ///
+  /// If false, the title will be used as [SemanticsProperties.namesRoute]
+  /// for Android, Fuchsia, Linux, and Windows platform. This means the title is
+  /// announced by screen reader when transition to this route.
+  ///
+  /// The accessibility behavior is platform adaptive, based on the device's
+  /// actual platform rather than the theme's platform setting. This ensures that
+  /// assistive technologies like VoiceOver on iOS and macOS receive the correct
+  /// `namesRoute` semantic information, even when the app's theme is configured
+  /// to mimic a different platform's appearance.
   ///
   /// Defaults to false.
   /// {@endtemplate}
@@ -864,21 +869,21 @@ class _AppBarState extends State<AppBar> {
 
       if (_scrolledUnder != oldScrolledUnder) {
         setState(() {
-          // React to a change in MaterialState.scrolledUnder
+          // React to a change in WidgetState.scrolledUnder
         });
       }
     }
   }
 
   Color _resolveColor(
-    Set<MaterialState> states,
+    Set<WidgetState> states,
     Color? widgetColor,
     Color? themeColor,
     Color defaultColor,
   ) {
-    return MaterialStateProperty.resolveAs<Color?>(widgetColor, states) ??
-        MaterialStateProperty.resolveAs<Color?>(themeColor, states) ??
-        MaterialStateProperty.resolveAs<Color>(defaultColor, states);
+    return WidgetStateProperty.resolveAs<Color?>(widgetColor, states) ??
+        WidgetStateProperty.resolveAs<Color?>(themeColor, states) ??
+        WidgetStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
   SystemUiOverlayStyle _systemOverlayStyleForBrightness(
@@ -912,8 +917,8 @@ class _AppBarState extends State<AppBar> {
 
     final FlexibleSpaceBarSettings? settings = context
         .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    final Set<MaterialState> states = <MaterialState>{
-      if (settings?.isScrolledUnder ?? _scrolledUnder) MaterialState.scrolledUnder,
+    final states = <WidgetState>{
+      if (settings?.isScrolledUnder ?? _scrolledUnder) WidgetState.scrolledUnder,
     };
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
@@ -937,7 +942,7 @@ class _AppBarState extends State<AppBar> {
       Theme.of(context).colorScheme.surfaceContainer,
     );
 
-    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+    final effectiveBackgroundColor = states.contains(WidgetState.scrolledUnder)
         ? scrolledUnderBackground
         : backgroundColor;
 
@@ -946,7 +951,7 @@ class _AppBarState extends State<AppBar> {
 
     final double elevation = widget.elevation ?? appBarTheme.elevation ?? defaults.elevation!;
 
-    final double effectiveElevation = states.contains(MaterialState.scrolledUnder)
+    final double effectiveElevation = states.contains(WidgetState.scrolledUnder)
         ? widget.scrolledUnderElevation ??
               appBarTheme.scrolledUnderElevation ??
               defaults.scrolledUnderElevation ??
@@ -1067,7 +1072,7 @@ class _AppBarState extends State<AppBar> {
       title = _AppBarTitleBox(child: title);
       if (!widget.excludeHeaderSemantics) {
         title = Semantics(
-          namesRoute: switch (theme.platform) {
+          namesRoute: switch (defaultTargetPlatform) {
             TargetPlatform.android ||
             TargetPlatform.fuchsia ||
             TargetPlatform.linux ||
@@ -2462,7 +2467,7 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     }
     size = constraints.biggest;
     child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final childParentData = child.parentData! as BoxParentData;
     childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }

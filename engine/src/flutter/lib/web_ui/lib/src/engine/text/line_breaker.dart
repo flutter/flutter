@@ -43,18 +43,18 @@ List<LineBreakFragment> breakLinesUsingV8BreakIterator(
   JSString jsText,
   DomV8BreakIterator iterator,
 ) {
-  final List<LineBreakFragment> breaks = <LineBreakFragment>[];
-  int fragmentStart = 0;
+  final breaks = <LineBreakFragment>[];
+  var fragmentStart = 0;
 
   iterator.adoptText(jsText);
   iterator.first();
   while (iterator.next() != -1) {
     final int fragmentEnd = iterator.current().toInt();
-    int trailingNewlines = 0;
-    int trailingSpaces = 0;
+    var trailingNewlines = 0;
+    var trailingSpaces = 0;
 
     // Calculate trailing newlines and spaces.
-    for (int i = fragmentStart; i < fragmentEnd; i++) {
+    for (var i = fragmentStart; i < fragmentEnd; i++) {
       final int codeUnit = text.codeUnitAt(i);
       if (_kNewlines.contains(codeUnit)) {
         trailingNewlines++;

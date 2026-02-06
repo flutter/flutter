@@ -13,7 +13,7 @@ OverlayLayer::OverlayLayer(int id,
                            std::unique_ptr<Surface> surface)
     : id(id),
       android_surface(std::move(android_surface)),
-      surface(std::move(surface)){};
+      surface(std::move(surface)) {};
 
 OverlayLayer::~OverlayLayer() = default;
 

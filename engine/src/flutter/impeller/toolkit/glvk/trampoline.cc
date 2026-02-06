@@ -256,7 +256,7 @@ bool Trampoline::BlitTextureOpenGLToVulkan(
   //
   // See the following help link for an overview of the different coordinate
   // systems:
-  // https://github.com/flutter/engine/blob/5810b3fc791f4bb82b9a454014310990eddc1181/impeller/docs/coordinate_system.md
+  // https://github.com/flutter/flutter/blob/master/docs/engine/impeller/docs/coordinate_system.md
   static constexpr const VertexData kVertData[] = {
       {{-1, -1}, {0, 1}},  // bottom left
       {{-1, +1}, {0, 0}},  // top left

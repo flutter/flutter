@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -49,7 +50,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'Runner.app',
-      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
+      'DEVELOPMENT_TEAM': ?developmentTeam,
     };
   }
 
@@ -124,7 +125,8 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({
+  // Sets up xcresulttool command for Xcode versions below 16.
+  FakeCommand setUpLegacyXCResultCommand({
     String stdout = '',
     void Function(List<String> command)? onRun,
   }) {
@@ -314,6 +316,7 @@ void main() {
       ]),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -350,6 +353,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -387,6 +391,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -423,6 +428,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -470,6 +476,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -508,6 +515,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -545,6 +553,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -580,6 +589,7 @@ void main() {
       Pub: ThrowingPub.new,
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -642,6 +652,7 @@ void main() {
       FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
       Analytics: () => fakeAnalytics,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
     },
   );
 
@@ -703,6 +714,7 @@ void main() {
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
         Pub: ThrowingPub.new,
         Analytics: () => fakeAnalytics,
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -762,10 +774,12 @@ void main() {
             plutilCommand,
             plutilCommand,
             plutilCommand,
+            plutilCommand,
           ]),
         ),
         Pub: ThrowingPub.new,
         Analytics: () => fakeAnalytics,
+        Artifacts: () => Artifacts.test(),
       },
     );
   });
@@ -789,7 +803,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -809,6 +823,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -831,7 +846,7 @@ void main() {
             },
             stdout: 'Lots of spew from Xcode',
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -857,6 +872,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -878,7 +894,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -910,6 +926,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -926,7 +943,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           xattrCommand,
           setUpFakeXcodeBuildHandler(exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -948,6 +965,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -969,7 +987,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1004,6 +1022,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1025,7 +1044,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1051,6 +1070,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1072,7 +1092,7 @@ void main() {
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1092,6 +1112,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1133,7 +1154,7 @@ void main() {
                   .createSync(recursive: true);
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1150,6 +1171,7 @@ void main() {
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1174,7 +1196,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1194,6 +1216,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1215,7 +1238,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1236,6 +1259,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1272,13 +1296,14 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonNoIssues),
           setUpRsyncCommand(),
         ]),
         Pub: ThrowingPub.new,
         EnvironmentType: () => EnvironmentType.physical,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1300,7 +1325,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
           setUpRsyncCommand(),
         ]);
 
@@ -1320,6 +1345,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1341,7 +1367,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1363,6 +1389,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1384,7 +1411,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
           setUpRsyncCommand(),
         ]);
 
@@ -1413,6 +1440,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () =>
             FakeXcodeProjectInterpreterWithBuildSettings(developmentTeam: null),
+        Artifacts: () => Artifacts.test(),
       },
     );
   });
@@ -1437,7 +1465,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(),
+          setUpLegacyXCResultCommand(),
           setUpRsyncCommand(),
         ]);
 
@@ -1459,6 +1487,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1481,7 +1510,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1507,6 +1536,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1530,7 +1560,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
               fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
             },
           ),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
           setUpRsyncCommand(),
         ]);
 
@@ -1564,6 +1594,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
 
@@ -1580,7 +1611,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         processManager.addCommands(<FakeCommand>[
           xattrCommand,
           setUpFakeXcodeBuildHandler(simulator: true, exitCode: 1),
-          setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
+          setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           setUpRsyncCommand(),
         ]);
 
@@ -1605,6 +1636,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         Pub: ThrowingPub.new,
         Platform: () => macosPlatform,
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+        Artifacts: () => Artifacts.test(),
       },
     );
   });

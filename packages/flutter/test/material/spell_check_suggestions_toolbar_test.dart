@@ -101,7 +101,7 @@ void main() {
   );
 
   test('buildSuggestionButtons only considers the first three suggestions', () {
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState(
+    final editableTextState = _FakeEditableTextState(
       suggestions: <String>['hello', 'yellow', 'yell', 'yeller'],
     );
     final List<ContextMenuButtonItem>? buttonItems = SpellCheckSuggestionsToolbar.buildButtonItems(
@@ -120,13 +120,31 @@ void main() {
   });
 
   test('buildButtonItems builds only a delete button when no suggestions', () {
-    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
+    final editableTextState = _FakeEditableTextState();
     final List<ContextMenuButtonItem>? buttonItems = SpellCheckSuggestionsToolbar.buildButtonItems(
       editableTextState,
     );
 
     expect(buttonItems, hasLength(1));
     expect(buttonItems!.first.type, ContextMenuButtonType.delete);
+  });
+
+  testWidgets('SpellCheckSuggestionsToolbar does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SpellCheckSuggestionsToolbar(
+              anchor: const Offset(1, 1),
+              buttonItems: buildSuggestionButtons(<String>['X', 'Y']),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SpellCheckSuggestionsToolbar)), Size.zero);
   });
 }
 

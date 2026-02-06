@@ -181,9 +181,6 @@ struct DlColor {
            green_ == other.green_ && blue_ == other.blue_ &&
            color_space_ == other.color_space_;
   }
-  bool operator!=(DlColor const& other) const {
-    return !this->operator==(other);
-  }
 
  private:
   DlScalar alpha_;

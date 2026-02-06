@@ -216,7 +216,7 @@ class _ScreenshotDevice extends Fake implements Device {
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
-  var supportsScreenshot = true;
+  bool supportsScreenshot = true;
 
   @override
   bool get isConnected => true;
@@ -225,7 +225,7 @@ class _ScreenshotDevice extends Fake implements Device {
   Future<bool> isSupported() async => true;
 
   @override
-  var ephemeral = true;
+  bool ephemeral = true;
 
   @override
   DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
@@ -253,7 +253,7 @@ class _ScreenshotDevice extends Fake implements Device {
 
 class _TestDeviceManager extends DeviceManager {
   _TestDeviceManager({required super.logger});
-  var devices = <Device>[];
+  List<Device> devices = <Device>[];
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {

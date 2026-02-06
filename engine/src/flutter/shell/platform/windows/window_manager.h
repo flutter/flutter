@@ -21,7 +21,61 @@ namespace flutter {
 
 class FlutterWindowsEngine;
 class HostWindow;
-struct WindowingInitRequest;
+
+// Specifies a preferred content size for the window.
+struct WindowSizeRequest {
+  bool has_preferred_view_size = false;
+  double preferred_view_width;
+  double preferred_view_height;
+};
+
+// Specifies a preferred constraint on the window.
+struct WindowConstraints {
+  bool has_view_constraints = false;
+  double view_min_width;
+  double view_min_height;
+  double view_max_width;
+  double view_max_height;
+};
+
+// Coordinates are in physical pixels.
+struct WindowRect {
+  int32_t left;
+  int32_t top;
+  int32_t width;
+  int32_t height;
+};
+
+// Sizes are in physical pixels.
+struct WindowSize {
+  int32_t width;
+  int32_t height;
+};
+
+// Sent by the framework to request a new window be created.
+struct RegularWindowCreationRequest {
+  WindowSizeRequest preferred_size;
+  WindowConstraints preferred_constraints;
+  LPCWSTR title;
+};
+
+struct DialogWindowCreationRequest {
+  WindowSizeRequest preferred_size;
+  WindowConstraints preferred_constraints;
+  LPCWSTR title;
+  HWND parent_or_null;
+};
+
+typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,
+                                                 const WindowRect& parent_rect,
+                                                 const WindowRect& output_rect);
+
+struct TooltipWindowCreationRequest {
+  WindowConstraints preferred_constraints;
+  bool is_sized_to_content;
+  HWND parent;
+  GetWindowPositionCallback get_position_callback;
+};
 
 struct WindowsMessage {
   FlutterViewId view_id;
@@ -33,23 +87,21 @@ struct WindowsMessage {
   bool handled;
 };
 
-struct WindowSizing {
-  bool has_preferred_view_size;
-  double preferred_view_width;
-  double preferred_view_height;
-  bool has_view_constraints;
-  double view_min_width;
-  double view_min_height;
-  double view_max_width;
-  double view_max_height;
-};
-
 struct WindowingInitRequest {
   void (*on_message)(WindowsMessage*);
 };
 
-struct WindowCreationRequest {
-  WindowSizing content_size;
+// Returned from |InternalFlutterWindows_WindowManager_GetWindowContentSize|.
+// This represents the current content size of the window.
+struct ActualWindowSize {
+  double width;
+  double height;
+};
+
+struct FullscreenRequest {
+  bool fullscreen;
+  bool has_display_id;
+  FlutterEngineDisplayId display_id;
 };
 
 // A manager class for managing |HostWindow| instances.
@@ -61,9 +113,13 @@ class WindowManager {
 
   void Initialize(const WindowingInitRequest* request);
 
-  bool HasTopLevelWindows() const;
+  FlutterViewId CreateRegularWindow(
+      const RegularWindowCreationRequest* request);
 
-  FlutterViewId CreateRegularWindow(const WindowCreationRequest* request);
+  FlutterViewId CreateDialogWindow(const DialogWindowCreationRequest* request);
+
+  FlutterViewId CreateTooltipWindow(
+      const TooltipWindowCreationRequest* request);
 
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
@@ -103,12 +159,19 @@ void InternalFlutterWindows_WindowManager_Initialize(
     const flutter::WindowingInitRequest* request);
 
 FLUTTER_EXPORT
-bool InternalFlutterWindows_WindowManager_HasTopLevelWindows(int64_t engine_id);
-
-FLUTTER_EXPORT
 FlutterViewId InternalFlutterWindows_WindowManager_CreateRegularWindow(
     int64_t engine_id,
-    const flutter::WindowCreationRequest* request);
+    const flutter::RegularWindowCreationRequest* request);
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateDialogWindow(
+    int64_t engine_id,
+    const flutter::DialogWindowCreationRequest* request);
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateTooltipWindow(
+    int64_t engine_id,
+    const flutter::TooltipWindowCreationRequest* request);
 
 // Retrives the HWND associated with this |engine_id| and |view_id|. Returns
 // NULL if the HWND cannot be found
@@ -117,19 +180,34 @@ HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
     int64_t engine_id,
     FlutterViewId view_id);
 
-struct FlutterWindowSize {
-  double width;
-  double height;
-};
+FLUTTER_EXPORT
+flutter::ActualWindowSize
+InternalFlutterWindows_WindowManager_GetWindowContentSize(HWND hwnd);
 
 FLUTTER_EXPORT
-FlutterWindowSize InternalFlutterWindows_WindowManager_GetWindowContentSize(
-    HWND hwnd);
-
-FLUTTER_EXPORT
-void InternalFlutterWindows_WindowManager_SetWindowContentSize(
+void InternalFlutterWindows_WindowManager_SetWindowSize(
     HWND hwnd,
-    const flutter::WindowSizing* size);
+    const flutter::WindowSizeRequest* size);
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetWindowConstraints(
+    HWND hwnd,
+    const flutter::WindowConstraints* constraints);
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetFullscreen(
+    HWND hwnd,
+    const flutter::FullscreenRequest* request);
+
+// Invoked by the framework when the host window receives WM_DESTROY.
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_OnDestroyWindow(HWND hwnd);
+
+FLUTTER_EXPORT
+bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd);
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

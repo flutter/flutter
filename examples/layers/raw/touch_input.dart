@@ -17,14 +17,14 @@ ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final recorder = ui.PictureRecorder();
 
   // Next, we create a canvas from the recorder. The canvas is an interface
   // which can receive drawing commands. The canvas interface is modeled after
   // the SkCanvas interface from Skia. The paintBounds establishes a "cull rect"
   // for the canvas, which lets the implementation discard any commands that
   // are entirely outside this rectangle.
-  final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
+  final canvas = ui.Canvas(recorder, paintBounds);
 
   // The commands draw a circle in the center of the screen.
   final ui.Size size = paintBounds.size;
@@ -49,7 +49,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
 
   // This transform scales the x and y coordinates by the devicePixelRatio.
-  final Float64List deviceTransform = Float64List(16)
+  final deviceTransform = Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
@@ -59,7 +59,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   // transform that scale its children by the device pixel ratio. This transform
   // lets us paint in "logical" pixels which are converted to device pixels by
   // this scaling operation.
-  final ui.SceneBuilder sceneBuilder = ui.SceneBuilder()
+  final sceneBuilder = ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();

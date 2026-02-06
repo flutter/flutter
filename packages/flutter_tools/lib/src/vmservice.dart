@@ -326,6 +326,9 @@ Future<vm_service.VmService> setUpVmService({
   try {
     await Future.wait(registrationRequests);
   } on vm_service.RPCError catch (e) {
+    if (e.isConnectionDisposedException) {
+      rethrow;
+    }
     throwToolExit('Failed to register service methods on attached VM Service: $e');
   }
   return vmService;
@@ -483,9 +486,7 @@ class FlutterVmService {
     try {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
-      if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
-          err.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
-          err.message.contains('Service connection disposed')) {
+      if (err.isConnectionDisposedException) {
         globals.printTrace('VmService.getVm call failed: $err');
         return null;
       }
@@ -505,9 +506,7 @@ class FlutterVmService {
       // and should begin to shutdown due to the service connection closing.
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
-      if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
-          e.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
-          e.message.contains('Service connection disposed')) {
+      if (e.isConnectionDisposedException) {
         return null;
       }
       rethrow;
@@ -773,10 +772,8 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
-          (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
-          (err.code == vm_service.RPCErrorKind.kConnectionDisposed.code) ||
-          (err.message.contains('Service connection disposed'))) {
+      if (err.code == vm_service.RPCErrorKind.kMethodNotFound.code ||
+          err.isConnectionDisposedException) {
         return null;
       }
       rethrow;
@@ -792,7 +789,7 @@ class FlutterVmService {
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object?>{if (isolateId != null) 'isolateId': isolateId, ...?args},
+      args: <String, Object?>{'isolateId': ?isolateId, ...?args},
     );
     return response?.json;
   }
@@ -1009,4 +1006,11 @@ String processVmServiceMessage(vm_service.Event event) {
     return message.substring(0, message.length - 1);
   }
   return message;
+}
+
+extension RPCErrorExtension on vm_service.RPCError {
+  bool get isConnectionDisposedException =>
+      code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+      code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
+      message.contains('Service connection disposed');
 }

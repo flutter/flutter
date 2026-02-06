@@ -21,12 +21,17 @@ class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({super.key});
 
   @override
-  State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
+  State<BottomNavigationBarExample> createState() =>
+      _BottomNavigationBarExampleState();
 }
 
-class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle = TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.bold,
+  );
   static const List<Widget> _widgetOptions = <Widget>[
     Text('Index 0: Home', style: optionStyle),
     Text('Index 1: Business', style: optionStyle),
@@ -47,7 +52,10 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.business), label: 'Business'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business),
+            label: 'Business',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'School'),
         ],
         currentIndex: _selectedIndex,

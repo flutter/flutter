@@ -12,7 +12,7 @@ import 'base/bot_detector.dart';
 import 'base/common.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
-import 'convert.dart';
+import 'base/utils.dart';
 import 'resident_runner.dart';
 
 /// An implementation of the devtools launcher that uses `dart devtools` to
@@ -66,9 +66,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       _processStartCompleter.complete();
 
       final devToolsCompleter = Completer<Uri>();
-      _devToolsProcess!.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((
-        String line,
-      ) {
+      _devToolsProcess!.stdout.transform(utf8LineDecoder).listen((String line) {
         final Match? dtdMatch = _serveDtdPattern.firstMatch(line);
         if (dtdMatch != null) {
           final String uri = dtdMatch[1]!;
@@ -80,10 +78,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
           devToolsCompleter.complete(Uri.parse(url));
         }
       });
-      _devToolsProcess!.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(_logger.printError);
+      _devToolsProcess!.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then((int exitCode) {

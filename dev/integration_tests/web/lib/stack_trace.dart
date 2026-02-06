@@ -70,7 +70,7 @@ const List<StackFrame> expectedDebugStackFrames = <StackFrame>[
 ///
 /// This test is run in debug, profile, and release modes.
 void main() async {
-  final StringBuffer output = StringBuffer();
+  final output = StringBuffer();
   try {
     try {
       foo();

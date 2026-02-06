@@ -10,8 +10,6 @@ namespace flutter {
 
 namespace {
 
-constexpr UINT kDefaultDpi = 96;
-
 // This is the MDT_EFFECTIVE_DPI value from MONITOR_DPI_TYPE, an enum declared
 // in ShellScalingApi.h. Replicating here to avoid importing the library
 // directly.

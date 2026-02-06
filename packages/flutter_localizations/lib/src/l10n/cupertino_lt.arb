@@ -39,5 +39,11 @@
   "shareButtonLabel": "Bendrinti...",
   "clearButtonLabel": "Išvalyti",
   "cancelButtonLabel": "Atšaukti",
-  "backButtonLabel": "Atgal"
+  "backButtonLabel": "Atgal",
+  "expansionTileExpandedHint": "dukart palieskite, kad sutrauktumėte",
+  "expansionTileCollapsedHint": "dukart palieskite, kad išskleistumėte",
+  "expansionTileExpandedTapHint": "Sutraukti",
+  "expansionTileCollapsedTapHint": "Išskleiskite, jei reikia daugiau išsamios informacijos",
+  "expandedHint": "Sutraukta",
+  "collapsedHint": "Išskleista"
 }

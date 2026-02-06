@@ -172,9 +172,8 @@ static thread_local std::unique_ptr<CommandPoolMap> tls_command_pool_map;
 static Mutex g_all_pools_map_mutex;
 static std::unordered_map<
     uint64_t,
-    std::unordered_map<std::thread::id,
-                       std::weak_ptr<CommandPoolVK>>> g_all_pools_map
-    IPLR_GUARDED_BY(g_all_pools_map_mutex);
+    std::unordered_map<std::thread::id, std::weak_ptr<CommandPoolVK>>>
+    g_all_pools_map IPLR_GUARDED_BY(g_all_pools_map_mutex);
 
 CommandPoolRecyclerVK::CommandPoolRecyclerVK(
     const std::shared_ptr<ContextVK>& context)
@@ -273,12 +272,14 @@ void CommandPoolRecyclerVK::Reclaim(
     return;
   }
   auto device = strong_context->GetDevice();
+  vk::CommandPoolResetFlags flags;
   if (should_trim) {
     buffers.clear();
-    device.resetCommandPool(pool.get(),
-                            vk::CommandPoolResetFlagBits::eReleaseResources);
-  } else {
-    device.resetCommandPool(pool.get(), {});
+    flags = vk::CommandPoolResetFlagBits::eReleaseResources;
+  }
+  const auto result = device.resetCommandPool(pool.get(), flags);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not reset command pool: " << vk::to_string(result);
   }
 
   // Move the pool to the recycled list.

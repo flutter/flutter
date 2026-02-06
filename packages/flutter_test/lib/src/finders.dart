@@ -361,7 +361,7 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Tooltip] widgets with the given `message`.
+  /// Finds [RawTooltip] or [Tooltip] widgets with the given `message`.
   ///
   /// ## Sample code
   ///
@@ -374,12 +374,20 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      return widget is Tooltip &&
+      // In cases where Tooltip.excludeFromSemantics is true, Tooltip provides
+      // no semantics tooltip to RawTooltip, so its message must be checked
+      // directly.
+      if (widget is Tooltip && (widget.excludeFromSemantics ?? false)) {
+        return (message is RegExp
+            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
+                  (widget.richMessage != null &&
+                      message.hasMatch(widget.richMessage!.toPlainText())))
+            : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      }
+      return widget is RawTooltip &&
           (message is RegExp
-              ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                    (widget.richMessage != null &&
-                        message.hasMatch(widget.richMessage!.toPlainText())))
-              : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+              ? message.hasMatch(widget.semanticsTooltip ?? '')
+              : (widget.semanticsTooltip == message));
     }, skipOffstage: skipOffstage);
   }
 
@@ -559,8 +567,15 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, {bool skipOffstage = true}) {
+    final String description = switch (label) {
+      final RegExp regExp => 'a semantics label matching the pattern "${regExp.pattern}"',
+      final String labelString => 'a semantics label named "$labelString"',
+      _ => 'a semantics label matching "$label"',
+    };
+
     return _bySemanticsProperty(
       label,
+      description,
       (SemanticsNode? semantics) => semantics?.label,
       skipOffstage: skipOffstage,
     );
@@ -583,8 +598,15 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsIdentifier(Pattern identifier, {bool skipOffstage = true}) {
+    final String description = switch (identifier) {
+      final RegExp regExp => 'a semantics identifier matching the pattern "${regExp.pattern}"',
+      final String id => 'a semantics identifier named "$id"',
+      _ => 'a semantics identifier matching "$identifier"',
+    };
+
     return _bySemanticsProperty(
       identifier,
+      description,
       (SemanticsNode? semantics) => semantics?.identifier,
       skipOffstage: skipOffstage,
     );
@@ -592,6 +614,7 @@ class CommonFinders {
 
   Finder _bySemanticsProperty(
     Pattern pattern,
+    String description,
     String? Function(SemanticsNode?) propertyGetter, {
     bool skipOffstage = true,
   }) {
@@ -602,18 +625,23 @@ class CommonFinders {
         'this finder, and call dispose on its return value after.',
       );
     }
-    return byElementPredicate((Element element) {
-      // Multiple elements can have the same renderObject - we want the "owner"
-      // of the renderObject, i.e. the RenderObjectElement.
-      if (element is! RenderObjectElement) {
-        return false;
-      }
-      final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
-      if (propertyValue == null) {
-        return false;
-      }
-      return pattern is RegExp ? pattern.hasMatch(propertyValue) : pattern == propertyValue;
-    }, skipOffstage: skipOffstage);
+
+    return byElementPredicate(
+      (Element element) {
+        // Multiple elements can have the same renderObject - we want the "owner"
+        // of the renderObject, i.e. the RenderObjectElement.
+        if (element is! RenderObjectElement) {
+          return false;
+        }
+        final String? propertyValue = propertyGetter(element.renderObject.debugSemantics);
+        if (propertyValue == null) {
+          return false;
+        }
+        return pattern is RegExp ? pattern.hasMatch(propertyValue) : pattern == propertyValue;
+      },
+      description: description,
+      skipOffstage: skipOffstage,
+    );
   }
 }
 
@@ -835,7 +863,7 @@ final class CommonTextRangeFinders {
     bool skipOffstage = true,
     FinderBase<Element>? descendentOf,
   }) {
-    final _TextContainingWidgetFinder textWidgetFinder = _TextContainingWidgetFinder(
+    final textWidgetFinder = _TextContainingWidgetFinder(
       substring,
       skipOffstage: skipOffstage,
       findRichText: true,
@@ -1216,7 +1244,7 @@ abstract class SemanticsFinder extends FinderBase<SemanticsNode> {
   }
 
   static Iterable<SemanticsNode> get _allRoots {
-    final List<SemanticsNode> roots = <SemanticsNode>[];
+    final roots = <SemanticsNode>[];
     void collectSemanticsRoots(PipelineOwner owner) {
       final SemanticsNode? root = owner.semanticsOwner?.rootSemanticsNode;
       if (root != null) {
@@ -1248,7 +1276,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
     }
 
     final View view = from.findAncestorWidgetOfExactType<View>()!;
-    final List<RenderParagraph> paragraphs = <RenderParagraph>[];
+    final paragraphs = <RenderParagraph>[];
 
     void visitor(RenderObject child) {
       switch (child) {
@@ -1351,7 +1379,7 @@ class _FirstWidgetFinder extends ChainedFinder with _FirstFinderMixin<Element> {
 mixin _LastFinderMixin<CandidateType> on ChainedFinderMixin<CandidateType> {
   @override
   String describeMatch(Plurality plurality) {
-    return '${parent.describeMatch(plurality)} (ignoring all but first)';
+    return '${parent.describeMatch(plurality)} (ignoring all but last)';
   }
 
   @override
@@ -1425,14 +1453,14 @@ class _HitTestableWidgetFinder extends ChainedFinder {
 
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
-    for (final Element candidate in parentCandidates) {
+    for (final candidate in parentCandidates) {
       final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderObject? object = candidate.renderObject;
       if (object is! RenderBox) {
         continue;
       }
       final Offset absoluteOffset = object.localToGlobal(alignment.alongSize(object.size));
-      final HitTestResult hitResult = HitTestResult();
+      final hitResult = HitTestResult();
       WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
@@ -1802,7 +1830,7 @@ mixin _AncestorFinderMixin<CandidateType> on FinderBase<CandidateType> {
 
   @override
   Iterable<CandidateType> get allCandidates {
-    final List<CandidateType> candidates = <CandidateType>[];
+    final candidates = <CandidateType>[];
     for (final CandidateType leaf in descendant.evaluate()) {
       if (matchLeaves) {
         candidates.add(leaf);
@@ -1831,7 +1859,7 @@ class _AncestorWidgetFinder extends Finder with _AncestorFinderMixin<Element> {
 
   @override
   Iterable<Element> _collectAncestors(Element child) {
-    final List<Element> ancestors = <Element>[];
+    final ancestors = <Element>[];
     child.visitAncestorElements((Element element) {
       ancestors.add(element);
       return true;
@@ -1855,7 +1883,7 @@ class _AncestorSemanticsFinder extends FinderBase<SemanticsNode>
 
   @override
   Iterable<SemanticsNode> _collectAncestors(SemanticsNode child) {
-    final List<SemanticsNode> ancestors = <SemanticsNode>[];
+    final ancestors = <SemanticsNode>[];
     while (child.parent != null) {
       ancestors.add(child.parent!);
       child = child.parent!;

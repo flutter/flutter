@@ -49,7 +49,7 @@ public class DartExecutorTest {
     assertNotNull(dartExecutor.getBinaryMessenger());
 
     // Execute the behavior under test.
-    ByteBuffer fakeMessage = mock(ByteBuffer.class);
+    ByteBuffer fakeMessage = ByteBuffer.allocate(0);
     dartExecutor.getBinaryMessenger().send("fake_channel", fakeMessage);
 
     // Verify that DartExecutor sent our message to FlutterJNI.

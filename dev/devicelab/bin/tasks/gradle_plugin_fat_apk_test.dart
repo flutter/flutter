@@ -133,8 +133,8 @@ Future<void> main() async {
 
         // When the platform-target isn't specified, we generate the snapshots
         // for arm and arm64.
-        final List<String> targetPlatforms = <String>['arm64-v8a', 'armeabi-v7a'];
-        for (final String targetPlatform in targetPlatforms) {
+        final targetPlatforms = <String>['arm64-v8a', 'armeabi-v7a'];
+        for (final targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(
             project.rootPath,
             'build',

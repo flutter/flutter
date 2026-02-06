@@ -213,22 +213,20 @@ class SkMatrixAdapter : public SkiaAdapterBase {
                        TestPoint out[],
                        int n) const override {
     static_assert(sizeof(TestPoint) == sizeof(SkPoint));
-    transform.sk_matrix.mapPoints(reinterpret_cast<SkPoint*>(out),
-                                  reinterpret_cast<const SkPoint*>(in), n);
+    transform.sk_matrix.mapPoints({reinterpret_cast<SkPoint*>(out), n},
+                                  {reinterpret_cast<const SkPoint*>(in), n});
   }
 
   void TransformRectFast(const TestTransform& transform,
                          const TestRect& in,
                          TestRect& out) const override {
-    out.sk_rect =
-        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+    out.sk_rect = transform.sk_matrix.mapRect(in.sk_rect);
   }
 
   void TransformAndClipRect(const TestTransform& transform,
                             const TestRect& in,
                             TestRect& out) const override {
-    out.sk_rect =
-        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+    out.sk_rect = transform.sk_matrix.mapRect(in.sk_rect);
   }
 
   int CountClippedCorners(const TestTransform& transform,
@@ -236,7 +234,7 @@ class SkMatrixAdapter : public SkiaAdapterBase {
     SkPoint3 homogenous[4];
     SkPoint corners[4];
     rect.sk_rect.toQuad(corners);
-    transform.sk_matrix.mapHomogeneousPoints(homogenous, corners, 4);
+    transform.sk_matrix.mapPointsToHomogeneous({homogenous, 4}, {corners, 4});
     int count = 0;
     for (SkPoint3 hpt : homogenous) {
       if (hpt.fZ <= 0) {
@@ -301,8 +299,9 @@ class SkM44Adapter : public SkiaAdapterBase {
                        TestPoint out[],
                        int n) const override {
     static_assert(sizeof(TestPoint) == sizeof(SkPoint));
-    transform.sk_m44.asM33().mapPoints(reinterpret_cast<SkPoint*>(out),
-                                       reinterpret_cast<const SkPoint*>(in), n);
+    transform.sk_m44.asM33().mapPoints(
+        {reinterpret_cast<SkPoint*>(out), n},
+        {reinterpret_cast<const SkPoint*>(in), n});
   }
 
   void TransformRectFast(const TestTransform& transform,
@@ -311,7 +310,7 @@ class SkM44Adapter : public SkiaAdapterBase {
     // clang-format off
     out.sk_rect = transform.sk_m44
                       .asM33()
-                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+                      .mapRect(in.sk_rect);
     // clang-format on
   }
 
@@ -321,7 +320,7 @@ class SkM44Adapter : public SkiaAdapterBase {
     // clang-format off
     out.sk_rect = transform.sk_m44
                       .asM33()
-                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+                      .mapRect(in.sk_rect);
     // clang-format on
   }
 
@@ -330,7 +329,8 @@ class SkM44Adapter : public SkiaAdapterBase {
     SkPoint3 homogenous[4];
     SkPoint corners[4];
     rect.sk_rect.toQuad(corners);
-    transform.sk_m44.asM33().mapHomogeneousPoints(homogenous, corners, 4);
+    transform.sk_m44.asM33().mapPointsToHomogeneous({homogenous, 4},
+                                                    {corners, 4});
     int count = 0;
     for (SkPoint3 hpt : homogenous) {
       if (hpt.fZ <= 0) {

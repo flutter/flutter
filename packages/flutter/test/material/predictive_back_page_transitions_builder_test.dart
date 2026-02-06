@@ -10,14 +10,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final PageTransitionsBuilder pageTransitionsBuilder in <PageTransitionsBuilder>[
+  for (final pageTransitionsBuilder in <PageTransitionsBuilder>[
     const PredictiveBackPageTransitionsBuilder(),
     const PredictiveBackFullscreenPageTransitionsBuilder(),
   ]) {
     testWidgets(
       'PredictiveBackPageTransitionsBuilder supports predictive back on Android',
       (WidgetTester tester) async {
-        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        final routes = <String, WidgetBuilder>{
           '/': (BuildContext context) => Material(
             child: TextButton(
               child: const Text('push'),
@@ -63,7 +63,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -127,7 +127,7 @@ void main() {
     testWidgets(
       'PredictiveBackPageTransitionsBuilder supports canceling a predictive back gesture',
       (WidgetTester tester) async {
-        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        final routes = <String, WidgetBuilder>{
           '/': (BuildContext context) => Material(
             child: TextButton(
               child: const Text('push'),
@@ -173,7 +173,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -236,9 +236,9 @@ void main() {
     testWidgets(
       'if there are multiple PredictiveBackPageTransitionBuilder observers, only one gets called for a given back gesture',
       (WidgetTester tester) async {
-        bool includingNestedNavigator = false;
+        var includingNestedNavigator = false;
         late StateSetter setState;
-        final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        final routes = <String, WidgetBuilder>{
           '/': (BuildContext context) => Material(
             child: TextButton(
               child: const Text('push'),
@@ -326,7 +326,7 @@ void main() {
         }
 
         // Start a system pop gesture, which will switch to using
-        // _PredictiveBackPageTransition for the page transition.
+        // _PredictiveBackSharedElementPageTransition for the page transition.
         final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
           const MethodCall('startBackGesture', <String, dynamic>{
             'touchOffset': <double>[5.0, 300.0],
@@ -423,7 +423,7 @@ void main() {
     );
 
     testWidgets('two back gestures back to back dismiss two routes', (WidgetTester tester) async {
-      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      final routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => Material(
           child: TextButton(
             child: const Text('push b'),
@@ -488,7 +488,7 @@ void main() {
       }
 
       // Start a system pop gesture, which will switch to using
-      // _PredictiveBackPageTransition for the page transition.
+      // _PredictiveBackSharedElementPageTransition for the page transition.
       final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
         const MethodCall('startBackGesture', <String, dynamic>{
           'touchOffset': <double>[5.0, 300.0],

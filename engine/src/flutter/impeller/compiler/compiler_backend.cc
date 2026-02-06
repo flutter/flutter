@@ -24,7 +24,7 @@ CompilerBackend::CompilerBackend(SkSLCompiler compiler)
 CompilerBackend::CompilerBackend() = default;
 
 CompilerBackend::CompilerBackend(Type type, Compiler compiler)
-    : type_(type), compiler_(std::move(compiler)){};
+    : type_(type), compiler_(std::move(compiler)) {};
 
 CompilerBackend::~CompilerBackend() = default;
 

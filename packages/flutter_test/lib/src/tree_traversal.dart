@@ -124,7 +124,7 @@ class _DepthFirstElementTreeIterator extends _DepthFirstTreeIterator<Element> {
 
   @override
   List<Element> _collectChildren(Element root) {
-    final List<Element> children = <Element>[];
+    final children = <Element>[];
     if (includeOffstage) {
       root.visitChildren(children.add);
     } else {

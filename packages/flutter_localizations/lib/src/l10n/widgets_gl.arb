@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Buscar na Web",
   "shareButtonLabel": "Compartir",
   "pasteButtonLabel": "Pegar",
-  "selectAllButtonLabel": "Seleccionar todo"
+  "selectAllButtonLabel": "Seleccionar todo",
+  "searchResultsFound": "Resultados da busca atopados",
+  "noResultsFound": "Ningún resultado atopado",
+  "radioButtonUnselectedLabel": "Botón non seleccionado"
 }

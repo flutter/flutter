@@ -16,7 +16,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../convert.dart';
+import '../base/utils.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -131,7 +131,7 @@ class ChromiumLauncher {
   bool get hasChromeInstance => currentCompleter.isCompleted;
 
   @visibleForTesting
-  var currentCompleter = Completer<Chromium>();
+  Completer<Chromium> currentCompleter = Completer<Chromium>();
 
   /// Whether we can locate the chrome executable.
   bool canFindExecutable() {
@@ -247,9 +247,9 @@ class ChromiumLauncher {
       '--disable-search-engine-choice-screen',
 
       if (headless) ...<String>[
+        '--no-sandbox',
         '--headless',
         '--disable-gpu',
-        '--no-sandbox',
         '--window-size=2400,1800',
       ],
       ...webBrowserFlags,
@@ -307,7 +307,7 @@ class ChromiumLauncher {
     while (true) {
       final Process process = await _processManager.start(args);
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+      process.stdout.transform(utf8LineDecoder).listen((String line) {
         _logger.printTrace('[CHROME]: $line');
       });
 
@@ -317,8 +317,7 @@ class ChromiumLauncher {
       var shouldRetry = false;
       final errors = <String>[];
       await process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform(utf8LineDecoder)
           .map((String line) {
             _logger.printTrace('[CHROME]: $line');
             errors.add('[CHROME]:$line');

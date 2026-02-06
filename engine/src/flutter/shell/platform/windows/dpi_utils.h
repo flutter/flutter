@@ -9,6 +9,8 @@
 
 namespace flutter {
 
+constexpr UINT kDefaultDpi = 96;
+
 /// Returns the DPI for |hwnd|. Supports all DPI awareness modes, and is
 /// backward compatible down to Windows Vista. If |hwnd| is nullptr, returns the
 /// DPI for the primary monitor. If Per-Monitor DPI awareness is not available,

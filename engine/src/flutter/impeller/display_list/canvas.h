@@ -96,25 +96,23 @@ enum class ContentBoundsPromise {
   kMayClipContents,
 };
 
-struct LazyRenderingConfig {
-  std::unique_ptr<EntityPassTarget> entity_pass_target;
-  std::unique_ptr<InlinePassContext> inline_pass_context;
+class LazyRenderingConfig {
+ public:
+  LazyRenderingConfig(ContentContext& renderer,
+                      std::unique_ptr<EntityPassTarget> p_entity_pass_target);
+
+  LazyRenderingConfig(LazyRenderingConfig&&) = default;
 
   /// Whether or not the clear color texture can still be updated.
-  bool IsApplyingClearColor() const { return !inline_pass_context->IsActive(); }
+  bool IsApplyingClearColor() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> p_entity_pass_target)
-      : entity_pass_target(std::move(p_entity_pass_target)) {
-    inline_pass_context =
-        std::make_unique<InlinePassContext>(renderer, *entity_pass_target);
-  }
+  EntityPassTarget* GetEntityPassTarget() const;
 
-  LazyRenderingConfig(ContentContext& renderer,
-                      std::unique_ptr<EntityPassTarget> entity_pass_target,
-                      std::unique_ptr<InlinePassContext> inline_pass_context)
-      : entity_pass_target(std::move(entity_pass_target)),
-        inline_pass_context(std::move(inline_pass_context)) {}
+  InlinePassContext* GetInlinePassContext() const;
+
+ private:
+  std::unique_ptr<EntityPassTarget> entity_pass_target_;
+  std::unique_ptr<InlinePassContext> inline_pass_context_;
 };
 
 class Canvas {
@@ -285,31 +283,17 @@ class Canvas {
   bool EnsureFinalMipmapGeneration() const;
 
  private:
-  class RRectLikeBlurShape {
+  class BlurShape {
    public:
-    virtual ~RRectLikeBlurShape() = default;
-    virtual std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() = 0;
-    virtual Geometry& BuildGeometry(Rect rect, Scalar radius) = 0;
+    virtual ~BlurShape() = default;
+    virtual Rect GetBounds() const = 0;
+    virtual std::shared_ptr<SolidBlurContents> BuildBlurContent(
+        Sigma sigma) = 0;
+    virtual const Geometry& BuildDrawGeometry() = 0;
   };
-
-  class RRectBlurShape : public RRectLikeBlurShape {
-   public:
-    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
-    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
-
-   private:
-    std::optional<RoundRectGeometry> geom_;  // optional stack allocation
-  };
-
-  class RSuperellipseBlurShape : public RRectLikeBlurShape {
-   public:
-    std::shared_ptr<SolidRRectLikeBlurContents> BuildBlurContent() override;
-    Geometry& BuildGeometry(Rect rect, Scalar radius) override;
-
-   private:
-    std::optional<RoundSuperellipseGeometry>
-        geom_;  // optional stack allocation
-  };
+  class RRectBlurShape;
+  class RSuperellipseBlurShape;
+  class PathBlurShape;
 
   ContentContext& renderer_;
   RenderTarget render_target_;
@@ -397,18 +381,27 @@ class Canvas {
 
   void AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth = false);
 
-  bool AttemptDrawBlurredRRect(const Rect& rect,
-                               Size corner_radii,
-                               const Paint& paint);
+  /// Returns true if this operation is consistent with a DrawShadow-like
+  /// operation.
+  static bool IsShadowBlurDrawOperation(const Paint& paint);
 
-  bool AttemptDrawBlurredRSuperellipse(const Rect& rect,
-                                       Size corner_radii,
+  bool AttemptDrawAntialiasedCircle(const Point& center,
+                                    Scalar radius,
+                                    const Paint& paint);
+
+  /// Returns the radius common to both width and height of all corners,
+  /// or -1 if the radii are not uniform.
+  static Scalar GetCommonRRectLikeRadius(const RoundingRadii& radii);
+
+  bool AttemptDrawBlurredPathSource(const PathSource& source,
+                                    const Paint& paint);
+
+  bool AttemptDrawBlurredRRect(const RoundRect& round_rect, const Paint& paint);
+
+  bool AttemptDrawBlurredRSuperellipse(const RoundSuperellipse& rse,
                                        const Paint& paint);
 
-  bool AttemptDrawBlurredRRectLike(const Rect& rect,
-                                   Size corner_radii,
-                                   const Paint& paint,
-                                   RRectLikeBlurShape& shape);
+  bool AttemptDrawBlur(BlurShape& shape, const Paint& paint);
 
   /// For simple DrawImageRect calls, optimize any draws with a color filter
   /// into the corresponding atlas draw.

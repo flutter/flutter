@@ -11,6 +11,8 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+const String _kWeightAxisTag = 'wght';
+
 final List<String> _testFonts = <String>['FlutterTest', 'Ahem'];
 List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   if (!ui_web.TestEnvironment.instance.forceTestFonts) {
@@ -18,6 +20,11 @@ List<String> _computeEffectiveFontFamilies(List<String> fontFamilies) {
   }
   final Iterable<String> filteredFonts = fontFamilies.where(_testFonts.contains);
   return filteredFonts.isEmpty ? _testFonts : filteredFonts.toList();
+}
+
+int getFourByteTag(String s) {
+  assert(s.length == 4);
+  return s.codeUnitAt(0) << 24 | s.codeUnitAt(1) << 16 | s.codeUnitAt(2) << 8 | s.codeUnitAt(3);
 }
 
 class SkwasmLineMetrics implements ui.LineMetrics {
@@ -264,7 +271,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
   List<SkwasmLineMetrics> computeLineMetrics() {
     final int lineCount = paragraphGetLineCount(handle);
     return List<SkwasmLineMetrics>.generate(lineCount, (int index) {
-      final metricsHandle = paragraphGetLineMetricsAtIndex(handle, index);
+      final LineMetricsHandle metricsHandle = paragraphGetLineMetricsAtIndex(handle, index);
       final metrics = SkwasmLineMetrics._fromHandle(metricsHandle);
       lineMetricsDispose(metricsHandle);
       return metrics;
@@ -291,13 +298,13 @@ void withScopedFontList(
     final Pointer<SkStringHandle> familiesPtr = scope
         .allocPointerArray(fontFamilies.length)
         .cast<SkStringHandle>();
-    int nativeIndex = 0;
-    for (int i = 0; i < fontFamilies.length; i++) {
+    var nativeIndex = 0;
+    for (var i = 0; i < fontFamilies.length; i++) {
       familiesPtr[nativeIndex] = skStringFromDartString(fontFamilies[i]);
       nativeIndex++;
     }
     callback(familiesPtr, fontFamilies.length);
-    for (int i = 0; i < fontFamilies.length; i++) {
+    for (var i = 0; i < fontFamilies.length; i++) {
       skStringFree(familiesPtr[i]);
     }
   });
@@ -405,12 +412,12 @@ class SkwasmTextStyle implements ui.TextStyle {
       skStringFree(localeHandle);
     }
     if (background != null) {
-      final backgroundPaint = (background! as SkwasmPaint).toRawPaint();
+      final PaintHandle backgroundPaint = (background! as SkwasmPaint).toRawPaint();
       textStyleSetBackground(handle, backgroundPaint);
       paintDispose(backgroundPaint);
     }
     if (foreground != null) {
-      final foregroundPaint = (foreground! as SkwasmPaint).toRawPaint();
+      final PaintHandle foregroundPaint = (foreground! as SkwasmPaint).toRawPaint();
       textStyleSetForeground(handle, foregroundPaint);
       paintDispose(foregroundPaint);
     }
@@ -433,26 +440,33 @@ class SkwasmTextStyle implements ui.TextStyle {
       }
     }
 
-    if (fontVariations != null && fontVariations!.isNotEmpty) {
-      final int variationCount = fontVariations!.length;
-      withStackScope((StackScope scope) {
-        final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
-        final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
-        for (int i = 0; i < variationCount; i++) {
-          final ui.FontVariation variation = fontVariations![i];
-          final String axis = variation.axis;
-          assert(axis.length == 4); // 4 byte code
-          final int axisNumber =
-              axis.codeUnitAt(0) << 24 |
-              axis.codeUnitAt(1) << 16 |
-              axis.codeUnitAt(2) << 8 |
-              axis.codeUnitAt(3);
-          axisBuffer[i] = axisNumber;
-          valueBuffer[i] = variation.value;
-        }
-        textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
-      });
+    Iterable<ui.FontVariation> allFontVariations;
+    if (fontVariations != null &&
+        fontVariations!.any((ui.FontVariation v) => v.axis == _kWeightAxisTag)) {
+      allFontVariations = fontVariations!;
+    } else {
+      final int weightValue = fontWeight?.value ?? ui.FontWeight.normal.value;
+      final weightVariation = <ui.FontVariation>[
+        ui.FontVariation(_kWeightAxisTag, weightValue.toDouble()),
+      ];
+      if (fontVariations == null) {
+        allFontVariations = weightVariation;
+      } else {
+        allFontVariations = fontVariations!.followedBy(weightVariation);
+      }
     }
+    final int variationCount = allFontVariations.length;
+    withStackScope((StackScope scope) {
+      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(variationCount);
+      final Pointer<Float> valueBuffer = scope.allocFloatArray(variationCount);
+      var i = 0;
+      for (final variation in allFontVariations) {
+        axisBuffer[i] = getFourByteTag(variation.axis);
+        valueBuffer[i] = variation.value;
+        i++;
+      }
+      textStyleSetFontVariations(handle, axisBuffer, valueBuffer, variationCount);
+    });
   }
 
   List<String> get fontFamilies => <String>[?fontFamily, ...?fontFamilyFallback];
@@ -544,7 +558,7 @@ class SkwasmTextStyle implements ui.TextStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final List<String>? fontFamilyFallback = this.fontFamilyFallback;
       final double? fontSize = this.fontSize;
@@ -680,7 +694,7 @@ final class SkwasmStrutStyle implements ui.StrutStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final List<String>? fontFamilyFallback = _fontFamilyFallback;
       final double? fontSize = _fontSize;
@@ -760,7 +774,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     }
     if (_strutStyle != null) {
       _strutStyle as SkwasmStrutStyle;
-      final strutStyleHandle = _strutStyle.createNativeHandle();
+      final StrutStyleHandle strutStyleHandle = _strutStyle.createNativeHandle();
       paragraphStyleSetStrutStyle(handle, strutStyleHandle);
       strutStyleDispose(strutStyleHandle);
     }
@@ -792,6 +806,14 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
         (_fontStyle ?? ui.FontStyle.normal).index,
       );
     }
+    withStackScope((StackScope scope) {
+      final Pointer<Uint32> axisBuffer = scope.allocUint32Array(1);
+      final Pointer<Float> valueBuffer = scope.allocFloatArray(1);
+      axisBuffer[0] = getFourByteTag(_kWeightAxisTag);
+      final int weightValue = _fontWeight?.value ?? ui.FontWeight.normal.value;
+      valueBuffer[0] = weightValue.toDouble();
+      textStyleSetFontVariations(textStyleHandle, axisBuffer, valueBuffer, 1);
+    });
     if (_textHeightBehavior != null) {
       textStyleSetHalfLeading(
         textStyleHandle,
@@ -864,7 +886,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
 
   @override
   String toString() {
-    String result = super.toString();
+    var result = super.toString();
     assert(() {
       final double? fontSize = _fontSize;
       final double? height = _height;
@@ -892,7 +914,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
 class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     implements ui.ParagraphBuilder {
   factory SkwasmParagraphBuilder(SkwasmParagraphStyle style, SkwasmFontCollection collection) {
-    final (paragraphStyleHandle, nativeTextStyle) = style.createNative();
+    final (ParagraphStyleHandle paragraphStyleHandle, SkwasmNativeTextStyle nativeTextStyle) = style
+        .createNative();
     final builder = SkwasmParagraphBuilder._(
       paragraphBuilderCreate(paragraphStyleHandle, collection.handle),
       style,
@@ -968,10 +991,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final List<int> codeUnitList = List<int>.generate(
-        outSize.value,
-        (int index) => utf8Data[index],
-      );
+      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
       text = utf8.decode(codeUnitList);
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
@@ -995,7 +1015,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     DomSegmenter segmenter,
   ) {
     final DomIteratorWrapper<DomSegment> iterator = segmenter.segmentRaw(jsText).iterator();
-    final List<int> breaks = <int>[];
+    final breaks = <int>[];
     while (iterator.moveNext()) {
       breaks.add(iterator.current.index);
     }
@@ -1003,7 +1023,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
 
     final UnicodePositionBufferHandle positionBuffer = unicodePositionBufferCreate(breaks.length);
     final Pointer<Uint32> buffer = unicodePositionBufferGetDataPointer(positionBuffer);
-    for (int i = 0; i < breaks.length; i++) {
+    for (var i = 0; i < breaks.length; i++) {
       buffer[i] = breaks[i];
     }
     return positionBuffer;
@@ -1040,7 +1060,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
 
     // First line break is always zero. The buffer is zero initialized, so we can just
     // skip the first one.
-    for (int i = 0; i < lineBreaks.length; i++) {
+    for (var i = 0; i < lineBreaks.length; i++) {
       final LineBreakFragment fragment = lineBreaks[i];
       lineBreakPointer[i + 1].position = fragment.end;
       lineBreakPointer[i + 1].lineBreakType = fragment.type == LineBreakType.mandatory
@@ -1058,7 +1078,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     }
     final paragraph = SkwasmParagraph(paragraphBuilderBuild(handle));
     while (textStyleStack.isNotEmpty) {
-      final style = textStyleStack.removeLast();
+      final SkwasmNativeTextStyle style = textStyleStack.removeLast();
       style.dispose();
     }
     dispose();

@@ -248,7 +248,7 @@ Channel "master" was previously on: v1.2.3.''',
 
 class FakeTerminal extends Fake implements Terminal {
   @override
-  var usesTerminalUi = false;
+  bool usesTerminalUi = false;
 
   void addPrompt(List<String> characters, String selected) {
     _characters = characters;
@@ -273,5 +273,5 @@ class FakeTerminal extends Fake implements Terminal {
 
 class FakeStdio extends Fake implements Stdio {
   @override
-  var hasTerminal = true;
+  bool hasTerminal = true;
 }

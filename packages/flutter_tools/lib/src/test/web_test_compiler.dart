@@ -32,18 +32,21 @@ class WebTestCompiler {
     required Platform platform,
     required ProcessManager processManager,
     required Config config,
+    required ShutdownHooks shutdownHooks,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _platform = platform,
        _processManager = processManager,
-       _config = config;
+       _config = config,
+       _shutdownHooks = shutdownHooks;
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final Platform _platform;
   final ProcessManager _processManager;
+  final ShutdownHooks _shutdownHooks;
   final Config _config;
 
   Future<File> _generateTestEntrypoint({
@@ -115,10 +118,6 @@ class WebTestCompiler {
     required WebRendererMode webRenderer,
   }) async {
     final LanguageVersion languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
-    final String platformDillPath = _fileSystem.path.join(
-      _artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder).path,
-      'ddc_outline.dill',
-    );
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -136,30 +135,20 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       config: _config,
     );
-    final List<String> dartDefines = webRenderer.updateDartDefines(buildInfo.dartDefines);
     final residentCompiler = ResidentCompiler(
-      _artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      fileSystemRoots: <String>[projectDirectory.childDirectory('test').path, testOutputDir],
-      // Override the filesystem scheme so that the frontend_server can find
-      // the generated entrypoint code.
-      fileSystemScheme: 'org-dartlang-app',
-      initializeFromDill: cachedKernelPath,
-      targetModel: TargetModel.dartdevc,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
-      dartDefines: dartDefines,
-      librariesSpec: _artifacts
-          .getHostArtifact(HostArtifact.flutterWebLibrariesJson)
-          .uri
-          .toString(),
-      packagesPath: buildInfo.packageConfigPath,
+      buildInfo: buildInfo.copyWith(
+        fileSystemRoots: <String>[projectDirectory.childDirectory('test').path, testOutputDir],
+        initializeFromDill: cachedKernelPath,
+        dartDefines: webRenderer.updateDartDefines(buildInfo.dartDefines),
+      ),
       artifacts: _artifacts,
       processManager: _processManager,
       logger: _logger,
       platform: _platform,
       fileSystem: _fileSystem,
+      shutdownHooks: _shutdownHooks,
+      config: _config,
+      targetPlatform: .web_javascript,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(

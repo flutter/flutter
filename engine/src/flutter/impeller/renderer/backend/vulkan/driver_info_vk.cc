@@ -11,8 +11,13 @@
 
 #include "flutter/fml/build_config.h"
 
+#ifdef FML_OS_ANDROID
+#include <sys/system_properties.h>
+#endif  // FML_OS_ANDROID
+
 namespace impeller {
 
+namespace {
 const std::unordered_map<std::string_view, AdrenoGPU> kAdrenoVersions = {
     // X
     // Note: I don't know if these strings actually match as there don't seem to
@@ -105,6 +110,27 @@ const std::unordered_map<std::string_view, MaliGPU> kMaliVersions = {
     {"T760", MaliGPU::kT760},
 };
 
+constexpr std::array<std::pair<std::string_view, PowerVRGPU>, 6> kGpuSeriesMap =
+    {{
+        {"BXE", PowerVRGPU::kBXE},
+        {"BXM", PowerVRGPU::kBXM},
+        {"BXS", PowerVRGPU::kBXS},
+        {"BXT", PowerVRGPU::kBXT},
+        {"CXT", PowerVRGPU::kCXT},
+        {"DXT", PowerVRGPU::kDXT},
+    }};
+}  // namespace
+
+// Pixel 10 device ID from ANGLE/Chromium source code.
+// https://chromium.googlesource.com/chromium/src/+/main/testing/buildbot/buildbot_json_magic_substitutions.py#51
+// https://source.chromium.org/chromium/chromium/src/+/main:content/test/gpu/gpu_tests/gpu_integration_test.py;l=1396;drc=6cce000efb9f288a9d51d42c7ab38b38beb5d77c
+const uint32_t kPixel10DeviceID = 0x71061212;
+// PowerVR 25.1@6794074 - the device_driver_version_ is a packed version number
+// which is vendor specific. This appears to be the PowerVR DDK build number.
+// https://www.khronos.org/conformance/adopters/conformant-products/opencl#submission_466
+// https://vulkan.gpuinfo.org/listreports.php?devicename=Google+Pixel+10&platform=android
+const uint32_t kPixel10MinDriverVersion = 6794074;  // Corresponds to 25.1
+
 AdrenoGPU GetAdrenoVersion(std::string_view version) {
   /// The format that Adreno names follow is "Adreno (TM) VERSION".
   auto paren_pos = version.find("Adreno (TM) ");
@@ -120,13 +146,12 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
 }
 
 PowerVRGPU GetPowerVRVersion(std::string_view version) {
-  // We don't really care about the specific model, just the series.
-  if (version.find("DXT") != std::string::npos) {
-    return PowerVRGPU::kDXT;
+  for (const auto& entry : kGpuSeriesMap) {
+    if (version.find(entry.first) != std::string::npos) {
+      return entry.second;
+    }
   }
-  if (version.find("CXT") != std::string::npos) {
-    return PowerVRGPU::kCXT;
-  }
+
   return PowerVRGPU::kUnknown;
 }
 
@@ -258,6 +283,8 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
   api_version_ = Version{VK_API_VERSION_MAJOR(props.apiVersion),
                          VK_API_VERSION_MINOR(props.apiVersion),
                          VK_API_VERSION_PATCH(props.apiVersion)};
+  driver_version_ = props.driverVersion;
+  device_id_ = props.deviceID;
   vendor_ = IdentifyVendor(props.vendorID);
   if (vendor_ == VendorVK::kUnknown) {
     FML_LOG(WARNING) << "Unknown GPU Driver Vendor: " << props.vendorID
@@ -305,6 +332,7 @@ void DriverInfoVK::DumpToLog() const {
   std::vector<std::pair<std::string, std::string>> items;
   items.emplace_back("Name", driver_name_);
   items.emplace_back("API Version", api_version_.ToString());
+  items.emplace_back("Driver Version", std::to_string(driver_version_));
   items.emplace_back("Vendor", VendorToString(vendor_));
   items.emplace_back("Device Type", DeviceTypeToString(type_));
   items.emplace_back("Is Emulator", std::to_string(IsEmulator()));
@@ -347,6 +375,30 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
+#if FML_OS_ANDROID
+  // Pixel 10 is identified by the PowerVR vendor and device ID 0x71061212.
+  // The driver version 25.1 or greater is required - which is device specific
+  // to 6794074 or greater.
+  if (vendor_ == VendorVK::kPowerVR && device_id_ == kPixel10DeviceID &&
+      driver_version_ < kPixel10MinDriverVersion) {
+    FML_LOG(WARNING) << "Pixel 10 driver version "
+                     << std::to_string(driver_version_)
+                     << " is less than 25.1. Blocking Vulkan initialization.";
+    return true;
+  }
+#endif  // FML_OS_ANDROID
+
+  // Fall back to OpenGL ES on older Adreno devices that require additional
+  // workarounds in the Impeller Vulkan back end such as disabling framebuffer
+  // fetch.
+  //
+  // See the following issues:
+  // https://github.com/flutter/flutter/issues/178285
+  // https://github.com/flutter/flutter/issues/178498
+  if (adreno_gpu_ && *adreno_gpu_ <= AdrenoGPU::kAdreno650) {
+    return true;
+  }
+
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
@@ -370,7 +422,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kBXE) {
     return true;
   }
   return false;

@@ -11,6 +11,7 @@ library;
 
 import 'dart:math' as math;
 import 'dart:math';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -489,7 +490,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     if (validChange) {
       final bool toggle =
           widget.multiSelectionEnabled || (widget.emptySelectionAllowed && onlySelectedSegment);
-      final Set<T> pressedSegment = <T>{segmentValue};
+      final pressedSegment = <T>{segmentValue};
       late final Set<T> updatedSelection;
       if (toggle) {
         updatedSelection = widget.selected.contains(segmentValue)
@@ -510,7 +511,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final SegmentedButtonThemeData theme = SegmentedButtonTheme.of(context);
     final SegmentedButtonThemeData defaults = _SegmentedButtonDefaultsM3(context);
     final TextDirection textDirection = Directionality.of(context);
-    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
+    const disabledState = <WidgetState>{WidgetState.disabled};
 
     P? effectiveValue<P>(P? Function(ButtonStyle? style) getProperty) {
       late final P? widgetValue = getProperty(widget.style);
@@ -520,8 +521,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
 
     P? resolve<P>(
-      MaterialStateProperty<P>? Function(ButtonStyle? style) getProperty, [
-      Set<MaterialState>? states,
+      WidgetStateProperty<P>? Function(ButtonStyle? style) getProperty, [
+      Set<WidgetState>? states,
     ]) {
       return effectiveValue((ButtonStyle? style) => getProperty(style)?.resolve(states ?? _states));
     }
@@ -570,44 +571,59 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       );
       controller.update(WidgetState.selected, segmentSelected);
 
-      final Widget button = icon != null
-          ? TextButton.icon(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              icon: icon,
-              label: label,
-            )
-          : TextButton(
-              style: segmentStyle,
-              statesController: controller,
-              onHover: (bool hovering) {
-                setState(() {
-                  _hovering = hovering;
-                });
-              },
-              onFocusChange: (bool focused) {
-                setState(() {
-                  _focused = focused;
-                });
-              },
-              onPressed: (_enabled && segment.enabled)
-                  ? () => _handleOnPressed(segment.value)
-                  : null,
-              child: label,
-            );
+      var content = label;
+      var effectiveSegmentStyle = segmentStyle;
+      if (icon != null) {
+        // This logic is needed to get the exact same rendering as using TextButton.icon.
+        // It is duplicated from _TextButtonWithIcon and _TextButtonWithIconChild.
+        // TODO(bleroux): remove once https://github.com/flutter/flutter/issues/173944 is fixed.
+        final bool useMaterial3 = Theme.of(context).useMaterial3;
+        final double defaultFontSize =
+            segmentStyle.textStyle?.resolve(const <WidgetState>{})?.fontSize ?? 14.0;
+        final double effectiveTextScale =
+            MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0;
+        final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
+          useMaterial3
+              ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8)
+              : const EdgeInsets.all(8),
+          const EdgeInsets.symmetric(horizontal: 4),
+          const EdgeInsets.symmetric(horizontal: 4),
+          effectiveTextScale,
+        );
+        effectiveSegmentStyle = segmentStyle.copyWith(
+          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
+        );
+        final double scale = clampDouble(effectiveTextScale, 1.0, 2.0) - 1.0;
+        final TextButtonThemeData textButtonTheme = TextButtonTheme.of(context);
+        final IconAlignment effectiveIconAlignment =
+            textButtonTheme.style?.iconAlignment ??
+            segmentStyle.iconAlignment ??
+            IconAlignment.start;
+        content = Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: lerpDouble(8, 4, scale)!,
+          children: effectiveIconAlignment == IconAlignment.start
+              ? <Widget>[icon, Flexible(child: label)]
+              : <Widget>[Flexible(child: label), icon],
+        );
+      }
+
+      final Widget button = TextButton(
+        style: effectiveSegmentStyle,
+        statesController: controller,
+        onHover: (bool hovering) {
+          setState(() {
+            _hovering = hovering;
+          });
+        },
+        onFocusChange: (bool focused) {
+          setState(() {
+            _focused = focused;
+          });
+        },
+        onPressed: (_enabled && segment.enabled) ? () => _handleOnPressed(segment.value) : null,
+        child: content,
+      );
 
       final Widget buttonWithTooltip = segment.tooltip != null
           ? Tooltip(message: segment.tooltip, child: button)
@@ -615,7 +631,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
       return MergeSemantics(
         child: Semantics(
-          checked: segmentSelected,
+          selected: segmentSelected,
           inMutuallyExclusiveGroup: widget.multiSelectionEnabled ? null : true,
           child: buttonWithTooltip,
         ),
@@ -651,7 +667,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final List<Widget> buttons = widget.segments.map(buttonFor).toList();
 
     final Offset densityAdjustment = resolvedVisualDensity.baseSizeAdjustment;
-    const double textButtonMinHeight = 40.0;
+    const textButtonMinHeight = 40.0;
 
     final double adjustButtonMinHeight = textButtonMinHeight + densityAdjustment.dy;
     final double effectiveVerticalPadding = resolvedPadding.vertical + densityAdjustment.dy * 2;
@@ -845,10 +861,9 @@ class _RenderSegmentedButton<T> extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    double minWidth = 0.0;
+    var minWidth = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       minWidth = math.max(minWidth, childWidth);
       child = childParentData.nextSibling;
@@ -859,10 +874,9 @@ class _RenderSegmentedButton<T> extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     RenderBox? child = firstChild;
-    double maxWidth = 0.0;
+    var maxWidth = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxWidth = math.max(maxWidth, childWidth);
       child = childParentData.nextSibling;
@@ -873,10 +887,9 @@ class _RenderSegmentedButton<T> extends RenderBox
   @override
   double computeMinIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    double minHeight = 0.0;
+    var minHeight = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       minHeight = math.max(minHeight, childHeight);
       child = childParentData.nextSibling;
@@ -887,10 +900,9 @@ class _RenderSegmentedButton<T> extends RenderBox
   @override
   double computeMaxIntrinsicHeight(double width) {
     RenderBox? child = firstChild;
-    double maxHeight = 0.0;
+    var maxHeight = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxHeight = math.max(maxHeight, childHeight);
       child = childParentData.nextSibling;
@@ -911,15 +923,14 @@ class _RenderSegmentedButton<T> extends RenderBox
   }
 
   void _layoutRects(_NextChild nextChild, RenderBox? leftChild, RenderBox? rightChild) {
-    RenderBox? child = leftChild;
-    double start = 0.0;
+    var child = leftChild;
+    var start = 0.0;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       late final RRect rChildRect;
       if (direction == Axis.vertical) {
         childParentData.offset = Offset(0.0, start);
-        final Rect childRect = Rect.fromLTWH(
+        final childRect = Rect.fromLTWH(
           0.0,
           childParentData.offset.dy,
           child.size.width,
@@ -929,7 +940,7 @@ class _RenderSegmentedButton<T> extends RenderBox
         start += child.size.height;
       } else {
         childParentData.offset = Offset(start, 0.0);
-        final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+        final childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
         rChildRect = RRect.fromRectAndCorners(childRect);
         start += child.size.width;
       }
@@ -987,7 +998,18 @@ class _RenderSegmentedButton<T> extends RenderBox
       maxWidth = math.max(maxWidth, boxWidth);
       child = childAfter(child);
     }
-    return Size(maxWidth, childHeight);
+
+    var childSize = Size(maxWidth, childHeight);
+
+    // When the parent provides a tight width constraint in the vertical
+    // direction, use that width for layout so the visual size and the
+    // interactive area match. This preserves the intrinsic (shrink-wrap)
+    // sizing behavior when the width is unconstrained.
+    if (constraints.hasTightWidth && childSize.width < constraints.maxWidth) {
+      childSize = Size(constraints.maxWidth, childSize.height);
+    }
+
+    return childSize;
   }
 
   Size _computeOverallSizeFromChildSize(Size childSize) {
@@ -1006,7 +1028,7 @@ class _RenderSegmentedButton<T> extends RenderBox
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final Size childSize = _calculateChildSize(constraints);
-    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+    final childConstraints = BoxConstraints.tight(childSize);
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
@@ -1022,7 +1044,7 @@ class _RenderSegmentedButton<T> extends RenderBox
     final BoxConstraints constraints = this.constraints;
     final Size childSize = _calculateChildSize(constraints);
 
-    final BoxConstraints childConstraints = BoxConstraints.tightFor(
+    final childConstraints = BoxConstraints.tightFor(
       width: childSize.width,
       height: childSize.height,
     );
@@ -1054,13 +1076,12 @@ class _RenderSegmentedButton<T> extends RenderBox
     );
     RenderBox? child = firstChild;
     RenderBox? previousChild;
-    int index = 0;
+    var index = 0;
     Path? enabledClipPath;
     Path? disabledClipPath;
 
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       final Rect childRect = childParentData.surroundingRect!.outerRect.shift(offset);
 
       context.canvas
@@ -1087,7 +1108,7 @@ class _RenderSegmentedButton<T> extends RenderBox
           segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentLeft;
       }
-      final Rect segmentClipRect = Rect.fromLTRB(
+      final segmentClipRect = Rect.fromLTRB(
         segmentLeft,
         borderRect.top - borderOutset,
         segmentRight,
@@ -1107,12 +1128,12 @@ class _RenderSegmentedButton<T> extends RenderBox
             ? enabledBorder.side.copyWith(strokeAlign: 0.0)
             : disabledBorder.side.copyWith(strokeAlign: 0.0);
         if (direction == Axis.horizontal) {
-          final Offset top = Offset(dividerPos, borderRect.top);
-          final Offset bottom = Offset(dividerPos, borderRect.bottom);
+          final top = Offset(dividerPos, borderRect.top);
+          final bottom = Offset(dividerPos, borderRect.bottom);
           context.canvas.drawLine(top, bottom, divider.toPaint());
         } else if (direction == Axis.vertical) {
-          final Offset start = Offset(borderRect.left, childRect.top);
-          final Offset end = Offset(borderRect.right, childRect.top);
+          final start = Offset(borderRect.left, childRect.top);
+          final end = Offset(borderRect.right, childRect.top);
           context.canvas
             ..save()
             ..clipPath(borderClipPath);
@@ -1152,8 +1173,7 @@ class _RenderSegmentedButton<T> extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     RenderBox? child = lastChild;
     while (child != null) {
-      final _SegmentedButtonContainerBoxParentData childParentData =
-          child.parentData! as _SegmentedButtonContainerBoxParentData;
+      final childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
       if (childParentData.surroundingRect!.contains(position)) {
         return result.addWithPaintOffset(
           offset: childParentData.offset,

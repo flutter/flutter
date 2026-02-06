@@ -189,6 +189,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
     this.padding,
+    this.showValueIndicator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -216,7 +217,7 @@ class Slider extends StatefulWidget {
   ///
   /// If a [CupertinoSlider] is created, the following parameters are ignored:
   /// [secondaryTrackValue], [label], [inactiveColor], [secondaryActiveColor],
-  /// [semanticFormatterCallback].
+  /// [semanticFormatterCallback], [showValueIndicator].
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Slider.adaptive({
@@ -240,6 +241,7 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.allowedInteraction,
+    this.showValueIndicator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -568,6 +570,13 @@ class Slider extends StatefulWidget {
   /// overlay shape, whichever is larger.
   final EdgeInsetsGeometry? padding;
 
+  /// Determines the conditions under which the value indicator is shown.
+  ///
+  /// If [Slider.showValueIndicator] is null then the
+  /// ambient [SliderThemeData.showValueIndicator] is used. If that is also
+  /// null, defaults to [ShowValueIndicator.onlyForDiscrete].
+  final ShowValueIndicator? showValueIndicator;
+
   /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
@@ -740,8 +749,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       _SliderAdjustmentType.right => directionality == TextDirection.ltr,
     };
 
-    final _RenderSlider slider =
-        _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
   }
 
@@ -839,7 +847,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const SliderInteraction defaultAllowedInteraction = SliderInteraction.tapAndSlide;
 
-    final Set<WidgetState> states = <WidgetState>{
+    final states = <WidgetState>{
       if (!_enabled) WidgetState.disabled,
       if (_hovering) WidgetState.hovered,
       if (_focused) WidgetState.focused,
@@ -915,7 +923,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       thumbShape: sliderTheme.thumbShape ?? defaults.thumbShape,
       overlayShape: sliderTheme.overlayShape ?? defaults.overlayShape,
       valueIndicatorShape: valueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
+      showValueIndicator:
+          widget.showValueIndicator ?? sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
       valueIndicatorTextStyle: valueIndicatorTextStyle,
       padding: widget.padding ?? sliderTheme.padding,
       thumbSize: sliderTheme.thumbSize ?? defaults.thumbSize,
@@ -1189,7 +1198,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _hovering = hovering,
        _allowedInteraction = allowedInteraction {
     _updateLabelPainter();
-    final GestureArenaTeam team = GestureArenaTeam();
+    final team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
       ..team = team
       ..onStart = _handleDragStart
@@ -1757,7 +1766,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete,
     );
     final double thumbPadding = (padding > thumbPreferredSize.width / 2 ? padding / 2 : 0);
-    final Offset thumbCenter = Offset(
+    final thumbCenter = Offset(
       clampDouble(thumbPosition, trackRect.left + thumbPadding, trackRect.right - thumbPadding),
       trackRect.center.dy,
     );
@@ -1827,12 +1836,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
-        for (int i = 0; i <= divisions!; i++) {
+        for (var i = 0; i <= divisions!; i++) {
           final double value = i / divisions!;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
           final double dx = trackRect.left + value * adjustedTrackWidth + discreteTrackPadding / 2;
-          final Offset tickMarkOffset = Offset(dx, dy);
+          final tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape!.paint(
             context,
             tickMarkOffset,

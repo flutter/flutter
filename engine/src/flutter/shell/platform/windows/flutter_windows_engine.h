@@ -56,6 +56,7 @@ namespace flutter {
 constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
+class DisplayManagerWin32;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(
@@ -132,7 +133,10 @@ class FlutterWindowsEngine {
   //
   // Returns null on failure.
   std::unique_ptr<FlutterWindowsView> CreateView(
-      std::unique_ptr<WindowBindingHandler> window);
+      std::unique_ptr<WindowBindingHandler> window,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
+      FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Remove a view. The engine will no longer render into it.
   virtual void RemoveView(FlutterViewId view_id);
@@ -158,6 +162,13 @@ class FlutterWindowsEngine {
   IncomingMessageDispatcher* message_dispatcher() {
     return message_dispatcher_.get();
   }
+
+  std::shared_ptr<DisplayManagerWin32> display_manager() {
+    return display_manager_;
+  }
+
+  // Notifies the engine about a display update.
+  void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
 
   TaskRunner* task_runner() { return task_runner_.get(); }
 
@@ -418,6 +429,9 @@ class FlutterWindowsEngine {
   // a view to the engine or after removing a view from the engine.
   mutable std::shared_mutex views_mutex_;
 
+  // The display monitor.
+  std::shared_ptr<DisplayManagerWin32> display_manager_;
+
   // Task runner for tasks posted from the engine.
   std::unique_ptr<TaskRunner> task_runner_;
 
@@ -509,6 +523,13 @@ class FlutterWindowsEngine {
   std::shared_ptr<egl::ProcTable> gl_;
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
+
+  // Handles display-related window messages.
+  bool HandleDisplayMonitorMessage(HWND hwnd,
+                                   UINT message,
+                                   WPARAM wparam,
+                                   LPARAM lparam,
+                                   LRESULT* result);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsEngine);
 };

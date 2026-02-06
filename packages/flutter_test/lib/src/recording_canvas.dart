@@ -434,7 +434,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
-    final OpacityLayer layer = OpacityLayer();
+    final layer = OpacityLayer();
     _createdLayers.add(layer);
     return layer;
   }
@@ -498,20 +498,20 @@ String _valueName(Object? value) {
 String _symbolName(Symbol symbol) {
   // WARNING: Assumes a fixed format for Symbol.toString which is *not*
   // guaranteed anywhere.
-  final String s = '$symbol';
+  final s = '$symbol';
   return s.substring(8, s.length - 2);
 }
 
 // Workaround for https://github.com/dart-lang/sdk/issues/28373
 String _describeInvocation(Invocation call) {
-  final StringBuffer buffer = StringBuffer();
+  final buffer = StringBuffer();
   buffer.write(_symbolName(call.memberName));
   if (call.isSetter) {
     buffer.write(call.positionalArguments[0].toString());
   } else if (call.isMethod) {
     buffer.write('(');
     buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
-    String separator = call.positionalArguments.isEmpty ? '' : ', ';
+    var separator = call.positionalArguments.isEmpty ? '' : ', ';
     call.namedArguments.forEach((Symbol name, Object? value) {
       buffer.write(separator);
       buffer.write(_symbolName(name));

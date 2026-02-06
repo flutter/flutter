@@ -16,6 +16,7 @@
                 "debug",
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
+                "--asan",
                 "--dart-debug",
                 "--rbe",
                 "--no-goma"
@@ -368,6 +369,7 @@
                 "debug",
                 "--no-prebuilt-dart-sdk",
                 "--build-embedder-examples",
+                "--no-lto",
                 "--rbe",
                 "--no-goma"
             ],

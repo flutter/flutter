@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 Future<void> main() async {
-  const Text text = Text('Hello, world!', textDirection: TextDirection.ltr);
+  const text = Text('Hello, world!', textDirection: TextDirection.ltr);
   // These calls must not result in an error. They behave differently in
   // release mode compared to debug or profile.
   // The test will grep logcat for any errors emitted by Flutter.
@@ -19,8 +19,8 @@ Future<void> main() async {
   print(computed);
 
   // regression test for https://github.com/flutter/flutter/issues/148983
-  const String value = 'testValueKey';
-  const ValueKey<String> valueKey = ValueKey<String>(value);
+  const value = 'testValueKey';
+  const valueKey = ValueKey<String>(value);
   if (!valueKey.toString().contains(value)) {
     throw Exception('ValueKey string does not contain the value');
   }

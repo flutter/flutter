@@ -14,8 +14,8 @@ sealed class CheckoutStatePostGradleRegeneration {
     }
 
     final List<String> changes = gitStatusOutput.split('\n');
-    final List<String> changedPaths = <String>[];
-    for (final String line in changes) {
+    final changedPaths = <String>[];
+    for (final line in changes) {
       final RegExpMatch? match = pattern.firstMatch(line);
       if (match == null) {
         return MalformedLine(line);

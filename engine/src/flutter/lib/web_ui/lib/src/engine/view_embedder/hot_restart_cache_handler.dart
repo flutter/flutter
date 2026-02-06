@@ -40,8 +40,8 @@ class HotRestartCacheHandler {
 
     if (jsStore != null) {
       // We are in a post hot-restart world, clear the elements now.
-      final List<Object?> store = jsStore.toObjectShallow as List<Object?>;
-      for (final Object? element in store) {
+      final store = jsStore.toObjectShallow as List<Object?>;
+      for (final element in store) {
         if (element != null) {
           (element as DomElement).remove();
         }

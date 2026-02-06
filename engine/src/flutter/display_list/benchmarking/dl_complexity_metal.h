@@ -73,12 +73,9 @@ class DisplayListMetalComplexityCalculator
                        bool render_with_attributes) override;
     void drawDisplayList(const sk_sp<DisplayList> display_list,
                          DlScalar opacity) override;
-    void drawTextBlob(const sk_sp<SkTextBlob> blob,
-                      DlScalar x,
-                      DlScalar y) override;
-    void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                       DlScalar x,
-                       DlScalar y) override;
+    void drawText(const std::shared_ptr<DlText>& text,
+                  DlScalar x,
+                  DlScalar y) override;
     void drawShadow(const DlPath& path,
                     const DlColor color,
                     const DlScalar elevation,
@@ -95,7 +92,7 @@ class DisplayListMetalComplexityCalculator
 
    private:
     unsigned int save_layer_count_ = 0;
-    unsigned int draw_text_blob_count_ = 0;
+    unsigned int draw_text_count_ = 0;
   };
 
   DisplayListMetalComplexityCalculator()

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'dropdown_menu.dart';
+import 'input_decorator.dart';
 import 'menu_style.dart';
 
 /// A [FormField] that contains a [DropdownMenu].
@@ -39,6 +40,8 @@ class DropdownMenuFormField<T> extends FormField<T> {
     double? menuHeight,
     Widget? leadingIcon,
     Widget? trailingIcon,
+    bool showTrailingIcon = true,
+    FocusNode? trailingIconFocusNode,
     Widget? label,
     String? hintText,
     String? helperText,
@@ -50,12 +53,14 @@ class DropdownMenuFormField<T> extends FormField<T> {
     TextAlign textAlign = TextAlign.start,
     // TODO(bleroux): Clean this up once `InputDecorationTheme` is fully normalized.
     Object? inputDecorationTheme,
+    DropdownMenuDecorationBuilder? decorationBuilder,
     MenuStyle? menuStyle,
     this.controller,
     T? initialSelection,
     this.onSelected,
     FocusNode? focusNode,
     bool? requestFocusOnTap,
+    bool selectOnly = false,
     EdgeInsetsGeometry? expandedInsets,
     Offset? alignmentOffset,
     FilterCallback<T>? filterCallback,
@@ -65,19 +70,40 @@ class DropdownMenuFormField<T> extends FormField<T> {
     DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all,
     int maxLines = 1,
     TextInputAction? textInputAction,
+    double? cursorHeight,
+    MenuController? menuController,
     super.restorationId,
     super.onSaved,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     super.validator,
     super.forceErrorText,
+    super.errorBuilder,
   }) : super(
          initialValue: initialSelection,
          autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
-           final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
-           void onSelectedHandler(T? value) {
-             field.didChange(value);
-             onSelected?.call(value);
+           final state = field as _DropdownMenuFormFieldState<T>;
+
+           InputDecoration effectiveDecorationBuilder(
+             BuildContext context,
+             MenuController menuController,
+           ) {
+             final InputDecoration decoration =
+                 decorationBuilder?.call(context, menuController) ?? const InputDecoration();
+             final InputDecoration decorationWithLabels = decoration.copyWith(
+               label: label,
+               hintText: hintText,
+               helperText: helperText,
+             );
+
+             final String? errorText = state.errorText;
+             if (errorText == null) {
+               return decorationWithLabels;
+             }
+
+             return errorBuilder != null
+                 ? decorationWithLabels.copyWith(error: errorBuilder(state.context, errorText))
+                 : decorationWithLabels.copyWith(errorText: errorText);
            }
 
            return UnmanagedRestorationScope(
@@ -89,10 +115,8 @@ class DropdownMenuFormField<T> extends FormField<T> {
                menuHeight: menuHeight,
                leadingIcon: leadingIcon,
                trailingIcon: trailingIcon,
-               label: label,
-               hintText: hintText,
-               helperText: helperText,
-               errorText: state.errorText,
+               showTrailingIcon: showTrailingIcon,
+               trailingIconFocusNode: trailingIconFocusNode,
                selectedTrailingIcon: selectedTrailingIcon,
                enableFilter: enableFilter,
                enableSearch: enableSearch,
@@ -100,12 +124,14 @@ class DropdownMenuFormField<T> extends FormField<T> {
                textStyle: textStyle,
                textAlign: textAlign,
                inputDecorationTheme: inputDecorationTheme,
+               decorationBuilder: effectiveDecorationBuilder,
                menuStyle: menuStyle,
-               controller: controller,
+               controller: state.textFieldController,
                initialSelection: state.value,
-               onSelected: onSelectedHandler,
+               onSelected: field.didChange,
                focusNode: focusNode,
                requestFocusOnTap: requestFocusOnTap,
+               selectOnly: selectOnly,
                expandedInsets: expandedInsets,
                alignmentOffset: alignmentOffset,
                filterCallback: filterCallback,
@@ -115,6 +141,8 @@ class DropdownMenuFormField<T> extends FormField<T> {
                dropdownMenuEntries: dropdownMenuEntries,
                maxLines: maxLines,
                textInputAction: textInputAction,
+               cursorHeight: cursorHeight,
+               menuController: menuController,
              ),
            );
          },
@@ -122,7 +150,12 @@ class DropdownMenuFormField<T> extends FormField<T> {
 
   /// The callback is called when a selection is made.
   ///
-  /// Defaults to null. If null, only the text field is updated.
+  /// The callback receives the selected entry's value of type `T` when the user
+  /// chooses an item. It may also be invoked with `null` to indicate that the
+  /// selection was cleared / that no item was chosen.
+  ///
+  /// Defaults to null. If this callback itself is null, the widget still updates
+  /// the text field with the selected label.
   final ValueChanged<T?>? onSelected;
 
   /// Controls the text being edited.
@@ -144,7 +177,13 @@ class DropdownMenuFormField<T> extends FormField<T> {
 class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
   DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
+  // The controller used to restore the selected item.
   RestorableTextEditingController? _restorableController;
+
+  // The controller used to reset the content of the DropdownMenu inner TextField.
+  TextEditingController? _localTextFieldController;
+  TextEditingController get textFieldController =>
+      _dropdownMenuFormField.controller ?? (_localTextFieldController ??= TextEditingController());
 
   @override
   void initState() {
@@ -168,11 +207,16 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
     if (oldWidget.initialValue != widget.initialValue && !hasInteractedByUser) {
       setValue(widget.initialValue);
     }
+    if (oldWidget.controller != _dropdownMenuFormField.controller) {
+      _localTextFieldController?.dispose();
+      _localTextFieldController = null;
+    }
   }
 
   @override
   void dispose() {
     _restorableController?.dispose();
+    _localTextFieldController?.dispose();
     super.dispose();
   }
 
@@ -188,6 +232,9 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
     super.reset();
     _dropdownMenuFormField.onSelected?.call(value);
     _updateRestorableController(widget.initialValue);
+    if (widget.initialValue == null) {
+      textFieldController.clear();
+    }
   }
 
   void _updateRestorableController(T? value) {

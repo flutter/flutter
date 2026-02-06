@@ -44,7 +44,7 @@ import '../widgets_localizations.dart';
 String generateWidgetsConstructor(LocaleInfo locale) {
   final String localeName = locale.originalString;
   final String language = locale.languageCode.toLowerCase();
-  final String textDirection = _rtlLanguages.contains(language)
+  final textDirection = _rtlLanguages.contains(language)
       ? 'TextDirection.rtl'
       : 'TextDirection.ltr';
   return '''

@@ -145,7 +145,7 @@ class FlutterView {
   ///
   /// The view can take on any [Size] that fulfills these constraints. These
   /// constraints are typically used by an UI framework as the input for its
-  /// layout algorithm to determine an approrpiate size for the view. To size
+  /// layout algorithm to determine an appropriate size for the view. To size
   /// the view, the selected size must be provided to the [render] method and it
   /// must satisfy the constraints.
   ///
@@ -164,10 +164,7 @@ class FlutterView {
   /// See also:
   ///
   ///  * [physicalSize], which returns the current size of the view.
-  // TODO(goderbauer): Wire this up so embedders can configure it. This will
-  //   also require to message the size provided to the render call back to the
-  //   embedder.
-  ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
+  ViewConstraints get physicalConstraints => _viewConfiguration.viewConstraints;
 
   /// The current dimensions of the rectangle as last reported by the platform
   /// into which scenes rendered in this view are drawn.
@@ -339,6 +336,12 @@ class FlutterView {
   ///  * [MediaQuery.of], a simpler mechanism to access this data.
   List<DisplayFeature> get displayFeatures => _viewConfiguration.displayFeatures;
 
+  /// The radii of the display corners in physical pixels.
+  ///
+  /// This is currently populated only on Android API 31+. On earlier Android
+  /// versions, iOS, and other platforms, this value is `null`.
+  DisplayCornerRadii? get displayCornerRadii => _viewConfiguration.displayCornerRadii;
+
   /// Updates the view's rendering on the GPU with the newly provided [Scene].
   ///
   /// This function must be called within the scope of the
@@ -390,9 +393,8 @@ class FlutterView {
 
   /// Change the retained semantics data about this [FlutterView].
   ///
-  /// If [PlatformDispatcher.semanticsEnabled] is true, the user has requested that this function
-  /// be called whenever the semantic content of this [FlutterView]
-  /// changes.
+  /// [PlatformDispatcher.setSemanticsTreeEnabled] must be called with true
+  /// before sending update through this method.
   ///
   /// This function disposes the given update, which means the semantics update
   /// cannot be used further.
@@ -775,7 +777,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// method of the [FlutterActivity](/javadoc/io/flutter/embedding/android/FlutterActivity.html)'s
   /// intent builder.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/android/add-flutter-screen#initial-route-with-a-cached-engine.
   ///
   /// ## iOS
   ///
@@ -783,7 +785,7 @@ class SingletonFlutterWindow extends FlutterView {
   /// [`FlutterViewController.setInitialRoute`](/ios-embedder/interface_flutter_view_controller.html#a7f269c2da73312f856d42611cc12a33f)
   /// initializer.
   ///
-  /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#route.
+  /// On a standalone engine, see https://docs.flutter.dev/development/add-to-app/ios/add-flutter-screen#route.
   ///
   /// See also:
   ///
@@ -932,6 +934,9 @@ class AccessibilityFeatures {
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
   static const int _kNoAnnounceIndex = 1 << 7;
+  static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
+  static const int _kNoAutoPlayVideosIndex = 1 << 9;
+  static const int _kDeterministicCursorIndex = 1 << 10;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -970,10 +975,10 @@ class AccessibilityFeatures {
   bool get onOffSwitchLabels => _kOnOffSwitchLabelsIndex & _index != 0;
 
   /// Whether the platform supports accessibility  announcement API,
-  /// i.e. [SemanticsService.announce].
+  /// i.e. [SemanticsService.sendAnnouncement].
   ///
   /// Some platforms do not support or discourage the use of
-  /// announcement. Using [SemanticsService.announce] on those platform
+  /// announcement. Using [SemanticsService.sendAnnouncement] on those platform
   /// may be ignored. Consider using other way to convey message to the
   /// user. For example, Android discourages the uses of direct message
   /// announcement, and rather encourages using other semantic
@@ -989,9 +994,33 @@ class AccessibilityFeatures {
   // "announce" than discourage it.
   bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
 
+  /// Whether the platform allows auto-playing animated images.
+  ///
+  /// Only supported on iOS.
+  ///
+  /// Always returns `true` on other platforms.
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto play.
+  bool get autoPlayAnimatedImages => _kNoAutoPlayAnimatedImagesIndex & _index == 0;
+
+  /// Whether the platform allows auto-playing videos.
+  ///
+  /// Only supported on iOS.
+  ///
+  /// Always returns `true` on other platforms.
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto play.
+  bool get autoPlayVideos => _kNoAutoPlayVideosIndex & _index == 0;
+
+  /// The platform is requesting to show deterministic (non-blinking) cursor in
+  /// editable text fields.
+  ///
+  /// Only supported on iOS.
+  bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
+
   @override
   String toString() {
-    final List<String> features = <String>[];
+    final features = <String>[];
     if (accessibleNavigation) {
       features.add('accessibleNavigation');
     }
@@ -1015,6 +1044,15 @@ class AccessibilityFeatures {
     }
     if (supportsAnnounce) {
       features.add('supportsAnnounce');
+    }
+    if (autoPlayAnimatedImages) {
+      features.add('autoPlayAnimatedImages');
+    }
+    if (autoPlayVideos) {
+      features.add('autoPlayVideos');
+    }
+    if (deterministicCursor) {
+      features.add('deterministicCursor');
     }
     return 'AccessibilityFeatures$features';
   }

@@ -178,6 +178,8 @@ class Hero extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     this.transitionOnUserGestures = false,
+    this.curve = Curves.fastOutSlowIn,
+    this.reverseCurve,
     required this.child,
   });
 
@@ -261,6 +263,16 @@ class Hero extends StatefulWidget {
   /// Defaults to false.
   final bool transitionOnUserGestures;
 
+  /// The curve to use in the forward direction.
+  ///
+  /// Defaults to [Curves.fastOutSlowIn].
+  final Curve curve;
+
+  /// The curve to use in the reverse direction.
+  ///
+  /// If this property is null, [Hero.curve].flipped is used.
+  final Curve? reverseCurve;
+
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
   // PageRoute to another.
@@ -269,7 +281,7 @@ class Hero extends StatefulWidget {
     bool isUserGestureTransition,
     NavigatorState navigator,
   ) {
-    final Map<Object, _HeroState> result = <Object, _HeroState>{};
+    final result = <Object, _HeroState>{};
 
     void inviteHero(StatefulElement hero, Object tag) {
       assert(() {
@@ -291,8 +303,8 @@ class Hero extends StatefulWidget {
         }
         return true;
       }());
-      final Hero heroWidget = hero.widget as Hero;
-      final _HeroState heroState = hero.state as _HeroState;
+      final heroWidget = hero.widget as Hero;
+      final heroState = hero.state as _HeroState;
       if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
         result[tag] = heroState;
       } else {
@@ -305,7 +317,7 @@ class Hero extends StatefulWidget {
     void visitor(Element element) {
       final Widget widget = element.widget;
       if (widget is Hero) {
-        final StatefulElement hero = element as StatefulElement;
+        final hero = element as StatefulElement;
         final Object tag = widget.tag;
         if (Navigator.of(hero) == navigator) {
           inviteHero(hero, tag);
@@ -369,7 +381,7 @@ class _HeroState extends State<Hero> {
   void startFlight({bool shouldIncludedChildInPlaceholder = false}) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+    final box = context.findRenderObject()! as RenderBox;
     assert(box.hasSize);
     setState(() {
       _placeholderSize = box.size;
@@ -402,7 +414,7 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.',
     );
 
-    final bool showPlaceholder = _placeholderSize != null;
+    final showPlaceholder = _placeholderSize != null;
 
     if (showPlaceholder && widget.placeholderBuilder != null) {
       return widget.placeholderBuilder!(context, _placeholderSize!, widget.child);
@@ -459,10 +471,23 @@ class _HeroFlightManifest {
   CurvedAnimation? _animation;
 
   Animation<double> get animation {
+    final Curve curve, reverseCurve;
+    final Animation<double> parent;
+    switch (type) {
+      case HeroFlightDirection.push:
+        parent = toRoute.animation!;
+        curve = toHero.widget.curve;
+        reverseCurve = toHero.widget.reverseCurve ?? curve.flipped;
+      case HeroFlightDirection.pop:
+        parent = fromRoute.animation!;
+        curve = fromHero.widget.curve;
+        reverseCurve = fromHero.widget.reverseCurve ?? curve.flipped;
+    }
+
     return _animation ??= CurvedAnimation(
-      parent: (type == HeroFlightDirection.push) ? toRoute.animation! : fromRoute.animation!,
-      curve: Curves.fastOutSlowIn,
-      reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
+      parent: parent,
+      curve: curve,
+      reverseCurve: isDiverted ? null : reverseCurve,
     );
   }
 
@@ -475,7 +500,7 @@ class _HeroFlightManifest {
   // render object's coordinate space.
   static Rect _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
     assert(ancestorContext != null);
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+    final box = context.findRenderObject()! as RenderBox;
     assert(box.hasSize && box.size.isFinite);
     return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
@@ -559,7 +584,7 @@ class _HeroFlight {
       child: shuttle,
       builder: (BuildContext context, Widget? child) {
         final Rect rect = heroRectTween.evaluate(_proxyAnimation)!;
-        final RelativeRect offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
+        final offsets = RelativeRect.fromSize(rect, manifest.navigatorSize);
         return Positioned(
           top: offsets.top,
           right: offsets.right,
@@ -876,7 +901,7 @@ class HeroController extends NavigatorObserver {
 
     // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
     // will also remove the flight from _flights.
-    for (final _HeroFlight flight in invalidFlights) {
+    for (final flight in invalidFlights) {
       flight._handleAnimationUpdate(AnimationStatus.dismissed);
     }
   }
@@ -924,7 +949,7 @@ class HeroController extends NavigatorObserver {
     // maintainState = true, then the hero's final dimensions can be measured
     // immediately because their page's layout is still valid. Unless due to directly
     // adding routes to the pages stack causing the route to never get laid out.
-    final RenderBox? fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
+    final fromRouteRenderBox = toRoute.subtreeContext?.findRenderObject() as RenderBox?;
     final bool hasValidSize =
         (fromRouteRenderBox?.hasSize ?? false) && fromRouteRenderBox!.size.isFinite;
     if (isUserGestureTransition &&
@@ -1055,7 +1080,7 @@ class HeroController extends NavigatorObserver {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    final Hero toHero = toHeroContext.widget as Hero;
+    final toHero = toHeroContext.widget as Hero;
 
     final MediaQueryData? toMediaQueryData = MediaQuery.maybeOf(toHeroContext);
     final MediaQueryData? fromMediaQueryData = MediaQuery.maybeOf(fromHeroContext);

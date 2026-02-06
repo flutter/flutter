@@ -741,7 +741,7 @@ class _AndroidViewState extends State<AndroidView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     _initializeOnce();
@@ -757,7 +757,7 @@ class _AndroidViewState extends State<AndroidView> {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
@@ -881,7 +881,7 @@ abstract class _DarwinViewState<
   void didChangeDependencies() {
     super.didChangeDependencies();
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     _initializeOnce();
@@ -897,7 +897,7 @@ abstract class _DarwinViewState<
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
-    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    final didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
@@ -1503,10 +1503,10 @@ class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController viewController = controller as AndroidViewController;
+    final viewController = controller as AndroidViewController;
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
-    final RenderAndroidView renderBox = RenderAndroidView(
+    final renderBox = RenderAndroidView(
       viewController: viewController,
       gestureRecognizers: gestureRecognizers,
       hitTestBehavior: hitTestBehavior,
@@ -1525,9 +1525,8 @@ class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    final AndroidViewController viewController = controller as AndroidViewController;
-    final PlatformViewRenderBox renderBox =
-        super.createRenderObject(context) as PlatformViewRenderBox;
+    final viewController = controller as AndroidViewController;
+    final renderBox = super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer = (Offset position) => renderBox.globalToLocal(position);
     return renderBox;
   }

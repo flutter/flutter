@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "flutter/shell/platform/common/geometry.h"
+#include "flutter/shell/geometry/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
 #include "flutter/third_party/accessibility/ax/platform/ax_fragment_root_delegate_win.h"

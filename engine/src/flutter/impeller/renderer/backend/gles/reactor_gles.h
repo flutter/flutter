@@ -9,11 +9,11 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "fml/closure.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
@@ -284,8 +284,8 @@ class ReactorGLES {
   std::unique_ptr<ProcTableGLES> proc_table_;
 
   mutable Mutex ops_mutex_;
-  std::map<std::thread::id, std::vector<Operation>> ops_ IPLR_GUARDED_BY(
-      ops_mutex_);
+  std::map<std::thread::id, std::vector<Operation>> ops_
+      IPLR_GUARDED_BY(ops_mutex_);
 
   using LiveHandles = absl::flat_hash_map<const HandleGLES,
                                           LiveHandle,
@@ -296,8 +296,8 @@ class ReactorGLES {
   int32_t handles_to_collect_count_ IPLR_GUARDED_BY(handles_mutex_) = 0;
 
   mutable Mutex workers_mutex_;
-  mutable std::map<WorkerID, std::weak_ptr<Worker>> workers_ IPLR_GUARDED_BY(
-      workers_mutex_);
+  mutable std::map<WorkerID, std::weak_ptr<Worker>> workers_
+      IPLR_GUARDED_BY(workers_mutex_);
 
   bool can_set_debug_labels_ = false;
   bool is_valid_ = false;

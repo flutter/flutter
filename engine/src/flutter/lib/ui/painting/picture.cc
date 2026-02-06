@@ -50,9 +50,28 @@ Dart_Handle Picture::toImage(uint32_t width,
 
 void Picture::toImageSync(uint32_t width,
                           uint32_t height,
+                          int32_t target_format,
                           Dart_Handle raw_image_handle) {
   FML_DCHECK(display_list_);
-  RasterizeToImageSync(display_list_, width, height, raw_image_handle);
+  SnapshotPixelFormat snapshot_pixel_format;
+  // This must be kept in sync with painting.dart.
+  switch (target_format) {
+    case 0:
+      snapshot_pixel_format = SnapshotPixelFormat::kDontCare;
+      break;
+    case 1:
+      snapshot_pixel_format = SnapshotPixelFormat::kRGBA32Float;
+      break;
+    case 2:
+      snapshot_pixel_format = SnapshotPixelFormat::kR32Float;
+      break;
+    default:
+      FML_DCHECK(false) << "unknown target format: " << target_format;
+      snapshot_pixel_format = SnapshotPixelFormat::kDontCare;
+      break;
+  }
+  RasterizeToImageSync(display_list_, width, height, snapshot_pixel_format,
+                       raw_image_handle);
 }
 
 static sk_sp<DlImage> CreateDeferredImage(
@@ -60,13 +79,14 @@ static sk_sp<DlImage> CreateDeferredImage(
     sk_sp<DisplayList> display_list,
     uint32_t width,
     uint32_t height,
+    SnapshotPixelFormat target_format,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue) {
 #if IMPELLER_SUPPORTS_RENDERING
   if (impeller) {
     return DlDeferredImageGPUImpeller::Make(
-        std::move(display_list), DlISize(width, height),
+        std::move(display_list), DlISize(width, height), target_format,
         std::move(snapshot_delegate), std::move(raster_task_runner));
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -87,6 +107,7 @@ static sk_sp<DlImage> CreateDeferredImage(
 void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
                                    uint32_t width,
                                    uint32_t height,
+                                   SnapshotPixelFormat target_format,
                                    Dart_Handle raw_image_handle) {
   auto* dart_state = UIDartState::Current();
   if (!dart_state) {
@@ -99,7 +120,8 @@ void Picture::RasterizeToImageSync(sk_sp<DisplayList> display_list,
   auto image = CanvasImage::Create();
   auto dl_image = CreateDeferredImage(
       dart_state->IsImpellerEnabled(), std::move(display_list), width, height,
-      std::move(snapshot_delegate), std::move(raster_task_runner), unref_queue);
+      target_format, std::move(snapshot_delegate),
+      std::move(raster_task_runner), unref_queue);
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }
@@ -220,7 +242,8 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
             [ui_task_runner, ui_task](const sk_sp<DlImage>& image) {
               fml::TaskRunner::RunNowOrPostTask(
                   ui_task_runner, [ui_task, image]() { ui_task(image); });
-            });
+            },
+            SnapshotPixelFormat::kDontCare);
       }));
 
   return Dart_Null();

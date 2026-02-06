@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Tìm kiếm trên web",
   "shareButtonLabel": "Chia sẻ",
   "pasteButtonLabel": "Dán",
-  "selectAllButtonLabel": "Chọn tất cả"
+  "selectAllButtonLabel": "Chọn tất cả",
+  "searchResultsFound": "Có kết quả tìm kiếm",
+  "noResultsFound": "Không tìm thấy kết quả",
+  "radioButtonUnselectedLabel": "Chưa chọn"
 }

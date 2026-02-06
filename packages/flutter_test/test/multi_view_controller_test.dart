@@ -146,7 +146,7 @@ void main() {
 
   testWidgets('layers includes layers from all views', (WidgetTester tester) async {
     await pumpViews(tester: tester);
-    const int numberOfViews = 3;
+    const numberOfViews = 3;
     expect(
       tester.binding.renderViews.length,
       numberOfViews,
@@ -227,7 +227,7 @@ void main() {
 }
 
 Future<void> pumpViews({required WidgetTester tester}) {
-  final List<Widget> views = <Widget>[
+  final views = <Widget>[
     for (int i = 0; i < 3; i++)
       View(
         view: i == 1 ? tester.view : FakeView(tester.view, viewId: i + 100),

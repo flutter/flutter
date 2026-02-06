@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -22,7 +21,7 @@ import 'theme_data.dart';
 /// Defines default property values for descendant [Radio] widgets.
 ///
 /// Descendant widgets obtain the current [RadioThemeData] object using
-/// `RadioTheme.of(context)`. Instances of [RadioThemeData] can be customized
+/// [RadioTheme.of]. Instances of [RadioThemeData] can be customized
 /// with [RadioThemeData.copyWith].
 ///
 /// Typically a [RadioThemeData] is specified as part of the overall [Theme]
@@ -58,17 +57,17 @@ class RadioThemeData with Diagnosticable {
   ///
   /// If specified, overrides the default value of [Radio.mouseCursor]. The
   /// default value is [WidgetStateMouseCursor.clickable].
-  final MaterialStateProperty<MouseCursor?>? mouseCursor;
+  final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
   /// {@macro flutter.material.radio.fillColor}
   ///
   /// If specified, overrides the default value of [Radio.fillColor].
-  final MaterialStateProperty<Color?>? fillColor;
+  final WidgetStateProperty<Color?>? fillColor;
 
   /// {@macro flutter.material.radio.overlayColor}
   ///
   /// If specified, overrides the default value of [Radio.overlayColor].
-  final MaterialStateProperty<Color?>? overlayColor;
+  final WidgetStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.radio.splashRadius}
   ///
@@ -110,9 +109,9 @@ class RadioThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    MaterialStateProperty<Color?>? fillColor,
-    MaterialStateProperty<Color?>? overlayColor,
+    WidgetStateProperty<MouseCursor?>? mouseCursor,
+    WidgetStateProperty<Color?>? fillColor,
+    WidgetStateProperty<Color?>? overlayColor,
     double? splashRadius,
     MaterialTapTargetSize? materialTapTargetSize,
     VisualDensity? visualDensity,

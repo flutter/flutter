@@ -42,11 +42,12 @@ class _ListTileExampleState extends State<ListTileExample> {
               _selected = !_selected;
             });
           },
-          iconColor: const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
-            WidgetState.disabled: Colors.red,
-            WidgetState.selected: Colors.green,
-            WidgetState.any: Colors.black,
-          }),
+          iconColor:
+              const WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+                WidgetState.disabled: Colors.red,
+                WidgetState.selected: Colors.green,
+                WidgetState.any: Colors.black,
+              }),
           // The same can be achieved using the .resolveWith() constructor.
           // The text color will be identical to the icon color above.
           textColor: WidgetStateColor.resolveWith((Set<WidgetState> states) {
@@ -62,10 +63,10 @@ class _ListTileExampleState extends State<ListTileExample> {
           title: const Text('Headline'),
           subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
           trailing: Switch(
-            onChanged: (bool? value) {
+            onChanged: (bool value) {
               // This is called when the user toggles the switch.
               setState(() {
-                _enabled = value!;
+                _enabled = value;
               });
             },
             value: _enabled,

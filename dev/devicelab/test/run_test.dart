@@ -119,7 +119,7 @@ void main() {
       final Directory tempDirectory = Directory.systemTemp.createTempSync(
         'flutter_devicelab_ab_test.',
       );
-      final File abResultsFile = File(path.join(tempDirectory.path, 'test_results.json'));
+      final abResultsFile = File(path.join(tempDirectory.path, 'test_results.json'));
 
       expect(abResultsFile.existsSync(), isFalse);
 
@@ -135,7 +135,7 @@ void main() {
       );
       expect(result.exitCode, 0);
 
-      String sectionHeader = !Platform.isWindows
+      var sectionHeader = !Platform.isWindows
           ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
           : 'A/B results so far';
       expect(
@@ -191,6 +191,15 @@ void main() {
         <String>['--service-account-file=test-file', '--task-key=task123'],
       );
       expect(result.exitCode, 1);
+    });
+
+    test('passes build mode to the test', () async {
+      final ProcessResult result = await runScript(
+        <String>['build_mode_test'],
+        <String>['--build-mode=debug'],
+      );
+      expect(result.exitCode, 0);
+      expect(result.stdout, contains('buildMode: debug'));
     });
   });
 }

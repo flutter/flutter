@@ -6,6 +6,7 @@
 
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
+#include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/base/validation.h"
 
 namespace impeller::interop {
@@ -65,7 +66,7 @@ ScopedObject<ImageFilter> ImageFilter::MakeFragmentProgram(
     return nullptr;
   }
   auto runtime_effect =
-      flutter::DlRuntimeEffect::MakeImpeller(std::move(runtime_stage));
+      flutter::DlRuntimeEffectImpeller::Make(std::move(runtime_stage));
   if (!runtime_effect) {
     VALIDATION_LOG << "Could not make runtime effect.";
     return nullptr;

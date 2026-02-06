@@ -11,8 +11,10 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-class SkwasmRenderer implements Renderer {
+class SkwasmRenderer extends Renderer {
   bool get isMultiThreaded => false;
+
+  bool get isWimp => false;
 
   @override
   ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
@@ -37,6 +39,7 @@ class SkwasmRenderer implements Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
+    ui.Rect? bounds,
   }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
@@ -253,11 +256,6 @@ class SkwasmRenderer implements Renderer {
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  FutureOr<void> initialize() {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
     int? targetWidth,
@@ -284,19 +282,12 @@ class SkwasmRenderer implements Renderer {
   String get rendererTag => throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  void clearFragmentProgramCache() => _programs.clear();
-
-  static final Map<String, Future<ui.FragmentProgram>> _programs =
-      <String, Future<ui.FragmentProgram>>{};
+  void clearFragmentProgramCache() =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey) {
-    if (_programs.containsKey(assetKey)) {
-      return _programs[assetKey]!;
-    }
-    return _programs[assetKey] = ui_web.assetManager.load(assetKey).then((ByteData data) {
-      return CkFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
-    });
+    throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
@@ -333,7 +324,11 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  void debugClear() {
+  void debugResetRasterizer() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
+
+  @override
+  Surface get pictureToImageSurface =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 }

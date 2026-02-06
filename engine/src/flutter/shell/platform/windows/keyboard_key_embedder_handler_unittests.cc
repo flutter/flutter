@@ -747,17 +747,30 @@ TEST(KeyboardKeyEmbedderHandlerTest, RepeatedDownIsIgnored) {
 
   // KeyA's key up is missed.
 
-  // Press A again (should yield an empty event)
+  // Press A again (should synthesize an up event followed by a new down).
   last_handled = false;
   handler->KeyboardHook(
       kVirtualKeyA, kScanCodeKeyA, WM_KEYDOWN, 'a', false, false,
       [&last_handled](bool handled) { last_handled = handled; });
-  EXPECT_EQ(last_handled, true);
-  EXPECT_EQ(results.size(), 1);
+  EXPECT_EQ(last_handled, false);
+  ASSERT_EQ(results.size(), 2u);
+
   event = &results[0];
-  EXPECT_EQ(event->physical, 0);
-  EXPECT_EQ(event->logical, 0);
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeUp);
+  EXPECT_EQ(event->physical, kPhysicalKeyA);
+  EXPECT_EQ(event->logical, kLogicalKeyA);
+  EXPECT_STREQ(event->character, "");
+  EXPECT_EQ(event->synthesized, true);
   EXPECT_EQ(event->callback, nullptr);
+
+  event = &results[1];
+  EXPECT_EQ(event->type, kFlutterKeyEventTypeDown);
+  EXPECT_EQ(event->physical, kPhysicalKeyA);
+  EXPECT_EQ(event->logical, kLogicalKeyA);
+  EXPECT_STREQ(event->character, "a");
+  EXPECT_EQ(event->synthesized, false);
+  event->callback(true, event->user_data);
+  EXPECT_EQ(last_handled, true);
   results.clear();
 }
 

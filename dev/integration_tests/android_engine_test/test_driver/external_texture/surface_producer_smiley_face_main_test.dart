@@ -23,7 +23,7 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
-  const String appName = 'com.example.android_engine_test';
+  const appName = 'com.example.android_engine_test';
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 

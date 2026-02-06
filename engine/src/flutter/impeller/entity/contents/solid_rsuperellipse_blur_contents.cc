@@ -80,11 +80,11 @@ bool SolidRSuperellipseBlurContents::SetPassInfo(
   frag_info.polyRight = compute_poly(param.top_right.right);
 
   // Back to pass setup.
-  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto& data_host_buffer = renderer.GetTransientsDataBuffer();
   pass.SetCommandLabel("RSuperellipse Shadow");
   pass.SetPipeline(renderer.GetRSuperellipseBlurPipeline(pass_context.opts));
 
-  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+  FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
   return true;
 }
 

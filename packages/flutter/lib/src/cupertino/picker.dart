@@ -442,7 +442,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
+    const radius = Radius.circular(_defaultSelectionOverlayRadius);
 
     return Container(
       margin: EdgeInsetsDirectional.only(
@@ -559,7 +559,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       return super.assembleSemanticsNode(node, config, children);
     }
     final SemanticsNode scrollable = children.first;
-    final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
+    final indexedChildren = <int, SemanticsNode>{};
     scrollable.visitChildren((SemanticsNode child) {
       assert(child.indexInParent != null);
       indexedChildren[child.indexInParent!] = child;
@@ -568,14 +568,26 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     if (indexedChildren[_currentIndex] == null) {
       return node.updateWith(config: config);
     }
-    config.value = indexedChildren[_currentIndex]!.label;
+    final String currentLabel = indexedChildren[_currentIndex]!.label;
+    // If the current item has an empty label (e.g., wrapped with ExcludeSemantics),
+    // don't set any semantics configuration to avoid assertion errors.
+    // The semantics system requires that if "value" is empty, "increasedValue"
+    // and "decreasedValue" must also be empty, and no increase/decrease actions
+    // should be set.
+    if (currentLabel.isEmpty) {
+      return node.updateWith(config: config);
+    }
+    config.value = currentLabel;
     final SemanticsNode? previousChild = indexedChildren[_currentIndex - 1];
     final SemanticsNode? nextChild = indexedChildren[_currentIndex + 1];
-    if (nextChild != null) {
+    // Only set increase/decrease actions if the adjacent item has a non-empty label.
+    // Items wrapped with ExcludeSemantics will have empty labels and should not
+    // be navigable via accessibility actions.
+    if (nextChild != null && nextChild.label.isNotEmpty) {
       config.increasedValue = nextChild.label;
       config.onIncrease = _handleIncrease;
     }
-    if (previousChild != null) {
+    if (previousChild != null && previousChild.label.isNotEmpty) {
       config.decreasedValue = previousChild.label;
       config.onDecrease = _handleDecrease;
     }

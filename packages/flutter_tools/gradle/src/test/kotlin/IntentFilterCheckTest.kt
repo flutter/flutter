@@ -18,7 +18,7 @@ class IntentFilterCheckTest {
         val intentJson = intentFilterCheck.toJson()
 
         // Keys are not a reference because the key values are accessed
-        // across the gradle/dart boundery.
+        // across the gradle/dart boundary.
         assertTrue(intentJson.containsKey("hasAutoVerify"))
         assertTrue(intentJson.containsKey("hasActionView"))
         assertTrue(intentJson.containsKey("hasDefaultCategory"))

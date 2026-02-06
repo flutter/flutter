@@ -590,7 +590,7 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  var failures = 0;
+  int failures = 0;
 
   /// A mapping of zip [File] paths to callbacks that receive the `targetDirectory`.
   ///

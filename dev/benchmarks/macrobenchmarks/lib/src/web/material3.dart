@@ -718,10 +718,10 @@ class _SwitchRowState extends State<SwitchRow> {
   bool value0 = false;
   bool value1 = true;
 
-  final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>((
-    Set<MaterialState> states,
+  final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((
+    Set<WidgetState> states,
   ) {
-    if (states.contains(MaterialState.selected)) {
+    if (states.contains(WidgetState.selected)) {
       return const Icon(Icons.check);
     }
     return const Icon(Icons.close);
@@ -1251,11 +1251,11 @@ ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
         : colors.onSurface.withOpacity(0.12),
     side: BorderSide(color: colors.outline),
   ).copyWith(
-    foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
+    foregroundColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
         return colors.onInverseSurface;
       }
-      if (states.contains(MaterialState.pressed)) {
+      if (states.contains(WidgetState.pressed)) {
         return colors.onSurface;
       }
       return null;
@@ -1432,7 +1432,7 @@ class SnackBarSection extends StatelessWidget {
       tooltipMessage: 'Use ScaffoldMessenger.of(context).showSnackBar with SnackBar',
       child: TextButton(
         onPressed: () {
-          final SnackBar snackBar = SnackBar(
+          final snackBar = SnackBar(
             behavior: SnackBarBehavior.floating,
             width: 400.0,
             content: const Text('This is a snackbar'),
@@ -1461,7 +1461,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> buttonList = <Widget>[
+    var buttonList = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.delete_outline)),
@@ -1469,7 +1469,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
       IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.favorite_border)),
     ];
-    const List<Text> labelList = <Text>[
+    const labelList = <Text>[
       Text('Share'),
       Text('Add to'),
       Text('Trash'),
@@ -1949,7 +1949,7 @@ class _MenusState extends State<Menus> {
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
+    final colorEntries = <DropdownMenuEntry<ColorLabel>>[];
     for (final ColorLabel color in ColorLabel.values) {
       colorEntries.add(
         DropdownMenuEntry<ColorLabel>(
@@ -1960,7 +1960,7 @@ class _MenusState extends State<Menus> {
       );
     }
 
-    final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
+    final iconEntries = <DropdownMenuEntry<IconLabel>>[];
     for (final IconLabel icon in IconLabel.values) {
       iconEntries.add(DropdownMenuEntry<IconLabel>(value: icon, label: icon.label));
     }

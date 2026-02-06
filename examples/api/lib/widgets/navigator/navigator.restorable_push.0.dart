@@ -15,7 +15,10 @@ class RestorablePushExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const RootRestorationScope(
       restorationId: 'app',
-      child: MaterialApp(restorationScopeId: 'app', home: RestorablePushExample()),
+      child: MaterialApp(
+        restorationScopeId: 'app',
+        home: RestorablePushExample(),
+      ),
     );
   }
 }

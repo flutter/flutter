@@ -441,10 +441,17 @@ void RuntimeController::CheckIfAllViewsRendered() {
 // |PlatformConfigurationClient|
 void RuntimeController::UpdateSemantics(int64_t view_id,
                                         SemanticsUpdate* update) {
-  if (platform_data_.semantics_enabled) {
-    client_.UpdateSemantics(view_id, update->takeNodes(),
-                            update->takeActions());
-  }
+  client_.UpdateSemantics(view_id, update->takeNodes(), update->takeActions());
+}
+
+// |PlatformConfigurationClient|
+void RuntimeController::SetApplicationLocale(std::string locale) {
+  client_.SetApplicationLocale(std::move(locale));
+}
+
+// |PlatformConfigurationClient|
+void RuntimeController::SetSemanticsTreeEnabled(bool enabled) {
+  client_.SetSemanticsTreeEnabled(enabled);
 }
 
 // |PlatformConfigurationClient|

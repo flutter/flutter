@@ -20,8 +20,8 @@ Future<void> _withApkInstall(
   String bundleName,
   Future<void> Function(AndroidDevice) body,
 ) async {
-  final DeviceDiscovery devices = DeviceDiscovery();
-  final AndroidDevice device = await devices.workingDevice as AndroidDevice;
+  final devices = DeviceDiscovery();
+  final device = await devices.workingDevice as AndroidDevice;
   await device.unlock();
   await device.adb(<String>['uninstall', bundleName], canFail: true);
   await device.adb(<String>['install', '-r', apkPath]);
@@ -42,9 +42,7 @@ void _copyGradleFromModule(String source, String destination) {
   final String windowsWrapperDestinationPath = path.join(destination, 'gradlew.bat');
   File(wrapperPath).copySync(wrapperDestinationPath);
   File(windowsWrapperPath).copySync(windowsWrapperDestinationPath);
-  final Directory gradleDestinationDirectory = Directory(
-    path.join(destination, 'gradle', 'wrapper'),
-  );
+  final gradleDestinationDirectory = Directory(path.join(destination, 'gradle', 'wrapper'));
   if (!gradleDestinationDirectory.existsSync()) {
     gradleDestinationDirectory.createSync(recursive: true);
   }
@@ -74,8 +72,8 @@ Future<TaskResult> _doTest() async {
     final String modulePath = path.join(multipleFluttersPath, 'module');
     final String androidPath = path.join(multipleFluttersPath, 'android');
 
-    final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-    final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+    final gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
     await utils.flutter('precache', options: <String>['--android'], workingDirectory: modulePath);
     await utils.flutter('pub', options: <String>['get'], workingDirectory: modulePath);
     _copyGradleFromModule(modulePath, androidPath);
@@ -94,8 +92,8 @@ Future<TaskResult> _doTest() async {
 
     TaskResult? result;
     await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
-      final List<int> totalMemorySamples = <int>[];
-      for (int i = 0; i < _numberOfIterations; ++i) {
+      final totalMemorySamples = <int>[];
+      for (var i = 0; i < _numberOfIterations; ++i) {
         await device.adb(<String>[
           'shell',
           'am',
@@ -105,15 +103,13 @@ Future<TaskResult> _doTest() async {
         ]);
         await Future<void>.delayed(const Duration(seconds: 10));
         final Map<String, dynamic> memoryStats = await device.getMemoryStats(_bundleName);
-        final int totalMemory = memoryStats['total_kb'] as int;
+        final totalMemory = memoryStats['total_kb'] as int;
         totalMemorySamples.add(totalMemory);
         await device.stop(_bundleName);
       }
-      final ListStatistics totalMemoryStatistics = ListStatistics(totalMemorySamples);
+      final totalMemoryStatistics = ListStatistics(totalMemorySamples);
 
-      final Map<String, dynamic> results = <String, dynamic>{
-        ...totalMemoryStatistics.asMap('totalMemory'),
-      };
+      final results = <String, dynamic>{...totalMemoryStatistics.asMap('totalMemory')};
       result = TaskResult.success(results, benchmarkScoreKeys: results.keys.toList());
     });
 

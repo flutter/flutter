@@ -235,7 +235,18 @@ abstract class FlutterVersion {
       ? _clock.now().difference(DateTime.parse(engineBuildDate!)).ago()
       : _getTimeSinceCommit(revision: engineRevision);
 
+  /// Populates bin/cache/flutter.version.json with the current version information, if it does not
+  /// already exist.
   void ensureVersionFile();
+
+  /// Deletes bin/cache/flutter.version.json so it can be regenerated on the next invocation of the
+  /// tool.
+  void deleteVersionFile() {
+    final File versionFile = getVersionFile(fs, flutterRoot);
+    if (versionFile.existsSync()) {
+      versionFile.deleteSync();
+    }
+  }
 
   @override
   String toString() {
@@ -271,9 +282,9 @@ abstract class FlutterVersion {
     'frameworkRevision': frameworkRevision,
     'frameworkCommitDate': frameworkCommitDate,
     'engineRevision': engineRevision,
-    if (engineCommitDate != null) 'engineCommitDate': engineCommitDate!,
-    if (engineContentHash != null) 'engineContentHash': engineContentHash!,
-    if (engineBuildDate != null) 'engineBuildDate': engineBuildDate!,
+    'engineCommitDate': ?engineCommitDate,
+    'engineContentHash': ?engineContentHash,
+    'engineBuildDate': ?engineBuildDate,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
     'flutterVersion': frameworkVersion,
@@ -689,7 +700,6 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   void ensureVersionFile() {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
-
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!newVersionFile.existsSync()) {
@@ -1049,21 +1059,45 @@ class GitTagVersion {
       }
     }
 
-    // If we're not currently on a tag, use git describe to find the most
-    // recent tag and number of commits past.
-    return parse(
-      git
-          .runSync([
-            'describe',
-            '--match',
-            '*.*.*',
-            '--long',
-            '--tags',
-            gitRef,
-          ], workingDirectory: workingDirectory)
-          .stdout
-          .trim(),
+    // If we don't exist in a tag, use git to find the latest tag.
+    return _useNewestTagAndCommitsPastFallback(
+      git: git,
+      workingDirectory: workingDirectory,
+      gitRef: gitRef,
     );
+  }
+
+  static GitTagVersion _useNewestTagAndCommitsPastFallback({
+    required Git git,
+    required String? workingDirectory,
+    required String gitRef,
+  }) {
+    final String latestTag = git
+        .runSync([
+          'for-each-ref',
+          '--sort=-v:refname',
+          '--count=1',
+          '--format=%(refname:short)',
+          'refs/tags/[0-9]*.*.*',
+        ], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    final String ancestorRef = git
+        .runSync(['merge-base', gitRef, latestTag], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    final String commitCount = git
+        .runSync([
+          'rev-list',
+          '--count',
+          '$ancestorRef..$gitRef',
+        ], workingDirectory: workingDirectory)
+        .stdout
+        .trim();
+
+    return parse('$latestTag-$commitCount');
   }
 
   /// Parse a version string.
@@ -1109,6 +1143,7 @@ class GitTagVersion {
     );
   }
 
+  @visibleForTesting
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
@@ -1209,7 +1244,7 @@ class VersionFreshnessValidator {
   ///
   /// This can be customized in tests to speed them up.
   @visibleForTesting
-  static var timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
   // We show a warning if either we know there is a new remote version, or we
   // couldn't tell but the local version is outdated.

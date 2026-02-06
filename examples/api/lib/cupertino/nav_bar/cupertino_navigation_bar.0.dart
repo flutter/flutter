@@ -33,7 +33,7 @@ class _NavBarExampleState extends State<NavBarExample> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         // Try removing opacity to observe the lack of a blur effect and of sliding content.
-        backgroundColor: CupertinoColors.systemGrey.withOpacity(0.5),
+        backgroundColor: CupertinoColors.systemGrey.withValues(alpha: 0.5),
         middle: const Text('CupertinoNavigationBar Sample'),
         automaticBackgroundVisibility: false,
       ),

@@ -15,9 +15,19 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
+import 'platform_plugins.dart';
 import 'plugins.dart';
 
 const _kValidPluginPlatforms = <String>{'android', 'ios', 'web', 'windows', 'linux', 'macos'};
+
+/// A wrapper for a platform-specific plugin configuration.
+class PluginPlatformConfig {
+  PluginPlatformConfig(this._config);
+
+  final Map<String, Object?> _config;
+
+  bool get sharedDarwinSource => _config[kSharedDarwinSource] == true;
+}
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -300,6 +310,24 @@ class FlutterManifest {
     return components;
   }
 
+  /// The iOS-specific plugin configuration, if any.
+  PluginPlatformConfig? get ios {
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null || platforms['ios'] is! Map<String, Object?>) {
+      return null;
+    }
+    return PluginPlatformConfig(platforms['ios']! as Map<String, Object?>);
+  }
+
+  /// The macOS-specific plugin configuration, if any.
+  PluginPlatformConfig? get macos {
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null || platforms['macos'] is! Map<String, Object?>) {
+      return null;
+    }
+    return PluginPlatformConfig(platforms['macos']! as Map<String, Object?>);
+  }
+
   /// Returns the iOS bundle identifier declared by this manifest in its
   /// module descriptor. Returns null if there is no such declaration.
   String? get iosBundleIdentifier {
@@ -416,7 +444,7 @@ class FlutterManifest {
         continue;
       }
       try {
-        results.add(Uri(pathSegments: item.split('/')));
+        results.add(Uri.parse(item));
       } on FormatException {
         _logger.printError('$singularName manifest contains invalid uri: $item.');
       }
@@ -788,20 +816,23 @@ class AssetsEntry {
   const AssetsEntry({
     required this.uri,
     this.flavors = const <String>{},
+    this.platforms = const <String>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
   final Set<String> flavors;
+  final Set<String> platforms;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty) {
+    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
+      if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
       if (transformers.isNotEmpty)
         _transformersKey: transformers.map((AssetTransformerEntry e) => e.descriptor).toList(),
     };
@@ -809,6 +840,7 @@ class AssetsEntry {
 
   static const _pathKey = 'path';
   static const _flavorKey = 'flavors';
+  static const _platformsKey = 'platforms';
   static const _transformersKey = 'transformers';
 
   static AssetsEntry? parseFromYaml(Object? yaml) {
@@ -822,7 +854,7 @@ class AssetsEntry {
   static (AssetsEntry? assetsEntry, String? error) parseFromYamlSafe(Object? yaml) {
     (Uri?, String?) tryParseUri(String uri) {
       try {
-        return (Uri(pathSegments: uri.split('/')), null);
+        return (Uri.parse(uri), null);
       } on FormatException {
         return (null, 'Asset manifest contains invalid uri: $uri.');
       }
@@ -856,11 +888,15 @@ class AssetsEntry {
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
+      final (List<String>? platforms, List<String> platformsErrors) = _parsePlatformsSection(
+        yaml[_platformsKey],
+      );
       final (List<AssetTransformerEntry>? transformers, List<String> transformersErrors) =
           _parseTransformersSection(yaml[_transformersKey]);
 
       final errors = <String>[
         ...flavorsErrors.map((String e) => 'In $_flavorKey section of asset "$path": $e'),
+        ...platformsErrors.map((String e) => 'In $_platformsKey section of asset "$path": $e'),
         ...transformersErrors.map(
           (String e) => 'In $_transformersKey section of asset "$path": $e',
         ),
@@ -873,6 +909,7 @@ class AssetsEntry {
         AssetsEntry(
           uri: Uri(pathSegments: path.split('/')),
           flavors: Set<String>.from(flavors ?? <String>[]),
+          platforms: Set<String>.from(platforms ?? <String>[]),
           transformers: transformers ?? <AssetTransformerEntry>[],
         ),
         null,
@@ -892,6 +929,41 @@ class AssetsEntry {
     }
 
     return _parseList<String>(yaml, _flavorKey, 'String');
+  }
+
+  /// Parses and validates the "platforms" section of an asset entry in pubspec.yaml.
+  ///
+  /// Returns a tuple containing the parsed platforms list and any validation errors.
+  /// If errors are encountered, the platforms list will be null and errors will be non-empty.
+  static (List<String>? platforms, List<String> errors) _parsePlatformsSection(Object? yaml) {
+    if (yaml == null) {
+      return (null, <String>[]);
+    }
+
+    final (List<String>? platforms, List<String> errors) = _parseList<String>(
+      yaml,
+      _platformsKey,
+      'String',
+    );
+
+    if (errors.isNotEmpty) {
+      return (null, errors);
+    }
+
+    if (platforms != null) {
+      final Set<String> invalidPlatforms = platforms.toSet().difference(_kValidPluginPlatforms);
+
+      if (invalidPlatforms.isNotEmpty) {
+        return (
+          null,
+          <String>[
+            'Invalid platform(s): "${invalidPlatforms.join(", ")}". Supported platforms are: "${_kValidPluginPlatforms.join(", ")}".',
+          ],
+        );
+      }
+    }
+
+    return (platforms, errors);
   }
 
   static (List<AssetTransformerEntry>?, List<String> errors) _parseTransformersSection(
@@ -934,18 +1006,22 @@ class AssetsEntry {
       return false;
     }
 
-    return uri == other.uri && setEquals(flavors, other.flavors);
+    return uri == other.uri &&
+        setEquals(flavors, other.flavors) &&
+        setEquals(platforms, other.platforms);
   }
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
     Object.hashAllUnordered(flavors),
+    Object.hashAllUnordered(platforms),
     Object.hashAll(transformers),
   ]);
 
   @override
-  String toString() => 'AssetsEntry(uri: $uri, flavors: $flavors, transformers: $transformers)';
+  String toString() =>
+      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.

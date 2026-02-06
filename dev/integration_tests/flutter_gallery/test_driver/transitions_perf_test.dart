@@ -32,25 +32,25 @@ List<String> _allDemos = <String>[];
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
-  final Map<String, List<int>> durations = <String, List<int>>{};
+  final durations = <String, List<int>>{};
   Map<String, dynamic>? startEvent;
   int? frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
-  for (final Map<String, dynamic> event in events) {
-    final String eventName = event['name'] as String;
+  for (final event in events) {
+    final eventName = event['name'] as String;
     if (eventName == 'Start Transition') {
       assert(startEvent == null);
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
-      final String phase = event['ph'] as String;
-      final int timestamp = event['ts'] as int;
+      final phase = event['ph'] as String;
+      final timestamp = event['ts'] as int;
       if (phase == 'B' || phase == 'b') {
         assert(frameStart == null);
         frameStart = timestamp;
       } else {
         assert(phase == 'E' || phase == 'e');
-        final String routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
+        final routeName = (startEvent['args'] as Map<String, dynamic>)['to'] as String;
         durations[routeName] ??= <int>[];
         durations[routeName]!.add(timestamp - frameStart!);
         startEvent = null;
@@ -63,7 +63,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   if (durations.keys.isEmpty) {
     throw 'no "Start Transition" timeline events found';
   }
-  final Map<String, int> unexpectedValueCounts = <String, int>{};
+  final unexpectedValueCounts = <String, int>{};
   durations.forEach((String routeName, List<int> values) {
     if (values.length != 2) {
       unexpectedValueCounts[routeName] = values.length;
@@ -71,7 +71,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = StringBuffer(
+    final error = StringBuffer(
       'Some routes recorded wrong number of values (expected 2 values/route):\n\n',
     );
     // When run with --trace-startup, the VM stores trace events in an endless buffer instead of a ring buffer.
@@ -81,16 +81,16 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     });
     error.writeln('\nFull event sequence:');
     final Iterator<Map<String, dynamic>> eventIter = events.iterator;
-    String lastEventName = '';
-    String lastRouteName = '';
+    var lastEventName = '';
+    var lastRouteName = '';
     while (eventIter.moveNext()) {
-      final String eventName = eventIter.current['name'] as String;
+      final eventName = eventIter.current['name'] as String;
 
       if (!<String>['Start Transition', 'Frame'].contains(eventName)) {
         continue;
       }
 
-      final String routeName = eventName == 'Start Transition'
+      final routeName = eventName == 'Start Transition'
           ? (eventIter.current['args'] as Map<String, dynamic>)['to'] as String
           : '';
 
@@ -117,7 +117,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String? currentDemoCategory;
 
-  for (final String demo in demos) {
+  for (final demo in demos) {
     if (kSkippedDemos.contains(demo)) {
       continue;
     }
@@ -142,7 +142,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     final SerializableFinder demoItem = find.text(demoName);
     await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0, alignment: 0.5);
 
-    for (int i = 0; i < 2; i += 1) {
+    for (var i = 0; i < 2; i += 1) {
       await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
@@ -221,7 +221,7 @@ void main([List<String> args = const <String>[]]) {
       // Save the duration (in microseconds) of the first timeline Frame event
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      final summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('transitions', pretty: true);
       final String histogramPath = path.join(
         testOutputsDirectory,
@@ -236,7 +236,7 @@ void main([List<String> args = const <String>[]]) {
       if (hybrid) {
         await driver.requestData('restDemos');
       } else {
-        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+        final unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
         await runDemos(unprofiledDemos.toList(), driver);
       }
     }, timeout: Timeout.none);

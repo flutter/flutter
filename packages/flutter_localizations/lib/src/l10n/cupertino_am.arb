@@ -29,5 +29,11 @@
   "shareButtonLabel": "አጋራ...",
   "clearButtonLabel": "አጽዳ",
   "cancelButtonLabel": "ይቅር",
-  "backButtonLabel": "ተመለስ"
+  "backButtonLabel": "ተመለስ",
+  "expansionTileExpandedHint": "ለመሰብሰብ ሁለቴ መታ ያድርጉ",
+  "expansionTileCollapsedHint": "ለመዘርጋት ድርብ ሁለቴ መታ ያድርጉ",
+  "expansionTileExpandedTapHint": "ሰብስብ",
+  "expansionTileCollapsedTapHint": "ለተጨማሪ ዝርዝሮች ይዘርጉ",
+  "expandedHint": "ተሰብስቧል",
+  "collapsedHint": "ተዘርግቷል"
 }

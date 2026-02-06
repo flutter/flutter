@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -52,14 +51,12 @@ void main() {
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           analytics: _FakeAnalytics(),
-          devtoolsHandler: createNoOpHandler,
         );
 
         await runner.run();
         await runner.cleanupAfterSignal();
         expect(flutterDevice.wasExited, true);
         expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
-        expect((runner.residentDevtoolsHandler! as NoOpDevtoolsHandler).wasShutdown, true);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -101,6 +98,46 @@ void main() {
         await runner.attach();
         await runner.cleanupAfterSignal();
         expect(flutterDevice.wasExited, false);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: FakeProcessManager.empty,
+      },
+    );
+  });
+
+  group('multiple target devices', () {
+    late List<_FakeHotCompatibleFlutterDevice> flutterDevices;
+    late MemoryFileSystem fileSystem;
+
+    setUp(() {
+      flutterDevices = [
+        _FakeHotCompatibleFlutterDevice(FakeDevice()),
+        _FakeHotCompatibleFlutterDevice(FakeDevice()),
+      ];
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testUsingContext(
+      'regression test for https://github.com/flutter/flutter/issues/179857',
+      () async {
+        final runner = HotRunner(
+          flutterDevices,
+          target: 'main.dart',
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          analytics: _FakeAnalytics(),
+        );
+
+        await runner.run();
+        await runner.cleanupAfterSignal();
+
+        // Providing multiple Flutter devices should result in the target platform being set to
+        // 'multiple', which we use to report analytics.
+        expect(runner.targetPlatformName, 'multiple');
+        for (final flutterDevice in flutterDevices) {
+          expect(flutterDevice.wasExited, true);
+          expect((flutterDevice.device.dds as FakeDartDevelopmentService).wasShutdown, true);
+        }
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -161,7 +198,7 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
     wasExited = true;
   }
 
-  var wasExited = false;
+  bool wasExited = false;
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {

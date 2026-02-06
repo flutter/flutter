@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -273,7 +274,7 @@ void main() {
     });
 
     test('dispose clears focusCallbacks', () async {
-      bool didFocus = false;
+      var didFocus = false;
       viewsController.registerViewType('webview');
       final AndroidViewController viewController = PlatformViewsService.initAndroidView(
         id: 0,
@@ -333,7 +334,7 @@ void main() {
 
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
-      final List<int> createdViews = <int>[];
+      final createdViews = <int>[];
       void callback(int id) {
         createdViews.add(id);
       }
@@ -439,6 +440,62 @@ void main() {
       await viewController.setOffset(const Offset(10, 20));
       expect(viewsController.offsets, equals(<int, Offset>{}));
     });
+
+    testWidgets('motion event converter does not duplicate move events', (
+      WidgetTester tester,
+    ) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 7,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      const pointerCount = 10;
+      for (var i = 0; i < pointerCount; i++) {
+        final PointerEvent event = PointerDownEvent(
+          timeStamp: const Duration(milliseconds: 1),
+          pointer: i,
+        );
+        viewController.dispatchPointerEvent(event);
+      }
+
+      // Pointer event platform data constant from _AndroidMotionEventConverter
+      const kPointerDataFlagMultiple = 2;
+
+      for (var i = 0; i < pointerCount; i++) {
+        final PointerEvent event = PointerMoveEvent(
+          timeStamp: const Duration(milliseconds: 2),
+          pointer: i,
+          platformData: kPointerDataFlagMultiple | (pointerCount << 8),
+        );
+        viewController.dispatchPointerEvent(event);
+      }
+
+      // Indexes in the list returned by AndroidMotionEvent._asList
+      const kAndroidMotionEventListIndexAction = 3;
+      const kAndroidMotionEventListIndexPointerCount = 4;
+
+      final List<MethodCall> moveCalls = log.where((MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return call.method == 'touch' &&
+            args[kAndroidMotionEventListIndexAction] == AndroidViewController.kActionMove;
+      }).toList();
+
+      // The _AndroidMotionEventConverter should yield one touch event containing all of the pointers.
+      expect(moveCalls.length, equals(1));
+      final moveArgs = moveCalls.single.arguments as List<dynamic>;
+      expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(pointerCount));
+    });
   });
 
   group('iOS', () {
@@ -535,14 +592,11 @@ void main() {
   });
 
   test('toString works as intended', () async {
-    const AndroidPointerProperties androidPointerProperties = AndroidPointerProperties(
-      id: 0,
-      toolType: 0,
-    );
+    const androidPointerProperties = AndroidPointerProperties(id: 0, toolType: 0);
     expect(androidPointerProperties.toString(), 'AndroidPointerProperties(id: 0, toolType: 0)');
 
-    const double zero = 0.0;
-    const AndroidPointerCoords androidPointerCoords = AndroidPointerCoords(
+    const zero = 0.0;
+    const androidPointerCoords = AndroidPointerCoords(
       orientation: zero,
       pressure: zero,
       size: zero,
@@ -566,7 +620,7 @@ void main() {
       'y: $zero)',
     );
 
-    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
+    final androidMotionEvent = AndroidMotionEvent(
       downTime: 0,
       eventTime: 0,
       action: 0,

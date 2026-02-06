@@ -3,22 +3,29 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/inherited_model/inherited_model.0.dart' as example;
+import 'package:flutter_api_samples/widgets/inherited_model/inherited_model.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Rebuild widget using InheritedModel', (WidgetTester tester) async {
+  testWidgets('Rebuild widget using InheritedModel', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const example.InheritedModelApp());
 
     BoxDecoration? decoration =
-        tester.widget<AnimatedContainer>(find.byType(AnimatedContainer).first).decoration
+        tester
+                .widget<AnimatedContainer>(find.byType(AnimatedContainer).first)
+                .decoration
             as BoxDecoration?;
     expect(decoration!.color, Colors.blue);
 
     await tester.tap(find.text('Update background'));
     await tester.pumpAndSettle();
     decoration =
-        tester.widget<AnimatedContainer>(find.byType(AnimatedContainer).first).decoration
+        tester
+                .widget<AnimatedContainer>(find.byType(AnimatedContainer).first)
+                .decoration
             as BoxDecoration?;
     expect(decoration!.color, Colors.red);
 

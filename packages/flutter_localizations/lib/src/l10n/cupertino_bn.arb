@@ -29,5 +29,11 @@
   "searchWebButtonLabel": "ওয়েবে সার্চ করুন",
   "shareButtonLabel": "শেয়ার করুন...",
   "cancelButtonLabel": "বাতিল করুন",
-  "backButtonLabel": "ফিরে যান"
+  "backButtonLabel": "ফিরে যান",
+  "expansionTileExpandedHint": "আড়াল করতে ডবল ট্যাপ করুন",
+  "expansionTileCollapsedHint": "বড় করে দেখতে ডবল ট্যাপ করুন",
+  "expansionTileExpandedTapHint": "আড়াল করুন",
+  "expansionTileCollapsedTapHint": "আরও বিবরণ পেতে বড় করে দেখুন",
+  "expandedHint": "আড়াল করা হয়েছে",
+  "collapsedHint": "বড় করা হয়েছে"
 }

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
 
@@ -61,6 +62,19 @@ void main() {
               'x64/libbar.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'dsymutil',
+                '/build/native_assets/ios/bar.framework/bar',
+                '-o',
+                '/build/native_assets/ios/bar.framework.dSYM',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/bar.framework/bar'],
+            ),
+          ],
           FakeCommand(
             command: const <Pattern>['otool', '-D', '/build/native_assets/ios/bar.framework/bar'],
             stdout: <String>[
@@ -80,6 +94,19 @@ void main() {
               'x64/libbuz.dylib',
             ],
           ),
+          if (buildMode == BuildMode.release) ...<FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'dsymutil',
+                '/build/native_assets/ios/buz.framework/buz',
+                '-o',
+                '/build/native_assets/ios/buz.framework.dSYM',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/buz.framework/buz'],
+            ),
+          ],
           FakeCommand(
             command: const <Pattern>['otool', '-D', '/build/native_assets/ios/buz.framework/buz'],
             stdout: <String>[
@@ -184,15 +211,17 @@ void main() {
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
         };
-        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
+          buildCodeAssets: true,
+          buildDataAssets: true,
         );
         await installCodeAssets(
-          dartBuildResult: dartBuildResult,
+          dartHookResult: dartHookResult,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -202,8 +231,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios [arm64, x64].',
-            'Building native assets for ios [arm64, x64] done.',
+            'Building native assets for ios_arm64, ios_x64.',
+            'Building native assets for ios_arm64, ios_x64 done.',
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);

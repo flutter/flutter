@@ -4,13 +4,13 @@
 
 #include <iostream>
 
-#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_set.h"
-#include "flutter/third_party/abseil-cpp/absl/log/check.h"
-#include "flutter/third_party/abseil-cpp/absl/log/globals.h"
-#include "flutter/third_party/abseil-cpp/absl/log/initialize.h"
-#include "flutter/third_party/abseil-cpp/absl/log/log.h"
 #include "flutter/third_party/re2/re2/re2.h"
 #include "flutter/tools/licenses_cpp/src/mmap_file.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_set.h"
+#include "third_party/abseil-cpp/absl/log/check.h"
+#include "third_party/abseil-cpp/absl/log/globals.h"
+#include "third_party/abseil-cpp/absl/log/initialize.h"
+#include "third_party/abseil-cpp/absl/log/log.h"
 
 namespace {
 re2::RE2 copyright_regex = R"regex((?i)copyright(.*\d\d\d\d.*))regex";

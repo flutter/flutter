@@ -13,6 +13,7 @@ Future<void> main() async {
       forceSingleThreadedSkwasm: false,
       useDdc: true,
       withHotReload: false,
+      buildMode: 'debug',
     ));
   });
 }

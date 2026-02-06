@@ -27,6 +27,13 @@
 
 #include <vulkan/vulkan.h>
 
+// The Vulkan headers may bring in X11 headers which define some macros that
+// conflict with other code.  Undefine these macros after including Vulkan.
+#undef Bool
+#undef None
+#undef Status
+#undef Success
+
 #define VK_CALL_LOG_ERROR(expression) VK_CALL_LOG(expression, ERROR)
 
 #define VK_CALL_LOG_FATAL(expression) VK_CALL_LOG(expression, FATAL)

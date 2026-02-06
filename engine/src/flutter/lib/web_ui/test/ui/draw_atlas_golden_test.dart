@@ -24,8 +24,8 @@ const ui.Rect kGreenSquiggleRegion = ui.Rect.fromLTRB(30, 25, 50, 55);
 const ui.Rect kTotalAtlasRegion = ui.Rect.fromLTRB(0, 0, 55, 55);
 
 ui.Image generateAtlas() {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
 
   canvas.drawColor(const ui.Color(0), ui.BlendMode.src);
 
@@ -65,12 +65,12 @@ ui.Image generateAtlas() {
 
   // Rotate two fifths of the circle each time
   const double rotation = 4.0 * math.pi / 5.0;
-  final ui.Path starPath = ui.Path();
+  final starPath = ui.Path();
   starPath.moveTo(
     starCenter.dx + radius * math.cos(theta),
     starCenter.dy + radius * math.sin(theta),
   );
-  for (int i = 0; i < 5; i++) {
+  for (var i = 0; i < 5; i++) {
     theta += rotation;
     starPath.lineTo(
       starCenter.dx + radius * math.cos(theta),
@@ -88,7 +88,7 @@ ui.Image generateAtlas() {
   // Draw the Squiggle
   canvas.save();
   canvas.clipRect(kGreenSquiggleRegion);
-  final ui.Path squigglePath = ui.Path();
+  final squigglePath = ui.Path();
   squigglePath.moveTo(kGreenSquiggleRegion.topCenter.dx, kGreenSquiggleRegion.topCenter.dy + 2.0);
   squigglePath.cubicTo(
     kGreenSquiggleRegion.left - 10.0,
@@ -114,11 +114,11 @@ ui.Image generateAtlas() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
-  const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
+  const region = ui.Rect.fromLTWH(0, 0, 300, 300);
 
   test('render atlas', () async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
     final ui.Image atlas = generateAtlas();
     canvas.drawImage(atlas, ui.Offset.zero, ui.Paint());
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
@@ -126,10 +126,10 @@ Future<void> testMain() async {
   });
 
   test('drawAtlas', () async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
     final ui.Image atlas = generateAtlas();
-    final List<ui.RSTransform> transforms = List<ui.RSTransform>.generate(12, (int index) {
+    final transforms = List<ui.RSTransform>.generate(12, (int index) {
       const double radius = 100;
       const double rotation = math.pi / 6.0;
       final double angle = rotation * index;
@@ -142,7 +142,7 @@ Future<void> testMain() async {
         region.center.dy + radius * ssin,
       );
     });
-    final List<ui.Rect> rects = <ui.Rect>[
+    final rects = <ui.Rect>[
       kBlueSquareRegion,
       kRedCircleRegion,
       kMagentaStarRegion,
@@ -163,11 +163,11 @@ Future<void> testMain() async {
   });
 
   test('drawAtlasRaw', () async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
     final ui.Image atlas = generateAtlas();
-    final Float32List transforms = Float32List(12 * 4);
-    for (int i = 0; i < 12; i++) {
+    final transforms = Float32List(12 * 4);
+    for (var i = 0; i < 12; i++) {
       const double radius = 100;
       const double rotation = math.pi / 6.0;
       final double angle = rotation * i;
@@ -178,7 +178,7 @@ Future<void> testMain() async {
       transforms[i * 4 + 2] = region.center.dx + radius * scos;
       transforms[i * 4 + 3] = region.center.dy + radius * ssin;
     }
-    final List<ui.Rect> rects = <ui.Rect>[
+    final rects = <ui.Rect>[
       kBlueSquareRegion,
       kRedCircleRegion,
       kMagentaStarRegion,
@@ -192,16 +192,16 @@ Future<void> testMain() async {
       kMagentaStarRegion,
       kGreenSquiggleRegion,
     ];
-    final Float32List rawRects = Float32List(rects.length * 4);
-    for (int i = 0; i < rects.length; i++) {
+    final rawRects = Float32List(rects.length * 4);
+    for (var i = 0; i < rects.length; i++) {
       rawRects[i * 4] = rects[i].left;
       rawRects[i * 4 + 1] = rects[i].top;
       rawRects[i * 4 + 2] = rects[i].right;
       rawRects[i * 4 + 3] = rects[i].bottom;
     }
 
-    final Int32List colors = Int32List(12);
-    for (int i = 0; i < 12; i++) {
+    final colors = Int32List(12);
+    for (var i = 0; i < 12; i++) {
       final int rgb = 0xFF << (8 * (i % 3));
       colors[i] = 0xFF000000 | rgb;
     }

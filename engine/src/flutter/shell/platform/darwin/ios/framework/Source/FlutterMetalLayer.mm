@@ -30,9 +30,9 @@ extern CFTimeInterval display_link_target;
 
   NSUInteger _nextDrawableId;
 
+  // Access to these variables must be synchronized.
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
-
   FlutterTexture* _front;
 
   // There must be a CADisplayLink scheduled *on main thread* otherwise
@@ -248,20 +248,26 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize {
-  [_availableTextures removeAllObjects];
-  _front = nil;
-  _totalTextures = 0;
-  _drawableSize = drawableSize;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _front = nil;
+    _totalTextures = 0;
+    _drawableSize = drawableSize;
+  }
 }
 
 - (void)didEnterBackground:(id)notification {
-  [_availableTextures removeAllObjects];
-  _totalTextures = _front != nil ? 1 : 0;
+  @synchronized(self) {
+    [_availableTextures removeAllObjects];
+    _totalTextures = _front != nil ? 1 : 0;
+  }
   _displayLink.paused = YES;
 }
 
 - (CGSize)drawableSize {
-  return _drawableSize;
+  @synchronized(self) {
+    return _drawableSize;
+  }
 }
 
 - (IOSurface*)createIOSurface {
@@ -398,6 +404,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)presentOnMainThread:(FlutterTexture*)texture {
+  if (texture.texture.width != _drawableSize.width ||
+      texture.texture.height != _drawableSize.height) {
+    // This texture was created with an old size, but the view has since been
+    // resized. Do not present this stale frame to avoid distortion. The texture
+    // will be correctly recycled on the next frame.
+    return;
+  }
+
   // This is needed otherwise frame gets skipped on touch begin / end. Go figure.
   // Might also be placebo
   [self setNeedsDisplay];
@@ -418,6 +432,10 @@ extern CFTimeInterval display_link_target;
 
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
+    if (texture.texture.width != _drawableSize.width ||
+        texture.texture.height != _drawableSize.height) {
+      return;
+    }
     if (_front != nil) {
       [_availableTextures addObject:_front];
     }
@@ -435,8 +453,14 @@ extern CFTimeInterval display_link_target;
 }
 
 - (void)returnTexture:(FlutterTexture*)texture {
+  if (texture == nil) {
+    return;
+  }
   @synchronized(self) {
-    [_availableTextures addObject:texture];
+    if (texture.texture.width == _drawableSize.width &&
+        texture.texture.height == _drawableSize.height) {
+      [_availableTextures addObject:texture];
+    }
   }
 }
 

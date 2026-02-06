@@ -24,7 +24,8 @@ class SystemOverlayStyleExample extends StatefulWidget {
   const SystemOverlayStyleExample({super.key});
 
   @override
-  State<SystemOverlayStyleExample> createState() => _SystemOverlayStyleExampleState();
+  State<SystemOverlayStyleExample> createState() =>
+      _SystemOverlayStyleExampleState();
 }
 
 class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
@@ -54,7 +55,10 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
         systemOverlayStyle: _currentStyle,
       ),
       body: Center(
-        child: ElevatedButton(onPressed: _changeColor, child: const Text('Change Color')),
+        child: ElevatedButton(
+          onPressed: _changeColor,
+          child: const Text('Change Color'),
+        ),
       ),
     );
   }

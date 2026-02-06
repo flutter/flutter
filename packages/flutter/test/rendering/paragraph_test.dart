@@ -15,7 +15,7 @@ const String _kText =
     "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
-  int index = 0;
+  var index = 0;
   RenderBox? previousBox;
   span.visitChildren((InlineSpan span) {
     if (span is! WidgetSpan) {
@@ -96,13 +96,13 @@ void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
   test('getOffsetForCaret control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
 
-    const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+    const caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
 
     final Offset offset5 = paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
     expect(offset5.dx, greaterThan(0.0));
@@ -115,7 +115,7 @@ void main() {
   });
 
   test('getFullHeightForCaret control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
@@ -126,7 +126,7 @@ void main() {
   });
 
   test('getPositionForOffset control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
@@ -143,7 +143,7 @@ void main() {
   });
 
   test('getBoxesForSelection control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
@@ -162,7 +162,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getBoxesForSelection test with multiple TextSpans and lines', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
         style: TextStyle(fontSize: 10.0),
@@ -207,7 +207,7 @@ void main() {
   });
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
         style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
@@ -249,7 +249,7 @@ void main() {
   });
 
   test('getWordBoundary control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
@@ -266,7 +266,7 @@ void main() {
   });
 
   test('overflow test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text:
             'This\n' // 4 characters * 10px font size = 40px width on the first line
@@ -345,7 +345,7 @@ void main() {
   });
 
   test('maxLines', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text:
             "How do you write like you're running out of time? Write day and night like you're running out of time?",
@@ -375,7 +375,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61018
 
   test('textAlign triggers TextPainter relayout in the paint method', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: 'A', style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.left,
@@ -434,7 +434,7 @@ void main() {
   });
 
   test('changing color does not do layout', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text: 'Hello',
         style: TextStyle(color: Color(0xFF000000)),
@@ -465,7 +465,7 @@ void main() {
   });
 
   test('nested TextSpans in paragraph handle linear textScaler correctly.', () {
-    const TextSpan testSpan = TextSpan(
+    const testSpan = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <TextSpan>[
@@ -477,7 +477,7 @@ void main() {
         TextSpan(text: 'd'),
       ],
     );
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       testSpan,
       textDirection: TextDirection.ltr,
       textScaler: const TextScaler.linear(1.3),
@@ -488,7 +488,7 @@ void main() {
 
     final int length = testSpan.toPlainText().length;
     // Test the sizes of nested spans.
-    final List<ui.TextBox> boxes = <ui.TextBox>[
+    final boxes = <ui.TextBox>[
       for (int i = 0; i < length; ++i)
         ...paragraph.getBoxesForSelection(TextSelection(baseOffset: i, extentOffset: i + 1)),
     ];
@@ -505,7 +505,7 @@ void main() {
   });
 
   test('toStringDeep', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
@@ -536,7 +536,7 @@ void main() {
   test('locale setter', () {
     // Regression test for https://github.com/flutter/flutter/issues/18175
 
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       locale: const Locale('zh', 'HK'),
       textDirection: TextDirection.ltr,
@@ -548,7 +548,7 @@ void main() {
   });
 
   test('inline widgets test', () {
-    const TextSpan text = TextSpan(
+    const text = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
@@ -560,13 +560,13 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    final List<RenderBox> renderBoxes = <RenderBox>[
+    final renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       text,
       textDirection: TextDirection.ltr,
       children: renderBoxes,
@@ -587,7 +587,7 @@ void main() {
   });
 
   test('getBoxesForSelection with boxHeightStyle for inline widgets', () {
-    const TextSpan text = TextSpan(
+    const text = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
@@ -601,13 +601,13 @@ void main() {
     // RenderParagraph to reduce the dependencies this test has. The dimensions
     // of these get used in place of the widths and heights specified in the
     // SizedBoxes above: each comes out as (w,h) = (14,14).
-    final List<RenderBox> renderBoxes = <RenderBox>[
+    final renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       text,
       textDirection: TextDirection.ltr,
       children: renderBoxes,
@@ -629,7 +629,7 @@ void main() {
   });
 
   test('inline widgets multiline test', () {
-    const TextSpan text = TextSpan(
+    const text = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
@@ -645,7 +645,7 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    final List<RenderBox> renderBoxes = <RenderBox>[
+    final renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
@@ -655,7 +655,7 @@ void main() {
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
 
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       text,
       textDirection: TextDirection.ltr,
       children: renderBoxes,
@@ -684,11 +684,11 @@ void main() {
   test('Does not include the semantics node of truncated rendering children', () {
     // Regression test for https://github.com/flutter/flutter/issues/88180
     const double screenWidth = 100;
-    const String sentence = 'truncated';
-    final List<RenderBox> renderBoxes = <RenderBox>[
+    const sentence = 'truncated';
+    final renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
     ];
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(
         text: 'a long line to be truncated.',
         children: <InlineSpan>[WidgetSpan(child: Text(sentence))],
@@ -699,8 +699,8 @@ void main() {
     );
     _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final SemanticsNode result = SemanticsNode();
-    final SemanticsNode truncatedChild = SemanticsNode();
+    final result = SemanticsNode();
+    final truncatedChild = SemanticsNode();
     truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
     paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[
       truncatedChild,
@@ -714,7 +714,7 @@ void main() {
   });
 
   test('Supports gesture recognizer semantics', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       TextSpan(
         text: _kText,
         children: <InlineSpan>[
@@ -727,9 +727,9 @@ void main() {
     );
     layout(paragraph);
 
-    final SemanticsNode node = SemanticsNode();
+    final node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
-    final List<SemanticsNode> children = <SemanticsNode>[];
+    final children = <SemanticsNode>[];
     node.visitChildren((SemanticsNode child) {
       children.add(child);
       return true;
@@ -742,19 +742,19 @@ void main() {
   });
 
   test('Supports empty text span with spell out', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: '', spellOut: true),
       textDirection: TextDirection.rtl,
     );
     layout(paragraph);
-    final SemanticsNode node = SemanticsNode();
+    final node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.attributedLabel.string, '');
     expect(node.attributedLabel.attributes.length, 0);
   });
 
   test('Asserts on unsupported gesture recognizer', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       TextSpan(
         text: _kText,
         children: <InlineSpan>[
@@ -765,7 +765,7 @@ void main() {
     );
     layout(paragraph);
 
-    bool failed = false;
+    var failed = false;
     try {
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
     } on AssertionError catch (e) {
@@ -790,13 +790,13 @@ void main() {
     );
     layout(paragraph);
 
-    final SemanticsNode node = SemanticsNode();
+    final node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
 
   test('assembleSemanticsNode handles empty WidgetSpans that do not yield selection boxes', () {
-    final TextSpan text = TextSpan(
+    final text = TextSpan(
       text: '',
       children: <InlineSpan>[
         TextSpan(text: 'A', recognizer: TapGestureRecognizer()..onTap = () {}),
@@ -804,7 +804,7 @@ void main() {
         TextSpan(text: 'C', recognizer: TapGestureRecognizer()..onTap = () {}),
       ],
     );
-    final List<RenderBox> renderBoxes = <RenderBox>[
+    final renderBoxes = <RenderBox>[
       RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
     ];
     final RenderParagraph paragraph = RenderParagraphWithEmptyBoxListForWidgetSpan(
@@ -815,21 +815,21 @@ void main() {
     _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph);
 
-    final SemanticsNode node = SemanticsNode();
+    final node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
 
   test('Basic TextSpan Hit testing', () {
-    final TextSpan textSpanA = TextSpan(text: 'A' * 10);
-    const TextSpan textSpanBC = TextSpan(text: 'BC', style: TextStyle(letterSpacing: 26.0));
+    final textSpanA = TextSpan(text: 'A' * 10);
+    const textSpanBC = TextSpan(text: 'BC', style: TextStyle(letterSpacing: 26.0));
 
-    final TextSpan text = TextSpan(
+    final text = TextSpan(
       style: const TextStyle(fontSize: 10.0),
       children: <InlineSpan>[textSpanA, textSpanBC],
     );
 
-    final RenderParagraph paragraph = RenderParagraph(text, textDirection: TextDirection.ltr);
+    final paragraph = RenderParagraph(text, textDirection: TextDirection.ltr);
     layout(paragraph, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     BoxHitTestResult result;
@@ -916,24 +916,22 @@ void main() {
   });
 
   test('TextSpan Hit testing with text justification', () {
-    const TextSpan textSpanA = TextSpan(text: 'A '); // The space is a word break.
-    const TextSpan textSpanB = TextSpan(
-      text: 'B\u200B',
-    ); // The zero-width space is used as a line break.
-    final TextSpan textSpanC = TextSpan(
+    const textSpanA = TextSpan(text: 'A '); // The space is a word break.
+    const textSpanB = TextSpan(text: 'B\u200B'); // The zero-width space is used as a line break.
+    final textSpanC = TextSpan(
       text: 'C' * 10,
     ); // The third span starts a new line since it's too long for the first line.
 
     // The text should look like:
     // A        B
     // CCCCCCCCCC
-    final TextSpan text = TextSpan(
+    final text = TextSpan(
       text: '',
       style: const TextStyle(fontSize: 10.0),
       children: <InlineSpan>[textSpanA, textSpanB, textSpanC],
     );
 
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       text,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.justify,
@@ -990,8 +988,8 @@ void main() {
     }
 
     test('subscribe to SelectionRegistrar', () {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
         const TextSpan(text: '1234567'),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1003,16 +1001,16 @@ void main() {
     });
 
     test('paints selection highlight', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      const Color selectionColor = Color(0xAF6694e8);
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      final paragraph = RenderParagraph(
         const TextSpan(text: '1234567'),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         selectionColor: selectionColor,
       );
       layout(paragraph);
-      final MockPaintingContext paintingContext = MockPaintingContext();
+      final paintingContext = MockPaintingContext();
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, isNull);
       expect(paintingContext.canvas.drawnRectPaint, isNull);
@@ -1035,16 +1033,16 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/126652.
     test('paints selection when tap at chinese character', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      const Color selectionColor = Color(0xAF6694e8);
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      final paragraph = RenderParagraph(
         const TextSpan(text: '你好'),
         textDirection: TextDirection.ltr,
         registrar: registrar,
         selectionColor: selectionColor,
       );
       layout(paragraph);
-      final MockPaintingContext paintingContext = MockPaintingContext();
+      final paintingContext = MockPaintingContext();
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, isNull);
       expect(paintingContext.canvas.drawnRectPaint, isNull);
@@ -1064,7 +1062,7 @@ void main() {
     });
 
     test('getPositionForOffset works', () async {
-      final RenderParagraph paragraph = RenderParagraph(
+      final paragraph = RenderParagraph(
         const TextSpan(text: '1234567'),
         textDirection: TextDirection.ltr,
       );
@@ -1076,11 +1074,11 @@ void main() {
     });
 
     test('can handle select all when contains widget span', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[
         RenderParagraph(const TextSpan(text: 'widget'), textDirection: TextDirection.ltr),
       ];
-      final RenderParagraph paragraph = RenderParagraph(
+      final paragraph = RenderParagraph(
         const TextSpan(
           children: <InlineSpan>[
             TextSpan(text: 'before the span'),
@@ -1111,9 +1109,9 @@ void main() {
     });
 
     test('can granularly extend selection - character', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1154,9 +1152,9 @@ void main() {
     });
 
     test('can granularly extend selection - word', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1208,9 +1206,9 @@ void main() {
     });
 
     test('can granularly extend selection - line', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1251,9 +1249,9 @@ void main() {
     });
 
     test('can granularly extend selection - document', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1302,9 +1300,9 @@ void main() {
     });
 
     test('can granularly extend selection when no active selection', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1351,9 +1349,9 @@ void main() {
     });
 
     test('can directionally extend selection', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1408,9 +1406,9 @@ void main() {
     });
 
     test('can directionally extend selection when no selection', () async {
-      final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-      final List<RenderBox> renderBoxes = <RenderBox>[];
-      final RenderParagraph paragraph = RenderParagraph(
+      final registrar = TestSelectionRegistrar();
+      final renderBoxes = <RenderBox>[];
+      final paragraph = RenderParagraph(
         const TextSpan(children: <InlineSpan>[TextSpan(text: 'how are you\nI am fine\nThank you')]),
         textDirection: TextDirection.ltr,
         registrar: registrar,
@@ -1463,13 +1461,13 @@ void main() {
   });
 
   test('can just update the gesture recognizer', () async {
-    final TapGestureRecognizer recognizerBefore = TapGestureRecognizer()..onTap = () {};
-    final RenderParagraph paragraph = RenderParagraph(
+    final recognizerBefore = TapGestureRecognizer()..onTap = () {};
+    final paragraph = RenderParagraph(
       TextSpan(text: 'How are you \n', recognizer: recognizerBefore),
       textDirection: TextDirection.ltr,
     );
 
-    int semanticsUpdateCount = 0;
+    var semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
     TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
       ++semanticsUpdateCount;
@@ -1478,10 +1476,10 @@ void main() {
     layout(paragraph);
 
     expect((paragraph.text as TextSpan).recognizer, same(recognizerBefore));
-    final SemanticsNode nodeBefore = SemanticsNode();
+    final nodeBefore = SemanticsNode();
     paragraph.assembleSemanticsNode(nodeBefore, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(semanticsUpdateCount, 0);
-    List<SemanticsNode> children = <SemanticsNode>[];
+    var children = <SemanticsNode>[];
     nodeBefore.visitChildren((SemanticsNode child) {
       children.add(child);
       return true;
@@ -1490,14 +1488,13 @@ void main() {
     expect(data.hasAction(SemanticsAction.longPress), false);
     expect(data.hasAction(SemanticsAction.tap), true);
 
-    final LongPressGestureRecognizer recognizerAfter = LongPressGestureRecognizer()
-      ..onLongPress = () {};
+    final recognizerAfter = LongPressGestureRecognizer()..onLongPress = () {};
     paragraph.text = TextSpan(text: 'How are you \n', recognizer: recognizerAfter);
 
     pumpFrame(phase: EnginePhase.flushSemantics);
 
     expect((paragraph.text as TextSpan).recognizer, same(recognizerAfter));
-    final SemanticsNode nodeAfter = SemanticsNode();
+    final nodeAfter = SemanticsNode();
     paragraph.assembleSemanticsNode(nodeAfter, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(semanticsUpdateCount, 1);
     children = <SemanticsNode>[];

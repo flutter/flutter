@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import '../web.dart' as web;
@@ -186,7 +187,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
     final bool containsNetworkImageHeaders = headers?.isNotEmpty ?? false;
 
-    final Completer<web.XMLHttpRequest> completer = Completer<web.XMLHttpRequest>();
+    final completer = Completer<web.XMLHttpRequest>();
     final web.XMLHttpRequest request = httpRequestFactory();
 
     request.open('GET', url, true);
@@ -202,8 +203,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       (web.Event e) {
         final int status = request.status;
         final bool accepted = status >= 200 && status < 300;
-        final bool fileUri = status == 0; // file:// URIs have status of 0.
-        final bool notModified = status == 304;
+        final fileUri = status == 0; // file:// URIs have status of 0.
+        final notModified = status == 304;
         final bool unknownRedirect = status > 307 && status < 400;
         final bool success = accepted || fileUri || notModified || unknownRedirect;
 
@@ -250,7 +251,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  int get hashCode => Object.hash(url, scale, webHtmlElementStrategy, headers);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    webHtmlElementStrategy,
+    const MapEquality<String, String>().hash(headers),
+  );
 
   @override
   String toString() =>

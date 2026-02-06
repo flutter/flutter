@@ -29,5 +29,11 @@
   "shareButtonLabel": "Paylaş...",
   "clearButtonLabel": "Temizle",
   "cancelButtonLabel": "İptal",
-  "backButtonLabel": "Geri"
+  "backButtonLabel": "Geri",
+  "expansionTileExpandedHint": "daraltmak için iki kez dokunun",
+  "expansionTileCollapsedHint": "genişletmek için iki kez dokunun",
+  "expansionTileExpandedTapHint": "Daralt",
+  "expansionTileCollapsedTapHint": "Daha fazla ayrıntı için genişletin",
+  "expandedHint": "Daraltıldı",
+  "collapsedHint": "Genişletildi"
 }

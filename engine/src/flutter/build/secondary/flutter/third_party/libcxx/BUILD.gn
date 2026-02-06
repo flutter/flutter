@@ -4,7 +4,8 @@
 
 config("libcxx_config") {
   defines = [ "_LIBCPP_DISABLE_AVAILABILITY=1" ]
-  include_dirs = [ "//flutter/build/secondary/flutter/third_party/libcxx/config" ]
+  include_dirs =
+      [ "//flutter/build/secondary/flutter/third_party/libcxx/config" ]
 }
 
 config("src_include") {
@@ -71,7 +72,7 @@ source_set("libcxx") {
 
   deps = [
     "//flutter/third_party/libcxxabi",
-    "//flutter/third_party/llvm_libc"
+    "//flutter/third_party/llvm_libc",
   ]
 
   # TODO(goderbauer): remove when all sources build with LTO for android_arm64 and android_x64.

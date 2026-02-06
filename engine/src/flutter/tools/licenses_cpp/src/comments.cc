@@ -751,24 +751,27 @@ YY_DECL {
 #line 45 "comments.l"
           {
             BEGIN(C_COMMENT);
+            if (!yyextra->buffer.empty()) {
+              // If we go from a block to a c comment, add a newline between
+              // them.
+              yyextra->buffer.append("\n");
+            }
           }
           YY_BREAK
 
         case 3:
           /* rule 3 can match eol */
           YY_RULE_SETUP
-#line 50 "comments.l"
+#line 54 "comments.l"
           {
             BEGIN(INITIAL);
             CommentsUtil::AddCEndTrimLine(&yyextra->buffer, yytext, yyleng - 2);
-            yyextra->callback(yyextra->buffer);
-            yyextra->buffer.clear();
           }
           YY_BREAK
         case 4:
           /* rule 4 can match eol */
           YY_RULE_SETUP
-#line 56 "comments.l"
+#line 58 "comments.l"
           {
             CommentsUtil::AddCTrimLine(&yyextra->buffer, yytext, yyleng);
           }
@@ -777,7 +780,7 @@ YY_DECL {
         case 5:
           /* rule 5 can match eol */
           YY_RULE_SETUP
-#line 62 "comments.l"
+#line 64 "comments.l"
           {
             yyextra->buffer.append("\n", 1);
             CommentsUtil::AddTrimLine(&yyextra->buffer, yytext + 1, yyleng - 1);
@@ -786,11 +789,9 @@ YY_DECL {
         case 6:
           /* rule 6 can match eol */
           YY_RULE_SETUP
-#line 66 "comments.l"
+#line 68 "comments.l"
           {
             BEGIN(INITIAL);
-            yyextra->callback(yyextra->buffer);
-            yyextra->buffer.clear();
           }
           YY_BREAK
 
@@ -799,14 +800,18 @@ YY_DECL {
           YY_RULE_SETUP
 #line 73 "comments.l"
           {
+            if (!yyextra->buffer.empty()) {
+              yyextra->callback(yyextra->buffer);
+              yyextra->buffer.clear();
+            }
           }
           YY_BREAK
         case 8:
           YY_RULE_SETUP
-#line 74 "comments.l"
+#line 79 "comments.l"
           ECHO;
           YY_BREAK
-#line 865 "comments.cc"
+#line 870 "comments.cc"
         case YY_STATE_EOF(INITIAL):
         case YY_STATE_EOF(C_COMMENT):
         case YY_STATE_EOF(BLOCK):
@@ -1915,7 +1920,7 @@ void yyfree(void* ptr, yyscan_t yyscanner) {
 
 #define YYTABLES_NAME "yytables"
 
-#line 74 "comments.l"
+#line 79 "comments.l"
 
 void IterateComments(const char* buffer,
                      size_t size,
@@ -1927,6 +1932,9 @@ void IterateComments(const char* buffer,
   yylex_init_extra(&context, &scanner);
   YY_BUFFER_STATE yybuffer = yy_scan_bytes(buffer, size, scanner);
   yylex(scanner);
+  if (!context.buffer.empty()) {
+    context.callback(context.buffer);
+  }
   yy_delete_buffer(yybuffer, scanner);
   yylex_destroy(scanner);
 }

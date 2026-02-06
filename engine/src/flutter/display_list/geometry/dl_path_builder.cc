@@ -57,31 +57,38 @@ DlPathBuilder& DlPathBuilder::SetFillType(DlPathFillType fill_type) {
 }
 
 DlPathBuilder& DlPathBuilder::MoveTo(DlPoint p2) {
-  path_.moveTo(p2.x, p2.y);
+  path_.moveTo({p2.x, p2.y});
   return *this;
 }
 
 DlPathBuilder& DlPathBuilder::LineTo(DlPoint p2) {
-  path_.lineTo(p2.x, p2.y);
+  path_.lineTo({p2.x, p2.y});
   return *this;
 }
 
 DlPathBuilder& DlPathBuilder::QuadraticCurveTo(DlPoint cp, DlPoint p2) {
-  path_.quadTo(cp.x, cp.y, p2.x, p2.y);
+  path_.quadTo({cp.x, cp.y}, {p2.x, p2.y});
   return *this;
 }
 
 DlPathBuilder& DlPathBuilder::ConicCurveTo(DlPoint cp,
                                            DlPoint p2,
                                            DlScalar weight) {
-  path_.conicTo(cp.x, cp.y, p2.x, p2.y, weight);
+  // Skia's SkPath object used to do these checks, but SkPathBuilder does not.
+  if (!(weight > 0)) {
+    return this->LineTo(p2);
+  } else if (!std::isfinite(weight)) {
+    this->LineTo(cp);
+    return this->LineTo(p2);
+  }
+  path_.conicTo({cp.x, cp.y}, {p2.x, p2.y}, weight);
   return *this;
 }
 
 DlPathBuilder& DlPathBuilder::CubicCurveTo(DlPoint cp1,
                                            DlPoint cp2,
                                            DlPoint p2) {
-  path_.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+  path_.cubicTo({cp1.x, cp1.y}, {cp2.x, cp2.y}, {p2.x, p2.y});
   return *this;
 }
 
@@ -139,13 +146,11 @@ DlPathBuilder& DlPathBuilder::AddPath(const DlPath& path) {
 }
 
 const DlPath DlPathBuilder::CopyPath() {
-  return DlPath(path_);
+  return DlPath(path_.snapshot());
 }
 
 const DlPath DlPathBuilder::TakePath() {
-  DlPath path = DlPath(path_);
-  path_.reset();
-  return path;
+  return DlPath(path_.detach());
 }
 
 }  // namespace flutter

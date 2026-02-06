@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Интернеттен издөө",
   "shareButtonLabel": "Бөлүшүү",
   "pasteButtonLabel": "Чаптоо",
-  "selectAllButtonLabel": "Баарын тандоо"
+  "selectAllButtonLabel": "Баарын тандоо",
+  "searchResultsFound": "Изделген нерсе табылды",
+  "noResultsFound": "Эч нерсе табылган жок",
+  "radioButtonUnselectedLabel": "Тандалган жок"
 }

@@ -7,6 +7,8 @@ library;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
@@ -33,6 +35,49 @@ void main() {
 
   tearDown(() {
     tryToDelete(tempDir);
+  });
+
+  group('DDS launch race', () {
+    late FlutterRunTestDriver flutterRun, flutterAttach, flutterAttach2;
+    setUp(() {
+      flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ', spawnDdsInstance: false);
+      flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH (1) ');
+      flutterAttach2 = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH (2) ');
+    });
+
+    tearDown(() async {
+      await flutterAttach.detach();
+      await flutterAttach2.detach();
+      await flutterRun.stop();
+    });
+
+    test('regression test for https://github.com/flutter/flutter/issues/169265', () async {
+      // This test is meant to mimic a race between "flutter run" and "flutter attach" instances
+      // both trying to start DDS for the same VM service instance. Unfortunately, we need a VM
+      // service port for "flutter attach" to work with the flutter-tester device, so instead we
+      // invoke "flutter run" with DDS disabled to get a Flutter process with a VM service port and
+      // try to perform two "flutter attach" operations to this port at the same time. This fails
+      // in the same way as a "flutter run" and "flutter attach" race as both operations result in
+      // the same DDS launching logic being executed.
+      await flutterRun.run(withDebugger: true, startPaused: true);
+
+      await Future.wait([
+        flutterAttach.attach(flutterRun.vmServicePort!),
+        flutterAttach2.attach(flutterRun.vmServicePort!),
+      ]);
+
+      // Both attach instances should succeed and should both be connected to the same service URI.
+      expect(flutterAttach.vmServiceWsUri, flutterAttach2.vmServiceWsUri);
+      final FlutterVmService service = await connectToVmService(
+        flutterAttach.vmServiceWsUri!,
+        logger: BufferLogger.test(),
+      );
+
+      // Verify that DDS has actually been launched and we're not just connected to the VM service
+      // directly.
+      final ProtocolList protocoList = await service.service.getSupportedProtocols();
+      expect(protocoList.protocols!.where((p) => p.protocolName == 'DDS'), hasLength(1));
+    });
   });
 
   group('DDS in flutter run', () {

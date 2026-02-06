@@ -123,7 +123,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
       return newKey;
     }
 
-    final bool isPrintable = key.length == 1;
+    final isPrintable = key.length == 1;
     if (isPrintable) {
       return LogicalKeyboardKey(key.toLowerCase().codeUnitAt(0));
     }

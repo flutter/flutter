@@ -16,8 +16,8 @@ Future<void> testMain() async {
   setUpUnitTests(setUpTestViewDimensions: false);
 
   test('blanks are equal to each other', () {
-    final ui.StrutStyle a = ui.StrutStyle();
-    final ui.StrutStyle b = ui.StrutStyle();
+    final a = ui.StrutStyle();
+    final b = ui.StrutStyle();
     expect(a, b);
     expect(a.hashCode, b.hashCode);
   });
@@ -26,11 +26,11 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populator = _populatorsA[property]!;
 
-      final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
+      final aBuilder = _TestStrutStyleBuilder();
       populator(aBuilder);
       final ui.StrutStyle a = aBuilder.build();
 
-      final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
+      final bBuilder = _TestStrutStyleBuilder();
       populator(bBuilder);
       final ui.StrutStyle b = bBuilder.build();
 
@@ -43,12 +43,12 @@ Future<void> testMain() async {
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populatorA = _populatorsA[property]!;
 
-      final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
+      final aBuilder = _TestStrutStyleBuilder();
       populatorA(aBuilder);
       final ui.StrutStyle a = aBuilder.build();
 
       final _StrutStylePropertyPopulator populatorB = _populatorsB[property]!;
-      final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
+      final bBuilder = _TestStrutStyleBuilder();
       populatorB(bBuilder);
       final ui.StrutStyle b = bBuilder.build();
 
@@ -58,8 +58,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether equal', () {
-    final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
-    final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
+    final aBuilder = _TestStrutStyleBuilder();
+    final bBuilder = _TestStrutStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populator = _populatorsA[property]!;
@@ -75,8 +75,8 @@ Future<void> testMain() async {
   });
 
   test('all properties altogether not equal', () {
-    final _TestStrutStyleBuilder aBuilder = _TestStrutStyleBuilder();
-    final _TestStrutStyleBuilder bBuilder = _TestStrutStyleBuilder();
+    final aBuilder = _TestStrutStyleBuilder();
+    final bBuilder = _TestStrutStyleBuilder();
 
     for (final String property in _populatorsA.keys) {
       final _StrutStylePropertyPopulator populatorA = _populatorsA[property]!;

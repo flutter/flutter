@@ -102,7 +102,10 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   for (final String key in <String>['A', 'B', 'C'])
-                    ElevatedButton(child: Text(key), onPressed: () => _handleKeyPress(key)),
+                    ElevatedButton(
+                      child: Text(key),
+                      onPressed: () => _handleKeyPress(key),
+                    ),
                 ],
               ),
             ),

@@ -712,6 +712,8 @@ class FakePlatformConfigurationClient : public PlatformConfigurationClient {
               double width,
               double height) override {}
   void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override {}
+  void SetApplicationLocale(std::string locale) override {}
+  void SetSemanticsTreeEnabled(bool enabled) override {}
   void HandlePlatformMessage(
       std::unique_ptr<PlatformMessage> message) override {}
   FontCollection& GetFontCollection() override {

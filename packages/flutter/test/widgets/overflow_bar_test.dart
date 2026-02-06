@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
-    const OverflowBar bar = OverflowBar();
+    const bar = OverflowBar();
     expect(bar.spacing, 0);
     expect(bar.alignment, null);
     expect(bar.overflowSpacing, 0);
@@ -17,7 +17,7 @@ void main() {
   });
 
   testWidgets('Empty OverflowBar', (WidgetTester tester) async {
-    const Size size = Size(16, 24);
+    const size = Size(16, 24);
 
     await tester.pumpWidget(
       Directionality(
@@ -309,13 +309,13 @@ void main() {
 
     // This list of children appears in a Row and an OverflowBar, so each
     // find.byKey() for key0, key1, key2 returns two widgets.
-    final List<Widget> children = <Widget>[
+    final children = <Widget>[
       SizedBox(key: key0, width: 50, height: 50),
       SizedBox(key: key1, width: 70, height: 50),
       SizedBox(key: key2, width: 80, height: 50),
     ];
 
-    const List<MainAxisAlignment> allAlignments = <MainAxisAlignment>[
+    const allAlignments = <MainAxisAlignment>[
       MainAxisAlignment.start,
       MainAxisAlignment.center,
       MainAxisAlignment.end,
@@ -324,10 +324,7 @@ void main() {
       MainAxisAlignment.spaceEvenly,
     ];
 
-    const List<TextDirection> allTextDirections = <TextDirection>[
-      TextDirection.ltr,
-      TextDirection.rtl,
-    ];
+    const allTextDirections = <TextDirection>[TextDirection.ltr, TextDirection.rtl];
 
     Widget buildFrame(MainAxisAlignment alignment, TextDirection textDirection) {
       return Directionality(
@@ -346,7 +343,7 @@ void main() {
     // same size and for their left and right edges to align.
     void testLayout() {
       expect(tester.getSize(find.byType(OverflowBar)), const Size(800, 50));
-      for (final Key key in <Key>[key0, key1, key2]) {
+      for (final key in <Key>[key0, key1, key2]) {
         final Finder matchingChildren = find.byKey(key);
         expect(matchingChildren.evaluate().length, 2);
         final Rect rect0 = tester.getRect(matchingChildren.first);
@@ -357,8 +354,8 @@ void main() {
       }
     }
 
-    for (final MainAxisAlignment alignment in allAlignments) {
-      for (final TextDirection textDirection in allTextDirections) {
+    for (final alignment in allAlignments) {
+      for (final textDirection in allTextDirections) {
         await tester.pumpWidget(buildFrame(alignment, textDirection));
         testLayout();
       }

@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/input_decorator/input_decoration.1.dart' as example;
+import 'package:flutter_api_samples/material/input_decorator/input_decoration.1.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,7 +16,10 @@ void main() {
     expect(find.text('Hint Text'), findsOneWidget);
 
     expect(
-      tester.widget<TextField>(find.byType(TextField)).decoration?.contentPadding,
+      tester
+          .widget<TextField>(find.byType(TextField))
+          .decoration
+          ?.contentPadding,
       EdgeInsets.zero,
     );
     expect(

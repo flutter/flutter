@@ -893,7 +893,7 @@ void Engine::WarmupSkps(
           SkMemoryStream::MakeDirect(mapping->GetMapping(), mapping->GetSize());
       SkDeserialProcs procs = {0};
       procs.fImageProc = flutter::DeserializeImageWithoutData;
-      procs.fTypefaceProc = flutter::DeserializeTypefaceWithoutData;
+      procs.fTypefaceStreamProc = flutter::DeserializeTypefaceWithoutData;
       sk_sp<SkPicture> picture =
           SkPicture::MakeFromStream(stream.get(), &procs);
       if (!picture) {

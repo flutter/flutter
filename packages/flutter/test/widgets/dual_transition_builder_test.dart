@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('runs animations', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -63,7 +63,7 @@ void main() {
   });
 
   testWidgets('keeps state', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -118,7 +118,7 @@ void main() {
   });
 
   testWidgets('does not jump when interrupted - forward', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),
     );
@@ -171,7 +171,7 @@ void main() {
   });
 
   testWidgets('does not jump when interrupted - reverse', (WidgetTester tester) async {
-    final AnimationController controller = AnimationController(
+    final controller = AnimationController(
       value: 1.0,
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 300),

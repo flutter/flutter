@@ -5,6 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show SystemChannels;
+import 'package:flutter/src/services/message_codecs.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -61,7 +63,7 @@ void main() {
       darkColor: Color(0xEE333333),
     );
 
-    const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
+    const backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFFFFFFFF),
       darkColor: Color(0xFF000000),
     );
@@ -205,7 +207,7 @@ void main() {
   );
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    const Center page1Center = Center();
+    const page1Center = Center();
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -244,7 +246,7 @@ void main() {
   testWidgets('Contents have automatic sliver padding between translucent bars', (
     WidgetTester tester,
   ) async {
-    const SizedBox content = SizedBox(height: 600.0, width: 600.0);
+    const content = SizedBox(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -403,11 +405,10 @@ void main() {
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoApp(home: CupertinoPageScaffold(child: Center())));
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -418,70 +419,11 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox =
-        tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
-  });
-
-  testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        builder: (BuildContext context, Widget? child) {
-          // Acts as a 20px status bar at the root of the app.
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
-            child: child!,
-          );
-        },
-        home: CupertinoPageScaffold(
-          // Default nav bar is translucent.
-          navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
-          child: ListView.builder(
-            itemExtent: 50,
-            itemBuilder: (BuildContext context, int index) => Text(index.toString()),
-          ),
-        ),
-      ),
-    );
-    // Top media query padding 20 + translucent nav bar 44.
-    expect(tester.getTopLeft(find.text('0')).dy, 64);
-    expect(tester.getTopLeft(find.text('6')).dy, 364);
-
-    await tester.fling(
-      find.text('5'), // Find some random text on the screen.
-      const Offset(0, -200),
-      20,
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
-    expect(
-      tester.getTopLeft(find.text('12')).dy,
-      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
-    );
-
-    // The media query top padding is 20. Tapping at 20 should do nothing.
-    await tester.tapAt(const Offset(400, 20));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
-    expect(
-      tester.getTopLeft(find.text('12')).dy,
-      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
-    );
-
-    // Tap 1 pixel higher.
-    await tester.tapAt(const Offset(400, 19));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(tester.getTopLeft(find.text('0')).dy, 64);
-    expect(tester.getTopLeft(find.text('6')).dy, 364);
-    expect(find.text('12'), findsNothing);
   });
 
   testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (
@@ -509,7 +451,7 @@ void main() {
     }
 
     // CupertinoPageScaffold should consume the viewInsets in all cases
-    final String expectedViewInsets = EdgeInsets.zero.toString();
+    final expectedViewInsets = EdgeInsets.zero.toString();
 
     // When there is a nav bar and no keyboard.
     await tester.pumpWidget(buildFrame(true, false));
@@ -588,5 +530,46 @@ void main() {
           .textScaler,
       const TextScaler.linear(99.0),
     );
+  });
+
+  testWidgets('Tap the status bar scrolls to top', (WidgetTester tester) async {
+    final scrollController = ScrollController(initialScrollOffset: 1000);
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return PrimaryScrollController(
+              controller: scrollController,
+              child: const CupertinoPageScaffold(
+                child: SingleChildScrollView(primary: true, child: SizedBox(height: 12345)),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('handleScrollToTop'),
+    );
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      SystemChannels.statusBar.name,
+      message,
+      (ByteData? data) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('CupertinoPageScaffold does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoPageScaffold(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoPageScaffold)), Size.zero);
   });
 }

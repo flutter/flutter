@@ -22,8 +22,6 @@ class TextShadow {
 
   bool operator==(const TextShadow& other) const;
 
-  bool operator!=(const TextShadow& other) const;
-
   bool hasShadow() const;
 };
 

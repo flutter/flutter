@@ -10,14 +10,14 @@
 namespace fml {
 
 template <class Type>
-constexpr void HashCombineSeed(std::size_t& seed, Type arg) {
+constexpr void HashCombineSeed(std::size_t& seed, const Type& arg) {
   seed ^= std::hash<Type>{}(arg) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template <class Type, class... Rest>
 constexpr void HashCombineSeed(std::size_t& seed,
-                               Type arg,
-                               Rest... other_args) {
+                               const Type& arg,
+                               const Rest&... other_args) {
   HashCombineSeed(seed, arg);
   HashCombineSeed(seed, other_args...);
 }
@@ -27,7 +27,7 @@ constexpr void HashCombineSeed(std::size_t& seed,
 }
 
 template <class... Type>
-[[nodiscard]] constexpr std::size_t HashCombine(Type... args) {
+[[nodiscard]] constexpr std::size_t HashCombine(const Type&... args) {
   std::size_t seed = HashCombine();
   HashCombineSeed(seed, args...);
   return seed;

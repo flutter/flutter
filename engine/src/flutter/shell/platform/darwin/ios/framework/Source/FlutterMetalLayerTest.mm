@@ -294,4 +294,33 @@
   XCTAssertNil(weakLayer);
 }
 
+- (void)testResizeAndPresent {
+  FlutterMetalLayer* layer = [self addMetalLayer];
+  TestCompositor* compositor = [[TestCompositor alloc] initWithLayer:layer];
+
+  id<CAMetalDrawable> oldSizeDrawable1 = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(oldSizeDrawable1);
+  id<CAMetalDrawable> oldSizeDrawable2 = [layer nextDrawable];
+  BAIL_IF_NO_DRAWABLE(oldSizeDrawable2);
+
+  const CGFloat newSize = 200;
+  layer.drawableSize = CGSizeMake(newSize, newSize);
+
+  // After resizing, present the drawables that were allocated using the old size.
+  [oldSizeDrawable1 present];
+  [compositor commitTransaction];
+  [oldSizeDrawable2 present];
+  [compositor commitTransaction];
+
+  // Verify that textures with the old size have been removed from the layer.
+  for (int i = 0; i < 4; i++) {
+    id<CAMetalDrawable> drawable = [layer nextDrawable];
+    [drawable present];
+    [compositor commitTransaction];
+    XCTAssertEqual(drawable.texture.width, newSize);
+  }
+
+  [self removeMetalLayer:layer];
+}
+
 @end

@@ -21,7 +21,11 @@ source_set("display_list_testing") {
     "//flutter/txt",
   ]
 
-  public_deps = [ "//flutter/display_list:display_list" ]
+  public_deps = [ "//flutter/display_list" ]
+
+  if (impeller_supports_rendering) {
+    public_deps += [ "//flutter/impeller/display_list" ]
+  }
 }
 
 surface_provider_include_software = !is_android && !is_ios

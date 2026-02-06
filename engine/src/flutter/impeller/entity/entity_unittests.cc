@@ -54,6 +54,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -829,16 +830,17 @@ TEST_P(EntityTest, BlendingModeOptions) {
       options.primitive_type = PrimitiveType::kTriangle;
       pass.SetPipeline(context.GetSolidFillPipeline(options));
       pass.SetVertexBuffer(
-          vtx_builder.CreateVertexBuffer(context.GetTransientsBuffer()));
+          vtx_builder.CreateVertexBuffer(context.GetTransientsDataBuffer(),
+                                         context.GetTransientsIndexesBuffer()));
 
       VS::FrameInfo frame_info;
       frame_info.mvp = pass.GetOrthographicTransform() * world_matrix;
       VS::BindFrameInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frame_info));
       FS::FragInfo frag_info;
       frag_info.color = color.Premultiply();
       FS::BindFragInfo(
-          pass, context.GetTransientsBuffer().EmplaceUniform(frame_info));
+          pass, context.GetTransientsDataBuffer().EmplaceUniform(frag_info));
       return pass.Draw().ok();
     };
 
@@ -1061,14 +1063,16 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       case 0:
         blur = std::make_shared<GaussianBlurFilterContents>(
             blur_sigma_x.sigma, blur_sigma_y.sigma,
-            tile_modes[selected_tile_mode], blur_styles[selected_blur_style],
+            tile_modes[selected_tile_mode], /*bounds=*/std::nullopt,
+            blur_styles[selected_blur_style],
             /*geometry=*/nullptr);
         blur->SetInputs({FilterInput::Make(input)});
         break;
       case 1:
         blur = FilterContents::MakeGaussianBlur(
             FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
-            tile_modes[selected_tile_mode], blur_styles[selected_blur_style]);
+            tile_modes[selected_tile_mode],
+            /*bounds=*/std::nullopt, blur_styles[selected_blur_style]);
         break;
     };
     FML_CHECK(blur);
@@ -1733,7 +1737,8 @@ TEST_P(EntityTest, YUVToRGBFilter) {
           textures[0], textures[1], yuv_color_space);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
-      auto snapshot = filter_contents->RenderToSnapshot(context, filter_entity);
+      auto snapshot =
+          filter_contents->RenderToSnapshot(context, filter_entity, {});
 
       Entity entity;
       auto contents = TextureContents::MakeRect(Rect::MakeLTRB(0, 0, 256, 256));
@@ -1750,10 +1755,12 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 }
 
 TEST_P(EntityTest, RuntimeEffect) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1806,9 +1813,12 @@ TEST_P(EntityTest, RuntimeEffect) {
     callback(*content_context, mock_pass);
 
     // Dirty the runtime stage.
-    runtime_stages = OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    auto runtime_stages_result =
+        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    ABSL_ASSERT_OK(runtime_stages_result);
     runtime_stage =
-        runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+        runtime_stages_result
+            .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
 
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
@@ -1818,10 +1828,12 @@ TEST_P(EntityTest, RuntimeEffect) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1865,10 +1877,12 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanPrecache) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1883,10 +1897,12 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
     GTEST_SKIP() << "Test only applies to Vulkan";
   }
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
   auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1906,10 +1922,9 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
-  auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsBuffer(),
-      runtime_stage->GetUniforms()[0],
-      GetContentContext()->GetTransientsBuffer().GetMinimumUniformAlignment());
+  auto buffer_view = RuntimeEffectContents::EmplaceUniform(
+      uniform_data->data(), GetContentContext()->GetTransientsDataBuffer(),
+      runtime_stage->GetUniforms()[0]);
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2297,6 +2312,117 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   }
 }
 
+TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+
+  // Butt caps never overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kButt};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+            << "start: " << start << " sweep: " << sweep;
+      }
+    }
+  }
+
+  // Round caps with 10 stroke width overlap starting at 348.6 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 348.6) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Round caps with 50 stroke width overlap starting at 300.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 300.0) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 10 stroke width overlap starting at 347.4 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 347.4) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 50 stroke width overlap starting at 270.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 270.1) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+}
+
 TEST_P(EntityTest, FailOnValidationError) {
   if (GetParam() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP() << "Validation is only fatal on Vulkan backend.";
@@ -2493,6 +2619,180 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
+  // This playground shows the enlarged corner of a rounded superellipse to
+  // compare pathing algorithm against the filling algorithm (benchmark) at very
+  // large ratio.
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    constexpr float corner_radius = 100.0;
+
+    // UI state.
+    static float logarithm_of_ratio = 1.5;  // ratio = size / corner_radius
+
+    float ratio = std::exp(logarithm_of_ratio);
+
+    float rect_size = corner_radius * ratio;
+    Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
+    constexpr float screen_canvas_padding = 200.0f;
+    constexpr float screen_canvas_size = 1000.0f;
+
+    // Scale so that "corner radius" is as long as half the canvas.
+    float scale = screen_canvas_size / 2 / corner_radius;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
+      ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
+      ImGui::Text("  where Ratio = RectSize / CornerRadius");
+    }
+    ImGui::End();
+
+    auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
+    auto transform = Matrix::MakeTranslation(top_right) *
+                     Matrix::MakeScale(Vector2(scale, scale)) *
+                     Matrix::MakeTranslation(Vector2(-rect_size, 0));
+    bool success = true;
+
+    auto fill_geom =
+        std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
+    // Fill
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Red());
+      contents->SetGeometry(fill_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Stroke
+    auto path = flutter::DlPath::MakeRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(rect, corner_radius));
+    auto stroke_geom = Geometry::MakeStrokePath(path, {.width = 2 / scale});
+    {
+      auto contents = std::make_shared<SolidColorContents>();
+      contents->SetColor(Color::Blue());
+      contents->SetGeometry(stroke_geom.get());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Draw a ruler to show the length in portion of rect size.
+    auto screen_top_right =
+        Matrix::MakeScale(GetContentScale()).Invert() * top_right;
+    constexpr float font_size = 13.0f;
+    for (int i = -1; i < 100; i++) {
+      float screen_offset_y = static_cast<float>(i) * 20.0f;
+      std::string label;
+      if (i == -1) {
+        label = "Ruler: (in portion of rect size)";
+      } else if (i == 0) {
+        label = "- 0.0";
+      } else {
+        float portion_of_rect =
+            screen_offset_y * GetContentScale().y / scale / rect_size;
+        label = std::format("- {:.2g}", portion_of_rect);
+      }
+      ImGui::GetBackgroundDrawList()->AddText(
+          nullptr, font_size,
+          // Draw the ruler at around the flat part of the curve, which is
+          // somewhere to the left of the top right corner.
+          //
+          // Offset vertically by font_size/2 so that the hyphen aligns with the
+          // top of shape.
+          {screen_top_right.x - 500,
+           screen_top_right.y + screen_offset_y - font_size / 2},
+          IM_COL32_WHITE, label.c_str());
+    }
+    return success;
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, CanDrawRoundSuperEllipseWithTinyRadius) {
+  // Regression test for https://github.com/flutter/flutter/issues/176894
+  // Verify that a radius marginally below the minimum threshold can be
+  // processed safely. The expectation is that the rounded corners degenerate
+  // into sharp corners (four corner points) and that no NaNs or crashes occur.
+  auto geom = Geometry::MakeRoundSuperellipse(
+      Rect::MakeLTRB(200, 200, 300, 300), 0.5 * kEhCloseEnough);
+
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  Entity entity;
+
+  auto cmd_buffer = content_context.GetContext()->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(
+      content_context.GetContext()->GetResourceAllocator());
+
+  auto render_target = allocator.CreateOffscreen(
+      *content_context.GetContext(), /*size=*/{500, 500}, /*mip_count=*/1);
+  auto pass = cmd_buffer->CreateRenderPass(render_target);
+
+  GeometryResult result =
+      geom->GetPositionBuffer(content_context, entity, *pass);
+
+  EXPECT_EQ(result.vertex_buffer.vertex_count, 4u);
+  Point* written_data = reinterpret_cast<Point*>(
+      (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
+       result.vertex_buffer.vertex_buffer.GetRange().offset));
+
+  std::vector<Point> expected = {Point(300.0, 200.0), Point(300.0, 300.0),
+                                 Point(200.0, 200.0), Point(200.0, 300.0)};
+
+  for (size_t i = 0; i < expected.size(); i++) {
+    const Point& point = written_data[i];
+    EXPECT_NEAR(point.x, expected[i].x, 0.1);
+    EXPECT_NEAR(point.y, expected[i].y, 0.1);
+  }
+}
+
+TEST_P(EntityTest, CanDrawRoundSuperEllipseWithJustEnoughRadius) {
+  // Regression test for https://github.com/flutter/flutter/issues/176894
+  // Verify that a radius marginally above the minimum threshold can be
+  // processed safely. The expectation is that the rounded corners are
+  // drawn as rounded and that no NaNs or crashes occur.
+  auto geom = Geometry::MakeRoundSuperellipse(
+      Rect::MakeLTRB(200, 200, 300, 300), 1.1 * kEhCloseEnough);
+
+  ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
+  Entity entity;
+
+  auto cmd_buffer = content_context.GetContext()->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(
+      content_context.GetContext()->GetResourceAllocator());
+
+  auto render_target = allocator.CreateOffscreen(
+      *content_context.GetContext(), /*size=*/{500, 500}, /*mip_count=*/1);
+  auto pass = cmd_buffer->CreateRenderPass(render_target);
+
+  GeometryResult result =
+      geom->GetPositionBuffer(content_context, entity, *pass);
+
+  EXPECT_EQ(result.vertex_buffer.vertex_count, 200u);
+  Point* written_data = reinterpret_cast<Point*>(
+      (result.vertex_buffer.vertex_buffer.GetBuffer()->OnGetContents() +
+       result.vertex_buffer.vertex_buffer.GetRange().offset));
+
+  std::vector<Point> expected_head = {Point(250.0, 200.0), Point(299.9, 200.0),
+                                      Point(200.1, 200.0), Point(299.9, 200.0)};
+
+  for (size_t i = 0; i < expected_head.size(); i++) {
+    const Point& point = written_data[i];
+    EXPECT_NEAR(point.x, expected_head[i].x, 0.1);
+    EXPECT_NEAR(point.y, expected_head[i].y, 0.1);
+  }
+}
+
 TEST_P(EntityTest, SolidColorApplyColorFilter) {
   auto contents = SolidColorContents();
   contents.SetColor(Color::CornflowerBlue().WithAlpha(0.75));
@@ -2581,6 +2881,83 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
   point = written_data[kPointArenaSize + 2];
   EXPECT_NEAR(point.x, expected[4].x, 0.1);
   EXPECT_NEAR(point.y, expected[4].y, 0.1);
+}
+
+class FlushTestDeviceBuffer : public DeviceBuffer {
+ public:
+  explicit FlushTestDeviceBuffer(const DeviceBufferDescriptor& desc)
+      : DeviceBuffer(desc), storage_(desc.size) {}
+
+  bool SetLabel(std::string_view label) override { return true; }
+  bool SetLabel(std::string_view label, Range range) override { return true; }
+  bool OnCopyHostBuffer(const uint8_t* source,
+                        Range source_range,
+                        size_t offset) {
+    return true;
+  }
+
+  uint8_t* OnGetContents() const override {
+    return const_cast<uint8_t*>(storage_.data());
+  }
+
+  void Flush(std::optional<Range> range) const override {
+    flush_called_ = true;
+  }
+
+  bool flush_called() const { return flush_called_; }
+
+ private:
+  std::vector<uint8_t> storage_;
+  mutable bool flush_called_ = false;
+};
+
+class FlushTestAllocator : public Allocator {
+ public:
+  ISize GetMaxTextureSizeSupported() const override {
+    return ISize(1024, 1024);
+  };
+
+  std::shared_ptr<DeviceBuffer> OnCreateBuffer(
+      const DeviceBufferDescriptor& desc) override {
+    return std::make_shared<FlushTestDeviceBuffer>(desc);
+  };
+
+  std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
+                                           bool threadsafe) override {
+    return nullptr;
+  }
+};
+
+class FlushTestContentContext : public ContentContext {
+ public:
+  FlushTestContentContext(
+      const std::shared_ptr<Context>& context,
+      const std::shared_ptr<TypographerContext>& typographer_context,
+      const std::shared_ptr<Allocator>& allocator)
+      : ContentContext(context, typographer_context) {
+    SetTransientsDataBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+    SetTransientsIndexesBuffer(HostBuffer::Create(
+        allocator, context->GetIdleWaiter(),
+        context->GetCapabilities()->GetMinimumUniformAlignment()));
+  }
+};
+
+TEST_P(EntityTest, RoundSuperellipseGetPositionBufferFlushes) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+
+  auto content_context = std::make_shared<FlushTestContentContext>(
+      GetContext(), GetTypographerContext(),
+      std::make_shared<FlushTestAllocator>());
+  auto geometry =
+      Geometry::MakeRoundSuperellipse(Rect::MakeLTRB(0, 0, 100, 100), 5);
+  auto result = geometry->GetPositionBuffer(*content_context, {}, mock_pass);
+
+  auto device_buffer = reinterpret_cast<const FlushTestDeviceBuffer*>(
+      result.vertex_buffer.vertex_buffer.GetBuffer());
+  EXPECT_TRUE(device_buffer->flush_called());
 }
 
 }  // namespace testing

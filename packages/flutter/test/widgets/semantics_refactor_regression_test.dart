@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('finder does not return dirty semantics nodes', (WidgetTester tester) async {
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
-    const String label = 'label';
+    final key1 = UniqueKey();
+    final key2 = UniqueKey();
+    const label = 'label';
     // not merged
     await tester.pumpWidget(
       Directionality(

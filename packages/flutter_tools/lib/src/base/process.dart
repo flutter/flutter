@@ -13,6 +13,7 @@ import 'async_guard.dart';
 import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
+import 'utils.dart';
 
 typedef StringConverter = String? Function(String string);
 
@@ -27,6 +28,9 @@ typedef ShutdownHook = FutureOr<void> Function();
 
 abstract class ShutdownHooks {
   factory ShutdownHooks() = _DefaultShutdownHooks;
+
+  /// Indicates whether the shutdown hooks have been run.
+  bool get isShuttingDown;
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
   void addShutdownHook(ShutdownHook shutdownHook);
@@ -53,6 +57,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   @override
   final registeredHooks = <ShutdownHook>[];
 
+  @override
+  bool get isShuttingDown => _isShuttingDown;
+  var _isShuttingDown = false;
+
   var _shutdownHooksRunning = false;
 
   @override
@@ -63,6 +71,10 @@ class _DefaultShutdownHooks implements ShutdownHooks {
 
   @override
   Future<void> runShutdownHooks(Logger logger) async {
+    if (_isShuttingDown) {
+      return;
+    }
+    _isShuttingDown = true;
     logger.printTrace(
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
@@ -550,8 +562,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       environment: environment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;
@@ -570,8 +581,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           }
         });
     final StreamSubscription<String> stderrSubscription = process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
+        .transform(utf8LineDecoder)
         .where((String line) => filter == null || filter.hasMatch(line))
         .listen((String line) {
           String? mappedLine = line;

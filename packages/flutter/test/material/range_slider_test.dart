@@ -15,8 +15,8 @@ import '../widgets/semantics_tester.dart';
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
   testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.1, 0.5);
-    bool dragStarted = false;
+    var values = const RangeValues(0.1, 0.5);
+    var dragStarted = false;
     final Key sliderKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -73,7 +73,7 @@ void main() {
     drag = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
     await tester.pump(kPressTimeout);
 
-    bool sliderEnd = false;
+    var sliderEnd = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -125,7 +125,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.8);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -151,13 +151,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.3, 0.8)));
     //  taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pump();
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.5, 0.8)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -168,7 +168,7 @@ void main() {
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
     expect(values.start, moreOrLessEquals(0.1, epsilon: 0.01));
-    expect(values.end, equals(0.7));
+    expect(values.end, equals(0.8));
 
     // The end thumb is selected when tapping the right inactive track.
     await tester.pump();
@@ -179,7 +179,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 1.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -205,13 +205,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.3, 1.0)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pump();
-    expect(values, equals(const RangeValues(0.3, 0.7)));
+    expect(values, equals(const RangeValues(0.5, 1.0)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -221,7 +221,7 @@ void main() {
     // The end thumb is selected when tapping the left inactive track.
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
-    expect(values.start, 0.3);
+    expect(values.start, 0.5);
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
 
     // The start thumb is selected when tapping the right inactive track.
@@ -233,7 +233,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    var values = const RangeValues(30, 80);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -261,13 +261,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(30, 80)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(50, 80)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -279,7 +279,7 @@ void main() {
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
     expect(values.start.round(), equals(10));
-    expect(values.end.round(), equals(70));
+    expect(values.end.round(), equals(80));
 
     // The end thumb is selected when tapping the right inactive track.
     await tester.pump();
@@ -291,7 +291,7 @@ void main() {
   });
 
   testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(30, 70);
+    var values = const RangeValues(30, 80);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -319,13 +319,13 @@ void main() {
       ),
     );
 
-    // No thumbs get select when tapping between the thumbs outside the touch
+    // The closest thumb is selected when tapping between the thumbs outside the touch
     // boundaries
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(30, 80)));
     // taps at 0.5
     await tester.tap(find.byType(RangeSlider));
     await tester.pumpAndSettle();
-    expect(values, equals(const RangeValues(30, 70)));
+    expect(values, equals(const RangeValues(50, 80)));
 
     // Get the bounds of the track by finding the slider edges and translating
     // inwards by the overlay radius.
@@ -336,7 +336,7 @@ void main() {
     final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.1;
     await tester.tapAt(leftTarget);
     await tester.pumpAndSettle();
-    expect(values.start.round(), equals(30));
+    expect(values.start.round(), equals(50));
     expect(values.end.round(), equals(90));
 
     // The end thumb is selected when tapping the right inactive track.
@@ -351,7 +351,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -397,7 +397,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -443,7 +443,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(30, 70);
+    var values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -491,7 +491,7 @@ void main() {
   testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(30, 70);
+    var values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -536,10 +536,96 @@ void main() {
     expect(values.start, equals(0));
   });
 
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (ltr)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
+  testWidgets('minThumbSeparation has same width as surrounding box, values still bounded (rtl)', (
+    WidgetTester tester,
+  ) async {
+    const boundingBoxSize = 200.0;
+    var values = const RangeValues(0.0, 1.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: SizedBox(
+                    width: boundingBoxSize,
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(minThumbSeparation: boundingBoxSize),
+                      child: RangeSlider(
+                        values: values,
+                        onChanged: (RangeValues newValues) {
+                          setState(() {
+                            values = newValues;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.drag(find.byType(RangeSlider), Offset.zero);
+    await tester.pumpAndSettle();
+
+    expect(values.start, inInclusiveRange(0.0, 1.0));
+    expect(values.end, inInclusiveRange(0.0, 1.0));
+  });
+
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.3, 0.7);
+      var values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -592,7 +678,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.3, 0.7);
+      var values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -645,7 +731,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -700,7 +786,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -744,6 +830,7 @@ void main() {
       final Offset rightTarget = topLeft + (bottomRight - topLeft) * 0.7;
       await tester.dragFrom(rightTarget, middle - rightTarget);
       expect(values.start, moreOrLessEquals(50, epsilon: 0.01));
+      expect(values.end, moreOrLessEquals(50, epsilon: 0.01));
 
       // Drag the start thumb apart.
       await tester.pumpAndSettle();
@@ -755,7 +842,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.3, 0.7);
+      var values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -808,7 +895,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.3, 0.7);
+      var values = const RangeValues(0.3, 0.7);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -861,7 +948,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -916,7 +1003,7 @@ void main() {
   testWidgets(
     'Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -971,7 +1058,7 @@ void main() {
   testWidgets(
     'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
       RangeValues? startValues;
       RangeValues? endValues;
 
@@ -1028,7 +1115,7 @@ void main() {
   testWidgets(
     'Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(30, 70);
+      var values = const RangeValues(30, 70);
       late RangeValues startValues;
       late RangeValues endValues;
 
@@ -1117,7 +1204,7 @@ void main() {
     int? divisions,
     bool enabled = true,
   }) {
-    RangeValues values = const RangeValues(0.5, 0.75);
+    var values = const RangeValues(0.5, 0.75);
     final ValueChanged<RangeValues>? onChanged = !enabled
         ? null
         : (RangeValues newValues) {
@@ -1180,7 +1267,7 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes when setting the active color',
     (WidgetTester tester) async {
-      const Color activeColor = Color(0xcafefeed);
+      const activeColor = Color(0xcafefeed);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1211,7 +1298,7 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes when setting the inactive color',
     (WidgetTester tester) async {
-      const Color inactiveColor = Color(0xdeadbeef);
+      const inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1241,8 +1328,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes with active and inactive colors',
     (WidgetTester tester) async {
-      const Color activeColor = Color(0xcafefeed);
-      const Color inactiveColor = Color(0xdeadbeef);
+      const activeColor = Color(0xcafefeed);
+      const inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1308,8 +1395,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors',
     (WidgetTester tester) async {
-      const Color activeColor = Color(0xcafefeed);
-      const Color inactiveColor = Color(0xdeadbeef);
+      const activeColor = Color(0xcafefeed);
+      const inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1376,8 +1463,8 @@ void main() {
   testWidgets(
     'Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors',
     (WidgetTester tester) async {
-      const Color activeColor = Color(0xcafefeed);
-      const Color inactiveColor = Color(0xdeadbeef);
+      const activeColor = Color(0xcafefeed);
+      const inactiveColor = Color(0xdeadbeef);
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1410,7 +1497,7 @@ void main() {
     (WidgetTester tester) async {
       final ThemeData theme = buildTheme();
       final SliderThemeData sliderTheme = theme.sliderTheme;
-      RangeValues values = const RangeValues(0.5, 0.75);
+      var values = const RangeValues(0.5, 0.75);
 
       Widget buildApp({
         Color? activeColor,
@@ -1474,8 +1561,8 @@ void main() {
   testWidgets(
     'Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.5, 0.75);
-      const Color fillColor = Color(0xf55f5f5f);
+      var values = const RangeValues(0.5, 0.75);
+      const fillColor = Color(0xf55f5f5f);
 
       Widget buildApp({
         Color? activeColor,
@@ -1531,7 +1618,7 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildApp(divisions: 3));
+      await tester.pumpWidget(buildApp(divisions: 5));
 
       final RenderObject valueIndicatorBox = tester.renderObject(find.byType(Overlay));
       final Offset topRight = tester.getTopRight(find.byType(RangeSlider)).translate(-24, 0);
@@ -1582,9 +1669,9 @@ void main() {
   );
 
   testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -1651,9 +1738,9 @@ void main() {
   testWidgets('Range Slider top value indicator gets stroked when overlapping', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -1730,9 +1817,9 @@ void main() {
   testWidgets(
     'Range Slider top value indicator gets stroked when overlapping with large text scale',
     (WidgetTester tester) async {
-      RangeValues values = const RangeValues(0.3, 0.7);
+      var values = const RangeValues(0.3, 0.7);
 
-      final ThemeData theme = ThemeData(
+      final theme = ThemeData(
         platform: TargetPlatform.android,
         primarySwatch: Colors.blue,
         sliderTheme: const SliderThemeData(
@@ -1811,9 +1898,9 @@ void main() {
   );
 
   testWidgets('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
-    final ThemeData theme = ThemeData(
+    final theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
       sliderTheme: const SliderThemeData(
@@ -1926,28 +2013,32 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '10%',
-                decreasedValue: '5%',
-                label: '',
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '12%',
-                increasedValue: '17%',
-                decreasedValue: '12%',
-                label: '',
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '10%',
+                    decreasedValue: '5%',
+                    label: '',
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '12%',
+                    increasedValue: '17%',
+                    decreasedValue: '12%',
+                    label: '',
+                  ),
+                ],
               ),
             ],
           ),
@@ -1986,28 +2077,32 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2019,18 +2114,21 @@ void main() {
     // the semantics node rects by avoiding floating point errors.
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
-    final List<Rect> rects = <Rect>[];
+    final rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
-        // Round rect values to avoid floating point errors.
-        rects.add(
-          Rect.fromLTRB(
-            node.rect.left.roundToDouble(),
-            node.rect.top.roundToDouble(),
-            node.rect.right.roundToDouble(),
-            node.rect.bottom.roundToDouble(),
-          ),
-        );
+        node.visitChildren((SemanticsNode node) {
+          // Round rect values to avoid floating point errors.
+          rects.add(
+            Rect.fromLTRB(
+              node.rect.left.roundToDouble(),
+              node.rect.top.roundToDouble(),
+              node.rect.right.roundToDouble(),
+              node.rect.bottom.roundToDouble(),
+            ),
+          );
+          return true;
+        });
         return true;
       });
       return true;
@@ -2072,26 +2170,30 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                  ),
+                ],
               ),
             ],
           ),
@@ -2103,18 +2205,21 @@ void main() {
     // the semantics node rects by avoiding floating point errors.
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
-    final List<Rect> rects = <Rect>[];
+    final rects = <Rect>[];
     semanticsNode.visitChildren((SemanticsNode node) {
       node.visitChildren((SemanticsNode node) {
-        // Round rect values to avoid floating point errors.
-        rects.add(
-          Rect.fromLTRB(
-            node.rect.left.roundToDouble(),
-            node.rect.top.roundToDouble(),
-            node.rect.right.roundToDouble(),
-            node.rect.bottom.roundToDouble(),
-          ),
-        );
+        node.visitChildren((SemanticsNode node) {
+          // Round rect values to avoid floating point errors.
+          rects.add(
+            Rect.fromLTRB(
+              node.rect.left.roundToDouble(),
+              node.rect.top.roundToDouble(),
+              node.rect.right.roundToDouble(),
+              node.rect.bottom.roundToDouble(),
+            ),
+          );
+          return true;
+        });
         return true;
       });
       return true;
@@ -2127,7 +2232,7 @@ void main() {
   });
 
   testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
       activeColor: Colors.blue,
@@ -2313,7 +2418,7 @@ void main() {
         }),
     );
 
-    const double padding = 4.0;
+    const padding = 4.0;
     // The 1st thumb should at one-third(5 / 15) of the Slider.
     // The 2nd thumb should at (8 / 15) of the Slider.
     // The left of the active track shape is the position of the 1st thumb.
@@ -2335,7 +2440,7 @@ void main() {
   });
 
   testWidgets('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {
-    const RangeValues values = RangeValues(50, 70);
+    const values = RangeValues(50, 70);
 
     // Test default cursor.
     await tester.pumpWidget(
@@ -2396,55 +2501,53 @@ void main() {
     );
   });
 
-  testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (
-    WidgetTester tester,
-  ) async {
-    RangeValues values = const RangeValues(50, 70);
-    const MouseCursor disabledCursor = SystemMouseCursors.basic;
-    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
+  testWidgets('RangeSlider WidgetStateMouseCursor resolves correctly', (WidgetTester tester) async {
+    var values = const RangeValues(20, 75);
+    const MouseCursor systemDefaultCursor = SystemMouseCursors.basic;
+    const MouseCursor disabledCursor = SystemMouseCursors.forbidden;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
+    const MouseCursor hoveredCursor = SystemMouseCursors.grab;
 
     Widget buildFrame({required bool enabled}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Center(
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.forbidden,
-                    child: RangeSlider(
-                      mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((
-                        Set<MaterialState> states,
-                      ) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return disabledCursor;
-                        }
-                        if (states.contains(MaterialState.dragged)) {
-                          return draggedCursor;
-                        }
-                        if (states.contains(MaterialState.hovered)) {
-                          return hoveredCursor;
-                        }
-
-                        return SystemMouseCursors.none;
-                      }),
-                      values: values,
-                      max: 100.0,
-                      onChanged: enabled
-                          ? (RangeValues newValues) {
-                              setState(() {
-                                values = newValues;
-                              });
-                            }
-                          : null,
-                      onChangeStart: enabled ? (RangeValues newValues) {} : null,
-                      onChangeEnd: enabled ? (RangeValues newValues) {} : null,
-                    ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return RangeSlider(
+                        mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.disabled)) {
+                            return disabledCursor;
+                          }
+                          if (states.contains(WidgetState.dragged)) {
+                            return draggedCursor;
+                          }
+                          if (states.contains(WidgetState.hovered)) {
+                            return hoveredCursor;
+                          }
+                          return SystemMouseCursors.click;
+                        }),
+                        values: values,
+                        max: 100.0,
+                        onChanged: enabled
+                            ? (RangeValues newValues) {
+                                setState(() {
+                                  values = newValues;
+                                });
+                              }
+                            : null,
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ),
@@ -2455,30 +2558,46 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
 
+    // System default.
+    await gesture.addPointer(location: Offset.zero);
     await tester.pumpWidget(buildFrame(enabled: false));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
+
+    // Disabled.
+    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider)));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), disabledCursor);
 
+    // Hovered.
     await tester.pumpWidget(buildFrame(enabled: true));
-    await gesture.moveTo(tester.getCenter(find.byType(RangeSlider))); // start hover
-    await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
 
-    await tester.timedDrag(
-      find.byType(RangeSlider),
-      const Offset(20.0, 0.0),
-      const Duration(milliseconds: 100),
-    );
+    // Dragged.
+    await gesture.down(tester.getCenter(find.byType(RangeSlider)));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await tester.pump();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
+
+    // Hovered.
+    await gesture.up();
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), hoveredCursor);
+
+    // System default.
+    await gesture.moveTo(Offset.zero);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), systemDefaultCursor);
   });
 
   testWidgets('RangeSlider can be hovered and has correct hover color', (
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    RangeValues values = const RangeValues(50, 70);
-    final ThemeData theme = ThemeData();
+    var values = const RangeValues(50, 70);
+    final theme = ThemeData();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2539,7 +2658,7 @@ void main() {
   });
 
   testWidgets('RangeSlider can be focused using keyboard focus', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(20, 80);
+    var values = const RangeValues(20, 80);
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2569,9 +2688,9 @@ void main() {
     // Focus on the start thumb
     final Finder rangeSliderFinder = find.byType(RangeSlider);
     expect(rangeSliderFinder, findsOneWidget);
-    final FocusNode startFocusNode =
+    final startFocusNode =
         (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
-    final FocusNode endFocusNode =
+    final endFocusNode =
         (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
 
     startFocusNode.requestFocus();
@@ -2604,9 +2723,9 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    final FocusNode startFocusNode =
+    final startFocusNode =
         (tester.firstState(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
-    final FocusNode endFocusNode =
+    final endFocusNode =
         (tester.firstState(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
     // Focus on the start thumb
     startFocusNode.requestFocus();
@@ -2622,29 +2741,33 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                isFocused: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    isFocused: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2665,29 +2788,33 @@ void main() {
           matchesSemantics(
             children: <Matcher>[
               matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '10%',
-                increasedValue: '15%',
-                decreasedValue: '5%',
-                rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
-              ),
-              matchesSemantics(
-                isEnabled: true,
-                isSlider: true,
-                isFocusable: true,
-                isFocused: true,
-                hasEnabledState: true,
-                hasIncreaseAction: true,
-                hasDecreaseAction: true,
-                value: '30%',
-                increasedValue: '35%',
-                decreasedValue: '25%',
-                rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                children: <Matcher>[
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '10%',
+                    increasedValue: '15%',
+                    decreasedValue: '5%',
+                    rect: const Rect.fromLTRB(75.2, 276.0, 123.2, 324.0),
+                  ),
+                  matchesSemantics(
+                    isEnabled: true,
+                    isSlider: true,
+                    isFocusable: true,
+                    isFocused: true,
+                    hasEnabledState: true,
+                    hasIncreaseAction: true,
+                    hasDecreaseAction: true,
+                    value: '30%',
+                    increasedValue: '35%',
+                    decreasedValue: '25%',
+                    rect: const Rect.fromLTRB(225.6, 276.0, 273.6, 324.0),
+                  ),
+                ],
               ),
             ],
           ),
@@ -2700,8 +2827,8 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    RangeValues values = const RangeValues(50, 70);
-    final ThemeData theme = ThemeData();
+    var values = const RangeValues(50, 70);
+    final theme = ThemeData();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2758,9 +2885,9 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    RangeValues values = const RangeValues(50, 70);
-    const Color hoverColor = Color(0xffff0000);
-    const Color draggedColor = Color(0xff0000ff);
+    var values = const RangeValues(50, 70);
+    const hoverColor = Color(0xffff0000);
+    const draggedColor = Color(0xff0000ff);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2773,13 +2900,13 @@ void main() {
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    overlayColor: MaterialStateProperty.resolveWith<Color?>((
-                      Set<MaterialState> states,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                      Set<WidgetState> states,
                     ) {
-                      if (states.contains(MaterialState.hovered)) {
+                      if (states.contains(WidgetState.hovered)) {
                         return hoverColor;
                       }
-                      if (states.contains(MaterialState.dragged)) {
+                      if (states.contains(WidgetState.dragged)) {
                         return draggedColor;
                       }
 
@@ -2877,8 +3004,8 @@ void main() {
   testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
-    int startFired = 0;
-    int endFired = 0;
+    var startFired = 0;
+    var endFired = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2946,7 +3073,7 @@ void main() {
   testWidgets('Semantic nodes do not throw an error after clearSemantics', (
     WidgetTester tester,
   ) async {
-    SemanticsTester semantics = SemanticsTester(tester);
+    var semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       Directionality(
@@ -2979,12 +3106,9 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
-    final ThemeData baseTheme = ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.blue,
-    );
+    final baseTheme = ThemeData(platform: TargetPlatform.android, primarySwatch: Colors.blue);
     SliderThemeData theme = baseTheme.sliderTheme.copyWith(valueIndicatorColor: Colors.red);
-    RangeValues value = const RangeValues(1, 5);
+    var value = const RangeValues(1, 5);
     Widget buildApp({required SliderThemeData sliderTheme, int? divisions, bool enabled = true}) {
       final ValueChanged<RangeValues>? onChanged = enabled ? (RangeValues d) => value = d : null;
       return MaterialApp(
@@ -3133,9 +3257,9 @@ void main() {
     WidgetTester tester,
   ) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    RangeValues values = const RangeValues(50, 70);
-    const Color hoverColor = Color(0xffff0000);
-    const Color dragColor = Color(0xff0000ff);
+    var values = const RangeValues(50, 70);
+    const hoverColor = Color(0xffff0000);
+    const dragColor = Color(0xff0000ff);
 
     Widget buildApp() {
       return MaterialApp(
@@ -3417,8 +3541,8 @@ void main() {
     WidgetTester tester,
   ) async {
     // The default track left and right padding.
-    const double sliderPadding = 24.0;
-    final ThemeData theme = ThemeData(
+    const sliderPadding = 24.0;
+    final theme = ThemeData(
       sliderTheme: const SliderThemeData(
         // Thumb padding is applied based on the track height.
         trackHeight: 100,
@@ -3456,7 +3580,7 @@ void main() {
   });
 
   testWidgets('Default RangeSlider when year2023 is false', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     final Color activeTrackColor = colorScheme.primary;
     final Color inactiveTrackColor = colorScheme.secondaryContainer;
@@ -3469,7 +3593,7 @@ void main() {
     final Color thumbColor = colorScheme.primary;
     final Color disabledThumbColor = colorScheme.onSurface.withOpacity(0.38);
     final Color valueIndicatorColor = colorScheme.inverseSurface;
-    RangeValues values = const RangeValues(25.0, 75.0);
+    var values = const RangeValues(25.0, 75.0);
     Widget buildApp({int? divisions, bool enabled = true}) {
       final ValueChanged<RangeValues>? onChanged = !enabled
           ? null
@@ -3500,8 +3624,8 @@ void main() {
     final MaterialInkController material = Material.of(tester.element(find.byType(RangeSlider)));
 
     // Test default track shape.
-    const Radius trackOuterCornerRadius = Radius.circular(8.0);
-    const Radius trackInnerCornerRadius = Radius.circular(2.0);
+    const trackOuterCornerRadius = Radius.circular(8.0);
+    const trackInnerCornerRadius = Radius.circular(2.0);
     expect(
       material,
       paints
@@ -3647,11 +3771,10 @@ void main() {
   testWidgets('RangeSlider value indicator text when year2023 is false', (
     WidgetTester tester,
   ) async {
-    const RangeValues values = RangeValues(25.0, 75.0);
-    final List<InlineSpan> log = <InlineSpan>[];
-    final LoggingRangeSliderValueIndicatorShape loggingValueIndicatorShape =
-        LoggingRangeSliderValueIndicatorShape(log);
-    final ThemeData theme = ThemeData(
+    const values = RangeValues(25.0, 75.0);
+    final log = <InlineSpan>[];
+    final loggingValueIndicatorShape = LoggingRangeSliderValueIndicatorShape(log);
+    final theme = ThemeData(
       sliderTheme: SliderThemeData(rangeValueIndicatorShape: loggingValueIndicatorShape),
     );
 
@@ -3687,9 +3810,9 @@ void main() {
   testWidgets('RangeSlider supports DropRangeSliderValueIndicatorShape', (
     WidgetTester tester,
   ) async {
-    const RangeValues values = RangeValues(25.0, 75.0);
-    const Color valueIndicatorColor = Color(0XFFFF0000);
-    final ThemeData theme = ThemeData(
+    const values = RangeValues(25.0, 75.0);
+    const valueIndicatorColor = Color(0XFFFF0000);
+    final theme = ThemeData(
       sliderTheme: const SliderThemeData(
         rangeValueIndicatorShape: DropRangeSliderValueIndicatorShape(),
         valueIndicatorColor: valueIndicatorColor,
@@ -3727,7 +3850,7 @@ void main() {
   testWidgets('Value indicator appears on tap', (WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
-    const RangeValues discreteValues = RangeValues(20, 40);
+    const discreteValues = RangeValues(20, 40);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -3756,6 +3879,21 @@ void main() {
         ..path(color: sliderTheme.valueIndicatorColor)
         ..paragraph(),
     );
+  });
+
+  testWidgets('RangeSlider does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox.shrink(
+              child: RangeSlider(values: const RangeValues(0, 1), onChanged: (_) {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RangeSlider)), Size.zero);
   });
 }
 

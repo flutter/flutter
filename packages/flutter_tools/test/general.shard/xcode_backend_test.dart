@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -53,6 +55,7 @@ void main() {
             '--DartDefines=',
             '--ExtraFrontEndOptions=',
             '-dSrcRoot=',
+            '-dXcodeBuildScript=build',
             '-dTargetDeviceOSVersion=',
             'debug_ios_bundle_flutter_assets',
           ],
@@ -103,7 +106,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -128,6 +130,7 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
+                '-dXcodeBuildScript=build',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 if (platform == TargetPlatform.macos) ...<String>[
                   '--build-inputs=/Flutter/ephemeral/FlutterInputs.xcfilelist',
@@ -191,7 +194,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -217,6 +219,7 @@ void main() {
                 '--DartDefines=$dartDefines',
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
+                '-dXcodeBuildScript=build',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
@@ -234,144 +237,13 @@ void main() {
         expect(context.stdout, contains('built and packaged successfully.'));
         expect(context.stderr, isEmpty);
       });
-
-      test(
-        'exits with useful error message when missing FLUTTER_CLI_BUILD_MODE during archive',
-        () {
-          final Directory buildDir = fileSystem.directory('/path/to/builds')
-            ..createSync(recursive: true);
-          final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-            ..createSync(recursive: true);
-
-          const buildMode = 'Release';
-
-          final context = TestContext(
-            <String>['build', platformName],
-            <String, String>{
-              'ACTION': 'install',
-              'CONFIGURATION': buildMode,
-              'BUILT_PRODUCTS_DIR': buildDir.path,
-              'FLUTTER_ROOT': flutterRoot.path,
-              'INFOPLIST_PATH': 'Info.plist',
-            },
-            commands: <FakeCommand>[],
-            fileSystem: fileSystem,
-          );
-          expect(() => context.run(), throwsException);
-          expect(
-            context.stderr,
-            contains(
-              'error: Your Flutter build settings are outdated. '
-              'Please run "flutter build ${platform.name} --config-only --release" '
-              'in your Flutter project and try again.',
-            ),
-          );
-        },
-      );
-
-      test('exits with useful error message when build mode mismatches during archive', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'install',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-        );
-        expect(() => context.run(), throwsException);
-        expect(
-          context.stderr,
-          contains(
-            'error: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when missing FLUTTER_CLI_BUILD_MODE', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'build',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter build settings are outdated. '
-            'Please run "flutter build ${platform.name} --config-only --release" '
-            'in your Flutter project and try again.',
-          ),
-        );
-      });
-
-      test('prints useful warning message when build mode mismatches', () {
-        final Directory buildDir = fileSystem.directory('/path/to/builds')
-          ..createSync(recursive: true);
-        final Directory flutterRoot = fileSystem.directory('/path/to/flutter')
-          ..createSync(recursive: true);
-
-        const buildMode = 'Release';
-
-        final context = TestContext(
-          <String>['build', platformName],
-          <String, String>{
-            'ACTION': 'debug',
-            'CONFIGURATION': buildMode,
-            'BUILT_PRODUCTS_DIR': buildDir.path,
-            'FLUTTER_ROOT': flutterRoot.path,
-            'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': 'debug',
-          },
-          commands: <FakeCommand>[],
-          fileSystem: fileSystem,
-          fakeProcessManager: FakeProcessManager.any(),
-        );
-        context.run();
-        expect(
-          context.stderr,
-          contains(
-            'warning: Your Flutter project is currently configured for debug mode. '
-            'Please run `flutter build ${platform.name} --config-only --release` '
-            'in your Flutter project to update your settings.',
-          ),
-        );
-      });
     });
   }
 
   group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
-      final Directory buildDir = fileSystem.directory('/path/to/builds');
-      buildDir.createSync(recursive: true);
+      final Directory buildDir = fileSystem.directory('/path/to/builds')
+        ..createSync(recursive: true);
       final context = TestContext(
         <String>['test_vm_service_bonjour_service'],
         <String, String>{
@@ -389,6 +261,154 @@ void main() {
         ),
       );
     });
+
+    for (final verbose in <bool>[true, false]) {
+      test(
+        'Missing NSBonjourServices key in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSBonjourServices';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices',
+                  '-json',
+                  '["_dartVmService._tcp"]',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsStringSync(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+
+      test(
+        'Missing NSLocalNetworkUsageDescription in Info.plist should not fail Xcode compilation under ${verbose ? 'verbose' : 'non-verbose'} mode',
+        () {
+          final Directory buildDir = fileSystem.directory('/path/to/builds')
+            ..createSync(recursive: true);
+          final File infoPlist = buildDir.childFile('Info.plist')..createSync();
+          const plutilErrorMessage =
+              'Could not extract value, error: No value at that key path or invalid key path: NSLocalNetworkUsageDescription';
+          final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+          final context = TestContext(
+            <String>['test_vm_service_bonjour_service'],
+            <String, String>{
+              'CONFIGURATION': 'Debug',
+              'BUILT_PRODUCTS_DIR': buildDir.path,
+              'INFOPLIST_PATH': 'Info.plist',
+              if (verbose) 'VERBOSE_SCRIPT_LOGGING': 'YES',
+            },
+            commands: <FakeCommand>[
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSBonjourServices',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSBonjourServices.0',
+                  '-string',
+                  '_dartVmService._tcp',
+                  infoPlist.path,
+                ],
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-extract',
+                  'NSLocalNetworkUsageDescription',
+                  'xml1',
+                  '-o',
+                  '-',
+                  infoPlist.path,
+                ],
+                exitCode: 1,
+                stderr: plutilErrorMessage,
+              ),
+              FakeCommand(
+                command: <String>[
+                  'plutil',
+                  '-insert',
+                  'NSLocalNetworkUsageDescription',
+                  '-string',
+                  'Allow Flutter tools on your computer to connect and debug your application. This prompt will not appear on release builds.',
+                  infoPlist.path,
+                ],
+              ),
+            ],
+            fileSystem: fileSystem,
+            scriptOutputStreamFile: pipe,
+          )..run();
+
+          expect(context.stderr, isNot(startsWith('error: ')));
+          expect(pipe.readAsString(), isNot(contains(plutilErrorMessage)));
+          expect(context.stderr, isNot(contains(plutilErrorMessage)));
+          if (verbose) {
+            expect(context.stdout, contains(plutilErrorMessage));
+          } else {
+            expect(context.stdout, isNot(contains(plutilErrorMessage)));
+          }
+        },
+      );
+    }
   });
 
   for (final platform in platforms) {
@@ -409,7 +429,6 @@ void main() {
             'BUILT_PRODUCTS_DIR': buildDir.path,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -432,7 +451,7 @@ void main() {
                 '--ExtraGenSnapshotOptions=',
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
-                '-dPreBuildAction=PrepareFramework',
+                '-dXcodeBuildScript=prepare',
                 '-dSrcRoot=',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
                 'debug_unpack_$platformName',
@@ -461,7 +480,6 @@ void main() {
             'CONFIGURATION': buildMode,
             'FLUTTER_ROOT': flutterRoot.path,
             'INFOPLIST_PATH': 'Info.plist',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -486,8 +504,8 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
+                '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
               ],
             ),
@@ -541,7 +559,6 @@ void main() {
             'TREE_SHAKE_ICONS': treeShake,
             'SRCROOT': srcRoot,
             'TARGET_DEVICE_OS_VERSION': iOSVersion,
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -567,11 +584,11 @@ void main() {
                 '--DartDefines=$dartDefines',
                 '--ExtraFrontEndOptions=$extraFrontEndOptions',
                 '-dSrcRoot=$srcRoot',
+                '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>[
                   '-dTargetDeviceOSVersion=$iOSVersion',
                   '-dCodesignIdentity=$expandedCodeSignIdentity',
                 ],
-                '-dPreBuildAction=PrepareFramework',
                 'release_unpack_$platformName',
               ],
             ),
@@ -599,7 +616,6 @@ void main() {
             'ARCHS': 'arm64 x86_64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -624,8 +640,8 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
+                '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
               ],
             ),
@@ -654,7 +670,6 @@ void main() {
             'ARCHS': 'arm64',
             'ONLY_ACTIVE_ARCH': 'YES',
             'NATIVE_ARCH': 'x86_64',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -679,8 +694,8 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
+                '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
               ],
             ),
@@ -708,7 +723,6 @@ void main() {
             'INFOPLIST_PATH': 'Info.plist',
             'ARCHS': 'arm64 x86_64',
             'NATIVE_ARCH': 'arm64e',
-            'FLUTTER_CLI_BUILD_MODE': buildMode.toLowerCase(),
           },
           commands: <FakeCommand>[
             FakeCommand(
@@ -733,8 +747,8 @@ void main() {
                 '--DartDefines=',
                 '--ExtraFrontEndOptions=',
                 '-dSrcRoot=',
+                '-dXcodeBuildScript=prepare',
                 if (platform == TargetPlatform.ios) ...<String>['-dTargetDeviceOSVersion='],
-                '-dPreBuildAction=PrepareFramework',
                 'debug_unpack_$platformName',
               ],
             ),
@@ -747,277 +761,457 @@ void main() {
     });
   }
 
-  test('embed for iOS copies frameworks', () {
-    final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug-iphoneos')
-      ..createSync(recursive: true);
-    final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug-iphoneos')
-      ..createSync(recursive: true);
-    const appPath = '/path/to/my_flutter_app';
-    const platformDirPath = '$appPath/ios';
-    const frameworksFolderPath = 'Runner.app/Frameworks';
-    const flutterBuildDir = 'build';
-    final Directory nativeAssetsDir = fileSystem.directory(
-      '/path/to/my_flutter_app/$flutterBuildDir/native_assets/ios/',
-    );
-    nativeAssetsDir.createSync(recursive: true);
-    const ffiPackageName = 'package_a';
-    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
-      ..createSync();
-    nativeAssetsDir.childFile('random.txt').createSync();
-    const infoPlistPath = 'Runner.app/Info.plist';
-    final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
-    infoPlist.createSync(recursive: true);
-    const buildMode = 'Debug';
-    final testContext = TestContext(
-      <String>['embed_and_thin', 'ios'],
-      <String, String>{
-        'BUILT_PRODUCTS_DIR': buildDir.path,
-        'CONFIGURATION': buildMode,
-        'INFOPLIST_PATH': infoPlistPath,
-        'SOURCE_ROOT': platformDirPath,
-        'FLUTTER_APPLICATION_PATH': appPath,
-        'FLUTTER_BUILD_DIR': flutterBuildDir,
-        'TARGET_BUILD_DIR': targetBuildDir.path,
-        'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
-        'EXPANDED_CODE_SIGN_IDENTITY': '12312313',
-      },
-      commands: <FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'mkdir',
-            '-p',
-            '--',
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            buildDir.childDirectory('App.framework').path,
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            buildDir.childDirectory('Flutter.framework').path,
-            '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            '--filter',
-            '- native_assets.yaml',
-            '--filter',
-            '- native_assets.json',
-            ffiPackageDir.path,
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'plutil',
-            '-extract',
-            'NSBonjourServices',
-            'xml1',
-            '-o',
-            '-',
-            infoPlist.path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'plutil',
-            '-insert',
-            'NSBonjourServices.0',
-            '-string',
-            '_dartVmService._tcp',
-            infoPlist.path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'plutil',
-            '-extract',
-            'NSLocalNetworkUsageDescription',
-            'xml1',
-            '-o',
-            '-',
-            infoPlist.path,
-          ],
-        ),
-      ],
-      fileSystem: fileSystem,
-    )..run();
-
-    expect(testContext.processManager.hasRemainingExpectations, isFalse);
-  });
-
-  test('embed for macos copies and codesigns frameworks', () {
-    final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug')
-      ..createSync(recursive: true);
-    final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug')
-      ..createSync(recursive: true);
-    const appPath = '/path/to/my_flutter_app';
-    const platformDirPath = '$appPath/macos';
-    const frameworksFolderPath = 'Runner.app/Frameworks';
-    const flutterBuildDir = 'build';
-    final Directory nativeAssetsDir = fileSystem.directory(
-      '/path/to/my_flutter_app/$flutterBuildDir/native_assets/macos/',
-    );
-    nativeAssetsDir.createSync(recursive: true);
-    const ffiPackageName = 'package_a';
-    final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
-      ..createSync();
-    nativeAssetsDir.childFile('random.txt').createSync();
-    const infoPlistPath = 'Runner.app/Info.plist';
-    final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
-    infoPlist.createSync(recursive: true);
-    const buildMode = 'Debug';
-    const codesignIdentity = '12312313';
-    final testContext = TestContext(
-      <String>['embed_and_thin', 'macos'],
-      <String, String>{
-        'BUILT_PRODUCTS_DIR': buildDir.path,
-        'CONFIGURATION': buildMode,
-        'INFOPLIST_PATH': infoPlistPath,
-        'SOURCE_ROOT': platformDirPath,
-        'FLUTTER_APPLICATION_PATH': appPath,
-        'FLUTTER_BUILD_DIR': flutterBuildDir,
-        'TARGET_BUILD_DIR': targetBuildDir.path,
-        'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
-        'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
-      },
-      commands: <FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            'mkdir',
-            '-p',
-            '--',
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            buildDir.childDirectory('App.framework').path,
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            '--filter',
-            '- Headers',
-            '--filter',
-            '- Modules',
-            buildDir.childDirectory('FlutterMacOS.framework').path,
-            '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'codesign',
-            '--force',
-            '--verbose',
-            '--sign',
-            codesignIdentity,
-            '--',
-            targetBuildDir.childDirectory(frameworksFolderPath).childFile('App.framework/App').path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'codesign',
-            '--force',
-            '--verbose',
-            '--sign',
-            codesignIdentity,
-            '--',
-            targetBuildDir
-                .childDirectory(frameworksFolderPath)
-                .childFile('FlutterMacOS.framework/FlutterMacOS')
-                .path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'rsync',
-            '-8',
-            '-av',
-            '--delete',
-            '--filter',
-            '- .DS_Store',
-            '--filter',
-            '- native_assets.yaml',
-            '--filter',
-            '- native_assets.json',
-            ffiPackageDir.path,
-            targetBuildDir.childDirectory(frameworksFolderPath).path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'codesign',
-            '--force',
-            '--verbose',
-            '--sign',
-            codesignIdentity,
-            '--',
-            targetBuildDir
-                .childDirectory(frameworksFolderPath)
-                .childFile('$ffiPackageName.framework/$ffiPackageName')
-                .path,
-          ],
-        ),
-      ],
-      fileSystem: fileSystem,
-    )..run();
-
-    expect(testContext.processManager.hasRemainingExpectations, isFalse);
-  });
-
-  group('parseFrameworkNameFromDirectory', () {
-    test('Non-framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(fileSystem.directory('path/to/directory')),
-        isNull,
+  group('embed for', () {
+    test('iOS copies frameworks', () {
+      final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug-iphoneos')
+        ..createSync(recursive: true);
+      final Directory targetBuildDir = fileSystem.directory(
+        '/path/to/Build/Products/Debug-iphoneos',
+      )..createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/ios';
+      const frameworksFolderPath = 'Runner.app/Frameworks';
+      final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+        '$frameworksFolderPath/App.framework/flutter_assets',
+      )..createSync(recursive: true);
+      const ffiPackageName = 'package_a';
+      flutterAssetsDir
+          .childFile('NativeAssetsManifest.json')
+          .writeAsStringSync(
+            jsonEncode({
+              'format-version': [1, 0, 0],
+              'native-assets': {
+                'ios_arm64': {
+                  'package:$ffiPackageName/native_asset.dart': [
+                    'absolute',
+                    '$ffiPackageName.framework/$ffiPackageName',
+                  ],
+                },
+              },
+            }),
+          );
+      const flutterBuildDir = 'build';
+      final Directory nativeAssetsDir = fileSystem.directory(
+        '$appPath/$flutterBuildDir/native_assets/ios/',
       );
+      nativeAssetsDir.createSync(recursive: true);
+      final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
+        ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
+      nativeAssetsDir.childFile('random.txt').createSync();
+      // In addition to the ffiPackageName framework, create an additional unrelated framework in
+      // the same directory. It should not get copied since it is not referenced in the manifest.
+      final Directory unrelatedFramework = nativeAssetsDir.childDirectory('unrelated.framework')
+        ..createSync();
+      unrelatedFramework.childFile('random.txt').createSync();
+
+      const infoPlistPath = 'Runner.app/Info.plist';
+      final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
+      infoPlist.createSync(recursive: true);
+      const buildMode = 'Debug';
+      final testContext = TestContext(
+        <String>['embed_and_thin', 'ios'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': flutterBuildDir,
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'EXPANDED_CODE_SIGN_IDENTITY': '12312313',
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'mkdir',
+              '-p',
+              '--',
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('Flutter.framework').path,
+              '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              // We should copy $ffiPackageName.framework, but not the unrelated framework path.
+              ffiPackageDir.path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-extract',
+              'NSBonjourServices',
+              'xml1',
+              '-o',
+              '-',
+              infoPlist.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-insert',
+              'NSBonjourServices.0',
+              '-string',
+              '_dartVmService._tcp',
+              infoPlist.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'plutil',
+              '-extract',
+              'NSLocalNetworkUsageDescription',
+              'xml1',
+              '-o',
+              '-',
+              infoPlist.path,
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(testContext.processManager.hasRemainingExpectations, isFalse);
     });
 
-    test('Framework directory', () {
-      expect(
-        Context.parseFrameworkNameFromDirectory(
-          fileSystem.directory('path/to/directory.framework'),
-        ),
-        'directory',
+    test('macos copies and codesigns frameworks', () {
+      final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+        ..createSync(recursive: true);
+      final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+        ..createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/macos';
+      const frameworksFolderPath = 'Runner.app/Frameworks';
+      final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+        '$frameworksFolderPath/App.framework/Resources/flutter_assets',
+      )..createSync(recursive: true);
+      const ffiPackageName = 'package_a';
+      flutterAssetsDir
+          .childFile('NativeAssetsManifest.json')
+          .writeAsStringSync(
+            jsonEncode({
+              'format-version': [1, 0, 0],
+              'native-assets': {
+                'ios_arm64': {
+                  'package:$ffiPackageName/native_asset.dart': [
+                    'absolute',
+                    '$ffiPackageName.framework/$ffiPackageName',
+                  ],
+                },
+              },
+            }),
+          );
+      const flutterBuildDir = 'build';
+      final Directory nativeAssetsDir = fileSystem.directory(
+        '/path/to/my_flutter_app/$flutterBuildDir/native_assets/macos/',
       );
+      nativeAssetsDir.createSync(recursive: true);
+      final Directory ffiPackageDir = nativeAssetsDir.childDirectory('$ffiPackageName.framework')
+        ..createSync();
+      nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').createSync();
+      nativeAssetsDir.childFile('random.txt').createSync();
+      // In addition to the ffiPackageName framework, create an additional unrelated framework in
+      // the same directory. It should not get copied since it is not referenced in the manifest.
+      final Directory unrelatedFramework = nativeAssetsDir.childDirectory('unrelated.framework')
+        ..createSync();
+      unrelatedFramework.childFile('random.txt').createSync();
+      const infoPlistPath = 'Runner.app/Info.plist';
+      final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
+      infoPlist.createSync(recursive: true);
+      const buildMode = 'Debug';
+      const codesignIdentity = '12312313';
+      final testContext = TestContext(
+        <String>['embed_and_thin', 'macos'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': flutterBuildDir,
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'mkdir',
+              '-p',
+              '--',
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '--filter',
+              '- Headers',
+              '--filter',
+              '- Modules',
+              buildDir.childDirectory('FlutterMacOS.framework').path,
+              '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+            ],
+          ),
+
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('FlutterMacOS.framework/FlutterMacOS')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              // We should copy $ffiPackageName.framework, but not the unrelated framework path.
+              ffiPackageDir.path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('$ffiPackageName.framework/$ffiPackageName')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              nativeAssetsDir.childDirectory('$ffiPackageName.framework.dSYM').path,
+              '${buildDir.path}/',
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      )..run();
+
+      expect(testContext.processManager.hasRemainingExpectations, isFalse);
+    });
+
+    test('reports error message for invalid native assets manifest', () {
+      final Directory buildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+        ..createSync(recursive: true);
+      final Directory targetBuildDir = fileSystem.directory('/path/to/Build/Products/Debug')
+        ..createSync(recursive: true);
+      const appPath = '/path/to/my_flutter_app';
+      const platformDirPath = '$appPath/macos';
+      const frameworksFolderPath = 'Runner.app/Frameworks';
+      final Directory flutterAssetsDir = targetBuildDir.childDirectory(
+        '$frameworksFolderPath/App.framework/Resources/flutter_assets',
+      )..createSync(recursive: true);
+      flutterAssetsDir
+          .childFile('NativeAssetsManifest.json')
+          .writeAsStringSync(
+            jsonEncode({
+              'format-version': [1, 0, 0],
+              'native-assets': {'ios_arm64': 'invalid content'},
+            }),
+          );
+      const flutterBuildDir = 'build';
+
+      const infoPlistPath = 'Runner.app/Info.plist';
+      final File infoPlist = fileSystem.file('${buildDir.path}/$infoPlistPath');
+      infoPlist.createSync(recursive: true);
+      const buildMode = 'Debug';
+      const codesignIdentity = '12312313';
+      final testContext = TestContext(
+        <String>['embed_and_thin', 'macos'],
+        <String, String>{
+          'BUILT_PRODUCTS_DIR': buildDir.path,
+          'CONFIGURATION': buildMode,
+          'INFOPLIST_PATH': infoPlistPath,
+          'SOURCE_ROOT': platformDirPath,
+          'FLUTTER_APPLICATION_PATH': appPath,
+          'FLUTTER_BUILD_DIR': flutterBuildDir,
+          'TARGET_BUILD_DIR': targetBuildDir.path,
+          'FRAMEWORKS_FOLDER_PATH': frameworksFolderPath,
+          'EXPANDED_CODE_SIGN_IDENTITY': codesignIdentity,
+        },
+        commands: <FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'mkdir',
+              '-p',
+              '--',
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              buildDir.childDirectory('App.framework').path,
+              targetBuildDir.childDirectory(frameworksFolderPath).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('App.framework/App')
+                  .path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-8',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store',
+              '--filter',
+              '- Headers',
+              '--filter',
+              '- Modules',
+              buildDir.childDirectory('FlutterMacOS.framework').path,
+              '${targetBuildDir.childDirectory(frameworksFolderPath).path}/',
+            ],
+          ),
+
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--verbose',
+              '--sign',
+              codesignIdentity,
+              '--',
+              targetBuildDir
+                  .childDirectory(frameworksFolderPath)
+                  .childFile('FlutterMacOS.framework/FlutterMacOS')
+                  .path,
+            ],
+          ),
+        ],
+        fileSystem: fileSystem,
+      );
+
+      expect(
+        testContext.run,
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'toString()',
+            contains('App exited with code -1'),
+          ),
+        ),
+      );
+
+      expect(testContext.processManager.hasRemainingExpectations, isFalse);
+      expect(testContext.stderr, contains('error: Failed to embed native assets:'));
     });
   });
 }
@@ -1040,8 +1234,8 @@ class TestContext extends Context {
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
 
-  var stdout = '';
-  var stderr = '';
+  String stdout = '';
+  String stderr = '';
 
   @override
   bool existsFile(String path) {
@@ -1054,13 +1248,12 @@ class TestContext extends Context {
   }
 
   @override
-  ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
-  }) {
+  File fileFromPath(String path) {
+    return fileSystem.file(path);
+  }
+
+  @override
+  ProcessResult runSyncProcess(String bin, List<String> args, {String? workingDirectory}) {
     return processManager.runSync(
       <dynamic>[bin, ...args],
       workingDirectory: workingDirectory,

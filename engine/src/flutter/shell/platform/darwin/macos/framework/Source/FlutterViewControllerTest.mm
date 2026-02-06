@@ -939,7 +939,8 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   CGEventRef cgEventDiscreteShift =
       CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
   CGEventSetType(cgEventDiscreteShift, kCGEventScrollWheel);
-  CGEventSetFlags(cgEventDiscreteShift, kCGEventFlagMaskShift | flutter::kModifierFlagShiftLeft);
+  CGEventSetFlags(cgEventDiscreteShift, static_cast<uint64_t>(kCGEventFlagMaskShift) |
+                                            static_cast<uint64_t>(flutter::kModifierFlagShiftLeft));
   CGEventSetIntegerValueField(cgEventDiscreteShift, kCGScrollWheelEventIsContinuous, 0);
   CGEventSetIntegerValueField(cgEventDiscreteShift, kCGScrollWheelEventDeltaAxis2,
                               0);  // scroll_delta_x

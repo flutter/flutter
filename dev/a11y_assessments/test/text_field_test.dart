@@ -59,7 +59,7 @@ void main() {
 
   testWidgets('text field wrapper exists', (WidgetTester tester) async {
     await pumpsUseCase(tester, TextFieldUseCase());
-    const String textFieldLabel = 'Input field with suffix @gmail.com';
+    const textFieldLabel = 'Input field with suffix @gmail.com';
 
     final Finder semanticsWidgets = find.bySemanticsLabel(RegExp(textFieldLabel));
     expect(semanticsWidgets, findsExactly(2));

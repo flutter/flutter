@@ -31,6 +31,7 @@ void main() {
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
       '',
       '',
+      '',
       1,
       1,
       <String, String>{},
@@ -55,6 +56,7 @@ void main() {
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
       '',
       '',
+      '',
       1,
       1,
       <String, String>{},
@@ -74,6 +76,7 @@ void main() {
     );
 
     final ExpressionCompilationResult result = await expressionCompiler.compileExpressionToJs(
+      '',
       '',
       '',
       1,
@@ -105,6 +108,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   @override
   Future<CompilerOutput?> compileExpressionToJs(
     String libraryUri,
+    String scriptUri,
     int line,
     int column,
     Map<String, String> jsModules,

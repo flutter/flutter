@@ -27,7 +27,7 @@ struct Vector3 {
     Scalar e[3];
   };
 
-  constexpr Vector3(){};
+  constexpr Vector3() {};
 
   constexpr Vector3(const Color& c) : x(c.red), y(c.green), z(c.blue) {}
 

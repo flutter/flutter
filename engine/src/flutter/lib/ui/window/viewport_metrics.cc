@@ -18,13 +18,20 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
+      physical_min_width_constraint(p_physical_width),
+      physical_max_width_constraint(p_physical_width),
+      physical_min_height_constraint(p_physical_height),
+      physical_max_height_constraint(p_physical_height),
       physical_touch_slop(p_physical_touch_slop),
       display_id(p_display_id) {}
-
 ViewportMetrics::ViewportMetrics(
     double p_device_pixel_ratio,
     double p_physical_width,
     double p_physical_height,
+    double p_physical_min_width_constraint,
+    double p_physical_max_width_constraint,
+    double p_physical_min_height_constraint,
+    double p_physical_max_height_constraint,
     double p_physical_padding_top,
     double p_physical_padding_right,
     double p_physical_padding_bottom,
@@ -41,10 +48,18 @@ ViewportMetrics::ViewportMetrics(
     const std::vector<double>& p_physical_display_features_bounds,
     const std::vector<int>& p_physical_display_features_type,
     const std::vector<int>& p_physical_display_features_state,
-    size_t p_display_id)
+    size_t p_display_id,
+    double p_physical_display_corner_radius_top_left,
+    double p_physical_display_corner_radius_top_right,
+    double p_physical_display_corner_radius_bottom_right,
+    double p_physical_display_corner_radius_bottom_left)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
+      physical_min_width_constraint(p_physical_min_width_constraint),
+      physical_max_width_constraint(p_physical_max_width_constraint),
+      physical_min_height_constraint(p_physical_min_height_constraint),
+      physical_max_height_constraint(p_physical_max_height_constraint),
       physical_padding_top(p_physical_padding_top),
       physical_padding_right(p_physical_padding_right),
       physical_padding_bottom(p_physical_padding_bottom),
@@ -63,12 +78,24 @@ ViewportMetrics::ViewportMetrics(
       physical_display_features_bounds(p_physical_display_features_bounds),
       physical_display_features_type(p_physical_display_features_type),
       physical_display_features_state(p_physical_display_features_state),
-      display_id(p_display_id) {}
+      display_id(p_display_id),
+      physical_display_corner_radius_top_left(
+          p_physical_display_corner_radius_top_left),
+      physical_display_corner_radius_top_right(
+          p_physical_display_corner_radius_top_right),
+      physical_display_corner_radius_bottom_right(
+          p_physical_display_corner_radius_bottom_right),
+      physical_display_corner_radius_bottom_left(
+          p_physical_display_corner_radius_bottom_left) {}
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
          a.physical_width == b.physical_width &&
          a.physical_height == b.physical_height &&
+         a.physical_min_width_constraint == b.physical_min_width_constraint &&
+         a.physical_max_width_constraint == b.physical_max_width_constraint &&
+         a.physical_min_height_constraint == b.physical_min_height_constraint &&
+         a.physical_max_height_constraint == b.physical_max_height_constraint &&
          a.physical_padding_top == b.physical_padding_top &&
          a.physical_padding_right == b.physical_padding_right &&
          a.physical_padding_bottom == b.physical_padding_bottom &&
@@ -91,7 +118,15 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
          a.physical_display_features_type == b.physical_display_features_type &&
          a.physical_display_features_state ==
              b.physical_display_features_state &&
-         a.display_id == b.display_id;
+         a.display_id == b.display_id &&
+         a.physical_display_corner_radius_top_left ==
+             b.physical_display_corner_radius_top_left &&
+         a.physical_display_corner_radius_top_right ==
+             b.physical_display_corner_radius_top_right &&
+         a.physical_display_corner_radius_bottom_right ==
+             b.physical_display_corner_radius_bottom_right &&
+         a.physical_display_corner_radius_bottom_left ==
+             b.physical_display_corner_radius_bottom_left;
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
@@ -99,6 +134,10 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << "W " << a.physical_height << "H] " << "Padding: ["
      << a.physical_padding_top << "T " << a.physical_padding_right << "R "
      << a.physical_padding_bottom << "B " << a.physical_padding_left << "L] "
+     << "View Constraints: [" << a.physical_min_width_constraint << "-"
+     << a.physical_max_width_constraint << "W "
+     << a.physical_min_height_constraint << "-"
+     << a.physical_max_height_constraint << "H] "
      << "Insets: [" << a.physical_view_inset_top << "T "
      << a.physical_view_inset_right << "R " << a.physical_view_inset_bottom
      << "B " << a.physical_view_inset_left << "L] " << "Gesture Insets: ["
@@ -107,7 +146,11 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << a.physical_system_gesture_inset_bottom << "B "
      << a.physical_system_gesture_inset_left << "L] "
      << "Display Features: " << a.physical_display_features_type.size() << " "
-     << "Display ID: " << a.display_id;
+     << "Display ID: " << a.display_id << " "
+     << "Corner Radii: [" << a.physical_display_corner_radius_top_left << "TL "
+     << a.physical_display_corner_radius_top_right << "TR "
+     << a.physical_display_corner_radius_bottom_right << "BR "
+     << a.physical_display_corner_radius_bottom_left << "BL]";
   return os;
 }
 

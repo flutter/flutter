@@ -4,11 +4,12 @@
 
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -18,6 +19,7 @@ import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
 import '../../web/compile.dart';
@@ -29,6 +31,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'localizations.dart';
+import 'native_assets.dart';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -360,7 +363,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
     if (compilerConfig.dryRun) {
-      _handleDryRunResult(environment, runResult);
+      await _handleDryRunResult(environment, runResult);
     }
   }
 
@@ -403,12 +406,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
         ];
 
-  void _handleDryRunResult(Environment environment, RunResult runResult) {
+  @visibleForTesting
+  Random? dryRunRandom;
+
+  Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    final String result;
-    String? findingsSummary;
+    String? result;
+    final Map<String, String> findingsInfo = {};
 
     if (exitCode != 0 && exitCode != 254) {
       environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
@@ -437,16 +443,98 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       result = 'findings';
-      findingsSummary = RegExp(
-        r'\(([0-9]+)\)',
-      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
-    } else {
-      result = 'unknown';
+      final Map<String, Set<Uri>> errorCodeToImportUris = {};
+      for (final String line in stdout.split('\n')) {
+        final Uri uri = Uri.parse(line.split(' ')[0]);
+        final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
+        if (errorCode != null) {
+          (errorCodeToImportUris[errorCode] ??= {}).add(uri);
+        }
+      }
+
+      final PackageConfig packageConfigPackages;
+      try {
+        packageConfigPackages = await loadPackageConfigWithLogging(
+          findPackageConfigFileOrDefault(environment.projectDir),
+          logger: environment.logger,
+        );
+      } on ToolExit {
+        _analytics.send(
+          Event.flutterWasmDryRunPackage(
+            result: result,
+            exitCode: exitCode,
+            findingsInfo: {
+              'error': 'packageConfigNotLoaded',
+              'findings': errorCodeToImportUris.keys.join(','),
+            },
+          ),
+        );
+        return;
+      }
+
+      final Map<String, String> hostedPackages = {};
+      final Set<String> privatePackages = {};
+      for (final Package package in packageConfigPackages.packages) {
+        final String packageName = package.name;
+        if (package.root.toString().contains('hosted/pub.dev')) {
+          final String? packageVersion = RegExp(
+            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
+          ).firstMatch(package.root.toString())?.group(1);
+          hostedPackages[packageName] = packageVersion ?? '?';
+        } else {
+          privatePackages.add(packageName);
+        }
+      }
+
+      errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
+        final Set<String> hostedPackageFindings = {};
+        // Randomize the URI order so that we
+        final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
+        var hostApp = false;
+        var privatePackage = false;
+        for (final uri in urisList) {
+          final String packageName = uri.pathSegments.first;
+          final String? hostedPackageVersion = hostedPackages[packageName];
+          if (uri.scheme == 'package') {
+            if (hostedPackageVersion != null) {
+              hostedPackageFindings.add('$packageName:$hostedPackageVersion');
+              continue;
+            } else if (privatePackages.contains(packageName)) {
+              privatePackage = true;
+              continue;
+            }
+          }
+          hostApp = true;
+        }
+        final String? hpHint = switch ((hostApp, privatePackage)) {
+          (true, true) => '-hp',
+          (true, false) => '-h',
+          (false, true) => '-p',
+          _ => null,
+        };
+
+        final findingsBuffer = StringBuffer(hpHint ?? '');
+        for (final hostedPackageFinding in hostedPackageFindings) {
+          // Try to fit as many findings as we can into the 100 character limit imposed
+          // by google analytics.
+          final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$hostedPackageFinding';
+          if (findingsBuffer.length + pendingString.length <= 100) {
+            findingsBuffer.write(pendingString);
+          }
+        }
+        findingsInfo['E$errorCode'] = findingsBuffer.toString();
+      });
     }
+    result ??= 'unknown';
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
-      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+      Event.flutterWasmDryRunPackage(
+        result: result,
+        exitCode: exitCode,
+        findingsInfo: findingsInfo,
+      ),
     );
   }
 }
@@ -478,7 +566,11 @@ class WebReleaseBundle extends Target {
   String get name => 'web_release_bundle';
 
   @override
-  List<Target> get dependencies => <Target>[...compileTargets, templatedFilesTarget];
+  List<Target> get dependencies => <Target>[
+    ...compileTargets,
+    templatedFilesTarget,
+    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+  ];
 
   Iterable<String> get buildPatternStems =>
       compileTargets.expand((Dart2WebTarget target) => target.buildPatternStems);
@@ -518,9 +610,11 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
+      dartHookResult: dartHookResult,
       targetPlatform: TargetPlatform.web_javascript,
       buildMode: buildMode,
     );
@@ -661,6 +755,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
         final String indexHtmlContent = indexHtmlTemplate.withSubstitutions(
           baseHref: environment.defines[kBaseHref] ?? '/',
+          staticAssetsUrl: environment.defines[kStaticAssetsUrl] ?? '/',
           serviceWorkerVersion: serviceWorkerVersion,
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
@@ -799,38 +894,15 @@ class WebServiceWorker extends Target {
         )
         .toList();
 
-    final urlToHash = <String, String>{};
-    for (final file in contents) {
-      // Do not force caching of source maps.
-      if (file.path.endsWith('main.dart.js.map') || file.path.endsWith('.part.js.map')) {
-        continue;
-      }
-      final url = environment.fileSystem.path
-          .toUri(environment.fileSystem.path.relative(file.path, from: environment.outputDir.path))
-          .toString();
-      final hash = md5.convert(await file.readAsBytes()).toString();
-      urlToHash[url] = hash;
-      // Add an additional entry for the base URL.
-      if (url == 'index.html') {
-        urlToHash['/'] = hash;
-      }
-    }
-
     final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
     final depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
       Artifact.flutterToolsFileGenerators,
     );
-    final String serviceWorker = generateServiceWorker(fileGeneratorsPath, urlToHash, <String>[
-      'main.dart.js',
-      if (compileConfigs.any(
-        (WebCompilerConfig config) => config is WasmCompilerConfig && !config.dryRun,
-      )) ...<String>['main.dart.wasm', 'main.dart.mjs'],
-      'index.html',
-      'flutter_bootstrap.js',
-      if (urlToHash.containsKey('assets/AssetManifest.bin.json')) 'assets/AssetManifest.bin.json',
-      if (urlToHash.containsKey('assets/FontManifest.json')) 'assets/FontManifest.json',
-    ], serviceWorkerStrategy: environment.serviceWorkerStrategy);
+    final String serviceWorker = generateServiceWorker(
+      fileGeneratorsPath,
+      serviceWorkerStrategy: environment.serviceWorkerStrategy,
+    );
     serviceWorkerFile.writeAsStringSync(serviceWorker);
     environment.depFileService.writeToFile(
       depfile,
@@ -841,5 +913,6 @@ class WebServiceWorker extends Target {
 
 extension on Environment {
   ServiceWorkerStrategy get serviceWorkerStrategy =>
-      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]);
+      ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]) ??
+      ServiceWorkerStrategy.offlineFirst;
 }

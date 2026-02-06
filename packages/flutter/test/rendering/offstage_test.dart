@@ -12,7 +12,7 @@ void main() {
 
   test('offstage', () {
     RenderBox child;
-    bool painted = false;
+    var painted = false;
     // incoming constraints are tight 800x600
     final RenderBox root = RenderPositionedBox(
       child: RenderConstrainedBox(

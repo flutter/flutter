@@ -1,14 +1,18 @@
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/flutter/buildroot/badge)](https://api.securityscorecards.dev/projects/github.com/flutter/buildroot)
+# Flutter Engine
 
-# buildroot
+The Flutter Engine is a portable runtime for hosting
+[Flutter](https://flutter.dev) applications. It implements Flutter's core
+libraries, including animation and graphics, file and network I/O,
+accessibility support, plugin architecture, and a Dart runtime and compile
+toolchain. Most developers will interact with Flutter via the [Flutter
+Framework](https://github.com/flutter/flutter), which provides a modern,
+reactive framework, and a rich set of platform, layout and foundation widgets.
 
-Build environment for the Flutter engine
+More tooling is available to make development experiences easier:
 
-This repository is used by the [flutter/engine](https://github.com/flutter/engine) repository.
-For instructions on how to use it, see that repository's [CONTRIBUTING.md](https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md) file.
+| Target            | Tool                                                    |
+| ----------------- | ------------------------------------------------------- |
+| Web               | [`felt`](flutter/lib/web_ui/README.md#using-felt)       |
+| Mobile or Desktop | [`et`](flutter/tools/engine_tool/README.md#engine-tool) |
 
-To update your checkout to use the latest buildroot, run `gclient sync`.
-
-To submit patches to this buildroot repository, create a branch, push to that branch, then submit a PR on GitHub for that branch.
-
-To point the engine to a new version of buildroot after your patch is merged, update the buildroot hash in the engine's [DEPS file](https://github.com/flutter/flutter/blob/main/DEPS).
+To learn about running tests, see [testing the engine](flutter/docs/testing/Testing-the-engine.md).

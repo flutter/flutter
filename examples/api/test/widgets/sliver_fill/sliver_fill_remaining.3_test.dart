@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.3.dart' as example;
+import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.3.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,7 +14,9 @@ void main() {
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.text('Bottom Pinned Button!'), findsOneWidget);
     expect(find.byType(CustomScrollView), findsOneWidget);
-    final CustomScrollView scroll = tester.widget(find.byType(CustomScrollView));
+    final CustomScrollView scroll = tester.widget(
+      find.byType(CustomScrollView),
+    );
     expect(
       scroll.physics,
       isA<BouncingScrollPhysics>().having(
@@ -25,20 +28,24 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => (widget is Container) && widget.color == Colors.tealAccent[700],
+        (Widget widget) =>
+            (widget is Container) && widget.color == Colors.tealAccent[700],
       ),
       findsOneWidget,
     );
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => (widget is Container) && widget.color == Colors.teal[100],
+        (Widget widget) =>
+            (widget is Container) && widget.color == Colors.teal[100],
       ),
       findsOneWidget,
     );
     expect(find.byType(Container), findsNWidgets(2));
 
     expect(find.byType(SliverFillRemaining), findsOneWidget);
-    final SliverFillRemaining fill = tester.widget(find.byType(SliverFillRemaining));
+    final SliverFillRemaining fill = tester.widget(
+      find.byType(SliverFillRemaining),
+    );
     expect(fill.hasScrollBody, false);
     expect(fill.fillOverscroll, true);
   });

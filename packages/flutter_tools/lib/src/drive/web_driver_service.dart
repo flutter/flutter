@@ -85,20 +85,16 @@ class WebDriverService extends DriverService {
       debuggingOptions: buildInfo.isRelease
           ? DebuggingOptions.disabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             )
           : DebuggingOptions.enabled(
               buildInfo,
-              port: debuggingOptions.port,
-              hostname: debuggingOptions.hostname,
+              webDevServerConfig: debuggingOptions.webDevServerConfig,
               disablePortPublication: debuggingOptions.disablePortPublication,
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
-              webHeaders: debuggingOptions.webHeaders,
             ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -301,18 +297,18 @@ enum Browser implements CliEnum {
 
   @override
   String get helpText => switch (this) {
-    Browser.androidChrome => 'Chrome on Android (see also "--android-emulator").',
-    Browser.chrome => 'Google Chrome on this computer (see also "--chrome-binary").',
-    Browser.edge => 'Microsoft Edge on this computer (Windows only).',
-    Browser.firefox => 'Mozilla Firefox on this computer.',
-    Browser.iosSafari => 'Apple Safari on an iOS device.',
-    Browser.safari => 'Apple Safari on this computer (macOS only).',
+    androidChrome => 'Chrome on Android (see also "--android-emulator").',
+    chrome => 'Google Chrome on this computer (see also "--chrome-binary").',
+    edge => 'Microsoft Edge on this computer (Windows only).',
+    firefox => 'Mozilla Firefox on this computer.',
+    iosSafari => 'Apple Safari on an iOS device.',
+    safari => 'Apple Safari on this computer (macOS only).',
   };
 
   @override
   String get cliName => kebabCase(name);
 
-  static Browser fromCliName(String? value) => Browser.values.singleWhere(
+  static Browser fromCliName(String? value) => values.singleWhere(
     (Browser element) => element.cliName == value,
     orElse: () => throw UnsupportedError('Browser $value not supported'),
   );
@@ -356,8 +352,8 @@ Map<String, dynamic> getDesiredCapabilities(
             'v8,blink.console,benchmark,blink,'
             'blink.user_timing',
       },
-      if (chromeBinary != null) 'binary': chromeBinary,
-      if (mobileEmulation != null) 'mobileEmulation': mobileEmulation,
+      'binary': ?chromeBinary,
+      'mobileEmulation': ?mobileEmulation,
     },
   },
   Browser.firefox => <String, dynamic>{

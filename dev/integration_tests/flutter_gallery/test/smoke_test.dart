@@ -36,7 +36,7 @@ void reportToStringError(
   // If you're on line 12, then it has index 11.
   // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
   // That's (lineNumber-1)-margin .. (lineNumber-1)+margin, or lineNumber-(margin+1) .. lineNumber+(margin-1)
-  const int margin = 5;
+  const margin = 5;
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
   print(
@@ -46,12 +46,12 @@ void reportToStringError(
 }
 
 void verifyToStringOutput(String name, String route, String testString) {
-  int lineNumber = 0;
+  var lineNumber = 0;
   final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n')) {
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
   }
-  for (final String line in lines) {
+  for (final line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
       reportToStringError(name, route, lineNumber, lines, 'found empty line');
@@ -177,7 +177,7 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
 }
 
 Future<void> smokeGallery(WidgetTester tester) async {
-  bool sendFeedbackButtonPressed = false;
+  var sendFeedbackButtonPressed = false;
 
   await tester.pumpWidget(
     GalleryApp(

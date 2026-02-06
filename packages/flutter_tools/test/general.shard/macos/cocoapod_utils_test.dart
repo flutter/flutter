@@ -434,7 +434,7 @@ void main() {
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   @override
-  late var dependencies = <String>{};
+  late Set<String> dependencies = <String>{};
   @override
   String get appName => 'my_app';
   @override
@@ -443,7 +443,7 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeFlutterProject extends Fake implements FlutterProject {
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   late FlutterManifest manifest;
@@ -481,7 +481,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
     : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
-  var pluginConfigKey = 'macos';
+  String pluginConfigKey = 'macos';
 
   @override
   final FlutterProject parent;
@@ -489,7 +489,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   @override
   Directory hostAppRoot;
 
-  var exists = true;
+  bool exists = true;
 
   @override
   bool existsSync() => exists;
@@ -518,7 +518,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings => usesSwiftPackageManager;
@@ -529,7 +529,7 @@ class FakeIosProject extends Fake implements IosProject {
     : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios');
 
   @override
-  var pluginConfigKey = 'ios';
+  String pluginConfigKey = 'ios';
 
   @override
   final FlutterProject parent;
@@ -538,7 +538,7 @@ class FakeIosProject extends Fake implements IosProject {
   Directory hostAppRoot;
 
   @override
-  var exists = true;
+  bool exists = true;
 
   @override
   bool existsSync() => exists;
@@ -567,7 +567,7 @@ class FakeIosProject extends Fake implements IosProject {
       flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
-  var usesSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings => usesSwiftPackageManager;
@@ -575,7 +575,7 @@ class FakeIosProject extends Fake implements IosProject {
 
 class FakeAndroidProject extends Fake implements AndroidProject {
   @override
-  var pluginConfigKey = 'android';
+  String pluginConfigKey = 'android';
 
   @override
   bool existsSync() => false;
@@ -583,7 +583,7 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 
 class FakeWebProject extends Fake implements WebProject {
   @override
-  var pluginConfigKey = 'web';
+  String pluginConfigKey = 'web';
 
   @override
   bool existsSync() => false;
@@ -591,7 +591,7 @@ class FakeWebProject extends Fake implements WebProject {
 
 class FakeWindowsProject extends Fake implements WindowsProject {
   @override
-  var pluginConfigKey = 'windows';
+  String pluginConfigKey = 'windows';
 
   @override
   bool existsSync() => false;
@@ -599,15 +599,15 @@ class FakeWindowsProject extends Fake implements WindowsProject {
 
 class FakeLinuxProject extends Fake implements LinuxProject {
   @override
-  var pluginConfigKey = 'linux';
+  String pluginConfigKey = 'linux';
 
   @override
   bool existsSync() => false;
 }
 
 class FakeCocoaPods extends Fake implements CocoaPods {
-  var podfileSetup = false;
-  var processedPods = false;
+  bool podfileSetup = false;
+  bool processedPods = false;
 
   @override
   Future<bool> processPods({

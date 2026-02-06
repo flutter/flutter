@@ -33,9 +33,8 @@ thread_local std::function<PFN_vkVoidFunction(VkInstance instance,
                                               const char* proc_name)>
     sContextVKProcAddressCallback;
 
-VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL ContextVKGetInstanceProcAddress(
-    VkInstance instance,
-    const char* proc_name) {
+VKAPI_ATTR PFN_vkVoidFunction VKAPI_CALL
+ContextVKGetInstanceProcAddress(VkInstance instance, const char* proc_name) {
   if (sContextVKProcAddressCallback) {
     return sContextVKProcAddressCallback(instance, proc_name);
   }

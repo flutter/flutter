@@ -17,8 +17,8 @@ import '../impeller_enabled.dart';
 Future<void> _testChromeFormatTrace(vms.VmService vmService) async {
   final vms.Timeline timeline = await vmService.getVMTimeline();
 
-  int saveLayerRecordCount = 0;
-  int saveLayerCount = 0;
+  var saveLayerRecordCount = 0;
+  var saveLayerCount = 0;
   // int flowEventCount = 0;
   for (final vms.TimelineEvent event in timeline.traceEvents!) {
     final Map<String, dynamic> json = event.json!;
@@ -47,10 +47,10 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
       .where((TracePacket packet) => packet.hasTrackEvent())
       .map((TracePacket packet) => packet.trackEvent);
 
-  int saveLayerRecordCount = 0;
-  int saveLayerCount = 0;
+  var saveLayerRecordCount = 0;
+  var saveLayerCount = 0;
   // int flowIdCount = 0;
-  for (final TrackEvent event in events) {
+  for (final event in events) {
     if (event.type == TrackEvent_Type.TYPE_SLICE_BEGIN) {
       if (event.name == 'ui.Canvas::saveLayer (Recorded)') {
         saveLayerRecordCount += 1;
@@ -80,10 +80,10 @@ void main() {
     );
     await vmService.clearVMTimeline();
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
       canvas.drawColor(const Color(0xff0000ff), BlendMode.srcOut);
       // Will saveLayer implicitly for Skia, but not Impeller.
       canvas.drawPaint(Paint()..imageFilter = ImageFilter.blur(sigmaX: 2, sigmaY: 3));
@@ -96,7 +96,7 @@ void main() {
       canvas.restore();
       final Picture picture = recorder.endRecording();
 
-      final SceneBuilder builder = SceneBuilder();
+      final builder = SceneBuilder();
       builder.addPicture(Offset.zero, picture);
       final Scene scene = builder.build();
 
@@ -124,13 +124,13 @@ void main() {
     );
     await vmService.clearVMTimeline();
 
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
       completer.complete();
     };
 
     // Schedule some frames.
-    for (int i = 0; i < 5; i++) {
+    for (var i = 0; i < 5; i++) {
       PlatformDispatcher.instance.scheduleFrame();
     }
     await completer.future;
@@ -138,8 +138,8 @@ void main() {
     // Check that each "Frame Request Pending" event is ended before the next
     // one begins.
     final vms.Timeline timeline = await vmService.getVMTimeline();
-    bool eventStarted = false;
-    int frameCount = 0;
+    var eventStarted = false;
+    var frameCount = 0;
     for (final vms.TimelineEvent event in timeline.traceEvents!) {
       final Map<String, dynamic> json = event.json!;
       if (json['name'] == 'Frame Request Pending') {

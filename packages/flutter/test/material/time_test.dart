@@ -6,6 +6,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('hourFormat', () {
+    test('returns HourFormat.h for 12-hour formats', () {
+      const formats = <TimeOfDayFormat>[
+        TimeOfDayFormat.h_colon_mm_space_a,
+        TimeOfDayFormat.a_space_h_colon_mm,
+      ];
+      for (final format in formats) {
+        expect(hourFormat(of: format), HourFormat.h, reason: 'for $format');
+      }
+    });
+
+    test('returns HourFormat.H for non-padded 24-hour format', () {
+      expect(hourFormat(of: TimeOfDayFormat.H_colon_mm), HourFormat.H);
+    });
+
+    test('returns HourFormat.HH for zero-padded 24-hour formats', () {
+      const formats = <TimeOfDayFormat>[
+        TimeOfDayFormat.HH_dot_mm,
+        TimeOfDayFormat.HH_colon_mm,
+        TimeOfDayFormat.frenchCanadian,
+      ];
+      for (final format in formats) {
+        expect(hourFormat(of: format), HourFormat.HH, reason: 'for $format');
+      }
+    });
+  });
+
   group('TimeOfDay.format', () {
     testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
@@ -61,9 +88,7 @@ void main() {
 
   group('RestorableTimeOfDay tests', () {
     testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
-      final RestorableTimeOfDay property = RestorableTimeOfDay(
-        const TimeOfDay(hour: 20, minute: 4),
-      );
+      final property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
       addTearDown(property.dispose);
       expect(() => property.value, throwsAssertionError);
     });
@@ -105,7 +130,7 @@ void main() {
 
       // Restores to previous values.
       await tester.restartAndRestore();
-      final _RestorableWidgetState oldState = state;
+      final oldState = state;
       state = tester.state(find.byType(_RestorableWidget));
       expect(state, isNot(same(oldState)));
 
@@ -149,7 +174,7 @@ void main() {
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
 
-      final List<String> notifyLog = <String>[];
+      final notifyLog = <String>[];
 
       state.timeOfDay.addListener(() {
         notifyLog.add('hello world');

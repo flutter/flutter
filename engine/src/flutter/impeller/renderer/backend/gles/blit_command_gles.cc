@@ -178,6 +178,11 @@ struct TexImage2DData {
         external_format = GL_RGBA;
         type = GL_FLOAT;
         break;
+      case PixelFormat::kR32Float:
+        internal_format = GL_RED;
+        external_format = GL_RED;
+        type = GL_FLOAT;
+        break;
       case PixelFormat::kR16G16B16A16Float:
         internal_format = GL_RGBA;
         external_format = GL_RGBA;
@@ -344,10 +349,10 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
 
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
-      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_READ_FRAMEBUFFER); });
+      [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
 
   {
-    auto read = ConfigureFBO(gl, source, GL_READ_FRAMEBUFFER);
+    auto read = ConfigureFBO(gl, source, GL_FRAMEBUFFER);
     if (!read.has_value()) {
       return false;
     }

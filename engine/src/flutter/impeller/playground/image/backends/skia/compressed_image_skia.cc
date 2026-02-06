@@ -7,6 +7,14 @@
 #include <memory>
 
 #include "impeller/base/validation.h"
+#include "third_party/skia/include/codec/SkBmpDecoder.h"
+#include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/codec/SkGifDecoder.h"
+#include "third_party/skia/include/codec/SkIcoDecoder.h"
+#include "third_party/skia/include/codec/SkJpegDecoder.h"
+#include "third_party/skia/include/codec/SkPngDecoder.h"
+#include "third_party/skia/include/codec/SkWbmpDecoder.h"
+#include "third_party/skia/include/codec/SkWebpDecoder.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -47,12 +55,28 @@ DecompressedImage CompressedImageSkia::Decode() const {
       },
       src);
 
-  auto image = SkImages::DeferredFromEncodedData(sk_data);
-  if (!image) {
+  std::unique_ptr<SkCodec> codec;
+  if (SkBmpDecoder::IsBmp(sk_data->bytes(), sk_data->size())) {
+    codec = SkBmpDecoder::Decode(sk_data, nullptr);
+  } else if (SkGifDecoder::IsGif(sk_data->bytes(), sk_data->size())) {
+    codec = SkGifDecoder::Decode(sk_data, nullptr);
+  } else if (SkIcoDecoder::IsIco(sk_data->bytes(), sk_data->size())) {
+    codec = SkIcoDecoder::Decode(sk_data, nullptr);
+  } else if (SkJpegDecoder::IsJpeg(sk_data->bytes(), sk_data->size())) {
+    codec = SkJpegDecoder::Decode(sk_data, nullptr);
+  } else if (SkPngDecoder::IsPng(sk_data->bytes(), sk_data->size())) {
+    codec = SkPngDecoder::Decode(sk_data, nullptr);
+  } else if (SkWebpDecoder::IsWebp(sk_data->bytes(), sk_data->size())) {
+    codec = SkWebpDecoder::Decode(sk_data, nullptr);
+  } else if (SkWbmpDecoder::IsWbmp(sk_data->bytes(), sk_data->size())) {
+    codec = SkWbmpDecoder::Decode(sk_data, nullptr);
+  }
+  if (!codec) {
+    VALIDATION_LOG << "Image data was not valid.";
     return {};
   }
 
-  const auto dims = image->imageInfo().dimensions();
+  const auto dims = codec->dimensions();
   auto info = SkImageInfo::Make(dims.width(), dims.height(),
                                 kRGBA_8888_SkColorType, kPremul_SkAlphaType);
 
@@ -62,8 +86,16 @@ DecompressedImage CompressedImageSkia::Decode() const {
     return {};
   }
 
+  // We extract this to an SkImage first because not all codecs can directly
+  // swizzle via getPixels.
+  auto image = SkCodecs::DeferredImage(std::move(codec));
+  if (!image) {
+    VALIDATION_LOG << "Could not extract image from compressed data.";
+    return {};
+  }
+
   if (!image->readPixels(nullptr, bitmap->pixmap(), 0, 0)) {
-    VALIDATION_LOG << "Could not decompress image into arena.";
+    VALIDATION_LOG << "Could not resize image into arena.";
     return {};
   }
 

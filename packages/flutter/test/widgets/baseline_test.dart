@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'list_tile_test_utils.dart';
 
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
@@ -39,7 +40,7 @@ void main() {
   testWidgets('Chip caches baseline', (WidgetTester tester) async {
     final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
     debugCheckIntrinsicSizes = false;
-    int calls = 0;
+    var calls = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -68,14 +69,14 @@ void main() {
   testWidgets('ListTile caches baseline', (WidgetTester tester) async {
     final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
     debugCheckIntrinsicSizes = false;
-    int calls = 0;
+    var calls = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Baseline(
             baseline: 100.0,
             baselineType: TextBaseline.alphabetic,
-            child: ListTile(
+            child: TestListTile(
               title: BaselineDetector(() {
                 assert(!debugCheckIntrinsicSizes);
                 calls += 1;

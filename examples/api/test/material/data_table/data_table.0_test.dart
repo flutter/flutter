@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/data_table/data_table.0.dart' as example;
+import 'package:flutter_api_samples/material/data_table/data_table.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,7 +12,9 @@ void main() {
     await tester.pumpWidget(const example.DataTableExampleApp());
     expect(find.widgetWithText(AppBar, 'DataTable Sample'), findsOneWidget);
     expect(find.byType(DataTable), findsOneWidget);
-    final DataTable dataTable = tester.widget<DataTable>(find.byType(DataTable));
+    final DataTable dataTable = tester.widget<DataTable>(
+      find.byType(DataTable),
+    );
     expect(dataTable.columns.length, 3);
     expect(dataTable.rows.length, 3);
     for (int i = 0; i < dataTable.rows.length; i++) {

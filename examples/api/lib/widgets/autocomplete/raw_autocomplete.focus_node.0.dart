@@ -39,7 +39,9 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
         title: TextFormField(
           controller: _textEditingController,
           focusNode: _focusNode,
-          decoration: const InputDecoration(hintText: 'Split RawAutocomplete App'),
+          decoration: const InputDecoration(
+            hintText: 'Split RawAutocomplete App',
+          ),
           onFieldSubmitted: (String value) {
             RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
           },

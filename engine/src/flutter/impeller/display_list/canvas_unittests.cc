@@ -13,11 +13,13 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
+#include "impeller/display_list/dl_runtime_effect_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -326,14 +328,15 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
 }
 
 TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
-
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result
+          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
   ASSERT_TRUE(runtime_stage);
 
-  auto runtime_effect = flutter::DlRuntimeEffect::MakeImpeller(runtime_stage);
+  auto runtime_effect = flutter::DlRuntimeEffectImpeller::Make(runtime_stage);
   auto uniform_data = std::make_shared<std::vector<uint8_t>>();
   auto color_source = flutter::DlColorSource::MakeRuntimeEffect(
       runtime_effect, {}, uniform_data);

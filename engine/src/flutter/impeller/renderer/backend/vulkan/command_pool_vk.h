@@ -72,8 +72,8 @@ class CommandPoolVK final {
   std::weak_ptr<ContextVK>& context_;
 
   // Used to retain a reference on these until the pool is reset.
-  std::vector<vk::UniqueCommandBuffer> collected_buffers_ IPLR_GUARDED_BY(
-      pool_mutex_);
+  std::vector<vk::UniqueCommandBuffer> collected_buffers_
+      IPLR_GUARDED_BY(pool_mutex_);
 };
 
 //------------------------------------------------------------------------------

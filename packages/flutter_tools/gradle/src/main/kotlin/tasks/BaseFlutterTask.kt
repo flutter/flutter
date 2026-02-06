@@ -43,10 +43,6 @@ open class BaseFlutterTask : DefaultTask() {
     @Input
     var localEngineSrcPath: String? = null
 
-    @Optional
-    @Input
-    var fastStart: Boolean? = null
-
     @Input
     var targetPath: String? = null
 

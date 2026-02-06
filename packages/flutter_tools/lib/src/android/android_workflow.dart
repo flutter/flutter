@@ -18,11 +18,8 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
+import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
-
-const kAndroidSdkMinVersion = 29;
-final kAndroidJavaMinVersion = Version(1, 8, 0);
-final kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
 AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
 AndroidValidator? get androidValidator => context.get<AndroidValidator>();
@@ -134,7 +131,7 @@ class AndroidValidator extends DoctorValidator {
   String? _task;
 
   /// Returns false if we cannot determine the Java version or if the version
-  /// is older that the minimum allowed version of 1.8.
+  /// is older that the minimum allowed version.
   Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
@@ -162,11 +159,18 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
         return false;
       }
-      if (javaVersion < kAndroidJavaMinVersion) {
+      // Should this be modified to be evaluated based on gradle version used?
+      if (javaVersion < gradle_utils.errorJavaMinVersionAndroid) {
         messages.add(
           ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
         );
         return false;
+      }
+      if (javaVersion < gradle_utils.warnJavaMinVersionAndroid) {
+        messages.add(
+          ValidationMessage.hint(_userMessages.androidJavaMinimumVersion(javaVersion.toString())),
+        );
+        return true;
       }
       messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.toString())));
       return true;
@@ -226,13 +230,13 @@ class AndroidValidator extends DoctorValidator {
     String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
     if (androidSdkLatestVersion != null) {
-      if (androidSdkLatestVersion.sdkLevel < kAndroidSdkMinVersion ||
-          androidSdkLatestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
+      if (androidSdkLatestVersion.sdkLevel < gradle_utils.compileSdkVersionInt ||
+          androidSdkLatestVersion.buildToolsVersion < gradle_utils.minBuildToolsVersion) {
         messages.add(
           ValidationMessage.error(
             _userMessages.androidSdkBuildToolsOutdated(
-              kAndroidSdkMinVersion,
-              kAndroidSdkBuildToolsMinVersion.toString(),
+              gradle_utils.compileSdkVersionInt,
+              gradle_utils.minBuildToolsVersion.toString(),
               _platform,
             ),
           ),

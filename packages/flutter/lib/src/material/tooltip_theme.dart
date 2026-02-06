@@ -4,7 +4,6 @@
 
 /// @docImport 'app.dart';
 /// @docImport 'tooltip.dart';
-/// @docImport 'tooltip_visibility.dart';
 library;
 
 import 'dart:ui' show lerpDouble;
@@ -17,16 +16,14 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the visual properties of [Tooltip] widgets, a tooltip theme.
+/// Defines default property values for descendant [Tooltip] widgets.
 ///
-/// Each property of [TooltipThemeData] corresponds to a property of [Tooltip],
-/// and describes the value to use when the [Tooltip] property is
-/// not given an explicit non-null value.
+/// Descendant widgets obtain the current [TooltipThemeData] object using
+/// [TooltipTheme.of]. Instances of [TooltipThemeData] can be customized
+/// with [TooltipThemeData.copyWith].
 ///
-/// Use this class to configure a [TooltipTheme] widget, or to set the
-/// [ThemeData.tooltipTheme] for a [Theme] widget or [MaterialApp.theme].
-///
-/// To obtain the current ambient tooltip theme, use [TooltipTheme.of].
+/// Typically a [TooltipThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.tooltipTheme].
 ///
 /// See also:
 ///
@@ -309,7 +306,7 @@ class TooltipThemeData with Diagnosticable {
 /// TooltipTheme(
 ///   data: TooltipThemeData(
 ///     decoration: BoxDecoration(
-///       color: Colors.blue.withOpacity(0.9),
+///       color: Colors.blue.withValues(alpha: 0.9),
 ///       borderRadius: BorderRadius.zero,
 ///     ),
 ///   ),
@@ -363,36 +360,4 @@ class TooltipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
-}
-
-/// The method of interaction that will trigger a tooltip.
-/// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
-///
-/// On desktop, a tooltip will be shown as soon as a pointer hovers over
-/// the widget, regardless of the value of [Tooltip.triggerMode].
-///
-/// See also:
-///
-///   * [Tooltip.waitDuration], which defines the length of time that
-///     a pointer must hover over a tooltip's widget before the tooltip
-///     will be shown.
-enum TooltipTriggerMode {
-  /// Tooltip will only be shown by calling `ensureTooltipVisible`.
-  manual,
-
-  /// Tooltip will be shown after a long press.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onLongPress], the event that is used for trigger.
-  ///   * [Feedback.forLongPress], the feedback method called when feedback is enabled.
-  longPress,
-
-  /// Tooltip will be shown after a single tap.
-  ///
-  /// See also:
-  ///
-  ///   * [GestureDetector.onTap], the event that is used for trigger.
-  ///   * [Feedback.forTap], the feedback method called when feedback is enabled.
-  tap,
 }

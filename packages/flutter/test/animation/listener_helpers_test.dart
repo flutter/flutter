@@ -9,7 +9,7 @@ void main() {
   test(
     'AnimationLocalStatusListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op',
     () {
-      final _TestAnimationLocalStatusListeners uut = _TestAnimationLocalStatusListeners();
+      final uut = _TestAnimationLocalStatusListeners();
       void fakeListener(AnimationStatus status) {}
       uut.removeStatusListener(fakeListener);
       expect(uut.callsToStart, 0);
@@ -20,7 +20,7 @@ void main() {
   test(
     'AnimationLocalListenersMixin with AnimationLazyListenerMixin - removing unregistered listener is no-op',
     () {
-      final _TestAnimationLocalListeners uut = _TestAnimationLocalListeners();
+      final uut = _TestAnimationLocalListeners();
       void fakeListener() {}
       uut.removeListener(fakeListener);
       expect(uut.callsToStart, 0);

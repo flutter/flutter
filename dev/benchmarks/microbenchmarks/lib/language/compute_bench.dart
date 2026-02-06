@@ -26,18 +26,18 @@ Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   // Warm up lap
-  for (int i = 0; i < _kNumWarmUp; i += 1) {
+  for (var i = 0; i < _kNumWarmUp; i += 1) {
     await compute(test, 10);
   }
 
-  final Stopwatch watch = Stopwatch();
+  final watch = Stopwatch();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     await compute(test, 1000000);
   }
   final int elapsedMicroseconds = watch.elapsedMicroseconds;
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
   const double scale = 1000.0 / _kNumIterations;
   printer.addResult(
     description: 'compute',

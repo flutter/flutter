@@ -11,13 +11,22 @@ void main() {
   testWidgets('The slider should be padded with the system gesture insets', (
     WidgetTester tester,
   ) async {
-    tester.view.systemGestureInsets = const FakeViewPadding(left: 60, right: 60);
+    tester.view.systemGestureInsets = const FakeViewPadding(
+      left: 60,
+      right: 60,
+    );
     await tester.pumpWidget(const example.SystemGestureInsetsExampleApp());
 
-    expect(find.widgetWithText(AppBar, 'Pad Slider to avoid systemGestureInsets'), findsOne);
+    expect(
+      find.widgetWithText(AppBar, 'Pad Slider to avoid systemGestureInsets'),
+      findsOne,
+    );
 
     final Rect rect = tester.getRect(find.byType(Slider));
 
-    expect(rect, rectMoreOrLessEquals(const Rect.fromLTRB(20.0, 56.0, 780.0, 600.0)));
+    expect(
+      rect,
+      rectMoreOrLessEquals(const Rect.fromLTRB(20.0, 56.0, 780.0, 600.0)),
+    );
   });
 }

@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RouteObserver].
 
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 void main() {
   runApp(const RouteObserverApp());
@@ -31,7 +32,8 @@ class RouteObserverExample extends StatefulWidget {
   State<RouteObserverExample> createState() => _RouteObserverExampleState();
 }
 
-class _RouteObserverExampleState extends State<RouteObserverExample> with RouteAware {
+class _RouteObserverExampleState extends State<RouteObserverExample>
+    with RouteAware {
   List<String> log = <String>[];
 
   @override
@@ -61,32 +63,39 @@ class _RouteObserverExampleState extends State<RouteObserverExample> with RouteA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('RouteObserver log:', style: Theme.of(context).textTheme.headlineSmall),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300.0),
-              child: ListView.builder(
-                itemCount: log.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (log.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Text(log[index], textAlign: TextAlign.center);
-                },
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                'RouteObserver log:',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(builder: (BuildContext context) => const NextPage()),
-                );
-              },
-              child: const Text('Go to next page'),
-            ),
-          ],
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300.0),
+                child: ListView.builder(
+                  itemCount: log.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (log.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return Text(log[index], textAlign: TextAlign.center);
+                  },
+                ),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => const NextPage(),
+                    ),
+                  );
+                },
+                child: const Text('Go to next page'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -11,5 +11,8 @@
   "searchWebButtonLabel": "Telusuri di Web",
   "shareButtonLabel": "Bagikan",
   "pasteButtonLabel": "Tempel",
-  "selectAllButtonLabel": "Pilih semua"
+  "selectAllButtonLabel": "Pilih semua",
+  "searchResultsFound": "Hasil penelusuran ditemukan",
+  "noResultsFound": "Tidak ditemukan hasil",
+  "radioButtonUnselectedLabel": "Tidak dipilih"
 }

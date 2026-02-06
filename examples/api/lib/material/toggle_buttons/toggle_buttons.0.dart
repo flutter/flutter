@@ -6,11 +6,23 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [ToggleButtons].
 
-const List<Widget> fruits = <Widget>[Text('Apple'), Text('Banana'), Text('Orange')];
+const List<Widget> fruits = <Widget>[
+  Text('Apple'),
+  Text('Banana'),
+  Text('Orange'),
+];
 
-const List<Widget> vegetables = <Widget>[Text('Tomatoes'), Text('Potatoes'), Text('Carrots')];
+const List<Widget> vegetables = <Widget>[
+  Text('Tomatoes'),
+  Text('Potatoes'),
+  Text('Carrots'),
+];
 
-const List<Widget> icons = <Widget>[Icon(Icons.sunny), Icon(Icons.cloud), Icon(Icons.ac_unit)];
+const List<Widget> icons = <Widget>[
+  Icon(Icons.sunny),
+  Icon(Icons.cloud),
+  Icon(Icons.ac_unit),
+];
 
 void main() => runApp(const ToggleButtonsExampleApp());
 
@@ -19,7 +31,9 @@ class ToggleButtonsExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ToggleButtonsSample(title: 'ToggleButtons Sample'));
+    return const MaterialApp(
+      home: ToggleButtonsSample(title: 'ToggleButtons Sample'),
+    );
   }
 }
 
@@ -68,7 +82,10 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 selectedColor: Colors.white,
                 fillColor: Colors.red[200],
                 color: Colors.red[400],
-                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 80.0,
+                ),
                 isSelected: _selectedFruits,
                 children: fruits,
               ),
@@ -89,7 +106,10 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
                 color: Colors.green[400],
-                constraints: const BoxConstraints(minHeight: 40.0, minWidth: 80.0),
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 80.0,
+                ),
                 isSelected: _selectedVegetables,
                 children: vegetables,
               ),

@@ -12,17 +12,20 @@ class SliverAnimatedListSample extends StatefulWidget {
   const SliverAnimatedListSample({super.key});
 
   @override
-  State<SliverAnimatedListSample> createState() => _SliverAnimatedListSampleState();
+  State<SliverAnimatedListSample> createState() =>
+      _SliverAnimatedListSampleState();
 }
 
 class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
-  final GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
+  final GlobalKey<SliverAnimatedListState> _listKey =
+      GlobalKey<SliverAnimatedListState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   late ListModel<int> _list;
   int? _selectedItem;
-  late int _nextItem; // The next item inserted when the user presses the '+' button.
+  late int
+  _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
@@ -36,7 +39,11 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+    BuildContext context,
+    int index,
+    Animation<double> animation,
+  ) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -56,13 +63,19 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   /// completed (even though it's gone as far this ListModel is concerned). The
   /// widget will be used by the [AnimatedListState.removeItem] method's
   /// [AnimatedRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(
+    int item,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return CardItem(animation: animation, item: item);
   }
 
   // Insert the "next item" into the list model.
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
+    final int index = _selectedItem == null
+        ? _list.length
+        : _list.indexOf(_selectedItem!);
     _list.insert(index, _nextItem++);
   }
 
@@ -76,7 +89,10 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
     } else {
       _scaffoldMessengerKey.currentState!.showSnackBar(
         const SnackBar(
-          content: Text('Select an item to remove from the list.', style: TextStyle(fontSize: 20)),
+          content: Text(
+            'Select an item to remove from the list.',
+            style: TextStyle(fontSize: 20),
+          ),
         ),
       );
     }
@@ -91,7 +107,10 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
         body: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
-              title: const Text('SliverAnimatedList', style: TextStyle(fontSize: 30)),
+              title: const Text(
+                'SliverAnimatedList',
+                style: TextStyle(fontSize: 30),
+              ),
               expandedHeight: 60,
               centerTitle: true,
               backgroundColor: Colors.amber[900],
@@ -135,8 +154,11 @@ typedef RemovedItemBuilder<E> =
 // mutate the list must make the same changes to the animated list in terms
 // of [AnimatedListState.insertItem] and [AnimatedList.removeItem].
 class ListModel<E> {
-  ListModel({required this.listKey, required this.removedItemBuilder, Iterable<E>? initialItems})
-    : _items = List<E>.from(initialItems ?? <E>[]);
+  ListModel({
+    required this.listKey,
+    required this.removedItemBuilder,
+    Iterable<E>? initialItems,
+  }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<SliverAnimatedListState> listKey;
   final RemovedItemBuilder<E> removedItemBuilder;
@@ -199,9 +221,14 @@ class CardItem extends StatelessWidget {
           child: SizedBox(
             height: 80.0,
             child: Card(
-              color: selected ? Colors.black12 : Colors.primaries[item % Colors.primaries.length],
+              color: selected
+                  ? Colors.black12
+                  : Colors.primaries[item % Colors.primaries.length],
               child: Center(
-                child: Text('Item $item', style: Theme.of(context).textTheme.headlineMedium),
+                child: Text(
+                  'Item $item',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
             ),
           ),

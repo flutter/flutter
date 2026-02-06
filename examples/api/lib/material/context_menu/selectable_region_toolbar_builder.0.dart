@@ -28,7 +28,8 @@ class _SelectableRegionToolbarBuilderExampleAppState
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
+        builder: (BuildContext context) =>
+            const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }
@@ -61,7 +62,10 @@ class _SelectableRegionToolbarBuilderExampleAppState
             width: 200.0,
             child: SelectionArea(
               contextMenuBuilder:
-                  (BuildContext context, SelectableRegionState selectableRegionState) {
+                  (
+                    BuildContext context,
+                    SelectableRegionState selectableRegionState,
+                  ) {
                     return AdaptiveTextSelectionToolbar.buttonItems(
                       anchors: selectableRegionState.contextMenuAnchors,
                       buttonItems: <ContextMenuButtonItem>[
@@ -76,7 +80,9 @@ class _SelectableRegionToolbarBuilderExampleAppState
                       ],
                     );
                   },
-              child: ListView(children: const <Widget>[SizedBox(height: 20.0), Text(text)]),
+              child: ListView(
+                children: const <Widget>[SizedBox(height: 20.0), Text(text)],
+              ),
             ),
           ),
         ),

@@ -95,10 +95,6 @@ void main() {
 
       expect(tester.takeException(), isFlutterError);
       expect(unknownForRouteCalled, '/');
-
-      // Work-around for https://github.com/flutter/flutter/issues/65655.
-      await tester.pumpWidget(Container());
-      expect(tester.takeException(), isAssertionError);
     },
   );
 
@@ -211,7 +207,7 @@ void main() {
   });
 
   testWidgets('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
@@ -292,7 +288,7 @@ void main() {
   });
 
   testWidgets('Handles Android back button', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -326,5 +322,16 @@ void main() {
 
     // Navigator didn't pop, so first route is still visible
     expect(find.text('first route'), findsOneWidget);
+  });
+
+  testWidgets('CupertinoTabView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoTabView(builder: (context) => const Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTabView)), Size.zero);
   });
 }

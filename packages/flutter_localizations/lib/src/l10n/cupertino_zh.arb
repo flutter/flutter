@@ -29,5 +29,11 @@
   "shareButtonLabel": "共享…",
   "clearButtonLabel": "清除",
   "cancelButtonLabel": "取消",
-  "backButtonLabel": "返回"
+  "backButtonLabel": "返回",
+  "expansionTileExpandedHint": "点按两次即可收起",
+  "expansionTileCollapsedHint": "点按两次即可展开",
+  "expansionTileExpandedTapHint": "收起",
+  "expansionTileCollapsedTapHint": "展开查看更多详情",
+  "expandedHint": "已收起",
+  "collapsedHint": "已展开"
 }

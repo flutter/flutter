@@ -10,7 +10,6 @@ import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/io.dart';
 import '../../../build_info.dart';
-import '../../../convert.dart';
 import '../../../globals.dart' as globals;
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
@@ -135,6 +134,38 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
   };
 }
 
+/// Creates a dSYM bundle for a dylib.
+Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
+  final ProcessResult result = await globals.processManager.run(<String>[
+    'dsymutil',
+    dylibFile.path,
+    '-o',
+    dsymPath,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printError(result.stdout as String);
+    globals.logger.printError(result.stderr as String);
+    throwToolExit('dsymutil failed with exit code ${result.exitCode}');
+  }
+}
+
+/// Strips a dylib.
+///
+/// This is useful for release builds to reduce binary size.
+Future<void> stripDylib(File dylibFile) async {
+  final ProcessResult result = await globals.processManager.run(<String>[
+    'strip',
+    '-x', // Remove local symbols.
+    '-S', // Remove debugging symbol table.
+    dylibFile.path,
+  ]);
+  if (result.exitCode != 0) {
+    globals.logger.printError(result.stdout as String);
+    globals.logger.printError(result.stderr as String);
+    throwToolExit('strip failed with exit code ${result.exitCode}');
+  }
+}
+
 Future<void> codesignDylib(
   String? codesignIdentity,
   BuildMode buildMode,
@@ -169,23 +200,37 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfig> cCompilerConfigMacOS() async {
+///
+/// If no XCode installation was found, [throwIfNotFound] controls whether this
+/// throws or returns `null`.
+Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) async {
+  final Uri? compiler = await _findXcrunBinary('clang', throwIfNotFound);
+  final Uri? archiver = await _findXcrunBinary('ar', throwIfNotFound);
+  final Uri? linker = await _findXcrunBinary('ld', throwIfNotFound);
+
+  if (compiler == null || archiver == null || linker == null) {
+    assert(!throwIfNotFound);
+    return null;
+  }
+
+  return CCompilerConfig(compiler: compiler, archiver: archiver, linker: linker);
+}
+
+/// Invokes `xcrun --find` to find the full path to [binaryName].
+Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
   final ProcessResult xcrunResult = await globals.processManager.run(<String>[
     'xcrun',
-    'clang',
-    '--version',
+    '--find',
+    binaryName,
   ]);
   if (xcrunResult.exitCode != 0) {
-    throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
+    if (throwIfNotFound) {
+      throwToolExit('Failed to find $binaryName with xcrun:\n${xcrunResult.stderr}');
+    } else {
+      return null;
+    }
   }
-  final String installPath = LineSplitter.split(
-    xcrunResult.stdout as String,
-  ).firstWhere((String s) => s.startsWith('InstalledDir: ')).split(' ').last;
-  return CCompilerConfig(
-    compiler: Uri.file('$installPath/clang'),
-    archiver: Uri.file('$installPath/ar'),
-    linker: Uri.file('$installPath/ld'),
-  );
+  return Uri.file((xcrunResult.stdout as String).trim());
 }
 
 /// Converts [fileName] into a suitable framework name.

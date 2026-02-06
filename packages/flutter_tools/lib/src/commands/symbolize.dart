@@ -11,6 +11,7 @@ import 'package:native_stack_traces/native_stack_traces.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
@@ -175,7 +176,7 @@ class SymbolizeCommand extends FlutterCommand {
       output = outputFile.openWrite();
     } else {
       final outputController = StreamController<List<int>>();
-      outputController.stream.transform(utf8.decoder).listen(_stdio.stdoutWrite);
+      outputController.stream.transformWithCallSite(utf8.decoder).listen(_stdio.stdoutWrite);
       output = IOSink(outputController);
     }
 
@@ -299,9 +300,8 @@ class DwarfSymbolizationService {
     StreamSubscription<void>? subscription;
     subscription = input
         .cast<List<int>>()
-        .transform(const Utf8Decoder())
-        .transform(const LineSplitter())
-        .transform(unitSymbolsTransformer(unitSymbols))
+        .transform(utf8LineDecoder)
+        .transformWithCallSite(unitSymbolsTransformer(unitSymbols))
         .listen(
           (String line) {
             try {

@@ -19,7 +19,11 @@ void main() {
 
     Matcher transformMatcher(Matrix4 matrix) {
       return everyElement(
-        isA<Transform>().having((Transform widget) => widget.transform, 'transform', matrix),
+        isA<Transform>().having(
+          (Transform widget) => widget.transform,
+          'transform',
+          matrix,
+        ),
       );
     }
 

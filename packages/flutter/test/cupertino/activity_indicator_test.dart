@@ -132,7 +132,7 @@ void main() {
 
   testWidgets('Can specify color', (WidgetTester tester) async {
     final Key key = UniqueKey();
-    const Color color = Color(0xFF5D3FD3);
+    const color = Color(0xFF5D3FD3);
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -154,6 +154,88 @@ void main() {
         color: color.withAlpha(47),
       ),
     );
+  });
+
+  group('CupertinoLinearActivityIndicator', () {
+    testWidgets('draws the linear activity indicator', (WidgetTester tester) async {
+      await tester.pumpWidget(const Center(child: CupertinoLinearActivityIndicator(progress: 0.2)));
+
+      expect(
+        find.byType(CupertinoLinearActivityIndicator),
+        paints
+          ..rrect(
+            color: CupertinoColors.systemFill,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 800, 4.5),
+              const Radius.circular(2.25),
+            ),
+          )
+          ..rrect(
+            color: CupertinoColors.activeBlue,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 160, 4.5),
+              const Radius.circular(2.25),
+            ),
+          ),
+      );
+    });
+
+    testWidgets('draws the linear activity indicator with a custom height and color', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Center(
+          child: CupertinoLinearActivityIndicator(
+            progress: 0.5,
+            height: 10,
+            color: CupertinoColors.activeGreen,
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoLinearActivityIndicator),
+        paints
+          ..rrect(
+            color: CupertinoColors.systemFill,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 800, 10),
+              const Radius.circular(5),
+            ),
+          )
+          ..rrect(
+            color: CupertinoColors.activeGreen,
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(0.0, 0.0, 400, 10),
+              const Radius.circular(5),
+            ),
+          ),
+      );
+    });
+  });
+
+  testWidgets('CupertinoActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoActivityIndicator())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoActivityIndicator)), Size.zero);
+  });
+
+  testWidgets('CupertinoLinearActivityIndicator does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: SizedBox.shrink(child: CupertinoLinearActivityIndicator(progress: 0.5)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoLinearActivityIndicator)), Size.zero);
   });
 }
 

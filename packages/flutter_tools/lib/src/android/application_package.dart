@@ -116,10 +116,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
       Directory apkDirectory = getApkDirectory(androidProject.parent);
-      if (androidProject.parent.isModule) {
+      if (androidProject.parent.isModule && buildInfo != null) {
         // Module builds output the apk in a subdirectory that corresponds
         // to the buildmode of the apk.
-        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
+        apkDirectory = apkDirectory.childDirectory(buildInfo.mode.cliName);
       }
       apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {

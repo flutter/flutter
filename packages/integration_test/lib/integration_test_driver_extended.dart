@@ -86,7 +86,7 @@ Future<void> integrationDriver({
   // error if it's used as a message for requestData.
   String jsonResponse = await driver.requestData(DriverTestMessage.pending().toString());
 
-  final Map<String, bool> onScreenshotResults = <String, bool>{};
+  final onScreenshotResults = <String, bool>{};
 
   Response response = Response.fromJson(jsonResponse);
 
@@ -95,12 +95,12 @@ Future<void> integrationDriver({
   while (response.data != null &&
       response.data!['web_driver_command'] != null &&
       response.data!['web_driver_command'] != '${WebDriverCommandType.noop}') {
-    final String? webDriverCommand = response.data!['web_driver_command'] as String?;
+    final webDriverCommand = response.data!['web_driver_command'] as String?;
     if (webDriverCommand == '${WebDriverCommandType.screenshot}') {
       assert(onScreenshot != null, 'screenshot command requires an onScreenshot callback');
       // Use `driver.screenshot()` method to get a screenshot of the web page.
       final List<int> screenshotImage = await driver.screenshot();
-      final String screenshotName = response.data!['screenshot_name']! as String;
+      final screenshotName = response.data!['screenshot_name']! as String;
       final Map<String, Object?>? args = (response.data!['args'] as Map<String, Object?>?)
           ?.cast<String, Object?>();
 
@@ -134,14 +134,14 @@ Future<void> integrationDriver({
   }
 
   if (response.data != null && response.data!['screenshots'] != null && onScreenshot != null) {
-    final List<dynamic> screenshots = response.data!['screenshots'] as List<dynamic>;
-    final List<String> failures = <String>[];
+    final screenshots = response.data!['screenshots'] as List<dynamic>;
+    final failures = <String>[];
     for (final dynamic screenshot in screenshots) {
-      final Map<String, dynamic> data = screenshot as Map<String, dynamic>;
-      final List<dynamic> screenshotBytes = data['bytes'] as List<dynamic>;
-      final String screenshotName = data['screenshotName'] as String;
+      final data = screenshot as Map<String, dynamic>;
+      final screenshotBytes = data['bytes'] as List<dynamic>;
+      final screenshotName = data['screenshotName'] as String;
 
-      bool ok = false;
+      var ok = false;
       try {
         ok =
             onScreenshotResults[screenshotName] ??

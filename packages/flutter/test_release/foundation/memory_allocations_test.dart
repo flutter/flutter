@@ -48,8 +48,8 @@ void _checkSdkHandlersNotSet() {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<void> _activateFlutterObjects(WidgetTester tester) async {
-  final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
-  final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
+  final valueNotifier = ValueNotifier<bool>(true);
+  final changeNotifier = ChangeNotifier()..addListener(() {});
   final Picture picture = _createPicture();
 
   valueNotifier.dispose();
@@ -68,9 +68,9 @@ Future<Image> _createImage() async {
 }
 
 Picture _createPicture() {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+  final recorder = PictureRecorder();
+  final canvas = Canvas(recorder);
+  const rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
 }

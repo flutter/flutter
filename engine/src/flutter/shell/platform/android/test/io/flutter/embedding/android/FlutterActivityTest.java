@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.android;
 
-import static io.flutter.Build.API_LEVELS;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_CACHED_ENGINE_ID;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.HANDLE_DEEPLINKING_META_DATA_KEY;
 import static org.junit.Assert.assertArrayEquals;
@@ -251,7 +250,7 @@ public class FlutterActivityTest {
     assertNull(flutterActivity.getDartEntrypointLibraryUri());
     assertNull(flutterActivity.getDartEntrypointArgs());
     assertEquals("/", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -304,7 +303,7 @@ public class FlutterActivityTest {
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
     assertArrayEquals(
         new String[] {"foo", "bar"}, flutterActivity.getDartEntrypointArgs().toArray());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -329,7 +328,7 @@ public class FlutterActivityTest {
     assertEquals("my_cached_engine_group", flutterActivity.getCachedEngineGroupId());
     assertEquals("custom_entrypoint", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/custom/route", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
     assertNull(flutterActivity.getCachedEngineId());
@@ -394,7 +393,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertFalse(flutterActivity.shouldDestroyEngineWithHost());
@@ -410,7 +409,7 @@ public class FlutterActivityTest {
         Robolectric.buildActivity(FlutterActivity.class, intent);
     FlutterActivity flutterActivity = activityController.get();
 
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertEquals("my_cached_engine", flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
@@ -504,7 +503,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotDelayDrawingwhenUsingTextureRendering() {
+  public void itDoesNotDelayDrawingWhenUsingTextureRendering() {
     Intent intent = FlutterActivityWithTextureRendering.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithTextureRendering> activityController =
         Robolectric.buildActivity(FlutterActivityWithTextureRendering.class, intent);
@@ -548,7 +547,7 @@ public class FlutterActivityTest {
   }
 
   @Test
-  public void itDoesNotReleaseEnginewhenDetachFromFlutterEngine() {
+  public void itDoesNotReleaseEngineWhenDetachFromFlutterEngine() {
     FlutterActivityAndFragmentDelegate mockDelegate =
         mock(FlutterActivityAndFragmentDelegate.class);
     isDelegateAttached = true;

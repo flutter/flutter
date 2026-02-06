@@ -42,7 +42,7 @@ class _ResizeAppState extends State<ResizeApp> {
               key: ResizeApp.extendedFab,
               label: const Text('Resize'),
               onPressed: () {
-                final Size nextSize = Size(
+                final nextSize = Size(
                   currentSize.width + ResizeApp.resizeBy,
                   currentSize.height + ResizeApp.resizeBy,
                 );

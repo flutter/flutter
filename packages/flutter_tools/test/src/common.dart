@@ -52,7 +52,7 @@ String getFlutterRoot() {
   }
 
   Error invalidScript() => StateError(
-    'Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.',
+    'Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.',
   );
 
   Uri scriptUri;
@@ -376,7 +376,7 @@ bool analyticsTimingEventExists({
   final lookup = <String, String>{
     'workflow': workflow,
     'variableName': variableName,
-    if (label != null) 'label': label,
+    'label': ?label,
   };
 
   for (final e in sentEvents) {

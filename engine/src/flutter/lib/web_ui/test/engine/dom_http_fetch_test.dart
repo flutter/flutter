@@ -100,17 +100,17 @@ Future<void> _testSuccessfulPayloads() async {
     // There is no guarantee that the server will actually serve the data in any
     // particular chunk sizes, but breaking up the data in _some_ way does cause
     // it to chunk it.
-    const List<List<int>> lengthAndChunks = <List<int>>[
+    const lengthAndChunks = <List<int>>[
       <int>[0, 0],
       <int>[10, 10],
       <int>[1000, 100],
       <int>[10000, 1000],
       <int>[100000, 10000],
     ];
-    for (final List<int> lengthAndChunk in lengthAndChunks) {
+    for (final lengthAndChunk in lengthAndChunks) {
       final int length = lengthAndChunk.first;
       final int chunkSize = lengthAndChunk.last;
-      final String url = '/long_test_payload?length=$length&chunk=$chunkSize';
+      final url = '/long_test_payload?length=$length&chunk=$chunkSize';
       final HttpFetchResponse response = await httpFetch(url);
       expect(response.status, 200);
       expect(response.contentLength, length);
@@ -118,7 +118,7 @@ Future<void> _testSuccessfulPayloads() async {
       expect(response.payload, isNotNull);
       expect(response.url, url);
 
-      final List<int> result = <int>[];
+      final result = <int>[];
       await response.payload.read((JSUint8Array chunk) => result.addAll(chunk.toDart));
       expect(result, hasLength(length));
       expect(result, List<int>.generate(length, (int i) => i & 0xFF));
@@ -180,13 +180,13 @@ Future<void> _testHttpErrorCodes() async {
   });
 
   test('httpFetch* functions throw HttpFetchNoPayloadError on 404', () async {
-    final List<AsyncCallback> testFunctions = <AsyncCallback>[
+    final testFunctions = <AsyncCallback>[
       () async => httpFetchText('/file_not_found'),
       () async => httpFetchByteBuffer('/file_not_found'),
       () async => httpFetchJson('/file_not_found'),
     ];
 
-    for (final AsyncCallback testFunction in testFunctions) {
+    for (final testFunction in testFunctions) {
       try {
         await testFunction();
         fail('Expected HttpFetchNoPayloadError');
@@ -206,16 +206,16 @@ Future<void> _testHttpErrorCodes() async {
 Future<void> _testNetworkErrors() async {
   test('httpFetch* functions throw HttpFetchError on network errors', () async {
     // Fetch throws the error this test wants on URLs with user credentials.
-    const String badUrl = 'https://user:password@example.com/';
+    const badUrl = 'https://user:password@example.com/';
 
-    final List<AsyncCallback> testFunctions = <AsyncCallback>[
+    final testFunctions = <AsyncCallback>[
       () async => httpFetch(badUrl),
       () async => httpFetchText(badUrl),
       () async => httpFetchByteBuffer(badUrl),
       () async => httpFetchJson(badUrl),
     ];
 
-    for (final AsyncCallback testFunction in testFunctions) {
+    for (final testFunction in testFunctions) {
       try {
         await testFunction();
         fail('Expected HttpFetchError');

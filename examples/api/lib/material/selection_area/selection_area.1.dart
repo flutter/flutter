@@ -16,7 +16,9 @@ class SelectionAreaSelectionListenerExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -32,7 +34,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final SelectionListenerNotifier _selectionNotifier = SelectionListenerNotifier();
+  final SelectionListenerNotifier _selectionNotifier =
+      SelectionListenerNotifier();
   SelectableRegionSelectionStatus? _selectableRegionStatus;
 
   void _handleOnSelectionStateChanged(SelectableRegionSelectionStatus status) {
@@ -61,20 +64,21 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                for (final (int? offset, String label) in <(int? offset, String label)>[
-                  (
-                    _selectionNotifier.registered
-                        ? _selectionNotifier.selection.range?.startOffset
-                        : null,
-                    'StartOffset',
-                  ),
-                  (
-                    _selectionNotifier.registered
-                        ? _selectionNotifier.selection.range?.endOffset
-                        : null,
-                    'EndOffset',
-                  ),
-                ])
+                for (final (int? offset, String label)
+                    in <(int? offset, String label)>[
+                      (
+                        _selectionNotifier.registered
+                            ? _selectionNotifier.selection.range?.startOffset
+                            : null,
+                        'StartOffset',
+                      ),
+                      (
+                        _selectionNotifier.registered
+                            ? _selectionNotifier.selection.range?.endOffset
+                            : null,
+                        'EndOffset',
+                      ),
+                    ])
                   Text('Selection $label: $offset'),
                 Text(
                   'Selection Status: ${_selectionNotifier.registered ? _selectionNotifier.selection.status : 'SelectionListenerNotifier not registered.'}',
@@ -97,7 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MySelectableText extends StatefulWidget {
-  const MySelectableText({super.key, required this.selectionNotifier, required this.onChanged});
+  const MySelectableText({
+    super.key,
+    required this.selectionNotifier,
+    required this.onChanged,
+  });
 
   final SelectionListenerNotifier selectionNotifier;
   final ValueChanged<SelectableRegionSelectionStatus> onChanged;
@@ -120,7 +128,9 @@ class _MySelectableTextState extends State<MySelectableText> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _selectableRegionScope?.removeListener(_handleOnSelectableRegionChanged);
-    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(context);
+    _selectableRegionScope = SelectableRegionSelectionStatusScope.maybeOf(
+      context,
+    );
     _selectableRegionScope?.addListener(_handleOnSelectableRegionChanged);
   }
 
@@ -135,7 +145,9 @@ class _MySelectableTextState extends State<MySelectableText> {
   Widget build(BuildContext context) {
     return SelectionListener(
       selectionNotifier: widget.selectionNotifier,
-      child: const Text('This is some text under a SelectionArea that can be selected.'),
+      child: const Text(
+        'This is some text under a SelectionArea that can be selected.',
+      ),
     );
   }
 }

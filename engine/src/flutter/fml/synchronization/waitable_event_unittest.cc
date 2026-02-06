@@ -74,6 +74,7 @@ TEST(AutoResetWaitableEventTest, MultipleWaiters) {
   for (size_t i = 0u; i < 5u; i++) {
     std::atomic_uint wake_count(0u);
     std::vector<std::thread> threads;
+    threads.reserve(4);
     for (size_t j = 0u; j < 4u; j++) {
       threads.push_back(std::thread([&ev, &wake_count]() {
         if (rand() % 2 == 0) {
@@ -157,6 +158,7 @@ TEST(ManualResetWaitableEventTest, SignalMultiple) {
   for (size_t i = 0u; i < 10u; i++) {
     for (size_t num_waiters = 1u; num_waiters < 5u; num_waiters++) {
       std::vector<std::thread> threads;
+      threads.reserve(num_waiters);
       for (size_t j = 0u; j < num_waiters; j++) {
         threads.push_back(std::thread([&ev]() {
           EpsilonRandomSleep();

@@ -56,7 +56,7 @@ class Java {
   /// Tools that depend on Java and need to find it will often check this
   /// variable. If you are looking to set `JAVA_HOME` when stating a process,
   /// consider using the [environment] instance property instead.
-  static var javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static String javaHomeEnvironmentVariable = 'JAVA_HOME';
 
   /// Finds the Java runtime environment that should be used for all java-dependent
   /// operations across the tool.
@@ -152,7 +152,7 @@ class Java {
   /// This map should be used as the environment when invoking any Java-dependent
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
   Map<String, String> get environment => <String, String>{
-    if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
+    javaHomeEnvironmentVariable: ?javaHome,
     'PATH':
         _fileSystem.path.dirname(binaryPath) +
         _os.pathVarSeparator +

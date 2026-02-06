@@ -132,11 +132,6 @@ String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
 }
 
-@visibleForTesting
-const androidX86DeprecationWarning =
-    'Support for Android x86 targets will be removed in the next stable release after 3.27. '
-    'See https://github.com/flutter/flutter/issues/157543 for details.';
-
 /// Returns the output APK file names for a given [AndroidBuildInfo].
 ///
 /// For example, when [AndroidBuildInfo.splitPerAbi] is `true`, multiple APKs are created.
@@ -480,7 +475,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // All automatically created files should exist.
     if (configOnly) {
-      _logger.printStatus('Config complete.');
       return;
     }
 
@@ -569,9 +563,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     }
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
-    }
-    if (androidBuildInfo.fastStart) {
-      options.add('-Pfast-start=true');
     }
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
@@ -713,17 +704,24 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
-    // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym') ||
-        result.stdout.contains('libflutter.so.dbg')) {
-      return true;
+    // As long as libflutter.so.sym/dbg and libapp.so.sym/dbg are present for at least
+    // one architecture, assume AGP succeeded in stripping.
+    if (!(result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg'))) {
+      _logger.printTrace(
+        'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
     }
 
-    _logger.printTrace(
-      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
-    );
-    return false;
+    if (!(result.stdout.contains('libapp.so.sym') || result.stdout.contains('libapp.so.dbg'))) {
+      _logger.printTrace(
+        'libapp.so.sym or libapp.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> _performCodeSizeAnalysis(

@@ -192,7 +192,7 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
 
   @override
   TimeOfDay fromPrimitives(Object? data) {
-    final List<Object?> timeData = data! as List<Object?>;
+    final timeData = data! as List<Object?>;
     return TimeOfDay(minute: timeData[0]! as int, hour: timeData[1]! as int);
   }
 
@@ -266,16 +266,10 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({required TimeOfDayFormat of}) {
-  switch (of) {
-    case TimeOfDayFormat.h_colon_mm_space_a:
-    case TimeOfDayFormat.a_space_h_colon_mm:
-      return HourFormat.h;
-    case TimeOfDayFormat.H_colon_mm:
-      return HourFormat.H;
-    case TimeOfDayFormat.HH_dot_mm:
-    case TimeOfDayFormat.HH_colon_mm:
-    case TimeOfDayFormat.frenchCanadian:
-      return HourFormat.HH;
-  }
-}
+HourFormat hourFormat({required TimeOfDayFormat of}) => switch (of) {
+  TimeOfDayFormat.h_colon_mm_space_a || TimeOfDayFormat.a_space_h_colon_mm => HourFormat.h,
+  TimeOfDayFormat.H_colon_mm => HourFormat.H,
+  TimeOfDayFormat.HH_dot_mm ||
+  TimeOfDayFormat.HH_colon_mm ||
+  TimeOfDayFormat.frenchCanadian => HourFormat.HH,
+};

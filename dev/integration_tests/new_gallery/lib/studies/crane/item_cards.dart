@@ -21,55 +21,54 @@ class DestinationCard extends StatelessWidget {
     final bool isDesktop = isDisplayDesktop(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
 
-    final Widget card =
-        isDesktop
-            ? Padding(
-              padding: const EdgeInsets.only(bottom: 40),
-              child: Semantics(
-                container: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(4)),
-                      child: _DestinationImage(destination: destination),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20, bottom: 10),
-                      child: SelectableText(destination.destination, style: textTheme.titleMedium),
-                    ),
-                    SelectableText(
-                      destination.subtitle(context),
-                      semanticsLabel: destination.subtitleSemantics(context),
-                      style: textTheme.titleSmall,
-                    ),
-                  ],
-                ),
-              ),
-            )
-            : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  contentPadding: const EdgeInsetsDirectional.only(end: 8),
-                  leading: ClipRRect(
+    final Widget card = isDesktop
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: 40),
+            child: Semantics(
+              container: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(4)),
-                    child: SizedBox(
-                      width: mobileThumbnailSize,
-                      height: mobileThumbnailSize,
-                      child: _DestinationImage(destination: destination),
-                    ),
+                    child: _DestinationImage(destination: destination),
                   ),
-                  title: SelectableText(destination.destination, style: textTheme.titleMedium),
-                  subtitle: SelectableText(
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20, bottom: 10),
+                    child: SelectableText(destination.destination, style: textTheme.titleMedium),
+                  ),
+                  SelectableText(
                     destination.subtitle(context),
                     semanticsLabel: destination.subtitleSemantics(context),
                     style: textTheme.titleSmall,
                   ),
+                ],
+              ),
+            ),
+          )
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                contentPadding: const EdgeInsetsDirectional.only(end: 8),
+                leading: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  child: SizedBox(
+                    width: mobileThumbnailSize,
+                    height: mobileThumbnailSize,
+                    child: _DestinationImage(destination: destination),
+                  ),
                 ),
-                const Divider(thickness: 1),
-              ],
-            );
+                title: SelectableText(destination.destination, style: textTheme.titleMedium),
+                subtitle: SelectableText(
+                  destination.subtitle(context),
+                  semanticsLabel: destination.subtitleSemantics(context),
+                  style: textTheme.titleSmall,
+                ),
+              ),
+              const Divider(thickness: 1),
+            ],
+          );
 
     return HighlightFocus(
       debugLabel: 'DestinationCard: ${destination.destination}',

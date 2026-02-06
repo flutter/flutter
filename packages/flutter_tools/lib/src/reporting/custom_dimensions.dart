@@ -27,7 +27,6 @@ class CustomDimensions {
     this.commandRunProjectType,
     this.commandRunProjectHostLanguage,
     this.commandCreateAndroidLanguage,
-    this.commandCreateIosLanguage,
     this.commandRunProjectModule,
     this.commandCreateProjectType,
     this.commandPackagesNumberPlugins,
@@ -83,7 +82,6 @@ class CustomDimensions {
   final String? commandRunProjectType; // cd14
   final String? commandRunProjectHostLanguage; // cd15
   final String? commandCreateAndroidLanguage; // cd16
-  final String? commandCreateIosLanguage; // cd17
   final bool? commandRunProjectModule; // cd18
   final String? commandCreateProjectType; // cd19
   final int? commandPackagesNumberPlugins; // cd20
@@ -161,8 +159,6 @@ class CustomDimensions {
     if (commandCreateAndroidLanguage != null)
       CustomDimensionsEnum.commandCreateAndroidLanguage.cdKey: commandCreateAndroidLanguage
           .toString(),
-    if (commandCreateIosLanguage != null)
-      CustomDimensionsEnum.commandCreateIosLanguage.cdKey: commandCreateIosLanguage.toString(),
     if (commandRunProjectModule != null)
       CustomDimensionsEnum.commandRunProjectModule.cdKey: commandRunProjectModule.toString(),
     if (commandCreateProjectType != null)
@@ -276,7 +272,6 @@ class CustomDimensions {
           other.commandRunProjectHostLanguage ?? commandRunProjectHostLanguage,
       commandCreateAndroidLanguage:
           other.commandCreateAndroidLanguage ?? commandCreateAndroidLanguage,
-      commandCreateIosLanguage: other.commandCreateIosLanguage ?? commandCreateIosLanguage,
       commandRunProjectModule: other.commandRunProjectModule ?? commandRunProjectModule,
       commandCreateProjectType: other.commandCreateProjectType ?? commandCreateProjectType,
       commandPackagesNumberPlugins:
@@ -356,7 +351,6 @@ class CustomDimensions {
       map,
       CustomDimensionsEnum.commandCreateAndroidLanguage,
     ),
-    commandCreateIosLanguage: _extractString(map, CustomDimensionsEnum.commandCreateIosLanguage),
     commandRunProjectModule: _extractBool(map, CustomDimensionsEnum.commandRunProjectModule),
     commandCreateProjectType: _extractString(map, CustomDimensionsEnum.commandCreateProjectType),
     commandPackagesNumberPlugins: _extractInt(
@@ -475,7 +469,8 @@ enum CustomDimensionsEnum {
   commandRunProjectType, // cd14
   commandRunProjectHostLanguage, // cd15
   commandCreateAndroidLanguage, // cd16
-  commandCreateIosLanguage, // cd17
+  // ignore: unused_field
+  _nullCreateIosLanguageDeprecatedDoNotUse, // cd17
   commandRunProjectModule, // cd18
   commandCreateProjectType, // cd19
   commandPackagesNumberPlugins, // cd20

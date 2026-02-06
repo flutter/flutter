@@ -17,15 +17,14 @@ import 'theme.dart';
 // Examples can assume:
 // late BuildContext context;
 
-/// Defines the color and border properties of [ToggleButtons] widgets.
+/// Defines default property values for descendant [ToggleButtons] widgets.
 ///
-/// Used by [ToggleButtonsTheme] to control the color and border properties
-/// of toggle buttons in a widget subtree.
+/// Descendant widgets obtain the current [ToggleButtonsThemeData] object using
+/// [ToggleButtonsTheme.of]. Instances of [ToggleButtonsThemeData] can be customized
+/// with [ToggleButtonsThemeData.copyWith].
 ///
-/// To obtain the current [ToggleButtonsTheme], use [ToggleButtonsTheme.of].
-///
-/// Values specified here are used for [ToggleButtons] properties that are not
-/// given an explicit non-null value.
+/// Typically a [ToggleButtonsThemeData] is specified as part of the overall [Theme]
+/// with [ThemeData.toggleButtonsTheme].
 ///
 /// See also:
 ///

@@ -17,7 +17,12 @@ void main() {
     expect(appbarMaterial.shadowColor, Colors.transparent);
     expect(appbarMaterial.elevation, 0);
 
-    await tester.drag(find.text('Item 4'), _kOffset, touchSlopY: 0, warnIfMissed: false);
+    await tester.drag(
+      find.text('Item 4'),
+      _kOffset,
+      touchSlopY: 0,
+      warnIfMissed: false,
+    );
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));

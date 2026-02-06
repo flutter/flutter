@@ -62,6 +62,15 @@ void main() {
       );
     });
 
+    testWithoutContext('flutterFrameworkSwiftPackageDirectory', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.flutterFrameworkSwiftPackageDirectory.path,
+        'app_name/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
+      );
+    });
+
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -147,6 +156,69 @@ void main() {
         overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
       );
     });
+
+    testUsingContext(
+      'schemeForBuildInfo succeeds',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const BuildInfo buildInfo = BuildInfo.debug;
+        expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
+      },
+      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo returns null if unable to find project',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        const BuildInfo buildInfo = BuildInfo.debug;
+        expect(await project.schemeForBuildInfo(buildInfo), isNull);
+      },
+      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo succeeds with flavor',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const buildInfo = BuildInfo(
+          BuildMode.debug,
+          'my_flavor',
+          treeShakeIcons: true,
+          packageConfigPath: '',
+        );
+        expect(await project.schemeForBuildInfo(buildInfo), 'my_flavor');
+      },
+      overrides: <Type, Generator>{
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      },
+    );
+
+    testUsingContext(
+      'schemeForBuildInfo throws error if flavor is not found',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        const buildInfo = BuildInfo(
+          BuildMode.debug,
+          'invalid_flavor',
+          treeShakeIcons: true,
+          packageConfigPath: '',
+        );
+        await expectLater(project.schemeForBuildInfo(buildInfo), throwsToolExit());
+      },
+      overrides: <Type, Generator>{
+        XcodeProjectInterpreter: () =>
+            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      },
+    );
 
     group('usesSwiftPackageManager', () {
       testUsingContext(
@@ -523,7 +595,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late final Directory directory = fileSystem.directory('app_name');
 
   @override
-  var isModule = false;
+  bool isModule = false;
 
   @override
   FlutterManifest get manifest => FakeFlutterManifest();
@@ -567,13 +639,19 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
   @override
   String get appName => '';
+
+  @override
+  PluginPlatformConfig? get ios => null;
+
+  @override
+  PluginPlatformConfig? get macos => null;
 }
 
 class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
 
   bool olderThanToolsStamp;
-  var filesOlderThanToolsStamp = <String, bool>{};
+  Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};
 
   @override
   bool isOlderThanToolsStamp(FileSystemEntity entity) {

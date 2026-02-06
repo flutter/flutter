@@ -43,15 +43,14 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   static void ensureInitialized(ui.RootIsolateToken token) {
     if (_instance == null) {
       ui.PlatformDispatcher.instance.registerBackgroundIsolate(token);
-      final BackgroundIsolateBinaryMessenger portBinaryMessenger =
-          BackgroundIsolateBinaryMessenger._();
+      final portBinaryMessenger = BackgroundIsolateBinaryMessenger._();
       _instance = portBinaryMessenger;
       portBinaryMessenger._receivePort.listen((dynamic message) {
         try {
-          final List<dynamic> args = message as List<dynamic>;
-          final int identifier = args[0] as int;
-          final Uint8List bytes = args[1] as Uint8List;
-          final ByteData byteData = ByteData.sublistView(bytes);
+          final args = message as List<dynamic>;
+          final identifier = args[0] as int;
+          final bytes = args[1] as Uint8List;
+          final byteData = ByteData.sublistView(bytes);
           portBinaryMessenger._completers.remove(identifier)!.complete(byteData);
         } catch (exception, stack) {
           FlutterError.reportError(
@@ -78,7 +77,7 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
 
   @override
   Future<ByteData?>? send(String channel, ByteData? message) {
-    final Completer<ByteData?> completer = Completer<ByteData?>();
+    final completer = Completer<ByteData?>();
     _messageCount += 1;
     final int messageIdentifier = _messageCount;
     _completers[messageIdentifier] = completer;

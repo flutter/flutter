@@ -12,20 +12,32 @@ void main() {
     await tester.pumpWidget(const example.AnimatedContainerExampleApp());
 
     Container container = tester.widget(
-      find.ancestor(of: find.byType(AnimatedContainer), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(AnimatedContainer),
+        matching: find.byType(Container),
+      ),
     );
     expect((container.decoration! as BoxDecoration).color, equals(Colors.blue));
-    expect(container.constraints, equals(const BoxConstraints.tightFor(width: 100, height: 200)));
+    expect(
+      container.constraints,
+      equals(const BoxConstraints.tightFor(width: 100, height: 200)),
+    );
     expect(container.alignment, equals(Alignment.topCenter));
 
     await tester.tap(find.byType(FlutterLogo));
     await tester.pump();
 
     container = tester.widget(
-      find.ancestor(of: find.byType(AnimatedContainer), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(AnimatedContainer),
+        matching: find.byType(Container),
+      ),
     );
     expect((container.decoration! as BoxDecoration).color, equals(Colors.blue));
-    expect(container.constraints, equals(const BoxConstraints.tightFor(width: 100, height: 200)));
+    expect(
+      container.constraints,
+      equals(const BoxConstraints.tightFor(width: 100, height: 200)),
+    );
     expect(container.alignment, equals(Alignment.topCenter));
 
     // Advance animation to the end by the 2-second duration specified in
@@ -33,10 +45,16 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     container = tester.widget(
-      find.ancestor(of: find.byType(AnimatedContainer), matching: find.byType(Container)),
+      find.ancestor(
+        of: find.byType(AnimatedContainer),
+        matching: find.byType(Container),
+      ),
     );
     expect((container.decoration! as BoxDecoration).color, equals(Colors.red));
-    expect(container.constraints, equals(const BoxConstraints.tightFor(width: 200, height: 100)));
+    expect(
+      container.constraints,
+      equals(const BoxConstraints.tightFor(width: 200, height: 100)),
+    );
     expect(container.alignment, equals(Alignment.center));
   });
 }

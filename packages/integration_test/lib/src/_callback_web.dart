@@ -114,18 +114,18 @@ class _WebCallbackManager implements CallbackManager {
       final WebDriverCommand command = await _webDriverCommandPipe.future;
       switch (command.type) {
         case WebDriverCommandType.screenshot:
-          final Map<String, dynamic> data = Map<String, dynamic>.from(command.values);
+          final data = Map<String, dynamic>.from(command.values);
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.screenshot));
           response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
         case WebDriverCommandType.noop:
-          final Map<String, dynamic> data = <String, dynamic>{};
+          final data = <String, dynamic>{};
           data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.noop));
           response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
         case WebDriverCommandType.ack:
           throw UnimplementedError('${command.type} is not implemented');
       }
     } else {
-      final Map<String, dynamic> data = <String, dynamic>{};
+      final data = <String, dynamic>{};
       data.addAll(WebDriverCommand.typeToMap(WebDriverCommandType.ack));
       response = <String, String>{'message': Response.webDriverCommand(data: data).toJson()};
       _driverCommandComplete.complete(message.isSuccess);
@@ -136,7 +136,7 @@ class _WebCallbackManager implements CallbackManager {
 
   Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
-    final Map<String, String> response = <String, String>{
+    final response = <String, String>{
       'message': allTestsPassed
           ? Response.allTestsPassed(data: testRunner.reportData).toJson()
           : Response.someTestsFailed(

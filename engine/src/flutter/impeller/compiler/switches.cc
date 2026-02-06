@@ -86,6 +86,9 @@ void Switches::PrintHelp(std::ostream& stream) {
             "ignored for glsl)"
          << std::endl;
   stream << optional_prefix
+         << "--entry-point-prefix=<entry_point_prefix> (default: empty)"
+         << std::endl;
+  stream << optional_prefix
          << "--iplr (causes --sl file to be emitted in "
             "iplr format)"
          << std::endl;
@@ -157,25 +160,32 @@ static SourceType SourceTypeFromCommandLine(
   return source_type_search->second;
 }
 
+// Get the value of a command line option as a filesystem path.  The option
+// value string must be encoded in UTF-8.
+static std::filesystem::path GetOptionAsPath(
+    const fml::CommandLine& command_line,
+    const char* arg) {
+  std::string value = command_line.GetOptionValueWithDefault(arg, "");
+  return std::filesystem::path(std::u8string(value.begin(), value.end()));
+}
+
 Switches::Switches(const fml::CommandLine& command_line)
     : working_directory(std::make_shared<fml::UniqueFD>(fml::OpenDirectory(
           Utf8FromPath(std::filesystem::current_path()).c_str(),
           false,  // create if necessary,
           fml::FilePermission::kRead))),
-      source_file_name(command_line.GetOptionValueWithDefault("input", "")),
+      source_file_name(GetOptionAsPath(command_line, "input")),
       input_type(SourceTypeFromCommandLine(command_line)),
-      sl_file_name(command_line.GetOptionValueWithDefault("sl", "")),
+      sl_file_name(GetOptionAsPath(command_line, "sl")),
       iplr(command_line.HasOption("iplr")),
       shader_bundle(
           command_line.GetOptionValueWithDefault("shader-bundle", "")),
-      spirv_file_name(command_line.GetOptionValueWithDefault("spirv", "")),
-      reflection_json_name(
-          command_line.GetOptionValueWithDefault("reflection-json", "")),
+      spirv_file_name(GetOptionAsPath(command_line, "spirv")),
+      reflection_json_name(GetOptionAsPath(command_line, "reflection-json")),
       reflection_header_name(
-          command_line.GetOptionValueWithDefault("reflection-header", "")),
-      reflection_cc_name(
-          command_line.GetOptionValueWithDefault("reflection-cc", "")),
-      depfile_path(command_line.GetOptionValueWithDefault("depfile", "")),
+          GetOptionAsPath(command_line, "reflection-header")),
+      reflection_cc_name(GetOptionAsPath(command_line, "reflection-cc")),
+      depfile_path(GetOptionAsPath(command_line, "depfile")),
       json_format(command_line.HasOption("json")),
       gles_language_version(
           stoi(command_line.GetOptionValueWithDefault("gles-language-version",
@@ -184,6 +194,8 @@ Switches::Switches(const fml::CommandLine& command_line)
           command_line.GetOptionValueWithDefault("metal-version", "1.2")),
       entry_point(
           command_line.GetOptionValueWithDefault("entry-point", "main")),
+      entry_point_prefix(
+          command_line.GetOptionValueWithDefault("entry-point-prefix", "")),
       use_half_textures(command_line.HasOption("use-half-textures")),
       require_framebuffer_fetch(
           command_line.HasOption("require-framebuffer-fetch")),
@@ -320,8 +332,10 @@ SourceOptions Switches::CreateSourceOptions(
   options.file_name = source_file_name;
   options.include_dirs = include_directories;
   options.defines = defines;
-  options.entry_point_name = EntryPointFunctionNameFromSourceName(
-      source_file_name, options.type, options.source_language, entry_point);
+  options.entry_point_name =
+      entry_point_prefix +
+      EntryPointFunctionNameFromSourceName(
+          source_file_name, options.type, options.source_language, entry_point);
   options.json_format = json_format;
   options.gles_language_version = gles_language_version;
   options.metal_version = metal_version;

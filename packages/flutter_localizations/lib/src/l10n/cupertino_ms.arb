@@ -29,5 +29,11 @@
   "shareButtonLabel": "Kongsi...",
   "clearButtonLabel": "Kosongkan",
   "cancelButtonLabel": "Batal",
-  "backButtonLabel": "Kembali"
+  "backButtonLabel": "Kembali",
+  "expansionTileExpandedHint": "ketik dua kali untuk kuncupkan",
+  "expansionTileCollapsedHint": "ketik dua kali untuk kembangkan",
+  "expansionTileExpandedTapHint": "Kuncupkan",
+  "expansionTileCollapsedTapHint": "Kembangkan untuk mendapatkan butiran lanjut",
+  "expandedHint": "Dikuncupkan",
+  "collapsedHint": "Dikembangkan"
 }

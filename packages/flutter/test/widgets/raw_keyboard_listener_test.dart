@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
     await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, child: Container()));
@@ -16,9 +16,9 @@ void main() {
   });
 
   testWidgets('Fuchsia key event', (WidgetTester tester) async {
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -34,7 +34,7 @@ void main() {
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data.runtimeType, equals(RawKeyEventDataFuchsia));
-    final RawKeyEventDataFuchsia typedData = events[0].data as RawKeyEventDataFuchsia;
+    final typedData = events[0].data as RawKeyEventDataFuchsia;
     expect(typedData.hidUsage, 0x700e3);
     expect(typedData.codePoint, 0x0);
     expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
@@ -44,9 +44,9 @@ void main() {
   }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
   testWidgets('Web key event', (WidgetTester tester) async {
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
@@ -62,7 +62,7 @@ void main() {
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(RawKeyDownEvent));
     expect(events[0].data, isA<RawKeyEventDataWeb>());
-    final RawKeyEventDataWeb typedData = events[0].data as RawKeyEventDataWeb;
+    final typedData = events[0].data as RawKeyEventDataWeb;
     expect(typedData.code, 'MetaLeft');
     expect(typedData.metaState, RawKeyEventDataWeb.modifierMeta);
     expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
@@ -71,9 +71,9 @@ void main() {
   });
 
   testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
+    final events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = FocusNode();
+    final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(

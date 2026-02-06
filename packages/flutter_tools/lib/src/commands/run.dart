@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -25,6 +26,7 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
+import '../web/devfs_config.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -34,6 +36,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
+    usesWebDefineOption();
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
@@ -279,7 +282,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
-  Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
+  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
@@ -289,18 +292,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
 
-    final Map<String, String> webHeaders = featureFlags.isWebEnabled
-        ? extractWebHeaders()
-        : const <String, String>{};
-
+    final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
+        ? boolArg('cross-origin-isolation')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
-        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy:
             featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend:
@@ -312,7 +310,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
-        webHeaders: webHeaders,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
@@ -323,6 +321,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
+        webDevServerConfig: webDevServerConfig,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -354,10 +353,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: boolArg('verbose-system-logs'),
-        hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
-        port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        tlsCertPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-path') : null,
-        tlsCertKeyPath: featureFlags.isWebEnabled ? stringArg('web-tls-cert-key-path') : null,
         webUseSseForDebugProxy:
             featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webUseSseForDebugBackend:
@@ -372,14 +367,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
-        webHeaders: webHeaders,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
-        fastStart:
-            argParser.options.containsKey('fast-start') &&
-            boolArg('fast-start') &&
-            !runningWithPrebuiltApplication,
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
@@ -393,8 +384,33 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        webDevServerConfig: webDevServerConfig,
       );
     }
+  }
+
+  Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+
+    // Determine HTTPS config with CLI > file precedence
+    final HttpsConfig? httpsConfig = HttpsConfig.parse(
+      stringArg('web-tls-cert-path') ?? fileConfig.https?.certPath,
+      stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
+    );
+
+    final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+    );
+    return webDevServerConfig;
   }
 }
 
@@ -475,17 +491,6 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the '
             'results out to "refresh_benchmark.json", and exit. This flag is '
             'intended for use in generating automated flutter benchmarks.',
-      )
-      // TODO(zanderso): Off by default with investigating whether this
-      // is slower for certain use cases.
-      // See: https://github.com/flutter/flutter/issues/49499
-      ..addFlag(
-        'fast-start',
-        help:
-            'Whether to quickly bootstrap applications with a minimal app. '
-            'Currently this is only supported on Android devices. This option '
-            'cannot be paired with "--${FlutterOptions.kUseApplicationBinary}".',
-        hide: !verboseHelp,
       );
   }
 
@@ -504,7 +509,19 @@ class RunCommand extends RunCommandBase {
   String get category => FlutterCommandCategory.project;
 
   List<Device>? devices;
-  var webMode = false;
+  Future<WebDevServerConfig?> getWebDevServerConfig() async {
+    // Only support "web mode" with a single web device due to resident runner
+    // refactoring required otherwise.
+
+    if (featureFlags.isWebEnabled &&
+        devices != null &&
+        devices!.length == 1 &&
+        await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
+      final WebDevServerConfig webDevServerConfig = await webDevServerConfigCore();
+      return webDevServerConfig;
+    }
+    return null;
+  }
 
   String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
@@ -655,6 +672,8 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
+    final webMode = webDevServerConfig != null;
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -672,19 +691,32 @@ class RunCommand extends RunCommandBase {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
 
-    // Only support "web mode" with a single web device due to resident runner
-    // refactoring required otherwise.
-    webMode =
-        featureFlags.isWebEnabled &&
-        devices!.length == 1 &&
-        await devices!.single.targetPlatform == TargetPlatform.web_javascript;
-
     if (useWasm && !webMode) {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
+    }
+
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
+      if (webEnableHotReload) {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release.',
+        );
+      } else {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release. '
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+        );
+      }
     }
 
     final String? flavor = stringArg('flavor');
@@ -707,11 +739,17 @@ class RunCommand extends RunCommandBase {
     required String? applicationBinaryPath,
     required FlutterProject flutterProject,
   }) async {
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
+    final webMode = webDevServerConfig != null;
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
+
     if (hotMode && !webMode) {
       return HotRunner(
         flutterDevices,
         target: targetFile,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: debuggingOptions,
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
@@ -721,13 +759,15 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        dartBuilder: hookRunner,
+        logger: globals.logger,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
-        debuggingOptions: await createDebuggingOptions(webMode),
+        debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         fileSystem: globals.fs,
         analytics: globals.analytics,
@@ -736,18 +776,20 @@ class RunCommand extends RunCommandBase {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
+        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
       flutterDevices,
       target: targetFile,
-      debuggingOptions: await createDebuggingOptions(webMode),
+      debuggingOptions: debuggingOptions,
       traceStartup: traceStartup,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null
           ? null
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
+      dartBuilder: hookRunner,
     );
   }
 
@@ -763,6 +805,7 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
 
     if (outputMachineFormat) {
       if (devices!.length > 1) {
@@ -770,13 +813,17 @@ class RunCommand extends RunCommandBase {
       }
       final Daemon daemon = createMachineDaemon();
       late AppInstance app;
+
+      final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+        webDevServerConfig: webDevServerConfig,
+      );
       try {
         app = await daemon.appDomain.startApp(
           devices!.first,
           globals.fs.currentDirectory.path,
           targetFile,
           route,
-          await createDebuggingOptions(webMode),
+          debuggingOptions,
           hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
@@ -821,16 +868,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String>? expFlags;
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      expFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,
@@ -874,7 +915,7 @@ class RunCommand extends RunCommandBase {
       }),
     );
     try {
-      final int? result = await runner.run(
+      final int result = await runner.run(
         appStartedCompleter: appStartedTimeRecorder,
         route: route,
       );

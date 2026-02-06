@@ -34,14 +34,14 @@ void main() {
       // We pick a short polling interval to speed up the test for most devices.
       // In local tests, Pixel 8 Pro API 36 usually only one poll iteration is needed,
       // older device like Galaxy Tab S3 API 28 takes 2-3 iterations.
-      const Duration pollDelay300Ms = Duration(milliseconds: 300);
+      const pollDelay300Ms = Duration(milliseconds: 300);
 
-      bool heightTextDidShrink = false;
+      var heightTextDidShrink = false;
       // TODO(harri35): Reconsider this polling duration when the root cause is found
       // in https://github.com/flutter/flutter/issues/163606.
       // Sometimes it can take up to 21.3 seconds for the keyboard to open,
       // so we allow ample time here (200 * pollDelay300Ms = 60 sec)
-      for (int i = 0; i < 200; ++i) {
+      for (var i = 0; i < 200; ++i) {
         await driver.tap(defaultTextField);
         await Future<void>.delayed(pollDelay300Ms);
         // Measure the height with keyboard displayed.
@@ -58,8 +58,8 @@ void main() {
       await driver.waitFor(unfocusButton);
       await driver.tap(unfocusButton);
 
-      bool heightTextDidExpand = false;
-      for (int i = 0; i < 10; ++i) {
+      var heightTextDidExpand = false;
+      for (var i = 0; i < 10; ++i) {
         await Future<void>.delayed(pollDelay300Ms);
         // Measure the final height.
         final String endHeight = await driver.getText(heightText);

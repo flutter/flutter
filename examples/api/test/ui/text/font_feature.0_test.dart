@@ -11,8 +11,14 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: example.ExampleWidget()));
 
     expect(find.byType(Text), findsNWidgets(9));
-    expect((tester.widget(find.byType(Text).at(0)) as Text).style!.fontSize, equals(18.0));
-    expect((tester.widget(find.byType(Text).at(1)) as Text).style!.fontFamily, equals('Cardo'));
+    expect(
+      (tester.widget(find.byType(Text).at(0)) as Text).style!.fontSize,
+      equals(18.0),
+    );
+    expect(
+      (tester.widget(find.byType(Text).at(1)) as Text).style!.fontFamily,
+      equals('Cardo'),
+    );
     expect(
       (tester.widget(find.byType(Text).at(3)) as Text).style!.fontFeatures,
       equals(const <FontFeature>[FontFeature.oldstyleFigures()]),

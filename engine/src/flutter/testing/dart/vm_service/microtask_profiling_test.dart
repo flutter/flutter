@@ -37,7 +37,7 @@ void main() {
 
     expect(microtaskEvents.length, isPositive);
 
-    for (final TrackEvent event in microtaskEvents) {
+    for (final event in microtaskEvents) {
       final Map<String, String> debugAnnotations = HashMap.fromEntries(
         event.debugAnnotations.map((a) => MapEntry(a.name, a.stringValue)),
       );

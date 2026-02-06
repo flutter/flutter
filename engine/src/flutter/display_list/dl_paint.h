@@ -203,7 +203,6 @@ class DlPaint {
   }
 
   bool operator==(DlPaint const& other) const;
-  bool operator!=(DlPaint const& other) const { return !(*this == other); }
 
  private:
 #define ASSERT_ENUM_FITS(last_enum, num_bits)                    \
@@ -221,12 +220,12 @@ class DlPaint {
 
   union {
     struct {
-      unsigned blend_mode_ : kBlendModeBits;
-      unsigned draw_style_ : kDrawStyleBits;
-      unsigned stroke_cap_ : kStrokeCapBits;
-      unsigned stroke_join_ : kStrokeJoinBits;
-      unsigned is_anti_alias_ : 1;
-      unsigned is_invert_colors_ : 1;
+      unsigned blend_mode_ : kBlendModeBits = {};
+      unsigned draw_style_ : kDrawStyleBits = {};
+      unsigned stroke_cap_ : kStrokeCapBits = {};
+      unsigned stroke_join_ : kStrokeJoinBits = {};
+      unsigned is_anti_alias_ : 1 = {};
+      unsigned is_invert_colors_ : 1 = {};
     };
   };
 

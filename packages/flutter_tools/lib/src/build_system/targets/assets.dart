@@ -12,6 +12,7 @@ import '../../build_info.dart';
 import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
+import '../../isolated/native_assets/dart_hook_result.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -33,6 +34,7 @@ import 'native_assets.dart';
 Future<Depfile> copyAssets(
   Environment environment,
   Directory outputDirectory, {
+  required DartHooksResult dartHookResult,
   Map<String, DevFSContent> additionalContent = const <String, DevFSContent>{},
   required TargetPlatform targetPlatform,
   required BuildMode buildMode,
@@ -48,6 +50,7 @@ Future<Depfile> copyAssets(
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
   final int resultCode = await assetBundle.build(
+    flutterHookResult: dartHookResult.asFlutterResult,
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
@@ -244,7 +247,11 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    DartBuildForNative(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -262,7 +269,10 @@ class CopyAssets extends Target {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(
+    Environment environment, {
+    TargetPlatform targetPlatform = TargetPlatform.android,
+  }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -270,10 +280,12 @@ class CopyAssets extends Target {
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
+    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       output,
-      targetPlatform: TargetPlatform.android,
+      dartHookResult: dartHookResult,
+      targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{

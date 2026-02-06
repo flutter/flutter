@@ -2,12 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart';
 import 'states.dart';
+
+class ItemWidget extends StatefulWidget {
+  const ItemWidget({super.key, required this.value});
+  final String value;
+
+  @override
+  State<StatefulWidget> createState() => _ItemWidgetState();
+}
+
+class _ItemWidgetState extends State<ItemWidget> {
+  int randomInt = Random().nextInt(1000);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('${widget.value}: $randomInt');
+  }
+}
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
@@ -65,7 +85,7 @@ Widget primaryScrollControllerBoilerplate({
 
 void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -103,9 +123,9 @@ void main() {
   });
 
   testWidgets('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -119,7 +139,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -129,8 +149,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -179,7 +199,7 @@ void main() {
   });
 
   testWidgets('PageView supports null items in itemBuilder', (WidgetTester tester) async {
-    final PageController controller = PageController(viewportFraction: 1 / 5);
+    final controller = PageController(viewportFraction: 1 / 5);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -225,9 +245,9 @@ void main() {
   });
 
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -242,7 +262,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -252,8 +272,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -263,9 +283,9 @@ void main() {
   });
 
   testWidgets('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -279,7 +299,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -289,8 +309,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -300,9 +320,9 @@ void main() {
   });
 
   testWidgets('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -313,12 +333,12 @@ void main() {
           padding: EdgeInsets.zero,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const Divider(),
+          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -328,8 +348,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -339,9 +359,9 @@ void main() {
   });
 
   testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -356,7 +376,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -366,8 +386,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -377,9 +397,9 @@ void main() {
   });
 
   testWidgets('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -395,7 +415,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -405,8 +425,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -416,9 +436,9 @@ void main() {
   });
 
   testWidgets('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -433,7 +453,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -443,8 +463,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -454,9 +474,9 @@ void main() {
   });
 
   testWidgets('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -471,7 +491,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -481,8 +501,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -492,9 +512,9 @@ void main() {
   });
 
   testWidgets('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -509,7 +529,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -519,8 +539,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -530,9 +550,9 @@ void main() {
   });
 
   testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -545,7 +565,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -555,8 +575,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -566,9 +586,9 @@ void main() {
   });
 
   testWidgets('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -582,7 +602,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -592,8 +612,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -603,9 +623,9 @@ void main() {
   });
 
   testWidgets('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -618,7 +638,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -628,8 +648,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -639,9 +659,9 @@ void main() {
   });
 
   testWidgets('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -651,12 +671,12 @@ void main() {
         child: ListView.separated(
           padding: EdgeInsets.zero,
           itemCount: focusNodes.length,
-          separatorBuilder: (BuildContext context, int index) => const Divider(),
+          separatorBuilder: (BuildContext context, int index) => const SizedBox(),
           itemBuilder: (BuildContext context, int index) {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -666,8 +686,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -677,9 +697,9 @@ void main() {
   });
 
   testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -693,7 +713,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -703,8 +723,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -714,9 +734,9 @@ void main() {
   });
 
   testWidgets('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -731,7 +751,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -741,8 +761,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -752,9 +772,9 @@ void main() {
   });
 
   testWidgets('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -768,7 +788,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -778,8 +798,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -789,9 +809,9 @@ void main() {
   });
 
   testWidgets('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -805,7 +825,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -815,8 +835,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -826,9 +846,9 @@ void main() {
   });
 
   testWidgets('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -842,7 +862,7 @@ void main() {
             return Container(
               height: 50,
               color: Colors.green,
-              child: TextField(
+              child: TestTextField(
                 focusNode: focusNodes[index],
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
@@ -852,8 +872,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -889,7 +909,7 @@ void main() {
   });
 
   testWidgets('CustomScrollView control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
+    final log = <String>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -935,9 +955,9 @@ void main() {
   });
 
   testWidgets('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    final focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
     addTearDown(() {
-      for (final FocusNode node in focusNodes) {
+      for (final node in focusNodes) {
         node.dispose();
       }
     });
@@ -953,7 +973,7 @@ void main() {
                 return Container(
                   height: 50,
                   color: Colors.green,
-                  child: TextField(
+                  child: TestTextField(
                     focusNode: focusNode,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -965,8 +985,8 @@ void main() {
       ),
     );
 
-    final Finder finder = find.byType(TextField).first;
-    final TextField textField = tester.widget(finder);
+    final Finder finder = find.byType(TestTextField).first;
+    final TestTextField textField = tester.widget(finder);
     await tester.showKeyboard(finder);
     expect(textField.focusNode!.hasFocus, isTrue);
 
@@ -976,8 +996,8 @@ void main() {
   });
 
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
-    final List<Type> log = <Type>[];
-    final ScrollController controller = ScrollController();
+    final log = <Type>[];
+    final controller = ScrollController();
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -1036,9 +1056,9 @@ void main() {
   test(
     'PrimaryScrollController.automaticallyInheritOnPlatforms defaults to all mobile platforms',
     () {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
-      final PrimaryScrollController primaryScrollController = PrimaryScrollController(
+      final primaryScrollController = PrimaryScrollController(
         controller: controller,
         child: const SizedBox(),
       );
@@ -1050,14 +1070,14 @@ void main() {
   );
 
   testWidgets('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
-    const CustomScrollView view = CustomScrollView();
+    const view = CustomScrollView();
     expect(view.primary, isNull);
   });
 
   testWidgets(
     'Vertical CustomScrollViews use PrimaryScrollController by default on mobile',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(child: const CustomScrollView(), controller: controller),
@@ -1070,7 +1090,7 @@ void main() {
   testWidgets(
     "Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop",
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(child: const CustomScrollView(), controller: controller),
@@ -1081,14 +1101,14 @@ void main() {
   );
 
   testWidgets('Vertical ListViews are not primary by default', (WidgetTester tester) async {
-    final ListView view = ListView();
+    final view = ListView();
     expect(view.primary, isNull);
   });
 
   testWidgets(
     'Vertical ListViews use PrimaryScrollController by default on mobile',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(child: ListView(), controller: controller),
@@ -1101,7 +1121,7 @@ void main() {
   testWidgets(
     "Vertical ListViews don't use PrimaryScrollController by default on desktop",
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(child: ListView(), controller: controller),
@@ -1112,14 +1132,14 @@ void main() {
   );
 
   testWidgets('Vertical GridViews are not primary by default', (WidgetTester tester) async {
-    final GridView view = GridView.count(crossAxisCount: 1);
+    final view = GridView.count(crossAxisCount: 1);
     expect(view.primary, isNull);
   });
 
   testWidgets(
     'Vertical GridViews use PrimaryScrollController by default on mobile',
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(
@@ -1135,7 +1155,7 @@ void main() {
   testWidgets(
     "Vertical GridViews don't use PrimaryScrollController by default on desktop",
     (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
+      final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         primaryScrollControllerBoilerplate(
@@ -1151,9 +1171,9 @@ void main() {
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1165,9 +1185,9 @@ void main() {
   });
 
   testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1179,9 +1199,9 @@ void main() {
   });
 
   testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1199,9 +1219,9 @@ void main() {
   testWidgets('CustomScrollViews with controllers are non-primary by default', (
     WidgetTester tester,
   ) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1213,9 +1233,9 @@ void main() {
   });
 
   testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1227,9 +1247,9 @@ void main() {
   });
 
   testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller1 = ScrollController();
+    final controller1 = ScrollController();
     addTearDown(controller1.dispose);
-    final ScrollController controller2 = ScrollController();
+    final controller2 = ScrollController();
     addTearDown(controller2.dispose);
     await tester.pumpWidget(
       primaryScrollControllerBoilerplate(
@@ -1243,7 +1263,7 @@ void main() {
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (
     WidgetTester tester,
   ) async {
-    final ScrollController primaryScrollController = ScrollController();
+    final primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1259,7 +1279,7 @@ void main() {
   });
 
   testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
-    final ScrollController primaryScrollController = ScrollController();
+    final primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1275,7 +1295,7 @@ void main() {
   });
 
   testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
-    final ScrollController primaryScrollController = ScrollController();
+    final primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1293,8 +1313,8 @@ void main() {
   testWidgets('Nested scrollables have a null PrimaryScrollController', (
     WidgetTester tester,
   ) async {
-    const Key innerKey = Key('inner');
-    final ScrollController primaryScrollController = ScrollController();
+    const innerKey = Key('inner');
+    final primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
@@ -1321,29 +1341,29 @@ void main() {
   });
 
   testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
-    final ListView view = ListView(primary: true);
+    final view = ListView(primary: true);
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
-    final ListView view = ListView(primary: false);
+    final view = ListView(primary: false);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
-    final ListView view = ListView();
+    final view = ListView();
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (
     WidgetTester tester,
   ) async {
-    final ListView view = ListView(scrollDirection: Axis.horizontal);
+    final view = ListView(scrollDirection: Axis.horizontal);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
-    bool scrolled = false;
+    var scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1361,7 +1381,7 @@ void main() {
   });
 
   testWidgets('primary:false leads to no scrolling', (WidgetTester tester) async {
-    bool scrolled = false;
+    var scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1381,7 +1401,7 @@ void main() {
   testWidgets(
     'physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior',
     (WidgetTester tester) async {
-      bool scrolled = false;
+      var scrolled = false;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -1402,7 +1422,7 @@ void main() {
   testWidgets('physics:ScrollPhysics actually overrides primary:true default behavior', (
     WidgetTester tester,
   ) async {
-    bool scrolled = false;
+    var scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1420,7 +1440,14 @@ void main() {
   });
 
   testWidgets('separatorBuilder must return something', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+
+    Widget buildDivider() {
+      return Padding(
+        padding: const EdgeInsets.all(4),
+        child: Container(color: const Color(0xFF000000), height: 4, width: double.infinity),
+      );
+    }
 
     Widget buildFrame(Widget firstSeparator) {
       return MaterialApp(
@@ -1430,11 +1457,7 @@ void main() {
               return Text(listOfValues[index]);
             },
             separatorBuilder: (BuildContext context, int index) {
-              if (index == 0) {
-                return firstSeparator;
-              } else {
-                return const Divider();
-              }
+              return index == 0 ? firstSeparator : buildDivider();
             },
             itemCount: listOfValues.length,
           ),
@@ -1442,13 +1465,13 @@ void main() {
       );
     }
 
-    // A separatorBuilder that always returns a Divider is fine
-    await tester.pumpWidget(buildFrame(const Divider()));
+    // A separatorBuilder that always returns a divider is fine
+    await tester.pumpWidget(buildFrame(buildDivider()));
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
     Widget buildFrame(bool throwOnFirstItem) {
       return MaterialApp(
@@ -1479,8 +1502,8 @@ void main() {
   });
 
   testWidgets('when separatorBuilder throws, creates ErrorWidget', (WidgetTester tester) async {
-    const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
-    const Key key = Key('list');
+    const listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
+    const key = Key('list');
 
     Widget buildFrame(bool throwOnFirstSeparator) {
       return MaterialApp(
@@ -1494,7 +1517,7 @@ void main() {
               if (index == 0 && throwOnFirstSeparator) {
                 throw Exception('separatorBuilder fail');
               }
-              return const Divider();
+              return const SizedBox();
             },
             itemCount: listOfValues.length,
           ),
@@ -1661,7 +1684,7 @@ void main() {
       equals(const Rect.fromLTRB(0.0, 0.0, 400.0, 50.0)),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
-    final AssertionError exception = tester.takeException() as AssertionError;
+    final exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
     expect(
       exception.message,
@@ -1675,7 +1698,7 @@ void main() {
   testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (
     WidgetTester tester,
   ) async {
-    final List<int> numbers = <int>[0, 1, 2];
+    final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1715,7 +1738,7 @@ void main() {
   testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (
     WidgetTester tester,
   ) async {
-    final List<int> numbers = <int>[0, 1, 2];
+    final numbers = <int>[0, 1, 2];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1755,8 +1778,8 @@ void main() {
   testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (
     WidgetTester tester,
   ) async {
-    final List<int> list = List<int>.generate(50, (int i) => i);
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final list = List<int>.generate(50, (int i) => i);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       textFieldBoilerplate(
@@ -1765,7 +1788,7 @@ void main() {
           drawer: Container(),
           body: Column(
             children: <Widget>[
-              const TextField(),
+              const TestTextField(),
               Expanded(
                 child: ListView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -1781,7 +1804,7 @@ void main() {
     );
 
     expect(tester.testTextInput.isVisible, isFalse);
-    final Finder finder = find.byType(TextField).first;
+    final Finder finder = find.byType(TestTextField).first;
     await tester.tap(finder);
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -1793,5 +1816,103 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('ListView.separated findItemIndexCallback preserves state correctly', (
+    WidgetTester tester,
+  ) async {
+    final items = <String>['A', 'B', 'C'];
+
+    Widget buildFrame(List<String> itemList) {
+      return MaterialApp(
+        home: Material(
+          child: ListView.separated(
+            itemCount: itemList.length,
+            findItemIndexCallback: (Key key) {
+              final valueKey = key as ValueKey<String>;
+              return itemList.indexOf(valueKey.value);
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+            },
+            separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+          ),
+        ),
+      );
+    }
+
+    // Build initial frame
+    await tester.pumpWidget(buildFrame(items));
+
+    final Finder texts = find.byType(Text);
+    expect(texts, findsNWidgets(3));
+
+    // Store all text in list
+    final textValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(texts.at(index)) as Text).data;
+    });
+
+    await tester.pumpWidget(buildFrame(items));
+    await tester.pump();
+
+    final Finder updatedTexts = find.byType(Text);
+    expect(updatedTexts, findsNWidgets(3));
+
+    final updatedTextValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(updatedTexts.at(index)) as Text).data;
+    });
+
+    expect(textValues, updatedTextValues);
+  });
+
+  testWidgets('SliverList.separated findItemIndexCallback preserves state correctly', (
+    WidgetTester tester,
+  ) async {
+    final items = <String>['A', 'B', 'C'];
+
+    Widget buildFrame(List<String> itemList) {
+      return MaterialApp(
+        home: Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList.separated(
+                itemCount: itemList.length,
+                findItemIndexCallback: (Key key) {
+                  final valueKey = key as ValueKey<String>;
+                  return itemList.indexOf(valueKey.value);
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemWidget(key: ValueKey<String>(itemList[index]), value: itemList[index]);
+                },
+                separatorBuilder: (BuildContext context, int index) => const SizedBox(),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Build initial frame
+    await tester.pumpWidget(buildFrame(items));
+
+    final Finder texts = find.byType(Text);
+    expect(texts, findsNWidgets(3));
+
+    // Store all text in list
+    final textValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(texts.at(index)) as Text).data;
+    });
+
+    await tester.pumpWidget(buildFrame(items));
+    await tester.pump();
+
+    final Finder updatedTexts = find.byType(Text);
+    expect(updatedTexts, findsNWidgets(3));
+
+    final updatedTextValues = List<String?>.generate(3, (int index) {
+      return (tester.widget(updatedTexts.at(index)) as Text).data;
+    });
+
+    expect(textValues, updatedTextValues);
   });
 }

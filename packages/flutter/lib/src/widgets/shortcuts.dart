@@ -55,7 +55,7 @@ class KeySet<T extends KeyboardKey> {
   ///
   /// The same [KeyboardKey] may not be appear more than once in the set.
   KeySet(T key1, [T? key2, T? key3, T? key4]) : _keys = HashSet<T>()..add(key1) {
-    int count = 1;
+    var count = 1;
     if (key2 != null) {
       _keys.add(key2);
       assert(() {
@@ -120,7 +120,7 @@ class KeySet<T extends KeyboardKey> {
 
     // There's always at least one key. Just extract it.
     iterator.moveNext();
-    final int h1 = iterator.current.hashCode;
+    final h1 = iterator.current.hashCode;
 
     if (length == 1) {
       // Don't do anything fancy if there's exactly one key.
@@ -128,7 +128,7 @@ class KeySet<T extends KeyboardKey> {
     }
 
     iterator.moveNext();
-    final int h2 = iterator.current.hashCode;
+    final h2 = iterator.current.hashCode;
     if (length == 2) {
       // No need to sort if there's two keys, just compare them.
       return h1 < h2 ? Object.hash(h1, h2) : Object.hash(h2, h1);
@@ -600,9 +600,9 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// [debugDescribeKeys] returns an empty string.
   @override
   String debugDescribeKeys() {
-    String result = '';
+    var result = '';
     assert(() {
-      final List<String> keys = <String>[
+      final keys = <String>[
         if (control) 'Control',
         if (alt) 'Alt',
         if (meta) 'Meta',
@@ -773,9 +773,9 @@ class CharacterActivator
 
   @override
   String debugDescribeKeys() {
-    String result = '';
+    var result = '';
     assert(() {
-      final List<String> keys = <String>[
+      final keys = <String>[
         if (alt) 'Alt',
         if (control) 'Control',
         if (meta) 'Meta',
@@ -866,8 +866,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   static Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> _indexShortcuts(
     Map<ShortcutActivator, Intent> source,
   ) {
-    final Map<LogicalKeyboardKey?, List<_ActivatorIntentPair>> result =
-        <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
+    final result = <LogicalKeyboardKey?, List<_ActivatorIntentPair>>{};
     source.forEach((ShortcutActivator activator, Intent intent) {
       // This intermediate variable is necessary to comply with Dart analyzer.
       final Iterable<LogicalKeyboardKey?>? nullableTriggers = activator.triggers;
@@ -1348,7 +1347,7 @@ class ShortcutRegistry with ChangeNotifier {
   ShortcutRegistryEntry addAll(Map<ShortcutActivator, Intent> value) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(value.isNotEmpty, 'Cannot register an empty map of shortcuts');
-    final ShortcutRegistryEntry entry = ShortcutRegistryEntry._(this);
+    final entry = ShortcutRegistryEntry._(this);
     _registeredShortcuts[entry] = value;
     assert(_debugCheckForDuplicates());
     _notifyListenersNextFrame();
@@ -1467,8 +1466,7 @@ class ShortcutRegistry with ChangeNotifier {
   }
 
   bool _debugCheckForDuplicates() {
-    final Map<ShortcutActivator, ShortcutRegistryEntry?> previous =
-        <ShortcutActivator, ShortcutRegistryEntry?>{};
+    final previous = <ShortcutActivator, ShortcutRegistryEntry?>{};
     for (final MapEntry<ShortcutRegistryEntry, Map<ShortcutActivator, Intent>> tokenEntry
         in _registeredShortcuts.entries) {
       for (final ShortcutActivator shortcut in tokenEntry.value.keys) {

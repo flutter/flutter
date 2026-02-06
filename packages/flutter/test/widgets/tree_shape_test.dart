@@ -4,19 +4,23 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
 void main() {
+  const red = Color(0xffffff00);
+  const green = Color(0xff00ff00);
+  const yellow = Color(0xfffffde7);
+
   testWidgets('Providing a RenderObjectWidget directly to the RootWidget fails', (
     WidgetTester tester,
   ) async {
     // No render tree exists to attach the RenderObjectWidget to.
-    await tester.pumpWidget(wrapWithView: false, const ColoredBox(color: Colors.red));
+    await tester.pumpWidget(wrapWithView: false, const ColoredBox(color: red));
 
     expect(
       tester.takeException(),
@@ -33,7 +37,7 @@ void main() {
   testWidgets('Moving a RenderObjectWidget to the RootWidget via GlobalKey fails', (
     WidgetTester tester,
   ) async {
-    final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: Colors.red);
+    final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: red);
 
     await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: globalKeyedWidget));
     expect(tester.takeException(), isNull);
@@ -94,36 +98,39 @@ void main() {
     },
   );
 
-  testWidgets('A View can not be moved via GlobalKey to be a child of a RenderObject', (
-    WidgetTester tester,
-  ) async {
-    final Widget globalKeyedView = View(
-      key: GlobalKey(),
-      view: FakeView(tester.view),
-      child: const ColoredBox(color: Colors.red),
-    );
+  testWidgets(
+    'A View can not be moved via GlobalKey to be a child of a RenderObject',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      final Widget globalKeyedView = View(
+        key: GlobalKey(),
+        view: FakeView(tester.view),
+        child: const ColoredBox(color: red),
+      );
 
-    await tester.pumpWidget(wrapWithView: false, globalKeyedView);
-    expect(tester.takeException(), isNull);
+      await tester.pumpWidget(wrapWithView: false, globalKeyedView);
+      expect(tester.takeException(), isNull);
 
-    await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: globalKeyedView));
+      await tester.pumpWidget(wrapWithView: false, View(view: tester.view, child: globalKeyedView));
 
-    expect(
-      tester.takeException(),
-      isFlutterError.having(
-        (FlutterError error) => error.message,
-        'message',
-        contains('cannot maintain an independent render tree at its current location.'),
-      ),
-    );
-  });
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError error) => error.message,
+          'message',
+          contains('cannot maintain an independent render tree at its current location.'),
+        ),
+      );
+    },
+  );
 
   testWidgets('The view property of a ViewAnchor cannot be a render object widget', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       ViewAnchor(
-        view: const ColoredBox(color: Colors.red),
+        view: const ColoredBox(color: red),
         child: Container(),
       ),
     );
@@ -143,7 +150,7 @@ void main() {
   testWidgets(
     'A RenderObject cannot be moved into the view property of a ViewAnchor via GlobalKey',
     (WidgetTester tester) async {
-      final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: Colors.red);
+      final Widget globalKeyedWidget = ColoredBox(key: GlobalKey(), color: red);
 
       await tester.pumpWidget(ViewAnchor(child: globalKeyedWidget));
       expect(tester.takeException(), isNull);
@@ -213,7 +220,7 @@ void main() {
   ) async {
     final Widget globalKeyView = View(
       view: FakeView(tester.view),
-      child: const ColoredBox(color: Colors.red),
+      child: const ColoredBox(color: red),
     );
 
     await tester.pumpWidget(
@@ -286,7 +293,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithView: false,
-      const ViewCollection(views: <Widget>[ColoredBox(color: Colors.red)]),
+      const ViewCollection(views: <Widget>[ColoredBox(color: red)]),
     );
 
     expect(
@@ -307,12 +314,12 @@ void main() {
     final Widget greenView = View(
       key: GlobalKey(debugLabel: 'green'),
       view: tester.view,
-      child: const ColoredBox(color: Colors.green),
+      child: const ColoredBox(color: green),
     );
     final Widget redView = View(
       key: GlobalKey(debugLabel: 'red'),
       view: FakeView(tester.view),
-      child: const ColoredBox(color: Colors.red),
+      child: const ColoredBox(color: red),
     );
 
     await tester.pumpWidget(
@@ -348,7 +355,7 @@ void main() {
     final Widget globalKeyChild = SizedBox(key: GlobalKey());
 
     Map<int, RenderObject> collectLeafRenderObjects() {
-      final Map<int, RenderObject> result = <int, RenderObject>{};
+      final result = <int, RenderObject>{};
       for (final RenderView renderView in RendererBinding.instance.renderViews) {
         void visit(RenderObject object) {
           result[renderView.flutterView.viewId] = object;
@@ -366,21 +373,21 @@ void main() {
         views: <Widget>[
           View(
             view: greenView,
-            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+            child: ColoredBox(color: green, child: globalKeyChild),
           ),
           View(
             view: redView,
-            child: const ColoredBox(color: Colors.red),
+            child: const ColoredBox(color: red),
           ),
         ],
       ),
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsNothing,
     );
     final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
@@ -396,22 +403,22 @@ void main() {
         views: <Widget>[
           View(
             view: greenView,
-            child: const ColoredBox(color: Colors.green),
+            child: const ColoredBox(color: green),
           ),
           View(
             view: redView,
-            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+            child: ColoredBox(color: red, child: globalKeyChild),
           ),
         ],
       ),
     );
 
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsNothing,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(tester.renderObject(find.byKey(globalKeyChild.key!)), equals(boxWithGlobalKey));
@@ -429,7 +436,7 @@ void main() {
     final Widget globalKeyChild = SizedBox(key: GlobalKey());
 
     Map<int, RenderObject> collectLeafRenderObjects() {
-      final Map<int, RenderObject> result = <int, RenderObject>{};
+      final result = <int, RenderObject>{};
       for (final RenderView renderView in RendererBinding.instance.renderViews) {
         void visit(RenderObject object) {
           result[renderView.flutterView.viewId] = object;
@@ -447,21 +454,21 @@ void main() {
         views: <Widget>[
           View(
             view: greenView,
-            child: const ColoredBox(color: Colors.green),
+            child: const ColoredBox(color: green),
           ),
           View(
             view: redView,
-            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+            child: ColoredBox(color: red, child: globalKeyChild),
           ),
         ],
       ),
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsNothing,
     );
     final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
@@ -477,22 +484,22 @@ void main() {
         views: <Widget>[
           View(
             view: greenView,
-            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+            child: ColoredBox(color: green, child: globalKeyChild),
           ),
           View(
             view: redView,
-            child: const ColoredBox(color: Colors.red),
+            child: const ColoredBox(color: red),
           ),
         ],
       ),
     );
 
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsNothing,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(tester.renderObject(find.byKey(globalKeyChild.key!)), equals(boxWithGlobalKey));
@@ -518,22 +525,22 @@ void main() {
           View(
             key: greenKey,
             view: greenView,
-            child: const ColoredBox(color: Colors.green),
+            child: const ColoredBox(color: green),
           ),
           View(
             key: redKey,
             view: redView,
-            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+            child: ColoredBox(color: red, child: globalKeyChild),
           ),
         ],
       ),
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsNothing,
     );
     final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
@@ -546,15 +553,15 @@ void main() {
           View(
             key: greenKey,
             view: greenView,
-            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+            child: ColoredBox(color: green, child: globalKeyChild),
           ),
         ],
       ),
     );
 
-    expect(findsColoredBox(Colors.red), findsNothing);
+    expect(findsColoredBox(red), findsNothing);
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(tester.renderObject(find.byKey(globalKeyChild.key!)), equals(boxWithGlobalKey));
@@ -576,22 +583,22 @@ void main() {
           View(
             key: greenKey,
             view: greenView,
-            child: ColoredBox(color: Colors.green, child: globalKeyChild),
+            child: ColoredBox(color: green, child: globalKeyChild),
           ),
           View(
             key: redKey,
             view: redView,
-            child: const ColoredBox(color: Colors.red),
+            child: const ColoredBox(color: red),
           ),
         ],
       ),
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.green), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(green), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsNothing,
     );
     final RenderObject boxWithGlobalKey = tester.renderObject(find.byKey(globalKeyChild.key!));
@@ -604,15 +611,15 @@ void main() {
           View(
             key: redKey,
             view: redView,
-            child: ColoredBox(color: Colors.red, child: globalKeyChild),
+            child: ColoredBox(color: red, child: globalKeyChild),
           ),
         ],
       ),
     );
 
-    expect(findsColoredBox(Colors.green), findsNothing);
+    expect(findsColoredBox(green), findsNothing);
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(tester.renderObject(find.byKey(globalKeyChild.key!)), equals(boxWithGlobalKey));
@@ -639,7 +646,7 @@ void main() {
               key: viewKey,
               view: FakeView(tester.view),
               child: SizedBox(
-                child: ColoredBox(key: childKey, color: Colors.green),
+                child: ColoredBox(key: childKey, color: green),
               ),
             ),
             child: const SizedBox(),
@@ -655,7 +662,7 @@ void main() {
         children: <Widget>[
           SizedBox(
             key: key1,
-            child: ColoredBox(key: childKey, color: Colors.green),
+            child: ColoredBox(key: childKey, color: green),
           ),
           ViewAnchor(key: key2, child: const SizedBox()),
           ViewAnchor(
@@ -678,7 +685,7 @@ void main() {
               key: viewKey,
               view: FakeView(tester.view),
               child: SizedBox(
-                child: ColoredBox(key: childKey, color: Colors.green),
+                child: ColoredBox(key: childKey, color: green),
               ),
             ),
             child: const SizedBox(),
@@ -711,7 +718,7 @@ void main() {
               key: viewKey,
               view: FakeView(tester.view),
               child: SizedBox(
-                child: ColoredBox(key: childKey, color: Colors.green),
+                child: ColoredBox(key: childKey, color: green),
               ),
             ),
             child: const SizedBox(),
@@ -734,7 +741,7 @@ void main() {
           ),
           SizedBox(
             key: key4,
-            child: ColoredBox(key: childKey, color: Colors.green),
+            child: ColoredBox(key: childKey, color: green),
           ),
         ],
       ),
@@ -750,7 +757,7 @@ void main() {
               key: viewKey,
               view: FakeView(tester.view),
               child: SizedBox(
-                child: ColoredBox(key: childKey, color: Colors.green),
+                child: ColoredBox(key: childKey, color: green),
               ),
             ),
             child: const SizedBox(),
@@ -770,26 +777,26 @@ void main() {
 
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.green,
+        color: green,
         child: ViewAnchor(
           view: View(
             view: anchorView,
-            child: ColoredBox(color: Colors.yellow, child: globalKeyChild),
+            child: ColoredBox(color: yellow, child: globalKeyChild),
           ),
-          child: const ColoredBox(color: Colors.red),
+          child: const ColoredBox(color: red),
         ),
       ),
     );
 
-    expect(findsColoredBox(Colors.green), findsOneWidget);
-    expect(findsColoredBox(Colors.yellow), findsOneWidget);
+    expect(findsColoredBox(green), findsOneWidget);
+    expect(findsColoredBox(yellow), findsOneWidget);
     expect(
-      find.descendant(of: findsColoredBox(Colors.yellow), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(yellow), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
-    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(findsColoredBox(red), findsOneWidget);
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsNothing,
     );
     expect(find.byType(SizedBox), findsOneWidget);
@@ -797,21 +804,21 @@ void main() {
 
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.green,
+        color: green,
         child: ViewAnchor(
-          child: ColoredBox(color: Colors.red, child: globalKeyChild),
+          child: ColoredBox(color: red, child: globalKeyChild),
         ),
       ),
     );
-    expect(findsColoredBox(Colors.green), findsOneWidget);
-    expect(findsColoredBox(Colors.yellow), findsNothing);
+    expect(findsColoredBox(green), findsOneWidget);
+    expect(findsColoredBox(yellow), findsNothing);
     expect(
-      find.descendant(of: findsColoredBox(Colors.yellow), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(yellow), matching: find.byType(SizedBox)),
       findsNothing,
     );
-    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(findsColoredBox(red), findsOneWidget);
     expect(
-      find.descendant(of: findsColoredBox(Colors.red), matching: find.byType(SizedBox)),
+      find.descendant(of: findsColoredBox(red), matching: find.byType(SizedBox)),
       findsOneWidget,
     );
     expect(find.byType(SizedBox), findsOneWidget);
@@ -825,23 +832,23 @@ void main() {
 
     await tester.pumpWidget(
       ColoredBox(
-        color: Colors.green,
+        color: green,
         child: ViewAnchor(
           view: View(
             view: anchorView,
-            child: const ColoredBox(color: Colors.yellow),
+            child: const ColoredBox(color: yellow),
           ),
-          child: const ColoredBox(color: Colors.red),
+          child: const ColoredBox(color: red),
         ),
       ),
     );
 
-    final RenderObject box = tester.renderObject(findsColoredBox(Colors.yellow));
+    final RenderObject box = tester.renderObject(findsColoredBox(yellow));
 
     await tester.pumpWidget(
       const ColoredBox(
-        color: Colors.green,
-        child: ViewAnchor(child: ColoredBox(color: Colors.red)),
+        color: green,
+        child: ViewAnchor(child: ColoredBox(color: red)),
       ),
     );
 
@@ -860,19 +867,19 @@ void main() {
         views: <Widget>[
           View(
             view: redView,
-            child: const ColoredBox(color: Colors.red),
+            child: const ColoredBox(color: red),
           ),
           View(
             view: greenView,
-            child: const ColoredBox(color: Colors.green),
+            child: const ColoredBox(color: green),
           ),
         ],
       ),
     );
 
-    expect(findsColoredBox(Colors.green), findsOneWidget);
-    expect(findsColoredBox(Colors.red), findsOneWidget);
-    final RenderObject box = tester.renderObject(findsColoredBox(Colors.green));
+    expect(findsColoredBox(green), findsOneWidget);
+    expect(findsColoredBox(red), findsOneWidget);
+    final RenderObject box = tester.renderObject(findsColoredBox(green));
 
     await tester.pumpWidget(
       wrapWithView: false,
@@ -880,14 +887,14 @@ void main() {
         views: <Widget>[
           View(
             view: redView,
-            child: const ColoredBox(color: Colors.red),
+            child: const ColoredBox(color: red),
           ),
         ],
       ),
     );
 
-    expect(findsColoredBox(Colors.green), findsNothing);
-    expect(findsColoredBox(Colors.red), findsOneWidget);
+    expect(findsColoredBox(green), findsNothing);
+    expect(findsColoredBox(red), findsOneWidget);
     expect(box.debugDisposed, isTrue);
   });
 
@@ -913,7 +920,7 @@ void main() {
   testWidgets('ViewAnchor with View can be wrapped and unwrapped', (WidgetTester tester) async {
     final Widget viewAnchor = ViewAnchor(
       view: View(view: FakeView(tester.view), child: const SizedBox()),
-      child: const ColoredBox(color: Colors.green),
+      child: const ColoredBox(color: green),
     );
 
     await tester.pumpWidget(viewAnchor);
@@ -921,7 +928,7 @@ void main() {
     final List<RenderObject> renderViews = tester.renderObjectList(find.byType(View)).toList();
     final RenderObject renderSizedBox = tester.renderObject(find.byType(SizedBox));
 
-    await tester.pumpWidget(ColoredBox(color: Colors.yellow, child: viewAnchor));
+    await tester.pumpWidget(ColoredBox(color: yellow, child: viewAnchor));
 
     expect(tester.renderObjectList(find.byType(View)), renderViews);
     expect(tester.renderObject(find.byType(SizedBox)), same(renderSizedBox));

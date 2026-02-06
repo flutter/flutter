@@ -24,7 +24,6 @@ double DisplayManager::GetMainDisplayRefreshRate() const {
 
 void DisplayManager::HandleDisplayUpdates(
     std::vector<std::unique_ptr<Display>> displays) {
-  FML_DCHECK(!displays.empty());
   std::scoped_lock lock(displays_mutex_);
   displays_ = std::move(displays);
 }

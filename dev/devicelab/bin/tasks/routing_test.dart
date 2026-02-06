@@ -28,15 +28,13 @@ void main() {
     });
     section('TEST WHETHER `flutter run --route` WORKS');
     await inDirectory(appDir, () async {
-      final Completer<void> ready = Completer<void>();
+      final ready = Completer<void>();
       late bool ok;
       print('run: starting...');
       final Process run = await startFlutter(
         'run',
-        // --fast-start does not support routes.
         options: <String>[
           '--disable-service-auth-codes',
-          '--no-fast-start',
           '--no-publish-port',
           '-d',
           device.deviceId,

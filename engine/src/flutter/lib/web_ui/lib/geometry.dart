@@ -515,7 +515,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   double get height => bottom - top;
   Rect get outerRect => Rect.fromLTRB(left, top, right, bottom);
   Rect get safeInnerRect {
-    const double kInsetFactor = 0.29289321881; // 1-cos(pi/4)
+    const kInsetFactor = 0.29289321881; // 1-cos(pi/4)
 
     final double leftRadius = math.max(blRadiusX, tlRadiusX);
     final double topRadius = math.max(tlRadiusY, trRadiusY);
@@ -608,7 +608,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   }
 
   T scaleRadii() {
-    double scale = 1.0;
+    var scale = 1.0;
     final double absWidth = width.abs();
     final double absHeight = height.abs();
     scale = _getMin(scale, blRadiusY, tlRadiusY, absHeight);
@@ -730,7 +730,7 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   );
 
   String _toString({required String className}) {
-    final String rect =
+    final rect =
         '${left.toStringAsFixed(1)}, '
         '${top.toStringAsFixed(1)}, '
         '${right.toStringAsFixed(1)}, '
@@ -1258,7 +1258,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     // Now determine a global scale to apply to all of the radii to ensure
     // that none of the adjacent pairs of radius values sum to larger than
     // the corresponding dimension of the rectangle.
-    double scale = 1.0;
+    var scale = 1.0;
     scale = _adjustScale(tlRadiusX, trRadiusX, width, scale);
     scale = _adjustScale(blRadiusX, brRadiusX, width, scale);
     scale = _adjustScale(tlRadiusY, blRadiusY, height, scale);
@@ -1292,7 +1292,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
       return Radius.zero;
     }
     final (double radiusX, double radiusY) = _normalizeEmptyToZero(tlRadiusX, tlRadiusY);
-    double scale = 1.0;
+    var scale = 1.0;
     scale = _adjustScale(radiusX, radiusX, width, scale);
     scale = _adjustScale(radiusY, radiusY, height, scale);
     return Radius.elliptical(radiusX * scale, radiusY * scale);

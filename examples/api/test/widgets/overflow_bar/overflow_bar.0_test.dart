@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/overflow_bar/overflow_bar.0.dart' as example;
+import 'package:flutter_api_samples/widgets/overflow_bar/overflow_bar.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -14,7 +15,10 @@ void main() {
     // `widgetType`, ensuring that the given widgets exist
     // inside of an OverflowBar.
     Finder buttonsFinder(Type widgetType) {
-      return find.descendant(of: find.byType(OverflowBar), matching: find.byType(widgetType));
+      return find.descendant(
+        of: find.byType(OverflowBar),
+        matching: find.byType(widgetType),
+      );
     }
 
     expect(buttonsFinder(TextButton), findsNWidgets(2));

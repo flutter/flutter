@@ -10,12 +10,12 @@ const int _kNumIterations = 100000;
 
 Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  final printer = BenchmarkResultPrinter();
 
-  const StandardMessageCodec codec = StandardMessageCodec();
-  final Stopwatch watch = Stopwatch();
+  const codec = StandardMessageCodec();
+  final watch = Stopwatch();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage(null);
   }
   watch.stop();
@@ -29,7 +29,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage(12345);
   }
   watch.stop();
@@ -44,7 +44,7 @@ Future<void> execute() async {
   watch.reset();
 
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage('This is a performance test.');
   }
   watch.stop();
@@ -58,7 +58,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage(<Object>[1234, 'This is a performance test.', 1.25, true]);
   }
   watch.stop();
@@ -72,7 +72,7 @@ Future<void> execute() async {
 
   watch.reset();
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage(<String, Object>{
       'integer': 1234,
       'string': 'This is a performance test.',
@@ -92,7 +92,7 @@ Future<void> execute() async {
   watch.reset();
 
   watch.start();
-  for (int i = 0; i < _kNumIterations; i += 1) {
+  for (var i = 0; i < _kNumIterations; i += 1) {
     codec.encodeMessage('special chars >\u263A\u{1F602}<');
   }
   watch.stop();

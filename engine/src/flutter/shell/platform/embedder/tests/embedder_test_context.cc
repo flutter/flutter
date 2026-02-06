@@ -293,8 +293,8 @@ void EmbedderTestContext::SetNextSceneCallback(
 std::future<sk_sp<SkImage>> EmbedderTestContext::GetNextSceneImage() {
   std::promise<sk_sp<SkImage>> promise;
   auto future = promise.get_future();
-  SetNextSceneCallback(
-      fml::MakeCopyable([promise = std::move(promise)](auto image) mutable {
+  SetNextSceneCallback(fml::MakeCopyable(
+      [promise = std::move(promise)](const auto& image) mutable {
         promise.set_value(image);
       }));
   return future;

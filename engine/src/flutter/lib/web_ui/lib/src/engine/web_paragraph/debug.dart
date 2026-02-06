@@ -3,15 +3,38 @@
 // found in the LICENSE file.
 
 class WebParagraphDebug {
-  static const bool logging = false;
+  static bool logging = false;
+  static bool apiLogging = false;
 
   static void log(String arg) {
-    if (logging) {
-      print(arg);
-    }
+    assert(() {
+      if (logging) {
+        print(arg);
+      }
+      return true;
+    }());
+  }
+
+  static void apiTrace(String arg) {
+    assert(() {
+      if (apiLogging || logging) {
+        print(arg);
+      }
+      return true;
+    }());
+  }
+
+  static void warning(String arg) {
+    assert(() {
+      print('WARNING: $arg');
+      return true;
+    }());
   }
 
   static void error(String arg) {
-    print('ERROR: $arg');
+    assert(() {
+      print('ERROR: $arg');
+      return true;
+    }());
   }
 }

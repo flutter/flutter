@@ -4,9 +4,9 @@
 
 #include "impeller/renderer/render_target.h"
 
+#include <format>
 #include <sstream>
 
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
@@ -279,22 +279,22 @@ std::string RenderTarget::ToString() const {
   std::stringstream stream;
 
   if (color0_.has_value()) {
-    stream << SPrintF("Color[%d]=(%s)", 0,
-                      ColorAttachmentToString(color0_.value()).c_str());
+    stream << std::format("Color[{}]=({})", 0,
+                          ColorAttachmentToString(color0_.value()));
   }
   for (const auto& [index, color] : colors_) {
-    stream << SPrintF("Color[%zu]=(%s)", index,
-                      ColorAttachmentToString(color).c_str());
+    stream << std::format("Color[{}]=({})", index,
+                          ColorAttachmentToString(color));
   }
   if (depth_) {
     stream << ",";
-    stream << SPrintF("Depth=(%s)",
-                      DepthAttachmentToString(depth_.value()).c_str());
+    stream << std::format("Depth=({})",
+                          DepthAttachmentToString(depth_.value()));
   }
   if (stencil_) {
     stream << ",";
-    stream << SPrintF("Stencil=(%s)",
-                      StencilAttachmentToString(stencil_.value()).c_str());
+    stream << std::format("Stencil=({})",
+                          StencilAttachmentToString(stencil_.value()));
   }
   return stream.str();
 }
@@ -327,7 +327,8 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
     RenderTarget::AttachmentConfig color_attachment_config,
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    std::optional<PixelFormat> target_pixel_format) {
   if (size.IsEmpty()) {
     return {};
   }
@@ -338,11 +339,12 @@ RenderTarget RenderTargetAllocator::CreateOffscreen(
   if (existing_color_texture) {
     color0_tex = existing_color_texture;
   } else {
-    PixelFormat pixel_format =
-        context.GetCapabilities()->GetDefaultColorFormat();
     TextureDescriptor color0_tex_desc;
     color0_tex_desc.storage_mode = color_attachment_config.storage_mode;
-    color0_tex_desc.format = pixel_format;
+    color0_tex_desc.format =
+        target_pixel_format.has_value()
+            ? target_pixel_format.value()
+            : context.GetCapabilities()->GetDefaultColorFormat();
     color0_tex_desc.size = size;
     color0_tex_desc.mip_count = mip_count;
     color0_tex_desc.usage =
@@ -382,13 +384,17 @@ RenderTarget RenderTargetAllocator::CreateOffscreenMSAA(
     std::optional<RenderTarget::AttachmentConfig> stencil_attachment_config,
     const std::shared_ptr<Texture>& existing_color_msaa_texture,
     const std::shared_ptr<Texture>& existing_color_resolve_texture,
-    const std::shared_ptr<Texture>& existing_depth_stencil_texture) {
+    const std::shared_ptr<Texture>& existing_depth_stencil_texture,
+    std::optional<PixelFormat> target_pixel_format) {
   if (size.IsEmpty()) {
     return {};
   }
 
   RenderTarget target;
-  PixelFormat pixel_format = context.GetCapabilities()->GetDefaultColorFormat();
+  PixelFormat pixel_format =
+      target_pixel_format.has_value()
+          ? target_pixel_format.value()
+          : context.GetCapabilities()->GetDefaultColorFormat();
 
   // Create MSAA color texture.
   std::shared_ptr<Texture> color0_msaa_tex;

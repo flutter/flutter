@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/tap_region/text_field_tap_region.0.dart' as example;
+import 'package:flutter_api_samples/widgets/tap_region/text_field_tap_region.0.dart'
+    as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -23,7 +24,10 @@ void main() {
     await tester.pump();
 
     expect(getFieldValue(tester).text, equals('0'));
-    expect(getFieldValue(tester).selection, equals(const TextSelection.collapsed(offset: 1)));
+    expect(
+      getFieldValue(tester).selection,
+      equals(const TextSelection.collapsed(offset: 1)),
+    );
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
@@ -64,7 +68,10 @@ void main() {
     await tester.enterText(find.byType(TextField), '123');
     await tester.pumpAndSettle();
     expect(getFieldValue(tester).text, equals('123'));
-    expect(getFieldValue(tester).selection, equals(const TextSelection.collapsed(offset: 3)));
+    expect(
+      getFieldValue(tester).selection,
+      equals(const TextSelection.collapsed(offset: 3)),
+    );
 
     await tester.tap(find.byIcon(Icons.remove));
     await tester.pumpAndSettle();

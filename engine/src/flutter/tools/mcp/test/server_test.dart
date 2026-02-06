@@ -23,7 +23,7 @@ void main() {
       StreamChannel.withCloseGuarantee(inputController.stream, outputController.sink),
     );
 
-    final streamIterator = StreamIterator(outputController.stream);
+    final StreamIterator<String> streamIterator = StreamIterator(outputController.stream);
 
     inputController.add(_initMessage);
     expect(await streamIterator.moveNext(), isTrue);
@@ -33,7 +33,7 @@ void main() {
 
     expect(await streamIterator.moveNext(), isTrue);
     final String outputString = streamIterator.current;
-    final Map<String, dynamic> json = jsonDecode(outputString) as Map<String, dynamic>;
+    final json = jsonDecode(outputString) as Map<String, dynamic>;
 
     expect(json['jsonrpc'], equals('2.0'), reason: outputString);
     expect(json['id'], equals(1), reason: outputString);
@@ -68,7 +68,7 @@ void main() {
       ),
     );
 
-    final streamIterator = StreamIterator(outputController.stream);
+    final StreamIterator<String> streamIterator = StreamIterator(outputController.stream);
 
     inputController.add(_initMessage);
     expect(await streamIterator.moveNext(), isTrue);
@@ -81,7 +81,7 @@ void main() {
     expect(await streamIterator.moveNext(), isTrue);
     final String outputString = streamIterator.current;
 
-    final Map<String, dynamic> json = jsonDecode(outputString) as Map<String, dynamic>;
+    final json = jsonDecode(outputString) as Map<String, dynamic>;
 
     expect(json['jsonrpc'], equals('2.0'), reason: outputString);
     expect(json['id'], equals(2), reason: outputString);
@@ -114,7 +114,7 @@ void main() {
       ),
     );
 
-    final streamIterator = StreamIterator(outputController.stream);
+    final StreamIterator<String> streamIterator = StreamIterator(outputController.stream);
 
     inputController.add(_initMessage);
     expect(await streamIterator.moveNext(), isTrue);
@@ -127,7 +127,7 @@ void main() {
     expect(await streamIterator.moveNext(), isTrue);
     final String outputString = streamIterator.current;
 
-    final Map<String, dynamic> json = jsonDecode(outputString) as Map<String, dynamic>;
+    final json = jsonDecode(outputString) as Map<String, dynamic>;
 
     expect(json['jsonrpc'], equals('2.0'), reason: outputString);
     expect(json['id'], equals(2), reason: outputString);
