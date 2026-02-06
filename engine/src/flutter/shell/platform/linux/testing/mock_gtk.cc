@@ -25,6 +25,88 @@ static void fl_mock_keymap_class_init(FlMockKeymapClass* klass) {
 
 static void fl_mock_keymap_init(FlMockKeymap* self) {}
 
+#if FLUTTER_LINUX_GTK4
+G_DECLARE_FINAL_TYPE(FlMockGtk4Surface,
+                     fl_mock_gtk4_surface,
+                     FL,
+                     MOCK_GTK4_SURFACE,
+                     GObject)
+
+struct _FlMockGtk4Surface {
+  GObject parent_instance;
+  GdkToplevelState state;
+  gboolean mapped;
+};
+
+G_DEFINE_TYPE_WITH_CODE(FlMockGtk4Surface,
+                        fl_mock_gtk4_surface,
+                        G_TYPE_OBJECT,
+                        G_IMPLEMENT_INTERFACE(GDK_TYPE_TOPLEVEL, nullptr))
+
+enum {
+  kPropState = 1,
+  kPropMapped,
+  kPropLast,
+};
+
+static GParamSpec* g_properties[kPropLast];
+
+static void fl_mock_gtk4_surface_set_property(GObject* object,
+                                              guint prop_id,
+                                              const GValue* value,
+                                              GParamSpec* pspec) {
+  FlMockGtk4Surface* self = FL_MOCK_GTK4_SURFACE(object);
+  switch (prop_id) {
+    case kPropState:
+      self->state = static_cast<GdkToplevelState>(g_value_get_flags(value));
+      break;
+    case kPropMapped:
+      self->mapped = g_value_get_boolean(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_mock_gtk4_surface_get_property(GObject* object,
+                                              guint prop_id,
+                                              GValue* value,
+                                              GParamSpec* pspec) {
+  FlMockGtk4Surface* self = FL_MOCK_GTK4_SURFACE(object);
+  switch (prop_id) {
+    case kPropState:
+      g_value_set_flags(value, self->state);
+      break;
+    case kPropMapped:
+      g_value_set_boolean(value, self->mapped);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_mock_gtk4_surface_class_init(FlMockGtk4SurfaceClass* klass) {
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->set_property = fl_mock_gtk4_surface_set_property;
+  object_class->get_property = fl_mock_gtk4_surface_get_property;
+
+  g_properties[kPropState] =
+      g_param_spec_flags("state", "state", "state", GDK_TYPE_TOPLEVEL_STATE,
+                         static_cast<GdkToplevelState>(0),
+                         static_cast<GParamFlags>(G_PARAM_READWRITE));
+  g_properties[kPropMapped] =
+      g_param_spec_boolean("mapped", "mapped", "mapped", FALSE,
+                           static_cast<GParamFlags>(G_PARAM_READWRITE));
+  g_object_class_install_properties(object_class, kPropLast, g_properties);
+}
+
+static void fl_mock_gtk4_surface_init(FlMockGtk4Surface* self) {
+  self->state = static_cast<GdkToplevelState>(0);
+  self->mapped = FALSE;
+}
+#endif  // FLUTTER_LINUX_GTK4
 // Override GdkKeymap
 GType gdk_keymap_get_type() {
   return fl_mock_keymap_get_type();
