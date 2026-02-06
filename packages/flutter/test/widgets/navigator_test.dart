@@ -357,8 +357,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final pages = <Page<void>>[
-      const ZeroTransitionPage(name: 'Page 1'),
-      const ZeroTransitionPage(name: 'Page 2'),
+      const ZeroTransitionPage(name: 'Page 1', child: Text('Page 1')),
+      const ZeroTransitionPage(name: 'Page 2', child: Text('Page 2')),
     ];
     final observations = <NavigatorObservation>[];
 
@@ -4101,8 +4101,9 @@ void main() {
         return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
-              const TestPageWithZeroTransitionDuration(child: Text('page1')),
-              if (secondPage) const TestPageWithZeroTransitionDuration(child: Text('page2')),
+              const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page1')),
+              if (secondPage)
+                const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page2')),
             ],
             onPopPage: (Route<dynamic> route, dynamic result) => false,
           ),
@@ -6456,15 +6457,6 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
       handleExitingRoute(pageRoute);
     }
     return results;
-  }
-}
-
-class ZeroTransitionPage extends Page<void> {
-  const ZeroTransitionPage({super.key, super.arguments, required String super.name});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return NoAnimationPageRoute(settings: this, pageBuilder: (BuildContext context) => Text(name!));
   }
 }
 

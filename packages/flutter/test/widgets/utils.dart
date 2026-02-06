@@ -27,19 +27,27 @@ Color getTestColor(int index) {
 // TODO(navaronbracke): fix usages of this test route (route_tester.dart)
 
 /// A [Page] that creates a [Route] with a [PageRoute.transitionDuration] set to [Duration.zero].
-class TestPageWithZeroTransitionDuration<T> extends Page<T> {
-  const TestPageWithZeroTransitionDuration({required this.child});
+class ZeroTransitionPage<T> extends Page<T> {
+  const ZeroTransitionPage({
+    super.key,
+    super.arguments,
+    super.name,
+    this.child,
+    this.builder,
+    this.allowSnapshotting = true,
+  }) : assert(child != null || builder != null, 'Either child or builder must be provided.');
 
-  final Widget child;
+  final Widget? child;
+  final WidgetBuilder? builder;
+  final bool allowSnapshotting;
 
   @override
   Route<T> createRoute(BuildContext context) {
     return TestRoute(
       settings: this,
-      allowSnapshotting: false,
-      // ignore: avoid_redundant_argument_values
-      transitionDuration: Duration.zero,
+      allowSnapshotting: allowSnapshotting,
       child: child,
+      builder: builder,
     );
   }
 }
@@ -52,6 +60,7 @@ class TestRoute<T> extends PageRoute<T> {
     this.barrierColor,
     this.maintainState = false,
     this.transitionDuration = Duration.zero,
+    this.reverseTransitionDuration = Duration.zero,
     this.transitionsBuilder,
     super.fullscreenDialog,
     super.allowSnapshotting,
@@ -63,6 +72,9 @@ class TestRoute<T> extends PageRoute<T> {
 
   @override
   final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   final Color? barrierColor;
