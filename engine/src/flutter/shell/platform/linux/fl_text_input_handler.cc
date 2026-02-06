@@ -367,8 +367,7 @@ static void update_im_cursor_position(FlTextInputHandler* self) {
   preedit_rect.x = static_cast<int>(dest_x);
   preedit_rect.y = static_cast<int>(dest_y);
 #else
-  gtk_widget_translate_coordinates(self->widget, toplevel,
-                                   static_cast<gint>(x),
+  gtk_widget_translate_coordinates(self->widget, toplevel, static_cast<gint>(x),
                                    static_cast<gint>(y), &preedit_rect.x,
                                    &preedit_rect.y);
 #endif
@@ -523,12 +522,12 @@ gboolean fl_text_input_handler_filter_keypress(FlTextInputHandler* self,
     return FALSE;
   }
 
-  if (gtk_im_context_filter_keypress(
-          self->im_context,
+  if (gtk_im_context_filter_keypress(self->im_context,
 #if FLUTTER_LINUX_GTK4
-          fl_key_event_get_origin(event))) {
+                                     fl_key_event_get_origin(event))) {
 #else
-          reinterpret_cast<GdkEventKey*>(fl_key_event_get_origin(event)))) {
+                                     reinterpret_cast<GdkEventKey*>(
+                                         fl_key_event_get_origin(event)))) {
 #endif
     return TRUE;
   }
