@@ -94,7 +94,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   ASSERT_TRUE(bridge && boston);
   raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
   ASSERT_TRUE(sampler);
-  auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
 
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
   SinglePassCallback callback = [&](RenderPass& pass) {
