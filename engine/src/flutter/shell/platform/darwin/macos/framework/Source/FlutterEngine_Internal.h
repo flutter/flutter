@@ -88,6 +88,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 @property(nonatomic, readonly) BOOL running;
 
 /**
+ * The project associated with this engine.
+ */
+@property(nonatomic, readonly, nonnull) FlutterDartProject* project;
+
+/**
  * Provides the renderer config needed to initialize the engine and also handles external
  * texture management.
  */
