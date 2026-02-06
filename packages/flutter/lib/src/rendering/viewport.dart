@@ -1063,12 +1063,24 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         };
     }
 
+    var anchorOffset = 0.0;
+    if (this is RenderViewport) {
+      final viewport = this as RenderViewport;
+      anchorOffset =
+          viewport.anchor *
+          switch (axis) {
+            Axis.vertical => size.height,
+            Axis.horizontal => size.width,
+          };
+    }
+
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
       Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
     };
 
-    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
+    final double targetOffset =
+        leadingScrollOffset + anchorOffset - mainAxisExtentDifference * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
 
     targetRect = switch (axisDirection) {
@@ -1352,32 +1364,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       1.0,
       rect: rect,
     );
-
-    // We need to account for the anchor point, or else it will try to jump
-    // the the wrong offset
-    var anchorOffset = 0.0;
-    if (viewport is RenderViewport) {
-      final double mainAxisExtent = viewport.axis == Axis.vertical
-          ? viewport.size.height
-          : viewport.size.width;
-
-      anchorOffset = viewport.anchor * mainAxisExtent;
-    }
-
-    final double shiftedLeading = leadingEdgeOffset.offset + anchorOffset;
-    final double shiftedTrailing = trailingEdgeOffset.offset + anchorOffset;
-
-    // Shift bounds to account for anchor offset
-    final correctedLeading = RevealedOffset(offset: shiftedLeading, rect: leadingEdgeOffset.rect);
-    final correctedTrailing = RevealedOffset(
-      offset: shiftedTrailing,
-      rect: trailingEdgeOffset.rect,
-    );
-
     final double currentOffset = offset.pixels;
     final RevealedOffset? targetOffset = RevealedOffset.clampOffset(
-      leadingEdgeOffset: correctedLeading,
-      trailingEdgeOffset: correctedTrailing,
+      leadingEdgeOffset: leadingEdgeOffset,
+      trailingEdgeOffset: trailingEdgeOffset,
       currentOffset: currentOffset,
     );
     if (targetOffset == null) {
