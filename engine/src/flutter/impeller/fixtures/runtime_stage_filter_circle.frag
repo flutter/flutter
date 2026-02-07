@@ -6,10 +6,10 @@
 
 uniform vec2 u_size;
 uniform sampler2D u_texture;
+uniform vec2 u_origin;
 
 out vec4 frag_color;
 
-vec2 origin = vec2(30.0, 30.0);
 float radius = 30.0;
 
 void main() {
@@ -18,7 +18,7 @@ void main() {
 #ifdef IMPELLER_TARGET_OPENGLES
   fixed_uv.y = 1.0 - fixed_uv.y;
 #endif
-  vec2 norm_origin = origin / u_size;
+  vec2 norm_origin = u_origin / u_size;
   float norm_radius = radius / max(u_size.x, u_size.y);
   if (distance(uv, norm_origin) < norm_radius) {
     frag_color = vec4(1.0, 0.0, 0.0, 1.0);
