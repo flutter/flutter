@@ -110,8 +110,8 @@ class SwiftPackage {
 
   /// Create a Package.swift using settings from [_templateContext].
   ///
-  /// When [generateEmptySources] is true (the default), it create an empty Swift source file since
-  /// swift packages require at least one source file per non-binary target.
+  /// When [generateEmptySources] is true (the default), it creates an empty Swift source file since
+  /// Swift packages require at least one source file per non-binary target.
   void createSwiftPackage({bool generateEmptySources = true}) {
     for (final SwiftPackageTarget target in _targets) {
       if (target.targetType == SwiftPackageTargetType.binaryTarget) {

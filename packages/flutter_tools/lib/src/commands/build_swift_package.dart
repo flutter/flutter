@@ -30,6 +30,7 @@ import 'build.dart';
 
 const String kPluginSwiftPackageName = 'FlutterPluginRegistrant';
 const String _kSources = 'Sources';
+const List<String> _kSupportedPlatforms = ['ios', 'macos'];
 
 /// Create a swift package that can be used to embed a Flutter app inside a native iOS or macOS app.
 class BuildSwiftPackage extends BuildSubCommand {
@@ -65,7 +66,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         valueHelp: 'path/to/directory/',
         help: 'Location to write the swift package.',
       )
-      ..addOption('platform', allowed: ['ios', 'macos'], defaultsTo: 'ios')
+      ..addOption('platform', allowed: _kSupportedPlatforms, defaultsTo: 'ios')
       ..addMultiOption(
         'build-mode',
         allowed: ['debug', 'profile', 'release'],
@@ -78,8 +79,8 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   @override
   final description =
-      'Produces Swift packages and scripts for a Flutter project '
-      'and its plugins for integration into existing, plain iOS and macOS Xcode projects.\n'
+      'Produces Swift packages and scripts for a Flutter project and its plugins for integration '
+      'into existing, native non-Flutter iOS and macOS Xcode projects.\n'
       'This can only be run on macOS hosts.';
 
   final Platform _platform;
@@ -107,33 +108,25 @@ class BuildSwiftPackage extends BuildSubCommand {
     }
     throwToolExit(
       'The $platformString platform is being targeted, but is not supported for this command. '
-      'Supported platforms include: ios, macos.',
+      'Supported platforms include: ${_kSupportedPlatforms.join(', ')}.',
     );
   }
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    switch (_targetPlatform) {
-      case FlutterDarwinPlatform.ios:
-        return <DevelopmentArtifact>{DevelopmentArtifact.iOS};
-      case FlutterDarwinPlatform.macos:
-        return <DevelopmentArtifact>{DevelopmentArtifact.macOS};
-    }
+    return switch (_targetPlatform) {
+      .ios => <DevelopmentArtifact>{.iOS},
+      .macos => <DevelopmentArtifact>{.macOS},
+    };
   }
 
   Future<List<BuildInfo>> _getBuildInfos() async {
     final List<String> buildModes = stringsArg('build-mode');
-    final List<BuildInfo> buildInfos = [];
-    if (buildModes.contains('debug')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
-    }
-    if (buildModes.contains('profile')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
-    }
-    if (buildModes.contains('release')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
-    }
-    return buildInfos;
+    return <BuildInfo>[
+      if (buildModes.contains('debug')) await getBuildInfo(forcedBuildMode: .debug),
+      if (buildModes.contains('profile')) await getBuildInfo(forcedBuildMode: .profile),
+      if (buildModes.contains('release')) await getBuildInfo(forcedBuildMode: .release),
+    ];
   }
 
   @override
@@ -149,14 +142,14 @@ class BuildSwiftPackage extends BuildSubCommand {
   /// Throws a [ToolExit] if iOS/macOS subproject does not exist.
   void _validateTargetPlatform() {
     switch (_targetPlatform) {
-      case FlutterDarwinPlatform.ios:
+      case .ios:
         if (!project.ios.existsSync()) {
           throwToolExit(
             'The iOS platform is being targeted but the Flutter project does not support iOS. Use '
             'the "--platform" flag to change the targeted platforms.',
           );
         }
-      case FlutterDarwinPlatform.macos:
+      case .macos:
         if (!project.macos.existsSync()) {
           throwToolExit(
             'The macOS platform is being targeted but the Flutter project does not support macOS. Use '
@@ -223,7 +216,7 @@ class BuildSwiftPackage extends BuildSubCommand {
         );
 
     if (outputArgument.isEmpty) {
-      throwToolExit('--output is required.');
+      throwToolExit('Please provide a value for --output.');
     }
 
     final Directory outputDirectory = _fileSystem.directory(
@@ -326,7 +319,7 @@ class FlutterPluginRegistrantSwiftPackage {
     final product = SwiftPackageProduct(
       name: swiftPackageName,
       targets: <String>[swiftPackageName],
-      libraryType: SwiftPackageLibraryType.static,
+      libraryType: .static,
     );
 
     final targets = <SwiftPackageTarget>[
@@ -366,32 +359,24 @@ class FlutterPluginRegistrantSwiftPackage {
       sourcesDirectory.childDirectory(kPluginSwiftPackageName),
       recursive: true,
     );
-
-    if (_targetPlatform == FlutterDarwinPlatform.ios) {
-      final File implementationFile = sourcesDirectory
-          .childDirectory(kPluginSwiftPackageName)
-          .childFile('GeneratedPluginRegistrant.m');
-      final File headerFile = sourcesDirectory
-          .childDirectory(kPluginSwiftPackageName)
-          .childDirectory('include')
-          .childFile('GeneratedPluginRegistrant.h');
-      await writeIOSPluginRegistrant(
-        _utils.project,
-        plugins,
-        pluginRegistrantHeader: headerFile,
-        pluginRegistrantImplementation: implementationFile,
-        templateRenderer: _utils.templateRenderer,
-      );
-    } else if (_targetPlatform == FlutterDarwinPlatform.macos) {
-      final File swiftFile = sourcesDirectory
-          .childDirectory(kPluginSwiftPackageName)
-          .childFile('GeneratedPluginRegistrant.swift');
-      await writeMacOSPluginRegistrant(
-        _utils.project,
-        plugins,
-        pluginRegistrantImplementation: swiftFile,
-        templateRenderer: _utils.templateRenderer,
-      );
+    final File swiftFile = sourcesDirectory
+        .childDirectory(kPluginSwiftPackageName)
+        .childFile('GeneratedPluginRegistrant.swift');
+    switch (_targetPlatform) {
+      case .ios:
+        await writeIOSPluginRegistrant(
+          _utils.project,
+          plugins,
+          swiftPluginRegistrant: swiftFile,
+          templateRenderer: _utils.templateRenderer,
+        );
+      case .macos:
+        await writeMacOSPluginRegistrant(
+          _utils.project,
+          plugins,
+          pluginRegistrantImplementation: swiftFile,
+          templateRenderer: _utils.templateRenderer,
+        );
     }
   }
 }

@@ -130,60 +130,27 @@ let package = Package(
     ]
 )
 ''');
-        final File generatedSourceHeader = swiftPackageOutput
+        final File generatedSource = swiftPackageOutput
             .childDirectory('Debug')
             .childDirectory('FlutterPluginRegistrant')
-            .childDirectory('include')
-            .childFile('GeneratedPluginRegistrant.h');
-        expect(generatedSourceHeader, exists);
-        expect(generatedSourceHeader.readAsStringSync(), '''
+            .childFile('GeneratedPluginRegistrant.swift');
+        expect(generatedSource, exists);
+        expect(generatedSource.readAsStringSync(), '''
 //
 //  Generated file. Do not edit.
 //
+import Flutter
+import UIKit
 
-// clang-format off
+import PluginA
 
-#ifndef GeneratedPluginRegistrant_h
-#define GeneratedPluginRegistrant_h
-
-#import <Flutter/Flutter.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface GeneratedPluginRegistrant : NSObject
-+ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
-@end
-
-NS_ASSUME_NONNULL_END
-#endif /* GeneratedPluginRegistrant_h */
-''');
-        final File generatedSourceImplementation = swiftPackageOutput
-            .childDirectory('Debug')
-            .childDirectory('FlutterPluginRegistrant')
-            .childFile('GeneratedPluginRegistrant.m');
-        expect(generatedSourceImplementation, exists);
-        expect(generatedSourceImplementation.readAsStringSync(), '''
-//
-//  Generated file. Do not edit.
-//
-
-// clang-format off
-
-#import "GeneratedPluginRegistrant.h"
-
-#if __has_include(<PluginA/PluginAPlugin.h>)
-#import <PluginA/PluginAPlugin.h>
-#else
-@import PluginA;
-#endif
-
-@implementation GeneratedPluginRegistrant
-
-+ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-  [PluginAPlugin registerWithRegistrar:[registry registrarForPlugin:@"PluginAPlugin"]];
+@objc public class GeneratedPluginRegistrant: NSObject {
+    @objc public static func register(with registry: FlutterPluginRegistry) {
+        if let pluginAPlugin = registry.registrar(forPlugin: "PluginAPlugin") {
+            PluginAPlugin.register(with: pluginAPlugin)
+        }
+    }
 }
-
-@end
 ''');
       });
     });
