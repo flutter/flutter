@@ -52,7 +52,7 @@ const kJITCrashFailureMessage =
     'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
 
 @visibleForTesting
-String jITCrashFailureInstructions(String deviceVersion) =>
+String jitCrashFailureInstructions(String deviceVersion) =>
     '''
 ════════════════════════════════════════════════════════════════════════════════
 A change to iOS has caused a temporary break in Flutter's debug mode on
@@ -836,7 +836,7 @@ class IOSDevice extends Device {
   }
 
   Future<void> _addLogInterceptors(SharedIOSDeviceLogReader deviceLogReader) async {
-    final String? uisceneWarning = globals.userMessages.uisceneMigrationWarning;
+    final String? uisceneWarning = globals.userMessages.uiSceneMigrationWarning;
     if (uisceneWarning != null) {
       final uisceneWarningInterceptor = LogInterceptor(
         identifier: 'uiscene_requirement',
@@ -960,7 +960,7 @@ class IOSDevice extends Device {
       identifier: kJITCrashLogInterceptorIdentifier,
       pattern: kJITCrashFailureMessage,
       action: () {
-        throwToolExit(jITCrashFailureInstructions(deviceSdkVersion));
+        throwToolExit(jitCrashFailureInstructions(deviceSdkVersion));
       },
       excludeFromStream: false,
     );
@@ -1550,14 +1550,12 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   // Logging from the dart code has no prefixing metadata.
   final _debuggerLoggingRegex = RegExp(r'^\S* \S* \S*\[[0-9:]*] (.*)');
 
-  late final _linesController = StreamController<String>.broadcast(
+  @override
+  @visibleForTesting
+  late final linesController = StreamController<String>.broadcast(
     onListen: _listenToSysLog,
     onCancel: dispose,
   );
-
-  @override
-  @visibleForTesting
-  StreamController<String> get linesController => _linesController;
 
   @visibleForTesting
   void addToLinesController(String message, IOSDeviceLogSource source) {

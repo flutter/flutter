@@ -1595,7 +1595,7 @@ void main() {
                 return null;
               },
               (Object error, StackTrace stack) {
-                expect(error.toString(), contains(jITCrashFailureInstructions('iOS 18.4')));
+                expect(error.toString(), contains(jitCrashFailureInstructions('iOS 18.4')));
                 completer.complete();
               },
             ),
@@ -1952,5 +1952,5 @@ class FakeSharedIOSDeviceLogReader extends SharedIOSDeviceLogReader {
 
 class OverrideUserMessages extends UserMessages {
   @override
-  String get uisceneMigrationWarning => 'override message';
+  String get uiSceneMigrationWarning => 'override message';
 }
