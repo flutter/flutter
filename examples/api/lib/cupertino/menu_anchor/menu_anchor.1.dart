@@ -55,7 +55,9 @@ class _CupertinoMenuAnchorExampleState
         children: <Widget>[
           CupertinoMenuAnchor(
             onAnimationStatusChanged: (AnimationStatus status) {
-              _status = status;
+              setState(() {
+                _status = status;
+              });
             },
             childFocusNode: _buttonFocusNode,
             menuChildren: <Widget>[
