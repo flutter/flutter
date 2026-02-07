@@ -110,6 +110,7 @@ export 'src/widgets/radio_group.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/raw_menu_anchor.dart';
 export 'src/widgets/raw_radio.dart';
+export 'src/widgets/raw_tooltip.dart';
 export 'src/widgets/reorderable_list.dart';
 export 'src/widgets/repeating_animation_builder.dart';
 export 'src/widgets/restoration.dart';

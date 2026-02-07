@@ -60,8 +60,8 @@ export 'dart:ui' show VoidCallback;
 ///    notifications whenever any of a list of other [Listenable]s trigger their
 ///    notifications.
 abstract class Listenable {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const Listenable();
 
   /// Return a [Listenable] that triggers when any of the given [Listenable]s
@@ -92,12 +92,14 @@ abstract class Listenable {
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
 abstract class ValueListenable<T> extends Listenable {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const ValueListenable();
 
-  /// The current value of the object. When the value changes, the callbacks
-  /// registered with [addListener] will be invoked.
+  /// The current value of the object.
+  ///
+  /// When the value changes, the callbacks registered with [addListener] will be
+  /// invoked.
   T get value;
 }
 
@@ -360,9 +362,10 @@ mixin class ChangeNotifier implements Listenable {
     }
   }
 
-  /// Discards any resources used by the object. After this is called, the
-  /// object is not in a usable state and should be discarded (calls to
-  /// [addListener] will throw after the object is disposed).
+  /// Discards any resources used by the object.
+  ///
+  /// After this is called, the object is not in a usable state and should be
+  /// discarded (calls to [addListener] will throw after the object is disposed).
   ///
   /// This method should only be called by the object's owner.
   ///
@@ -516,22 +519,26 @@ class _MergingListenable extends Listenable {
 
 /// A [ChangeNotifier] that holds a single value.
 ///
-/// When [value] is replaced with something that is not equal to the old
-/// value as evaluated by the equality operator ==, this class notifies its
+/// When [value] is replaced with a new value that is **not equal** to the old
+/// value as evaluated by the equality operator (`==`), this class notifies its
 /// listeners.
 ///
 /// ## Limitations
 ///
-/// Because this class only notifies listeners when the [value]'s _identity_
-/// changes, listeners will not be notified when mutable state within the
-/// value itself changes.
+/// Notifications are triggered based on **equality (`==`)**, not on mutations
+/// within the value itself. As a result, changes to mutable objects that do not
+/// affect their equality will not cause listeners to be notified.
 ///
-/// For example, a `ValueNotifier<List<int>>` will not notify its listeners
-/// when the _contents_ of the list are changed.
+/// For example, a `ValueNotifier<List<int>>` will not notify listeners when
+/// the contents of the existing list are modified in-place; it only notifies
+/// when a new value is assigned to the `value` property (i.e. `value = newValue`),
+/// where equality is determined by `==`.
 ///
-/// As a result, this class is best used with only immutable data types.
+/// Because of this behavior, [ValueNotifier] is best used with immutable data
+/// types.
 ///
-/// For mutable data types, consider extending [ChangeNotifier] directly.
+/// For mutable data types, consider extending [ChangeNotifier] directly and
+/// calling [notifyListeners] manually when changes occur.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {

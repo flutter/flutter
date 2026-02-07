@@ -12,7 +12,7 @@ When triaging web issues follow the following process:
 * All [P0 issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP0) are assigned and being worked on.
 * The list of [P1 issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-web+label%3AP1) should be manageable (<30 issues)
 * Number of open PRs should be manageable (<15):
-  * [flutter/flutter](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-web+sort%3Acreated-asc+-is%3Adraft)
+  * [flutter/flutter](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aplatform-web+sort%3Acreated-asc+draft%3Afalse+-label%3Atriaged-web)
   * [flutter/packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-web+sort%3Aupdated-asc+-is%3Adraft)
     * Remove the `triage-web` label when the PR is approved.
     * If you are the last reviewer, add the `autosubmit` label.

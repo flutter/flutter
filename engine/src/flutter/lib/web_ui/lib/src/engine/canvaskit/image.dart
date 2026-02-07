@@ -115,7 +115,12 @@ class CkResizingCodec extends ResizingCodec {
       scaledHeight,
     );
     final DomImageBitmap bitmap = offscreenCanvas.transferToImageBitmap();
-    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    SkImage? skImage;
+    if (CanvasKitRenderer.instance.isSoftware) {
+      skImage = canvasKit.MakeImageFromCanvasImageSource(bitmap);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromImageBitmap(bitmap, true);
+    }
 
     // Resize the canvas to 0x0 to cause the browser to eagerly reclaim its
     // memory.
@@ -137,16 +142,21 @@ ui.Image createCkImageFromImageElement(
   int naturalWidth,
   int naturalHeight,
 ) {
-  final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-    image,
-    SkPartialImageInfo(
-      alphaType: canvasKit.AlphaType.Premul,
-      colorType: canvasKit.ColorType.RGBA_8888,
-      colorSpace: SkColorSpaceSRGB,
-      width: naturalWidth.toDouble(),
-      height: naturalHeight.toDouble(),
-    ),
-  );
+  SkImage? skImage;
+  if (CanvasKitRenderer.instance.isSoftware) {
+    skImage = canvasKit.MakeImageFromCanvasImageSource(image);
+  } else {
+    skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+      image,
+      SkPartialImageInfo(
+        alphaType: canvasKit.AlphaType.Premul,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: naturalWidth.toDouble(),
+        height: naturalHeight.toDouble(),
+      ),
+    );
+  }
   if (skImage == null) {
     throw ImageCodecException('Failed to create image from Image.decode');
   }
@@ -334,16 +344,7 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
         debugSource: url,
       );
     } else {
-      final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-      final codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
-
-      try {
-        await codec.decode();
-        return codec;
-      } on ImageCodecException {
-        codec.dispose();
-        return CkAnimatedImage.decodeFromBytes(list, url);
-      }
+      return CkAnimatedImage.decodeFromBytes(list, url);
     }
   }
 }
@@ -500,7 +501,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
     assert(_debugCheckIsNotDisposed());
     switch (imageSource) {
       case ImageElementImageSource():
@@ -531,11 +532,7 @@ class CkImage implements ui.Image, StackTraceDebugger {
     }
     ByteData? data = _readPixelsFromSkImage(format);
     data ??= _readPixelsFromImageViaSurface(format);
-    if (data == null) {
-      return Future<ByteData>.error('Failed to encode the image into bytes.');
-    } else {
-      return Future<ByteData>.value(data);
-    }
+    return data;
   }
 
   @override
@@ -555,13 +552,16 @@ class CkImage implements ui.Image, StackTraceDebugger {
     return data;
   }
 
-  ByteData? _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
-    final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    final CkSurface ckSurface = surface.createOrUpdateSurface(BitmapSize(width, height));
-    final CkCanvas ckCanvas = ckSurface.getCanvas();
+  ByteData _readPixelsFromImageViaSurface(ui.ImageByteFormat format) {
+    final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
+    surface.setSize(BitmapSize(width, height));
+    final SkSurface skiaSurface = surface.skSurface!;
+
+    final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawImage(this, ui.Offset.zero, CkPaint());
-    final SkImage skImage = ckSurface.surface.makeImageSnapshot();
+    final SkImage skImage = skiaSurface.makeImageSnapshot();
+
     final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
@@ -570,6 +570,8 @@ class CkImage implements ui.Image, StackTraceDebugger {
       height: height.toDouble(),
     );
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
+    skImage.delete();
+
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }

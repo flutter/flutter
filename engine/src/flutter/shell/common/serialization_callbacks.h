@@ -8,6 +8,7 @@
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSerialProcs.h"
+#include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace flutter {
@@ -15,9 +16,7 @@ namespace flutter {
 SkSerialReturnType SerializeTypefaceWithoutData(SkTypeface* typeface,
                                                 void* ctx);
 SkSerialReturnType SerializeTypefaceWithData(SkTypeface* typeface, void* ctx);
-sk_sp<SkTypeface> DeserializeTypefaceWithoutData(const void* data,
-                                                 size_t length,
-                                                 void* ctx);
+sk_sp<SkTypeface> DeserializeTypefaceWithoutData(SkStream&, void* ctx);
 
 // Serializes only the metadata of the image and not the underlying pixel data.
 SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx);
