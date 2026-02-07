@@ -80,11 +80,12 @@ void main() {
       ),
     );
 
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    // The foreground image is in a foreground DecoratedBox wrapping the RawAvatar.
+    final RenderDecoratedBox foregroundBox = tester.renderObject(find.byType(CircleAvatar));
+    final foregroundDecoration = foregroundBox.decoration as ShapeDecoration;
+    expect(foregroundDecoration.image!.fit, equals(BoxFit.cover));
+    final box = foregroundBox.child! as RenderConstrainedBox;
     expect(box.size, equals(const Size(100.0, 100.0)));
-    final child = box.child! as RenderDecoratedBox;
-    final decoration = child.decoration as ShapeDecoration;
-    expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
   testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (
@@ -107,10 +108,13 @@ void main() {
     );
 
     expect(caughtForegroundImageError, true);
-    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.size, equals(const Size(100.0, 100.0)));
-    final child = box.child! as RenderDecoratedBox;
-    final decoration = child.decoration as ShapeDecoration;
+    // The foreground DecoratedBox wraps the RawAvatar's ConstrainedBox.
+    final RenderDecoratedBox foregroundBox = tester.renderObject(find.byType(CircleAvatar));
+    final constrainedBox = foregroundBox.child! as RenderConstrainedBox;
+    expect(constrainedBox.size, equals(const Size(100.0, 100.0)));
+    // The background image is in the RawAvatar's decoration underneath.
+    final backgroundBox = constrainedBox.child! as RenderDecoratedBox;
+    final decoration = backgroundBox.decoration as ShapeDecoration;
     expect(decoration.image!.fit, equals(BoxFit.cover));
     await expectLater(find.byType(CircleAvatar), matchesGoldenFile('circle_avatar.fallback.png'));
   });
