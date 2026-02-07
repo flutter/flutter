@@ -92,6 +92,40 @@ let package = Package(
     ]
 )
 ''');
+
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory.childFile('Package.swift').existsSync(),
+              isTrue,
+            );
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory
+                  .childFile('Package.swift')
+                  .readAsStringSync(),
+              '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "FlutterFramework",
+    products: [
+        .library(name: "FlutterFramework", targets: ["FlutterFramework"])
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+        .target(
+            name: "FlutterFramework"
+        )
+    ]
+)
+''',
+            );
           });
 
           testWithoutContext(
@@ -483,7 +517,7 @@ let package = Package(
         });
 
         group('updateFlutterFrameworkSymlink', () {
-          testWithoutContext('create link if does not exists', () {
+          testWithoutContext('does not create link', () {
             final fs = MemoryFileSystem();
             final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
             final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
@@ -495,6 +529,23 @@ let package = Package(
               fileSystem: fs,
               platform: platform,
               project: project,
+            );
+            expect(frameworkSymlink.existsSync(), isFalse);
+          });
+
+          testWithoutContext('creates link when createIfNotFound is true', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory.childLink(
+              '${platform.binaryName}.xcframework',
+            );
+            expect(frameworkSymlink.existsSync(), isFalse);
+            SwiftPackageManager.updateFlutterFrameworkSymlink(
+              buildMode: BuildMode.profile,
+              fileSystem: fs,
+              platform: platform,
+              project: project,
+              createIfNotFound: true,
             );
             expect(frameworkSymlink.targetSync(), './Profile/${platform.binaryName}.xcframework');
           });
