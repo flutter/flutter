@@ -77,7 +77,7 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.navigatorKey], the equivalent property in the full app widget.
+  ///  * [WidgetsApp.navigatorKey], the equivalent property in [WidgetsApp].
   final GlobalKey<NavigatorState>? navigatorKey;
 
   /// The widget displayed when the app launches.
@@ -88,7 +88,7 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.home], the equivalent property in the full app widget.
+  ///  * [WidgetsApp.home], the equivalent property in [WidgetsApp].
   final Widget? home;
 
   /// The application's top-level routing table.
@@ -104,18 +104,20 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.routes], the equivalent property in the full app widget.
+  ///  * [WidgetsApp.routes], the equivalent property in [WidgetsApp].
   final Map<String, WidgetBuilder> routes;
 
   /// The primary color to use for the application in the operating system
   /// interface.
   ///
-  /// In tests, this is typically not relevant as OS-level features are not
-  /// exercised. Defaults to white.
+  /// This is typically unused in tests as OS-level features are not
+  /// exercised.
+  ///
+  /// Defaults to white.
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.color], the equivalent property in the full app widget.
+  ///  * [WidgetsApp.color], the equivalent property in [WidgetsApp].
   final Color color;
 
   /// A function that creates page routes for named navigation.
@@ -143,7 +145,7 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [WidgetsApp.pageRouteBuilder], the equivalent property in the full app widget.
+  ///  * [WidgetsApp.pageRouteBuilder], the equivalent property in [WidgetsApp].
   final PageRouteFactory pageRouteBuilder;
 
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
