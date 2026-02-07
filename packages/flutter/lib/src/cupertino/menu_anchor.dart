@@ -2765,7 +2765,7 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     _completeSwipe();
   }
 
-  void _handleSwipeUpdate(DragUpdateDetails updateDetails, {bool onTarget = false}) {
+  void _handleSwipeUpdate(DragUpdateDetails updateDetails) {
     _position = _position! + updateDetails.delta;
 
     // We can't used expandToInclude() because the total menu area may not be
@@ -2793,7 +2793,6 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     assert(!isSwiping, 'A new swipe should not begin while a swipe is active.');
     _position = position;
     return _SwipeHandle(
-      router: this,
       viewId: View.of(context).viewId,
       initialPosition: position,
       onSwipeUpdate: _handleSwipeUpdate,
@@ -2905,7 +2904,6 @@ class _SwipeHandle extends Drag {
   _SwipeHandle({
     required Offset initialPosition,
     required this.viewId,
-    required this.router,
     required this.onSwipeEnd,
     required this.onSwipeUpdate,
     required this.onSwipeCanceled,
@@ -2918,7 +2916,6 @@ class _SwipeHandle extends Drag {
   final GestureDragUpdateCallback onSwipeUpdate;
   final GestureDragEndCallback onSwipeEnd;
   final GestureDragCancelCallback onSwipeCanceled;
-  final _SwipeRegionState router;
   Offset _position;
 
   @override
