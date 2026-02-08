@@ -42,6 +42,12 @@ class BuildLinuxCommand extends BuildSubCommand {
           'the app is compiled. This option is valid only '
           'if the current host and target architectures are different.',
     );
+    argParser.addOption(
+      'linux-dir',
+      help:
+          'Override the Linux runner directory (relative to the project root). '
+          'Use this to build from an alternate Linux runner such as linux-gtk4.',
+    );
     argParser.addFlag(
       'config-only',
       help: 'Update the project configuration without performing a build.',

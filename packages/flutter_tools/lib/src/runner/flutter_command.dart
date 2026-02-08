@@ -1620,10 +1620,15 @@ abstract class FlutterCommand extends Command<void> {
   @override
   Future<void> run() {
     final DateTime startTime = globals.systemClock.now();
+    final Map<Type, Generator> overrides = <Type, Generator>{FlutterCommand: () => this};
+    final String? linuxDirOverride = _linuxDirectoryOverride;
+    if (linuxDirOverride != null) {
+      overrides[LinuxProjectDirectory] = () => LinuxProjectDirectory(linuxDirOverride);
+    }
 
     return context.run<void>(
       name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
+      overrides: overrides,
       body: () async {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
@@ -1653,6 +1658,17 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  String? get _linuxDirectoryOverride {
+    if (!argParser.options.containsKey('linux-dir')) {
+      return null;
+    }
+    final String? value = stringArg('linux-dir');
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    return value.trim();
   }
 
   @override
