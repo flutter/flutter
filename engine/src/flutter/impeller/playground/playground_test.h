@@ -11,6 +11,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/switches.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 
 #if FML_OS_MACOSX

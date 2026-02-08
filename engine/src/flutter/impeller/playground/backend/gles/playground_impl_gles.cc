@@ -71,7 +71,8 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
-      use_angle_(switches.use_angle) {
+      use_angle_(switches.use_angle),
+      is_gles3_(false) {
   if (use_angle_) {
 #if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
     angle_glesv2_ = dlopen("libGLESv2.dylib", RTLD_LAZY);
@@ -188,11 +189,10 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
     gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
 #endif
   }
-  const auto is_gles3 =
-      gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
+  is_gles3_ = gl->GetDescription()->GetGlVersion().IsAtLeast(Version(3));
   auto context =
       ContextGLES::Create(switches_.flags, std::move(gl),
-                          ShaderLibraryMappingsForPlayground(is_gles3), true);
+                          ShaderLibraryMappingsForPlayground(is_gles3_), true);
   if (!context) {
     FML_LOG(ERROR) << "Could not create context.";
     return nullptr;
@@ -255,6 +255,11 @@ fml::Status PlaygroundImplGLES::SetCapabilities(
   return fml::Status(
       fml::StatusCode::kUnimplemented,
       "PlaygroundImplGLES doesn't support setting the capabilities.");
+}
+
+RuntimeStageBackend PlaygroundImplGLES::GetRuntimeStageBackend() const {
+  return is_gles3_ ? RuntimeStageBackend::kOpenGLES3
+                   : RuntimeStageBackend::kOpenGLES;
 }
 
 }  // namespace impeller
