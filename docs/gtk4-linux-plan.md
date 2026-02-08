@@ -23,6 +23,34 @@ Make the Linux desktop embedder use GTK4 by default while keeping a short transi
 - Verify `template_manifest.json` stays consistent and new projects generate GTK4 code by default.
 - Provide a migration note for existing apps: re-run `flutter create --platforms=linux .` or manually port the runner code.
 
+### 2a) Multi-runner directory selection (GTK3 + GTK4 side-by-side)
+Problem: Flutter tooling hardcodes the Linux project directory to `linux/`, so
+an app can only have one Linux runner at a time. This blocks a smooth GTK3/GTK4
+transition where both runners exist in-tree.
+
+Proposal: add an explicit Linux runner directory selection that maps to GTK
+version. Keep `linux/` as GTK3 (or legacy) and allow `linux-gtk4/` (or similar)
+for GTK4, with a tool flag to select which directory is active.
+
+Implementation outline:
+- Add `--linux-dir=<path>` to `flutter run` and `flutter build linux`.
+- Add `--linux-dir=<path>` to `flutter create` to generate an alternate
+  directory (e.g., `linux-gtk4/`).
+- Update `LinuxProject` to resolve its `_editableDirectory` from the selected
+  directory, defaulting to `linux/` if unset.
+- Ensure plugin registrant generation and build paths are derived from
+  `project.linux.*`, so they follow the selected directory.
+
+Example layout:
+- `linux/` (GTK3)
+- `linux-gtk4/` (GTK4)
+
+Example usage:
+```
+flutter create --platforms=linux --linux-gtk=gtk4 --linux-dir=linux-gtk4
+flutter run -d linux --linux-dir=linux-gtk4
+```
+
 ### 3) Plugins + Platform Interfaces
 - Audit `packages/` Linux plugins for GTK3-specific types or assumptions.
 - Update plugin examples and registrant usage if API surface changes in `flutter_linux`.
