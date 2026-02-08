@@ -435,12 +435,12 @@ class _FlWindowMonitor extends _GObject {
   /// Create a new FlWindowMonitor.
   factory _FlWindowMonitor(
     _GtkWindow window, {
-    void Function()? onConfigure,
-    void Function()? onStateChanged,
-    void Function()? onIsActiveNotify,
-    void Function()? onTitleNotify,
-    void Function()? onClose,
-    void Function()? onDestroy,
+    VoidCallback? onConfigure,
+    VoidCallback? onStateChanged,
+    VoidCallback? onIsActiveNotify,
+    VoidCallback? onTitleNotify,
+    VoidCallback? onClose,
+    VoidCallback? onDestroy,
   }) {
     void noop() {}
     return _FlWindowMonitor._internal(
