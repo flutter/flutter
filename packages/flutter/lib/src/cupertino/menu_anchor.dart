@@ -334,7 +334,10 @@ class CupertinoMenuAnchor extends StatefulWidget {
     this.builder,
     this.child,
     this.childFocusNode,
-  });
+  }) : assert(
+         enableSwipe || !enableLongPressToOpen,
+         'enableLongPressToOpen cannot be true if enableSwipe is false',
+       );
 
   /// An optional controller that allows opening and closing of the menu from
   /// other widgets.
@@ -407,6 +410,9 @@ class CupertinoMenuAnchor extends StatefulWidget {
   ///
   /// When a menu is opened via long-press, the menu can be swiped in the same
   /// gesture to select and activate menu items.
+  ///
+  /// Because long-press-to-open relies on the swipe gesture, [enableSwipe] must
+  /// be true if [enableLongPressToOpen] is true.
   ///
   /// If the widget built by [builder] is disabled, [enableLongPressToOpen]
   /// should be set to false to prevent the menu from opening on long-press.
@@ -2714,8 +2720,8 @@ class _SwipeRegionState extends State<_SwipeRegion> {
 
   @override
   void dispose() {
-    assert(_surfaces.isEmpty);
-    _disposeInactiveRecognizer();
+    _recognizer?.dispose();
+    _recognizer = null;
     super.dispose();
   }
 
@@ -2801,20 +2807,11 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     );
   }
 
-  void _disposeInactiveRecognizer() {
-    if (!isSwiping && _recognizer != null) {
-      _recognizer!.dispose();
-      _recognizer = null;
-    }
-  }
-
   void _completeSwipe() {
     _position = null;
     widget.onDistanceChanged(0);
-    if (!mounted) {
-      // If the widget is not mounted, safely dispose of the recognizer.
-      _disposeInactiveRecognizer();
-    }
+    _recognizer!.dispose();
+    _recognizer = null;
   }
 
   @override
@@ -2950,31 +2947,51 @@ class _SwipeHandle extends Drag {
         targets.add(metaData);
       }
     }
+    // Identify targets that are no longer hit.
+    //
+    // This ensures disjoint siblings (A -> B) have a "Leave A" -> "Enter B" order.
+    _enteredTargets.removeWhere((target) {
+      if (!targets.contains(target)) {
+        target.didSwipeLeave(pointerUp: false);
+        return true;
+      }
+      return false;
+    });
 
-    if (_enteredTargets.isNotEmpty && targets.length >= _enteredTargets.length) {
-      var listsMatch = true;
-      for (var i = 0; i < _enteredTargets.length; i++) {
-        if (targets[i] != _enteredTargets[i]) {
-          listsMatch = false;
+    final nextEntered = <_SwipeTarget>{};
+    // If we encounter an existing target, we assume the previous chain is effectively
+    // active and we shouldn't add *new* underlying targets that weren't there before
+    // (preserving "blocking" behavior without calling didSwipeEnter again).
+    var hasEncounteredExisting = false;
+    for (final target in targets) {
+      if (_enteredTargets.contains(target)) {
+        nextEntered.add(target);
+        hasEncounteredExisting = true;
+      } else {
+        if (hasEncounteredExisting) {
+          // If we have already hit a target that was previously entered, we perform
+          // a "sticky" block. We assume the existing target blocked this new underlying
+          // target previously, so we don't enter it now.
           break;
         }
-      }
-
-      if (listsMatch) {
-        return;
+        nextEntered.add(target);
+        if (target.didSwipeEnter()) {
+          break;
+        }
       }
     }
 
     // Leave old targets.
-    _leaveAllEntered();
-
-    // Enter new targets.
-    for (final target in targets) {
-      _enteredTargets.add(target);
-      if (target.didSwipeEnter()) {
-        return;
+    // Iterate backwards to leave from the end of the chain (underlying) up to the surface.
+    for (final _SwipeTarget target in _enteredTargets.reversed) {
+      if (!nextEntered.contains(target)) {
+        target.didSwipeLeave(pointerUp: false);
       }
     }
+
+    _enteredTargets
+      ..clear()
+      ..addAll(nextEntered);
   }
 
   void _leaveAllEntered({bool pointerUp = false}) {
