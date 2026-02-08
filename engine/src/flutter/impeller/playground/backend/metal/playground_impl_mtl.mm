@@ -76,12 +76,13 @@ PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
     return;
   }
 
+  std::optional<PixelFormat> wide_gamut_format = std::nullopt;
+  if (switches.enable_wide_gamut) {
+    wide_gamut_format = PixelFormat::kB10G10R10A10XR;
+  }
   auto context = ContextMTL::Create(
       switches.flags, ShaderLibraryMappingsForPlayground(),
-      is_gpu_disabled_sync_switch_, "Playground Library",
-      switches.enable_wide_gamut
-          ? std::optional<PixelFormat>(PixelFormat::kB10G10R10A10XR)
-          : std::nullopt);
+      is_gpu_disabled_sync_switch_, "Playground Library", wide_gamut_format);
   if (!context) {
     return;
   }
