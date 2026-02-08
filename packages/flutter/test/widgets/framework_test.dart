@@ -1192,7 +1192,7 @@ void main() {
         addTearDown(pageController.dispose);
       });
 
-      await tester.pumpAndSettle(); 
+      await tester.pumpAndSettle();
 
       expect(pageController.page, 0);
     },
@@ -1687,9 +1687,7 @@ void main() {
       const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
     );
     final navigationBarTheme = _TestInheritedElement(
-      const TestInheritedWidget(
-        child: Placeholder(),
-      ),
+      const TestInheritedWidget(child: Placeholder()),
     );
 
     // Dependencies are added out of alphabetical order.
