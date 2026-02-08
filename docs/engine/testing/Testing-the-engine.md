@@ -36,7 +36,7 @@ testing/run_tests.py --type=engine --variant=host_debug_unopt_arm64
 
 Some tests depend on the underlying Graphics Driver implementation which can result
 in test flakyness. Test reliability on Linux for OpenGLES can be improved by selecting the
-[Software OpenGLES renderer](https://docs.mesa3d.org/drivers/llvmpipe.html) 
+[Software OpenGLES renderer](https://docs.mesa3d.org/drivers/llvmpipe.html)
 with [libglvnd](https://gitlab.freedesktop.org/glvnd/libglvnd). For example:
 
 ```sh

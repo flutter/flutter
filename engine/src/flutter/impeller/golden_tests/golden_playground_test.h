@@ -90,6 +90,8 @@ class GoldenPlaygroundTest
   /// Returns true if `OpenPlaygroundHere` will actually render anything.
   bool WillRenderSomething() const { return true; }
 
+  RuntimeStageBackend GetRuntimeStageBackend() const;
+
  protected:
   void SetWindowSize(ISize size);
 

@@ -82,4 +82,8 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
   return nullptr;
 }
 
+RuntimeStageBackend GoldenPlaygroundTest::GetRuntimeStageBackend() const {
+  FML_UNREACHABLE();
+}
+
 }  // namespace impeller

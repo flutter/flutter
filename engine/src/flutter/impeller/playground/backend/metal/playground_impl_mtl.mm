@@ -144,7 +144,7 @@ void PlaygroundImplMTL::SetGPUDisabled(bool disabled) const {
 }
 
 RuntimeStageBackend PlaygroundImplMTL::GetRuntimeStageBackend() const {
-  return RuntimeStageBackend::Metal;
+  return RuntimeStageBackend::kMetal;
 }
 
 }  // namespace impeller
