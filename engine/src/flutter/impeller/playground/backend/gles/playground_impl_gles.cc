@@ -71,8 +71,7 @@ PlaygroundImplGLES::PlaygroundImplGLES(PlaygroundSwitches switches)
     : PlaygroundImpl(switches),
       handle_(nullptr, &DestroyWindowHandle),
       worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
-      use_angle_(switches.use_angle),
-      is_gles3_(false) {
+      use_angle_(switches.use_angle) {
   if (use_angle_) {
 #if IMPELLER_PLAYGROUND_SUPPORTS_ANGLE
     angle_glesv2_ = dlopen("libGLESv2.dylib", RTLD_LAZY);
