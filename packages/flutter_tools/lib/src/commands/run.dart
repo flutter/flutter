@@ -465,6 +465,12 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
+      ..addOption(
+        'linux-dir',
+        help:
+            'Override the Linux runner directory (relative to the project root). '
+            'Use this to run from an alternate Linux runner such as linux-gtk4.',
+      )
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
