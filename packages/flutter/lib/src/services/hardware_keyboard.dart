@@ -513,15 +513,19 @@ class HardwareKeyboard {
   // This function will also print debug messages if the event is inconsistent
   // with the current state.
   bool _eventShouldProceed(KeyEvent event) {
+    const common =
+        'This is typically either due to https://github.com/flutter/flutter/issues/125975, '
+        'or a bug in the embedding\'s key event conciliation logic.'
     if (event is KeyDownEvent) {
       final bool shouldProcess = !_pressedKeys.containsKey(event.physicalKey);
       assert(() {
         if (!shouldProcess) {
           _keyboardDebug(
             () =>
-                'Received unexpected ${event.runtimeType} for key that is already pressed:\n'
-                'Event: $event\n'
-                'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
+                'ERROR: Received unexpected ${event.runtimeType} for key that is already pressed.\n'
+                '$common\n'
+                '    Event: $event\n'
+                '    Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
         }
         return true;
@@ -535,15 +539,17 @@ class HardwareKeyboard {
         if (!shouldProcess) {
           _keyboardDebug(
             () =>
-                'Received unexpected ${event.runtimeType} for key that is not pressed:\n'
-                'Event: $event',
+                'ERROR: Received unexpected ${event.runtimeType} for key that is not pressed:\n'
+                '$common\n'
+                '    Event: $event',
           );
         } else if (_pressedKeys[event.physicalKey] != event.logicalKey) {
           _keyboardDebug(
             () =>
-                'Received unexpected ${event.runtimeType} for key with mismatched logical key:\n'
-                'Event: $event\n'
-                'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
+                'ERROR: Received unexpected ${event.runtimeType} for key with mismatched logical key:\n'
+                '$common\n'
+                '    Event: $event\n'
+                '    Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
         }
         return true;
