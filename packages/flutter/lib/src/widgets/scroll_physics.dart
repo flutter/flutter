@@ -685,6 +685,31 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// Used to determine parameters for friction simulations.
   final ScrollDecelerationRate decelerationRate;
 
+  /// Approximation of iOS native rubber band decay rate.
+  static const double _kRubberBandDecayRate = 0.07;
+
+  /// Decay constant (lambda) for rubber band spring simulation.
+  ///
+  /// Derived from half-life of 70ms: lambda = ln(2) / 0.07
+  static final double _rubberBandLambda = math.log(2) / _kRubberBandDecayRate;
+
+  /// Spring used to animate overscroll bounce similar to iOS native behavior.
+  /// Used in [createBallisticSimulation] depending on the conditions.
+  ///
+  /// This overdamped spring produces exponential decay x(t) = e^(-lambda*t)
+  /// with two modes:
+  /// - Slow mode: r1 = -lambda (desired decay rate, visible)
+  /// - Fast mode: r2 = -1e5 * lambda (vanishes almost instantly)
+  ///
+  /// Mathematical derivation:
+  /// - r1 + r2 = -damping/mass, so damping = 100001 * lambda
+  /// - r1 * r2 = stiffness/mass, so stiffness = 1e5 * lambda^2
+  static final SpringDescription rubberBandSpring = SpringDescription(
+    mass: 1.0,
+    stiffness: 1e5 * _rubberBandLambda * _rubberBandLambda,
+    damping: 100001 * _rubberBandLambda,
+  );
+
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return BouncingScrollPhysics(parent: buildParent(ancestor), decelerationRate: decelerationRate);
@@ -753,9 +778,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
-    if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
+    final bool isStationary = velocity.abs() <= tolerance.velocity;
+    final bool isRubberBand = isStationary && position.outOfRange;
+
+    if (!isStationary || position.outOfRange) {
       return BouncingScrollSimulation(
-        spring: spring,
+        spring: isRubberBand ? rubberBandSpring : spring,
         position: position.pixels,
         velocity: velocity,
         leadingExtent: position.minScrollExtent,
