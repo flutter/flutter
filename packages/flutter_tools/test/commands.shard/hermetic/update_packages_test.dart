@@ -86,9 +86,34 @@ dependencies:
 
 dev_dependencies:
   flutter_tools:
-    path: ../../../
+    path: ../../../packages/flutter_tools/
 
-# PUBSPEC CHECKSUM: rseq17
+# PUBSPEC CHECKSUM: 55t4hi
+''';
+
+// An example pubspec.yaml from flutter, not necessary for it to be up to date.
+const kNonWorkspacePubspecYaml = r'''
+name: hook_user_defines
+description: 'Project for testing user-defines.'
+version: 0.0.1
+
+environment:
+  sdk: ^3.9.0-0
+
+hooks:
+  user_defines:
+    hook_user_defines: # package name
+      magic_value: 1000
+
+dependencies:
+  hooks: 1.0.0
+  logging: 1.3.0
+  native_toolchain_c: 0.17.4
+
+dev_dependencies:
+  test: 1.28.0
+
+# PUBSPEC CHECKSUM: qlfuuh
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -197,6 +222,7 @@ void main() {
     late Directory flutterSdk;
     late Directory flutterTools;
     late Directory widgetPreviewScaffold;
+    late Directory hookUserDefinesIntegrationTest;
     late _FakePub pub;
     late FakeProcessManager processManager;
     late BufferLogger logger;
@@ -237,14 +263,19 @@ void main() {
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
       widgetPreviewScaffold = flutterSdk
-          .childDirectory('packages')
-          .childDirectory('flutter_tools')
-          .childDirectory('test')
-          .childDirectory('widget_preview_scaffold.shard')
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
           .childDirectory('widget_preview_scaffold');
       widgetPreviewScaffold.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kWidgetTestPubspecYaml);
+      hookUserDefinesIntegrationTest = flutterSdk
+          .childDirectory('dev')
+          .childDirectory('integration_tests')
+          .childDirectory('hook_user_defines');
+      hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kNonWorkspacePubspecYaml);
       Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub();
       processManager = FakeProcessManager.empty();

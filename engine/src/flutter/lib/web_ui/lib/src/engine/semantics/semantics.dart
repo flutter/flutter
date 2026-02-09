@@ -37,6 +37,7 @@ import 'list.dart';
 import 'live_region.dart';
 import 'menus.dart';
 import 'platform_view.dart';
+import 'progress_bar.dart';
 import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
@@ -59,6 +60,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   static const int _kHighContrastIndex = 1 << 5;
   static const int _kOnOffSwitchLabelsIndex = 1 << 6;
   static const int _kNoAnnounceIndex = 1 << 7;
+  static const int _kNoAutoPlayAnimatedImagesIndex = 1 << 8;
+  static const int _kNoAutoPlayVideosIndex = 1 << 9;
+  static const int _kDeterministicCursorIndex = 1 << 10;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -81,6 +85,16 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
   // announce than discourage it.
   @override
   bool get supportsAnnounce => _kNoAnnounceIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto-play.
+  @override
+  bool get autoPlayAnimatedImages => _kNoAutoPlayAnimatedImagesIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto-play.
+  @override
+  bool get autoPlayVideos => _kNoAutoPlayVideosIndex & _index == 0;
+  @override
+  bool get deterministicCursor => _kDeterministicCursorIndex & _index != 0;
 
   @override
   String toString() {
@@ -109,6 +123,15 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     if (supportsAnnounce) {
       features.add('supportsAnnounce');
     }
+    if (autoPlayAnimatedImages) {
+      features.add('autoPlayAnimatedImages');
+    }
+    if (autoPlayVideos) {
+      features.add('autoPlayVideos');
+    }
+    if (deterministicCursor) {
+      features.add('deterministicCursor');
+    }
     return 'AccessibilityFeatures$features';
   }
 
@@ -132,6 +155,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     bool? highContrast,
     bool? onOffSwitchLabels,
     bool? supportsAnnounce,
+    bool? autoPlayAnimatedImages,
+    bool? autoPlayVideos,
+    bool? deterministicCursor,
   }) {
     final builder = EngineAccessibilityFeaturesBuilder(0);
 
@@ -143,6 +169,9 @@ class EngineAccessibilityFeatures implements ui.AccessibilityFeatures {
     builder.highContrast = highContrast ?? this.highContrast;
     builder.onOffSwitchLabels = onOffSwitchLabels ?? this.onOffSwitchLabels;
     builder.supportsAnnounce = supportsAnnounce ?? this.supportsAnnounce;
+    builder.autoPlayAnimatedImages = autoPlayAnimatedImages ?? this.autoPlayAnimatedImages;
+    builder.autoPlayVideos = autoPlayVideos ?? this.autoPlayVideos;
+    builder.deterministicCursor = deterministicCursor ?? this.deterministicCursor;
 
     return builder.build();
   }
@@ -163,6 +192,15 @@ class EngineAccessibilityFeaturesBuilder {
   // This index check is inverted (== 0 vs != 0); far more platforms support
   // announce than discourage it.
   bool get supportsAnnounce => EngineAccessibilityFeatures._kNoAnnounceIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable animated images auto-play.
+  bool get autoPlayAnimatedImages =>
+      EngineAccessibilityFeatures._kNoAutoPlayAnimatedImagesIndex & _index == 0;
+  // This index check is inverted (== 0 vs != 0) since most of the platforms
+  // don't have an option to disable videos auto-play.
+  bool get autoPlayVideos => EngineAccessibilityFeatures._kNoAutoPlayVideosIndex & _index == 0;
+  bool get deterministicCursor =>
+      EngineAccessibilityFeatures._kDeterministicCursorIndex & _index != 0;
 
   set accessibleNavigation(bool value) {
     const int accessibleNavigation = EngineAccessibilityFeatures._kAccessibleNavigation;
@@ -205,6 +243,28 @@ class EngineAccessibilityFeaturesBuilder {
   set supportsAnnounce(bool value) {
     const int noAnnounce = EngineAccessibilityFeatures._kNoAnnounceIndex;
     _index = !value ? _index | noAnnounce : _index & ~noAnnounce;
+  }
+
+  // This setter uses an inverted check (!value instead of value) to set the
+  // autoPlayAnimatedImages field in EngineAccessibilityFeatures since most
+  // of the platforms don't have an option to disable this setting.
+  set autoPlayAnimatedImages(bool value) {
+    const int noAutoPlayAnimatedImages =
+        EngineAccessibilityFeatures._kNoAutoPlayAnimatedImagesIndex;
+    _index = !value ? _index | noAutoPlayAnimatedImages : _index & ~noAutoPlayAnimatedImages;
+  }
+
+  // This setter uses an inverted check (!value instead of value) to set the
+  // autoPlayVideos field in EngineAccessibilityFeatures since most of the
+  // platforms don't have an option to disable this setting.
+  set autoPlayVideos(bool value) {
+    const int noAutoPlayVideos = EngineAccessibilityFeatures._kNoAutoPlayVideosIndex;
+    _index = !value ? _index | noAutoPlayVideos : _index & ~noAutoPlayVideos;
+  }
+
+  set deterministicCursor(bool value) {
+    const int deterministicCursor = EngineAccessibilityFeatures._kDeterministicCursorIndex;
+    _index = value ? _index | deterministicCursor : _index & ~deterministicCursor;
   }
 
   /// Creates and returns an instance of EngineAccessibilityFeatures based on the value of _index
@@ -275,6 +335,8 @@ class SemanticsNodeUpdate {
     this.hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required this.inputType,
     required this.locale,
+    required this.minValue,
+    required this.maxValue,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -399,6 +461,12 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.Locale? locale;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String minValue;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final String maxValue;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -502,6 +570,12 @@ enum EngineSemanticsRole {
 
   /// An item in a [list].
   listItem,
+
+  /// A graphic object that shows progress with a numeric number.
+  progressBar,
+
+  /// A graphic object that spins to indicate the application is busy.
+  loadingSpinner,
 
   /// A role used when a more specific role cannot be assigend to
   /// a [SemanticsObject].
@@ -1550,6 +1624,31 @@ class SemanticsObject {
     _dirtyFields |= _hitTestBehaviorIndex;
   }
 
+  String? get minValue => _minValue;
+  String? _minValue;
+
+  static const int _minValueIndex = 1 << 29;
+
+  /// Whether the [minValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMinValueDirty => _isDirty(_minValueIndex);
+  void _markMinValueDirty() {
+    _dirtyFields |= _minValueIndex;
+  }
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+
+  static const int _maxValueIndex = 1 << 30;
+
+  /// Whether the [maxValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMaxValueDirty => _isDirty(_maxValueIndex);
+  void _markMaxValueDirty() {
+    _dirtyFields |= _maxValueIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1887,6 +1986,16 @@ class SemanticsObject {
       _markHitTestBehaviorDirty();
     }
 
+    if (_minValue != update.minValue) {
+      _minValue = update.minValue;
+      _markMinValueDirty();
+    }
+
+    if (_maxValue != update.maxValue) {
+      _maxValue = update.maxValue;
+      _markMaxValueDirty();
+    }
+
     role = update.role;
 
     inputType = update.inputType;
@@ -2139,14 +2248,16 @@ class SemanticsObject {
         return EngineSemanticsRole.region;
       case ui.SemanticsRole.form:
         return EngineSemanticsRole.form;
+      case ui.SemanticsRole.loadingSpinner:
+        return EngineSemanticsRole.loadingSpinner;
+      case ui.SemanticsRole.progressBar:
+        return EngineSemanticsRole.progressBar;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
       case ui.SemanticsRole.tooltip:
-      case ui.SemanticsRole.loadingSpinner:
-      case ui.SemanticsRole.progressBar:
       case ui.SemanticsRole.hotKey:
       case ui.SemanticsRole.none:
       // fallback to checking semantics properties.
@@ -2213,6 +2324,8 @@ class SemanticsObject {
       EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
+      EngineSemanticsRole.progressBar => SemanticsProgressBar(this),
+      EngineSemanticsRole.loadingSpinner => SemanticsLoadingSpinner(this),
       EngineSemanticsRole.generic => GenericRole(this),
       EngineSemanticsRole.complementary => SemanticComplementary(this),
       EngineSemanticsRole.contentInfo => SemanticContentInfo(this),

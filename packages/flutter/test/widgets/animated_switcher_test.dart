@@ -416,6 +416,48 @@ void main() {
       expect(find.text('1'), findsOneWidget);
     },
   );
+
+  testWidgets('AnimatedSwitcher does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: AnimatedSwitcher(duration: Duration(microseconds: 500))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSwitcher(
+              duration: Duration(microseconds: 500),
+              child: Text(key: Key('x'), 'X'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSwitcher(
+              duration: Duration(microseconds: 500),
+              child: Text(key: Key('y'), 'Y'),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedSwitcher)), Size.zero);
+  });
 }
 
 class StatefulTest extends StatefulWidget {

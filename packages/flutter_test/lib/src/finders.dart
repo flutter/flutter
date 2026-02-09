@@ -361,7 +361,7 @@ class CommonFinders {
     );
   }
 
-  /// Finds [Tooltip] widgets with the given `message`.
+  /// Finds [RawTooltip] or [Tooltip] widgets with the given `message`.
   ///
   /// ## Sample code
   ///
@@ -374,12 +374,20 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
-      return widget is Tooltip &&
+      // In cases where Tooltip.excludeFromSemantics is true, Tooltip provides
+      // no semantics tooltip to RawTooltip, so its message must be checked
+      // directly.
+      if (widget is Tooltip && (widget.excludeFromSemantics ?? false)) {
+        return (message is RegExp
+            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
+                  (widget.richMessage != null &&
+                      message.hasMatch(widget.richMessage!.toPlainText())))
+            : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+      }
+      return widget is RawTooltip &&
           (message is RegExp
-              ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                    (widget.richMessage != null &&
-                        message.hasMatch(widget.richMessage!.toPlainText())))
-              : ((widget.message ?? widget.richMessage?.toPlainText()) == message));
+              ? message.hasMatch(widget.semanticsTooltip ?? '')
+              : (widget.semanticsTooltip == message));
     }, skipOffstage: skipOffstage);
   }
 

@@ -6,6 +6,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+import 'tooltip_window_content.dart';
 import 'dialog_window_content.dart';
 import 'regular_window_content.dart';
 import 'package:flutter/src/widgets/_window.dart';
@@ -39,7 +40,15 @@ class WindowContent extends StatelessWidget {
         controller: dialog,
         child: MaterialApp(home: DialogWindowContent(window: dialog)),
       ),
-      TooltipWindowController() => throw UnimplementedError(),
+      final TooltipWindowController tooltip => TooltipWindow(
+        key: windowKey,
+        controller: tooltip,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TooltipWindowContent(controller: tooltip),
+        ),
+      ),
+      PopupWindowController() => throw UnimplementedError(),
     };
   }
 }

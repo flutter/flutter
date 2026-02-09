@@ -44,6 +44,9 @@ abstract class Renderer {
 
   late Rasterizer rasterizer;
 
+  /// A surface used specifically for `Picture.toImage`.
+  Surface get pictureToImageSurface;
+
   /// Resets the [Rasterizer] to the default value. Used in tests.
   @visibleForTesting
   void debugResetRasterizer();
@@ -64,6 +67,10 @@ abstract class Renderer {
 
   @mustCallSuper
   FutureOr<void> initialize() {
+    _setUpViewListeners();
+  }
+
+  void _setUpViewListeners() {
     // Views may have been registered before this renderer was initialized.
     // Create rasterizers for them and then start listening for new view
     // creation/disposal events.
@@ -337,18 +344,19 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.dispose();
-    }
-    rasterizers.clear();
     rasterizer.dispose();
+    pictureToImageSurface.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.
   @mustCallSuper
   void debugClear() {
+    _onViewCreatedListener.cancel();
+    _onViewDisposedListener.cancel();
     for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.debugClear();
+      rasterizer.dispose();
     }
+    rasterizers.clear();
+    _setUpViewListeners();
   }
 }

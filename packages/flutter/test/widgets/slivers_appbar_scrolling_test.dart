@@ -168,7 +168,7 @@ void main() {
       final SemanticsFinder sliverAppBar = find.semantics.byLabel('Sliver App Bar');
 
       expect(sliverAppBar, findsOne);
-      expect(sliverAppBar, containsSemantics(isHidden: false));
+      expect(sliverAppBar, isSemantics(isHidden: false));
       handle.dispose();
     });
 
@@ -209,7 +209,7 @@ void main() {
       final SemanticsFinder sliverAppBar = find.semantics.byLabel('Sliver App Bar');
 
       expect(sliverAppBar, findsOne);
-      expect(sliverAppBar, containsSemantics(isHidden: false));
+      expect(sliverAppBar, isSemantics(isHidden: false));
       handle.dispose();
     });
 
@@ -246,7 +246,7 @@ void main() {
       final SemanticsFinder sliverAppBar = find.semantics.byLabel('Sliver App Bar');
 
       expect(sliverAppBar, findsOne);
-      expect(sliverAppBar, containsSemantics(isHidden: true));
+      expect(sliverAppBar, isSemantics(isHidden: true));
       handle.dispose();
     });
 

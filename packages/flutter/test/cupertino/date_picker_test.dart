@@ -2140,6 +2140,8 @@ void main() {
     handle.dispose();
   });
 
+  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets('DatePicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildDatePicker(Brightness brightness) {
       return MaterialApp(
@@ -2167,6 +2169,8 @@ void main() {
     expect(paragraph.text.style!.color.toString().contains('UNRESOLVED'), isFalse);
   });
 
+  // TODO(justinmc): Don't test Material interactions in Cupertino tests.
+  // https://github.com/flutter/flutter/issues/177028
   testWidgets('TimerPicker adapts to MaterialApp dark mode', (WidgetTester tester) async {
     Widget buildTimerPicker(Brightness brightness) {
       return MaterialApp(

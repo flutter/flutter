@@ -36,6 +36,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
+    usesWebDefineOption();
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
@@ -387,6 +388,30 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       );
     }
   }
+
+  Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+
+    // Determine HTTPS config with CLI > file precedence
+    final HttpsConfig? httpsConfig = HttpsConfig.parse(
+      stringArg('web-tls-cert-path') ?? fileConfig.https?.certPath,
+      stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
+    );
+
+    final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+    );
+    return webDevServerConfig;
+  }
 }
 
 class RunCommand extends RunCommandBase {
@@ -492,25 +517,7 @@ class RunCommand extends RunCommandBase {
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
-      final String? webPortArg = stringArg('web-port');
-      final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
-
-      final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-
-      final HttpsConfig? httpsConfig = fileConfig.https?.copyWith(
-        certPath: stringArg('web-tls-cert-path'),
-        certKeyPath: stringArg('web-tls-cert-key-path'),
-      );
-
-      final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
-        host: stringArg('web-hostname'),
-        port: webPort,
-        https: httpsConfig,
-        headers: extractWebHeaders(),
-      );
+      final WebDevServerConfig webDevServerConfig = await webDevServerConfigCore();
       return webDevServerConfig;
     }
     return null;
@@ -749,6 +756,7 @@ class RunCommand extends RunCommandBase {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
+        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(

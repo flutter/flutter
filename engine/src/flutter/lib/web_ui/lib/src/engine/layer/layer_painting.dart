@@ -36,6 +36,9 @@ abstract class LayerPicture implements ui.Picture {
   ///
   /// The copy points to the same underlying Skia picture as this picture.
   LayerPicture clone();
+
+  /// Returns `true` if the picture has been disposed.
+  bool get isDisposed;
 }
 
 /// A [ui.PictureRecorder] which allows callers to know if it has been disposed.

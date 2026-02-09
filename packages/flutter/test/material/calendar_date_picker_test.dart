@@ -1492,8 +1492,10 @@ void main() {
 
           // The initial date should be announced.
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester.takeAnnouncements().last,
+            isAccessibilityAnnouncement(
+              '${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            ),
           );
 
           // Select a new date.
@@ -1502,8 +1504,10 @@ void main() {
 
           // The selected date should be announced.
           expect(
-            tester.takeAnnouncements().last.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+            tester.takeAnnouncements().last,
+            isAccessibilityAnnouncement(
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(selectedDate!)}$semanticLabelSuffix',
+            ),
           );
 
           // Select the initial date.
@@ -1511,8 +1515,10 @@ void main() {
 
           // The initial date should be announced as selected.
           expect(
-            tester.takeAnnouncements().first.message,
-            '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            tester.takeAnnouncements().first,
+            isAccessibilityAnnouncement(
+              '${localizations.selectedDateLabel} ${localizations.formatFullDate(initialDate)}$semanticLabelSuffix',
+            ),
           );
 
           semantics.dispose();

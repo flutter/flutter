@@ -52,6 +52,8 @@ impeller_component("renderer") {
     "pipeline.h",
     "pipeline_builder.cc",
     "pipeline_builder.h",
+    "pipeline_compile_queue.cc",
+    "pipeline_compile_queue.h",
     "pipeline_descriptor.cc",
     "pipeline_descriptor.h",
     "pipeline_library.cc",
@@ -107,6 +109,9 @@ template("renderer_unittests_component") {
     "pool_unittests.cc",
     "renderer_unittests.cc",
   ]
+  if (impeller_enable_compute) {
+    predefined_sources += [ "compute_unittests.cc" ]
+  }
   impeller_component(target_name) {
     testonly = true
     if (defined(invoker.defines)) {

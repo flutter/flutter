@@ -608,9 +608,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction tx = createTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
-    tx.apply();
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -618,9 +617,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction tx = createTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
-    tx.apply();
   }
 
   public boolean isHcppEnabled() {

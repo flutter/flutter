@@ -753,6 +753,9 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
+    // TODO(justinmc): Widgets tests should not import Material/Cupertino. This
+    // test can probably go into Cupertino with a CupertinoApp.
+    // https://github.com/flutter/flutter/issues/177028
     testWidgets(
       'delegated transitions are removed when secondary animation is dismissed and next route is removed',
       (WidgetTester tester) async {

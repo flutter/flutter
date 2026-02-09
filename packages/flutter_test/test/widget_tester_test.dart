@@ -704,24 +704,21 @@ void main() {
       );
       await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
-      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
-      expect(list, hasLength(3));
-      final CapturedAccessibilityAnnouncement first = list[0];
-      expect(first.message, 'announcement 1');
-      expect(first.textDirection, TextDirection.ltr);
+      expect(tester.takeAnnouncements(), [
+        isAccessibilityAnnouncement('announcement 1', textDirection: TextDirection.ltr),
+        isAccessibilityAnnouncement(
+          'announcement 2',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.assertive,
+        ),
+        isAccessibilityAnnouncement(
+          'announcement 3',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.polite,
+        ),
+      ]);
 
-      final CapturedAccessibilityAnnouncement second = list[1];
-      expect(second.message, 'announcement 2');
-      expect(second.textDirection, TextDirection.rtl);
-      expect(second.assertiveness, Assertiveness.assertive);
-
-      final CapturedAccessibilityAnnouncement third = list[2];
-      expect(third.message, 'announcement 3');
-      expect(third.textDirection, TextDirection.rtl);
-      expect(third.assertiveness, Assertiveness.polite);
-
-      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
-      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+      expect(tester.takeAnnouncements(), <CapturedAccessibilityAnnouncement>[]);
     });
 
     testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {
@@ -817,6 +814,27 @@ void main() {
       View(view: tester.view, child: const SizedBox.shrink()),
     );
     expect(find.byType(View), findsOne);
+  });
+
+  group('Leak tests', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169119.
+    testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
+      var counterByWidgets = 0;
+      final RestorationManager managerByWidgets = WidgetsBinding.instance.restorationManager;
+      expect(managerByWidgets, isA<TestRestorationManager>());
+      managerByWidgets.addListener(() => counterByWidgets++);
+      managerByWidgets.notifyListeners();
+      expect(counterByWidgets, 1);
+
+      var counterByServices = 0;
+      final RestorationManager managerByServices = ServicesBinding.instance.restorationManager;
+      expect(managerByServices, isA<TestRestorationManager>());
+      managerByServices.addListener(() => counterByServices++);
+      managerByServices.notifyListeners();
+      expect(counterByServices, 1);
+
+      // Passes if no leaks are detected.
+    });
   });
 }
 

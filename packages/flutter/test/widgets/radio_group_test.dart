@@ -26,33 +26,33 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: true, isEnabled: true),
     );
   });
 
@@ -74,11 +74,11 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
 
     await tester.tap(find.byKey(key0));
@@ -86,11 +86,11 @@ void main() {
     // Can't be select because the radio is disabled.
     expect(
       tester.getSemantics(find.byKey(key0)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: false),
     );
     expect(
       tester.getSemantics(find.byKey(key1)),
-      containsSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
+      isSemantics(isInMutuallyExclusiveGroup: true, isChecked: false, isEnabled: true),
     );
   });
 
