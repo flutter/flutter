@@ -681,21 +681,14 @@ mixin RendererBinding
     rootPipelineOwner.flushLayout();
     rootPipelineOwner.flushCompositingBits();
 
-    final viewsToComposite = <RenderView>[];
-    for (final RenderView renderView in renderViews) {
-      if (renderView.layer == null) {
-        continue;
-      }
-      final PipelineOwner? owner = renderView.owner;
-      if (_viewsNeedingCompositing.contains(renderView) ||
-          (owner?.needsPaint ?? false)) {
-        viewsToComposite.add(renderView);
-      }
-    }
+    final List<RenderView> viewsToComposite = [
+      for (final RenderView renderView in renderViews)
+        if (_needsCompositing(renderView)) renderView,
+    ];
 
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      for (final RenderView renderView in viewsToComposite) {
+      for (final renderView in viewsToComposite) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }
       // Only mark views as successfully composited if this is not a warm-up
@@ -708,6 +701,23 @@ mixin RendererBinding
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
     }
+  }
+
+  /// Whether the given [renderView] needs to be composited during this frame.
+  ///
+  /// A view needs compositing if:
+  ///  - It has been prepared (i.e. [RenderView.prepareInitialFrame] was called).
+  ///  - It is explicitly tracked in [_viewsNeedingCompositing] (e.g. newly added
+  ///    views or views returning from a paused lifecycle state).
+  ///  - Its [PipelineOwner] has render objects that need painting.
+  bool _needsCompositing(RenderView renderView) {
+    if (!renderView.hasInitialFrameBeenPrepared) {
+      return false;
+    }
+    if (_viewsNeedingCompositing.contains(renderView)) {
+      return true;
+    }
+    return renderView.owner?.needsPaint ?? false;
   }
 
   @override
