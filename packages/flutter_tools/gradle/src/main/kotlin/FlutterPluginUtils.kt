@@ -12,12 +12,14 @@ import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.PrintTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.kotlin.dsl.register
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Properties
@@ -708,12 +710,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForJavaVersion")
     internal fun addTaskForJavaVersion(project: Project) {
-        project.tasks.register("javaVersion") {
+        project.tasks.register<PrintTask>("javaVersion") {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            doLast {
-                println(VersionFetcher.getJavaVersion())
-            }
+            message.set(VersionFetcher.getJavaVersion().toString())
         }
     }
 
