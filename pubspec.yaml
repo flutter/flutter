@@ -177,7 +177,7 @@ dependencies:
   typed_data: 1.4.0
   url_launcher: 6.3.2
   url_launcher_android: 6.3.28
-  url_launcher_ios: 6.3.6
+  url_launcher_ios: 6.4.0
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
   url_launcher_platform_interface: 2.3.2
@@ -216,4 +216,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: i5or8r
+# PUBSPEC CHECKSUM: q8irkm
