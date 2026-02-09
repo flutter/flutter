@@ -40,8 +40,11 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
          [device supportsFamily:MTLGPUFamilyMac2];
 }
 
-// See "Extended Range and wide color pixel formats" in the metal feature set
-// tables.
+// See "Extended Range and wide color pixel formats" in the Metal Feature Set
+// Tables: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+// Wide gamut requires Apple3+ GPU family (supports 10-bit and F16 formats).
+// This includes all iOS devices with A9+ chip and Apple Silicon Macs (M1+).
+// Intel Macs (Mac2 family) do not support wide gamut.
 static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple3];
 }
