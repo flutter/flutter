@@ -70,6 +70,9 @@ abstract class FeatureFlags {
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
 
+  /// Whether accessibility evaluations is enabled.
+  bool get isAccessibilityEvaluationsEnabled;
+
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
 
@@ -100,6 +103,7 @@ abstract class FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -237,6 +241,15 @@ const windowingFeature = Feature(
   configSetting: 'enable-windowing',
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Whether accessibility evaluations is enabled.
+const accessibilityEvaluationsFeature = Feature(
+  name: 'support for accessibility evaluations',
+  configSetting: 'enable-accessibility-evaluations',
+  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
+  runtimeId: 'accessibility_evaluations',
   master: FeatureChannelSetting(available: true),
 );
 
