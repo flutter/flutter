@@ -75,7 +75,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   }
 
   @override
-  final name = 'swift-packages';
+  final name = 'swift-package';
 
   @override
   final description =
