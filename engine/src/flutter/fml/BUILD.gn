@@ -202,10 +202,6 @@ source_set("fml") {
 
   if (is_fuchsia) {
     sources += [
-      "platform/fuchsia/log_interest_listener.cc",
-      "platform/fuchsia/log_interest_listener.h",
-      "platform/fuchsia/log_state.cc",
-      "platform/fuchsia/log_state.h",
       "platform/fuchsia/message_loop_fuchsia.cc",
       "platform/fuchsia/message_loop_fuchsia.h",
       "platform/fuchsia/paths_fuchsia.cc",
@@ -220,6 +216,7 @@ source_set("fml") {
       "${fuchsia_sdk}/pkg/async-loop-cpp",
       "${fuchsia_sdk}/pkg/async-loop-default",
       "${fuchsia_sdk}/pkg/component_incoming_cpp",
+      "${fuchsia_sdk}/pkg/syslog_cpp",
       "${fuchsia_sdk}/pkg/syslog_structured_backend",
       "${fuchsia_sdk}/pkg/trace",
       "${fuchsia_sdk}/pkg/trace-engine",
@@ -372,10 +369,6 @@ if (enable_unittests) {
         "platform/darwin/cf_utils_unittests.mm",
         "platform/darwin/string_range_sanitization_unittests.mm",
       ]
-    }
-
-    if (is_fuchsia) {
-      sources += [ "platform/fuchsia/log_interest_listener_unittests.cc" ]
     }
 
     if (is_win) {

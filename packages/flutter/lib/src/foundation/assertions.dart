@@ -99,8 +99,8 @@ class PartialStackFrame {
 /// A class that filters stack frames for additional filtering on
 /// [FlutterError.defaultStackFilter].
 abstract class StackFilter {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const StackFilter();
 
   /// Filters the list of [StackFrame]s by updating corresponding indices in
@@ -121,8 +121,7 @@ abstract class StackFilter {
 ///   * [PartialStackFrame], a class that helps match partial method information
 ///     to a stack frame.
 class RepetitiveStackFrameFilter extends StackFilter {
-  /// Creates a new RepetitiveStackFrameFilter. All parameters are required and must not be
-  /// null.
+  /// Creates a new RepetitiveStackFrameFilter.
   const RepetitiveStackFrameFilter({required this.frames, required this.replacement});
 
   /// The shape of this repetitive stack pattern.
@@ -435,8 +434,10 @@ class FlutterErrorDetails with Diagnosticable {
   static final List<DiagnosticPropertiesTransformer> propertiesTransformers =
       <DiagnosticPropertiesTransformer>[];
 
-  /// The exception. Often this will be an [AssertionError], maybe specifically
-  /// a [FlutterError]. However, this could be any value at all.
+  /// The exception.
+  ///
+  /// Often this will be an [AssertionError], maybe specifically a [FlutterError].
+  /// However, this could be any value at all.
   final Object exception;
 
   /// The stack trace from where the [exception] was thrown (as opposed to where
@@ -452,9 +453,9 @@ class FlutterErrorDetails with Diagnosticable {
   /// [StackTrace.toString].
   final StackTrace? stack;
 
-  /// A human-readable brief name describing the library that caught the error
-  /// message. This is used by the default error handler in the header dumped to
-  /// the console.
+  /// A human-readable brief name describing the library that caught the error message.
+  ///
+  /// This is used by the default error handler in the header dumped to the console.
   final String? library;
 
   /// A [DiagnosticsNode] that provides a human-readable description of where
@@ -498,9 +499,10 @@ class FlutterErrorDetails with Diagnosticable {
   ///    [FlutterErrorDetails].
   final DiagnosticsNode? context;
 
-  /// A callback which filters the [stack] trace. Receives an iterable of
-  /// strings representing the frames encoded in the way that
-  /// [StackTrace.toString()] provides. Should return an iterable of lines to
+  /// A callback which filters the [stack] trace.
+  ///
+  /// Receives an iterable of strings representing the frames encoded in the way
+  /// that [StackTrace.toString()] provides. Should return an iterable of lines to
   /// output for the stack.
   ///
   /// If this is not provided, then [FlutterError.dumpErrorToConsole] will use

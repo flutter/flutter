@@ -26,6 +26,7 @@ import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -121,6 +122,9 @@ public class FlutterView extends FrameLayout
 
   // Maximum size allowed for a content sized view.
   @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
+
+  // Flag to enable content sizing.
+  @VisibleForTesting boolean isContentSizingEnabled = false;
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -423,6 +427,8 @@ public class FlutterView extends FrameLayout
       addView(flutterImageView);
     }
 
+    isContentSizingEnabled = ContentSizingFlag.isEnabled(getContext());
+
     // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
     setFocusable(true);
     setFocusableInTouchMode(true);
@@ -520,7 +526,7 @@ public class FlutterView extends FrameLayout
     viewportMetrics.width = width;
     viewportMetrics.height = height;
 
-    if (heightMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && heightMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView height is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minHeight = 0;
       viewportMetrics.maxHeight = CONTENT_SIZING_MAX;
@@ -528,7 +534,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.minHeight = viewportMetrics.height;
       viewportMetrics.maxHeight = viewportMetrics.height;
     }
-    if (widthMode == MeasureSpec.UNSPECIFIED) {
+    if (isContentSizingEnabled && widthMode == MeasureSpec.UNSPECIFIED) {
       Log.d(TAG, "FlutterView width is set to wrap content - updating viewport metrics to max");
       viewportMetrics.minWidth = 0;
       viewportMetrics.maxWidth = CONTENT_SIZING_MAX;
@@ -850,6 +856,20 @@ public class FlutterView extends FrameLayout
     // existing Insets-based method calls above.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_35) {
       delegate.growViewportMetricsToCaptionBar(getContext(), viewportMetrics);
+    }
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      RoundedCorner topLeft = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+      RoundedCorner topRight = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+      RoundedCorner bottomRight = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+      RoundedCorner bottomLeft = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+
+      viewportMetrics.displayCornerRadiusTopLeft = topLeft != null ? topLeft.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusTopRight = topRight != null ? topRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomRight =
+          bottomRight != null ? bottomRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomLeft =
+          bottomLeft != null ? bottomLeft.getRadius() : 0;
     }
 
     Log.v(
