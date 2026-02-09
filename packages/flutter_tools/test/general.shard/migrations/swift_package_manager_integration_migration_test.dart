@@ -1160,21 +1160,23 @@ void main() {
                 );
                 _createProjectFiles(project, platform, isExampleApp: true);
 
-                final settingsBeforeMigration = <String>[..._allSectionsUnmigrated(platform)];
+                final settingsBeforeMigration = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
                 settingsBeforeMigration[_fileReferenceSectionIndex] =
                     unmigratedFileReferenceSection;
                 project.xcodeProjectInfoFile.writeAsStringSync(
                   _projectSettings(settingsBeforeMigration),
                 );
                 final settingsAsJsonBeforeMigration = <String>[
-                  ..._allSectionsMigratedAsJson(platform),
+                  ..._allSectionsMigratedAsJson(platform, includePlugin: true),
                 ];
                 settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
                     unmigratedFileReferenceAsJson(platform);
 
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
                 ]);
 
                 final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -1194,6 +1196,7 @@ void main() {
                 );
                 settingsBeforeMigration[_fileReferenceSectionIndex] = migratedFileReferenceSection(
                   platform,
+                  includePlugin: true,
                 );
                 expect(
                   project.xcodeProjectInfoFile.readAsStringSync(),
@@ -1756,13 +1759,15 @@ void main() {
                 expectedSettings[_groupSectionIndex] = migratedGroupSection(
                   platform,
                   missingChildren: true,
+                  includePlugin: true,
                 );
                 expectedSettings[_fileReferenceSectionIndex] = migratedFileReferenceSection(
                   platform,
+                  includePlugin: true,
                 );
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
                 ]);
 
                 final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -1816,14 +1821,20 @@ void main() {
                   ..._allSectionsUnmigratedAsJson(platform),
                 ];
 
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
-                expectedSettings[_groupSectionIndex] = migratedGroupSection(platform);
+                final expectedSettings = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
+                expectedSettings[_groupSectionIndex] = migratedGroupSection(
+                  platform,
+                  includePlugin: true,
+                );
                 expectedSettings[_fileReferenceSectionIndex] = migratedFileReferenceSection(
                   platform,
+                  includePlugin: true,
                 );
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
                 ]);
 
                 final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -2958,24 +2969,19 @@ void main() {
                 _createProjectFiles(project, platform, isExampleApp: true);
 
                 final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
-                settingsBeforeMigration[_fileReferenceSectionIndex] =
-                    unmigratedFileReferenceSection;
-                settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
                 project.xcodeProjectInfoFile.writeAsStringSync(
                   _projectSettings(settingsBeforeMigration),
                 );
                 final settingsAsJsonBeforeMigration = <String>[
                   ..._allSectionsMigratedAsJson(platform),
                 ];
-                settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                    unmigratedFileReferenceAsJson(platform);
-                settingsAsJsonBeforeMigration[_groupSectionIndex] = unmigratedGroupSectionAsJson(
-                  platform,
-                );
-                final expectedSettings = <String>[..._allSectionsMigrated(platform)];
+
+                final expectedSettings = <String>[
+                  ..._allSectionsMigrated(platform, includePlugin: true),
+                ];
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
-                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform, includePlugin: true)),
                 ]);
 
                 final projectMigration = SwiftPackageManagerIntegrationMigration(
@@ -2988,6 +2994,11 @@ void main() {
                   plistParser: plistParser,
                 );
                 await projectMigration.migrate();
+                expect(
+                  testLogger.traceText,
+                  'Updating project settings...\n'
+                  'Validating project settings...\n',
+                );
                 expect(testLogger.errorText, isEmpty);
                 expect(
                   project.xcodeProjectInfoFile.readAsStringSync(),
@@ -3015,20 +3026,13 @@ void main() {
                 _createProjectFiles(project, platform, isExampleApp: true);
 
                 final settingsBeforeMigration = <String>[..._allSectionsMigrated(platform)];
-                settingsBeforeMigration[_fileReferenceSectionIndex] =
-                    unmigratedFileReferenceSection;
-                settingsBeforeMigration[_groupSectionIndex] = unmigratedGroupSection(platform);
                 project.xcodeProjectInfoFile.writeAsStringSync(
                   _projectSettings(settingsBeforeMigration),
                 );
                 final settingsAsJsonBeforeMigration = <String>[
                   ..._allSectionsMigratedAsJson(platform),
                 ];
-                settingsAsJsonBeforeMigration[_fileReferenceSectionIndex] =
-                    unmigratedFileReferenceAsJson(platform);
-                settingsAsJsonBeforeMigration[_groupSectionIndex] = unmigratedGroupSectionAsJson(
-                  platform,
-                );
+
                 final plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
                   _plutilOutput(['something went wrong']),
@@ -3045,7 +3049,12 @@ void main() {
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
-                expect(testLogger.traceText, contains("An error occurred when adding the plugin's Swift package to the Xcode project"));
+                expect(
+                  testLogger.traceText,
+                  contains(
+                    "An error occurred when adding the plugin's Swift package to the Xcode project",
+                  ),
+                );
                 expect(
                   project.xcodeProjectInfoFile.readAsStringSync(),
                   _projectSettings(settingsBeforeMigration),
@@ -3269,12 +3278,12 @@ const _projectSectionIndex = 5;
 const _localSwiftPackageReferenceSectionIndex = 6;
 const _swiftPackageProductDependencySectionIndex = 7;
 
-List<String> _allSectionsMigrated(FlutterDarwinPlatform platform) {
+List<String> _allSectionsMigrated(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
   return <String>[
     migratedBuildFileSection,
-    migratedFileReferenceSection(platform),
+    migratedFileReferenceSection(platform, includePlugin: includePlugin),
     migratedFrameworksBuildPhaseSection(platform),
-    migratedGroupSection(platform),
+    migratedGroupSection(platform, includePlugin: includePlugin),
     migratedNativeTargetSection(platform),
     migratedProjectSection(platform),
     migratedLocalSwiftPackageReferenceSection(),
@@ -3282,12 +3291,15 @@ List<String> _allSectionsMigrated(FlutterDarwinPlatform platform) {
   ];
 }
 
-List<String> _allSectionsMigratedAsJson(FlutterDarwinPlatform platform) {
+List<String> _allSectionsMigratedAsJson(
+  FlutterDarwinPlatform platform, {
+  bool includePlugin = false,
+}) {
   return <String>[
     migratedBuildFileSectionAsJson,
-    migratedFileReferenceAsJson(platform),
+    migratedFileReferenceAsJson(platform, includePlugin: includePlugin),
     migratedFrameworksBuildPhaseSectionAsJson(platform),
-    migratedGroupSectionAsJson(platform),
+    migratedGroupSectionAsJson(platform, includePlugin: includePlugin),
     migratedNativeTargetSectionAsJson(platform),
     migratedProjectSectionAsJson(platform),
     migratedLocalSwiftPackageReferenceSectionAsJson,
@@ -3407,12 +3419,12 @@ const unmigratedFileReferenceSection = '''
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 ''';
-String migratedFileReferenceSection(FlutterDarwinPlatform platform) {
+
+String migratedFileReferenceSection(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
   return '''
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
-		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };
+		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };${includePlugin ? '\n		78DABEA22ED26510000E7860 /* $pluginName */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = $pluginName; path = ../../${platform.name}/$pluginName; sourceTree = "<group>"; };' : ''}
 /* End PBXFileReference section */
 ''';
 }
@@ -3434,8 +3446,8 @@ String unmigratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
     }''';
 }
 
-String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
-  return '''
+String migratedFileReferenceAsJson(FlutterDarwinPlatform platform, {bool includePlugin = false}) {
+  var migratedJson = '''
     "1498D2321E8E86230040F4C2": {
       "path": "GeneratedPluginRegistrant.h",
       "isa": "PBXFileReference",
@@ -3448,7 +3460,11 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
       "lastKnownFileType": "sourcecode.c.objc",
       "sourceTree": "<group>",
       "fileEncoding": "4"
-    },
+    }''';
+  if (includePlugin) {
+    migratedJson =
+        '''
+$migratedJson,
     "78DABEA22ED26510000E7860": {
       "path": "../../${platform.name}/$pluginName",
       "isa": "PBXFileReference",
@@ -3456,6 +3472,8 @@ String migratedFileReferenceAsJson(FlutterDarwinPlatform platform) {
       "lastKnownFileType": "wrapper",
       "sourceTree": "<group>"
     }''';
+  }
+  return migratedJson;
 }
 
 // PBXFrameworksBuildPhase
@@ -3556,19 +3574,23 @@ String unmigratedGroupSection(FlutterDarwinPlatform platform, {bool missingChild
   ].join('\n');
 }
 
-String migratedGroupSection(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSection(
+  FlutterDarwinPlatform platform, {
+  bool missingChildren = false,
+  bool includePlugin = false,
+}) {
   return <String>[
     '/* Begin PBXGroup section */',
     '		${_flutterGroupIdentifier(platform)} /* Flutter */ = {',
     if (missingChildren) ...<String>[
       '			children = (',
-      '				78DABEA22ED26510000E7860 /* $pluginName */,',
+      if (includePlugin) '				78DABEA22ED26510000E7860 /* $pluginName */,',
       '			);',
       '			isa = PBXGroup;',
     ] else ...<String>[
       '			isa = PBXGroup;',
       '			children = (',
-      '				78DABEA22ED26510000E7860 /* $pluginName */,',
+      if (includePlugin) '				78DABEA22ED26510000E7860 /* $pluginName */,',
       '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,',
       '				9740EEB21CF90195004384FC /* Debug.xcconfig */,',
       '				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,',
@@ -3603,20 +3625,27 @@ String unmigratedGroupSectionAsJson(
   ].join('\n');
 }
 
-String migratedGroupSectionAsJson(FlutterDarwinPlatform platform, {bool missingChildren = false}) {
+String migratedGroupSectionAsJson(
+  FlutterDarwinPlatform platform, {
+  bool missingChildren = false,
+  bool includePlugin = false,
+}) {
   return <String>[
     '    "${_flutterGroupIdentifier(platform)}" : {',
     '      "isa": "PBXGroup",',
     '      "name": "Flutter",',
     '        "children": [',
-    if (missingChildren) ...<String>['            "78DABEA22ED26510000E7860",'] else ...<String>[
-      '            "78DABEA22ED26510000E7860",',
+    if (missingChildren) ...<String>[
+      if (includePlugin) '            "78DABEA22ED26510000E7860",',
+    ] else ...<String>[
+      if (includePlugin) '            "78DABEA22ED26510000E7860",',
       '            "3B3967151E833CAA004F5970",',
       '            "9740EEB21CF90195004384FC",',
       '            "7AFA3C8E1D35360C0083082E",',
       '            "9740EEB31CF90195004384FC"',
+
+      '      ],',
     ],
-    '      ],',
     '      "sourceTree": "<group>"',
     '    }',
   ].join('\n');

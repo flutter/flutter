@@ -425,32 +425,3 @@ class FakePlugin extends Fake implements Plugin {
 }
 
 class FakePluginPlatform extends Fake implements PluginPlatform {}
-
-class FakeArtifacts extends Fake implements Artifacts {
-  @override
-  String getArtifactPath(
-    Artifact artifact, {
-    TargetPlatform? platform,
-    BuildMode? mode,
-    EnvironmentType? environmentType,
-  }) {
-    final String platformName;
-    final String frameworkName;
-    if (platform == TargetPlatform.darwin) {
-      platformName = 'darwin-x64';
-      frameworkName = 'FlutterMacOS';
-    } else {
-      platformName = 'ios';
-      frameworkName = 'Flutter';
-    }
-    final String plaformBuildMode;
-    if (mode == BuildMode.release) {
-      plaformBuildMode = '$platformName-release';
-    } else if (mode == BuildMode.profile) {
-      plaformBuildMode = '$platformName-profile';
-    } else {
-      plaformBuildMode = platformName;
-    }
-    return 'flutter/bin/cache/artifacts/engine/$plaformBuildMode/$frameworkName.xcframework';
-  }
-}
