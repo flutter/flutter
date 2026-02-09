@@ -220,7 +220,7 @@ mixin RenderInlineChildrenContainerDefaults
       if (child == null) {
         assert(
           false,
-          'The length of boxes (${boxes.length}) should be greater than childCount ($childCount)',
+          'The length of boxes (${boxes.length}) must not be greater than childCount ($childCount)',
         );
         return;
       }
