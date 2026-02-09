@@ -6631,8 +6631,6 @@ const String _kBodyFont = 'CupertinoSystemText';
 /// The font family for menu items at larger text scales.
 const String _kDisplayFont = 'CupertinoSystemDisplay';
 
-// TODO(davidhicks980): DynamicType should be moved to text_theme.dart when all
-// styles are implemented. https://github.com/flutter/flutter/issues/179828
 enum DynamicTypeStyle {
   body(
     xSmall: TextStyle(fontSize: 14, height: 19 / 14, letterSpacing: -0.15, fontFamily: _kBodyFont),
@@ -6701,26 +6699,21 @@ enum DynamicTypeStyle {
   final TextStyle ax4;
   final TextStyle ax5;
 
-  double _interpolateUnits(double units, int minimum, int maximum) {
-    final double t = (units - minimum) / (maximum - minimum);
-    return ui.lerpDouble(0, 1, t)!;
-  }
-
   TextStyle resolveTextStyle(TextScaler textScaler) {
     final double units = (textScaler.scale(17) - 17).roundToDouble();
     return switch (units) {
       <= -3 => xSmall,
-      < -2 => TextStyle.lerp(xSmall, small, _interpolateUnits(units, -3, -2))!,
-      < -1 => TextStyle.lerp(small, medium, _interpolateUnits(units, -2, -1))!,
-      < 0 => TextStyle.lerp(medium, large, _interpolateUnits(units, -1, 0))!,
-      < 2 => TextStyle.lerp(large, xLarge, _interpolateUnits(units, 0, 2))!,
-      < 4 => TextStyle.lerp(xLarge, xxLarge, _interpolateUnits(units, 2, 4))!,
-      < 6 => TextStyle.lerp(xxLarge, xxxLarge, _interpolateUnits(units, 4, 6))!,
-      < 11 => TextStyle.lerp(xxxLarge, ax1, _interpolateUnits(units, 6, 11))!,
-      < 16 => TextStyle.lerp(ax1, ax2, _interpolateUnits(units, 11, 16))!,
-      < 23 => TextStyle.lerp(ax2, ax3, _interpolateUnits(units, 16, 23))!,
-      < 30 => TextStyle.lerp(ax3, ax4, _interpolateUnits(units, 23, 30))!,
-      < 36 => TextStyle.lerp(ax4, ax5, _interpolateUnits(units, 30, 36))!,
+      == -2 => small,
+      == -1 => medium,
+      == 0 => large,
+      == 2 => xLarge,
+      == 4 => xxLarge,
+      == 6 => xxxLarge,
+      == 11 => ax1,
+      == 16 => ax2,
+      == 23 => ax3,
+      == 30 => ax4,
+      == 36 => ax5,
       _ => ax5,
     };
   }
