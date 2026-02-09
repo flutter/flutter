@@ -1787,7 +1787,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
 /// tree create windows which are logically nested under a particular widget
 /// while at the same time need to be rendered at the root of the widget tree.
 ///
-/// /// {@tool snippet}
+/// {@tool snippet}
 /// An example usage might look like this, where the `WindowManager` wraps wrap
 /// the root of the widget tree so that dialogs can be rendered at the same level
 /// as a [RegularWindow].
