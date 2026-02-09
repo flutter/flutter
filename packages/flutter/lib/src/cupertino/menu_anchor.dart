@@ -1174,27 +1174,22 @@ class _MenuOverlayState extends State<_MenuOverlay>
 class _ShadowPainter extends CustomPainter {
   const _ShadowPainter({required this.brightness, required this.repaint}) : super(repaint: repaint);
   static const Radius radius = Radius.circular(13);
-  static const double lightShadowOpacity = 0.12;
-  static const double darkShadowOpacity = 0.24;
-  double get shadowOpacity => ui.clampDouble(repaint.value, 0, 1);
+  static const double shadowOpacity = 0.12;
+  double get shadowAnimation => ui.clampDouble(repaint.value, 0, 1);
   final Animation<double> repaint;
   final ui.Brightness brightness;
 
   @override
   void paint(Canvas canvas, Size size) {
-    assert(shadowOpacity >= 0 && shadowOpacity <= 1);
+    assert(shadowAnimation >= 0 && shadowAnimation <= 1);
     final center = Offset(size.width / 2, size.height / 2);
     final rect = Rect.fromCenter(center: center, width: size.width, height: size.height);
     final roundedRect = RSuperellipse.fromRectAndRadius(rect, radius);
-    final double opacityMultiplier = switch (brightness) {
-      ui.Brightness.light => lightShadowOpacity,
-      ui.Brightness.dark => darkShadowOpacity,
-    };
 
-    final double blurSigma = shadowOpacity * 50;
+    final double blurSigma = shadowAnimation * 50;
     final shadowPaint = Paint()
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma)
-      ..color = ui.Color.fromRGBO(0, 0, 10, shadowOpacity * shadowOpacity * opacityMultiplier);
+      ..color = ui.Color.fromRGBO(0, 0, 10, shadowAnimation * shadowAnimation * shadowOpacity);
 
     final maskPath = Path()
       ..fillType = ui.PathFillType.evenOdd
@@ -2485,7 +2480,7 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   @override
   bool didSwipeEnter() {
     if (!isEnabled) {
-      return false;
+      return true;
     }
 
     switch (defaultTargetPlatform) {
@@ -2504,16 +2499,17 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
   }
 
   @override
-  void didSwipeLeave({bool pointerUp = false}) {
-    if (!mounted) {
-      return;
+  void didSwipeLeave() {
+    if (mounted) {
+      isSwiped = false;
     }
+  }
 
-    if (isEnabled && pointerUp) {
+  @override
+  void didSwipeActivate() {
+    if (mounted && isEnabled) {
       _handleActivation();
     }
-
-    isSwiped = false;
   }
 
   @override
@@ -2657,14 +2653,35 @@ class _CupertinoMenuItemInteractionHandlerState extends State<_CupertinoMenuItem
 /// An ancestor [_SwipeRegion] must be present in order to receive these
 /// callbacks.
 abstract interface class _SwipeTarget {
-  /// Called when a pointer enters the [_SwipeTarget]. Return true if the pointer
-  /// should be considered "on" the [_SwipeTarget], and false otherwise (for
-  /// example, when the [_SwipeTarget] is disabled).
+  /// A pointer has entered this region while down.
+  ///
+  /// This includes:
+  ///
+  ///  * The pointer has moved into this region from outside.
+  ///  * The point has contacted the screen in this region. In this case, this
+  ///    method is called as soon as the pointer down event occurs regardless of
+  ///    whether the gesture wins the arena immediately.
+  ///
+  /// When this function returns true, this [_SwipeTarget] will prevent
+  /// underlying widgets from being entered by the swipe gesture. Otherwise,
+  /// underlying widgets may also receive swipe enter events.
   bool didSwipeEnter();
 
-  /// Called when the swipe is ended or canceled. If `pointerUp` is true,
-  /// then the pointer was removed from the screen while over this [_SwipeTarget].
-  void didSwipeLeave({required bool pointerUp});
+  /// A pointer has exited this region.
+  ///
+  /// This includes:
+  ///  * The pointer has moved out of this region.
+  ///  * The pointer is no longer in contact with the screen.
+  ///  * The pointer is canceled.
+  ///  * The gesture loses the arena.
+  ///  * The gesture ends. In this case, this method is called immediately
+  ///    before [didSwipeActivate].
+  void didSwipeLeave();
+
+  /// The drag gesture is completed in this region.
+  ///
+  /// This method is called immediately after a [didSwipeLeave].
+  void didSwipeActivate();
 }
 
 class _SwipeScope extends InheritedWidget {
@@ -2695,7 +2712,6 @@ class _SwipeRegion extends StatefulWidget {
 class _SwipeRegionState extends State<_SwipeRegion> {
   final Set<_RenderSwipeSurface> _surfaces = <_RenderSwipeSurface>{};
   MultiDragGestureRecognizer? _recognizer;
-
   bool get isSwiping => _position != null;
   ui.Offset? _position;
 
@@ -2720,6 +2736,7 @@ class _SwipeRegionState extends State<_SwipeRegion> {
 
   @override
   void dispose() {
+    assert(_surfaces.isEmpty);
     _recognizer?.dispose();
     _recognizer = null;
     super.dispose();
@@ -2949,18 +2966,19 @@ class _SwipeHandle extends Drag {
     }
     // Identify targets that are no longer hit.
     //
-    // This ensures disjoint siblings (A -> B) have a "Leave A" -> "Enter B" order.
+    // This ensures disjoint siblings (1 -> 2) have a "Leave 1" -> "Enter 2" order.
     _enteredTargets.removeWhere((target) {
       if (!targets.contains(target)) {
-        target.didSwipeLeave(pointerUp: false);
+        target.didSwipeLeave();
         return true;
       }
       return false;
     });
 
     final nextEntered = <_SwipeTarget>{};
-    // If we encounter an existing target, we assume the previous chain is effectively
-    // active and we shouldn't add *new* underlying targets that weren't there before
+
+    // If an existing target is encountered, assume the previous chain is effectively
+    // active and don't add *new* underlying targets that weren't there before
     // (preserving "blocking" behavior without calling didSwipeEnter again).
     var hasEncounteredExisting = false;
     for (final target in targets) {
@@ -2982,10 +3000,18 @@ class _SwipeHandle extends Drag {
     }
 
     // Leave old targets.
-    // Iterate backwards to leave from the end of the chain (underlying) up to the surface.
+    //
+    // Disjoint siblings were removed above (1 -> 2) to preserve the expected
+    // "Leave 1" -> "Enter 2" order. For nested items (1 -> 1.1 -> 1.1.1), the
+    // order is less critical, but the most specific item should still be left
+    // last to preserve the expected behavior of the surface.
+    //
+    // This means that entering a nested item (1.1) that obscures a parent item
+    // (1) will result in "Enter 1.1" -> "Leave 1". Leaving the nested item will
+    // behave in the opposite order: "Leave 1.1" -> "Enter 1".
     for (final _SwipeTarget target in _enteredTargets.reversed) {
       if (!nextEntered.contains(target)) {
-        target.didSwipeLeave(pointerUp: false);
+        target.didSwipeLeave();
       }
     }
 
@@ -2996,7 +3022,11 @@ class _SwipeHandle extends Drag {
 
   void _leaveAllEntered({bool pointerUp = false}) {
     for (var i = 0; i < _enteredTargets.length; i += 1) {
-      _enteredTargets[i].didSwipeLeave(pointerUp: pointerUp);
+      final _SwipeTarget target = _enteredTargets[i];
+      target.didSwipeLeave();
+      if (pointerUp) {
+        target.didSwipeActivate();
+      }
     }
     _enteredTargets.clear();
   }
