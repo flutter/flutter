@@ -39,11 +39,6 @@ const kStaticAssetsUrl = 'staticAssetsUrl';
 const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
 /// Prefix for web-define variables stored in [Environment.defines].
-///
-/// Web-define variables are user-specified key-value pairs passed via
-/// `--web-define=KEY=VALUE` on the CLI. They are stored in the build
-/// environment with this prefix so that build targets can distinguish
-/// them from other defines.
 const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
