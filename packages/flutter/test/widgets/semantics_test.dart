@@ -6,8 +6,8 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -1880,8 +1880,9 @@ void main() {
     final key1 = UniqueKey();
     final key2 = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           blockUserActions: true,
           explicitChildNodes: true,
           child: Column(
@@ -1918,8 +1919,9 @@ void main() {
   testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
     final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -1952,8 +1954,9 @@ void main() {
   ) async {
     final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -2075,20 +2078,25 @@ void main() {
     final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Headings')),
-          body: ListView(
-            children: <Widget>[
-              for (int level = 1; level <= 6; level++)
-                Semantics(
-                  key: ValueKey<String>('heading-$level'),
-                  headingLevel: level,
-                  child: Text('Heading level $level'),
-                ),
-              const Text('This is not a heading'),
-            ],
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 50, child: Text('Headings')),
+            Expanded(
+              child: ListView(
+                children: <Widget>[
+                  for (int level = 1; level <= 6; level++)
+                    Semantics(
+                      key: ValueKey<String>('heading-$level'),
+                      headingLevel: level,
+                      child: Text('Heading level $level'),
+                    ),
+                  const Text('This is not a heading'),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -2232,20 +2240,18 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Scaffold(
-          body: Column(
-            children: <Widget>[
-              Semantics(
-                traversalParentIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              const SizedBox.square(dimension: 10),
-            ],
-          ),
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
         ),
       ),
     );
@@ -2308,24 +2314,22 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Scaffold(
-          body: Column(
-            children: <Widget>[
-              Semantics(
-                traversalParentIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              const SizedBox.square(dimension: 10),
-            ],
-          ),
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
         ),
       ),
     );
@@ -2391,19 +2395,20 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Scaffold(
-            body: Column(
-              children: <Widget>[
-                Semantics(
-                  traversalChildIdentifier: identifier,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Semantics(traversalParentIdentifier: identifier),
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                traversalChildIdentifier: identifier,
+                child: Semantics(
+                  container: true, 
+                  child: Semantics(
+                    traversalParentIdentifier: identifier,
+                    child: const SizedBox(width: 50, height: 50),
                   ),
                 ),
-                const SizedBox.square(dimension: 10),
-              ],
-            ),
+              ),
+              const SizedBox.square(dimension: 10),
+            ],
           ),
         ),
       );
