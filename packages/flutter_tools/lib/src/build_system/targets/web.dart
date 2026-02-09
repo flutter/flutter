@@ -728,7 +728,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
     // Extract web-define variables from the environment. These are stored with
     // the [kWebDefinePrefix] prefix by [WebBuilder.buildWeb].
-    final Map<String, String> webDefines = <String, String>{
+    final webDefines = <String, String>{
       for (final MapEntry<String, String> entry in environment.defines.entries)
         if (entry.key.startsWith(kWebDefinePrefix))
           entry.key.substring(kWebDefinePrefix.length): entry.value,
