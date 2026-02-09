@@ -750,13 +750,14 @@ object FlutterPluginUtils {
         // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
         //                 the groovy `flutter.android` lines.
         val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
-        project.tasks.register("printBuildVariants") {
+
+        project.tasks.register<PrintTask>("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
-            doLast {
-                androidExtension.applicationVariants.forEach { variant ->
-                    println("BuildVariant: ${variant.name}")
-                }
+            val messageBuilder = StringBuilder()
+            androidExtension.applicationVariants.forEach { variant ->
+                messageBuilder.append("BuildVariant: ${variant.name}\n")
             }
+            message.set(messageBuilder.toString())
         }
     }
 
