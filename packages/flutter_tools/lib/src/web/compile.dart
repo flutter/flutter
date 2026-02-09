@@ -63,6 +63,8 @@ class WebBuilder {
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
+  /// Builds the web application using the specified compiler configurations
+  /// and generates the necessary web assets in the output directory.
   Future<void> buildWeb(
     FlutterProject flutterProject,
     String target,
