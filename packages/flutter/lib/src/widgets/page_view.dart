@@ -972,8 +972,9 @@ class _PageViewState extends State<PageView> {
             // TODO(dnfield): we should provide a way to set cacheExtent
             // independent of implicit scrolling:
             // https://github.com/flutter/flutter/issues/45632
-            cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
-            cacheExtentStyle: CacheExtentStyle.viewport,
+            scrollCacheExtent: widget.allowImplicitScrolling
+                ? const ScrollCacheExtent.viewport(1.0)
+                : const ScrollCacheExtent.viewport(0.0),
             axisDirection: axisDirection,
             offset: position,
             clipBehavior: widget.clipBehavior,

@@ -24,4 +24,40 @@ void main() {
   RenderParagraph();
   RenderEditable(textScaleFactor: math.min(123, 456));
   RenderEditable();
+  // Changes made in https://github.com/flutter/flutter/issues/13044
+  RenderViewport renderViewport = RenderViewport();
+  renderViewport = RenderViewport(cacheExtent: 1.0);
+  renderViewport = RenderViewport(
+    cacheExtent: 1.0,
+    cacheExtentStyle: CacheExtentStyle.pixel,
+  );
+  renderViewport = RenderViewport(
+    cacheExtent: 2.0,
+    cacheExtentStyle: CacheExtentStyle.viewport,
+  );
+
+  // Runtime variable (should NOT be migrated)
+  CacheExtentStyle cacheExtentStyle = CacheExtentStyle.viewport;
+  renderViewport = RenderViewport(
+    cacheExtent: 1.0,
+    cacheExtentStyle: cacheExtentStyle,
+  );
+
+  RenderShrinkWrappingViewport renderShrinkWrappingViewport =
+      RenderShrinkWrappingViewport();
+  renderShrinkWrappingViewport = RenderShrinkWrappingViewport(cacheExtent: 1.0);
+  renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
+    cacheExtent: 1.0,
+    cacheExtentStyle: CacheExtentStyle.pixel,
+  );
+  renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
+    cacheExtent: 2.0,
+    cacheExtentStyle: CacheExtentStyle.viewport,
+  );
+
+  // Runtime variable (should NOT be migrated)
+  renderShrinkWrappingViewport = RenderShrinkWrappingViewport(
+    cacheExtent: 1.0,
+    cacheExtentStyle: cacheExtentStyle,
+  );
 }
