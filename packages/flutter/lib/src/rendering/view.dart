@@ -262,6 +262,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
   }
 
+  /// Whether [prepareInitialFrame] has been called on this render view.
+  ///
+  /// This is true after the first call to [prepareInitialFrame], which sets up
+  /// the initial layout and paint for the view. Before this is true, the view
+  /// cannot be composited.
+  bool get hasInitialFrameBeenPrepared => _rootTransform != null;
+
   Matrix4? _rootTransform;
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
