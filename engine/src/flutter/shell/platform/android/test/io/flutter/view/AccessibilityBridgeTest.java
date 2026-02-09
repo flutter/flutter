@@ -2429,6 +2429,54 @@ public class AccessibilityBridgeTest {
   @Config(sdk = API_LEVELS.API_36)
   @TargetApi(API_LEVELS.API_36)
   @Test
+  public void itSetsCheckedStateBasedOnFlagsCorrectly() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode node = new TestSemanticsNode();
+    TestSemanticsUpdate testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_UNDEFINED, nodeInfo.getChecked());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_FALSE, nodeInfo.getChecked());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
+    node.addFlag(AccessibilityBridge.Flag.IS_CHECKED);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_TRUE, nodeInfo.getChecked());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_FALSE, nodeInfo.getChecked());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
+    node.addFlag(AccessibilityBridge.Flag.IS_TOGGLED);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_TRUE, nodeInfo.getChecked());
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @Test
   public void itSetsExpandedStateBasedOnFlagsCorrectly() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 

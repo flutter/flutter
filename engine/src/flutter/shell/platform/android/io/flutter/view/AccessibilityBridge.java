@@ -1121,6 +1121,20 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
+    // Starting on API level 36. setChecked takes int instead.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+      if (hasCheckedState) {
+        result.setChecked(
+            semanticsNode.hasFlag(Flag.IS_CHECKED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      } else if (hasToggledState) {
+        result.setChecked(
+            semanticsNode.hasFlag(Flag.IS_TOGGLED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      }
+    }
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
         final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
