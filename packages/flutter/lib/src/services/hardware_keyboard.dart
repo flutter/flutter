@@ -519,7 +519,7 @@ class HardwareKeyboard {
         if (!shouldProcess) {
           _keyboardDebug(
             () =>
-                'Received ${event.runtimeType} for key that is already pressed:\n'
+                'Received unexpected ${event.runtimeType} for key that is already pressed:\n'
                 'Event: $event\n'
                 'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
@@ -535,13 +535,13 @@ class HardwareKeyboard {
         if (!shouldProcess) {
           _keyboardDebug(
             () =>
-                'Received ${event.runtimeType} for key that is not pressed:\n'
+                'Received unexpected ${event.runtimeType} for key that is not pressed:\n'
                 'Event: $event',
           );
         } else if (_pressedKeys[event.physicalKey] != event.logicalKey) {
           _keyboardDebug(
             () =>
-                'Received ${event.runtimeType} for key with mismatched logical key:\n'
+                'Received unexpected ${event.runtimeType} for key with mismatched logical key:\n'
                 'Event: $event\n'
                 'Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
@@ -550,14 +550,7 @@ class HardwareKeyboard {
       }());
       return shouldProcess;
     } else {
-      assert(() {
-        _keyboardDebug(
-          () =>
-              'Received unknown KeyEvent subtype:\n'
-              'Event: $event',
-        );
-        return true;
-      }());
+      assert(false, 'Received unexpected key event class ${event.runtimeType}');
       return false;
     }
   }

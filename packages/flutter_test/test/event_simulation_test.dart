@@ -577,7 +577,7 @@ void main() {
     // malformed data sequence in real applications.
     await _shouldDebugPrint(() {
       return simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA);
-    }, 'Received KeyUpEvent for key with mismatched logical key:');
+    }, 'Received unexpected KeyUpEvent for key with mismatched logical key:');
 
     debugPrintKeyboardEvents = false;
     debugKeyEventSimulatorTransitModeOverride = null;
