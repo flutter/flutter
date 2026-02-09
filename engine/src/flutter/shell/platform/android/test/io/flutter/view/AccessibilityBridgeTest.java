@@ -2458,6 +2458,14 @@ public class AccessibilityBridgeTest {
 
     node = new TestSemanticsNode();
     node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_FALSE, nodeInfo.getCheckedState());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
     node.addFlag(AccessibilityBridge.Flag.IS_TOGGLED);
     testSemanticsUpdate = node.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
