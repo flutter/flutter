@@ -449,52 +449,48 @@ void main() {
       },
     );
 
-    testWidgets(
-      'when a valid date is submitted, onDateChanged is called with that date',
-      (WidgetTester tester) async {
-        DateTime? changedDate;
-        await tester.pumpWidget(
-          inputDatePickerField(
-            onDateChanged: (DateTime? date) => changedDate = date,
-          ),
-        );
-        expect(changedDate, isNull);
+    testWidgets('when a valid date is submitted, onDateChanged is called with that date', (
+      WidgetTester tester,
+    ) async {
+      DateTime? changedDate;
+      await tester.pumpWidget(
+        inputDatePickerField(onDateChanged: (DateTime? date) => changedDate = date),
+      );
+      expect(changedDate, isNull);
 
-        await tester.enterText(find.byType(TextField), '02/21/2016');
-        await tester.testTextInput.receiveAction(TextInputAction.done);
-        await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '02/21/2016');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
 
-        expect(changedDate, equals(DateTime(2016, DateTime.february, 21)));
-      },
-    );
+      expect(changedDate, equals(DateTime(2016, DateTime.february, 21)));
+    });
 
-    testWidgets(
-      'when a valid date is saved, onDateChanged is called with that date',
-      (WidgetTester tester) async {
-        final formKey = GlobalKey<FormState>();
-        DateTime? changedDate;
-        await tester.pumpWidget(
-          inputDatePickerField(
-            onDateChanged: (DateTime? date) => changedDate = date,
-            formKey: formKey,
-          ),
-        );
-        expect(changedDate, isNull);
+    testWidgets('when a valid date is saved, onDateChanged is called with that date', (
+      WidgetTester tester,
+    ) async {
+      final formKey = GlobalKey<FormState>();
+      DateTime? changedDate;
+      await tester.pumpWidget(
+        inputDatePickerField(
+          onDateChanged: (DateTime? date) => changedDate = date,
+          formKey: formKey,
+        ),
+      );
+      expect(changedDate, isNull);
 
-        await tester.enterText(find.byType(TextField), '02/21/2016');
-        await tester.pumpAndSettle();
-        formKey.currentState!.save();
-        await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '02/21/2016');
+      await tester.pumpAndSettle();
+      formKey.currentState!.save();
+      await tester.pumpAndSettle();
 
-        expect(changedDate, equals(DateTime(2016, DateTime.february, 21)));
-      },
-    );
+      expect(changedDate, equals(DateTime(2016, DateTime.february, 21)));
+    });
 
     testWidgets(
       'when acceptEmptyDate is true, entering a date then clearing calls onDateChanged with date then null',
       (WidgetTester tester) async {
         final formKey = GlobalKey<FormState>();
-        final List<DateTime?> changedDates = <DateTime?>[];
+        final changedDates = <DateTime?>[];
         await tester.pumpWidget(
           inputDatePickerField(
             acceptEmptyDate: true,
