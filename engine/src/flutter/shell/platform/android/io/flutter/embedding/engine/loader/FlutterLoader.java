@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.loader;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -274,7 +273,6 @@ public class FlutterLoader {
    * @param isRelease Whether or not the Flutter component is running in release mode.
    */
   @VisibleForTesting
-  @SuppressLint("NewApi") // Calls to Stream and Collection#stream require API 24
   void ensureInitializationComplete(
       @NonNull Context applicationContext, @Nullable String[] args, @NonNull boolean isRelease) {
     if (initialized) {
