@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -422,6 +423,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private final AccessibilityManager.TouchExplorationStateChangeListener
       touchExplorationStateChangeListener;
 
+  private final Object highContrastObserver;
+
+  private final ContentObserver invertColorsObserver =
+      new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+          setInvertColorsFlag();
+        }
+      };
+
   // Listener that is notified when the global TRANSITION_ANIMATION_SCALE. When this scale goes
   // to zero, we instruct Flutter to disable animations.
   private final ContentObserver animationScaleObserver =
@@ -527,6 +538,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       setBoldTextFlag();
     }
 
+    Context context = rootAccessibilityView.getContext();
+
+    setInvertColorsFlag();
+    contentResolver.registerContentObserver(
+        Settings.Secure.getUriFor("accessibility_display_inversion_enabled"),
+        false,
+        invertColorsObserver);
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      highContrastObserver =
+          (UiModeManager.ContrastChangeListener) contrast -> setHighContrastFlag();
+      setHighContrastFlag();
+      registerHighContrastObserver(rootAccessibilityView.getContext());
+    } else {
+      highContrastObserver = null;
+    }
+
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
@@ -603,6 +631,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     accessibilityManager.removeTouchExplorationStateChangeListener(
         touchExplorationStateChangeListener);
     contentResolver.unregisterContentObserver(animationScaleObserver);
+    contentResolver.unregisterContentObserver(invertColorsObserver);
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+      unregisterHighContrastObserver(rootAccessibilityView.getContext());
+    }
     accessibilityChannel.setAccessibilityMessageHandler(null);
   }
 
@@ -655,7 +687,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   @RequiresApi(API_LEVELS.API_31)
   private void setBoldTextFlag() {
-    if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
+    if (rootAccessibilityView.getResources() == null) {
       return;
     }
     int fontWeightAdjustment =
@@ -668,6 +700,55 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       accessibilityFeatureFlags |= AccessibilityFeature.BOLD_TEXT.value;
     } else {
       accessibilityFeatureFlags &= ~AccessibilityFeature.BOLD_TEXT.value;
+    }
+    sendLatestAccessibilityFlagsToFlutter();
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void registerHighContrastObserver(Context context) {
+    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+    uiModeManager.addContrastChangeListener(
+        context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void unregisterHighContrastObserver(Context context) {
+    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+    uiModeManager.removeContrastChangeListener(
+        (UiModeManager.ContrastChangeListener) highContrastObserver);
+  }
+
+  @RequiresApi(API_LEVELS.API_34)
+  private void setHighContrastFlag() {
+    Context context = rootAccessibilityView.getContext();
+    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+
+    float uiContrast = uiModeManager.getContrast();
+    // uiContrast: 0.0 (standard), 0.5 (medium), 1.0 (high)
+    boolean isHighContrastEnabled = uiContrast > 0.0f;
+
+    updateAccessibilityFeature(AccessibilityFeature.HIGH_CONTRAST, isHighContrastEnabled);
+  }
+
+  private void setInvertColorsFlag() {
+    boolean isHighContrastEnabled = false;
+
+    try {
+      isHighContrastEnabled =
+          Settings.Secure.getInt(
+                  contentResolver, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED)
+              == 1;
+    } catch (Settings.SettingNotFoundException ignored) {
+    }
+
+    updateAccessibilityFeature(AccessibilityFeature.INVERT_COLORS, isHighContrastEnabled);
+  }
+
+  private void updateAccessibilityFeature(AccessibilityFeature feature, boolean enabled) {
+    if (enabled) {
+      accessibilityFeatureFlags |= feature.value;
+    } else {
+      accessibilityFeatureFlags &= ~feature.value;
     }
     sendLatestAccessibilityFlagsToFlutter();
   }
@@ -2385,11 +2466,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // Must match the enum defined in window.dart.
   private enum AccessibilityFeature {
     ACCESSIBLE_NAVIGATION(1 << 0),
-    INVERT_COLORS(1 << 1), // NOT SUPPORTED
+    INVERT_COLORS(1 << 1),
     DISABLE_ANIMATIONS(1 << 2),
-    BOLD_TEXT(1 << 3), // NOT SUPPORTED
+    BOLD_TEXT(1 << 3),
     REDUCE_MOTION(1 << 4), // NOT SUPPORTED
-    HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
+    HIGH_CONTRAST(1 << 5),
     ON_OFF_SWITCH_LABELS(1 << 6), // NOT SUPPORTED
     NO_ANNOUNCE(1 << 7),
     NO_AUTO_PLAY_ANIMATED_IMAGES(1 << 8), // NOT SUPPORTED
