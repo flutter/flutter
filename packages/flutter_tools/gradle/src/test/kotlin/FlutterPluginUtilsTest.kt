@@ -10,6 +10,7 @@ import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -24,6 +25,8 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
@@ -34,6 +37,7 @@ import kotlin.io.path.createDirectory
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class FlutterPluginUtilsTest {
     companion object {
@@ -1006,22 +1010,30 @@ class FlutterPluginUtilsTest {
         }
     }
 
-    // addTaskForJavaVersion
     @Test
     fun `addTaskForJavaVersion adds task for Java version`() {
         val project = mockk<Project>()
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
-        FlutterPluginUtils.addTaskForJavaVersion(project)
-        verify { project.tasks.register("javaVersion", capture(captureSlot)) }
+        val taskContainer = mockk<TaskContainer>()
+        every { project.tasks } returns taskContainer
+        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        val captureSlot = slot<Action<PrintTask>>()
 
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-        captureSlot.captured.execute(mockTask)
+        every {
+            project.tasks.register(eq("javaVersion"), PrintTask::class.java, capture(captureSlot))
+        } returns mockTaskProvider
+
+        FlutterPluginUtils.addTaskForJavaVersion(project)
+        captureSlot.captured.execute(mockPrintTask)
+
         verify {
-            mockTask.description = "Print the current java version used by gradle. see: " +
+            mockPrintTask.description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+        }
+        verify {
+            mockPrintTask.message.set(
+                withArg<String> { assertNotNull(it.toIntOrNull(), message = "$it java version is not an int") }
+            )
         }
     }
 
