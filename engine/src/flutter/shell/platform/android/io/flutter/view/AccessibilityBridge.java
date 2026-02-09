@@ -1126,8 +1126,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             semanticsNode.hasFlag(Flag.IS_CHECKED)
                 ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
                 : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
-      }
-      else if (hasToggledState) {
+      } else if (hasToggledState) {
         result.setCheckedState(
             semanticsNode.hasFlag(Flag.IS_TOGGLED)
                 ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
