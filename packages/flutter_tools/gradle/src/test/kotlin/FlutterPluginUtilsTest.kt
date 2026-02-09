@@ -6,6 +6,7 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
@@ -1073,21 +1074,44 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
         val project = mockk<Project>()
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockk()
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
+        val taskContainer = mockk<TaskContainer>()
+        every { project.tasks } returns taskContainer
+        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        val captureSlot = slot<Action<PrintTask>>()
+        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
+
+        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
+        val variantCollection = mockk<org.gradle.api.DomainObjectSet<ApplicationVariant>>()
+        every { mockAbstractAppExtension.applicationVariants } returns variantCollection
+
+        val variantDebug = mockk<ApplicationVariant>()
+        every { variantDebug.name } returns "debug"
+        val variantRelease = mockk<ApplicationVariant>()
+        every { variantRelease.name } returns "release"
+        val variantProfile = mockk<ApplicationVariant>()
+        every { variantProfile.name } returns "profile"
+        every { variantCollection.iterator() } returns
+            mutableSetOf<ApplicationVariant>(variantDebug, variantRelease, variantProfile).iterator()
+
+        every {
+            project.tasks.register(eq("printBuildVariants"), PrintTask::class.java, capture(captureSlot))
+        } returns mockTaskProvider
 
         FlutterPluginUtils.addTaskForPrintBuildVariants(project)
-
-        verify { project.tasks.register("printBuildVariants", capture(captureSlot)) }
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-
-        captureSlot.captured.execute(mockTask)
+        captureSlot.captured.execute(mockPrintTask)
 
         verify {
-            mockTask.description = "Prints out all build variants for this Android project"
+            mockPrintTask.description = "Prints out all build variants for this Android project"
+        }
+        verify {
+            mockPrintTask.message.set(
+                withArg<String> {
+                    assertContains(it, "BuildVariant: debug")
+                    assertContains(it, "BuildVariant: release")
+                    assertContains(it, "BuildVariant: profile")
+                }
+            )
         }
     }
 }
