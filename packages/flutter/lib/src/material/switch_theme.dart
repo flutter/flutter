@@ -19,7 +19,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [Switch] widgets.
 ///
 /// Descendant widgets obtain the current [SwitchThemeData] object using
-/// `SwitchTheme.of(context)`. Instances of [SwitchThemeData] can be customized
+/// [SwitchTheme.of]. Instances of [SwitchThemeData] can be customized
 /// with [SwitchThemeData.copyWith].
 ///
 /// Typically a [SwitchThemeData] is specified as part of the overall [Theme]

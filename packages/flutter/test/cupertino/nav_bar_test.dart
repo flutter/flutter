@@ -3236,6 +3236,8 @@ void main() {
 
       tester.view.devicePixelRatio = 1;
       tester.binding.platformDispatcher.textScaleFactorTestValue = 1;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.binding.platformDispatcher.clearTextScaleFactorTestValue);
       setWindowToPortrait(tester, size: const Size(402, 874));
 
       var count = 0;
@@ -3328,6 +3330,15 @@ void main() {
 
     expect(find.text('First'), findsNothing);
     expect(find.text('Second'), findsOneWidget);
+  });
+
+  testWidgets('CupertinoNavigationBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: SizedBox.shrink(child: CupertinoNavigationBar())),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoNavigationBar)), Size.zero);
   });
 }
 

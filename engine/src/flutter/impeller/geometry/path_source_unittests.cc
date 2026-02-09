@@ -16,7 +16,8 @@
 namespace impeller {
 namespace testing {
 
-using DlPathReceiverMock = flutter::testing::DlPathReceiverMock;
+using ::flutter::testing::DlPathReceiverMock;
+using ::testing::Return;
 
 TEST(PathSourceTest, RectSourceTest) {
   Rect rect = Rect::MakeLTRB(10, 15, 20, 30);
@@ -249,6 +250,72 @@ TEST(PathSourceTest, DashedLinePathSourceInvalidOnRegion) {
   }
 
   source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, PathTransformerRectSourceTest) {
+  Matrix matrix =
+      Matrix::MakeTranslateScale({2.0f, 3.0f, 1.0f}, {1.5f, 4.25f, 0.0f});
+  Rect rect = Rect::MakeLTRB(10, 15, 20, 30);
+  RectPathSource source(rect);
+
+  EXPECT_TRUE(source.IsConvex());
+  EXPECT_EQ(source.GetFillType(), FillType::kNonZero);
+  EXPECT_EQ(source.GetBounds(), Rect::MakeLTRB(10, 15, 20, 30));
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+  PathTransformer receiver = PathTransformer(mock_receiver, matrix);
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(Point(21.5f, 49.25f), true));
+    EXPECT_CALL(mock_receiver, LineTo(Point(41.5f, 49.25f)));
+    EXPECT_CALL(mock_receiver, LineTo(Point(41.5f, 94.25f)));
+    EXPECT_CALL(mock_receiver, LineTo(Point(21.5f, 94.25f)));
+    EXPECT_CALL(mock_receiver, LineTo(Point(21.5f, 49.25f)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  source.Dispatch(receiver);
+}
+
+TEST(PathSourceTest, PathTransformerAllSegmentsTest) {
+  Matrix matrix =
+      Matrix::MakeTranslateScale({2.0f, 3.0f, 1.0f}, {1.5f, 4.25f, 0.0f});
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+  PathTransformer receiver = PathTransformer(mock_receiver, matrix);
+
+  {
+    ::testing::Sequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(Point(21.5f, 49.25f), false));
+    EXPECT_CALL(mock_receiver, LineTo(Point(41.5f, 49.25f)));
+
+    EXPECT_CALL(mock_receiver, MoveTo(Point(221.5f, 349.25f), true));
+    EXPECT_CALL(mock_receiver,
+                QuadTo(Point(241.5f, 349.25f), Point(241.5f, 394.25f)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(Point(237.5f, 409.25f), Point(231.5f, 409.25f), 5))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(Point(225.5f, 409.25f), Point(221.5f, 394.25f), 6))
+        .WillOnce(Return(false));
+    EXPECT_CALL(mock_receiver,
+                CubicTo(Point(211.5f, 379.25f), Point(211.5f, 364.25f),
+                        Point(221.5f, 349.25f)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  receiver.MoveTo(Point(10, 15), false);
+  receiver.LineTo(Point(20, 15));
+
+  receiver.MoveTo(Point(110, 115), true);
+  receiver.QuadTo(Point(120, 115), Point(120, 130));
+  EXPECT_TRUE(receiver.ConicTo(Point(118, 135), Point(115, 135), 5));
+  EXPECT_FALSE(receiver.ConicTo(Point(112, 135), Point(110, 130), 6));
+  receiver.CubicTo(Point(105, 125), Point(105, 120), Point(110, 115));
+  receiver.Close();
 }
 
 }  // namespace testing

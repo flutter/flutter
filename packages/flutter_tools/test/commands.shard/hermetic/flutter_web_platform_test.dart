@@ -94,6 +94,7 @@ void main() {
         useWasm: false,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        crossOriginIsolation: false,
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);
@@ -147,6 +148,7 @@ void main() {
         useWasm: false,
         serverFactory: () async => server,
         testPackageUri: Uri.parse('test'),
+        crossOriginIsolation: false,
       );
       final shelf.Handler? handler = server.mountedHandler;
       expect(handler, isNotNull);

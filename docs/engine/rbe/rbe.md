@@ -58,6 +58,13 @@ Execute the following to create application default credentials:
 gcloud auth application-default login
 ```
 
+Already using another cloud project or haven't refreshed in a while? Try:
+
+```sh
+gcloud config set project flutter-rbe-prod
+gcloud auth application-default login
+```
+
 ## Running an RBE build
 
 In the engine repo, all RBE builds must be initiated through the `et` tool whose

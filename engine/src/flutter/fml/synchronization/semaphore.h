@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_SYNCHRONIZATION_SEMAPHORE_H_
 #define FLUTTER_FML_SYNCHRONIZATION_SEMAPHORE_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "flutter/fml/macros.h"

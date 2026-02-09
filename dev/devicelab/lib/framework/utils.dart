@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
@@ -283,7 +284,17 @@ Future<Process> startProcess(
 }) async {
   final command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
-  final newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
+  final newEnvironment = <String, String>{
+    ...?environment,
+    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+  };
+  // Override ANDROID_NDK_PATH with a valid discovered path or empty string to clear a potentially bad value.
+  // See also bots/run_command.dart.
+  final String? bestNdkPath = _discoverBestNdkPath();
+  if (bestNdkPath != null) {
+    newEnvironment['ANDROID_NDK_PATH'] = bestNdkPath;
+  }
+
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
@@ -796,11 +807,64 @@ Uri? parseServiceUri(String line, {Pattern? prefix}) {
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0)!);
 }
 
-/// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exist.', file);
+    fail('File not found: $file');
   }
+}
+
+String? _bestNdkPath;
+String? _discoverBestNdkPath() {
+  if (_bestNdkPath != null) {
+    return _bestNdkPath;
+  }
+  // If we found a valid NDK, return it.
+  // Otherwise return empty string to clear any bad inherited value.
+  final Map<String, String> env = Platform.environment;
+  String? androidHome = env['ANDROID_HOME'] ?? env['ANDROID_SDK_ROOT'];
+  if (androidHome == null) {
+    // Try to find it in common default locations.
+    if (Platform.isMacOS) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Library', 'Android', 'sdk');
+      }
+    } else if (Platform.isLinux) {
+      final String? home = env['HOME'];
+      if (home != null) {
+        androidHome = path.join(home, 'Android', 'Sdk');
+      }
+    } else if (Platform.isWindows) {
+      final String? homeDrive = env['HOMEDRIVE'];
+      final String? homePath = env['HOMEPATH'];
+      if (homeDrive != null && homePath != null) {
+        androidHome = path.join(homeDrive + homePath, 'AppData', 'Local', 'Android', 'sdk');
+      }
+    }
+  }
+
+  if (androidHome == null) {
+    return _bestNdkPath = null;
+  }
+  final ndkDir = Directory(path.join(androidHome, 'ndk'));
+  if (!ndkDir.existsSync()) {
+    return _bestNdkPath = null;
+  }
+  final versions = <Version>[];
+  for (final FileSystemEntity entity in ndkDir.listSync()) {
+    if (entity is Directory) {
+      try {
+        versions.add(Version.parse(path.basename(entity.path)));
+      } on FormatException {
+        // Ignore non-version directories.
+      }
+    }
+  }
+  if (versions.isEmpty) {
+    return _bestNdkPath = null;
+  }
+  versions.sort();
+  return _bestNdkPath = path.join(ndkDir.path, versions.last.toString());
 }
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].

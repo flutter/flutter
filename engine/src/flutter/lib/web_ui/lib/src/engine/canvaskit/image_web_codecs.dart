@@ -42,16 +42,26 @@ class CkBrowserImageDecoder extends BrowserImageDecoder {
 
   @override
   ui.Image generateImageFromVideoFrame(VideoFrame frame) {
-    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
-      frame,
-      SkPartialImageInfo(
-        alphaType: canvasKit.AlphaType.Premul,
-        colorType: canvasKit.ColorType.RGBA_8888,
-        colorSpace: SkColorSpaceSRGB,
-        width: frame.displayWidth,
-        height: frame.displayHeight,
-      ),
-    );
+    SkImage? skImage;
+    if (CanvasKitRenderer.instance.isSoftware) {
+      final int width = frame.displayWidth.toInt();
+      final int height = frame.displayHeight.toInt();
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: width, height: height);
+      final DomCanvasRenderingContext2D ctx = canvas.context2D;
+      ctx.drawImage(frame, 0, 0);
+      skImage = canvasKit.MakeImageFromCanvasImageSource(canvas);
+    } else {
+      skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
+        frame,
+        SkPartialImageInfo(
+          alphaType: canvasKit.AlphaType.Premul,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: frame.displayWidth,
+          height: frame.displayHeight,
+        ),
+      );
+    }
     if (skImage == null) {
       throw ImageCodecException(
         "Failed to create image from pixel data decoded using the browser's ImageDecoder.",

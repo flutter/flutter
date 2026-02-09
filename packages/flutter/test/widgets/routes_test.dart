@@ -11,6 +11,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_utils.dart' show TestTextField;
 import 'semantics_tester.dart';
 
 final List<String> results = <String>[];
@@ -525,7 +526,11 @@ void main() {
               settings: settings,
               pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
                 return Focus(
-                  child: TextField(autofocus: true, focusNode: focusNode, controller: controller),
+                  child: TestTextField(
+                    autofocus: true,
+                    focusNode: focusNode,
+                    controller: controller,
+                  ),
                 );
               },
             );
@@ -753,6 +758,9 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
+    // TODO(justinmc): Widgets tests should not import Material/Cupertino. This
+    // test can probably go into Cupertino with a CupertinoApp.
+    // https://github.com/flutter/flutter/issues/177028
     testWidgets(
       'delegated transitions are removed when secondary animation is dismissed and next route is removed',
       (WidgetTester tester) async {
@@ -1989,12 +1997,12 @@ void main() {
         // Pushes one page.
         navigatorKey.currentState!.push<void>(
           MaterialPageRoute<void>(
-            builder: (BuildContext context) => const Material(child: TextField()),
+            builder: (BuildContext context) => const Material(child: TestTextField()),
           ),
         );
         await tester.pumpAndSettle();
 
-        final Element textOnPageTwo = tester.element(find.byType(TextField));
+        final Element textOnPageTwo = tester.element(find.byType(TestTextField));
         final FocusScopeNode focusNodeOnPageTwo = FocusScope.of(textOnPageTwo);
         // The focus should be on second page.
         expect(focusNodeOnPageOne.hasFocus, isFalse);
@@ -2824,7 +2832,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigatorKey,
-        home: Scaffold(body: TextField(focusNode: focusNode)),
+        home: Scaffold(body: TestTextField(focusNode: focusNode)),
       ),
     );
     focusNode.requestFocus();

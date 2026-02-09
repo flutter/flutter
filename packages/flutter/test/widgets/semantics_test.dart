@@ -184,6 +184,43 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('different locale will not merge', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final GlobalKey key = GlobalKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          localeForSubtree: const Locale('AB', 'CD'),
+          child: Semantics(
+            key: key,
+            localeForSubtree: const Locale('DE', 'FG'),
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              locale: const Locale('AB', 'CD'),
+              children: <TestSemantics>[TestSemantics(locale: const Locale('DE', 'FG'))],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
+  });
+
   testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
@@ -842,13 +879,13 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
         child: Column(
           children: <Widget>[
             // If the child set blockSubTreeAccessibilityFocus to `none`, it's still blcok because its parent.
             Semantics(
               container: true,
-              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -907,12 +944,12 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
         child: Column(
           children: <Widget>[
             Semantics(
               container: true,
-              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -967,7 +1004,7 @@ void main() {
             children: <Widget>[
               Semantics(
                 container: true,
-                accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+                accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
                 label: 'node1',
                 child: const SizedBox(width: 10, height: 10),
               ),
@@ -1013,7 +1050,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1068,7 +1105,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1114,7 +1151,7 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
         focused: true,
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'action1'): () {},
@@ -1942,8 +1979,8 @@ void main() {
       node,
       matchesSemantics(
         children: <Matcher>[
-          containsSemantics(label: 'label1'),
-          containsSemantics(label: 'label2'),
+          isSemantics(label: 'label1'),
+          isSemantics(label: 'label2'),
         ],
       ),
     );
@@ -2131,7 +2168,7 @@ void main() {
       final SemanticsNode result = tester.getSemantics(find.byKey(key));
       expect(
         result,
-        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+        isSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
       );
     }
 

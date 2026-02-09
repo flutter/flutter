@@ -12,6 +12,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_accessibility_handler.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
@@ -25,7 +26,6 @@
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
-#include "flutter/shell/platform/linux/fl_windowing_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 // Unique number associated with platform tasks.
@@ -63,8 +63,8 @@ struct _FlEngine {
   // Implements the flutter/platform channel.
   FlPlatformHandler* platform_handler;
 
-  // Implements the flutter/windowing channel.
-  FlWindowingHandler* windowing_handler;
+  // Implements the flutter/accessibility channel.
+  FlAccessibilityHandler* accessibility_handler;
 
   // Process keyboard events.
   FlKeyboardManager* keyboard_manager;
@@ -587,7 +587,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
   g_clear_object(&self->platform_handler);
-  g_clear_object(&self->windowing_handler);
+  g_clear_object(&self->accessibility_handler);
   g_clear_object(&self->keyboard_manager);
   g_clear_object(&self->text_input_handler);
   g_clear_object(&self->keyboard_handler);
@@ -683,7 +683,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   self->keyboard_manager = fl_keyboard_manager_new(self);
   self->mouse_cursor_handler =
       fl_mouse_cursor_handler_new(self->binary_messenger);
-  self->windowing_handler = fl_windowing_handler_new(self);
+  self->accessibility_handler = fl_accessibility_handler_new(self);
 
   return self;
 }
@@ -950,7 +950,7 @@ FlRenderable* fl_engine_get_renderable(FlEngine* self, FlutterViewId view_id) {
 
   GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
       self->renderables_by_view_id, GINT_TO_POINTER(view_id)));
-  return FL_RENDERABLE(g_weak_ref_get(ref));
+  return ref != nullptr ? FL_RENDERABLE(g_weak_ref_get(ref)) : nullptr;
 }
 
 void fl_engine_remove_view(FlEngine* self,
@@ -1489,11 +1489,6 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
 void fl_engine_request_app_exit(FlEngine* self) {
   g_return_if_fail(FL_IS_ENGINE(self));
   fl_platform_handler_request_app_exit(self->platform_handler);
-}
-
-FlWindowingHandler* fl_engine_get_windowing_handler(FlEngine* self) {
-  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
-  return self->windowing_handler;
 }
 
 FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* self) {

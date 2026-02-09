@@ -950,8 +950,8 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
-    if (properties.accessiblityFocusBlockType != null) {
-      config.accessiblityFocusBlockType = properties.accessiblityFocusBlockType!;
+    if (properties.accessibilityFocusBlockType != null) {
+      config.accessibilityFocusBlockType = properties.accessibilityFocusBlockType!;
     }
     if (properties.enabled != null) {
       config.isEnabled = properties.enabled;
@@ -1043,8 +1043,17 @@ class RenderCustomPaint extends RenderProxyBox {
     if (config.validationResult != properties.validationResult) {
       config.validationResult = properties.validationResult;
     }
+    if (properties.hitTestBehavior != null) {
+      config.hitTestBehavior = properties.hitTestBehavior!;
+    }
     if (properties.inputType != null) {
       config.inputType = properties.inputType!;
+    }
+    if (properties.minValue != null) {
+      config.minValue = properties.minValue;
+    }
+    if (properties.maxValue != null) {
+      config.maxValue = properties.maxValue;
     }
     if (properties.onTap != null) {
       config.onTap = properties.onTap;

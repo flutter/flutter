@@ -47,9 +47,9 @@ sk_sp<flutter::DlImage> GoldenPlaygroundTest::CreateDlImageForFixture(
   return nullptr;
 }
 
-RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+absl::StatusOr<RuntimeStage::Map> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
     const char* asset_name) const {
-  return {};
+  return absl::UnimplementedError("Not implemented.");
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {

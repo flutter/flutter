@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -361,6 +362,48 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   auto backdrop_filter =
       DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderBoundedBlur) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+  builder.Save();
+
+  // Subcase 1: The 1st branch of downsampling, where the coverage hint is
+  // non-null but was ignored during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect1 = DlRect::MakeLTRB(70, 70, 313, 170);
+  builder.ClipRect(rect1);
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: The 2nd branch of downsampling, where the coverage hint is null
+  // or was already used during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect2 = DlRect::MakeLTRB(55, 190, 298, 290);
+  builder.ClipRect(rect2);
+  auto backdrop_filter2 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

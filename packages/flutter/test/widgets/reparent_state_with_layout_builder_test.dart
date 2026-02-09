@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This is a regression test for https://github.com/flutter/flutter/issues/5840.
@@ -95,6 +95,8 @@ void main() {
     var layoutBuilderChild = keyedWidget;
     Widget deepChild = Container();
 
+    const green = Color(0xff00ff00);
+
     await tester.pumpWidget(
       MediaQuery(
         data: MediaQueryData.fromView(tester.view),
@@ -112,17 +114,17 @@ void main() {
               },
             ),
             ColoredBox(
-              color: Colors.green,
+              color: green,
               child: ColoredBox(
-                color: Colors.green,
+                color: green,
                 child: ColoredBox(
-                  color: Colors.green,
+                  color: green,
                   child: ColoredBox(
-                    color: Colors.green,
+                    color: green,
                     child: ColoredBox(
-                      color: Colors.green,
+                      color: green,
                       child: ColoredBox(
-                        color: Colors.green,
+                        color: green,
                         child: StatefulBuilder(
                           builder: (BuildContext context, StateSetter setState) {
                             childSetState = setState;

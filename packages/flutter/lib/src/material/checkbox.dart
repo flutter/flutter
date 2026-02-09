@@ -352,7 +352,7 @@ class Checkbox extends StatefulWidget {
   /// The shape of the checkbox's [Material].
   /// {@endtemplate}
   ///
-  /// If this property is null then [CheckboxThemeData.shape] of [ThemeData.checkboxTheme]
+  /// If this property is null then the ambient [CheckboxThemeData.shape]
   /// is used. If that's null then the shape will be a [RoundedRectangleBorder]
   /// with a circular corner radius of 1.0 in Material 2, and 2.0 in Material 3.
   final OutlinedBorder? shape;
@@ -378,9 +378,8 @@ class Checkbox extends StatefulWidget {
   /// compatibility.
   /// {@endtemplate}
   ///
-  /// If this property is null, then [CheckboxThemeData.side] of
-  /// [ThemeData.checkboxTheme] is used. If that is also null, then the side
-  /// will be width 2.
+  /// If this property is null, then the ambient [CheckboxThemeData.side] is
+  /// used. If that is also null, then the side will be width 2.
   final BorderSide? side;
 
   /// {@template flutter.material.checkbox.isError}

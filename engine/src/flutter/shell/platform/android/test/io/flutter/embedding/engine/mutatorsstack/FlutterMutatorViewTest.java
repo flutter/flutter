@@ -40,6 +40,7 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0);
+      view.layout(1, 2, 1, 2);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
@@ -53,19 +54,7 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 3, /*top=*/ 4, /*width=*/ 0, /*height=*/ 0);
-      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
-      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
-      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
-
-      final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(1, 2);
-      assertEquals(matrixCaptor.getValue(), screenMatrix);
-    }
-
-    reset(touchProcessor);
-
-    {
-      view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0);
+      view.layout(3, 4, 3, 4);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
@@ -78,7 +67,22 @@ public class FlutterMutatorViewTest {
     reset(touchProcessor);
 
     {
+      view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0);
+      view.layout(5, 6, 5, 6);
+      view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
+      final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+      verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+
+      final Matrix screenMatrix = new Matrix();
+      screenMatrix.postTranslate(5, 6);
+      assertEquals(matrixCaptor.getValue(), screenMatrix);
+    }
+
+    reset(touchProcessor);
+
+    {
       view.readyToDisplay(mutatorStack, /*left=*/ 7, /*top=*/ 8, /*width=*/ 0, /*height=*/ 0);
+      view.layout(7, 8, 7, 8);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());

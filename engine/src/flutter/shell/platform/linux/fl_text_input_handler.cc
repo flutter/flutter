@@ -11,6 +11,8 @@
 #include "flutter/shell/platform/linux/fl_text_input_channel.h"
 
 static constexpr char kNewlineInputAction[] = "TextInputAction.newline";
+static constexpr char kInputPurposeImProperty[] = "input-purpose";
+static constexpr char kInputHintsImProperty[] = "input-hints";
 
 static constexpr int64_t kClientIdUnset = -1;
 
@@ -239,18 +241,30 @@ static gboolean im_delete_surrounding_cb(FlTextInputHandler* self,
 }
 
 // Called when the input method client is set up.
-static void set_client(int64_t client_id,
-                       const gchar* input_action,
-                       gboolean enable_delta_model,
-                       FlTextInputType input_type,
-                       gpointer user_data) {
+static void set_client(int64_t client_id, gpointer user_data) {
   FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
 
   self->client_id = client_id;
+}
+
+// Called when the input method configuration is changed.
+static void configure(const gchar* input_action,
+                      gboolean enable_delta_model,
+                      FlTextInputType input_type,
+                      GtkInputPurpose im_purpose,
+                      GtkInputHints im_hints,
+                      gpointer user_data) {
+  FlTextInputHandler* self = FL_TEXT_INPUT_HANDLER(user_data);
+
   g_free(self->input_action);
   self->input_action = g_strdup(input_action);
   self->enable_delta_model = enable_delta_model;
   self->input_type = input_type;
+
+  g_object_set(G_OBJECT(self->im_context), kInputPurposeImProperty, im_purpose,
+               nullptr);
+  g_object_set(G_OBJECT(self->im_context), kInputHintsImProperty, im_hints,
+               nullptr);
 }
 
 // Hides the input method.
@@ -411,6 +425,7 @@ static void fl_text_input_handler_init(FlTextInputHandler* self) {
 
 static FlTextInputChannelVTable text_input_vtable = {
     .set_client = set_client,
+    .configure = configure,
     .hide = hide,
     .show = show,
     .set_editing_state = set_editing_state,
