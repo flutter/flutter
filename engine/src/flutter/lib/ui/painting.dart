@@ -5740,7 +5740,7 @@ base class UniformVec4Slot extends UniformType {
 base class UniformMat2Slot extends UniformType {
   UniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
 
-  /// Set the float value of the bound uniform.
+  /// Set the float value of the matrix in row-major order.
   void set(double m00, double m01, double m10, double m11) {
     _m00.set(m00);
     _m01.set(m01);
@@ -5767,7 +5767,7 @@ base class UniformMat2Slot extends UniformType {
 /// ```
 ///
 /// See also:
-///   [FragmentShader.getUniformMat2] - How [UniformMat2Slot] instances are acquired.
+///   [FragmentShader.getUniformMat3] - How [UniformMat3Slot] instances are acquired.
 ///
 base class UniformMat3Slot extends UniformType {
   UniformMat3Slot._(
@@ -5782,7 +5782,7 @@ base class UniformMat3Slot extends UniformType {
     this._m22,
   );
 
-  /// Set the float value of the bound uniform.
+  /// Set the float value of the matrix in row-major order.
   void set(
     double m00,
     double m01,
@@ -5848,7 +5848,7 @@ base class UniformMat4Slot extends UniformType {
     this._m33,
   );
 
-  /// Set the float value of the bound uniform.
+  /// Set the float value of the matrix in row-major order.
   void set(
     double m00,
     double m01,

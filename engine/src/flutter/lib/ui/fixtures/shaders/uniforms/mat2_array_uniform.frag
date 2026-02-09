@@ -13,9 +13,9 @@ uniform mat2[2] colors;
 out vec4 fragColor;
 
 void main() {
-  vec2 uv = FlutterFragCoord().xy / 2.0;
+  vec2 uv = FlutterFragCoord().xy;
 
-  if (uv.x < 0.5) {
+  if (uv.x < 1) {
     fragColor = vec4(colors[0][0], colors[0][1]);
   } else {
     fragColor = vec4(colors[1][0], colors[1][1]);

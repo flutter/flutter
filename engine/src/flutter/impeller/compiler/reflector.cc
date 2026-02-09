@@ -938,7 +938,7 @@ std::vector<StructMember> Reflector::ReadStructMembers(
 
     if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
         member.width == 32 && member.columns == 3 && member.vecsize == 3) {
-      // Mat3s are packed as three vec3s with one byte of padding after each.
+      // Mat3s are packed as three vec3s with one float of padding after each.
       // {val, val, val, padding, val, val, val, padding, val, val, val,
       // padding}.
       uint32_t count = array_elements.value_or(1) * 3;
