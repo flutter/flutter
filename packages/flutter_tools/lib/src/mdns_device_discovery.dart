@@ -71,7 +71,6 @@ class MDNSDeviceDiscovery {
         );
       }
 
-
       if (vmServiceUri == null) {
         logger.printTrace('VM Service URI not available, not starting mDNS server.');
         return;

@@ -260,8 +260,6 @@ abstract class FlutterCommand extends Command<void> {
   var _excludeDebug = false;
   var _excludeRelease = false;
 
-
-
   /// Grabs the [Analytics] instance from the global context. It is defined
   /// at the [FlutterCommand] level to enable any classes that extend it to
   /// easily reference it or overwrite as necessary.
@@ -1284,7 +1282,6 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Whether to enable the experimental embedder API on iOS.',
     );
   }
-
 
   void addMachineOutputFlag({required bool verboseHelp}) {
     argParser.addFlag(
