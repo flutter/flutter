@@ -296,48 +296,24 @@ class Context {
 
     _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
 
-    var shouldEmbedFlutterFramework = true;
-    if (_usingFlutterFrameworkSwiftPackage()) {
-      final bool isFrameworkCorrect = _validateFlutterFramework(
-        buildMode: parseFlutterBuildMode(),
-        platform: platform,
-        builtProductsDir: environment['BUILT_PRODUCTS_DIR'],
-        targetBuildDir: xcodeFrameworksDir,
-      );
-      if (isFrameworkCorrect) {
-        // If the engine is correct, skip embedding.
-        shouldEmbedFlutterFramework = false;
-      } else {
-        // If the engine is wrong in either BUILT_PRODUCTS_DIR or TARGET_BUILD_DIR, call unpack
-        // again so the correct framework is copied into BUILT_PRODUCTS_DIR to then be embedded
-        // into TARGET_BUILD_DIR below.
-        unpackFor(platform, 'embed');
-      }
-    }
+    // Embed the actual Flutter.framework that the Flutter app expects to run against,
+    // which could be a local build or an arch/type-specific build.
+    switch (platform) {
+      case TargetPlatform.ios:
+        runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
+      case TargetPlatform.macos:
+        runRsync(
+          extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
+          '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
+          '$xcodeFrameworksDir/',
+        );
 
-    if (shouldEmbedFlutterFramework) {
-      // Embed the actual Flutter.framework that the Flutter app expects to run against,
-      // which could be a local build or an arch/type-specific build.
-      switch (platform) {
-        case TargetPlatform.ios:
-          runRsync(
-            '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-            '$xcodeFrameworksDir/',
+        if (codesign) {
+          _codesignFramework(
+            expandedCodeSignIdentity,
+            '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
           );
-        case TargetPlatform.macos:
-          runRsync(
-            extraArgs: <String>['--filter', '- Headers', '--filter', '- Modules'],
-            '${environment['BUILT_PRODUCTS_DIR']}/FlutterMacOS.framework',
-            '$xcodeFrameworksDir/',
-          );
-
-          if (codesign) {
-            _codesignFramework(
-              expandedCodeSignIdentity,
-              '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
-            );
-          }
-      }
+        }
     }
 
     _embedNativeAssets(
@@ -357,115 +333,6 @@ class Context {
     if (expandedCodeSignIdentity != null) {
       _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
     }
-  }
-
-  /// Returns `true` if a directory exists at `FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH`.
-  bool _usingFlutterFrameworkSwiftPackage() {
-    final String? swiftPackagePath = environment['FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH'];
-    if (swiftPackagePath == null) {
-      return false;
-    }
-    final swiftPackage = Directory(swiftPackagePath);
-    return swiftPackage.existsSync();
-  }
-
-  /// Returns `true` if the Flutter/FlutterMacOS framework Info.plist in [builtProductsDir] and
-  /// [targetBuildDir] matches the framework Info.plist from the engine cache for the
-  /// corresponding [platform] and [buildMode].
-  ///
-  /// The Info.plist contains the build mode and engine version.
-  ///
-  /// This validation will always fail when using a local engine since the engine version will not match.
-  bool _validateFlutterFramework({
-    required String buildMode,
-    required TargetPlatform platform,
-    required String? builtProductsDir,
-    required String? targetBuildDir,
-  }) {
-    if (builtProductsDir == null) {
-      echo('Unable to locate $builtProductsDir; falling back to direct embedding.');
-      return false;
-    }
-    if (targetBuildDir == null) {
-      echo('Unable to locate $targetBuildDir; falling back to direct embedding.');
-      return false;
-    }
-    try {
-      final infoPlistFromBuild = File('$builtProductsDir/${platform.infoPlistPath}');
-      if (!infoPlistFromBuild.existsSync()) {
-        echo('Unable to locate $infoPlistFromBuild; falling back to direct embedding.');
-        return false;
-      }
-      final infoPlistFromEmbedded = File('$targetBuildDir/${platform.infoPlistPath}');
-      if (!infoPlistFromEmbedded.existsSync()) {
-        echo('Unable to locate $infoPlistFromEmbedded; falling back to direct embedding.');
-        return false;
-      }
-
-      final File? infoPlistFromEngineCache = _infoPlistFromEngineCache(buildMode, platform);
-      if (infoPlistFromEngineCache == null || !infoPlistFromEngineCache.existsSync()) {
-        echo('Unable to locate $infoPlistFromEngineCache; falling back to direct embedding.');
-        return false;
-      }
-      final String expectedInfoPlist = infoPlistFromEngineCache.readAsStringSync();
-      if (infoPlistFromBuild.readAsStringSync() != expectedInfoPlist) {
-        echo(
-          'Initially processed Flutter framework did not match expectations; falling back to direct embedding.',
-        );
-        return false;
-      }
-      if (infoPlistFromEmbedded.readAsStringSync() != expectedInfoPlist) {
-        echo(
-          'Initially embedded Flutter framework did not match expectations; falling back to direct embedding.',
-        );
-        return false;
-      }
-      return infoPlistFromBuild.readAsStringSync() == expectedInfoPlist &&
-          infoPlistFromEmbedded.readAsStringSync() == expectedInfoPlist;
-    } on Exception catch (e) {
-      // Use `echo` instead of `echoError` so it does not cause the build to fail.
-      echo('$e\n');
-      echo(
-        'An error occured while validating the Flutter framework; falling back to direct embedding.\n',
-      );
-    }
-    return false;
-  }
-
-  /// Find the Info.plist of the Flutter/FlutterMacOS framework for the corresponding [buildMode]
-  /// and [platform].
-  File? _infoPlistFromEngineCache(String buildMode, TargetPlatform platform) {
-    final String artifactMode = buildMode == 'debug'
-        ? platform.artifactName
-        : '${platform.artifactName}-$buildMode';
-    final xcframework = Directory(
-      '${environment['FLUTTER_ROOT'] ?? ''}/bin/cache/artifacts/engine/$artifactMode/${platform.frameworkName}.xcframework',
-    );
-    switch (platform) {
-      case TargetPlatform.ios:
-        final String? sdkRoot = environment['SDKROOT']?.toLowerCase();
-        if (sdkRoot == null || !sdkRoot.contains('iphone')) {
-          return null;
-        }
-        final bool simulatorSDK = sdkRoot.contains('simulator');
-        for (final FileSystemEntity entity in xcframework.listSync()) {
-          final String platformBaseName = Uri.parse(entity.path).pathSegments.last;
-          if (entity is Directory && platformBaseName.startsWith('ios-')) {
-            final bool isSimulatorDirectory = platformBaseName.endsWith('-simulator');
-            if (simulatorSDK == isSimulatorDirectory) {
-              return File('${entity.path}/${platform.infoPlistPath}');
-            }
-          }
-        }
-      case TargetPlatform.macos:
-        for (final FileSystemEntity entity in xcframework.listSync()) {
-          final String platformBaseName = Uri.parse(entity.path).pathSegments.last;
-          if (entity is Directory && platformBaseName.startsWith('macos-')) {
-            return File('${entity.path}/${platform.infoPlistPath}');
-          }
-        }
-    }
-    return null;
   }
 
   void _embedNativeAssets(
@@ -550,16 +417,19 @@ class Context {
         );
       }
 
-      runRsync(
-        extraArgs: <String>['--filter', '- native_assets.yaml', '--filter', '- native_assets.json'],
-        frameworkDirectory.path,
-        xcodeFrameworksDir,
-      );
+      runRsync(frameworkDirectory.path, xcodeFrameworksDir);
       if (codesign && expandedCodeSignIdentity != null) {
         _codesignFramework(
           expandedCodeSignIdentity,
           '$xcodeFrameworksDir/$framework.framework/$framework',
         );
+      }
+
+      final Directory dsymDirectory = directoryFromPath(
+        '$nativeAssetsPath$framework.framework.dSYM',
+      );
+      if (dsymDirectory.existsSync()) {
+        runRsync(dsymDirectory.path, '${environment['BUILT_PRODUCTS_DIR']}/');
       }
     }
   }
@@ -862,21 +732,4 @@ class Context {
   }
 }
 
-enum TargetPlatform {
-  ios(artifactName: 'ios', frameworkName: 'Flutter', infoPlistPath: 'Flutter.framework/Info.plist'),
-  macos(
-    artifactName: 'darwin-x64',
-    frameworkName: 'FlutterMacOS',
-    infoPlistPath: 'FlutterMacOS.framework/Resources/Info.plist',
-  );
-
-  const TargetPlatform({
-    required this.artifactName,
-    required this.frameworkName,
-    required this.infoPlistPath,
-  });
-
-  final String artifactName;
-  final String frameworkName;
-  final String infoPlistPath;
-}
+enum TargetPlatform { ios, macos }
