@@ -10,6 +10,7 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.writeText
 import kotlin.test.Test
+import kotlin.test.assertContains
 
 class FlutterPluginTest {
     @Test
@@ -88,8 +90,15 @@ class FlutterPluginTest {
         flutterPlugin.apply(project)
 
         verify { project.tasks.register("generateLockfiles", any()) }
-        verify { project.tasks.register("javaVersion", any()) }
-        verify { project.tasks.register("printBuildVariants", any()) }
+
+        val registeredPrintTasks = mutableListOf<String>()
+        verify {
+            project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
+        }
+
+        assertContains(registeredPrintTasks, "javaVersion")
+        assertContains(registeredPrintTasks, "kgpVersion")
+        assertContains(registeredPrintTasks, "printBuildVariants")
     }
 
     @Test
