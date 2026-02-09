@@ -1108,31 +1108,36 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       Log.e(TAG, "Expected semanticsNode to have checked state and toggled state.");
     }
     result.setCheckable(hasCheckedState || hasToggledState);
-    if (hasCheckedState) {
-      result.setChecked(semanticsNode.hasFlag(Flag.IS_CHECKED));
-      if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
-        result.setClassName("android.widget.RadioButton");
-      } else {
-        result.setClassName("android.widget.CheckBox");
-      }
-    } else if (hasToggledState) {
-      result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
-      result.setClassName("android.widget.Switch");
-    }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
-
-    // Starting on API level 36. setChecked takes int instead.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (hasCheckedState) {
         result.setChecked(
             semanticsNode.hasFlag(Flag.IS_CHECKED)
                 ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
                 : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+        if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
+          result.setClassName("android.widget.RadioButton");
+        } else {
+          result.setClassName("android.widget.CheckBox");
+        }
       } else if (hasToggledState) {
         result.setChecked(
             semanticsNode.hasFlag(Flag.IS_TOGGLED)
                 ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
                 : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+        result.setClassName("android.widget.Switch");
+      }
+    } else {
+      if (hasCheckedState) {
+        result.setChecked(semanticsNode.hasFlag(Flag.IS_CHECKED));
+        if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
+          result.setClassName("android.widget.RadioButton");
+        } else {
+          result.setClassName("android.widget.CheckBox");
+        }
+      } else if (hasToggledState) {
+        result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
+        result.setClassName("android.widget.Switch");
       }
     }
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
