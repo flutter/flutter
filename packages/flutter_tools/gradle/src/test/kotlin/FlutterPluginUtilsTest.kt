@@ -1041,17 +1041,31 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForKGPVersion adds task for KGP version`() {
         val project = mockk<Project>()
-        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
-        val captureSlot = slot<Action<Task>>()
-        FlutterPluginUtils.addTaskForKGPVersion(project)
-        verify { project.tasks.register("kgpVersion", capture(captureSlot)) }
+        val taskContainer = mockk<TaskContainer>()
+        every { project.tasks } returns taskContainer
+        val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
+        val captureSlot = slot<Action<PrintTask>>()
 
-        val mockTask = mockk<Task>()
-        every { mockTask.description = any() } returns Unit
-        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
-        captureSlot.captured.execute(mockTask)
+        every {
+            project.tasks.register(eq("kgpVersion"), PrintTask::class.java, capture(captureSlot))
+        } returns mockTaskProvider
+
+        // Minimal configuration for `VersionFetcher.getKGPVersion` to return something.
+        every { project.hasProperty("kotlin_version") } returns true
+        every { project.properties["kotlin_version"] } returns "2.2.0"
+
+        FlutterPluginUtils.addTaskForKGPVersion(project)
+        captureSlot.captured.execute(mockPrintTask)
+
         verify {
-            mockTask.description = "Print the current kgp version used by the project."
+            mockPrintTask.description = "Print the current kgp version used by the project."
+        }
+
+        verify {
+            mockPrintTask.message.set(
+                withArg<String> { assertContains(it, "2.2.0") }
+            )
         }
     }
 
