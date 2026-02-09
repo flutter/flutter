@@ -2711,7 +2711,8 @@ class _SwipeRegionState extends State<_SwipeRegion> {
   @override
   void dispose() {
     assert(_surfaces.isEmpty);
-    _disposeInactiveRecognizer();
+    _recognizer?.dispose();
+    _recognizer = null;
     super.dispose();
   }
 
@@ -2798,20 +2799,12 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     );
   }
 
-  void _disposeInactiveRecognizer() {
-    if (!isSwiping && _recognizer != null) {
-      _recognizer!.dispose();
-      _recognizer = null;
-    }
-  }
-
   void _completeSwipe() {
+    if (!mounted) {
+      return;
+    }
     _position = null;
     widget.onDistanceChanged(0);
-    if (!mounted) {
-      // If the widget is not mounted, safely dispose of the recognizer.
-      _disposeInactiveRecognizer();
-    }
   }
 
   @override
