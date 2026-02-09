@@ -377,7 +377,7 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.all(borderSide.width);
+    return EdgeInsets.all(borderSide.strokeInset);
   }
 
   @override
@@ -418,7 +418,7 @@ class OutlineInputBorder extends InputBorder {
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.strokeInset));
   }
 
   @override
@@ -478,8 +478,8 @@ class OutlineInputBorder extends InputBorder {
       path.addArc(tlCorner, math.pi, tlCornerArcSweep);
     } else {
       // Because the path is painted with Paint.strokeCap = StrokeCap.butt, horizontal coordinate is moved
-      // to the left using borderSide.width / 2.
-      path.moveTo(scaledRRect.left - borderSide.width / 2, scaledRRect.top);
+      // based on strokeOffset to respect strokeAlign.
+      path.moveTo(scaledRRect.left + borderSide.strokeOffset / 2, scaledRRect.top);
     }
 
     // Draw top border from top left corner to gap start.
@@ -545,7 +545,7 @@ class OutlineInputBorder extends InputBorder {
 
     final Paint paint = borderSide.toPaint();
     final RRect outer = borderRadius.toRRect(rect);
-    final RRect center = outer.deflate(borderSide.width / 2.0);
+    final RRect center = outer.inflate(borderSide.strokeOffset / 2);
     if (gapStart == null || gapExtent <= 0.0 || gapPercentage == 0.0) {
       canvas.drawRRect(center, paint);
     } else {
