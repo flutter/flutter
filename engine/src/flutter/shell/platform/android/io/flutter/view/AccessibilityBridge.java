@@ -1120,7 +1120,20 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setClassName("android.widget.Switch");
     }
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
-
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+      if (hasCheckedState) {
+        result.setCheckedState(
+            semanticsNode.hasFlag(Flag.IS_CHECKED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      }
+      if (hasToggledState) {
+        result.setCheckedState(
+            semanticsNode.hasFlag(Flag.IS_TOGGLED)
+                ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
+                : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
+      }
+    }
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
         final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
