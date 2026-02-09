@@ -53,6 +53,7 @@ class InputDatePickerFormField extends StatefulWidget {
     required DateTime lastDate,
     this.onDateSubmitted,
     this.onDateSaved,
+    this.onDateChanged,
     this.selectableDayPredicate,
     this.errorFormatText,
     this.errorInvalidText,
@@ -104,6 +105,10 @@ class InputDatePickerFormField extends StatefulWidget {
   /// saved via [FormState.save]. Will only be called if the input represents
   /// a valid [DateTime].
   final ValueChanged<DateTime>? onDateSaved;
+
+  /// An optional method called whenever the field's date value changes (valid
+  /// date or null when empty and [acceptEmptyDate] is true).
+  final ValueChanged<DateTime?>? onDateChanged;
 
   /// Function to provide full control over which [DateTime] can be selected.
   final SelectableDayPredicate? selectableDayPredicate;
@@ -242,14 +247,31 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       _selectedDate = date;
       _inputText = text;
       callback?.call(_selectedDate!);
+      widget.onDateChanged?.call(_selectedDate);
     }
   }
 
   void _handleSaved(String? text) {
+    if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
+      setState(() {
+        _selectedDate = null;
+        _inputText = text ?? '';
+      });
+      widget.onDateChanged?.call(null);
+      return;
+    }
     _updateDate(text, widget.onDateSaved);
   }
 
   void _handleSubmitted(String text) {
+    if (text.isEmpty && widget.acceptEmptyDate) {
+      setState(() {
+        _selectedDate = null;
+        _inputText = text;
+      });
+      widget.onDateChanged?.call(null);
+      return;
+    }
     _updateDate(text, widget.onDateSubmitted);
   }
 
