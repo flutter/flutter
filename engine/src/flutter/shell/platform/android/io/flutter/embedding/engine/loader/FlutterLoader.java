@@ -259,8 +259,8 @@ public class FlutterLoader {
    * @param applicationContext The Android application context.
    * @param args Flags sent to the Flutter runtime.
    */
-  public void ensureInitializationComplete(
-      @NonNull Context applicationContext, @Nullable String[] args) {
+  @VisibleForTesting
+  void ensureInitializationComplete(@NonNull Context applicationContext, @Nullable String[] args) {
     ensureInitializationComplete(applicationContext, args, BuildConfig.RELEASE);
   }
 
