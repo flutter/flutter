@@ -43,7 +43,7 @@ import androidx.fragment.app.FragmentManager;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.FlutterShellArgsIntentUtils;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import java.util.ArrayList;
@@ -591,7 +591,7 @@ public class FlutterFragmentActivity extends FragmentActivity
           .dartEntrypointArgs(getDartEntrypointArgs())
           .initialRoute(getInitialRoute())
           .appBundlePath(getAppBundlePath())
-          .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
+          .flutterShellArgs(FlutterShellArgsIntentUtils.getFlutterShellCommandLineArgs(getIntent()))
           .handleDeeplinking(shouldHandleDeeplinking())
           .renderMode(renderMode)
           .transparencyMode(transparencyMode)

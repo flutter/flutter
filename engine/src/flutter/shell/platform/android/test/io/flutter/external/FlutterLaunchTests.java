@@ -26,7 +26,7 @@ public class FlutterLaunchTests {
 
     assertEquals("main", flutterActivity.getDartEntrypointFunctionName());
     assertEquals("/", flutterActivity.getInitialRoute());
-    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs().toArray());
+    assertArrayEquals(new String[] {}, flutterActivity.getFlutterShellArgs());
     assertTrue(flutterActivity.shouldAttachEngineToActivity());
     assertNull(flutterActivity.getCachedEngineId());
     assertTrue(flutterActivity.shouldDestroyEngineWithHost());
