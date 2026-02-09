@@ -2433,18 +2433,11 @@ public class AccessibilityBridgeTest {
     AccessibilityBridge accessibilityBridge = setUpBridge();
 
     TestSemanticsNode node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
     TestSemanticsUpdate testSemanticsUpdate = node.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
-    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_UNDEFINED, nodeInfo.getChecked());
-
-    node = new TestSemanticsNode();
-    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
-    testSemanticsUpdate = node.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertEquals(AccessibilityNodeInfo.CHECKED_STATE_FALSE, nodeInfo.getChecked());
 
     node = new TestSemanticsNode();
@@ -2455,6 +2448,15 @@ public class AccessibilityBridgeTest {
 
     nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertEquals(AccessibilityNodeInfo.CHECKED_STATE_TRUE, nodeInfo.getChecked());
+
+    node = new TestSemanticsNode();
+    node.addFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
+    node.addFlag(AccessibilityBridge.Flag.IS_CHECK_STATE_MIXED);
+    testSemanticsUpdate = node.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals(AccessibilityNodeInfo.CHECKED_STATE_PARTIAL, nodeInfo.getChecked());
 
     node = new TestSemanticsNode();
     node.addFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
