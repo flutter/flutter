@@ -726,6 +726,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
     final String buildConfig = buildConfigString(environment);
 
+    // Extract web-define variables from the environment. These are stored with
+    // the [kWebDefinePrefix] prefix by [WebBuilder.buildWeb].
+    final Map<String, String> webDefines = <String, String>{
+      for (final MapEntry<String, String> entry in environment.defines.entries)
+        if (entry.key.startsWith(kWebDefinePrefix))
+          entry.key.substring(kWebDefinePrefix.length): entry.value,
+    };
+
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
@@ -737,6 +745,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
+      webDefines: webDefines,
     );
 
     final File outputFlutterBootstrapJs = fileSystem.file(
@@ -760,6 +769,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
+          webDefines: webDefines,
         );
         final File outputIndexHtml = fileSystem.file(
           fileSystem.path.join(environment.outputDir.path, relativePath),

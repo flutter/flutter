@@ -38,6 +38,14 @@ const kStaticAssetsUrl = 'staticAssetsUrl';
 /// The caching strategy to use for service worker generation.
 const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 
+/// Prefix for web-define variables stored in [Environment.defines].
+///
+/// Web-define variables are user-specified key-value pairs passed via
+/// `--web-define=KEY=VALUE` on the CLI. They are stored in the build
+/// environment with this prefix so that build targets can distinguish
+/// them from other defines.
+const kWebDefinePrefix = 'webDefine:';
+
 class WebBuilder {
   WebBuilder({
     required Logger logger,
@@ -69,6 +77,7 @@ class WebBuilder {
     String? baseHref,
     String? staticAssetsUrl,
     String? outputDirectoryPath,
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (serviceWorkerStrategy != null) {
       _logger.printWarning(
@@ -114,6 +123,8 @@ class WebBuilder {
             kServiceWorkerStrategy:
                 serviceWorkerStrategy?.cliName ?? ServiceWorkerStrategy.offlineFirst.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
+            for (final MapEntry<String, String> entry in webDefines.entries)
+              '$kWebDefinePrefix${entry.key}': entry.value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
           artifacts: globals.artifacts!,
