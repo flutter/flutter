@@ -2717,6 +2717,10 @@ class FakeMacOSProject extends Fake implements MacOSProject {
   late Directory managedDirectory;
 
   @override
+  File get pluginRegistrantImplementation =>
+      managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+  @override
   bool existsSync() => exists;
 }
 
