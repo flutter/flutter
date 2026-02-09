@@ -243,7 +243,7 @@ TaskFunction createWideGamutTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/wide_gamut_test',
     'integration_test/app_test.dart',
-    createPlatforms: <String>['ios'],
+    createPlatforms: <String>['ios', 'macos'],
   ).call;
 }
 
