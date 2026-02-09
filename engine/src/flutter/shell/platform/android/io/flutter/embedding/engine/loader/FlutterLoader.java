@@ -259,8 +259,8 @@ public class FlutterLoader {
    * @param applicationContext The Android application context.
    * @param args Flags sent to the Flutter runtime.
    */
-  @VisibleForTesting
-  void ensureInitializationComplete(@NonNull Context applicationContext, @Nullable String[] args) {
+  public void ensureInitializationComplete(
+      @NonNull Context applicationContext, @Nullable String[] args) {
     ensureInitializationComplete(applicationContext, args, BuildConfig.RELEASE);
   }
 
@@ -273,8 +273,9 @@ public class FlutterLoader {
    * @param args Flags sent to the Flutter runtime.
    * @param isRelease Whether or not the Flutter component is running in release mode.
    */
+  @VisibleForTesting
   @SuppressLint("NewApi") // Calls to Stream and Collection#stream require API 24
-  public void ensureInitializationComplete(
+  void ensureInitializationComplete(
       @NonNull Context applicationContext, @Nullable String[] args, @NonNull boolean isRelease) {
     if (initialized) {
       return;
