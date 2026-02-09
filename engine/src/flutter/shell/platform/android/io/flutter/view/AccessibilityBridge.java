@@ -1108,7 +1108,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       Log.e(TAG, "Expected semanticsNode to have checked state and toggled state.");
     }
     result.setCheckable(hasCheckedState || hasToggledState);
-    result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
     if (hasCheckedState) {
       if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
         result.setClassName("android.widget.RadioButton");
@@ -1136,6 +1135,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
       }
     }
+    result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (semanticsNode.hasFlag(Flag.HAS_EXPANDED_STATE)) {
         final boolean isExpanded = semanticsNode.hasFlag(Flag.IS_EXPANDED);
