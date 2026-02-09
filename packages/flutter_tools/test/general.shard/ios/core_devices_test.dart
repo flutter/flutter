@@ -1902,6 +1902,7 @@ Waiting for the application to terminate...
 2025-09-16 12:15:47.939171-0500 Runner[1230:133819] This log happens after the application is launched but matches an ignore pattern and should be skipped
 This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
 2025-09-16 12:15:47.939171-0500 Runner[1230:133819] flutter: This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
+2026-01-26 16:12:19.095287-0600 Runner[2236:2107639] [UIKit App Config] `UIScene` lifecycle will soon be required. Failure to adopt will result in an assert in the future.
 2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [INFO:flutter/runtime/service_protocol.cc(121)] This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder
 ''',
           ),
@@ -1919,13 +1920,14 @@ This log happens after the application is launched and should be sent to FakeIOS
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(shutdownHooks.registeredHooks.length, 1);
         expect(logger.errorText, isEmpty);
-        expect(logForwarder.logs.length, 3);
+        expect(logForwarder.logs.length, 4);
         expect(
           logForwarder.logs,
           containsAll([
             'This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
             '2025-09-16 12:15:47.939171-0500 Runner[1230:133819] flutter: This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
             '2025-09-16 12:15:47.939171-0500 Runner[1230:133819] [INFO:flutter/runtime/service_protocol.cc(121)] This log happens after the application is launched and should be sent to FakeIOSCoreDeviceLogForwarder',
+            '2026-01-26 16:12:19.095287-0600 Runner[2236:2107639] [UIKit App Config] `UIScene` lifecycle will soon be required. Failure to adopt will result in an assert in the future.',
           ]),
         );
         expect(

@@ -322,4 +322,8 @@ class UserMessages {
       return '${baseUrl}android-setup';
     }
   }
+
+  /// Overridable message to be shown when detected from device logs that UIScene migration is
+  /// still required.
+  String? uiSceneMigrationWarning;
 }
