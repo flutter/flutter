@@ -39,13 +39,13 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.autofill.AutofillValue;
-import android.util.SparseArray;
 import android.widget.FrameLayout;
 import androidx.core.util.Consumer;
 import androidx.test.core.app.ActivityScenario;
@@ -1422,9 +1422,8 @@ public class FlutterViewTest {
   }
 
   /**
-   * Test that autofill methods do nothing when TextInputPlugin is null.
-   * This verifies that no NullPointerException is thrown and the plugin methods
-   * are not called.
+   * Test that autofill methods do nothing when TextInputPlugin is null. This verifies that no
+   * NullPointerException is thrown and the plugin methods are not called.
    */
   @Test
   public void autofill_doesNothingWhenTextInputPluginIsNull() throws Exception {
