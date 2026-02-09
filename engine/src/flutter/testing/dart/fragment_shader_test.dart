@@ -61,7 +61,7 @@ void main() async {
       shader = program.fragmentShader();
     });
 
-    _runSkiaTest('FragmentProgram uniform info', () async {
+    test('FragmentProgram uniform info', () async {
       final List<UniformFloatSlot> slots = [
         shader.getUniformFloat('iFloatUniform'),
         shader.getUniformFloat('iVec2Uniform', 0),
