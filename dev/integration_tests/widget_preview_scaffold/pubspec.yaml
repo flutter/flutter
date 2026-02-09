@@ -39,7 +39,7 @@ dependencies:
   material_color_utilities: 0.13.0
   meta: 1.18.0
   plugin_platform_interface: 2.1.8
-  source_span: 1.10.1
+  source_span: 1.10.2
   stream_channel: 2.1.4
   string_scanner: 1.4.1
   term_glyph: 1.2.2
@@ -68,4 +68,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-# PUBSPEC CHECKSUM: jiappb
+# PUBSPEC CHECKSUM: fghelk
