@@ -22,6 +22,23 @@ import 'package:meta/meta.dart';
 @internal
 bool isWindowingEnabled = debugEnabledFeatureFlags.contains('windowing');
 
+/// Whether the accessibility evaluations feature is enabled for the current
+/// application.
+///
+/// Do not use this API. Flutter will make breaking changes
+/// to this API, even in patch versions.
+///
+/// If this returns `false`, `@internal` APIs in the following
+/// files will throw an `UnsupportedError`:
+///
+/// 1. packages/flutter/lib/src/widgets/_accessibility_evaluations.dart
+///
+/// See: https://github.com/flutter/flutter/issues/32057.
+@internal
+bool isAccessibilityEvaluationsEnabled = debugEnabledFeatureFlags.contains(
+  'accessibility_evaluations',
+);
+
 /// The feature flags this app was built with.
 ///
 /// Do not use this API. Flutter can and will make breaking changes to this API.
