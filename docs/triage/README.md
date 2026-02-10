@@ -122,7 +122,7 @@ Once the main labels above are added, consider what additional labels could be a
 - Most issues will have a general category label, such as `engine`, `framework`, `tool`, or `package`. An issue with a category-specific label (`e: *` for engine, `f: *` for framework, `t: *` for tool, `p: *` for package) should have the associated category label.
 - Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
 - Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
-- Issues specific to one or more platforms should have the corresponding `platform-*` label(s). However, don't add platform labels if the issues applies to every relevant platform (e.g., all platforms that a plugin supports).
+- Issues specific to one or more platforms should have the corresponding `platform-*` label(s). However, don't add platform labels if the issue applies to every relevant platform (e.g., all platforms that a plugin supports).
 
 ### Additional comments
 
