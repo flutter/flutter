@@ -190,13 +190,11 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
-        expect(environment.defines['webDefine:API_URL'], 'https://api.example.com');
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines['webDefine:VERSION'], 'v1.2.3');
+            expect(environment.defines['webDefine:API_URL'], 'https://api.example.com');
+          }),
     },
   );
 
@@ -212,12 +210,7 @@ void main() {
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
-      await runner.run(<String>[
-        'build',
-        'web',
-        '--no-pub',
-        '--no-web-resources-cdn',
-      ]);
+      await runner.run(<String>['build', 'web', '--no-pub', '--no-web-resources-cdn']);
 
       final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
 
@@ -228,16 +221,14 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        // No web-define entries should be present.
-        final bool hasWebDefines = environment.defines.keys.any(
-          (String key) => key.startsWith('webDefine:'),
-        );
-        expect(hasWebDefines, isFalse);
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            // No web-define entries should be present.
+            final bool hasWebDefines = environment.defines.keys.any(
+              (String key) => key.startsWith('webDefine:'),
+            );
+            expect(hasWebDefines, isFalse);
+          }),
     },
   );
 

@@ -312,8 +312,7 @@ name: foo
         environment.buildDir.childFile('main.dart.js').createSync();
         await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
 
-        final String outputHtml =
-            environment.outputDir.childFile('index.html').readAsStringSync();
+        final String outputHtml = environment.outputDir.childFile('index.html').readAsStringSync();
         expect(outputHtml, contains("const version = 'v1.2.3'"));
         expect(outputHtml, contains("const apiUrl = 'https://api.example.com'"));
       }),
@@ -333,8 +332,9 @@ _flutter.loader.load();
         environment.buildDir.childFile('main.dart.js').createSync();
         await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
 
-        final String outputBootstrap =
-            environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync();
+        final String outputBootstrap = environment.outputDir
+            .childFile('flutter_bootstrap.js')
+            .readAsStringSync();
         expect(outputBootstrap, contains("const appVersion = 'test-build-42'"));
       }),
     );
