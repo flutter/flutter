@@ -6592,7 +6592,10 @@ void main() {
       expect(parentSelection, isNull);
       expect(childSelection?.plainText, 'Child Text');
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.linux, TargetPlatform.windows}),
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/181231.
