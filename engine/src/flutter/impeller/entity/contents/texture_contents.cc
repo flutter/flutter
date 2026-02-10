@@ -186,9 +186,9 @@ bool TextureContents::Render(const ContentContext& renderer,
     FSStrict::FragInfo frag_info;
     if (texture_->GetYCoordScale() < 0.0) {
       frag_info.source_rect = Vector4(strict_texture_coords.GetLeft(),
-                                      1.0 - strict_texture_coords.GetBottom(),
+                                      1.0f - strict_texture_coords.GetBottom(),
                                       strict_texture_coords.GetRight(),
-                                      1.0 - strict_texture_coords.GetTop());
+                                      1.0f - strict_texture_coords.GetTop());
     } else {
       frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
     }
