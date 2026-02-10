@@ -729,9 +729,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     // Extract web-define variables from the environment. These are stored with
     // the [kWebDefinePrefix] prefix by [WebBuilder.buildWeb].
     final webDefines = <String, String>{
-      for (final MapEntry<String, String> entry in environment.defines.entries)
-        if (entry.key.startsWith(kWebDefinePrefix))
-          entry.key.substring(kWebDefinePrefix.length): entry.value,
+      for (final MapEntry(:key, :value) in environment.defines.entries)
+        if (key.startsWith(kWebDefinePrefix)) key.substring(kWebDefinePrefix.length): value,
     };
 
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,

@@ -120,8 +120,7 @@ class WebBuilder {
             kServiceWorkerStrategy:
                 serviceWorkerStrategy?.cliName ?? ServiceWorkerStrategy.offlineFirst.cliName,
             ...buildInfo.toBuildSystemEnvironment(),
-            for (final MapEntry<String, String> entry in webDefines.entries)
-              '$kWebDefinePrefix${entry.key}': entry.value,
+            for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
           artifacts: globals.artifacts!,
