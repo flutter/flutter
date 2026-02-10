@@ -96,6 +96,7 @@ class HotRunner extends ResidentRunner {
     String? nativeAssetsYamlFile,
     required Analytics analytics,
     super.dartBuilder,
+    super.shutdownHooks,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
@@ -130,6 +131,7 @@ class HotRunner extends ResidentRunner {
 
   @visibleForTesting
   String? get targetPlatformName => _targetPlatformName;
+
   String? _targetPlatformName;
   final _targetPlatforms = <TargetPlatform>{};
 
@@ -167,6 +169,7 @@ class HotRunner extends ResidentRunner {
         );
         _sdkName = 'multiple';
         _emulator = false;
+
       default:
         _targetPlatformName = 'unknown';
         _sdkName = 'unknown';
@@ -1265,6 +1268,7 @@ class HotRunner extends ResidentRunner {
     }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
+    await super.cleanupAtFinish();
   }
 }
 

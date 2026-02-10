@@ -4,7 +4,9 @@
 
 #include <epoxy/egl.h>
 #include <gdk/gdkwayland.h>
+#ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
+#endif
 
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 
@@ -43,9 +45,11 @@ static void fl_opengl_manager_init(FlOpenGLManager* self) {
     self->display = eglGetPlatformDisplayEXT(
         EGL_PLATFORM_WAYLAND_EXT, gdk_wayland_display_get_wl_display(display),
         NULL);
+#ifdef GDK_WINDOWING_X11
   } else if (GDK_IS_X11_DISPLAY(display)) {
     self->display = eglGetPlatformDisplayEXT(
         EGL_PLATFORM_X11_EXT, gdk_x11_display_get_xdisplay(display), NULL);
+#endif
   } else {
     g_critical("Unsupported GDK backend, unable to get EGL display");
   }
