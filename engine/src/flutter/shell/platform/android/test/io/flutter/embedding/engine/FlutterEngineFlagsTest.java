@@ -52,7 +52,8 @@ public class FlutterEngineFlagsTest {
   @Test
   public void getFlagByMetadataKey_returnsExpectedFlagWhenValidKeySpecified() {
     FlutterEngineFlags.Flag flag =
-        FlutterEngineFlags.getFlagByMetadataKey("io.flutter.embedding.android.AOTSharedLibraryName");
+        FlutterEngineFlags.getFlagByMetadataKey(
+            "io.flutter.embedding.android.AOTSharedLibraryName");
     assertEquals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME, flag);
   }
 
@@ -117,6 +118,7 @@ public class FlutterEngineFlagsTest {
 
   @Test
   public void getReplacementFlagIfDeprecated_returnsNullWhenFlagIsNotDeprecated() {
-    assertNull(FlutterEngineFlags.getReplacementFlagIfDeprecated(FlutterEngineFlags.VM_SNAPSHOT_DATA));
+    assertNull(
+        FlutterEngineFlags.getReplacementFlagIfDeprecated(FlutterEngineFlags.VM_SNAPSHOT_DATA));
   }
 }

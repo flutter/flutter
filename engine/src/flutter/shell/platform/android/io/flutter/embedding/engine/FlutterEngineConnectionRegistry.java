@@ -15,8 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
-import io.flutter.embedding.engine.FlutterEngineFlags;
-import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.android.ExclusiveAppComponent;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
