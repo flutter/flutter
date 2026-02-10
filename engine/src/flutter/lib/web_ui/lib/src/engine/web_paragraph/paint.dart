@@ -257,7 +257,6 @@ abstract class TextPaint {
         continue;
       }
 
-      // TODO(jlavrova): Why using these instead of multiplied values?
       final double height =
           block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
       final double ascent = block.multipliedFontBoundingBoxAscent;

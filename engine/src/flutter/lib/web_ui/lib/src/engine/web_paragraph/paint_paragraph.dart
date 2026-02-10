@@ -209,6 +209,7 @@ class PaintParagraph extends TextPaint {
       _fillAllBlocks(StyleElements.decorations, layout);
 
       // Draw background blocks directly on the output canvas
+      // so it will be cached together with the text blocks on Canvas2D canvas
       _drawAllBlocks(StyleElements.background, canvas, layout, painter, x, y);
     } else {
       // We already have cached image for the entire paragraph (including the backgrounds)

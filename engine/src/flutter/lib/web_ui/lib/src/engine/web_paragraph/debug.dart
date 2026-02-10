@@ -53,7 +53,7 @@ class WebParagraphProfiler {
   static Map<String, Duration> durations = {};
   static Map<String, int> counts = {};
 
-  ///
+  /// Register an engine benchmark callback to collect profiling data for WebParagraph operations.
   static void register() {
     Profiler.ensureInitialized();
     engineBenchmarkValueCallback = (String name, double value) {
