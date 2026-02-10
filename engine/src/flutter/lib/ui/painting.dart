@@ -5727,7 +5727,7 @@ base class UniformVec4Slot extends UniformType {
 ///
 /// ```dart
 /// void updateShader(ui.FragmentShader shader) {
-///   shader.UniformMat2Slot('uIdentity').set(
+///   shader.getUniformMat2('uIdentity').set(
 ///     1.0, 0.0,
 ///     0.0, 1.0
 ///   );
@@ -5758,7 +5758,7 @@ base class UniformMat2Slot extends UniformType {
 ///
 /// ```dart
 /// void updateShader(ui.FragmentShader shader) {
-///   shader.UniformMat3Slot('uIdentity').set(
+///   shader.getUniformMat3('uIdentity').set(
 ///     1.0, 0.0, 0.0,
 ///     0.0, 1.0, 0.0,
 ///     0.0, 0.0, 1.0
@@ -5815,7 +5815,7 @@ base class UniformMat3Slot extends UniformType {
 ///
 /// ```dart
 /// void updateShader(ui.FragmentShader shader) {
-///   shader.UniformMat4Slot('uIdentity').set(
+///   shader.getUniformMat4('uIdentity').set(
 ///     1.0, 0.0, 0.0, 0.0,
 ///     0.0, 1.0, 0.0, 0.0,
 ///     0.0, 0.0, 1.0, 0.0,
