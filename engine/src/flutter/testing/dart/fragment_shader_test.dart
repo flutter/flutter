@@ -787,7 +787,7 @@ void main() async {
     shader.dispose();
   });
 
-  _runSkiaTest('FragmentProgram getImageSampler wrong type', () async {
+  test('FragmentProgram getImageSampler wrong type', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
     final FragmentShader shader = program.fragmentShader();
     try {
@@ -978,16 +978,6 @@ void main() async {
 ////////////////////////////////////////////////////////////////////////////////
 // Helper Functions ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-void _runSkiaTest(String name, Future<void> Function() callback) {
-  test(name, () async {
-    if (impellerEnabled) {
-      print('Skipped for Impeller.');
-      return;
-    }
-    await callback();
-  });
-}
 
 void _runImpellerTest(String name, Future<void> Function() callback, {Object? skip}) {
   test(name, () async {
