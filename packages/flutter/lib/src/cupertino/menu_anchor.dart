@@ -2797,6 +2797,18 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     _recognizer!.addPointer(event);
   }
 
+  Drag _createSwipeHandle(ui.Offset position) {
+    assert(!isSwiping, 'A new swipe should not begin while a swipe is active.');
+    _position = position;
+    return _SwipeHandle(
+      viewId: View.of(context).viewId,
+      initialPosition: position,
+      onSwipeUpdate: _handleSwipeUpdate,
+      onSwipeEnd: _handleSwipeEnd,
+      onSwipeCanceled: _handleSwipeCancel,
+    );
+  }
+
   void _handleSwipeUpdate(DragUpdateDetails updateDetails) {
     _position = _position! + updateDetails.delta;
 
@@ -2831,23 +2843,11 @@ class _SwipeRegionState extends State<_SwipeRegion> {
 
   void _completeSwipe() {
     _position = null;
-    _recognizer!.dispose();
+    _recognizer?.dispose();
     _recognizer = null;
     if (mounted) {
       widget.onDistanceChanged(0);
     }
-  }
-
-  Drag _createSwipeHandle(ui.Offset position) {
-    assert(!isSwiping, 'A new swipe should not begin while a swipe is active.');
-    _position = position;
-    return _SwipeHandle(
-      viewId: View.of(context).viewId,
-      initialPosition: position,
-      onSwipeUpdate: _handleSwipeUpdate,
-      onSwipeEnd: _handleSwipeEnd,
-      onSwipeCanceled: _handleSwipeCancel,
-    );
   }
 
   @override
