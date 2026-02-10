@@ -124,13 +124,13 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   return nil;
 }
 
-- (UITextWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
+- (NSWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
                                               inDirection:(UITextStorageDirection)direction {
   // Not editable. Does not apply.
-  return UITextWritingDirectionNatural;
+  return NSWritingDirectionNatural;
 }
 
-- (void)setBaseWritingDirection:(UITextWritingDirection)writingDirection
+- (void)setBaseWritingDirection:(NSWritingDirection)writingDirection
                        forRange:(UITextRange*)range {
   // Not editable. Does not apply.
 }
@@ -422,12 +422,12 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
                                                           inDirection:direction];
 }
 
-- (UITextWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
+- (NSWritingDirection)baseWritingDirectionForPosition:(UITextPosition*)position
                                               inDirection:(UITextStorageDirection)direction {
   return [[self textInputSurrogate] baseWritingDirectionForPosition:position inDirection:direction];
 }
 
-- (void)setBaseWritingDirection:(UITextWritingDirection)writingDirection
+- (void)setBaseWritingDirection:(NSWritingDirection)writingDirection
                        forRange:(UITextRange*)range {
   [[self textInputSurrogate] setBaseWritingDirection:writingDirection forRange:range];
 }
