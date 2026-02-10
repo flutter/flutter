@@ -1176,7 +1176,9 @@ public class FlutterView extends FrameLayout
     isFlutterUiDisplayed = flutterRenderer.isDisplayingFlutterUi();
     renderSurface.attachToRenderer(flutterRenderer);
     flutterRenderer.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.addResizingFlutterUiListener(flutterUiResizeListener);
+    }
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -1323,7 +1325,9 @@ public class FlutterView extends FrameLayout
     FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
-    flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    if (isContentSizingEnabled) {
+      flutterRenderer.removeResizingFlutterUiListener(flutterUiResizeListener);
+    }
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
 
