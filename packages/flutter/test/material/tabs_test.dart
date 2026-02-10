@@ -2811,7 +2811,7 @@ void main() {
 
     // The pixels of the new position should be the same as before the update.
     expect(scrollableState.position.pixels, oldPixels);
-    expect(tabScrollController.debugHasTabBarState, isFalse);
+    expect(tabScrollController.debugCheckHasTabBarState, throwsAssertionError);
   });
 
   testWidgets('TabBar attaches state to external TabBarScrollController in didUpdateWidget', (
@@ -2856,7 +2856,10 @@ void main() {
 
     // The pixels of the new position should be the same as before the update.
     expect(scrollableState.position.pixels, oldPixels);
-    expect(tabScrollController.debugHasTabBarState, isTrue);
+
+    // This should not throw, since the tab bar is attached to the external controller.
+    expect(tabScrollController.debugCheckHasTabBarState(), isTrue);
+    expect(tester.takeException(), isNull);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/124608

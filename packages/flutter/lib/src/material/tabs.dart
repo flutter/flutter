@@ -889,14 +889,25 @@ final class TabBarScrollController extends ScrollController {
   }
 
   _TabBarState get _tabBarState {
-    assert(_tabBar != null, 'TabBarScrollController is not attached to any TabBar.');
+    assert(debugCheckHasTabBarState());
 
     return _tabBar!;
   }
 
-  /// Whether this controller is currently attached to a [TabBar]'s [State].
-  @visibleForTesting
-  bool get debugHasTabBarState => _tabBar != null;
+  /// Asserts that this controller is currently attached to a [TabBar]'s [State].
+  ///
+  /// To invoke this function, use the following pattern:
+  ///
+  /// ```dart
+  /// assert(debugCheckHasTabBarState());
+  /// ```
+  ///
+  /// Does nothing if asserts are disabled. Always returns true.
+  bool debugCheckHasTabBarState() {
+    assert(_tabBar != null, 'This TabBarScrollController is not attached to any TabBar.');
+
+    return true;
+  }
 
   @override
   ScrollPosition createScrollPosition(
