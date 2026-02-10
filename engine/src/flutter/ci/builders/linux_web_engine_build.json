@@ -27,13 +27,13 @@
         "--web",
         "--runtime-mode=release",
         "--no-rbe",
-        "--no-goma"
+        "--no-goma",
+        "--experimental-webparagraph"
       ],
       "ninja": {
         "config": "wasm_release",
         "targets": [
-          "flutter/web_sdk:flutter_web_sdk_archive",
-          "flutter/third_party/canvaskit:canvaskit_experimental_webparagraph_group"
+          "flutter/web_sdk:flutter_web_sdk_archive"
         ]
       },
       "archives": [

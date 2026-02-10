@@ -63,6 +63,10 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
           'Embed DWARF debugging info into the output wasm modules. This is '
           'only valid in debug mode.',
     );
+    argParser.addFlag(
+      'experimental-webparagraph',
+      help: 'Include an additional CanvasKit build with experimental WebParagraph support.',
+    );
   }
 
   @override
@@ -77,6 +81,8 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
   List<String> get targets => argResults?.rest ?? <String>[];
   bool get embedDwarf => boolArg('dwarf');
+
+  bool get experimentalWebParagraph => boolArg('experimental-webparagraph');
 
   RuntimeMode get runtimeMode {
     final bool isProfile = boolArg('profile');
@@ -100,7 +106,12 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     }
     final libPath = FilePath.fromWebUi('lib');
     final steps = <PipelineStep>[
-      GnPipelineStep(host: host, runtimeMode: runtimeMode, embedDwarf: embedDwarf),
+      GnPipelineStep(
+        host: host,
+        runtimeMode: runtimeMode,
+        embedDwarf: embedDwarf,
+        experimentalWebParagraph: experimentalWebParagraph,
+      ),
       NinjaPipelineStep(
         host: host,
         runtimeMode: runtimeMode,
@@ -129,11 +140,17 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 /// Not safe to interrupt as it may leave the `out/` directory in a corrupted
 /// state. GN is pretty quick though, so it's OK to not support interruption.
 class GnPipelineStep extends ProcessStep {
-  GnPipelineStep({required this.host, required this.runtimeMode, required this.embedDwarf});
+  GnPipelineStep({
+    required this.host,
+    required this.runtimeMode,
+    required this.embedDwarf,
+    required this.experimentalWebParagraph,
+  });
 
   final bool host;
   final RuntimeMode runtimeMode;
   final bool embedDwarf;
+  final bool experimentalWebParagraph;
 
   @override
   String get description => 'gn';
@@ -150,6 +167,7 @@ class GnPipelineStep extends ProcessStep {
         '--runtime-mode=${runtimeMode.name}',
         if (runtimeMode == RuntimeMode.debug) '--unoptimized',
         if (embedDwarf) '--wasm-use-dwarf',
+        if (experimentalWebParagraph) '--experimental-webparagraph',
       ];
     }
   }
