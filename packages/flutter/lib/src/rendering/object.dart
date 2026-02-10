@@ -1117,13 +1117,6 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   @nonVirtual
   Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
-  /// Whether there are any render objects managed by this pipeline owner that
-  /// need layout.
-  ///
-  /// This is used by [RendererBinding.drawFrame] to determine which views
-  /// have pending work that requires compositing.
-  bool get needsLayout => _nodesNeedingLayout.isNotEmpty;
-
   /// Whether this pipeline is currently in the layout phase.
   ///
   /// Specifically, whether [flushLayout] is currently running.
