@@ -234,7 +234,6 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///    and provides api to dispatch selection event to the collected widget.
 ///  * [SelectionListener], which enables accessing the [SelectionDetails] of
 ///    the selectable subtree it wraps.
-
 class SelectableRegion extends StatefulWidget {
   /// Create a new [SelectableRegion] widget.
   ///
@@ -399,7 +398,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers =
       <Type, GestureRecognizerFactory>{};
-  bool _ignoreOneRightClick = false;
+  bool _childHandledSecondaryTap = false;
   SelectionOverlay? _selectionOverlay;
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
@@ -1045,7 +1044,7 @@ class SelectableRegionState extends State<SelectableRegion>
     final Offset? previousSecondaryTapDownPosition = _lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     // If a child handling the right click has already been detected, do not handle it again.
-    if (_ignoreOneRightClick) {
+    if (_childHandledSecondaryTap) {
       // The flag is reset in a post-frame callback.
       return;
     }
@@ -1957,12 +1956,12 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     return NotificationListener<_SelectableRegionSecondaryTapNotification>(
       onNotification: (_SelectableRegionSecondaryTapNotification notification) {
-        if (_ignoreOneRightClick) {
+        if (_childHandledSecondaryTap) {
           return false;
         }
-        _ignoreOneRightClick = true;
+        _childHandledSecondaryTap = true;
         SchedulerBinding.instance.addPostFrameCallback((_) {
-          _ignoreOneRightClick = false;
+          _childHandledSecondaryTap = false;
         });
         return false;
       },
