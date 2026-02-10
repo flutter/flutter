@@ -9,7 +9,7 @@ All flags available on Android can be set via the command line **and** via
 manifest metadata. See `src/flutter/shell/common/switches.cc` for
 the list of all supported flags, and see
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
-`FlutterShellArgs.java` for the list of flags that can be set for the
+`FlutterEngineFlags.java` for the list of flags that can be set for the
 Android shell.
 
 ## When to use manifest metadata versus the command line
@@ -58,7 +58,7 @@ All manifest metadata keys must be prefixed with the package name
 `io.flutter.embedding.android` and are suffixed with the metadata name for the
 related command line flag as determined in
 `src/flutter/shell/platform/android/io/flutter/embedding/engine/`
-`FlutterShellArgs.java`. For example, the `--impeller-lazy-shader-mode=`
+`FlutterEngineFlags.java`. For example, the `--impeller-lazy-shader-mode=`
 command line flag corresponds to the metadata key
 `io.flutter.embedding.android.ImpellerLazyShaderInitialization`.
 
@@ -93,7 +93,7 @@ Set the `--enable-flutter-gpu` flag:
 
 - Some flags are not allowed in release mode. The Android embedding enforces
     this policy (see `src/flutter/shell/platform/android/io/flutter/
-    embedding/engine/FlutterShellArgs`, which marks allowed flags
+    embedding/engine/FlutterEngineFlags`, which marks allowed flags
     with `allowedInRelease`). If a disallowed flag is set in release, it will
     be ignored.
 - If you need different behavior in release vs debug/profile mode, configure it
