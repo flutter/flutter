@@ -628,8 +628,6 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/174246 .
-  // This is a control case against its Web counterpart in
-  // html_element_view_test.dart.
   testWidgets('SelectionArea applies correct mouse cursors in its empty region', (
     WidgetTester tester,
   ) async {
@@ -666,82 +664,15 @@ void main() {
 
     await tester.pump();
 
-    const region1 = Offset(10, 10);
-    final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
-    final Offset region3 = tester.getCenter(find.byKey(innerRegion));
-
-    final TestGesture gesture = await tester.startGesture(region1, kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.grab,
-    );
-
-    await gesture.moveTo(region2);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.grab,
-    );
-
-    await gesture.moveTo(region3);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.forbidden,
-    );
-
-    await gesture.moveTo(region2);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.grab,
-    );
-  }, skip: kIsWeb); // [1/2]: Non-Web version. There's a Web version below.
-
-  // Regression test for https://github.com/flutter/flutter/issues/174246 .
-  // [2/2]: Web version. There's a non-Web version above.
-  testWidgets('SelectionArea applies correct mouse cursors in its empty region on Web', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey innerRegion = GlobalKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          // Region 1 (fullscreen)
-          body: MouseRegion(
-            cursor: SystemMouseCursors.grab,
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(border: Border.all()),
-                // Region 2 (SelectionArea)
-                child: SelectionArea(
-                  child: Padding(
-                    padding: const EdgeInsetsGeometry.all(40),
-                    // Region 3 (inner MouseRegion)
-                    child: MouseRegion(
-                      key: innerRegion,
-                      cursor: SystemMouseCursors.forbidden,
-                      onHover: (_) {},
-                      child: Container(color: const Color(0xFFAA9933), width: 200, height: 50),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+    // On web, ensure that the HtmlElementView is initialized.
+    if (kIsWeb) {
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) => widget.toString().contains('_PlatformViewPlaceHolder'),
         ),
-      ),
-    );
-
-    // Initialize the HtmlElementView inside SelectionArea.
-    await tester.pump();
-
-    // Ensure that the HtmlElementView is initialized.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) => widget.toString().contains('_PlatformViewPlaceHolder'),
-      ),
-      findsNothing,
-    );
+        findsNothing,
+      );
+    }
 
     const region1 = Offset(10, 10);
     final Offset region2 = tester.getTopLeft(find.byKey(innerRegion)) - const Offset(3, 3);
@@ -771,7 +702,7 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.grab,
     );
-  }, skip: !kIsWeb); // [2/2]: Web version. There's a non-Web version above.
+  });
 
   testWidgets('SelectionArea does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
