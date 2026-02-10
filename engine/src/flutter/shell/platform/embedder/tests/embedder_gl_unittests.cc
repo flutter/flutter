@@ -4859,10 +4859,17 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
          FlutterOpenGLTexture* texture) -> bool {
     std::vector<uint8_t> buffer(800 * 600 * 4);
-    for (int i = 0; i < 800 * 600; ++i) {
+    for (int i = 0; i < 800 * 300; ++i) {
       buffer[i * 4 + 0] = 255;  // Red channel
       buffer[i * 4 + 1] = 0;    // Green channel
       buffer[i * 4 + 2] = 0;    // Blue channel
+      buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
+    }
+
+    for (int i = 800 * 300; i < 800 * 600; ++i) {
+      buffer[i * 4 + 0] = 0;  // Red channel
+      buffer[i * 4 + 1] = 0;    // Green channel
+      buffer[i * 4 + 2] = 255;    // Blue channel
       buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
     }
 
@@ -4900,7 +4907,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
             kSuccess);
   latch.Wait();
   ASSERT_TRUE(
-      ImageMatchesFixture("external_texture_metal.png", rendered_scene));
+      ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
 }
 
 TEST_F(EmbedderTest, ImpellerOpenGLImageSnapshot) {
