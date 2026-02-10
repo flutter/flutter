@@ -65,10 +65,12 @@ enum FlutterDarwinPlatform {
 
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
-    return switch (this) {
-      ios => Version(13, 0, null),
-      macos => Version(10, 15, null),
-    };
+    switch (this) {
+      case FlutterDarwinPlatform.ios:
+        return Version(13, 0, null);
+      case FlutterDarwinPlatform.macos:
+        return Version(10, 15, null);
+    }
   }
 
   /// Artifact name for the platform and [mode].
@@ -97,8 +99,19 @@ enum FlutterDarwinPlatform {
   /// e.g. (`Flutter.xcframework`, `FlutterMacOS.xcframework`).
   String get xcframeworkName => '$binaryName.xcframework';
 
+  /// The name of the project build setting for the minimum supported deployment target.
+  String get deploymentTargetBuildSetting {
+    switch (this) {
+      case FlutterDarwinPlatform.ios:
+        return 'IPHONEOS_DEPLOYMENT_TARGET';
+      case FlutterDarwinPlatform.macos:
+        return 'MACOSX_DEPLOYMENT_TARGET';
+    }
+  }
+
   /// Returns corresponding [FlutterDarwinPlatform] for the [targetPlatform].
   static FlutterDarwinPlatform? fromTargetPlatform(TargetPlatform targetPlatform) {
+
     for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
       if (targetPlatform == darwinPlatform.targetPlatform) {
         return darwinPlatform;
@@ -107,21 +120,13 @@ enum FlutterDarwinPlatform {
     return null;
   }
 
-  /// Returns [FlutterDarwinPlatform] that matches the [name]. Returns null if no match is found.
-  static FlutterDarwinPlatform? fromName(String name) {
-    for (final FlutterDarwinPlatform darwinPlatform in FlutterDarwinPlatform.values) {
-      if (name == darwinPlatform.name) {
-        return darwinPlatform;
-      }
-    }
-    return null;
-  }
-
   /// Returns corresponding [XcodeBasedProject] for the platform.
   XcodeBasedProject xcodeProject(FlutterProject project) {
-    return switch (this) {
-      ios => project.ios,
-      macos => project.macos,
-    };
+    switch (this) {
+      case FlutterDarwinPlatform.ios:
+        return project.ios;
+      case FlutterDarwinPlatform.macos:
+        return project.macos;
+    }
   }
 }
