@@ -504,22 +504,15 @@ class HardwareKeyboard {
         isLogicalKeyPressed(LogicalKeyboardKey.metaRight);
   }
 
-  // Returns whether the event should be processed.
-  //
-  // Generally, this function returns true if the event is consistent with the
-  // current state of the keyboard. There are exceptions when the event is
-  // inconsistent but the state should be still updated according to the event.
-  //
-  // This function will also print debug messages if the event is inconsistent
-  // with the current state.
-  bool _eventShouldProceed(KeyEvent event) {
-    const common =
-        'This is typically either due to https://github.com/flutter/flutter/issues/125975, '
-        'or a bug in the embedding\'s key event conciliation logic.'
-    if (event is KeyDownEvent) {
-      final bool shouldProcess = !_pressedKeys.containsKey(event.physicalKey);
-      assert(() {
-        if (!shouldProcess) {
+  // Print debug messages if the event is inconsistent
+  // with the current state, and if [debugPrintKeyboardEvents] is true.
+  void _logEventIfIrregular(KeyEvent event) {
+    assert(() {
+      const common =
+          'This is typically either due to https://github.com/flutter/flutter/issues/125975, '
+          'or a bug in the embedding\'s key event conciliation logic.';
+      if (event is KeyDownEvent) {
+        if (_pressedKeys.containsKey(event.physicalKey)) {
           _keyboardDebug(
             () =>
                 'ERROR: Received unexpected ${event.runtimeType} for key that is already pressed.\n'
@@ -528,15 +521,8 @@ class HardwareKeyboard {
                 '    Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
         }
-        return true;
-      }());
-      return shouldProcess;
-    } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
-      // Only checks physical key here and don't reject based on logical key,
-      // since otherwise the key will never be released.
-      final bool shouldProcess = _pressedKeys.containsKey(event.physicalKey);
-      assert(() {
-        if (!shouldProcess) {
+      } else if (event is KeyRepeatEvent || event is KeyUpEvent) {
+        if (!_pressedKeys.containsKey(event.physicalKey)) {
           _keyboardDebug(
             () =>
                 'ERROR: Received unexpected ${event.runtimeType} for key that is not pressed:\n'
@@ -552,13 +538,11 @@ class HardwareKeyboard {
                 '    Pressed logical key: ${_pressedKeys[event.physicalKey]}',
           );
         }
-        return true;
-      }());
-      return shouldProcess;
-    } else {
-      assert(false, 'Received unexpected key event class ${event.runtimeType}');
-      return false;
-    }
+      } else {
+        assert(false, 'Received unexpected key event class ${event.runtimeType}');
+      }
+      return true;
+    }());
   }
 
   List<KeyEventCallback> _handlers = <KeyEventCallback>[];
@@ -684,11 +668,7 @@ class HardwareKeyboard {
     assert(
       _keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails),
     );
-    if (!_eventShouldProceed(event)) {
-      // Treat this event as handled since ignoring it is equivalent to
-      // acknowledging that it occurred earlier, resulting in the current state.
-      return true;
-    }
+    _logEventIfIrregular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
     if (event is KeyDownEvent) {

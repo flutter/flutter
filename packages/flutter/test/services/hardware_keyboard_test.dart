@@ -603,65 +603,71 @@ void main() {
   });
 
   testWidgets(
-    'Irregular key events are ignored',
+    'Irregular key events are processed',
     (WidgetTester tester) async {
-      // The flags can be a bit confusing, so we define them here for clarity.
-      //
-      // A processed event means the event could have been handled by a handler,
-      // but since we have no handlers, the event turns out to be unhandled.
-      //
-      // On the other hand, an ignored event means the event is irregular and is
-      // not even considered for handling, resulting in a handled status.
-      const isProcessed = false;
-      const isIgnored = true;
+      final logs = <String>[];
+
+      debugPrintKeyboardEvents = true;
+      final oldDebugPrint = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) {
+          logs.add(message);
+        }
+      };
+
+      Future<void> expectIsRegular(Future<bool> simulateEvent, bool isRegular) async {
+        // All simulated events should return a `handled` result of false to
+        // indicate that they are indeed dispatched to handlers.
+        expect(await simulateEvent, isFalse);
+
+        final String log = logs.join('\n');
+        final errorCheck = contains('ERROR');
+        expect(log, isRegular ? isNot(errorCheck) : errorCheck);
+        logs.clear();
+      }
 
       // 1. Press keyA.
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isProcessed);
+      await expectIsRegular(simulateKeyDownEvent(LogicalKeyboardKey.keyA), true);
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
         PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
       });
-      // Press keyA again, which should be ignored.
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isIgnored);
-      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
-        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
-      });
-
-      // 2. Release keyA.
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), isProcessed);
-      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
-
-      // Release keyA again, which should be ignored.
-      expect(await simulateKeyUpEvent(LogicalKeyboardKey.keyA), isIgnored);
-      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
-
-      // 3. Send a repeat event for keyA, which should be ignored.
-      expect(await simulateKeyRepeatEvent(LogicalKeyboardKey.keyA), isIgnored);
-      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
-
-      // 4. Press physical keyA.
-      expect(await simulateKeyDownEvent(LogicalKeyboardKey.keyA), isProcessed);
-      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
-        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
-      });
-
-      // Send a repeat event with a different logical key, which should be processed.
-      expect(
-        await simulateKeyRepeatEvent(
-          LogicalKeyboardKey.keyB,
-          physicalKey: PhysicalKeyboardKey.keyA,
-        ),
-        isProcessed,
-      );
+      // Press keyA again with a mismatched logical key, which should affect the
+      // state.
+      await expectIsRegular(simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), false);
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
         PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyB,
       });
 
-      // 5. Send a key up event with a different logical key, which should be processed.
-      expect(
-        await simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
-        isProcessed,
+      // 2. Release keyA.
+      await expectIsRegular(simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), true);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      // Release keyA again.
+      await expectIsRegular(simulateKeyUpEvent(LogicalKeyboardKey.keyA), false);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      // 3. Send a repeat event for keyA, which should affect the state.
+      await expectIsRegular(simulateKeyRepeatEvent(LogicalKeyboardKey.keyA), false);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyA,
+      });
+
+      // 4. Send a repeat event with a mismatched logical key, which should
+      // affect the state.
+      await expectIsRegular(simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), false);
+      expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
+        PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyB,
+      });
+
+      // 5. Send a key up event with a mismatched logical key, which should affect the state.
+      await expectIsRegular(
+        simulateKeyUpEvent(LogicalKeyboardKey.keyA),
+        false,
       );
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
+
+      debugPrintKeyboardEvents = false;
+      debugPrint = oldDebugPrint;
     },
     variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData(),
   );
