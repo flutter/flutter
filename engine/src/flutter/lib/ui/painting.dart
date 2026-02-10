@@ -5524,7 +5524,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }
 
     if (!found) {
-      throw ArgumentError('No uniform named "$name".');
+      if (_hasUniform(name)) {
+        throw ArgumentError('Uniform "$name" is not an image sampler.');
+      } else {
+        throw ArgumentError('No uniform named "$name".');
+      }
     }
     return index;
   }
