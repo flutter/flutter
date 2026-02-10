@@ -1072,12 +1072,16 @@ class SelectableRegionState extends State<SelectableRegion>
         _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
       case TargetPlatform.iOS:
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.macOS:
         if (previousSecondaryTapDownPosition == _lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
