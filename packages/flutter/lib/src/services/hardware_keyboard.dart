@@ -510,7 +510,7 @@ class HardwareKeyboard {
     assert(() {
       const common =
           'This is typically either due to https://github.com/flutter/flutter/issues/125975, '
-          'or a bug in the embedding\'s key event conciliation logic.';
+          "or a bug in the embedding's key event conciliation logic.";
       if (event is KeyDownEvent) {
         if (_pressedKeys.containsKey(event.physicalKey)) {
           _keyboardDebug(

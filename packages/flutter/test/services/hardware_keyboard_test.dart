@@ -608,7 +608,7 @@ void main() {
       final logs = <String>[];
 
       debugPrintKeyboardEvents = true;
-      final oldDebugPrint = debugPrint;
+      final DebugPrintCallback oldDebugPrint = debugPrint;
       debugPrint = (String? message, {int? wrapWidth}) {
         if (message != null) {
           logs.add(message);
@@ -621,7 +621,7 @@ void main() {
         expect(await simulateEvent, isFalse);
 
         final String log = logs.join('\n');
-        final errorCheck = contains('ERROR');
+        final Matcher errorCheck = contains('ERROR');
         expect(log, isRegular ? isNot(errorCheck) : errorCheck);
         logs.clear();
       }
@@ -633,13 +633,19 @@ void main() {
       });
       // Press keyA again with a mismatched logical key, which should affect the
       // state.
-      await expectIsRegular(simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), false);
+      await expectIsRegular(
+        simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
+        false,
+      );
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
         PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyB,
       });
 
       // 2. Release keyA.
-      await expectIsRegular(simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), true);
+      await expectIsRegular(
+        simulateKeyUpEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
+        true,
+      );
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
 
       // Release keyA again.
@@ -654,16 +660,16 @@ void main() {
 
       // 4. Send a repeat event with a mismatched logical key, which should
       // affect the state.
-      await expectIsRegular(simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA), false);
+      await expectIsRegular(
+        simulateKeyDownEvent(LogicalKeyboardKey.keyB, physicalKey: PhysicalKeyboardKey.keyA),
+        false,
+      );
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{
         PhysicalKeyboardKey.keyA: LogicalKeyboardKey.keyB,
       });
 
       // 5. Send a key up event with a mismatched logical key, which should affect the state.
-      await expectIsRegular(
-        simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-        false,
-      );
+      await expectIsRegular(simulateKeyUpEvent(LogicalKeyboardKey.keyA), false);
       expectState(<PhysicalKeyboardKey, LogicalKeyboardKey>{});
 
       debugPrintKeyboardEvents = false;
