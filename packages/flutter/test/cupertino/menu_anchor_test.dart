@@ -58,7 +58,7 @@ void main() {
 
   T findMenuPanelAncestor<T extends Widget>(WidgetTester tester) {
     return tester.firstWidget<T>(
-      find.ancestor(of: find.byType(CupertinoPopupSurface), matching: find.byType(T)),
+      find.ancestor(of: find.byType(ClipRSuperellipse), matching: find.byType(T)),
     );
   }
 
@@ -69,7 +69,7 @@ void main() {
   List<Widget> findMenuChildren(WidgetTester tester) {
     return tester
         .firstWidget<Column>(
-          find.descendant(of: find.byType(CupertinoPopupSurface), matching: find.byType(Column)),
+          find.descendant(of: find.byType(ClipRSuperellipse), matching: find.byType(Column)),
         )
         .children;
   }
@@ -382,7 +382,9 @@ void main() {
           },
           child: CupertinoMenuAnchor(
             childFocusNode: anchorFocusNode,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: aFocusNode)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+            ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
@@ -421,7 +423,9 @@ void main() {
       CupertinoApp(
         home: CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: aFocusNode)],
+          menuChildren: <Widget>[
+            CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+          ],
           child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
         ),
       ),
@@ -472,8 +476,8 @@ void main() {
       CupertinoApp(
         home: Column(
           children: <Widget>[
-            MenuItem.tag(
-              Tag.outside,
+            CupertinoButton(
+              child: Text(Tag.outside.text),
               onPressed: () {
                 selected.add(Tag.outside);
               },
@@ -486,7 +490,7 @@ void main() {
               onClose: () {
                 onClose(Tag.anchor);
               },
-              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
               child: AnchorButton(Tag.anchor, onPressed: onPressed),
             ),
           ],
@@ -549,7 +553,7 @@ void main() {
               onClose: () {
                 onClose(Tag.anchor);
               },
-              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
               child: AnchorButton(Tag.anchor, onPressed: onPressed),
             ),
           ],
@@ -766,22 +770,26 @@ void main() {
               },
               child: Column(
                 children: <Widget>[
-                  MenuItem.tag(Tag.a),
+                  CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
                   CupertinoMenuAnchor(
                     menuChildren: <Widget>[
-                      MenuItem.tag(Tag.b.a),
+                      CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.a.text)),
                       Shortcuts(
                         shortcuts: defaultTraversalShortcuts,
-                        child: MenuItem.tag(Tag.b.b, focusNode: bbFocusNode),
+                        child: CupertinoMenuItem(
+                          onPressed: () {},
+                          focusNode: bbFocusNode,
+                          child: Text(Tag.b.b.text),
+                        ),
                       ),
-                      MenuItem.tag(Tag.b.c),
+                      CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.c.text)),
                     ],
                     child: Shortcuts(
                       shortcuts: defaultTraversalShortcuts,
                       child: AnchorButton(Tag.b, focusNode: bFocusNode),
                     ),
                   ),
-                  MenuItem.tag(Tag.c),
+                  CupertinoMenuItem(onPressed: () {}, child: Text(Tag.c.text)),
                 ],
               ),
             ),
@@ -899,10 +907,10 @@ void main() {
               onClose(Tag.anchor);
             },
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a),
-              MenuItem.tag(Tag.b),
-              MenuItem.tag(Tag.c),
-              MenuItem.tag(Tag.d),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.c.text)),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.d.text)),
             ],
             child: const AnchorButton(Tag.anchor),
           ),
@@ -946,10 +954,26 @@ void main() {
                 rootOpened = false;
               },
               menuChildren: <Widget>[
-                MenuItem.tag(Tag.a, constraints: largeButtonConstraints),
-                MenuItem.tag(Tag.b, constraints: largeButtonConstraints),
-                MenuItem.tag(Tag.c, constraints: largeButtonConstraints),
-                MenuItem.tag(Tag.d, constraints: largeButtonConstraints),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  constraints: largeButtonConstraints,
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  constraints: largeButtonConstraints,
+                  child: Text(Tag.b.text),
+                ),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  constraints: largeButtonConstraints,
+                  child: Text(Tag.c.text),
+                ),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  constraints: largeButtonConstraints,
+                  child: Text(Tag.d.text),
+                ),
               ],
               child: const AnchorButton(Tag.anchor),
             ),
@@ -992,7 +1016,7 @@ void main() {
     await tester.pumpWidget(
       App(
         CupertinoMenuAnchor(
-          menuChildren: <Widget>[MenuItem.text('Menu Item')],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           builder: (BuildContext context, MenuController controller, Widget? child) {
             isOpen = controller.isOpen;
             return CupertinoButton.filled(
@@ -1060,7 +1084,9 @@ void main() {
                   child: CupertinoMenuAnchor(
                     useRootOverlay: true,
                     controller: controller,
-                    menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+                    ],
                     child: const AnchorButton(Tag.anchor),
                   ),
                 );
@@ -1119,7 +1145,9 @@ void main() {
                 return Center(
                   child: CupertinoMenuAnchor(
                     controller: controller,
-                    menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+                    menuChildren: <Widget>[
+                      CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+                    ],
                     child: const AnchorButton(Tag.anchor),
                   ),
                 );
@@ -1160,7 +1188,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1177,7 +1205,7 @@ void main() {
     await gesture.down(startPosition);
     await tester.pump();
 
-    final Rect menuRect = tester.getRect(find.byType(CupertinoPopupSurface));
+    final Rect menuRect = tester.getRect(find.byType(ClipRSuperellipse));
 
     // Check that all corners of the menu are not scaled
     await gesture.moveTo(menuRect.topLeft);
@@ -1246,7 +1274,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1263,7 +1291,7 @@ void main() {
     await gesture.down(startPosition);
     await tester.pump();
 
-    final Rect menuRect = tester.getRect(find.byType(CupertinoPopupSurface));
+    final Rect menuRect = tester.getRect(find.byType(ClipRSuperellipse));
 
     // Move far outside menu bounds to scale to minimum
     await gesture.moveTo(menuRect.topLeft - const Offset(500, 500));
@@ -1292,7 +1320,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1305,7 +1333,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final Rect child = tester.getRect(find.byType(CupertinoPopupSurface));
+    final Rect child = tester.getRect(find.byType(ClipRSuperellipse));
 
     await gesture.down(child.bottomRight - const Offset(5, 5));
     await pumpFrames(15);
@@ -1348,7 +1376,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1365,7 +1393,7 @@ void main() {
     await gesture.down(startPosition);
     await tester.pump();
 
-    final Rect menuRect = tester.getRect(find.byType(CupertinoPopupSurface));
+    final Rect menuRect = tester.getRect(find.byType(ClipRSuperellipse));
 
     // Start with full scale
     expect(getScale(tester), moreOrLessEquals(1.0, epsilon: 0.01));
@@ -1417,7 +1445,7 @@ void main() {
         CupertinoMenuAnchor(
           controller: controller,
           enableSwipe: enableSwipe,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       );
@@ -1436,7 +1464,7 @@ void main() {
     await gesture.down(startPosition);
     await tester.pump();
 
-    final Rect menuRect = tester.getRect(find.byType(CupertinoPopupSurface));
+    final Rect menuRect = tester.getRect(find.byType(ClipRSuperellipse));
     // Move far outside the menu bounds
     await gesture.moveTo(menuRect.topLeft - const Offset(200, 200));
     await tester.pump();
@@ -1468,7 +1496,7 @@ void main() {
         child: App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+            menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -1479,7 +1507,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final Size popupSize = tester.getSize(find.byType(CupertinoPopupSurface));
+    final Size popupSize = tester.getSize(find.byType(ClipRSuperellipse));
     expect(popupSize.width, moreOrLessEquals(250, epsilon: 0.1));
   });
 
@@ -1490,7 +1518,7 @@ void main() {
         child: App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+            menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -1501,7 +1529,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final Size popupSize = tester.getSize(find.byType(CupertinoPopupSurface));
+    final Size popupSize = tester.getSize(find.byType(ClipRSuperellipse));
     expect(popupSize.width, moreOrLessEquals(262, epsilon: 0.1));
   });
 
@@ -1512,7 +1540,7 @@ void main() {
         child: App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+            menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -1523,7 +1551,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final Size popupSize = tester.getSize(find.byType(CupertinoPopupSurface));
+    final Size popupSize = tester.getSize(find.byType(ClipRSuperellipse));
     expect(popupSize.width, moreOrLessEquals(370, epsilon: 0.1));
   });
 
@@ -1534,7 +1562,7 @@ void main() {
         child: App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+            menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -1545,7 +1573,7 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final Size popupSize = tester.getSize(find.byType(CupertinoPopupSurface));
+    final Size popupSize = tester.getSize(find.byType(ClipRSuperellipse));
     expect(popupSize.width, moreOrLessEquals(343, epsilon: 0.1));
   });
 
@@ -1554,7 +1582,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1589,7 +1617,7 @@ void main() {
       App(
         CupertinoMenuAnchor(
           controller: controller,
-          menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+          menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
           child: const AnchorButton(Tag.anchor),
         ),
       ),
@@ -1599,7 +1627,7 @@ void main() {
     await tester.pump();
 
     final FadeTransition baselineFade = tester.widget<FadeTransition>(
-      find.ancestor(of: find.byType(CupertinoPopupSurface), matching: find.byType(FadeTransition)),
+      find.ancestor(of: find.byType(ClipRSuperellipse), matching: find.byType(FadeTransition)),
     );
 
     expect(baselineFade.opacity.value, lessThan(0.5));
@@ -1616,7 +1644,7 @@ void main() {
     await tester.pump();
 
     final FadeTransition disabledFade = tester.widget<FadeTransition>(
-      find.ancestor(of: find.byType(CupertinoPopupSurface), matching: find.byType(FadeTransition)),
+      find.ancestor(of: find.byType(ClipRSuperellipse), matching: find.byType(FadeTransition)),
     );
     expect(disabledFade.opacity.value, moreOrLessEquals(1, epsilon: 0.01));
   });
@@ -1638,9 +1666,17 @@ void main() {
             CupertinoMenuAnchor(
               controller: controller,
               menuChildren: <Widget>[
-                MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-                MenuItem.tag(Tag.b),
-                MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: firstItemFocusNode,
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: lastItemFocusNode,
+                  child: Text(Tag.c.text),
+                ),
               ],
               child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
             ),
@@ -1692,9 +1728,17 @@ void main() {
             CupertinoMenuAnchor(
               controller: controller,
               menuChildren: <Widget>[
-                MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-                MenuItem.tag(Tag.b),
-                MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: firstItemFocusNode,
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: lastItemFocusNode,
+                  child: Text(Tag.c.text),
+                ),
               ],
               child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
             ),
@@ -1743,9 +1787,17 @@ void main() {
           App(
             CupertinoMenuAnchor(
               menuChildren: <Widget>[
-                MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-                MenuItem.tag(Tag.b),
-                MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: firstItemFocusNode,
+                  child: Text(Tag.a.text),
+                ),
+                CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+                CupertinoMenuItem(
+                  onPressed: () {},
+                  focusNode: lastItemFocusNode,
+                  child: Text(Tag.c.text),
+                ),
               ],
               child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
             ),
@@ -1790,12 +1842,12 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(
-                Tag.a,
+              CupertinoMenuItem(
                 focusNode: aFocusNode,
                 onPressed: () {
                   itemActivated = true;
                 },
+                child: Text(Tag.a.text),
               ),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
@@ -1829,7 +1881,9 @@ void main() {
         App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: aFocusNode)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+            ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
@@ -1869,9 +1923,9 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: aFocusNode),
-              MenuItem.tag(Tag.b, focusNode: bFocusNode),
-              MenuItem.tag(Tag.c, focusNode: cFocusNode),
+              CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+              CupertinoMenuItem(onPressed: () {}, focusNode: bFocusNode, child: Text(Tag.b.text)),
+              CupertinoMenuItem(onPressed: () {}, focusNode: cFocusNode, child: Text(Tag.c.text)),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -1923,7 +1977,9 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             childFocusNode: anchorFocusNode,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: aFocusNode)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+            ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
         ),
@@ -1962,8 +2018,8 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: aFocusNode),
-              MenuItem.tag(Tag.b, focusNode: bFocusNode),
+              CupertinoMenuItem(onPressed: () {}, focusNode: aFocusNode, child: Text(Tag.a.text)),
+              CupertinoMenuItem(onPressed: () {}, focusNode: bFocusNode, child: Text(Tag.b.text)),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -2007,8 +2063,16 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-              MenuItem.tag(Tag.b, focusNode: secondItemFocusNode),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: firstItemFocusNode,
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: secondItemFocusNode,
+                child: Text(Tag.b.text),
+              ),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -2046,9 +2110,17 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-              MenuItem.tag(Tag.b),
-              MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: firstItemFocusNode,
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(onPressed: () {}, child: Text(Tag.b.text)),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: lastItemFocusNode,
+                child: Text(Tag.c.text),
+              ),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -2088,9 +2160,21 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-              MenuItem.tag(Tag.b, focusNode: middleItemFocusNode),
-              MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: firstItemFocusNode,
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: middleItemFocusNode,
+                child: Text(Tag.b.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: lastItemFocusNode,
+                child: Text(Tag.c.text),
+              ),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -2127,9 +2211,21 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              MenuItem.tag(Tag.a, focusNode: firstItemFocusNode),
-              MenuItem.tag(Tag.b, focusNode: middleItemFocusNode),
-              MenuItem.tag(Tag.c, focusNode: lastItemFocusNode),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: firstItemFocusNode,
+                child: Text(Tag.a.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: middleItemFocusNode,
+                child: Text(Tag.b.text),
+              ),
+              CupertinoMenuItem(
+                onPressed: () {},
+                focusNode: lastItemFocusNode,
+                child: Text(Tag.c.text),
+              ),
             ],
             child: AnchorButton(Tag.anchor, focusNode: anchorFocusNode),
           ),
@@ -2159,7 +2255,7 @@ void main() {
       final menuRects = <Rect>[];
       final Finder finder = clipped
           ? find.byType(UnconstrainedBox)
-          : find.byType(CupertinoPopupSurface);
+          : find.byType(ClipRSuperellipse);
       for (final Element candidate in finder.evaluate().toList()) {
         final box = candidate.renderObject! as RenderBox;
         final Offset topLeft = box.localToGlobal(box.size.topLeft(Offset.zero));
@@ -2491,7 +2587,13 @@ void main() {
           CupertinoMenuAnchor(
             constrainCrossAxis: true,
             overlayPadding: EdgeInsets.zero,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, constraints: constraints)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onPressed: () {},
+                constraints: constraints,
+                child: Text(Tag.a.text),
+              ),
+            ],
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -2524,7 +2626,13 @@ void main() {
           CupertinoMenuAnchor(
             constrainCrossAxis: true,
             overlayPadding: EdgeInsets.zero,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, constraints: constraints)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onPressed: () {},
+                constraints: constraints,
+                child: Text(Tag.a.text),
+              ),
+            ],
             child: const AnchorButton(Tag.anchor, constraints: constraints),
           ),
         ),
@@ -2586,7 +2694,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      final Finder overlayFinder = find.byType(CupertinoPopupSurface);
+      final Finder overlayFinder = find.byType(ClipRSuperellipse);
       expect(
         tester.getTopLeft(overlayFinder),
         offsetMoreOrLessEquals(const Offset(8, 8), epsilon: 0.01),
@@ -2628,7 +2736,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      final Rect overlay = tester.getRect(find.byType(CupertinoPopupSurface));
+      final Rect overlay = tester.getRect(find.byType(ClipRSuperellipse));
 
       expect(
         overlay.topLeft,
@@ -2665,7 +2773,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      final Rect overlay = tester.getRect(find.byType(CupertinoPopupSurface));
+      final Rect overlay = tester.getRect(find.byType(ClipRSuperellipse));
       expect(
         overlay.topLeft,
         offsetMoreOrLessEquals(
@@ -2712,7 +2820,7 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
 
-      final Rect overlay = tester.getRect(find.byType(CupertinoPopupSurface));
+      final Rect overlay = tester.getRect(find.byType(ClipRSuperellipse));
       expect(
         overlay.topLeft,
         offsetMoreOrLessEquals(
@@ -2973,7 +3081,7 @@ void main() {
     }
 
     Widget entry({required bool isDivider, Widget? child}) {
-      return DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: isDivider, child: child);
+      return DebugCupertinoMenuEntry(key: UniqueKey(), isDivider: isDivider, child: child);
     }
 
     testWidgets('Implicit dividers are drawn between menu items when isDivider is false ', (
@@ -2993,9 +3101,9 @@ void main() {
       // Borders are drawn below menu items.
       List<Widget> children = findMenuChildren(tester);
       expect(children.length, 5);
-      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[4], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntry>());
+      expect(children[2], isA<DebugCupertinoMenuEntry>());
+      expect(children[4], isA<DebugCupertinoMenuEntry>());
 
       // First item should never have a leading separator and bottom item should
       // never have a trailing separator.
@@ -3009,9 +3117,9 @@ void main() {
 
       children = findMenuChildren(tester);
       expect(children.length, 4);
-      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[1], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[3], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntry>());
+      expect(children[1], isA<DebugCupertinoMenuEntry>());
+      expect(children[3], isA<DebugCupertinoMenuEntry>());
 
       await tester.pumpWidget(
         buildApp(<Widget>[
@@ -3024,9 +3132,9 @@ void main() {
       children = findMenuChildren(tester);
       // item 1: leading == false so no separator should be drawn before it
       expect(children.length, 3);
-      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[1], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntry>());
+      expect(children[1], isA<DebugCupertinoMenuEntry>());
+      expect(children[2], isA<DebugCupertinoMenuEntry>());
 
       await tester.pumpWidget(
         buildApp(<Widget>[
@@ -3039,9 +3147,9 @@ void main() {
       children = findMenuChildren(tester);
       // item 1: trailing == false so no separator should be drawn after it
       expect(children.length, 4);
-      expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[2], isA<DebugCupertinoMenuEntryMixin>());
-      expect(children[3], isA<DebugCupertinoMenuEntryMixin>());
+      expect(children[0], isA<DebugCupertinoMenuEntry>());
+      expect(children[2], isA<DebugCupertinoMenuEntry>());
+      expect(children[3], isA<DebugCupertinoMenuEntry>());
 
       children.clear();
     });
@@ -3063,9 +3171,9 @@ void main() {
         // Borders are drawn below menu items.
         final List<Widget> children = findMenuChildren(tester);
         expect(children.length, 5);
-        expect(children[0], isA<DebugCupertinoMenuEntryMixin>());
+        expect(children[0], isA<DebugCupertinoMenuEntry>());
         expect(children[2], isA<SizedBox>());
-        expect(children[4], isA<DebugCupertinoMenuEntryMixin>());
+        expect(children[4], isA<DebugCupertinoMenuEntry>());
       },
     );
 
@@ -3075,8 +3183,8 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              CupertinoMenuItem(key: Tag.a.key, child: Text(Tag.a.text)),
-              DebugCupertinoMenuEntryMixin(hasLeading: hasLeading),
+              CupertinoMenuItem(key: Tag.a.key, onPressed: () {}, child: Text(Tag.a.text)),
+              DebugCupertinoMenuEntry(hasLeading: hasLeading),
             ],
           ),
         );
@@ -3114,7 +3222,7 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              CupertinoMenuItem(key: Tag.a.key, child: Text(Tag.a.text)),
+              CupertinoMenuItem(key: Tag.a.key, onPressed: () {}, child: Text(Tag.a.text)),
               const CupertinoMenuDivider(),
             ],
           ),
@@ -3172,9 +3280,9 @@ void main() {
           CupertinoMenuAnchor(
             controller: controller,
             menuChildren: <Widget>[
-              DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: true),
+              DebugCupertinoMenuEntry(key: UniqueKey(), isDivider: true),
               const CupertinoMenuDivider(),
-              DebugCupertinoMenuEntryMixin(key: UniqueKey(), isDivider: true),
+              DebugCupertinoMenuEntry(key: UniqueKey(), isDivider: true),
             ],
           ),
         ),
@@ -3214,6 +3322,7 @@ void main() {
                     controller: controller,
                     menuChildren: <Widget>[
                       CupertinoMenuItem(
+                        onPressed: () {},
                         leading: Stack(
                           children: <Widget>[
                             Text(Tag.a.text),
@@ -3221,7 +3330,6 @@ void main() {
                           ],
                         ),
                         child: const Text('Menu Item'),
-                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -3303,11 +3411,11 @@ void main() {
                     controller: controller,
                     menuChildren: <Widget>[
                       CupertinoMenuItem(
+                        onPressed: () {},
                         trailing: Stack(
                           children: <Widget>[Text(Tag.a.text), const Icon(CupertinoIcons.trash)],
                         ),
                         child: const Text('Menu Item'),
-                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -3392,7 +3500,7 @@ void main() {
                   child: CupertinoMenuAnchor(
                     controller: controller,
                     menuChildren: <Widget>[
-                      CupertinoMenuItem(child: Text(Tag.a.text), onPressed: () {}),
+                      CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
                     ],
                   ),
                 );
@@ -3451,8 +3559,8 @@ void main() {
                     controller: controller,
                     menuChildren: <Widget>[
                       CupertinoMenuItem(
-                        subtitle: Text(Tag.a.text),
                         onPressed: () {},
+                        subtitle: Text(Tag.a.text),
                         child: const Text('Menu Item'),
                       ),
                     ],
@@ -3547,12 +3655,12 @@ void main() {
                 controller: controller,
                 menuChildren: <Widget>[
                   CupertinoMenuItem(
+                    onPressed: () {},
                     isDestructiveAction: true,
                     subtitle: Text(Tag.b.text),
                     leading: const Icon(CupertinoIcons.left_chevron),
                     trailing: const Icon(CupertinoIcons.right_chevron),
                     child: Text(Tag.a.text),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -3596,9 +3704,9 @@ void main() {
             CupertinoMenuAnchor(
               controller: controller,
               menuChildren: <Widget>[
-                DebugCupertinoMenuEntryMixin(key: UniqueKey()),
-                CupertinoMenuItem(child: Text(Tag.a.text)),
-                DebugCupertinoMenuEntryMixin(key: UniqueKey()),
+                DebugCupertinoMenuEntry(key: UniqueKey()),
+                CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text)),
+                DebugCupertinoMenuEntry(key: UniqueKey()),
               ],
             ),
           ),
@@ -3732,9 +3840,9 @@ void main() {
               controller: controller,
               menuChildren: <Widget>[
                 CupertinoMenuItem(
+                  onPressed: () {},
                   requestFocusOnHover: false,
                   child: Text(Tag.a.text),
-                  onPressed: () {},
                 ),
                 CupertinoMenuItem(
                   requestFocusOnHover: false,
@@ -3823,15 +3931,15 @@ void main() {
               controller: controller,
               menuChildren: <Widget>[
                 CupertinoMenuItem(
+                  onPressed: () {},
                   requestFocusOnHover: false,
                   requestCloseOnActivate: false,
-                  onPressed: () {},
                   child: Text(Tag.a.text),
                 ),
                 CupertinoMenuItem(
+                  onPressed: () {},
                   requestFocusOnHover: false,
                   requestCloseOnActivate: false,
-                  onPressed: () {},
                   decoration: decoration,
                   child: Text(Tag.b.text),
                 ),
@@ -3933,7 +4041,7 @@ void main() {
             home: CupertinoMenuAnchor(
               controller: controller,
               menuChildren: <Widget>[
-                CupertinoMenuItem(focusNode: focusNodeA, child: Text(Tag.a.text), onPressed: () {}),
+                CupertinoMenuItem(onPressed: () {}, focusNode: focusNodeA, child: Text(Tag.a.text)),
                 CupertinoMenuItem(
                   focusNode: focusNodeB,
                   onPressed: () {},
@@ -3994,9 +4102,9 @@ void main() {
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
                 child: CupertinoMenuItem(
+                  onPressed: () {},
                   mouseCursor: const WidgetStatePropertyAll<MouseCursor>(SystemMouseCursors.text),
                   child: Text(Tag.a.text),
-                  onPressed: () {},
                 ),
               ),
             ),
@@ -4020,6 +4128,7 @@ void main() {
             home: Align(
               alignment: Alignment.topLeft,
               child: CupertinoMenuItem(
+                onPressed: () {},
                 child: MouseRegion(cursor: SystemMouseCursors.basic, child: Container()),
               ),
             ),
@@ -4263,11 +4372,11 @@ void main() {
                 controller: controller,
                 menuChildren: <Widget>[
                   CupertinoMenuItem(
+                    onPressed: () {},
                     leadingWidth: 33,
                     trailingWidth: 47,
                     leading: Icon(CupertinoIcons.star, key: Tag.leading.key),
                     trailing: Icon(CupertinoIcons.heart, key: Tag.trailing.key),
-                    onPressed: () {},
                     child: Text(Tag.child.text),
                   ),
                 ],
@@ -4300,11 +4409,11 @@ void main() {
                   controller: controller,
                   menuChildren: <Widget>[
                     CupertinoMenuItem(
+                      onPressed: () {},
                       leadingWidth: 33,
                       trailingWidth: 47,
                       leading: Icon(CupertinoIcons.star, key: Tag.leading.key),
                       trailing: Icon(CupertinoIcons.heart, key: Tag.trailing.key),
-                      onPressed: () {},
                       child: Text(Tag.child.text),
                     ),
                   ],
@@ -4697,6 +4806,7 @@ void main() {
                 controller: controller,
                 menuChildren: <Widget>[
                   CupertinoMenuItem(
+                    onPressed: () {},
                     leadingWidth: 60,
                     child: Text(Tag.child.text, key: Tag.child.key),
                   ),
@@ -5018,6 +5128,7 @@ void main() {
                 controller: controller,
                 menuChildren: <Widget>[
                   CupertinoMenuItem(
+                    onPressed: () {},
                     trailingWidth: 60,
                     trailing: Icon(CupertinoIcons.right_chevron, key: Tag.trailing.key),
                     child: Center(key: Tag.child.key, child: Text(Tag.child.text)),
@@ -5718,10 +5829,10 @@ void main() {
             controller: controller,
             menuChildren: <Widget>[
               CupertinoMenuItem(
+                onPressed: () {},
                 onHover: (bool value) {
                   hovered.add((Tag.a, value));
                 },
-                onPressed: () {},
                 child: Text(Tag.a.text),
               ),
 
@@ -5734,10 +5845,10 @@ void main() {
               ),
 
               CupertinoMenuItem(
+                onPressed: () {},
                 onHover: (bool value) {
                   hovered.add((Tag.c, value));
                 },
-                onPressed: () {},
                 child: Text(Tag.c.text),
               ),
             ],
@@ -5996,7 +6107,9 @@ void main() {
         return App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, focusNode: focusNode)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(onPressed: () {}, focusNode: focusNode, child: Text(Tag.a.text)),
+            ],
             child: const AnchorButton(Tag.anchor),
           ),
         );
@@ -6038,7 +6151,14 @@ void main() {
         App(
           CupertinoMenuAnchor(
             controller: controller,
-            menuChildren: <Widget>[MenuItem.tag(Tag.a, autofocus: true, focusNode: focusNode)],
+            menuChildren: <Widget>[
+              CupertinoMenuItem(
+                onPressed: () {},
+                autofocus: true,
+                focusNode: focusNode,
+                child: Text(Tag.a.text),
+              ),
+            ],
             child: const AnchorButton(Tag.anchor),
           ),
         ),
@@ -6061,7 +6181,7 @@ void main() {
             data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 30.0)),
             child: CupertinoMenuAnchor(
               controller: controller,
-              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
               child: const AnchorButton(Tag.anchor),
             ),
           ),
@@ -6085,7 +6205,7 @@ void main() {
             data: const MediaQueryData(gestureSettings: DeviceGestureSettings(touchSlop: 100.0)),
             child: CupertinoMenuAnchor(
               controller: controller,
-              menuChildren: <Widget>[MenuItem.tag(Tag.a)],
+              menuChildren: <Widget>[CupertinoMenuItem(onPressed: () {}, child: Text(Tag.a.text))],
               child: const AnchorButton(Tag.anchor),
             ),
           ),
@@ -6437,89 +6557,6 @@ class NestedTag extends Tag {
   Key get key => ValueKey<String>('${text}_Key');
 }
 
-class MenuItem extends StatelessWidget {
-  const MenuItem(
-    this.child, {
-    super.key,
-    this.onPressed = _onPressed,
-    this.focusNode,
-    this.autofocus = false,
-    this.onFocusChange,
-    this.constraints,
-  });
-
-  factory MenuItem.text(
-    String text, {
-    Key? key,
-    VoidCallback? onPressed = _onPressed,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    BoxConstraints? constraints,
-    void Function(bool)? onFocusChange,
-  }) {
-    return MenuItem(
-      Text(text),
-      key: key,
-      onPressed: onPressed,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      constraints: constraints,
-      onFocusChange: onFocusChange,
-    );
-  }
-
-  factory MenuItem.tag(
-    Tag tag, {
-    Key? key,
-    VoidCallback? onPressed = _onPressed,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    BoxConstraints? constraints,
-    void Function(bool)? onFocusChange,
-  }) {
-    return MenuItem(
-      Text(tag.text),
-      key: key,
-      onPressed: onPressed,
-      focusNode: focusNode,
-      autofocus: autofocus,
-      constraints: constraints,
-      onFocusChange: onFocusChange,
-    );
-  }
-
-  static void _onPressed() {}
-
-  final Widget child;
-  final VoidCallback? onPressed;
-  final void Function(bool)? onFocusChange;
-  final FocusNode? focusNode;
-  final bool autofocus;
-  final BoxConstraints? constraints;
-
-  @override
-  Widget build(BuildContext context) {
-    if (constraints != null) {
-      return CupertinoMenuItem(
-        constraints: constraints,
-        onPressed: onPressed,
-        onFocusChange: onFocusChange,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        child: child,
-      );
-    } else {
-      return CupertinoMenuItem(
-        onPressed: onPressed,
-        onFocusChange: onFocusChange,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        child: child,
-      );
-    }
-  }
-}
-
 class AnchorButton extends StatelessWidget {
   const AnchorButton(
     this.tag, {
@@ -6558,24 +6595,11 @@ class AnchorButton extends StatelessWidget {
   }
 }
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App(this.child, {super.key, this.textDirection, this.alignment = Alignment.center});
   final Widget child;
   final TextDirection? textDirection;
   final AlignmentGeometry alignment;
-
-  @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  TextDirection? _directionality;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _directionality = Directionality.maybeOf(context);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -6583,8 +6607,8 @@ class _AppState extends State<App> {
       home: ColoredBox(
         color: const Color(0xff000000),
         child: Directionality(
-          textDirection: widget.textDirection ?? _directionality ?? TextDirection.ltr,
-          child: Align(alignment: widget.alignment, child: widget.child),
+          textDirection: textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr,
+          child: Align(alignment: alignment, child: child),
         ),
       ),
     );
@@ -6719,8 +6743,8 @@ enum DynamicTypeStyle {
   }
 }
 
-class DebugCupertinoMenuEntryMixin extends StatelessWidget implements CupertinoMenuEntry {
-  const DebugCupertinoMenuEntryMixin({
+class DebugCupertinoMenuEntry extends StatelessWidget implements CupertinoMenuEntry {
+  const DebugCupertinoMenuEntry({
     super.key,
     bool hasLeading = false,
     this.isDivider = false,
