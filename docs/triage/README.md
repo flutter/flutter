@@ -1,3 +1,11 @@
+# Triage Overview
+
+Issues generally go through two triage steps:
+- Primary triage ensures that the bug is clear and actionable, then routes it to a team for secondary triage. This usually happens within 1–2 working days.
+- Secondary triage by the relevant team determines a priority, and may add more labels and information. This usually happens once per week.
+
+PRs are triaged directly by teams during secondary triage, and assigned reviewers. This usually happens once per week.
+
 # Primary issue triage process
 
 The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
@@ -71,15 +79,15 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Impeller, add `team-engine`.
-- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`.
-  - If it's specific to a single platform, also add that platform's fyi label.
+- If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
 - If it's about Cupertino or Material Design, add `team-design`.
-- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`.
-  - If it's specific to a single platform, also add that platform's fyi label.
-  - If it's specific to text fields or text input, also add `a: text input`.
-  - If it's specific to text selection or selectable region also add `f: selection`.
-- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`).
-  - If the issue is about a first-party package, also add `fyi-ecosystem`.
+- If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`. And:
+  - if it's specific to a single platform, also add that platform's `fyi-*` label.
+  - if it's specific to text fields or text input, also add `a: text input`.
+  - if it's specific to text selection or selectable region also add `f: selection`.
+- If it's specific to a single platform, add that platform's team (`team-android`, `team-ios`, `team-linux`, `team-macos`, `team-web`, or `team-windows`). And:
+  - if the issue is about a first-party package, also add `fyi-ecosystem`.
 - If it's about the Flutter engine, add `team-engine`.
 - If it's about the Flutter framework, add `team-framework`.
 - If it's about the Flutter tool, add `team-tool`.
@@ -111,9 +119,10 @@ Bugs relating to the website should be moved to the `flutter/website` repo.
 
 Once the main labels above are added, consider what additional labels could be added, in particular:
 
-Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
-
-Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- Most issues will have a general category label, such as `engine`, `framework`, `tool`, or `package`. An issue with a category-specific label (`e: *` for engine, `f: *` for framework, `t: *` for tool, `p: *` for package) should have the associated category label.
+- Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
+- Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- Issues specific to one or more platforms should have the corresponding `platform-*` label(s). However, don't add platform labels if the issues applies to every relevant platform (e.g., all platforms that a plugin supports).
 
 ### Additional comments
 
