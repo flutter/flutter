@@ -752,6 +752,101 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+namespace {
+DlPath ManuallyConstructCirclePath(Scalar radius) {
+  DlPathBuilder path_builder;
+  // Circle as 4 cubic bezier segments (standard circle approximation)
+  // Using kappa = 0.5522847498 for circular arc approximation
+  const Scalar k = 0.5522847498f;
+
+  path_builder.MoveTo(DlPoint(0.0f, -radius));  // Top
+  // Top to Right
+  path_builder.CubicCurveTo(DlPoint(radius * k, -radius),  //
+                            DlPoint(radius, -radius * k),  //
+                            DlPoint(radius, 0.0f));
+  // Right to Bottom
+  path_builder.CubicCurveTo(DlPoint(radius, radius * k),  //
+                            DlPoint(radius * k, radius),  //
+                            DlPoint(0.0f, radius));
+  // Bottom to Left
+  path_builder.CubicCurveTo(DlPoint(-radius * k, radius),  //
+                            DlPoint(-radius, radius * k),  //
+                            DlPoint(-radius, 0.0f));
+  // Left to Top
+  path_builder.CubicCurveTo(DlPoint(-radius, -radius * k),  //
+                            DlPoint(-radius * k, -radius),  //
+                            DlPoint(0.0f, -radius));
+  path_builder.Close();
+  return path_builder.TakePath();
+}
+
+void DrawStrokedAndFilledCirclesWithZoom(AiksTest* test,
+                                         Scalar zoom,
+                                         Scalar radius,
+                                         Scalar stroke_width) {
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  DlPaint fill_paint;
+  fill_paint.setColor(DlColor::kBlue());
+
+  DlPaint stroke_paint;
+  stroke_paint.setColor(DlColor::kGreen());
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  stroke_paint.setStrokeWidth(stroke_width);
+
+  DlPath path = ManuallyConstructCirclePath(radius);
+
+  constexpr Scalar kLeftX = 300.0f;
+  constexpr Scalar kRightX = 680.0f;
+  constexpr Scalar kTopY = 200.0f;
+  constexpr Scalar kBottomY = 580.0f;
+
+  // Upper left quadrant is fill + stroke
+  builder.Save();
+  builder.Translate(kLeftX, kTopY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, fill_paint);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  // Upper right quadrant is fill only
+  builder.Save();
+  builder.Translate(kRightX, kTopY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, fill_paint);
+  builder.Restore();
+
+  // Lower left quadrant is stroke only
+  builder.Save();
+  builder.Translate(kLeftX, kBottomY);
+  builder.Scale(zoom, zoom);
+  builder.DrawPath(path, stroke_paint);
+  builder.Restore();
+
+  // Lower right quadrant is a filled circle the size of the radius and
+  // the stroke combined for comparison to the stroked outlines.
+  builder.Save();
+  builder.Translate(kRightX, kBottomY);
+  builder.Scale(zoom, zoom);
+  builder.DrawCircle({}, radius + stroke_width * 0.5f, fill_paint);
+  builder.Restore();
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+}  // namespace
+
+TEST_P(AiksTest, ZoomedStrokedPathRendersCorrectly) {
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/80.0f, /*radius=*/2.0f,
+                                      /*stroke_width=*/0.05f);
+}
+
+TEST_P(AiksTest, StrokedPathWithLargeStrokeWidthRendersCorrectly) {
+  DrawStrokedAndFilledCirclesWithZoom(this, /*zoom=*/1.0f, /*radius=*/1.0f,
+                                      /*stroke_width=*/5.0f);
+}
+
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -1727,7 +1822,7 @@ TEST_P(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-// This makes sure the WideGamut named tests use 16bit float pixel format.
+// This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);

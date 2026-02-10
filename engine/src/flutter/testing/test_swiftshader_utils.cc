@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/playground/backend/vulkan/swiftshader_utilities.h"
+#include "flutter/testing/test_swiftshader_utils.h"
 
 #include <cstdlib>
+#include <mutex>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
@@ -15,22 +16,27 @@
 #include <Windows.h>
 #endif  // FML_OS_WIN
 
-namespace impeller {
+namespace flutter::testing {
 
-static void FindSwiftShaderICDAtKnownPaths() {
+namespace {
+
+void FindSwiftShaderICDAtKnownPaths() {
   static constexpr const char* kSwiftShaderICDJSON = "vk_swiftshader_icd.json";
   static constexpr const char* kVulkanICDFileNamesEnvVariableKey =
       "VK_ICD_FILENAMES";
   const auto executable_directory_path =
       fml::paths::GetExecutableDirectoryPath();
   FML_CHECK(executable_directory_path.first);
-  const auto executable_directory =
-      fml::OpenDirectory(executable_directory_path.second.c_str(), false,
-                         fml::FilePermission::kRead);
-  FML_CHECK(executable_directory.is_valid());
-  if (fml::FileExists(executable_directory, kSwiftShaderICDJSON)) {
-    const auto icd_path = fml::paths::JoinPaths(
-        {executable_directory_path.second, kSwiftShaderICDJSON});
+  auto icd_directory = executable_directory_path.second;
+  if (icd_directory.ends_with("exe.unstripped")) {
+    icd_directory = fml::paths::GetDirectoryName(icd_directory);
+  }
+  const auto icd_directory_fd = fml::OpenDirectory(icd_directory.c_str(), false,
+                                                   fml::FilePermission::kRead);
+  FML_CHECK(icd_directory_fd.is_valid());
+  if (fml::FileExists(icd_directory_fd, kSwiftShaderICDJSON)) {
+    const auto icd_path =
+        fml::paths::JoinPaths({icd_directory, kSwiftShaderICDJSON});
 #if FML_OS_WIN
     const auto success =
         ::SetEnvironmentVariableA(kVulkanICDFileNamesEnvVariableKey,  //
@@ -51,6 +57,8 @@ static void FindSwiftShaderICDAtKnownPaths() {
   }
 }
 
+}  // namespace
+
 void SetupSwiftshaderOnce(bool use_swiftshader) {
   static bool swiftshader_preference = false;
   static std::once_flag sOnceInitializer;
@@ -65,4 +73,4 @@ void SetupSwiftshaderOnce(bool use_swiftshader) {
          "may not be changed later.";
 }
 
-}  // namespace impeller
+}  // namespace flutter::testing
