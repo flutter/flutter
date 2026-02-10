@@ -101,7 +101,8 @@
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"
                 }
-            ]
+            ],
+            "timeout": 120
         },
         {
             "archives": [],

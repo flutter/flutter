@@ -412,7 +412,6 @@ targets:
     timeout: 120
     properties:
       config_name: linux_unopt
-      test_timeout_secs: "7200"
 
   - name: Linux mac_android_aot_engine
     recipe: engine_v2/engine_v2
