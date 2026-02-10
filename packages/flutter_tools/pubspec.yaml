@@ -86,7 +86,7 @@ dependencies:
   csslib: 1.0.2
   dap: 1.4.0
   dds_service_extensions: 2.1.0
-  devtools_shared: 12.0.0
+  devtools_shared: 12.1.0
   dtd: 4.0.0
   extension_discovery: 2.1.0
   fixnum: 1.1.1
@@ -114,6 +114,7 @@ dependencies:
   web: 1.1.1
   web_socket: 1.0.1
   yaml_edit: 2.2.3
+  mdns_dart: ^2.1.0
 
 dev_dependencies:
   file_testing: 3.0.2
@@ -128,4 +129,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: aseqsm
+# PUBSPEC CHECKSUM: 8kslb0
