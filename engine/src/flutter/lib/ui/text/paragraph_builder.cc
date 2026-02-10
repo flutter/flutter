@@ -28,6 +28,15 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
+
+// On Windows and Linux, font sizes specified in typographic points (1/72 inch)
+// must be converted to logical pixels (1/96 inch). The fixed scale is 96/72.
+// On other platforms (macOS, iOS, Android) no conversion is needed.
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+static constexpr double kFontSizeScale = 96.0 / 72.0;
+#else
+static constexpr double kFontSizeScale = 1.0;
+#endif
 namespace {
 
 const double kTextHeightNone = 0.0;
@@ -258,13 +267,7 @@ ParagraphBuilder::ParagraphBuilder(
     }
 
     if (mask & kPSFontSizeMask) {
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
-      // Convert typographic points to logical pixels: 1pt = 1/72 inch,
-      // 1 logical pixel = 1/96 inch, so the fixed scale is 96/72.
-      style.font_size = fontSize * (96.0 / 72.0);
-#else
-      style.font_size = fontSize;
-#endif
+      style.font_size = fontSize * kFontSizeScale;
     }
 
     if (mask & kPSHeightMask) {
@@ -431,11 +434,7 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     }
 
     if (mask & kTSFontSizeMask) {
-#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
-      style.font_size = fontSize * (96.0 / 72.0);
-#else
-      style.font_size = fontSize;
-#endif
+      style.font_size = fontSize * kFontSizeScale;
     }
 
     if (mask & kTSLetterSpacingMask) {
