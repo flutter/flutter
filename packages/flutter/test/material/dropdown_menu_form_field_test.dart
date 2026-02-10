@@ -24,12 +24,16 @@ void main() {
     menuEntries.add(entry);
   }
 
-  Finder findMenuItem(MenuItem menuItem) {
-    // For each menu item there are two MenuItemButton widgets.
+  Finder findMenuItemButton(String label) {
+    // For each menu items there are two MenuItemButton widgets.
     // The last one is the real button item in the menu.
     // The first one is not visible, it is part of _DropdownMenuBody
     // which is used to compute the dropdown width.
-    return find.widgetWithText(MenuItemButton, menuItem.label).last;
+    return find.widgetWithText(MenuItemButton, label).last;
+  }
+
+  Finder findMenuItem(MenuItem menuItem) {
+    return findMenuItemButton(menuItem.label);
   }
 
   testWidgets('Creates an underlying DropdownMenu', (WidgetTester tester) async {
@@ -196,6 +200,64 @@ void main() {
 
     dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.trailingIcon, trailingIcon);
+  });
+
+  testWidgets('Passes showTrailingIcon to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.showTrailingIcon, true);
+
+    const showTrailingIcon = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            showTrailingIcon: showTrailingIcon,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.showTrailingIcon, showTrailingIcon);
+  });
+
+  testWidgets('Passes trailingIconFocusNode to underlying DropdownMenu', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.trailingIconFocusNode, null);
+
+    final trailingIconFocusNode = FocusNode();
+    addTearDown(trailingIconFocusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            trailingIconFocusNode: trailingIconFocusNode,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.trailingIconFocusNode, trailingIconFocusNode);
   });
 
   testWidgets('Passes label to underlying InputDecoration', (WidgetTester tester) async {
@@ -616,6 +678,33 @@ void main() {
     expect(dropdownMenu.requestFocusOnTap, requestFocusOnTap);
   });
 
+  testWidgets('Passes selectOnly to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.selectOnly, false);
+
+    const selectOnly = true;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            selectOnly: selectOnly,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.selectOnly, selectOnly);
+  });
+
   testWidgets('Passes expandedInsets to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -847,6 +936,60 @@ void main() {
     expect(dropdownMenu.textInputAction, textInputAction);
   });
 
+  testWidgets('Passes cursorHeight to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.cursorHeight, null);
+
+    const cursorHeight = 4.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            cursorHeight: cursorHeight,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.cursorHeight, cursorHeight);
+  });
+
+  testWidgets('Passes menuController to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.menuController, null);
+
+    final menuController = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            menuController: menuController,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.menuController, menuController);
+  });
+
   testWidgets('Passes restorationId to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -876,7 +1019,7 @@ void main() {
     expect(dropdownMenu.restorationId, restorationId);
   });
 
-  testWidgets('Field state is correcly updated', (WidgetTester tester) async {
+  testWidgets('Field state is correctly updated', (WidgetTester tester) async {
     final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
     await tester.pumpWidget(
@@ -1358,7 +1501,7 @@ void main() {
     expect(onSelectedCallCount, 1);
   });
 
-  testWidgets('onSelect is called exactly once when reseted', (WidgetTester tester) async {
+  testWidgets('onSelect is called exactly once when reset', (WidgetTester tester) async {
     var onSelectedCallCount = 0;
     final fieldKey = GlobalKey<FormFieldState<MenuItem>>();
     await tester.pumpWidget(
@@ -1393,5 +1536,48 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(DropdownMenuFormField<MenuItem>)), Size.zero);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180121.
+  testWidgets('Allow null entry to clear selection', (WidgetTester tester) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    const selectNoneLabel = 'Select none';
+    final nullableMenuItems = <DropdownMenuEntry<String?>>[
+      const DropdownMenuEntry<String?>(value: null, label: selectNoneLabel),
+      const DropdownMenuEntry<String?>(value: 'a', label: 'A'),
+      const DropdownMenuEntry<String?>(value: 'b', label: 'B'),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return DropdownMenuFormField<String?>(
+                controller: controller,
+                requestFocusOnTap: true,
+                enableFilter: true,
+                dropdownMenuEntries: nullableMenuItems,
+                onSelected: (_) {
+                  setState(() {});
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenuFormField<String?>));
+    await tester.pump();
+
+    // Select the 'None' item.
+    await tester.tap(findMenuItemButton(selectNoneLabel));
+    await tester.pumpAndSettle();
+
+    expect(controller.text, selectNoneLabel);
   });
 }

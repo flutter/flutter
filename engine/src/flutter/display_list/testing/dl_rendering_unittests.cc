@@ -23,6 +23,7 @@
 #include "flutter/fml/math.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/testing.h"
+#include "include/core/SkColor.h"
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
 #include "flutter/impeller/typographer/backends/skia/text_frame_skia.h"  // nogncheck
@@ -37,7 +38,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
+#include "third_party/skia/include/effects/SkGradient.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -1778,10 +1779,10 @@ class CanvasCompareTester {
           DlColor::kYellow().withAlpha(0x7f),
           DlColor::kBlue(),
       };
-      SkColor sk_colors[] = {
-          SK_ColorGREEN,
-          SkColorSetA(SK_ColorYELLOW, 0x7f),
-          SK_ColorBLUE,
+      SkColor4f sk_colors[] = {
+          SkColors::kGreen,
+          SkColors::kYellow.withAlpha(127.0f / 255.0f),
+          SkColors::kBlue,
       };
       float stops[] = {
           0.0,
@@ -1791,9 +1792,11 @@ class CanvasCompareTester {
       auto dl_gradient =
           DlColorSource::MakeLinear(dl_end_points[0], dl_end_points[1], 3,
                                     dl_colors, stops, DlTileMode::kMirror);
-      auto sk_gradient = SkGradientShader::MakeLinear(
-          ToSkPoints(dl_end_points), sk_colors, stops, 3, SkTileMode::kMirror,
-          0, nullptr);
+      auto sk_gradient = SkShaders::LinearGradient(
+          ToSkPoints(dl_end_points),
+          SkGradient(SkGradient::Colors(sk_colors, stops, SkTileMode::kMirror),
+                     SkGradient::Interpolation()),
+          nullptr);
       {
         RenderWith(testP, env, tolerance,
                    CaseParameters(

@@ -58,6 +58,10 @@ common_libs = [
     name = "libvfs_internal.so"
     path = rebase_path("$fuchsia_sdk_dist")
   },
+  {
+    name = "libbackend_fuchsia_globals.so"
+    path = rebase_path("$fuchsia_sdk_dist")
+  },
 ]
 
 # Note, for clang libs we use the md5 hashes here because of gn limitations of

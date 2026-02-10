@@ -29,8 +29,12 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTimeConverter.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterVSyncWaiter.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
+
+#import <CoreVideo/CoreVideo.h>
+#import <IOSurface/IOSurface.h>
 
 @class FlutterEngineRegistrar;
 
@@ -151,14 +155,6 @@ constexpr char kTextPlainFormat[] = "text/plain";
  * Handles a platform message from the engine.
  */
 - (void)engineCallbackOnPlatformMessage:(const FlutterPlatformMessage*)message;
-
-/**
- * Invoked right before the engine is restarted.
- *
- * This should reset states to as if the application has just started.  It
- * usually indicates a hot restart (Shift-R in Flutter CLI.)
- */
-- (void)engineCallbackOnPreEngineRestart;
 
 /**
  * Requests that the task be posted back the to the Flutter engine at the target time. The target
@@ -468,6 +464,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // A method channel for miscellaneous platform functionality.
   FlutterMethodChannel* _platformChannel;
 
+  // A method channel for taking screenshots via the rasterizer.
+  FlutterMethodChannel* _screenshotChannel;
+
   // Whether the application is currently the active application.
   BOOL _active;
 
@@ -502,6 +501,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
 }
 
 @synthesize windowController = _windowController;
+@synthesize project = _project;
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
@@ -723,6 +723,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   };
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
+  flutterArguments.enable_wide_gamut = _project.enableWideGamut;
 
   BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =
@@ -1170,12 +1171,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   NSAssert([self viewControllerForIdentifier:viewController.viewIdentifier] == viewController,
            @"The provided view controller is not attached to this engine.");
-  NSView* view = viewController.flutterView;
+  FlutterView* view = viewController.flutterView;
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
   CGSize scaledSize = scaledBounds.size;
-  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+  double pixelRatio = view.layer.contentsScale;
   auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
-  const FlutterWindowMetricsEvent windowMetricsEvent = {
+  FlutterWindowMetricsEvent windowMetricsEvent = {
       .struct_size = sizeof(windowMetricsEvent),
       .width = static_cast<size_t>(scaledSize.width),
       .height = static_cast<size_t>(scaledSize.height),
@@ -1185,6 +1186,20 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       .display_id = static_cast<uint64_t>(displayId),
       .view_id = viewController.viewIdentifier,
   };
+  if (view.sizedToContents) {
+    CGSize maximumContentSize = [view convertSizeToBacking:view.maximumContentSize];
+    CGSize minimumContentSize = [view convertSizeToBacking:view.minimumContentSize];
+    windowMetricsEvent.has_constraints = true;
+    windowMetricsEvent.min_width_constraint = static_cast<size_t>(minimumContentSize.width);
+    windowMetricsEvent.min_height_constraint = static_cast<size_t>(minimumContentSize.height);
+    windowMetricsEvent.max_width_constraint = static_cast<size_t>(maximumContentSize.width);
+    windowMetricsEvent.max_height_constraint = static_cast<size_t>(maximumContentSize.height);
+  } else {
+    windowMetricsEvent.min_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.min_height_constraint = static_cast<size_t>(scaledSize.height);
+    windowMetricsEvent.max_width_constraint = static_cast<size_t>(scaledSize.width);
+    windowMetricsEvent.max_height_constraint = static_cast<size_t>(scaledSize.height);
+  }
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }
 
@@ -1289,6 +1304,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [nextViewController onPreEngineRestart];
   }
+  [_windowController closeAllWindows];
   [_platformViewController reset];
   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 }
@@ -1402,6 +1418,79 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [weakSelf handleMethodCall:call result:result];
   }];
+
+  _screenshotChannel =
+      [FlutterMethodChannel methodChannelWithName:@"flutter/screenshot"
+                                  binaryMessenger:self.binaryMessenger
+                                            codec:[FlutterStandardMethodCodec sharedInstance]];
+  [_screenshotChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    FlutterEngine* strongSelf = weakSelf;
+    if (!strongSelf) {
+      return result([FlutterError errorWithCode:@"invalid_state"
+                                        message:@"Engine deallocated."
+                                        details:nil]);
+    }
+
+    FlutterViewController* viewController =
+        [strongSelf viewControllerForIdentifier:flutter::kFlutterImplicitViewId];
+    if (!viewController) {
+      return result([FlutterError errorWithCode:@"failure"
+                                        message:@"No view controller."
+                                        details:nil]);
+    }
+
+    NSArray<FlutterSurface*>* frontSurfaces =
+        viewController.flutterView.surfaceManager.frontSurfaces;
+    if (frontSurfaces.count == 0) {
+      return result([FlutterError errorWithCode:@"failure"
+                                        message:@"No front surfaces."
+                                        details:nil]);
+    }
+
+    // Use the first front surface (the main backing store).
+    FlutterSurface* surface = frontSurfaces.firstObject;
+    IOSurfaceRef ioSurface = surface.ioSurface;
+
+    size_t width = IOSurfaceGetWidth(ioSurface);
+    size_t height = IOSurfaceGetHeight(ioSurface);
+    size_t bytesPerRow = IOSurfaceGetBytesPerRow(ioSurface);
+    size_t bytesPerElement = IOSurfaceGetBytesPerElement(ioSurface);
+    uint32_t pixelFormat = (uint32_t)IOSurfaceGetPixelFormat(ioSurface);
+
+    NSString* formatString;
+    switch (pixelFormat) {
+      case kCVPixelFormatType_40ARGBLEWideGamut:
+        formatString = @"MTLPixelFormatBGRA10_XR";
+        break;
+      case kCVPixelFormatType_32BGRA:
+        formatString = @"MTLPixelFormatBGRA8Unorm";
+        break;
+      default:
+        formatString = [NSString stringWithFormat:@"Unknown(%u)", pixelFormat];
+        break;
+    }
+
+    IOSurfaceLock(ioSurface, kIOSurfaceLockReadOnly, nil);
+    void* baseAddress = IOSurfaceGetBaseAddress(ioSurface);
+
+    // Copy pixel data row by row into a tightly-packed buffer.
+    size_t packedBytesPerRow = width * bytesPerElement;
+    NSMutableData* packedData = [NSMutableData dataWithLength:packedBytesPerRow * height];
+    uint8_t* dest = (uint8_t*)packedData.mutableBytes;
+    for (size_t row = 0; row < height; row++) {
+      memcpy(dest + row * packedBytesPerRow, (uint8_t*)baseAddress + row * bytesPerRow,
+             packedBytesPerRow);
+    }
+
+    IOSurfaceUnlock(ioSurface, kIOSurfaceLockReadOnly, nil);
+
+    return result(@[
+      @(width),
+      @(height),
+      formatString,
+      [FlutterStandardTypedData typedDataWithBytes:packedData],
+    ]);
+  }];
 }
 
 - (void)didUpdateMouseCursor:(NSCursor*)cursor {
@@ -1422,6 +1511,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   FlutterViewController* nextViewController;
   while ((nextViewController = [viewControllerEnumerator nextObject])) {
     [self updateWindowMetricsForViewController:nextViewController];
+    [nextViewController updateWideGamutForScreen];
   }
 }
 
