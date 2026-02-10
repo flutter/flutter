@@ -1642,14 +1642,21 @@ void main() {
               return true;
             }
             final rect = arguments[0] as Rect;
+            final paint = arguments[1] as Paint;
+
             // _CupertinoEdgeShadowDecoration draws the shadows with a series of
             // differently colored 1px rects. Skip all rects not drawn by a
             // _CupertinoEdgeShadowDecoration.
-            if (rect.width == 1.0 && rect.left >= 0.0) {
-              throw '''
-          Expected: no visible rects with a width of 1px.
-          Found: $rect.
-          ''';
+            if (rect.width == 1.0) {
+              final bool isOnScreen = rect.left >= 0 && rect.right <= 600.0;
+              final bool isVisible = paint.color.opacity > 0;
+
+              if (isOnScreen && isVisible) {
+                throw '''
+    Expected: no visible shadow rects on-screen.
+    Found: $rect with opacity ${paint.color.opacity}.
+        ''';
+              }
             }
             return true;
           });
@@ -1657,11 +1664,12 @@ void main() {
 
         await tester.pumpWidget(const CupertinoApp(home: SizedBox.expand()));
 
-        final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-
         tester
             .state<NavigatorState>(find.byType(Navigator))
             .push(buildRoute(fullscreenDialog: true));
+        await tester.pump();
+
+        final RenderBox box = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
 
         await tester.pumpAndSettle();
         expect(box, paintsNoShadows());
@@ -1669,8 +1677,7 @@ void main() {
         tester.state<NavigatorState>(find.byType(Navigator)).pop();
 
         await tester.pumpAndSettle();
-        final RenderBox boxAfterPop = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
-        expect(boxAfterPop, paintsNoShadows());
+        expect(box, paintsNoShadows());
       },
     );
   });

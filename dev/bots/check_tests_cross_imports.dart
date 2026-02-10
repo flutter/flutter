@@ -248,7 +248,7 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownCupertinoCrossImports = <String>{
-    // TODO(justinmc): This one uses SelectableText
+    // TODO(justinmc): This one uses SelectableText. See https://github.com/flutter/flutter/issues/181682
     'packages/flutter/test/cupertino/text_selection_test.dart',
   };
 
