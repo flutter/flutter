@@ -106,13 +106,17 @@ void main() {
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: CupertinoApp(
-              home: Center(
-                child: Container(
-                  key: fakeTextFieldKey,
-                  width: 10,
-                  height: 10,
-                  color: const Color(0xFFF44336),
-                  child: const Placeholder(),
+              theme: const CupertinoThemeData(primaryColor: Color(0xFF6750A4)),
+              home: CupertinoPageScaffold(
+                backgroundColor: const Color.fromARGB(255, 0, 255, 179),
+                child: Center(
+                  child: Container(
+                    key: fakeTextFieldKey,
+                    width: 10,
+                    height: 10,
+                    color: const Color(0xFFF44336),
+                    child: const Placeholder(),
+                  ),
                 ),
               ),
             ),
