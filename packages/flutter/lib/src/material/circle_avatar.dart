@@ -230,11 +230,13 @@ class CircleAvatar extends StatelessWidget {
       backgroundColor: effectiveBackgroundColor,
       image: backgroundImage,
       onImageError: onBackgroundImageError,
-      child: AnimatedDefaultTextStyle(
-        style: textStyle,
-        duration: _kTextStyleChangeDuration,
-        child: childContent ?? const SizedBox.shrink(),
-      ),
+      child: childContent != null
+          ? AnimatedDefaultTextStyle(
+              style: textStyle,
+              duration: _kTextStyleChangeDuration,
+              child: childContent,
+            )
+          : null,
     );
 
     // Layer the foreground image on top using a foreground decoration.
