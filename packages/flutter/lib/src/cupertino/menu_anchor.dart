@@ -18,7 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'dialog.dart';
 import 'theme.dart';
 
 // Dismiss is handled by RawMenuAnchor
@@ -41,6 +40,11 @@ bool get _isCupertino {
       return false;
   }
 }
+
+const Color _kMenuSurfaceColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xCCF2F2F2),
+  darkColor: Color(0xCC2D2D2D),
+);
 
 /// The font family for menu items at smaller text scales.
 const String _kBodyFont = 'CupertinoSystemText';
@@ -1061,6 +1065,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
       );
       constraints = BoxConstraints.tightFor(width: menuWidth.points);
     }
+
     Widget child = _SwipeSurface(
       child: TapRegion(
         groupId: widget.tapRegionGroupId,
@@ -1091,18 +1096,28 @@ class _MenuOverlayState extends State<_MenuOverlay>
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   alwaysIncludeSemantics: true,
-                  child: CupertinoPopupSurface(
-                    child: AnimatedBuilder(
-                      animation: _sizeAnimation,
-                      builder: _buildAlign,
-                      child: Semantics(
-                        explicitChildNodes: true,
-                        scopesRoute: true,
-                        child: ConstrainedBox(
-                          constraints: constraints,
-                          child: SingleChildScrollView(
-                            clipBehavior: Clip.none,
-                            child: Column(mainAxisSize: MainAxisSize.min, children: _children),
+                  // TODO(davidhicks980): Use CupertinoPopupSurface when
+                  // appearance is fixed on Impeller.
+                  // https://github.com/flutter/flutter/issues/182066
+                  child: ClipRSuperellipse(
+                    borderRadius: const BorderRadius.all(Radius.circular(13)),
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      child: ColoredBox(
+                        color: CupertinoDynamicColor.resolve(_kMenuSurfaceColor, context),
+                        child: AnimatedBuilder(
+                          animation: _sizeAnimation,
+                          builder: _buildAlign,
+                          child: Semantics(
+                            explicitChildNodes: true,
+                            scopesRoute: true,
+                            child: ConstrainedBox(
+                              constraints: constraints,
+                              child: SingleChildScrollView(
+                                clipBehavior: Clip.none,
+                                child: Column(mainAxisSize: MainAxisSize.min, children: _children),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -1197,6 +1212,8 @@ class _ShadowPainter extends CustomPainter {
       ..addRect(rect.inflate(200))
       ..addRRect(RRect.fromRectAndRadius(rect, radius));
 
+    // Clip the shadow underneath the menu shape to make the shadow appear more
+    // vibrant.
     canvas
       ..save()
       ..clipPath(maskPath)
@@ -2780,14 +2797,6 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     _recognizer!.addPointer(event);
   }
 
-  void _handleSwipeEnd(DragEndDetails position) {
-    _completeSwipe();
-  }
-
-  void _handleSwipeCancel() {
-    _completeSwipe();
-  }
-
   void _handleSwipeUpdate(DragUpdateDetails updateDetails) {
     _position = _position! + updateDetails.delta;
 
@@ -2812,6 +2821,23 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     widget.onDistanceChanged(distance);
   }
 
+  void _handleSwipeEnd(DragEndDetails position) {
+    _completeSwipe();
+  }
+
+  void _handleSwipeCancel() {
+    _completeSwipe();
+  }
+
+  void _completeSwipe() {
+    _position = null;
+    _recognizer!.dispose();
+    _recognizer = null;
+    if (mounted) {
+      widget.onDistanceChanged(0);
+    }
+  }
+
   Drag _createSwipeHandle(ui.Offset position) {
     assert(!isSwiping, 'A new swipe should not begin while a swipe is active.');
     _position = position;
@@ -2822,13 +2848,6 @@ class _SwipeRegionState extends State<_SwipeRegion> {
       onSwipeEnd: _handleSwipeEnd,
       onSwipeCanceled: _handleSwipeCancel,
     );
-  }
-
-  void _completeSwipe() {
-    _position = null;
-    widget.onDistanceChanged(0);
-    _recognizer!.dispose();
-    _recognizer = null;
   }
 
   @override
