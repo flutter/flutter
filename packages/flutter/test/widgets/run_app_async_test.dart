@@ -44,7 +44,7 @@ void main() {
   test('WidgetBinding build rendering tree and warm up frame back to back', () {
     final fakeAsync = FakeAsync();
     fakeAsync.run((FakeAsync async) {
-      runApp(const SizedBox(child: Text('test')));
+      runApp(const Directionality(textDirection: TextDirection.ltr, child: Text('test')));
       // Rendering tree is not built synchronously.
       expect(WidgetsBinding.instance.rootElement, isNull);
       fakeAsync.flushTimers();
