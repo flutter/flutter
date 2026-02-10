@@ -729,7 +729,7 @@ object FlutterPluginUtils {
     internal fun addTaskForKGPVersion(project: Project) {
         project.tasks.register<PrintTask>("kgpVersion") {
             description = "Print the current kgp version used by the project."
-            message.set("KGP Version: " + VersionFetcher.getKGPVersion(project).toString())
+            message.set(project.provider { "KGP Version: " + VersionFetcher.getKGPVersion(project).toString() })
         }
     }
 
@@ -746,18 +746,20 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintBuildVariants")
     internal fun addTaskForPrintBuildVariants(project: Project) {
-        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
-        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
-        //                 the groovy `flutter.android` lines.
-        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
-
         project.tasks.register<PrintTask>("printBuildVariants") {
             description = "Prints out all build variants for this Android project"
-            val messageBuilder = StringBuilder()
-            androidExtension.applicationVariants.forEach { variant ->
-                messageBuilder.append("BuildVariant: ${variant.name}\n")
+            project.provider {
+                // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
+                // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
+                //                 the groovy `flutter.android` lines.
+                val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+
+                val messageBuilder = StringBuilder()
+                androidExtension.applicationVariants.forEach { variant ->
+                    messageBuilder.append("BuildVariant: ${variant.name}\n")
+                }
+                message.set(messageBuilder.toString())
             }
-            message.set(messageBuilder.toString())
         }
     }
 

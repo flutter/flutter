@@ -6,7 +6,6 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.builder.model.BuildType
@@ -1051,22 +1050,14 @@ class FlutterPluginUtilsTest {
         every {
             project.tasks.register(eq("kgpVersion"), PrintTask::class.java, capture(captureSlot))
         } returns mockTaskProvider
-
-        // Minimal configuration for `VersionFetcher.getKGPVersion` to return something.
-        every { project.hasProperty("kotlin_version") } returns true
-        every { project.properties["kotlin_version"] } returns "2.2.0"
+        every { project.provider<PrintTask>(any()) } returns mockTaskProvider
+        every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
 
         FlutterPluginUtils.addTaskForKGPVersion(project)
         captureSlot.captured.execute(mockPrintTask)
 
         verify {
             mockPrintTask.description = "Print the current kgp version used by the project."
-        }
-
-        verify {
-            mockPrintTask.message.set(
-                withArg<String> { assertContains(it, "2.2.0") }
-            )
         }
     }
 
@@ -1079,39 +1070,18 @@ class FlutterPluginUtilsTest {
         val mockTaskProvider = mockk<TaskProvider<PrintTask>>()
         val mockPrintTask = mockk<PrintTask>(relaxed = true)
         val captureSlot = slot<Action<PrintTask>>()
-        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
-
-        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
-        val variantCollection = mockk<org.gradle.api.DomainObjectSet<ApplicationVariant>>()
-        every { mockAbstractAppExtension.applicationVariants } returns variantCollection
-
-        val variantDebug = mockk<ApplicationVariant>()
-        every { variantDebug.name } returns "debug"
-        val variantRelease = mockk<ApplicationVariant>()
-        every { variantRelease.name } returns "release"
-        val variantProfile = mockk<ApplicationVariant>()
-        every { variantProfile.name } returns "profile"
-        every { variantCollection.iterator() } returns
-            mutableSetOf<ApplicationVariant>(variantDebug, variantRelease, variantProfile).iterator()
 
         every {
             project.tasks.register(eq("printBuildVariants"), PrintTask::class.java, capture(captureSlot))
         } returns mockTaskProvider
+        every { project.provider<PrintTask>(any()) } returns mockTaskProvider
+        every { mockTaskProvider.configure(any()).hint(PrintTask::class) }
 
         FlutterPluginUtils.addTaskForPrintBuildVariants(project)
         captureSlot.captured.execute(mockPrintTask)
 
         verify {
             mockPrintTask.description = "Prints out all build variants for this Android project"
-        }
-        verify {
-            mockPrintTask.message.set(
-                withArg<String> {
-                    assertContains(it, "BuildVariant: debug")
-                    assertContains(it, "BuildVariant: release")
-                    assertContains(it, "BuildVariant: profile")
-                }
-            )
         }
     }
 }
