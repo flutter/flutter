@@ -34,7 +34,7 @@ class SemanticScrollable extends SemanticRole {
   /// content under this scrollable area. This element is sized based on the
   /// total scroll extent calculated by scrollExtentMax - scrollExtentMin + rect.height
   /// of the [SemanticsObject] managed by this scrollable.
-  final DomElement _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
+  DomElement? _scrollOverflowElement;
 
   /// Listens to HTML "scroll" gestures detected by the browser.
   ///
@@ -109,62 +109,69 @@ class SemanticScrollable extends SemanticRole {
     // that may still experience overscroll issues when macOS inserts scrollbars
     // into the application.
     semanticsObject.element.style.scrollbarWidth = 'none';
-
-    _scrollOverflowElement.style
-      ..position = 'absolute'
-      ..transformOrigin = '0 0 0'
-      // Ignore pointer events since this is a dummy element.
-      ..pointerEvents = 'none';
-    append(_scrollOverflowElement);
   }
 
   @override
   void update() {
     super.update();
 
-    semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      if (_canScroll) {
-        final double? scrollPosition = semanticsObject.scrollPosition;
-        assert(scrollPosition != null);
-        if (scrollPosition != _domScrollPosition) {
-          element.scrollTop = scrollPosition!;
-          _previousDomScrollPosition = _domScrollPosition;
-        }
+    if (_canScroll) {
+      if (_scrollOverflowElement == null) {
+        _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
+        _scrollOverflowElement!.style
+          ..position = 'absolute'
+          ..transformOrigin = '0 0 0'
+          // Ignore pointer events since this is a dummy element.
+          ..pointerEvents = 'none';
+        append(_scrollOverflowElement!);
       }
-      _updateScrollableState();
-      semanticsObject.recomputePositionAndSize();
-      semanticsObject.updateChildrenPositionAndSize();
-    });
 
-    _updateCssOverflow();
-
-    if (scrollListener == null) {
-      // We need to set touch-action:none explicitly here, despite the fact
-      // that we already have it on the <body> tag because overflow:scroll
-      // still causes the browser to take over pointer events in order to
-      // process scrolling. We don't want that when scrolling is handled by
-      // the framework.
-      //
-      // This is effective only in Chrome. Safari does not implement this
-      // CSS property. In Safari the `PointerBinding` uses `preventDefault`
-      // to prevent browser scrolling.
-      element.style.touchAction = 'none';
-
-      // Memoize the tear-off because Dart does not guarantee that two
-      // tear-offs of a method on the same instance will produce the same
-      // object.
-      _gestureModeListener = (_) {
-        _updateCssOverflow();
-      };
-      EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
-
-      scrollListener = createDomEventListener((DomEvent _) {
-        if (!_canScroll) {
-          return;
+      semanticsObject.owner.addOneTimePostUpdateCallback(() {
+        if (_canScroll) {
+          final double? scrollPosition = semanticsObject.scrollPosition;
+          assert(scrollPosition != null);
+          if (scrollPosition != _domScrollPosition) {
+            element.scrollTop = scrollPosition!;
+            _previousDomScrollPosition = _domScrollPosition;
+          }
         }
-        _recomputeScrollPosition();
+        _updateScrollableState();
+        semanticsObject.recomputePositionAndSize();
+        semanticsObject.updateChildrenPositionAndSize();
       });
-      addEventListener('scroll', scrollListener);
+
+      _updateCssOverflow();
+
+      if (scrollListener == null) {
+        // We need to set touch-action:none explicitly here, despite the fact
+        // that we already have it on the <body> tag because overflow:scroll
+        // still causes the browser to take over pointer events in order to
+        // process scrolling. We don't want that when scrolling is handled by
+        // the framework.
+        //
+        // This is effective only in Chrome. Safari does not implement this
+        // CSS property. In Safari the `PointerBinding` uses `preventDefault`
+        // to prevent browser scrolling.
+        element.style.touchAction = 'none';
+
+        // Memoize the tear-off because Dart does not guarantee that two
+        // tear-offs of a method on the same instance will produce the same
+        // object.
+        _gestureModeListener = (_) {
+          _updateCssOverflow();
+        };
+        EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
+
+        scrollListener = createDomEventListener((DomEvent _) {
+          if (!_canScroll) {
+            return;
+          }
+          _recomputeScrollPosition();
+        });
+        addEventListener('scroll', scrollListener);
+      }
+    } else {
+      _cleanUp();
     }
   }
 
@@ -197,7 +204,7 @@ class SemanticScrollable extends SemanticRole {
     // and size it based on the total scroll extent so the browser
     // knows how much scrollable content there is.
     if (semanticsObject.isVerticalScrollContainer) {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         // The cross axis size should be non-zero so it is taken into
         // account in the scrollable elements scrollHeight.
         ..width = '1px'
@@ -206,7 +213,7 @@ class SemanticScrollable extends SemanticRole {
         ..verticalScrollAdjustment = element.scrollTop
         ..horizontalScrollAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         ..width = '${scrollExtentTotal.toStringAsFixed(1)}px'
         // The cross axis size should be non-zero so it is taken into
         // account in the scrollable elements scrollHeight.
@@ -215,7 +222,7 @@ class SemanticScrollable extends SemanticRole {
         ..verticalScrollAdjustment = 0.0
         ..horizontalScrollAdjustment = element.scrollLeft;
     } else {
-      _scrollOverflowElement.style
+      _scrollOverflowElement!.style
         ..transform = 'translate(0px,0px)'
         ..width = '0px'
         ..height = '0px';
@@ -257,8 +264,15 @@ class SemanticScrollable extends SemanticRole {
   @override
   void dispose() {
     super.dispose();
+    _cleanUp();
+  }
+
+  void _cleanUp() {
+    if (_scrollOverflowElement != null) {
+      _scrollOverflowElement!.remove();
+      _scrollOverflowElement = null;
+    }
     final DomCSSStyleDeclaration style = element.style;
-    assert(_gestureModeListener != null);
     style.removeProperty('overflowY');
     style.removeProperty('overflowX');
     style.removeProperty('touch-action');
