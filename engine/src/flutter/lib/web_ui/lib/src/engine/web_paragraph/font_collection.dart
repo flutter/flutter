@@ -77,13 +77,11 @@ class WebFontCollection implements FlutterFontCollection {
     String asset,
     Map<String, String> descriptors,
   ) async {
-    print('_loadFontAsset("$family", "$asset", $descriptors)');
     try {
       // Right now, this is only used in Chrome which accepts unquoted font family names.
       // However, in the future, we should examine other browsers and see if they require
       // quoting for certain font family names.
       final DomFontFace fontFace = await _loadFontFace(family, asset, descriptors);
-      print('document.fonts.add("${fontFace.family}")');
       domDocument.fonts!.add(fontFace);
     } on FontLoadError catch (error) {
       return error;
