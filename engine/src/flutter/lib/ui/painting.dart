@@ -5524,12 +5524,7 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }
 
     if (!found) {
-      bool didFindFloat = false;
-      try {
-        _getUniformFloatInfo(name);
-        didFindFloat = true;
-      } catch (_) {}
-      if (didFindFloat) {
+      if (_hasUniform(name)) {
         throw ArgumentError('Uniform "$name" is not an image sampler.');
       } else {
         throw ArgumentError('No uniform named "$name".');
