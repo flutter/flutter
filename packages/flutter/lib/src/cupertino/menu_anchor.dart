@@ -2737,10 +2737,10 @@ class _SwipeRegionState extends State<_SwipeRegion> {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
       if (!widget.enabled) {
-        _position = null;
-        widget.onDistanceChanged(0);
         _recognizer?.dispose();
         _recognizer = null;
+        _position = null;
+        widget.onDistanceChanged(0);
       }
     }
   }
@@ -2842,9 +2842,9 @@ class _SwipeRegionState extends State<_SwipeRegion> {
   }
 
   void _completeSwipe() {
-    _position = null;
     _recognizer?.dispose();
     _recognizer = null;
+    _position = null;
     if (mounted) {
       widget.onDistanceChanged(0);
     }
