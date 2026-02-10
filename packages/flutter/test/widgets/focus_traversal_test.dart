@@ -6,12 +6,13 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'list_tile_test_utils.dart';
 import 'semantics_tester.dart';
+import 'utils.dart';
+import 'widgets_app_tester.dart';
 
 void main() {
   group(WidgetOrderTraversalPolicy, () {
@@ -441,32 +442,37 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusTraversalGroup(
             policy: WidgetOrderTraversalPolicy(),
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
-                  return ElevatedButton(
+                  return TestButton(
                     key: key1,
                     focusNode: testNode1,
                     autofocus: true,
                     onPressed: () {
                       Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return Center(
-                              child: ElevatedButton(
-                                key: key2,
-                                focusNode: testNode2,
-                                autofocus: true,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Go Back'),
-                              ),
-                            );
-                          },
+                        PageRouteBuilder<void>(
+                          pageBuilder:
+                              (
+                                BuildContext context,
+                                Animation<double> animation,
+                                Animation<double> secondaryAnimation,
+                              ) {
+                                return Center(
+                                  child: TestButton(
+                                    key: key2,
+                                    focusNode: testNode2,
+                                    autofocus: true,
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Go Back'),
+                                  ),
+                                );
+                              },
                         ),
                       );
                     },
@@ -571,7 +577,7 @@ void main() {
                   height: 100,
                   child: Navigator(
                     pages: <Page<void>>[
-                      MaterialPage<void>(
+                      TestPage<void>(
                         child: Focus(
                           focusNode: node2,
                           child: const SizedBox(width: 100, height: 100),
@@ -1536,7 +1542,7 @@ void main() {
       addTearDown(testNode2.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: FocusTraversalGroup(
             policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
             child: Center(
@@ -1544,29 +1550,34 @@ void main() {
                 builder: (BuildContext context) {
                   return FocusTraversalOrder(
                     order: const NumericFocusOrder(0),
-                    child: ElevatedButton(
+                    child: TestButton(
                       key: key1,
                       focusNode: testNode1,
                       autofocus: true,
                       onPressed: () {
                         Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) {
-                              return Center(
-                                child: FocusTraversalOrder(
-                                  order: const NumericFocusOrder(0),
-                                  child: ElevatedButton(
-                                    key: key2,
-                                    focusNode: testNode2,
-                                    autofocus: true,
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Go Back'),
-                                  ),
-                                ),
-                              );
-                            },
+                          PageRouteBuilder<void>(
+                            pageBuilder:
+                                (
+                                  BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secondaryAnimation,
+                                ) {
+                                  return Center(
+                                    child: FocusTraversalOrder(
+                                      order: const NumericFocusOrder(0),
+                                      child: TestButton(
+                                        key: key2,
+                                        focusNode: testNode2,
+                                        autofocus: true,
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Go Back'),
+                                      ),
+                                    ),
+                                  );
+                                },
                           ),
                         );
                       },
@@ -1938,7 +1949,7 @@ void main() {
             // checks for the closest node.
             width: index == 3 ? 150 : 100,
             height: index == 1 ? 150 : 100,
-            color: Colors.primaries[index],
+            color: getTestColor(index),
             child: Text('[$row, $col]'),
           ),
         );
@@ -2070,7 +2081,7 @@ void main() {
             child: Container(
               width: row == 1 ? 150 : 100,
               height: 100,
-              color: Colors.primaries[row],
+              color: getTestColor(row),
               child: Text('[$row]'),
             ),
           ),
@@ -2161,7 +2172,7 @@ void main() {
             child: Container(
               width: 100,
               height: col == 1 ? 150 : 100,
-              color: Colors.primaries[col],
+              color: getTestColor(col),
               child: Text('[$col]'),
             ),
           ),
@@ -2364,47 +2375,42 @@ void main() {
         final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: const Color(0xFFFFFFFF),
-            onGenerateRoute: (RouteSettings settings) {
-              return TestRoute(
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: FocusScope(
-                    debugLabel: 'scope',
-                    child: Column(
+          TestWidgetsApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                debugLabel: 'scope',
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              autofocus: true,
-                              debugLabel: 'upperLeft',
-                              child: SizedBox(width: 100, height: 100, key: upperLeftKey),
-                            ),
-                            Focus(
-                              debugLabel: 'upperRight',
-                              child: SizedBox(width: 100, height: 100, key: upperRightKey),
-                            ),
-                          ],
+                        Focus(
+                          autofocus: true,
+                          debugLabel: 'upperLeft',
+                          child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                         ),
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              debugLabel: 'lowerLeft',
-                              child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
-                            ),
-                            Focus(
-                              debugLabel: 'lowerRight',
-                              child: SizedBox(width: 100, height: 100, key: lowerRightKey),
-                            ),
-                          ],
+                        Focus(
+                          debugLabel: 'upperRight',
+                          child: SizedBox(width: 100, height: 100, key: upperRightKey),
                         ),
                       ],
                     ),
-                  ),
+                    Row(
+                      children: <Widget>[
+                        Focus(
+                          debugLabel: 'lowerLeft',
+                          child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
+                        ),
+                        Focus(
+                          debugLabel: 'lowerRight',
+                          child: SizedBox(width: 100, height: 100, key: lowerRightKey),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
 
@@ -2458,40 +2464,35 @@ void main() {
         final GlobalKey key3 = GlobalKey(debugLabel: 'key3');
 
         await tester.pumpWidget(
-          WidgetsApp(
-            color: const Color(0xFFFFFFFF),
-            onGenerateRoute: (RouteSettings settings) {
-              return TestRoute(
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: FocusScope(
-                    debugLabel: 'scope',
-                    child: Column(
+          TestWidgetsApp(
+            home: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                debugLabel: 'scope',
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Focus(
-                              autofocus: true,
-                              skipTraversal: true,
-                              debugLabel: '1',
-                              child: SizedBox(width: 100, height: 100, key: key1),
-                            ),
-                            Focus(
-                              debugLabel: '2',
-                              child: SizedBox(width: 100, height: 100, key: key2),
-                            ),
-                            Focus(
-                              debugLabel: '3',
-                              child: SizedBox(width: 100, height: 100, key: key3),
-                            ),
-                          ],
+                        Focus(
+                          autofocus: true,
+                          skipTraversal: true,
+                          debugLabel: '1',
+                          child: SizedBox(width: 100, height: 100, key: key1),
+                        ),
+                        Focus(
+                          debugLabel: '2',
+                          child: SizedBox(width: 100, height: 100, key: key2),
+                        ),
+                        Focus(
+                          debugLabel: '3',
+                          child: SizedBox(width: 100, height: 100, key: key3),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           ),
         );
 
@@ -2532,7 +2533,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Column(
               children: <Widget>[
                 Focus(focusNode: topNode, child: Container(height: 100)),
@@ -2656,7 +2657,7 @@ void main() {
         addTearDown(controller.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Row(
               children: <Widget>[
                 Focus(focusNode: leftNode, child: Container(width: 100)),
@@ -2801,12 +2802,12 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Column(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(height: cellHeight, color: Colors.blue),
+                  child: Container(height: cellHeight, color: const Color(0xFF0000FF)),
                 ),
                 Expanded(
                   child: ListView.separated(
@@ -2826,7 +2827,7 @@ void main() {
                               child: Container(
                                 width: cellHeight,
                                 height: cellHeight,
-                                color: Colors.primaries[rowIndex % Colors.primaries.length],
+                                color: getTestColor(rowIndex),
                               ),
                             );
                           },
@@ -2928,12 +2929,12 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Row(
               children: <Widget>[
                 Focus(
                   focusNode: stickyButtonNode,
-                  child: Container(width: cellWidth, color: Colors.blue),
+                  child: Container(width: cellWidth, color: const Color(0xFF0000FF)),
                 ),
                 Expanded(
                   child: ListView.separated(
@@ -2953,7 +2954,7 @@ void main() {
                               child: Container(
                                 width: cellWidth,
                                 height: cellWidth,
-                                color: Colors.red,
+                                color: const Color(0xFFFF0000),
                               ),
                             );
                           },
@@ -3040,7 +3041,7 @@ void main() {
         final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
         addTearDown(focusNodeLowerRight.dispose);
 
-        Widget generatetestWidgets(bool ignoreTextFields) {
+        Widget generateTestWidgets(bool ignoreTextFields) {
           final shortcuts = <ShortcutActivator, Intent>{
             const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
               TraversalDirection.left,
@@ -3060,7 +3061,7 @@ void main() {
             ),
           };
 
-          return MaterialApp(
+          return TestWidgetsApp(
             home: Shortcuts(
               shortcuts: shortcuts,
               child: FocusScope(
@@ -3131,7 +3132,7 @@ void main() {
           );
         }
 
-        await tester.pumpWidget(generatetestWidgets(false));
+        await tester.pumpWidget(generateTestWidgets(false));
 
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -3143,7 +3144,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
 
-        await tester.pumpWidget(generatetestWidgets(true));
+        await tester.pumpWidget(generateTestWidgets(true));
 
         expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
@@ -3162,11 +3163,11 @@ void main() {
     );
 
     testWidgets(
-      'Focus traversal does not break when no focusable is available on a MaterialApp',
+      'Focus traversal does not break when no focusable is available on a WidgetsApp',
       (WidgetTester tester) async {
         final events = <Object>[];
 
-        await tester.pumpWidget(MaterialApp(home: Container()));
+        await tester.pumpWidget(TestWidgetsApp(home: Container()));
 
         HardwareKeyboard.instance.addHandler((KeyEvent event) {
           events.add(event);
@@ -3186,8 +3187,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: TestListTile(title: Text('title'))),
+        const TestWidgetsApp(
+          home: SizedBox.expand(child: Center(child: Text('title'))),
         ),
       );
       final FocusNode? initialFocus = primaryFocus;
@@ -3201,22 +3202,7 @@ void main() {
       (WidgetTester tester) async {
         final events = <KeyEvent>[];
 
-        await tester.pumpWidget(
-          WidgetsApp(
-            color: Colors.white,
-            onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
-              settings: settings,
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation1,
-                    Animation<double> animation2,
-                  ) {
-                    return const Placeholder();
-                  },
-            ),
-          ),
-        );
+        await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
         HardwareKeyboard.instance.addHandler((KeyEvent event) {
           events.add(event);
@@ -3661,11 +3647,11 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: <Widget>[
-            TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
-            TextButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
+            TestButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+            TestButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
           ],
         ),
       ),
@@ -3735,13 +3721,13 @@ void main() {
     }
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Focus(
           focusNode: scope,
           child: Column(
             children: <Widget>[
-              TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
-              TextButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
+              TestButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+              TestButton(focusNode: nodeB, child: const Text('B'), onPressed: () {}),
             ],
           ),
         ),
@@ -3836,9 +3822,9 @@ void main() {
     addTearDown(nodeA.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SingleChildScrollView(
-          child: TextButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
+          child: TestButton(focusNode: nodeA, child: const Text('A'), onPressed: () {}),
         ),
       ),
     );
@@ -3934,7 +3920,7 @@ void main() {
           child: home,
         );
       }
-      await tester.pumpWidget(MaterialApp(home: home));
+      await tester.pumpWidget(TestWidgetsApp(home: home));
     }
 
     await pumpApp();
@@ -4063,12 +4049,12 @@ void main() {
       addTearDown(enabledButton2Node.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                MaterialButton(
+                TestButton(
                   focusNode: enabledButton1Node,
                   onPressed: () {}, // enabled
                   child: const Text('Enabled Button 1'),
@@ -4077,19 +4063,13 @@ void main() {
                   child: const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      MaterialButton(
-                        onPressed: null, // disabled
-                        child: Text('Disabled Button 1'),
-                      ),
+                      TestButton(child: Text('Disabled Button 1')),
                       SizedBox(height: 16),
-                      MaterialButton(
-                        onPressed: null, // disabled
-                        child: Text('Disabled Button 2'),
-                      ),
+                      TestButton(child: Text('Disabled Button 2')),
                     ],
                   ),
                 ),
-                MaterialButton(
+                TestButton(
                   focusNode: enabledButton2Node,
                   onPressed: () {}, // enabled
                   child: const Text('Enabled Button 2'),
@@ -4111,13 +4091,23 @@ void main() {
   );
 }
 
-class TestRoute extends PageRouteBuilder<void> {
-  TestRoute({required Widget child})
-    : super(
-        pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
-          return child;
-        },
-      );
+class TestPage<T> extends Page<T> {
+  const TestPage({required this.child, super.key, super.name});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(
+      settings: this,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => child,
+    );
+  }
 }
 
 /// Used to test removal of nodes while sorting.
