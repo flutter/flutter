@@ -277,6 +277,8 @@ class NoIdeValidator extends DoctorValidator {
     'VS Code - https://code.visualstudio.com/',
   ];
 
+  String get noIdeStatusInfo => 'No supported IDEs installed';
+
   @override
   Future<ValidationResult> validateImpl() async {
     return ValidationResult(
@@ -286,8 +288,6 @@ class NoIdeValidator extends DoctorValidator {
       statusInfo: noIdeStatusInfo,
     );
   }
-
-  String get noIdeStatusInfo => 'No supported IDEs installed';
 }
 
 class ValidatorWithResult extends DoctorValidator {
