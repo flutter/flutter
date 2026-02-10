@@ -5524,7 +5524,11 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }
 
     if (!found) {
-      throw ArgumentError('No uniform named "$name".');
+      if (_hasUniform(name)) {
+        throw ArgumentError('Uniform "$name" is not an image sampler.');
+      } else {
+        throw ArgumentError('No uniform named "$name".');
+      }
     }
     return index;
   }
@@ -5809,7 +5813,7 @@ base class FragmentShader extends Shader {
 
     final slots = List<UniformFloatSlot>.generate(
       size,
-      (i) => UniformFloatSlot._(this, name, info.index, i),
+      (i) => UniformFloatSlot._(this, name, i, info.index + i),
     );
     _slots.removeWhere((WeakReference<UniformFloatSlot> ref) => ref.target == null);
     _slots.addAll(slots.map((slot) => WeakReference<UniformFloatSlot>(slot)));
