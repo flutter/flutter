@@ -1204,7 +1204,9 @@ def parse_args(args):
   parser.add_argument(
       '--stripped',
       action='store_true',
-      help='Strip debug symbols from the output. This defaults to true and has no effect on iOS.'
+      default=None,
+      help='Strip debug symbols from the output. This defaults to true for all targets '
+      'except android, and has no effect on iOS.'
   )
   parser.add_argument('--no-stripped', dest='stripped', action='store_false')
 
