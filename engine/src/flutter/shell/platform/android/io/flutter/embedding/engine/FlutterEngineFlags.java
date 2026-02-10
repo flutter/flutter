@@ -126,7 +126,7 @@ public final class FlutterEngineFlags {
   /**
    * The deprecated flag that sets the directory containing Flutter assets.
    *
-   * <p>Please use {@link DEPRECATED_FLUTTER_ASSETS_DIR} instead.
+   * <p>Please use {@link FLUTTER_ASSETS_DIR} instead.
    */
   @Deprecated
   public static final Flag DEPRECATED_FLUTTER_ASSETS_DIR =
