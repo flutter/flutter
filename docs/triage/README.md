@@ -46,17 +46,23 @@ As discussed above, if a filed issue is unactionable due to vagueness or a lack 
 
 In the specific case of a bug with unclear steps to reproduce but very specific symptoms, we like to leave the issue open so that other people having the same problem can congregate together and maybe together we can figure out the underlying cause. This only applies to issues that have very specific symptoms like a specific and unusual crash signature, a specific and unusual error message, or other unusual and recognizable symptoms, and where some effort was made on the part of the bug reporter to determine the cause (even if that effort was ultimately futile).
 
-### Duplicates
+#### Duplicates
 
-If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, then close the bug. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
+If you recognize that this bug is a duplicate of an existing bug, add a reference to that bug in a comment, close the bug using the "Close as duplicate" option, and add `r: duplicate`. Skip the remaining steps. As you triage more and more bugs you will become more and more familiar with the existing bugs and so you will get better and better at marking duplicates in this way.
 
 When closing the duplicate bug, the GitHub issue tracker does not copy the list of people being notified on the closed bug into the original bug. This can matter, especially when asking on the original bug for things like reproduction steps. Consider cc'ing the author of the duplicate issue into the original issue, especially if we're still trying to determine reproduction steps for the issue.
 
-### Requests for help (documentation issues)
+#### Requests for help (documentation issues)
 
 If the bug report is a question, then it probably belongs in Stack Overflow or on our #help channel or some other forum for getting help. However, if it appears that the reporter did try to read our documentation to find the answer, and failed, or, if you look in our documentation and find it is inadequate here, then please consider it a documentation bug (and update the summary accordingly).
 
 If you are confident our official documentation (on flutter.dev or api.flutter.dev) fully answers their question, then provide a link to the relevant page and close the issue, being very polite and asking them to reopen if the documentation is not sufficiently clear for them.
+
+When closing an issue because it is a help request rather than an actionable issue, mark it `r: invalid`.
+
+#### Issues in other products.
+
+If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for exmaple, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
 
 ### Labels
 
@@ -120,9 +126,10 @@ Bugs relating to the website should be moved to the `flutter/website` repo.
 Once the main labels above are added, consider what additional labels could be added, in particular:
 
 - Most issues will have a general category label, such as `engine`, `framework`, `tool`, or `package`. An issue with a category-specific label (`e: *` for engine, `f: *` for framework, `t: *` for tool, `p: *` for package) should have the associated category label.
-- Add any of the applicable "c: *" labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
-- Add any of the applicable "a: *" labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
-- Issues specific to one or more platforms should have the corresponding `platform-*` label(s). However, don't add platform labels if the issue applies to every relevant platform (e.g., all platforms that a plugin supports).
+- Add any of the applicable `c: *` labels; typically only one will apply but sometimes `c: regression` will apply in conjunction with one of the others.
+- Add any of the applicable `a: *` labels. There are many, it's worth browsing the list to get an idea of which ones might apply.
+- If an issue is specific to one or more platforms, add the corresponding `platform-*` label(s). However, don't add platform labels if the issue applies to every relevant platform (e.g., all platforms that a plugin supports).
+- If a `platform-web` issue is specific to one or more browsers, add the corresponding `browser: *` label(s). As with `platform-*`, only do this when it's known to happen on some browsers but not others.
 
 ### Additional comments
 
