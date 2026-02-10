@@ -4867,9 +4867,9 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
     }
 
     for (int i = 800 * 300; i < 800 * 600; ++i) {
-      buffer[i * 4 + 0] = 0;  // Red channel
+      buffer[i * 4 + 0] = 0;    // Red channel
       buffer[i * 4 + 1] = 0;    // Green channel
-      buffer[i * 4 + 2] = 255;    // Blue channel
+      buffer[i * 4 + 2] = 255;  // Blue channel
       buffer[i * 4 + 3] = 255;  // Alpha channel (fully opaque)
     }
 
