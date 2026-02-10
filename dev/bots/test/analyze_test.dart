@@ -78,6 +78,7 @@ void main() {
       matchesErrorsInFile(
         fixture,
         endsWith: <String>[
+          'Deprecation notice must end with a line saying "This feature was deprecated after v<version> ...".',
           'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
         ],
       ),
