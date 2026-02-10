@@ -258,7 +258,13 @@ ParagraphBuilder::ParagraphBuilder(
     }
 
     if (mask & kPSFontSizeMask) {
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+      // Convert typographic points to logical pixels: 1pt = 1/72 inch,
+      // 1 logical pixel = 1/96 inch, so the fixed scale is 96/72.
+      style.font_size = fontSize * (96.0 / 72.0);
+#else
       style.font_size = fontSize;
+#endif
     }
 
     if (mask & kPSHeightMask) {
@@ -425,7 +431,11 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
     }
 
     if (mask & kTSFontSizeMask) {
+#if defined(_WIN32) || (defined(__linux__) && !defined(__ANDROID__))
+      style.font_size = fontSize * (96.0 / 72.0);
+#else
       style.font_size = fontSize;
+#endif
     }
 
     if (mask & kTSLetterSpacingMask) {

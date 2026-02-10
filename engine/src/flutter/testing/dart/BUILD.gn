@@ -7,6 +7,7 @@ import("//flutter/build/dart/rules.gni")
 tests = [
   "assets_test.dart",
   "canvas_test.dart",
+  "font_scale_test.dart",
   "channel_buffers_test.dart",
   "codec_test.dart",
   "color_filter_test.dart",
