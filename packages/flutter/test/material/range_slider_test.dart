@@ -1729,6 +1729,7 @@ void main() {
     expect(
       sliderBox,
       paints
+        ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.thumbColor)
         ..circle(color: sliderTheme.overlappingShapeStrokeColor)
         ..circle(color: sliderTheme.thumbColor),
@@ -3375,8 +3376,8 @@ void main() {
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-    // 2 thumbs and 1 overlay.
-    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
+    // 2 thumbs, 1 overlay for hover, and 1 overlay for focus.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 4));
 
     // Move away from thumb
     await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
@@ -3894,6 +3895,172 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(RangeSlider)), Size.zero);
+  });
+
+  testWidgets('RangeSlider taps should set focus on start/end thumbs', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                  onChangeStart: (RangeValues newValues) {},
+                  onChangeEnd: (RangeValues newValues) {},
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state: root focus scope has focus
+    final FocusNode initialFocus = FocusManager.instance.primaryFocus!;
+    expect(initialFocus, isNotNull);
+
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Tap near the start thumb (0.3)
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.tapAt(startThumbPos);
+    await tester.pump();
+
+    // Verify focus changed to start thumb
+    final dynamic state = tester.state(find.byType(RangeSlider));
+    expect(state.startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+
+    // Reset focus
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+
+    // Tap near the end thumb (0.7)
+    final Offset endThumbPos = topLeft + (bottomRight - topLeft) * 0.7;
+    await tester.tapAt(endThumbPos);
+    await tester.pump();
+
+    expect(state.endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
+  });
+
+  testWidgets('RangeSlider drag should set focus on start/end thumbs', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state
+    final FocusNode initialFocus = FocusManager.instance.primaryFocus!;
+    expect(initialFocus, isNotNull);
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Drag start thumb
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    final TestGesture gesture = await tester.startGesture(startThumbPos);
+    await tester.pump();
+
+    // Verify focus on start drag
+    final dynamic state = tester.state(find.byType(RangeSlider));
+    expect(state.startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+
+    await gesture.moveBy(const Offset(10, 0));
+    await gesture.up();
+    await tester.pump();
+
+    // Reset focus
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+
+    // Drag end thumb
+    final Offset endThumbPos = topLeft + (bottomRight - topLeft) * 0.7;
+    final TestGesture endGesture = await tester.startGesture(endThumbPos);
+    await tester.pump();
+
+    // Verify focus on end drag
+    expect(state.endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
+
+    await endGesture.moveBy(const Offset(-10, 0));
+    await endGesture.up();
+    await tester.pump();
+  });
+
+  testWidgets('RangeSlider tap start thumb then tab should focus end thumb', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.3, 0.7);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return RangeSlider(
+                  values: values,
+                  onChanged: (RangeValues newValues) {
+                    setState(() {
+                      values = newValues;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider));
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider));
+
+    // Tap near the start thumb (0.3)
+    final Offset startThumbPos = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.tapAt(startThumbPos);
+    await tester.pump();
+
+    // Verify start thumb has focus
+    final dynamic state = tester.state(find.byType(RangeSlider));
+    expect(state.startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+
+    // Press Tab
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    // Verify end thumb has focus
+    expect(state.endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
+    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
   });
 }
 
