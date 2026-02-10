@@ -2683,6 +2683,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // Error takes priority over hint since it requires user action.
     // Note: When an error widget is displayed (even without errorText),
     // we don't announce hintText since the visual state shows an error.
+    // TODO(flutter-zl): A follow-up using aria-describedby with element IDs
+    // will address complex cases (custom error widgets, errors outside
+    // InputDecoration, custom announcement ordering). See
+    // https://github.com/flutter/flutter/issues/180496#issuecomment-3713178684.
     final bool hasErrorWidget = decoration.error != null || decoration.errorText != null;
     final String? semanticsHint = hasErrorWidget ? decoration.errorText : decoration.hintText;
 
