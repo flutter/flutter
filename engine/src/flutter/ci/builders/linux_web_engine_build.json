@@ -27,8 +27,7 @@
         "--web",
         "--runtime-mode=release",
         "--no-rbe",
-        "--no-goma",
-        "--experimental-webparagraph"
+        "--no-goma"
       ],
       "ninja": {
         "config": "wasm_release",
