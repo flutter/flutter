@@ -1530,6 +1530,12 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // This node is already dirty, skip it.
           continue;
         }
+
+        if (node._semantics.shouldFormSemanticsNode) {
+          node._semantics.geometry = null;
+          continue;
+        }
+
         if (!node._semantics.contributesToSemanticsTree) {
           // This node merely presents its subtree in the mergeup, so we need to clear
           // the geometry for all the semantics nodes in the mergeup.
@@ -1549,6 +1555,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           }
           continue;
         }
+        // This node won't form a semantics node, but it has children that form
+        // semantics nodes. We need to clear the geometry for all the semantics
+        // nodes in the subtree.
         for (final _RenderObjectSemantics child in node._semantics._children) {
           child.geometry = null;
         }
