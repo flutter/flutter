@@ -32,7 +32,7 @@ class AndroidContext {
   struct ContextSettings {
     bool enable_validation = false;
     bool enable_gpu_tracing = false;
-    bool enable_surface_control = false;
+    bool enable_surface_control_and_hcpp = false;
     bool quiet = false;
     impeller::Flags impeller_flags;
   };

@@ -165,8 +165,8 @@ public final class FlutterShellArgs {
    *
    * <p>This is allowed in release to opt-in to this rendering feature in production.
    */
-  private static final Flag ENABLE_SURFACE_CONTROL =
-      new Flag("--enable-surface-control", "EnableSurfaceControl", true);
+  private static final Flag ENABLE_SURFACE_CONTROL_AND_HCPP =
+      new Flag("--enable-surface-control-and-hcpp", "EnableSurfaceControlAndHCPP", true);
 
   /**
    * Enables the Flutter GPU backend.
@@ -329,7 +329,7 @@ public final class FlutterShellArgs {
               OLD_GEN_HEAP_SIZE,
               ENABLE_IMPELLER,
               IMPELLER_BACKEND,
-              ENABLE_SURFACE_CONTROL,
+              ENABLE_SURFACE_CONTROL_AND_HCPP,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODE,
               IMPELLER_ANTIALIAS_LINES,

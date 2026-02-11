@@ -123,7 +123,8 @@ GetActualRenderingAPIForImpeller(
           .enable_validation = false,
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
-          .enable_surface_control = settings.enable_surface_control,
+          .enable_surface_control_and_hcpp =
+              settings.enable_surface_control_and_hcpp,
           .impeller_flags =
               {
                   .antialiased_lines =

@@ -151,6 +151,7 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
+  static const kEnableSurfaceControlAndHcpp = 'enable-surface-control-and-hcpp';
 }
 
 /// flutter command categories for usage.
@@ -1289,6 +1290,14 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       help: 'Outputs in a machine readable structured JSON format.',
       hide: !verboseHelp,
+    );
+  }
+
+  void addEnableSurfaceControlAndHcppFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-surface-control-and-hcpp',
+      hide: !verboseHelp,
+      help: 'Whether to enable surface control and hcpp on the Impeller rendering backend.',
     );
   }
 

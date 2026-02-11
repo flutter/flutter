@@ -32,7 +32,7 @@ std::shared_ptr<Context> CreateContext() {
   settings.shader_libraries_data = {};
   settings.enable_validation = false;
   settings.enable_gpu_tracing = false;
-  settings.enable_surface_control = false;
+  settings.enable_surface_control_and_hcpp = false;
 
   return ContextVK::Create(std::move(settings));
 }

@@ -46,7 +46,8 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
   }
 
   // Use AHB Swapchains if they are opted in.
-  if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
+  if (ContextVK::Cast(*context)
+          .GetShouldEnableSurfaceControlAndHCPPSwapchain() &&
       AHBSwapchainVK::IsAvailableOnPlatform()) {
     CreateTransactionCB callback =
         android_get_device_api_level() >= 34 ? cb : CreateTransactionCB({});

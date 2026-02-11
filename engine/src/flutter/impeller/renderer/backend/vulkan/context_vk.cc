@@ -490,7 +490,8 @@ void ContextVK::Setup(Settings settings) {
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
   device_name_ = std::string(physical_device_properties.deviceName);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
-  should_enable_surface_control_ = settings.enable_surface_control;
+  should_enable_surface_control_and_hcpp_ =
+      settings.enable_surface_control_and_hcpp;
   should_batch_cmd_buffers_ = !workarounds_.batch_submit_command_buffer_timeout;
   is_valid_ = true;
 
@@ -736,8 +737,8 @@ const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
   return driver_info_;
 }
 
-bool ContextVK::GetShouldEnableSurfaceControlSwapchain() const {
-  return should_enable_surface_control_ &&
+bool ContextVK::GetShouldEnableSurfaceControlAndHCPPSwapchain() const {
+  return should_enable_surface_control_and_hcpp_ &&
          CapabilitiesVK::Cast(*device_capabilities_)
              .SupportsExternalSemaphoreExtensions();
 }

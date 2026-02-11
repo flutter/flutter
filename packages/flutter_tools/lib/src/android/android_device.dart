@@ -671,6 +671,11 @@ class AndroidDevice extends Device {
         'enable-vulkan-validation',
         'true',
       ],
+      if (debuggingOptions.androidEnableSurfaceControlAndHCPP) ...<String>[
+        '--ez',
+        'enable-surface-control-and-hcpp',
+        'true',
+      ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],

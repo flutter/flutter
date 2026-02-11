@@ -359,11 +359,11 @@ TEST(ContextVKTest, AHBSwapchainCapabilitiesCanBeMissing) {
     std::shared_ptr<ContextVK> context =
         MockVulkanContextBuilder()
             .SetSettingsCallback([](ContextVK::Settings& settings) {
-              settings.enable_surface_control = true;
+              settings.enable_surface_control_and_hcpp = true;
             })
             .Build();
 
-    EXPECT_FALSE(context->GetShouldEnableSurfaceControlSwapchain());
+    EXPECT_FALSE(context->GetShouldEnableSurfaceControlAndHCPPSwapchain());
   }
 
   ContextVK::EmbedderData data;
@@ -383,12 +383,12 @@ TEST(ContextVKTest, AHBSwapchainCapabilitiesCanBeMissing) {
 
   auto context = MockVulkanContextBuilder()
                      .SetSettingsCallback([](ContextVK::Settings& settings) {
-                       settings.enable_surface_control = true;
+                       settings.enable_surface_control_and_hcpp = true;
                      })
                      .SetEmbedderData(data)
                      .Build();
 
-  EXPECT_TRUE(context->GetShouldEnableSurfaceControlSwapchain());
+  EXPECT_TRUE(context->GetShouldEnableSurfaceControlAndHCPPSwapchain());
 
 }  // namespace impeller
 

@@ -58,7 +58,8 @@ AndroidContext::ContextSettings CreateContextSettings(
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
-  settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.enable_surface_control_and_hcpp =
+      p_settings.enable_surface_control_and_hcpp;
   settings.impeller_flags.antialiased_lines =
       p_settings.impeller_antialiased_lines;
   return settings;
@@ -168,7 +169,7 @@ PlatformViewAndroid::PlatformViewAndroid(
     );
     android_surface_ = surface_factory_->CreateSurface();
     android_meets_hcpp_criteria_ =
-        delegate.OnPlatformViewGetSettings().enable_surface_control &&
+        delegate.OnPlatformViewGetSettings().enable_surface_control_and_hcpp &&
         android_get_device_api_level() >= kMinAPILevelHCPP &&
         delegate.OnPlatformViewGetSettings().enable_impeller;
     FML_CHECK(android_surface_ && android_surface_->IsValid())
@@ -560,7 +561,7 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
          android_context_->RenderingApi() ==
              AndroidRenderingAPI::kImpellerVulkan &&
          impeller::ContextVK::Cast(*android_context_->GetImpellerContext())
-             .GetShouldEnableSurfaceControlSwapchain();
+             .GetShouldEnableSurfaceControlAndHCPPSwapchain();
 }
 
 void PlatformViewAndroid::SetupImpellerContext() {

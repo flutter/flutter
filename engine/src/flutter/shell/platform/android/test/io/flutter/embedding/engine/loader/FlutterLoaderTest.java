@@ -824,11 +824,15 @@ public class FlutterLoaderTest {
   public void itSetsEnableSurfaceControlFromMetadata() {
     // Test debug mode.
     testFlagFromMetadataPresent(
-        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
+        "io.flutter.embedding.android.EnableSurfaceControlAndHCPP",
+        true,
+        "--enable-surface-control-and-hcpp");
 
     // Test release mode.
     testFlagFromMetadataPresentInReleaseMode(
-        "io.flutter.embedding.android.EnableSurfaceControl", true, "--enable-surface-control");
+        "io.flutter.embedding.android.EnableSurfaceControlAndHCPP",
+        true,
+        "--enable-surface-control-and-hcpp");
   }
 
   @Test

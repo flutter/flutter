@@ -248,6 +248,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
+    addEnableSurfaceControlAndHcppFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -264,6 +265,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableSurfaceControlAndHcpp => boolArg('enable-surface-control-and-hcpp');
   bool get enableLocalDiscovery => boolArg(RunCommand.kEnableLocalDiscovery);
 
   @override
@@ -330,6 +332,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableLocalDiscovery: enableLocalDiscovery,
+        androidEnableSurfaceControlAndHCPP: false,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -394,6 +397,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableLocalDiscovery: enableLocalDiscovery,
         webDevServerConfig: webDevServerConfig,
+        androidEnableSurfaceControlAndHCPP: enableSurfaceControlAndHcpp,
       );
     }
   }

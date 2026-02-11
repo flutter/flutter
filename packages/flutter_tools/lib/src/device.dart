@@ -1007,6 +1007,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.enableLocalDiscovery = false,
     this.webDevServerConfig,
+    this.androidEnableSurfaceControlAndHCPP = false,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1037,6 +1038,7 @@ class DebuggingOptions {
     this.debugLogsDirectoryPath,
     this.webDevServerConfig,
     this.enableLocalDiscovery = false,
+    this.androidEnableSurfaceControlAndHCPP = false,
   }) : debuggingEnabled = false,
        useTestFonts = false,
        startPaused = false,
@@ -1098,6 +1100,7 @@ class DebuggingOptions {
     required this.webEnableExposeUrl,
     required this.webUseSseForDebugProxy,
     required this.webUseSseForDebugBackend,
+    required this.androidEnableSurfaceControlAndHCPP,
     required this.webUseSseForInjectedClient,
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
@@ -1204,6 +1207,7 @@ class DebuggingOptions {
 
   /// Whether to compile to webassembly
   final bool webUseWasm;
+  final bool androidEnableSurfaceControlAndHCPP;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1329,6 +1333,7 @@ class DebuggingOptions {
     'dumpSkpOnShaderCompilation': false,
     'cacheSkSL': false,
     'enableLocalDiscovery': enableLocalDiscovery,
+    'androidEnableSurfaceControlAndHCPP': androidEnableSurfaceControlAndHCPP,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1380,6 +1385,8 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
+        androidEnableSurfaceControlAndHCPP:
+            (json['androidEnableSurfaceControlAndHCPP'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
         debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,

@@ -233,7 +233,7 @@ struct Settings {
   bool enable_flutter_gpu = false;
 
   // Enable android surface control swapchains where supported.
-  bool enable_surface_control = false;
+  bool enable_surface_control_and_hcpp = false;
 
   // Whether to lazily initialize impeller PSO state.
   bool impeller_enable_lazy_shader_mode = false;
