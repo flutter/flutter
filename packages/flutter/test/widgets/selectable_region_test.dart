@@ -6596,6 +6596,7 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     }),
+    skip: kIsWeb, // [intended] This test verifies desktop behavior.
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/181231.
@@ -6645,6 +6646,7 @@ void main() {
       expect(parentSelection, isNull);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
+    skip: kIsWeb, // [intended] Web use its native context menu.
   );
 }
 

@@ -1070,6 +1070,8 @@ class SelectableRegionState extends State<SelectableRegion>
           return;
         }
         _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+        // ignore: unnecessary_breaks
+        break;
       case TargetPlatform.iOS:
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
         // ignore: unnecessary_breaks
