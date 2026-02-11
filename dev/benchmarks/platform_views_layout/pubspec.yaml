@@ -23,13 +23,6 @@ dev_dependencies:
     sdk: flutter
   test: any
 
-dependency_overrides:
-  webview_flutter_wkwebview:
-    git:
-      url: https://github.com/okorohelijah/packages.git
-      ref: swift_force_load_packages
-      path: packages/webview_flutter/webview_flutter_wkwebview
-
 
 flutter:
   uses-material-design: true
