@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'utils.dart';
+import 'widgets_app_tester.dart';
 
 List<Widget> children(int n) {
   return List<Widget>.generate(n, (int i) {
@@ -22,7 +25,7 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(controller: controller, children: children(30)),
       ),
     );
@@ -32,7 +35,7 @@ void main() {
     controller.jumpTo(thirty + 100.0); // past the end
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(controller: controller, children: children(31)),
       ),
     );
@@ -50,7 +53,7 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(controller: controller, children: children(30)),
       ),
     );
@@ -60,7 +63,7 @@ void main() {
     controller.jumpTo(thirty + 200.0); // past the end
     await tester.pump();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(controller: controller, children: children(31)),
       ),
     );
@@ -126,7 +129,7 @@ void main() {
   testWidgets('Ability to keep a PageView at the end manually (issue 62209)', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: PageView62209()));
+    await tester.pumpWidget(const TestWidgetsApp(home: PageView62209()));
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 100'), findsNothing);
     await tester.drag(find.byType(PageView62209), const Offset(-800.0, 0.0));
@@ -154,13 +157,13 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(TextButton)); // 6
+    await tester.tap(find.byType(TestButton)); // 6
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsOneWidget);
-    await tester.tap(find.byType(TextButton)); // 7
+    await tester.tap(find.byType(TestButton)); // 7
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 6'), findsNothing);
@@ -178,7 +181,7 @@ void main() {
     expect(find.text('Page 4'), findsOneWidget);
     expect(find.text('Page 5'), findsNothing);
     expect(find.text('Page 100'), findsNothing);
-    await tester.tap(find.byType(TextButton)); // 8
+    await tester.tap(find.byType(TestButton)); // 8
     await tester.pump();
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 8'), findsNothing);
@@ -203,7 +206,7 @@ void main() {
     await tester.drag(find.byType(PageView62209), const Offset(800.0, 0.0));
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
-    await tester.tap(find.byType(TextButton)); // 9
+    await tester.tap(find.byType(TestButton)); // 9
     await tester.pump();
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 9'), findsNothing);
@@ -218,7 +221,7 @@ void main() {
     int? lastTapped;
     int? lastHovered;
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           controller: controller,
           children: List<Widget>.generate(30, (int i) {
@@ -382,23 +385,21 @@ class _PageView62209State extends State<PageView62209> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(child: Carousel62209(pages: _pages)),
-          TextButton(
-            child: const Text('ADD PAGE'),
-            onPressed: () {
-              setState(() {
-                _pages.insert(
-                  1,
-                  Carousel62209Page(key: Key('$_nextPageNum'), number: _nextPageNum++),
-                );
-              });
-            },
-          ),
-        ],
-      ),
+    return Column(
+      children: <Widget>[
+        Expanded(child: Carousel62209(pages: _pages)),
+        TestButton(
+          child: const Text('ADD PAGE'),
+          onPressed: () {
+            setState(() {
+              _pages.insert(
+                1,
+                Carousel62209Page(key: Key('$_nextPageNum'), number: _nextPageNum++),
+              );
+            });
+          },
+        ),
+      ],
     );
   }
 }

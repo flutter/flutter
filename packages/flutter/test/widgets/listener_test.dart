@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_utils.dart';
@@ -87,7 +87,7 @@ void main() {
             onPointerSignal: (PointerSignalEvent event) {
               events.add(event);
             },
-            child: Container(key: key, color: Colors.red, height: 100, width: 100),
+            child: Container(key: key, color: const Color(0xFFFF0000), height: 100, width: 100),
           ),
         ),
       );
@@ -158,7 +158,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(key: key, color: Colors.red, height: 100, width: 100),
+              child: Container(key: key, color: const Color(0xFFFF0000), height: 100, width: 100),
             ),
           ),
         ),
@@ -228,7 +228,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(key: key, color: Colors.red, height: 100, width: 100),
+              child: Container(key: key, color: const Color(0xFFFF0000), height: 100, width: 100),
             ),
           ),
         ),
@@ -300,7 +300,7 @@ void main() {
               onPointerSignal: (PointerSignalEvent event) {
                 events.add(event);
               },
-              child: Container(key: key, color: Colors.red, height: 100, width: 100),
+              child: Container(key: key, color: const Color(0xFFFF0000), height: 100, width: 100),
             ),
           ),
         ),

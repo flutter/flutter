@@ -4,7 +4,7 @@
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This test is very fragile and bypasses some zone-related checks.
@@ -44,7 +44,7 @@ void main() {
   test('WidgetBinding build rendering tree and warm up frame back to back', () {
     final fakeAsync = FakeAsync();
     fakeAsync.run((FakeAsync async) {
-      runApp(const MaterialApp(home: Material(child: Text('test'))));
+      runApp(const Directionality(textDirection: TextDirection.ltr, child: Text('test')));
       // Rendering tree is not built synchronously.
       expect(WidgetsBinding.instance.rootElement, isNull);
       fakeAsync.flushTimers();

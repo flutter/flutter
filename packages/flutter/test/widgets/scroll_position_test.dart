@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 ScrollController _controller = ScrollController(initialScrollOffset: 110.0);
@@ -34,16 +34,20 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
           key: navigatorKey,
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == '/') {
-              return MaterialPageRoute<void>(
+              return PageRouteBuilder<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 0),
                 maintainState: maintainState,
+                pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
+                  return const ThePositiveNumbers(from: 0);
+                },
               );
             } else if (settings.name == '/second') {
-              return MaterialPageRoute<void>(
+              return PageRouteBuilder<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 10000),
                 maintainState: maintainState,
+                pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) {
+                  return const ThePositiveNumbers(from: 10000);
+                },
               );
             }
             return null;
@@ -140,11 +144,14 @@ void main() {
   ) async {
     var count = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            return Text('$index', textDirection: TextDirection.ltr);
-          },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Text('$index', textDirection: TextDirection.ltr);
+            },
+          ),
         ),
       ),
     );
@@ -178,16 +185,20 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          controller: controller,
-          children: items.map<Widget>((int item) {
-            return Focus(
-              key: ValueKey<int>(item),
-              focusNode: nodes[item],
-              child: Container(height: 110),
-            );
-          }).toList(),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView(
+            controller: controller,
+            children: [
+              for (final int item in items)
+                Focus(
+                  key: ValueKey<int>(item),
+                  focusNode: nodes[item],
+                  child: Container(height: 110),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -240,15 +251,18 @@ void main() {
     var buildCount = 0;
     const double height = 500;
     await tester.pumpWidget(
-      MaterialApp(
-        home: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            buildCount += 1;
-            if (Scrollable.recommendDeferredLoadingForContext(context)) {
-              loadedWithDeferral += 1;
-            }
-            return const SizedBox(height: height);
-          },
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              buildCount += 1;
+              if (Scrollable.recommendDeferredLoadingForContext(context)) {
+                loadedWithDeferral += 1;
+              }
+              return const SizedBox(height: height);
+            },
+          ),
         ),
       ),
     );

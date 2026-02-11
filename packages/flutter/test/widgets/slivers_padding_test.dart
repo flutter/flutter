@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MockRenderSliver extends RenderSliver {
@@ -542,7 +542,7 @@ void main() {
                 padding: const EdgeInsets.only(top: 30),
                 sliver: SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Container(key: key, color: Colors.red),
+                  child: Container(key: key, color: const Color(0xFFFF0000)),
                 ),
               ),
             ],
