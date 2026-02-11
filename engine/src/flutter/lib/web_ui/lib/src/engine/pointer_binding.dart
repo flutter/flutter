@@ -890,7 +890,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     } else {
       // Original behavior for:
       // 1. Apps NOT in an iframe (normal page)
-      // 2. Custom element apps in an iframe (Flutter as a component)
+      // 2. Multi-view mode inside an iframe
       //
       // Only preventDefault when a scrollable widget handles the event.
       // This preserves native scroll behavior when Flutter can't scroll.
