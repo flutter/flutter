@@ -18,26 +18,11 @@ See also:
 
 ## Adding a New Scenario
 
-Like a regular Flutter iOS app, the Scenario app consists of the [iOS embedding
-code](ios/Scenarios/Scenarios/AppDelegate.m) and the dart logic that are
-`Scenario`s.
-
-To introduce a new subclass of [Scenario](lib/src/scenario.dart), add it to the map
-in [scenarios.dart](lib/src/scenarios.dart). For an example,
+Create a new subclass of [Scenario](lib/src/scenario.dart) and add it to the map
+in [scenarios.dart](lib/src/scenarios.dart). For an example, see
 [animated_color_square.dart](lib/src/animated_color_square.dart), which draws a
 continuously animating colored square that bounces off the sides of the
 viewport.
 
-The Scenarios app loads a `Scenario` when it receives a `set_scenario` method call
-on the `driver` platform channel from the objective-c code. However if you're
-adding a UI test this is typically not needed as you typically should add a new
-launch argument. See
-[ScenariosUITests](ios/Scenarios/ScenariosUITests/README.md) for more details.
-
-## Running a specific test
-
-The `run_ios_tests.sh` script runs all tests in the `Scenarios` project. If you're
-debugging a specific test, rebuild the `ios_debug_sim_unopt_arm64` engine variant
-(assuming testing on a simulator on Apple Silicon chips), and open
-`src/out/ios_debug_sim_unopt_arm64/ios_scenario_app/Scenarios.xcworkspace` in xcode.
-Use the xcode UI to run the test.
+Then set the scenario from the iOS app by calling `set_scenario` on platform
+channel `driver`.
