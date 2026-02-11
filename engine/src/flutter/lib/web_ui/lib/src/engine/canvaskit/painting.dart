@@ -512,32 +512,102 @@ class CkFragmentShader implements ui.FragmentShader, CkShader {
 
   @override
   ui.UniformMat2Slot getUniformMat2(String name) {
-    throw UnsupportedError('getUniformMat2 is not supported on the web.');
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 4);
+    return _CkUniformMat2Slot._(slots[0], slots[1], slots[2], slots[3]);
   }
 
   @override
   ui.UniformMat3Slot getUniformMat3(String name) {
-    throw UnsupportedError('getUniformMat3 is not supported on the web.');
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 9);
+    return _CkUniformMat3Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+    );
   }
 
   @override
   ui.UniformMat4Slot getUniformMat4(String name) {
-    throw UnsupportedError('getUniformMat4 is not supported on the web.');
+    final List<CkUniformFloatSlot> slots = _getUniformFloatSlots(name, 16);
+    return _CkUniformMat4Slot._(
+      slots[0],
+      slots[1],
+      slots[2],
+      slots[3],
+      slots[4],
+      slots[5],
+      slots[6],
+      slots[7],
+      slots[8],
+      slots[9],
+      slots[10],
+      slots[11],
+      slots[12],
+      slots[13],
+      slots[14],
+      slots[15],
+    );
   }
 
   @override
   ui.UniformArray<ui.UniformMat2Slot> getUniformMat2Array(String name) {
-    throw UnsupportedError('getUniformMat2Array is not supported on the web.');
+    return _getUniformArray<_CkUniformMat2Slot>(
+      name,
+      4,
+      (components) =>
+          _CkUniformMat2Slot._(components[0], components[1], components[2], components[3]),
+    );
   }
 
   @override
   ui.UniformArray<ui.UniformMat3Slot> getUniformMat3Array(String name) {
-    throw UnsupportedError('getUniformMat3Array is not supported on the web.');
+    return _getUniformArray<_CkUniformMat3Slot>(
+      name,
+      9,
+      (components) => _CkUniformMat3Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+      ),
+    );
   }
 
   @override
   ui.UniformArray<ui.UniformMat4Slot> getUniformMat4Array(String name) {
-    throw UnsupportedError('getUniformMat4Array is not supported on the web.');
+    return _getUniformArray<_CkUniformMat4Slot>(
+      name,
+      16,
+      (components) => _CkUniformMat4Slot._(
+        components[0],
+        components[1],
+        components[2],
+        components[3],
+        components[4],
+        components[5],
+        components[6],
+        components[7],
+        components[8],
+        components[9],
+        components[10],
+        components[11],
+        components[12],
+        components[13],
+        components[14],
+        components[15],
+      ),
+    );
   }
 
   @override
@@ -616,6 +686,134 @@ class _CkUniformVec4Slot implements ui.UniformVec4Slot {
   }
 
   final CkUniformFloatSlot _xSlot, _ySlot, _zSlot, _wSlot;
+}
+
+class _CkUniformMat2Slot implements ui.UniformMat2Slot {
+  _CkUniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
+
+  @override
+  void set(double m00, double m01, double m10, double m11) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m10.set(m10);
+    _m11.set(m11);
+  }
+
+  final CkUniformFloatSlot _m00, _m01, _m10, _m11;
+}
+
+class _CkUniformMat3Slot implements ui.UniformMat3Slot {
+  _CkUniformMat3Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m20,
+    this._m21,
+    this._m22,
+  );
+
+  @override
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m10,
+    double m11,
+    double m12,
+    double m20,
+    double m21,
+    double m22,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+  }
+
+  final CkUniformFloatSlot _m00, _m01, _m02, _m10, _m11, _m12, _m20, _m21, _m22;
+}
+
+class _CkUniformMat4Slot implements ui.UniformMat4Slot {
+  _CkUniformMat4Slot._(
+    this._m00,
+    this._m01,
+    this._m02,
+    this._m03,
+    this._m10,
+    this._m11,
+    this._m12,
+    this._m13,
+    this._m20,
+    this._m21,
+    this._m22,
+    this._m23,
+    this._m30,
+    this._m31,
+    this._m32,
+    this._m33,
+  );
+
+  @override
+  void set(
+    double m00,
+    double m01,
+    double m02,
+    double m03,
+    double m10,
+    double m11,
+    double m12,
+    double m13,
+    double m20,
+    double m21,
+    double m22,
+    double m23,
+    double m30,
+    double m31,
+    double m32,
+    double m33,
+  ) {
+    _m00.set(m00);
+    _m01.set(m01);
+    _m02.set(m02);
+    _m03.set(m03);
+    _m10.set(m10);
+    _m11.set(m11);
+    _m12.set(m12);
+    _m13.set(m13);
+    _m20.set(m20);
+    _m21.set(m21);
+    _m22.set(m22);
+    _m23.set(m23);
+    _m30.set(m30);
+    _m31.set(m31);
+    _m32.set(m32);
+    _m33.set(m33);
+  }
+
+  final CkUniformFloatSlot _m00,
+      _m01,
+      _m02,
+      _m03,
+      _m10,
+      _m11,
+      _m12,
+      _m13,
+      _m20,
+      _m21,
+      _m22,
+      _m23,
+      _m30,
+      _m31,
+      _m32,
+      _m33;
 }
 
 class _CkUniformFloatArray<T extends ui.UniformType> implements ui.UniformArray<T> {
