@@ -708,7 +708,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final ImageFilterConfig? filter = _buildFilter(CupertinoTheme.maybeBrightnessOf(context));
