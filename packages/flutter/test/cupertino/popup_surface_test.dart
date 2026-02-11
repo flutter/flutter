@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FilterTest extends StatelessWidget {
@@ -337,5 +338,28 @@ void main() {
       find.byType(CupertinoApp),
       matchesGoldenFile('cupertinoPopupSurface.composition.png'),
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/182066.
+  testWidgets('CupertinoPopupSurface uses unbounded blur', (WidgetTester tester) async {
+    void expectContainsUnboundedBlur() {
+      var foundBlur = false;
+      for (final Layer layer in tester.layers) {
+        if (layer is BackdropFilterLayer) {
+          if (layer.toString().contains('blur')) {
+            expect(layer.toString(), isNot(contains('bounds: ')));
+            foundBlur = true;
+          }
+        }
+      }
+      expect(foundBlur, isTrue);
+    }
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoPopupSurface(child: Text('X'))),
+      ),
+    );
+    expectContainsUnboundedBlur();
   });
 }
