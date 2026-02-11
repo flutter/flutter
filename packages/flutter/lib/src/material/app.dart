@@ -18,20 +18,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
-import '../widgets/_window.dart'
-    show
-        BaseWindowController,
-        DialogWindow,
-        DialogWindowController,
-        WindowEntry,
-        WindowRegistry,
-        WindowRegistryScope;
+import 'package:flutter/src/widgets/_window.dart' show WindowManager;
 
 import 'arc.dart';
 import 'button_style.dart';
 import 'colors.dart';
-import 'dialog_theme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -1170,7 +1161,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
-      child: _WindowManager(
+      child: WindowManager(
         child: HeroControllerScope(controller: _heroController, child: result),
       ),
     );
@@ -1279,194 +1270,5 @@ class _MaterialInspectorButton extends InspectorButton {
   Color _secondaryColor(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
-  }
-}
-
-class _WindowManager extends StatefulWidget {
-  _WindowManager({required this.child});
-
-  final Widget child;
-  final WindowRegistry _registry = WindowRegistry();
-
-  @override
-  State<_WindowManager> createState() => _WindowManagerState();
-}
-
-class _WindowManagerState extends State<_WindowManager> {
-  Widget _buildDialog(WindowEntry entry, DialogWindowController controller) {
-    final TextDirection? textDirection = entry.parentContext != null
-        ? Directionality.of(entry.parentContext!)
-        : null;
-    final ThemeData? themeData = entry.parentContext != null
-        ? Theme.of(entry.parentContext!)
-        : null;
-    final MediaQueryData? mediaQuery = entry.parentContext != null
-        ? MediaQuery.of(entry.parentContext!)
-        : null;
-    final Widget dialogContent = _DialogPopScope(
-      onPop: Navigator.of(entry.parentContext!).pop,
-      child: Builder(
-        builder: (BuildContext innerContext) {
-          return _FullWindowDialogWrapper(child: entry.builder(innerContext));
-        },
-      ),
-    );
-
-    return DialogWindow(
-      controller: controller,
-      child: Directionality(
-        textDirection: textDirection ?? Directionality.of(context),
-        child: Theme(
-          data: themeData ?? Theme.of(context),
-          child: MediaQuery(data: mediaQuery ?? MediaQuery.of(context), child: dialogContent),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isWindowingEnabled) {
-      return widget.child;
-    }
-
-    return WindowRegistryScope(
-      registry: widget._registry,
-      child: ListenableBuilder(
-        listenable: widget._registry,
-        builder: (BuildContext context, Widget? child) {
-          final List<Widget> subViews = widget._registry.windows.map((WindowEntry entry) {
-            final BaseWindowController controller = entry.controller;
-            if (controller is DialogWindowController) {
-              return _buildDialog(entry, controller);
-            } else {
-              throw UnimplementedError(
-                'Unsupported window controller type: ${controller.runtimeType}',
-              );
-            }
-          }).toList();
-
-          return ViewAnchor(
-            view: subViews.isNotEmpty ? ViewCollection(views: subViews) : null,
-            child: child!,
-          );
-        },
-        child: widget.child,
-      ),
-    );
-  }
-}
-
-// Wrapper that makes dialogs fill the entire window without insets or rounded corners.
-class _FullWindowDialogWrapper extends StatelessWidget {
-  const _FullWindowDialogWrapper({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
-      insetPadding: EdgeInsets.zero,
-      shape: const RoundedRectangleBorder(), // No rounded corners.
-      alignment: Alignment.topLeft, // Align to top-left so it fills from corner.
-      constraints:
-          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space.
-    );
-
-    return DialogTheme(
-      data: windowDialogTheme,
-      child: MediaQuery.removeViewInsets(
-        removeLeft: true,
-        removeTop: true,
-        removeRight: true,
-        removeBottom: true,
-        context: context,
-        child: MediaQuery.removeViewPadding(
-          removeLeft: true,
-          removeTop: true,
-          removeRight: true,
-          removeBottom: true,
-          context: context,
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// Provides a pop callback that dialog content can use.
-// Wraps content to provide a Navigator-like interface for popping.
-class _DialogPopScope extends StatelessWidget {
-  const _DialogPopScope({required this.child, this.onPop});
-
-  final Widget child;
-  final VoidCallback? onPop;
-
-  @override
-  Widget build(BuildContext context) {
-    // Wrap with PopupScope to handle back button and provide popNavigator function.
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (!didPop) {
-          onPop?.call();
-        }
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          // Provide a way for child widgets to pop using Navigator.maybePop(context)
-          // by wrapping in a minimal Navigator.
-          return _NavigatorShim(onPop: onPop, child: child);
-        },
-      ),
-    );
-  }
-}
-
-// Creates a minimal Navigator that intercepts pop calls.
-class _NavigatorShim extends StatelessWidget {
-  const _NavigatorShim({required this.child, this.onPop});
-
-  final VoidCallback? onPop;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // Create a Navigator with a single page that contains the child
-    // This allows Navigator.pop(context) calls from within the dialog to work.
-    return Navigator(
-      pages: <Page<void>>[_DialogContentPage(child: child)],
-      onPopPage: (Route<dynamic> route, dynamic result) {
-        // When the page is popped, call our onPop callback
-        onPop?.call();
-        // Return false to prevent the route from being removed from the Navigator
-        // (since we're handling the pop externally by closing the dialog window).
-        return false;
-      },
-    );
-  }
-}
-
-// A simple page for the dialog content.
-class _DialogContentPage extends Page<void> {
-  const _DialogContentPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return PageRouteBuilder<void>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) {
-            return child;
-          },
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-    );
   }
 }

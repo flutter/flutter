@@ -1440,7 +1440,7 @@ class _DialogWindowRoute<T> extends Route<T> {
     final NavigatorState? nav = navigator;
     final BuildContext? routeContext = nav?.context;
     if (routeContext != null && nav != null) {
-      _entry = WindowEntry(controller: _controller!, builder: builder, parentContext: routeContext);
+      _entry = WindowEntry(controller: _controller!, builder: builder);
       _registry?.register(_entry!);
     }
   }
@@ -1467,6 +1467,120 @@ class _DialogWindowRoute<T> extends Route<T> {
     _controller?.dispose();
     _controller = null;
     super.dispose();
+  }
+}
+
+// Wrapper that makes dialogs fill the entire window without insets or rounded corners.
+class _FullWindowDialogWrapper extends StatelessWidget {
+  const _FullWindowDialogWrapper({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final DialogThemeData windowDialogTheme = DialogTheme.of(context).copyWith(
+      insetPadding: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(), // No rounded corners.
+      alignment: Alignment.topLeft, // Align to top-left so it fills from corner.
+      constraints:
+          const BoxConstraints.expand(), // Remove default constraints so dialog can expand to fill available space.
+    );
+
+    return DialogTheme(
+      data: windowDialogTheme,
+      child: MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: MediaQuery.removeViewPadding(
+          removeLeft: true,
+          removeTop: true,
+          removeRight: true,
+          removeBottom: true,
+          context: context,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+// Provides a pop callback that dialog content can use.
+// Wraps content to provide a Navigator-like interface for popping.
+class _DialogPopScope extends StatelessWidget {
+  const _DialogPopScope({required this.child, this.onPop});
+
+  final Widget child;
+  final void Function(Object?)? onPop;
+
+  @override
+  Widget build(BuildContext context) {
+    // Wrap with PopupScope to handle back button and provide popNavigator function.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) {
+          onPop?.call(result);
+        }
+      },
+      child: Builder(
+        builder: (BuildContext context) {
+          // Provide a way for child widgets to pop using Navigator.maybePop(context)
+          // by wrapping in a minimal Navigator.
+          return _NavigatorShim(onPop: onPop, child: child);
+        },
+      ),
+    );
+  }
+}
+
+// Creates a minimal Navigator that intercepts pop calls.
+class _NavigatorShim extends StatelessWidget {
+  const _NavigatorShim({required this.child, this.onPop});
+
+  final void Function(Object?)? onPop;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a Navigator with a single page that contains the child
+    // This allows Navigator.pop(context) calls from within the dialog to work.
+    return Navigator(
+      pages: <Page<void>>[_DialogContentPage(child: child)],
+      onPopPage: (Route<dynamic> route, dynamic result) {
+        // When the page is popped, call our onPop callback
+        onPop?.call(result);
+        // Return false to prevent the route from being removed from the Navigator
+        // (since we're handling the pop externally by closing the dialog window).
+        return false;
+      },
+    );
+  }
+}
+
+// A simple page for the dialog content.
+class _DialogContentPage extends Page<void> {
+  const _DialogContentPage({required this.child});
+
+  final Widget child;
+
+  @override
+  Route<void> createRoute(BuildContext context) {
+    return PageRouteBuilder<void>(
+      settings: this,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return child;
+          },
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    );
   }
 }
 
@@ -1614,9 +1728,32 @@ Future<T?> showDialog<T>({
   if (windowingConfiguration != null && isWindowingEnabled) {
     try {
       final Size? parentSize = WindowScope.maybeContentSizeOf(context);
-      return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
+      final NavigatorState nav = Navigator.of(context, rootNavigator: useRootNavigator);
+      return nav.push<T>(
         _DialogWindowRoute<T>(
-          builder: builder,
+          builder: (BuildContext context) {
+            // Wrap the build dialog with the theme, text direcction, and media
+            // query data from the parent context.
+            final TextDirection textDirection = Directionality.of(nav.context);
+            final ThemeData themeData = Theme.of(nav.context);
+            final MediaQueryData mediaQuery = MediaQuery.of(nav.context);
+            final Widget dialogContent = _DialogPopScope(
+              onPop: Navigator.of(nav.context).pop,
+              child: Builder(
+                builder: (BuildContext innerContext) {
+                  return _FullWindowDialogWrapper(child: builder(innerContext));
+                },
+              ),
+            );
+
+            return Directionality(
+              textDirection: textDirection,
+              child: Theme(
+                data: themeData,
+                child: MediaQuery(data: mediaQuery, child: dialogContent),
+              ),
+            );
+          },
           parentController: WindowScope.maybeOf(context),
           context: context,
           settings: routeSettings,
