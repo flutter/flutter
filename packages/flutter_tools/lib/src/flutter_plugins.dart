@@ -1210,7 +1210,7 @@ Future<void> refreshPluginsList(
 
 /// Validates Swift Package Manager support for a plugin's example app.
 ///
-/// This function checks if the current project is a plugin example app and
+/// Checks if the current project is a plugin example app and
 /// validates the parent plugin's Swift Package Manager compatibility:
 /// 1. If the plugin has a podspec but no Package.swift, prompts the user to
 ///    add SPM support.
@@ -1246,9 +1246,9 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
   }
 
   final List<Plugin> plugins = await findPlugins(project);
-  final Plugin? parentPlugin = plugins.where(
-    (Plugin p) => p.name == parentProject.manifest.appName,
-  ).firstOrNull;
+  final Plugin? parentPlugin = plugins
+      .where((Plugin p) => p.name == parentProject.manifest.appName)
+      .firstOrNull;
 
   if (parentPlugin == null) {
     return;
@@ -1262,10 +1262,10 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
   for (final platform in platforms) {
     final SwiftPackageManagerPluginValidationResult result =
         validatePluginSwiftPackageManagerSupport(
-      parentPlugin,
-      fileSystem: globals.fs,
-      platform: platform,
-    );
+          parentPlugin,
+          fileSystem: globals.fs,
+          platform: platform,
+        );
 
     result.validationMessages.forEach(globals.printWarning);
   }

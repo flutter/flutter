@@ -2655,61 +2655,67 @@ flutter:
       fs = MemoryFileSystem.test();
     });
 
-    testWithoutContext('returns needsSwiftPackageManagerSupport when podspec exists but no Package.swift', () {
-      // Create a plugin with podspec but no Package.swift
-      final plugin = Plugin(
-        name: 'test_plugin',
-        path: '/path/to/test_plugin/',
-        defaultPackagePlatforms: const <String, String>{},
-        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: const <String, PluginPlatform>{
-          IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
-        },
-        dependencies: <String>[],
-        isDirectDependency: true,
-        isDevDependency: false,
-      );
+    testWithoutContext(
+      'returns needsSwiftPackageManagerSupport when podspec exists but no Package.swift',
+      () {
+        // Create a plugin with podspec but no Package.swift
+        final plugin = Plugin(
+          name: 'test_plugin',
+          path: '/path/to/test_plugin/',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        );
 
-      // Create podspec but no Package.swift
-      fs.directory('/path/to/test_plugin/ios').createSync(recursive: true);
-      fs.file('/path/to/test_plugin/ios/test_plugin.podspec').createSync();
+        // Create podspec but no Package.swift
+        fs.directory('/path/to/test_plugin/ios').createSync(recursive: true);
+        fs.file('/path/to/test_plugin/ios/test_plugin.podspec').createSync();
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+        final SwiftPackageManagerPluginValidationResult result =
+            validatePluginSwiftPackageManagerSupport(
+              plugin,
+              fileSystem: fs,
+              platform: IOSPlugin.kConfigKey,
+            );
 
-      expect(result.hasPodspec, isTrue);
-      expect(result.hasPackageSwift, isFalse);
-      expect(result.hasFlutterFrameworkDependency, isFalse);
-      expect(result.needsSwiftPackageManagerSupport, isTrue);
-      expect(result.isFullyCompatible, isFalse);
-      expect(result.validationMessages, hasLength(1));
-      expect(
-        result.validationMessages.first,
-        contains('does not have Swift Package Manager support'),
-      );
-      expect(result.validationMessages.first, contains(kSwiftPackageManagerDocsUrl));
-    });
+        expect(result.hasPodspec, isTrue);
+        expect(result.hasPackageSwift, isFalse);
+        expect(result.hasFlutterFrameworkDependency, isFalse);
+        expect(result.needsSwiftPackageManagerSupport, isTrue);
+        expect(result.isFullyCompatible, isFalse);
+        expect(result.validationMessages, hasLength(1));
+        expect(
+          result.validationMessages.first,
+          contains('does not have Swift Package Manager support'),
+        );
+        expect(result.validationMessages.first, contains(kSwiftPackageManagerDocsUrl));
+      },
+    );
 
-    testWithoutContext('returns valid when Package.swift exists with FlutterFramework dependency', () {
-      final plugin = Plugin(
-        name: 'test_plugin',
-        path: '/path/to/test_plugin/',
-        defaultPackagePlatforms: const <String, String>{},
-        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: const <String, PluginPlatform>{
-          IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
-        },
-        dependencies: <String>[],
-        isDirectDependency: true,
-        isDevDependency: false,
-      );
+    testWithoutContext(
+      'returns valid when Package.swift exists with FlutterFramework dependency',
+      () {
+        final plugin = Plugin(
+          name: 'test_plugin',
+          path: '/path/to/test_plugin/',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        );
 
-      // Create Package.swift with FlutterFramework dependency
-      fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
-      fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
+        // Create Package.swift with FlutterFramework dependency
+        fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
+        fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
 // swift-tools-version: 5.9
 import PackageDescription
 
@@ -2735,37 +2741,41 @@ let package = Package(
 )
 ''');
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+        final SwiftPackageManagerPluginValidationResult result =
+            validatePluginSwiftPackageManagerSupport(
+              plugin,
+              fileSystem: fs,
+              platform: IOSPlugin.kConfigKey,
+            );
 
-      expect(result.hasPodspec, isFalse);
-      expect(result.hasPackageSwift, isTrue);
-      expect(result.hasFlutterFrameworkDependency, isTrue);
-      expect(result.needsSwiftPackageManagerSupport, isFalse);
-      expect(result.isFullyCompatible, isTrue);
-      expect(result.validationMessages, isEmpty);
-    });
+        expect(result.hasPodspec, isFalse);
+        expect(result.hasPackageSwift, isTrue);
+        expect(result.hasFlutterFrameworkDependency, isTrue);
+        expect(result.needsSwiftPackageManagerSupport, isFalse);
+        expect(result.isFullyCompatible, isTrue);
+        expect(result.validationMessages, isEmpty);
+      },
+    );
 
-    testWithoutContext('returns warning when Package.swift exists without FlutterFramework dependency', () {
-      final plugin = Plugin(
-        name: 'test_plugin',
-        path: '/path/to/test_plugin/',
-        defaultPackagePlatforms: const <String, String>{},
-        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
-        platforms: const <String, PluginPlatform>{
-          IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
-        },
-        dependencies: <String>[],
-        isDirectDependency: true,
-        isDevDependency: false,
-      );
+    testWithoutContext(
+      'returns warning when Package.swift exists without FlutterFramework dependency',
+      () {
+        final plugin = Plugin(
+          name: 'test_plugin',
+          path: '/path/to/test_plugin/',
+          defaultPackagePlatforms: const <String, String>{},
+          pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+          platforms: const <String, PluginPlatform>{
+            IOSPlugin.kConfigKey: IOSPlugin(name: 'test_plugin', classPrefix: ''),
+          },
+          dependencies: <String>[],
+          isDirectDependency: true,
+          isDevDependency: false,
+        );
 
-      // Create Package.swift WITHOUT FlutterFramework dependency
-      fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
-      fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
+        // Create Package.swift WITHOUT FlutterFramework dependency
+        fs.directory('/path/to/test_plugin/ios/test_plugin').createSync(recursive: true);
+        fs.file('/path/to/test_plugin/ios/test_plugin/Package.swift').writeAsStringSync('''
 // swift-tools-version: 5.9
 import PackageDescription
 
@@ -2784,24 +2794,26 @@ let package = Package(
 )
 ''');
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+        final SwiftPackageManagerPluginValidationResult result =
+            validatePluginSwiftPackageManagerSupport(
+              plugin,
+              fileSystem: fs,
+              platform: IOSPlugin.kConfigKey,
+            );
 
-      expect(result.hasPodspec, isFalse);
-      expect(result.hasPackageSwift, isTrue);
-      expect(result.hasFlutterFrameworkDependency, isFalse);
-      expect(result.needsSwiftPackageManagerSupport, isFalse);
-      expect(result.isFullyCompatible, isFalse);
-      expect(result.validationMessages, hasLength(1));
-      expect(
-        result.validationMessages.first,
-        contains('is missing a dependency on FlutterFramework'),
-      );
-      expect(result.validationMessages.first, contains(kSwiftPackageManagerDocsUrl));
-    });
+        expect(result.hasPodspec, isFalse);
+        expect(result.hasPackageSwift, isTrue);
+        expect(result.hasFlutterFrameworkDependency, isFalse);
+        expect(result.needsSwiftPackageManagerSupport, isFalse);
+        expect(result.isFullyCompatible, isFalse);
+        expect(result.validationMessages, hasLength(1));
+        expect(
+          result.validationMessages.first,
+          contains('is missing a dependency on FlutterFramework'),
+        );
+        expect(result.validationMessages.first, contains(kSwiftPackageManagerDocsUrl));
+      },
+    );
 
     testWithoutContext('detects FlutterFramework dependency with product dependency syntax', () {
       final plugin = Plugin(
@@ -2839,11 +2851,12 @@ let package = Package(
 )
 ''');
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+      final SwiftPackageManagerPluginValidationResult result =
+          validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: IOSPlugin.kConfigKey,
+          );
 
       expect(result.hasFlutterFrameworkDependency, isTrue);
       expect(result.isFullyCompatible, isTrue);
@@ -2867,11 +2880,12 @@ let package = Package(
       fs.directory('/path/to/test_plugin/macos').createSync(recursive: true);
       fs.file('/path/to/test_plugin/macos/test_plugin.podspec').createSync();
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: MacOSPlugin.kConfigKey,
-      );
+      final SwiftPackageManagerPluginValidationResult result =
+          validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: MacOSPlugin.kConfigKey,
+          );
 
       expect(result.hasPodspec, isTrue);
       expect(result.hasPackageSwift, isFalse);
@@ -2900,11 +2914,12 @@ let package = Package(
         isDevDependency: false,
       );
 
-      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+      final SwiftPackageManagerPluginValidationResult result =
+          validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: IOSPlugin.kConfigKey,
+          );
 
       expect(result.hasPodspec, isFalse);
       expect(result.hasPackageSwift, isFalse);
@@ -2924,10 +2939,7 @@ let package = Package(
             classPrefix: '',
             sharedDarwinSource: true,
           ),
-          MacOSPlugin.kConfigKey: MacOSPlugin(
-            name: 'test_plugin',
-            sharedDarwinSource: true,
-          ),
+          MacOSPlugin.kConfigKey: MacOSPlugin(name: 'test_plugin', sharedDarwinSource: true),
         },
         dependencies: <String>[],
         isDirectDependency: true,
@@ -2938,28 +2950,29 @@ let package = Package(
       fs.directory('/path/to/test_plugin/darwin').createSync(recursive: true);
       fs.file('/path/to/test_plugin/darwin/test_plugin.podspec').createSync();
 
-      final SwiftPackageManagerPluginValidationResult iosResult = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: IOSPlugin.kConfigKey,
-      );
+      final SwiftPackageManagerPluginValidationResult iosResult =
+          validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: IOSPlugin.kConfigKey,
+          );
 
       expect(iosResult.hasPodspec, isTrue);
       expect(iosResult.hasPackageSwift, isFalse);
       expect(iosResult.needsSwiftPackageManagerSupport, isTrue);
 
-      final SwiftPackageManagerPluginValidationResult macosResult = validatePluginSwiftPackageManagerSupport(
-        plugin,
-        fileSystem: fs,
-        platform: MacOSPlugin.kConfigKey,
-      );
+      final SwiftPackageManagerPluginValidationResult macosResult =
+          validatePluginSwiftPackageManagerSupport(
+            plugin,
+            fileSystem: fs,
+            platform: MacOSPlugin.kConfigKey,
+          );
 
       expect(macosResult.hasPodspec, isTrue);
       expect(macosResult.hasPackageSwift, isFalse);
       expect(macosResult.needsSwiftPackageManagerSupport, isTrue);
     });
   });
-
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {

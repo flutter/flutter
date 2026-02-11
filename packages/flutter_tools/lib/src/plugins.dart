@@ -530,7 +530,8 @@ class PluginInterfaceResolution {
 typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});
 
 /// The URL for documentation on adding Swift Package Manager support to a plugin.
-const String kSwiftPackageManagerDocsUrl = 'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors';
+const String kSwiftPackageManagerDocsUrl =
+    'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors';
 
 /// The result of validating a plugin's Swift Package Manager compatibility.
 class SwiftPackageManagerPluginValidationResult {
@@ -546,8 +547,7 @@ class SwiftPackageManagerPluginValidationResult {
   final bool hasFlutterFrameworkDependency;
   final List<String> validationMessages;
 
-  bool get isFullyCompatible =>
-      hasPackageSwift && hasFlutterFrameworkDependency;
+  bool get isFullyCompatible => hasPackageSwift && hasFlutterFrameworkDependency;
 
   bool get needsSwiftPackageManagerSupport => hasPodspec && !hasPackageSwift;
 }
@@ -622,16 +622,12 @@ bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
 
   try {
     final String contents = packageSwiftFile.readAsStringSync();
-    final bool hasPackageDependency = contents.contains(RegExp(
-      r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"',
-    )) || contents.contains(RegExp(
-      r'\.package\s*\(\s*path\s*:\s*"[^"]*FlutterFramework[^"]*"',
-    ));
-    final bool hasTargetDependency = contents.contains(RegExp(
-      r'package\s*:\s*"FlutterFramework"',
-    )) || contents.contains(RegExp(
-      r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"',
-    ));
+    final bool hasPackageDependency =
+        contents.contains(RegExp(r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"')) ||
+        contents.contains(RegExp(r'\.package\s*\(\s*path\s*:\s*"[^"]*FlutterFramework[^"]*"'));
+    final bool hasTargetDependency =
+        contents.contains(RegExp(r'package\s*:\s*"FlutterFramework"')) ||
+        contents.contains(RegExp(r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"'));
 
     return hasPackageDependency || hasTargetDependency;
   } on FileSystemException {
