@@ -568,4 +568,42 @@ needs to be wrapped.
     await validCompleter.future;
     await errorCompleter.future;
   });
+
+  testWithoutContext('formatTable', () {
+    expect(formatTable(<List<String>>[]), isEmpty);
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['Col1', 'Col2'],
+        <String>['Value1', 'Value2'],
+      ]),
+      <String>['Col1   • Col2', 'Value1 • Value2'],
+    );
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B', 'C'],
+        <String>['LongValue', 'Short', 'Tiny'],
+      ]),
+      <String>['A         • B     • C', 'LongValue • Short • Tiny'],
+    );
+
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B'],
+        <String>['1', '2'],
+      ], separator: ' | '),
+      <String>['A | B', '1 | 2'],
+    );
+  });
+
+  testWithoutContext('formatTable with indent', () {
+    expect(
+      formatTable(<List<String>>[
+        <String>['A', 'B'],
+        <String>['1', '2'],
+      ], indent: 2),
+      <String>['  A • B', '  1 • 2'],
+    );
+  });
 }

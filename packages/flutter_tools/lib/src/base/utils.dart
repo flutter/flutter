@@ -611,3 +611,30 @@ extension StackTraceTransform<T> on Stream<T> {
 final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
   (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
 );
+
+/// Formats a list of rows into a table with aligned columns.
+///
+/// [table] is a list of rows, where each row is a list of strings.
+/// [separator] is the string used to separate columns (default is ' • ').
+///
+/// Returns a list of strings, where each string is a formatted row.
+List<String> formatTable(List<List<String>> table, {String separator = ' • ', int indent = 0}) {
+  if (table.isEmpty) {
+    return <String>[];
+  }
+
+  // Calculate column widths
+  final indices = List<int>.generate(table[0].length - 1, (int i) => i);
+  List<int> widths = indices.map<int>((int i) => 0).toList();
+  for (final row in table) {
+    widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+  }
+
+  final String indentString = ' ' * indent;
+
+  // Join columns into lines of text
+  return <String>[
+    for (final List<String> row in table)
+      '$indentString${indices.map<String>((int i) => row[i].padRight(widths[i])).followedBy(<String>[row.last]).join(separator)}',
+  ];
+}
