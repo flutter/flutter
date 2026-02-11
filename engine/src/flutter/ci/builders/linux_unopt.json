@@ -16,6 +16,7 @@
                 "debug",
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
+                "--asan",
                 "--dart-debug",
                 "--rbe",
                 "--no-goma"
@@ -59,7 +60,6 @@
                     "name": "test: Host_Tests_for_host_debug_unopt",
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
-                        "--quiet",
                         "--logs-dir",
                         "${FLUTTER_LOGS_DIR}",
                         "--variant",
@@ -101,7 +101,8 @@
                     "language": "python3",
                     "script": "flutter/tools/gn_test.py"
                 }
-            ]
+            ],
+            "timeout": 120
         },
         {
             "archives": [],
