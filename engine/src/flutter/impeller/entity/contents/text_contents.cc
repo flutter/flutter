@@ -265,8 +265,27 @@ bool TextContents::Render(const ContentContext& renderer,
 
   SamplerDescriptor sampler_desc;
   if (is_translation_scale) {
-    sampler_desc.min_filter = MinMagFilter::kNearest;
-    sampler_desc.mag_filter = MinMagFilter::kNearest;
+    // When the transform is translation+scale only, we normally use nearest-
+    // neighbor sampling for pixel-perfect text.  However, if the X and Y
+    // scales differ significantly (non-uniform / anisotropic scaling, e.g.
+    // Transform.scale(scaleY: 2)), the glyph atlas entry is rasterized at
+    // max(|scaleX|,|scaleY|) uniformly and the compensating unscaled_basis
+    // squeezes one axis, causing a minification.  Nearest-neighbor during
+    // minification discards texel columns/rows, producing jagged diagonals
+    // and varying stroke weights.  Fall back to bilinear in that case.
+    // See https://github.com/flutter/flutter/issues/182143
+    Scalar sx = std::abs(entity_transform.GetBasisX().GetLength());
+    Scalar sy = std::abs(entity_transform.GetBasisY().GetLength());
+    Scalar ratio = (sx > sy) ? sx / std::max(sy, 0.001f)
+                             : sy / std::max(sx, 0.001f);
+    if (ratio > 1.15f) {
+      // Non-uniform scale — use bilinear to avoid aliasing.
+      sampler_desc.min_filter = MinMagFilter::kLinear;
+      sampler_desc.mag_filter = MinMagFilter::kLinear;
+    } else {
+      sampler_desc.min_filter = MinMagFilter::kNearest;
+      sampler_desc.mag_filter = MinMagFilter::kNearest;
+    }
   } else {
     // Currently, we only propagate the scale of the transform to the atlas
     // renderer, so if the transform has more than just a translation, we turn
