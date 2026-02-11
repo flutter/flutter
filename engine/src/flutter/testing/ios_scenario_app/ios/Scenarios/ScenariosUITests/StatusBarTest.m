@@ -16,10 +16,6 @@
 }
 
 - (void)testTapStatusBar {
-  XCUIElement* textField = self.application.textFields[@"handleScrollToTop"];
-  BOOL exists = [textField waitForExistenceWithTimeout:1];
-  XCTAssertFalse(exists, @"");
-
   XCUIApplication* systemApp =
       [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
   XCUIElement* statusBar = [systemApp.statusBars firstMatch];
@@ -29,7 +25,21 @@
     XCUICoordinate* coordinates = [statusBar coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
     [coordinates tap];
   }
-  exists = [textField waitForExistenceWithTimeout:1];
+
+  XCUIElement* addTextField =
+      self.application
+          .textFields[@"0,PointerChange.add,device=0,buttons=0,signalKind=PointerSignalKind.none"];
+  BOOL exists = [addTextField waitForExistenceWithTimeout:1];
+  XCTAssertTrue(exists, @"");
+  XCUIElement* downTextField =
+      self.application
+          .textFields[@"1,PointerChange.down,device=0,buttons=0,signalKind=PointerSignalKind.none"];
+  exists = [downTextField waitForExistenceWithTimeout:1];
+  XCTAssertTrue(exists, @"");
+  XCUIElement* upTextField =
+      self.application
+          .textFields[@"2,PointerChange.up,device=0,buttons=0,signalKind=PointerSignalKind.none"];
+  exists = [upTextField waitForExistenceWithTimeout:1];
   XCTAssertTrue(exists, @"");
 }
 
