@@ -250,24 +250,13 @@ class SkwasmFragmentProgram extends SkwasmObjectWrapper<RawRuntimeEffect>
 
   int get uniformSize => runtimeEffectGetUniformSize(handle);
 
-  int _getShaderIndex(String name, int index, [int? expectedSize]) {
-    var result = 0;
+  UniformData _getUniformFloatInfo(String name) {
     for (final UniformData uniform in _shaderData.uniforms) {
       if (uniform.name == name) {
-        if (index < 0 || index >= uniform.floatCount) {
-          throw IndexError.withLength(index, uniform.floatCount);
-        }
-        if (expectedSize != null && uniform.floatCount != expectedSize) {
-          throw ArgumentError(
-            'Uniform `$name` has size ${uniform.floatCount}, not size $expectedSize.',
-          );
-        }
-        result += index;
-        break;
+        return uniform;
       }
-      result += uniform.floatCount;
     }
-    return result;
+    throw ArgumentError('No uniform named "$name".');
   }
 }
 
@@ -383,8 +372,11 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   @override
   ui.UniformFloatSlot getUniformFloat(String name, [int? index]) {
     index ??= 0;
-    final int shaderIndex = _program._getShaderIndex(name, index);
-    return SkwasmUniformFloatSlot._(this, index, name, shaderIndex);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    IndexError.check(index, info.floatCount, message: 'Index `$index` out of bounds for `$name`.');
+
+    return SkwasmUniformFloatSlot._(this, index, name, info.floatOffset + index);
   }
 
   @override
@@ -411,10 +403,15 @@ class SkwasmFragmentShader implements SkwasmShader, ui.FragmentShader {
   }
 
   List<SkwasmUniformFloatSlot> _getUniformFloatSlots(String name, int size) {
-    final int baseShaderIndex = _program._getShaderIndex(name, 0, size);
+    final UniformData info = _program._getUniformFloatInfo(name);
+
+    if (info.floatCount != size) {
+      throw ArgumentError('Uniform `$name` has size ${info.floatCount}, not size $size.');
+    }
+
     return List<SkwasmUniformFloatSlot>.generate(
       size,
-      (i) => SkwasmUniformFloatSlot._(this, i, name, baseShaderIndex),
+      (i) => SkwasmUniformFloatSlot._(this, i, name, info.floatOffset + i),
     );
   }
 }
