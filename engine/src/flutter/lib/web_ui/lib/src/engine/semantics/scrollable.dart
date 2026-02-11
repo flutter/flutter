@@ -122,56 +122,55 @@ class SemanticScrollable extends SemanticRole {
       _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
       _scrollOverflowElement!.style
         ..position = 'absolute'
-          ..transformOrigin = '0 0 0'
-          // Ignore pointer events since this is a dummy element.
-          ..pointerEvents = 'none';
-        append(_scrollOverflowElement!);
-      }
+        ..transformOrigin = '0 0 0'
+        // Ignore pointer events since this is a dummy element.
+        ..pointerEvents = 'none';
+      append(_scrollOverflowElement!);
+    }
 
-      semanticsObject.owner.addOneTimePostUpdateCallback(() {
-        if (_canScroll) {
-          final double? scrollPosition = semanticsObject.scrollPosition;
-          assert(scrollPosition != null);
-          if (scrollPosition != _domScrollPosition) {
-            element.scrollTop = scrollPosition!;
-            _previousDomScrollPosition = _domScrollPosition;
-          }
+    semanticsObject.owner.addOneTimePostUpdateCallback(() {
+      if (_canScroll) {
+        final double? scrollPosition = semanticsObject.scrollPosition;
+        assert(scrollPosition != null);
+        if (scrollPosition != _domScrollPosition) {
+          element.scrollTop = scrollPosition!;
+          _previousDomScrollPosition = _domScrollPosition;
         }
-        _updateScrollableState();
-        semanticsObject.recomputePositionAndSize();
-        semanticsObject.updateChildrenPositionAndSize();
-      });
-
-      _updateCssOverflow();
-
-      if (scrollListener == null) {
-        // We need to set touch-action:none explicitly here, despite the fact
-        // that we already have it on the <body> tag because overflow:scroll
-        // still causes the browser to take over pointer events in order to
-        // process scrolling. We don't want that when scrolling is handled by
-        // the framework.
-        //
-        // This is effective only in Chrome. Safari does not implement this
-        // CSS property. In Safari the `PointerBinding` uses `preventDefault`
-        // to prevent browser scrolling.
-        element.style.touchAction = 'none';
-
-        // Memoize the tear-off because Dart does not guarantee that two
-        // tear-offs of a method on the same instance will produce the same
-        // object.
-        _gestureModeListener = (_) {
-          _updateCssOverflow();
-        };
-        EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
-
-        scrollListener = createDomEventListener((DomEvent _) {
-          if (!_canScroll) {
-            return;
-          }
-          _recomputeScrollPosition();
-        });
-        addEventListener('scroll', scrollListener);
       }
+      _updateScrollableState();
+      semanticsObject.recomputePositionAndSize();
+      semanticsObject.updateChildrenPositionAndSize();
+    });
+
+    _updateCssOverflow();
+
+    if (scrollListener == null) {
+      // We need to set touch-action:none explicitly here, despite the fact
+      // that we already have it on the <body> tag because overflow:scroll
+      // still causes the browser to take over pointer events in order to
+      // process scrolling. We don't want that when scrolling is handled by
+      // the framework.
+      //
+      // This is effective only in Chrome. Safari does not implement this
+      // CSS property. In Safari the `PointerBinding` uses `preventDefault`
+      // to prevent browser scrolling.
+      element.style.touchAction = 'none';
+
+      // Memoize the tear-off because Dart does not guarantee that two
+      // tear-offs of a method on the same instance will produce the same
+      // object.
+      _gestureModeListener = (_) {
+        _updateCssOverflow();
+      };
+      EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
+
+      scrollListener = createDomEventListener((DomEvent _) {
+        if (!_canScroll) {
+          return;
+        }
+        _recomputeScrollPosition();
+      });
+      addEventListener('scroll', scrollListener);
     }
   }
 
