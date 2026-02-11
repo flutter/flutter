@@ -598,6 +598,23 @@ void main() {
   }
 
   testWidgets(
+    'Tapping the status bar scrolls to top',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(500.0);
+      expect(scrollable.position.pixels, equals(500.0));
+      await tester.tapAt(const Offset(100.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(scrollable.position.pixels, equals(0.0));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
     'No status bar when primary is false',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -675,43 +692,51 @@ void main() {
     }),
   );
 
-  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (
-    WidgetTester tester,
-  ) async {
-    const duration = 1000;
-    final stops = <double>[0.842, 0.959, 0.993, 1.0];
-    const double scrollOffset = 1000;
+  testWidgets(
+    'Tapping the status bar scrolls to top with ease out curve animation',
+    (WidgetTester tester) async {
+      const duration = 1000;
+      final stops = <double>[0.842, 0.959, 0.993, 1.0];
+      const double scrollOffset = 1000;
 
-    await tester.pumpWidget(buildStatusBarTestApp(null));
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(scrollOffset);
+      await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(scrollOffset);
+      await tester.tapAt(const Offset(100.0, 10.0));
 
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('handleScrollToTop'),
-    );
-    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.statusBar.name,
-      message,
-      (ByteData? data) {},
-    );
+      await tester.pump(Duration.zero);
+      expect(scrollable.position.pixels, equals(scrollOffset));
 
-    await tester.pump(Duration.zero);
-    expect(scrollable.position.pixels, equals(scrollOffset));
+      for (var i = 0; i < stops.length; i++) {
+        await tester.pump(Duration(milliseconds: duration ~/ stops.length));
+        // Scroll pixel position is very long double, compare with floored int
+        // pixel position
+        expect(scrollable.position.pixels.toInt(), equals((scrollOffset * (1 - stops[i])).toInt()));
+      }
 
-    for (var i = 0; i < stops.length; i++) {
-      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
-      // Scroll pixel position is very long double, compare with floored int
-      // pixel position
-      expect(
-        scrollable.position.pixels.toInt(),
-        equals((scrollOffset * (1 - stops[i])).toInt()),
-        reason: 'stop $i',
-      );
-    }
+      // Finally stops at the top.
+      expect(scrollable.position.pixels, equals(0.0));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
 
-    // Finally stops at the top.
-    expect(scrollable.position.pixels, equals(0.0));
-  });
+  testWidgets(
+    'Tapping the status bar does not scroll to top',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(buildStatusBarTestApp(TargetPlatform.android));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(500.0);
+      expect(scrollable.position.pixels, equals(500.0));
+      await tester.tapAt(const Offset(100.0, 10.0));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(scrollable.position.pixels, equals(500.0));
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+  );
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
