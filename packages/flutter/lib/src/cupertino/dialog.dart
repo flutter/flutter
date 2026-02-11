@@ -679,6 +679,8 @@ class CupertinoPopupSurface extends StatelessWidget {
   /// Defaults to true.
   static bool debugIsVibrancePainted = true;
 
+  // TODO(davidhicks980): Set `bounded` to true on ImageFilterConfig.blur after
+  // https://github.com/flutter/flutter/issues/182066 is resolved.
   ImageFilterConfig? _buildFilter(Brightness? brightness) {
     var isVibrancePainted = true;
     assert(() {
@@ -689,7 +691,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       if (blurSigma == 0) {
         return null;
       }
-      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: true);
+      return ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma);
     }
 
     final colorFilter = ImageFilterConfig(switch (brightness) {
@@ -703,7 +705,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 
     return ImageFilterConfig.compose(
       inner: colorFilter,
-      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma, bounded: true),
+      outer: ImageFilterConfig.blur(sigmaX: blurSigma, sigmaY: blurSigma),
     );
   }
 
