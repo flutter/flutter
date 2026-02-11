@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
+import android.app.UiModeManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -64,15 +65,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityBridgeTest {
 
-  private static final int ACCESSIBILITY_FEATURE_NAVIGATION = 1 << 0;
-  private static final int ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS = 1 << 2;
-  private static final int ACCESSIBILITY_FEATURE_BOLD_TEXT = 1 << 3;
-  private static final int ACCESSIBILITY_FEATURE_NO_ANNOUNCE = 1 << 7;
+    private static final int ACCESSIBILITY_FEATURE_NAVIGATION = 1 << 0;
+    private static final int ACCESSIBILITY_FEATURE_INVERT_COLORS = 1 << 1;
+    private static final int ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS = 1 << 2;
+    private static final int ACCESSIBILITY_FEATURE_BOLD_TEXT = 1 << 3;
+    private static final int ACCESSIBILITY_FEATURE_HIGH_CONTRAST = 1 << 5;
+    private static final int ACCESSIBILITY_FEATURE_NO_ANNOUNCE = 1 << 7;
 
   @Test
   public void itDescribesNonTextFieldsWithAContentDescription() {
@@ -161,7 +165,7 @@ public class AccessibilityBridgeTest {
         /* contentResolver= */ null,
         /* accessibilityViewEmbedder= */ mockViewEmbedder,
         /* platformViewsAccessibilityDelegate= */ null);
-    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+      verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
   }
 
   @Test
@@ -238,20 +242,17 @@ public class AccessibilityBridgeTest {
     verify(mockManager).addTouchExplorationStateChangeListener(listenerCaptor.capture());
 
     assertFalse(accessibilityBridge.getAccessibleNavigation());
-    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Simulate assistive technology accessing accessibility tree.
     accessibilityBridge.createAccessibilityNodeInfo(0);
-    verify(mockChannel)
-        .setAccessibilityFeatures(
-            ACCESSIBILITY_FEATURE_NAVIGATION | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
-    assertTrue(accessibilityBridge.getAccessibleNavigation());
+    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NAVIGATION | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
 
     // Simulate turning off TalkBack.
     reset(mockChannel);
     listenerCaptor.getValue().onTouchExplorationStateChanged(false);
-    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     assertFalse(accessibilityBridge.getAccessibleNavigation());
   }
 
@@ -1412,7 +1413,7 @@ public class AccessibilityBridgeTest {
             /* accessibilityViewEmbedder= */ mockViewEmbedder,
             /* platformViewsAccessibilityDelegate= */ null);
 
-    verify(mockChannel)
+    verify(mockChannel, atLeastOnce())
         .setAccessibilityFeatures(
             ACCESSIBILITY_FEATURE_BOLD_TEXT | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
@@ -1446,7 +1447,158 @@ public class AccessibilityBridgeTest {
     Settings.Global.putFloat(null, "transition_animation_scale", 1.0f);
   }
 
-  @Test
+    @Test
+    public void itSetsInvertColorsFlagBasedOnSecureSetting() {
+        AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+        ContentResolver realContentResolver = RuntimeEnvironment.getApplication().getContentResolver();
+        ContentResolver spyContentResolver = spy(realContentResolver);
+
+        AccessibilityBridge accessibilityBridge =
+                setUpBridge(
+                        /* rootAccessibilityView= */ null,
+                        /* accessibilityChannel= */ mockChannel,
+                        /* accessibilityManager= */ null,
+                        /* contentResolver= */ spyContentResolver,
+                        /* accessibilityViewEmbedder= */ null,
+                        /* platformViewsAccessibilityDelegate= */ null);
+
+        ArgumentCaptor<ContentObserver> observerCaptor = ArgumentCaptor.forClass(ContentObserver.class);
+        verify(spyContentResolver)
+                .registerContentObserver(
+                        eq(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED)),
+                        eq(false),
+                        observerCaptor.capture());
+        ContentObserver observer = observerCaptor.getValue();
+
+        reset(mockChannel);
+
+        Settings.Secure.putInt(
+                spyContentResolver, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 1);
+        observer.onChange(false);
+
+        ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+        assertEquals(ACCESSIBILITY_FEATURE_INVERT_COLORS, (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_INVERT_COLORS));
+
+        reset(mockChannel);
+
+        Settings.Secure.putInt(
+                spyContentResolver, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0);
+        observer.onChange(false);
+
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+        assertNotEquals(ACCESSIBILITY_FEATURE_INVERT_COLORS, (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_INVERT_COLORS));
+    }
+
+    @Config(sdk = API_LEVELS.API_34)
+    @TargetApi(API_LEVELS.API_34)
+    @Test
+    public void itSetsHighContrastFlagBasedOnUiModeManager() {
+        AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+        AccessibilityManager mockManager = mock(AccessibilityManager.class);
+        View mockRootView = mock(View.class);
+        Context context = mock(Context.class);
+        UiModeManager mockUiModeManager = mock(UiModeManager.class);
+
+        when(mockRootView.getContext()).thenReturn(context);
+        when(context.getSystemService(Context.UI_MODE_SERVICE)).thenReturn(mockUiModeManager);
+        when(context.getMainExecutor()).thenReturn(RuntimeEnvironment.getApplication().getMainExecutor());
+
+        when(mockUiModeManager.getContrast()).thenReturn(1.0f);
+
+        AccessibilityBridge accessibilityBridge =
+                setUpBridge(
+                        /* rootAccessibilityView= */ mockRootView,
+                        /* accessibilityChannel= */ mockChannel,
+                        /* accessibilityManager= */ mockManager,
+                        /* contentResolver= */ null,
+                        /* accessibilityViewEmbedder= */ null,
+                        /* platformViewsAccessibilityDelegate= */ null);
+
+        ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+        assertEquals(ACCESSIBILITY_FEATURE_HIGH_CONTRAST, (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
+    }
+
+
+    @Config(sdk = API_LEVELS.API_34)
+    @TargetApi(API_LEVELS.API_34)
+    @Test
+    public void itUpdatesHighContrastFlagOnChangeListener() {
+        AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+        AccessibilityManager mockManager = mock(AccessibilityManager.class);
+        View mockRootView = mock(View.class);
+        Context context = mock(Context.class);
+        UiModeManager mockUiModeManager = mock(UiModeManager.class);
+
+        when(mockRootView.getContext()).thenReturn(context);
+        when(context.getSystemService(Context.UI_MODE_SERVICE)).thenReturn(mockUiModeManager);
+        when(context.getMainExecutor()).thenReturn(RuntimeEnvironment.getApplication().getMainExecutor());
+
+        when(mockUiModeManager.getContrast()).thenReturn(0.0f);
+
+        AccessibilityBridge accessibilityBridge =
+                setUpBridge(
+                        /* rootAccessibilityView= */ mockRootView,
+                        /* accessibilityChannel= */ mockChannel,
+                        /* accessibilityManager= */ mockManager,
+                        /* contentResolver= */ null,
+                        /* accessibilityViewEmbedder= */ null,
+                        /* platformViewsAccessibilityDelegate= */ null);
+
+        ArgumentCaptor<UiModeManager.ContrastChangeListener> listenerCaptor =
+                ArgumentCaptor.forClass(UiModeManager.ContrastChangeListener.class);
+        verify(mockUiModeManager).addContrastChangeListener(any(), listenerCaptor.capture());
+        UiModeManager.ContrastChangeListener listener = listenerCaptor.getValue();
+
+        reset(mockChannel);
+
+        when(mockUiModeManager.getContrast()).thenReturn(0.5f);
+        listener.onContrastChanged(0.5f);
+
+        ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+        assertTrue(
+                (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST)
+                        == ACCESSIBILITY_FEATURE_HIGH_CONTRAST);
+
+        reset(mockChannel);
+
+        when(mockUiModeManager.getContrast()).thenReturn(0.0f);
+        listener.onContrastChanged(0.0f);
+
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+        assertNotEquals(ACCESSIBILITY_FEATURE_HIGH_CONTRAST, (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
+    }
+
+    @Config(sdk = API_LEVELS.API_33)
+    @TargetApi(API_LEVELS.API_33)
+    @Test
+    public void itDoesNotSetHighContrastFlagOnOldApi() {
+        AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+        AccessibilityManager mockManager = mock(AccessibilityManager.class);
+        View mockRootView = mock(View.class);
+        Context context = mock(Context.class);
+
+        when(mockRootView.getContext()).thenReturn(context);
+        AccessibilityBridge accessibilityBridge =
+                setUpBridge(
+                        /* rootAccessibilityView= */ mockRootView,
+                        /* accessibilityChannel= */ mockChannel,
+                        /* accessibilityManager= */ mockManager,
+                        /* contentResolver= */ null,
+                        /* accessibilityViewEmbedder= */ null,
+                        /* platformViewsAccessibilityDelegate= */ null);
+
+        ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
+
+        assertNotEquals(ACCESSIBILITY_FEATURE_HIGH_CONTRAST, (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
+
+        verify(context, never()).getSystemService(Context.UI_MODE_SERVICE);
+    }
+
+    @Test
   public void itSetsFocusedNodeBeforeSendingEvent() {
     BasicMessageChannel mockChannel = mock(BasicMessageChannel.class);
     AccessibilityChannel accessibilityChannel =
@@ -2178,13 +2330,13 @@ public class AccessibilityBridgeTest {
     ContentObserver observer = observerCaptor.getValue();
 
     // Initial state
-    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
 
     // Animations are disabled
     Settings.Global.putFloat(mockContentResolver, "transition_animation_scale", 0.0f);
     observer.onChange(false);
-    verify(mockChannel)
+    verify(mockChannel, atLeastOnce())
         .setAccessibilityFeatures(
             ACCESSIBILITY_FEATURE_DISABLE_ANIMATIONS | ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
     reset(mockChannel);
@@ -2192,7 +2344,7 @@ public class AccessibilityBridgeTest {
     // Animations are enabled
     Settings.Global.putFloat(mockContentResolver, "transition_animation_scale", 1.0f);
     observer.onChange(false);
-    verify(mockChannel).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
+    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(ACCESSIBILITY_FEATURE_NO_ANNOUNCE);
   }
 
   @Test

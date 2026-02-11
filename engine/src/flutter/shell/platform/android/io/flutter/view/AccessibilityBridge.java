@@ -42,7 +42,6 @@ import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Predicate;
@@ -155,10 +154,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // an embedded view in the accessibility tree.
   @NonNull private final PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate;
 
-  // Android's {@link ContentResolver}, which is used to observe the global
-  // TRANSITION_ANIMATION_SCALE,
-  // which determines whether Flutter's animations should be enabled or disabled for accessibility
-  // purposes.
+  // Android's {@link ContentResolver}, which is used to query for system-wide accessibility
+  // settings, such as animation transition scales and high contrast mode.
   @NonNull private final ContentResolver contentResolver;
 
   // The entire Flutter semantics tree of the running Flutter app, stored as a Map
@@ -423,46 +420,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   private final AccessibilityManager.TouchExplorationStateChangeListener
       touchExplorationStateChangeListener;
 
+  // Listener that is notified when the high contrast mode is turned on/off.
+  // This is a UiModeManager.ContrastChangeListener on API 34+, null otherwise.
+  // Type is Object to avoid requiring API 34 for the field declaration.
   private final Object highContrastObserver;
 
-  private final ContentObserver invertColorsObserver =
-      new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-          setInvertColorsFlag();
-        }
-      };
+  // Listener that is notified when the invert colors flag is turned on/off.
+  private final AccessibilityFeatureObserver invertColorsObserver;
 
   // Listener that is notified when the global TRANSITION_ANIMATION_SCALE. When this scale goes
   // to zero, we instruct Flutter to disable animations.
-  private final ContentObserver animationScaleObserver =
-      new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-          this.onChange(selfChange, null);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-          if (isReleased) {
-            return;
-          }
-          // Retrieve the current value of TRANSITION_ANIMATION_SCALE from the OS.
-          float value =
-              Settings.Global.getFloat(
-                  contentResolver,
-                  Settings.Global.TRANSITION_ANIMATION_SCALE,
-                  DEFAULT_TRANSITION_ANIMATION_SCALE);
-
-          boolean shouldAnimationsBeDisabled = value == DISABLED_TRANSITION_ANIMATION_SCALE;
-          if (shouldAnimationsBeDisabled) {
-            accessibilityFeatureFlags |= AccessibilityFeature.DISABLE_ANIMATIONS.value;
-          } else {
-            accessibilityFeatureFlags &= ~AccessibilityFeature.DISABLE_ANIMATIONS.value;
-          }
-          sendLatestAccessibilityFlagsToFlutter();
-        }
-      };
+  private final AccessibilityFeatureObserver animationScaleObserver;
 
   public AccessibilityBridge(
       @NonNull View rootAccessibilityView,
@@ -477,6 +445,85 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         contentResolver,
         new AccessibilityViewEmbedder(rootAccessibilityView, MIN_ENGINE_GENERATED_NODE_ID),
         platformViewsAccessibilityDelegate);
+  }
+
+  /**
+   * Base class for ContentObserver that monitors accessibility features. Handles feature state
+   * updates and provides template method for feature detection.
+   */
+  private abstract class AccessibilityFeatureObserver extends ContentObserver {
+    protected final AccessibilityFeature feature;
+
+    AccessibilityFeatureObserver(AccessibilityFeature feature) {
+      super(new Handler());
+      this.feature = feature;
+    }
+
+    @Override
+    public void onChange(boolean selfChange) {
+      onChange(selfChange, null);
+    }
+
+    @Override
+    public void onChange(boolean selfChange, Uri uri) {
+      if (isReleased) {
+        return;
+      }
+      updateAccessibilityFeature(feature, isFeatureEnabled());
+    }
+
+
+    protected abstract boolean isFeatureEnabled();
+
+    void initialize() {
+      updateAccessibilityFeature(feature, isFeatureEnabled());
+    }
+  }
+
+  /** Observer for Settings.Secure based accessibility features. */
+  private class SecureSettingObserver extends AccessibilityFeatureObserver {
+    private final String settingKey;
+    private final int defaultValue;
+
+    SecureSettingObserver(AccessibilityFeature feature, String settingKey) {
+      this(feature, settingKey, 0);
+    }
+
+    SecureSettingObserver(AccessibilityFeature feature, String settingKey, int defaultValue) {
+      super(feature);
+      this.settingKey = settingKey;
+      this.defaultValue = defaultValue;
+    }
+
+    @Override
+    protected boolean isFeatureEnabled() {
+      try {
+        return Settings.Secure.getInt(contentResolver, settingKey) == 1;
+      } catch (Settings.SettingNotFoundException e) {
+        return defaultValue == 1;
+      }
+    }
+  }
+
+  /** Observer for Settings.Global based accessibility features. */
+  private class GlobalSettingObserver extends AccessibilityFeatureObserver {
+    private final String settingKey;
+    private final float enabledValue;
+    private final float defaultValue;
+
+    GlobalSettingObserver(
+        AccessibilityFeature feature, String settingKey, float enabledValue, float defaultValue) {
+      super(feature);
+      this.settingKey = settingKey;
+      this.enabledValue = enabledValue;
+      this.defaultValue = defaultValue;
+    }
+
+    @Override
+    protected boolean isFeatureEnabled() {
+      float value = Settings.Global.getFloat(contentResolver, settingKey, defaultValue);
+      return value == enabledValue;
+    }
   }
 
   @VisibleForTesting
@@ -527,9 +574,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
     // Tell Flutter whether animations should initially be enabled or disabled. Then register a
     // listener to be notified of changes in the future.
-    animationScaleObserver.onChange(false);
-    Uri transitionUri = Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
-    this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
+    animationScaleObserver =
+        new GlobalSettingObserver(
+            AccessibilityFeature.DISABLE_ANIMATIONS,
+            Settings.Global.TRANSITION_ANIMATION_SCALE,
+            DISABLED_TRANSITION_ANIMATION_SCALE,
+            DEFAULT_TRANSITION_ANIMATION_SCALE);
+    animationScaleObserver.initialize();
+    contentResolver.registerContentObserver(
+        Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE),
+        false,
+        animationScaleObserver);
 
     // Tells Flutter whether the text should be bolded or not. If the user changes bold text
     // setting, the configuration will change and trigger a re-build of the
@@ -538,14 +593,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       setBoldTextFlag();
     }
 
-    Context context = rootAccessibilityView.getContext();
-
-    setInvertColorsFlag();
+    // Initialize and register invert colors observer
+    invertColorsObserver =
+        new SecureSettingObserver(
+            AccessibilityFeature.INVERT_COLORS,
+            Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+    invertColorsObserver.initialize();
     contentResolver.registerContentObserver(
-        Settings.Secure.getUriFor("accessibility_display_inversion_enabled"),
+        Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED),
         false,
         invertColorsObserver);
 
+    // Initialize and register contrast listener
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
       highContrastObserver =
           (UiModeManager.ContrastChangeListener) contrast -> setHighContrastFlag();
@@ -558,49 +617,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
-  private static List<StringAttribute> getStringAttributesFromBuffer(
-      @NonNull ByteBuffer buffer, @NonNull ByteBuffer[] stringAttributeArgs) {
-    final int attributesCount = buffer.getInt();
-    if (attributesCount == -1) {
-      return null;
-    }
-    final List<StringAttribute> result = new ArrayList<>(attributesCount);
-    for (int i = 0; i < attributesCount; ++i) {
-      final int start = buffer.getInt();
-      final int end = buffer.getInt();
-      final StringAttributeType type = StringAttributeType.values()[buffer.getInt()];
-      switch (type) {
-        case SPELLOUT:
-          {
-            // Pops the -1 size.
-            buffer.getInt();
-            SpellOutStringAttribute attribute = new SpellOutStringAttribute();
-            attribute.start = start;
-            attribute.end = end;
-            attribute.type = type;
-            result.add(attribute);
-            break;
-          }
-        case LOCALE:
-          {
-            final int argsIndex = buffer.getInt();
-            final ByteBuffer args = stringAttributeArgs[argsIndex];
-            LocaleStringAttribute attribute = new LocaleStringAttribute();
-            attribute.start = start;
-            attribute.end = end;
-            attribute.type = type;
-            attribute.locale = Charset.forName("UTF-8").decode(args).toString();
-            result.add(attribute);
-            break;
-          }
-        default:
-          break;
-      }
-    }
-    return result;
-  }
-
-  private static String getStringFromBuffer(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
+    private static String getStringFromBuffer(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
     int stringIndex = buffer.getInt();
 
     return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
@@ -704,44 +721,41 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     sendLatestAccessibilityFlagsToFlutter();
   }
 
-  @RequiresApi(API_LEVELS.API_34)
-  private void registerHighContrastObserver(Context context) {
-    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-    uiModeManager.addContrastChangeListener(
-        context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
-  }
+    @RequiresApi(API_LEVELS.API_34)
+    private void registerHighContrastObserver(Context context) {
+        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager != null) {
+            uiModeManager.addContrastChangeListener(
+                    context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
+        }
+    }
 
-  @RequiresApi(API_LEVELS.API_34)
-  private void unregisterHighContrastObserver(Context context) {
-    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-    uiModeManager.removeContrastChangeListener(
-        (UiModeManager.ContrastChangeListener) highContrastObserver);
-  }
+
+    @RequiresApi(API_LEVELS.API_34)
+    private void unregisterHighContrastObserver(Context context) {
+        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager != null) {
+            uiModeManager.removeContrastChangeListener(
+                    (UiModeManager.ContrastChangeListener) highContrastObserver);
+        }
+    }
 
   @RequiresApi(API_LEVELS.API_34)
   private void setHighContrastFlag() {
     Context context = rootAccessibilityView.getContext();
     UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
 
+    if (uiModeManager == null) {
+      updateAccessibilityFeature(AccessibilityFeature.HIGH_CONTRAST, false);
+      return;
+    }
+
     float uiContrast = uiModeManager.getContrast();
-    // uiContrast: 0.0 (standard), 0.5 (medium), 1.0 (high)
+    // 0.0 (standard), 0.5 (medium), 1.0 (high)
+    // Any enhancement above standard is considered high contrast
     boolean isHighContrastEnabled = uiContrast > 0.0f;
 
     updateAccessibilityFeature(AccessibilityFeature.HIGH_CONTRAST, isHighContrastEnabled);
-  }
-
-  private void setInvertColorsFlag() {
-    boolean isHighContrastEnabled = false;
-
-    try {
-      isHighContrastEnabled =
-          Settings.Secure.getInt(
-                  contentResolver, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED)
-              == 1;
-    } catch (Settings.SettingNotFoundException ignored) {
-    }
-
-    updateAccessibilityFeature(AccessibilityFeature.INVERT_COLORS, isHighContrastEnabled);
   }
 
   private void updateAccessibilityFeature(AccessibilityFeature feature, boolean enabled) {
