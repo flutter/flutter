@@ -1133,14 +1133,14 @@ Future<void> testMain() async {
           shader.setFloat(1, color.g);
           shader.setFloat(2, color.b);
           shader.setFloat(3, color.a);
-          _expectShaderRendersColor(shader, color);
+          await _expectShaderRendersColor(shader, color);
         });
 
         test('set using getUniformMat2', () async {
           const color = ui.Color.fromARGB(255, 12, 37, 27);
           final ui.FragmentShader shader = shaderMap[ui.UniformMat2Slot]!;
           shader.getUniformMat2('color_rgba').set(color.r, color.g, color.b, color.a);
-          _expectShaderRendersColor(shader, color);
+          await _expectShaderRendersColor(shader, color);
         });
 
         test('wrong datatype', () async {
@@ -1502,6 +1502,96 @@ Future<void> testMain() async {
         });
       });
 
+      group('mat3 array', () {
+        test('set using setFloat', () async {
+          const cpuColors = [
+            ui.Color.fromARGB(255, 67, 42, 12),
+            ui.Color.fromARGB(255, 11, 22, 96),
+            ui.Color.fromARGB(255, 2, 4, 6),
+            ui.Color.fromARGB(255, 8, 10, 12),
+            ui.Color.fromARGB(255, 14, 16, 18),
+            ui.Color.fromARGB(255, 20, 22, 24),
+          ];
+          final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformMat3Slot>]!;
+          shader.setFloat(0, cpuColors[0].r);
+          shader.setFloat(1, cpuColors[0].g);
+          shader.setFloat(2, cpuColors[0].b);
+
+          shader.setFloat(3, cpuColors[1].r);
+          shader.setFloat(4, cpuColors[1].g);
+          shader.setFloat(5, cpuColors[1].b);
+
+          shader.setFloat(6, cpuColors[2].r);
+          shader.setFloat(7, cpuColors[2].g);
+          shader.setFloat(8, cpuColors[2].b);
+
+          shader.setFloat(9, cpuColors[3].r);
+          shader.setFloat(10, cpuColors[3].g);
+          shader.setFloat(11, cpuColors[3].b);
+
+          shader.setFloat(12, cpuColors[4].r);
+          shader.setFloat(13, cpuColors[4].g);
+          shader.setFloat(14, cpuColors[4].b);
+
+          shader.setFloat(15, cpuColors[5].r);
+          shader.setFloat(16, cpuColors[5].g);
+          shader.setFloat(17, cpuColors[5].b);
+
+          await _expectShaderRendersBarcode(shader, cpuColors);
+        });
+
+        test('set using getUniformMat3Array', () async {
+          const cpuColors = [
+            ui.Color.fromARGB(255, 67, 42, 12),
+            ui.Color.fromARGB(255, 11, 22, 96),
+            ui.Color.fromARGB(255, 2, 4, 6),
+            ui.Color.fromARGB(255, 8, 10, 12),
+            ui.Color.fromARGB(255, 14, 16, 18),
+            ui.Color.fromARGB(255, 20, 22, 24),
+          ];
+          final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformMat3Slot>]!;
+          final ui.UniformArray<ui.UniformMat3Slot> colors = shader.getUniformMat3Array('colors');
+          colors[0].set(
+            cpuColors[0].r,
+            cpuColors[0].g,
+            cpuColors[0].b,
+            cpuColors[1].r,
+            cpuColors[1].g,
+            cpuColors[1].b,
+            cpuColors[2].r,
+            cpuColors[2].g,
+            cpuColors[2].b,
+          );
+
+          colors[1].set(
+            cpuColors[3].r,
+            cpuColors[3].g,
+            cpuColors[3].b,
+            cpuColors[4].r,
+            cpuColors[4].g,
+            cpuColors[4].b,
+            cpuColors[5].r,
+            cpuColors[5].g,
+            cpuColors[5].b,
+          );
+          await _expectShaderRendersBarcode(shader, cpuColors);
+        });
+
+        test('wrong datatype', () async {
+          final ui.FragmentShader shader = shaderMap[ui.UniformVec3Slot]!;
+          expect(
+            () => shader.getUniformMat3Array('color_rgb'),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains('Uniform size (3) for "color_rgb" is not a multiple of 9.'),
+              ),
+            ),
+          );
+        });
+      });
+
       group('mat4 array', () {
         test('set using setFloat', () async {
           const cpuColors = [
@@ -1626,96 +1716,6 @@ Future<void> testMain() async {
                 (e) => e.message,
                 'message',
                 contains('Uniform size (3) for "color_rgb" is not a multiple of 16.'),
-              ),
-            ),
-          );
-        });
-      });
-
-      group('mat3 array', () {
-        test('set using setFloat', () async {
-          const cpuColors = [
-            ui.Color.fromARGB(255, 67, 42, 12),
-            ui.Color.fromARGB(255, 11, 22, 96),
-            ui.Color.fromARGB(255, 2, 4, 6),
-            ui.Color.fromARGB(255, 8, 10, 12),
-            ui.Color.fromARGB(255, 14, 16, 18),
-            ui.Color.fromARGB(255, 20, 22, 24),
-          ];
-          final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformMat3Slot>]!;
-          shader.setFloat(0, cpuColors[0].r);
-          shader.setFloat(1, cpuColors[0].g);
-          shader.setFloat(2, cpuColors[0].b);
-
-          shader.setFloat(3, cpuColors[1].r);
-          shader.setFloat(4, cpuColors[1].g);
-          shader.setFloat(5, cpuColors[1].b);
-
-          shader.setFloat(6, cpuColors[2].r);
-          shader.setFloat(7, cpuColors[2].g);
-          shader.setFloat(8, cpuColors[2].b);
-
-          shader.setFloat(9, cpuColors[3].r);
-          shader.setFloat(10, cpuColors[3].g);
-          shader.setFloat(11, cpuColors[3].b);
-
-          shader.setFloat(12, cpuColors[4].r);
-          shader.setFloat(13, cpuColors[4].g);
-          shader.setFloat(14, cpuColors[4].b);
-
-          shader.setFloat(15, cpuColors[5].r);
-          shader.setFloat(16, cpuColors[5].g);
-          shader.setFloat(17, cpuColors[5].b);
-
-          await _expectShaderRendersBarcode(shader, cpuColors);
-        });
-
-        test('set using getUniformMat3Array', () async {
-          const cpuColors = [
-            ui.Color.fromARGB(255, 67, 42, 12),
-            ui.Color.fromARGB(255, 11, 22, 96),
-            ui.Color.fromARGB(255, 2, 4, 6),
-            ui.Color.fromARGB(255, 8, 10, 12),
-            ui.Color.fromARGB(255, 14, 16, 18),
-            ui.Color.fromARGB(255, 20, 22, 24),
-          ];
-          final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformMat3Slot>]!;
-          final ui.UniformArray<ui.UniformMat3Slot> colors = shader.getUniformMat3Array('colors');
-          colors[0].set(
-            cpuColors[0].r,
-            cpuColors[0].g,
-            cpuColors[0].b,
-            cpuColors[1].r,
-            cpuColors[1].g,
-            cpuColors[1].b,
-            cpuColors[2].r,
-            cpuColors[2].g,
-            cpuColors[2].b,
-          );
-
-          colors[1].set(
-            cpuColors[3].r,
-            cpuColors[3].g,
-            cpuColors[3].b,
-            cpuColors[4].r,
-            cpuColors[4].g,
-            cpuColors[4].b,
-            cpuColors[5].r,
-            cpuColors[5].g,
-            cpuColors[5].b,
-          );
-          await _expectShaderRendersBarcode(shader, cpuColors);
-        });
-
-        test('wrong datatype', () async {
-          final ui.FragmentShader shader = shaderMap[ui.UniformVec3Slot]!;
-          expect(
-            () => shader.getUniformMat3Array('color_rgb'),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.message,
-                'message',
-                contains('Uniform size (3) for "color_rgb" is not a multiple of 9.'),
               ),
             ),
           );
@@ -1898,7 +1898,7 @@ Future<void> testMain() async {
             shader.setFloat(shaderOffset++, cpuColors[colorOffset++].a);
           }
 
-          _expectShaderRendersBarcode(shader, cpuColors);
+          await _expectShaderRendersBarcode(shader, cpuColors);
         });
 
         test('set using getUniform*', () async {

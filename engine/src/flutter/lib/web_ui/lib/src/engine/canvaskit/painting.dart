@@ -691,6 +691,7 @@ class _CkUniformVec4Slot implements ui.UniformVec4Slot {
 class _CkUniformMat2Slot implements ui.UniformMat2Slot {
   _CkUniformMat2Slot._(this._m00, this._m01, this._m10, this._m11);
 
+  // Set the elemnts of the matrix in row-major order.
   @override
   void set(double m00, double m01, double m10, double m11) {
     _m00.set(m00);
@@ -699,6 +700,7 @@ class _CkUniformMat2Slot implements ui.UniformMat2Slot {
     _m11.set(m11);
   }
 
+  // The elements of the matrix. Where mij referes to the ith row and the jth column.
   final CkUniformFloatSlot _m00, _m01, _m10, _m11;
 }
 
@@ -715,6 +717,7 @@ class _CkUniformMat3Slot implements ui.UniformMat3Slot {
     this._m22,
   );
 
+  // Set the elemnts of the matrix in row-major order.
   @override
   void set(
     double m00,
@@ -738,6 +741,7 @@ class _CkUniformMat3Slot implements ui.UniformMat3Slot {
     _m22.set(m22);
   }
 
+  // The elements of the matrix. Where mij referes to the ith row and the jth column.
   final CkUniformFloatSlot _m00, _m01, _m02, _m10, _m11, _m12, _m20, _m21, _m22;
 }
 
@@ -761,6 +765,7 @@ class _CkUniformMat4Slot implements ui.UniformMat4Slot {
     this._m33,
   );
 
+  // Set the elemnts of the matrix in row-major order.
   @override
   void set(
     double m00,
@@ -798,6 +803,7 @@ class _CkUniformMat4Slot implements ui.UniformMat4Slot {
     _m33.set(m33);
   }
 
+  // The elements of the matrix. Where mij referes to the ith row and the jth column.
   final CkUniformFloatSlot _m00,
       _m01,
       _m02,
