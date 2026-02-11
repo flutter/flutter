@@ -936,6 +936,29 @@ std::vector<StructMember> Reflector::ReadStructMembers(
       continue;
     }
 
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
+        member.width == 32 && member.columns == 3 && member.vecsize == 3) {
+      // Mat3s are packed as three vec3s with one float of padding after each.
+      // {val, val, val, padding, val, val, val, padding, val, val, val,
+      // padding}.
+      uint32_t count = array_elements.value_or(1) * 3;
+      uint32_t stride = 16;
+      uint32_t total_length = stride * count;
+
+      result.emplace_back(StructMember{
+          /*p_type=*/"Mat3",
+          /*p_base_type=*/spirv_cross::SPIRType::BaseType::Float,
+          /*p_name=*/GetMemberNameAtIndex(struct_type, i),
+          /*p_offset=*/struct_member_offset,
+          /*p_size=*/12,
+          /*p_byte_length=*/total_length,
+          /*p_array_elements=*/count,
+          /*p_element_padding=*/4,
+      });
+      current_byte_offset += total_length;
+      continue;
+    }
+
     // Tightly packed 4x4 Matrix is special cased as we know how to work with
     // those.
     if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&  //
