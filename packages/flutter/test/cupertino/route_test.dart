@@ -1642,19 +1642,17 @@ void main() {
               return true;
             }
             final rect = arguments[0] as Rect;
-            final paint = arguments[1] as Paint;
 
             // _CupertinoEdgeShadowDecoration draws the shadows with a series of
             // differently colored 1px rects. Skip all rects not drawn by a
             // _CupertinoEdgeShadowDecoration.
             if (rect.width == 1.0) {
               final bool isOnScreen = rect.left >= 0 && rect.right <= 600.0;
-              final bool isVisible = paint.color.opacity > 0;
 
-              if (isOnScreen && isVisible) {
+              if (isOnScreen) {
                 throw '''
-    Expected: no visible shadow rects on-screen.
-    Found: $rect with opacity ${paint.color.opacity}.
+    Expected: no visible rects on-screen.
+    Found: $rect.
         ''';
               }
             }
