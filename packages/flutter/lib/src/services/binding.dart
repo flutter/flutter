@@ -436,7 +436,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         _systemContextMenuClient!.handleCustomContextMenuAction(callbackId);
       case 'SystemChrome.systemUIChange':
         final args = methodCall.arguments as List<dynamic>;
-        await _systemUiChangeCallback?.call(args[0] as bool);
+        if (_systemUiChangeCallback != null) {
+          await _systemUiChangeCallback!(args[0] as bool);
+        }
       case 'System.requestAppExit':
         return <String, dynamic>{'response': (await handleRequestAppExit()).name};
       default:

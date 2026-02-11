@@ -78,10 +78,6 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--tap-status-bar"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "--bogus-font-text"
             isEnabled = "NO">
          </CommandLineArgument>

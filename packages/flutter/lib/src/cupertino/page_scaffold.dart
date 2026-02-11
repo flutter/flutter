@@ -89,29 +89,10 @@ class CupertinoPageScaffold extends StatefulWidget {
   State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
 }
 
-class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void deactivate() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.deactivate();
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void handleStatusBarTap() {
-    super.handleStatusBarTap();
+class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
+  void _handleStatusBarTap() {
     final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
+    // Only act on the scroll controller if it has any attached scroll positions.
     if (primaryScrollController != null && primaryScrollController.hasClients) {
       primaryScrollController.animateTo(
         0.0,
@@ -206,6 +187,15 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> with Widg
                   right: 0.0,
                   child: MediaQuery.withNoTextScaling(child: widget.navigationBar!),
                 ),
+              // Add a touch handler the size of the status bar on top of all contents
+              // to handle scroll to top by status bar taps.
+              Positioned(
+                top: 0.0,
+                left: 0.0,
+                right: 0.0,
+                height: existingMediaQuery.padding.top,
+                child: GestureDetector(excludeFromSemantics: true, onTap: _handleStatusBarTap),
+              ),
             ],
           ),
         ),

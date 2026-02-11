@@ -5,8 +5,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart' show SystemChannels;
-import 'package:flutter/src/services/message_codecs.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
@@ -426,6 +424,64 @@ void main() {
     expect(decoration.color, const Color(0xFF010203));
   });
 
+  testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget? child) {
+          // Acts as a 20px status bar at the root of the app.
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
+            child: child!,
+          );
+        },
+        home: CupertinoPageScaffold(
+          // Default nav bar is translucent.
+          navigationBar: const CupertinoNavigationBar(middle: Text('Title')),
+          child: ListView.builder(
+            itemExtent: 50,
+            itemBuilder: (BuildContext context, int index) => Text(index.toString()),
+          ),
+        ),
+      ),
+    );
+    // Top media query padding 20 + translucent nav bar 44.
+    expect(tester.getTopLeft(find.text('0')).dy, 64);
+    expect(tester.getTopLeft(find.text('6')).dy, 364);
+
+    await tester.fling(
+      find.text('5'), // Find some random text on the screen.
+      const Offset(0, -200),
+      20,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
+    expect(
+      tester.getTopLeft(find.text('12')).dy,
+      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
+    );
+
+    // The media query top padding is 20. Tapping at 20 should do nothing.
+    await tester.tapAt(const Offset(400, 20));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
+    expect(
+      tester.getTopLeft(find.text('12')).dy,
+      moreOrLessEquals(466.8333333333334, epsilon: 0.1),
+    );
+
+    // Tap 1 pixel higher.
+    await tester.tapAt(const Offset(400, 19));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.getTopLeft(find.text('0')).dy, 64);
+    expect(tester.getTopLeft(find.text('6')).dy, 364);
+    expect(find.text('12'), findsNothing);
+  });
+
   testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (
     WidgetTester tester,
   ) async {
@@ -530,36 +586,6 @@ void main() {
           .textScaler,
       const TextScaler.linear(99.0),
     );
-  });
-
-  testWidgets('Tap the status bar scrolls to top', (WidgetTester tester) async {
-    final scrollController = ScrollController(initialScrollOffset: 1000);
-    addTearDown(scrollController.dispose);
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return PrimaryScrollController(
-              controller: scrollController,
-              child: const CupertinoPageScaffold(
-                child: SingleChildScrollView(primary: true, child: SizedBox(height: 12345)),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-    final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      const MethodCall('handleScrollToTop'),
-    );
-    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.statusBar.name,
-      message,
-      (ByteData? data) {},
-    );
-    await tester.pumpAndSettle();
-
-    expect(scrollController.offset, 0.0);
   });
 
   testWidgets('CupertinoPageScaffold does not crash at zero area', (WidgetTester tester) async {
