@@ -34,7 +34,7 @@ void ImageFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
   }
 
   if (filter_) {
-    DlMatrix current_matrix = context->GetMatrix();
+    const DlMatrix& current_matrix = context->GetMatrix();
     // This transform will be applied to every child rect in the subtree
     context->PushFilterBoundsAdjustment(
         [filter = filter_, current_matrix](DlRect rect) {
