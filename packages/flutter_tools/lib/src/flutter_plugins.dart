@@ -1197,6 +1197,80 @@ Future<void> refreshPluginsList(
       globals.cocoaPods?.invalidatePodInstallOutput(project.macos);
     }
   }
+
+  // Validate Swift Package Manager support for plugin example apps
+  if (iosPlatform || macOSPlatform) {
+    await _validatePluginExampleAppSwiftPackageManagerSupport(
+      project,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+    );
+  }
+}
+
+/// Validates Swift Package Manager support for a plugin's example app.
+///
+/// This function checks if the current project is a plugin example app and
+/// validates the parent plugin's Swift Package Manager compatibility:
+/// 1. If the plugin has a podspec but no Package.swift, prompts the user to
+///    add SPM support.
+/// 2. If the plugin has a Package.swift, validates that it has a dependency
+///    on FlutterFramework.
+///
+/// Warnings are printed to inform plugin authors about SPM compatibility issues.
+Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
+  FlutterProject project, {
+  bool iosPlatform = false,
+  bool macOSPlatform = false,
+}) async {
+  final Directory projectDir = project.directory;
+  if (!projectDir.path.endsWith('example')) {
+    return;
+  }
+
+  final Directory parentDir = projectDir.parent;
+  final File parentPubspec = parentDir.childFile('pubspec.yaml');
+  if (!parentPubspec.existsSync()) {
+    return;
+  }
+
+  final FlutterProject parentProject;
+  try {
+    parentProject = FlutterProject.fromDirectory(parentDir);
+  } on Exception {
+    return;
+  }
+
+  if (!parentProject.isPlugin) {
+    return;
+  }
+
+  final List<Plugin> plugins = await findPlugins(project);
+  final Plugin? parentPlugin = plugins.where(
+    (Plugin p) => p.name == parentProject.manifest.appName,
+  ).firstOrNull;
+
+  if (parentPlugin == null) {
+    return;
+  }
+
+  final List<String> platforms = <String>[
+    if (iosPlatform) IOSPlugin.kConfigKey,
+    if (macOSPlatform) MacOSPlugin.kConfigKey,
+  ];
+
+  for (final String platform in platforms) {
+    final SwiftPackageManagerPluginValidationResult result =
+        validatePluginSwiftPackageManagerSupport(
+      parentPlugin,
+      fileSystem: globals.fs,
+      platform: platform,
+    );
+
+    for (final String message in result.validationMessages) {
+      globals.printWarning(message);
+    }
+  }
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects

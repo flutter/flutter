@@ -528,3 +528,113 @@ class PluginInterfaceResolution {
 /// See also:
 /// - [PluginInterfaceResolution], which uses this record to create Map with metadata.
 typedef DartPluginClassAndFilePair = ({String dartClass, String dartFileName});
+
+/// The URL for documentation on adding Swift Package Manager support to a plugin.
+const String kSwiftPackageManagerDocsUrl = 'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors';
+
+/// The result of validating a plugin's Swift Package Manager compatibility.
+class SwiftPackageManagerPluginValidationResult {
+  SwiftPackageManagerPluginValidationResult({
+    required this.hasPodspec,
+    required this.hasPackageSwift,
+    required this.hasFlutterFrameworkDependency,
+    this.validationMessages = const <String>[],
+  });
+
+  final bool hasPodspec;
+  final bool hasPackageSwift;
+  final bool hasFlutterFrameworkDependency;
+  final List<String> validationMessages;
+
+  bool get isFullyCompatible =>
+      hasPackageSwift && hasFlutterFrameworkDependency;
+
+  bool get needsSwiftPackageManagerSupport => hasPodspec && !hasPackageSwift;
+}
+
+/// Validates a plugin's Swift Package Manager compatibility for a given [platform].
+///
+/// This function checks:
+/// 1. If the plugin has a podspec but no Package.swift, it means the plugin
+///    needs to add Swift Package Manager support.
+/// 2. If the plugin has a Package.swift, it validates that there's a dependency
+///    on FlutterFramework.
+///
+/// Returns a [SwiftPackageManagerPluginValidationResult] with the validation results.
+///
+/// The [platform] should be either 'ios' or 'macos'.
+SwiftPackageManagerPluginValidationResult validatePluginSwiftPackageManagerSupport(
+  Plugin plugin, {
+  required FileSystem fileSystem,
+  required String platform,
+}) {
+  final List<String> messages = <String>[];
+
+  final String? podspecPath = plugin.pluginPodspecPath(fileSystem, platform);
+  final String? packageSwiftPath = plugin.pluginSwiftPackageManifestPath(fileSystem, platform);
+
+  final bool hasPodspec = podspecPath != null && fileSystem.file(podspecPath).existsSync();
+
+  final bool hasPackageSwift =
+      packageSwiftPath != null && fileSystem.file(packageSwiftPath).existsSync();
+
+  bool hasFlutterFrameworkDependency = false;
+
+  if (hasPodspec && !hasPackageSwift) {
+    messages.add(
+      'Plugin ${plugin.name} does not have Swift Package Manager support for $platform. '
+      'Consider adding Swift Package Manager compatibility to your plugin. '
+      'See $kSwiftPackageManagerDocsUrl for more information.',
+    );
+  } else if (hasPackageSwift) {
+    hasFlutterFrameworkDependency = _hasFlutterFrameworkDependency(
+      fileSystem.file(packageSwiftPath),
+    );
+    if (!hasFlutterFrameworkDependency) {
+      messages.add(
+        'Plugin ${plugin.name} has a Package.swift for $platform but is missing a dependency '
+        'on FlutterFramework. Add the following to your Package.swift dependencies:\n'
+        '    .package(name: "FlutterFramework", path: "../FlutterFramework")\n'
+        'And add FlutterFramework as a target dependency:\n'
+        '    .product(name: "FlutterFramework", package: "FlutterFramework")\n'
+        'See $kSwiftPackageManagerDocsUrl for more information.',
+      );
+    }
+  }
+
+  return SwiftPackageManagerPluginValidationResult(
+    hasPodspec: hasPodspec,
+    hasPackageSwift: hasPackageSwift,
+    hasFlutterFrameworkDependency: hasFlutterFrameworkDependency,
+    validationMessages: messages,
+  );
+}
+
+/// Checks if a Package.swift file contains a dependency on FlutterFramework.
+///
+/// This looks for common patterns used to declare a FlutterFramework dependency:
+/// - `.package(name: "FlutterFramework"` - path-based dependency
+/// - `package: "FlutterFramework"` - product dependency reference
+bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
+  if (!packageSwiftFile.existsSync()) {
+    return false;
+  }
+
+  try {
+    final String contents = packageSwiftFile.readAsStringSync();
+    final bool hasPackageDependency = contents.contains(RegExp(
+      r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"',
+    )) || contents.contains(RegExp(
+      r'\.package\s*\(\s*path\s*:\s*"[^"]*FlutterFramework[^"]*"',
+    ));
+    final bool hasTargetDependency = contents.contains(RegExp(
+      r'package\s*:\s*"FlutterFramework"',
+    )) || contents.contains(RegExp(
+      r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"',
+    ));
+
+    return hasPackageDependency || hasTargetDependency;
+  } on FileSystemException {
+    return false;
+  }
+}
