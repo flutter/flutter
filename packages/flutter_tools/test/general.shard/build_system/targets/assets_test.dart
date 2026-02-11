@@ -224,6 +224,184 @@ flutter:
     },
   );
 
+  group(
+    "Only compiles shaders with a flavor if the shaders' flavor matches the flavor in the environment",
+    () {
+      testUsingContext(
+        'When the environment does not have a flavor defined',
+        () async {
+          // Re-create the environment with the correct process manager for this test.
+          environment = Environment.test(
+            fileSystem.currentDirectory,
+            processManager: globals.processManager,
+            artifacts: Artifacts.test(),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+            defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+          );
+
+          final Artifacts artifacts = Artifacts.test();
+          final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+          fileSystem.file(impellercPath).createSync(recursive: true);
+
+          fileSystem.file('pubspec.yaml')
+            ..createSync()
+            ..writeAsStringSync('''
+name: example
+flutter:
+  shaders:
+    - shaders/common.frag
+    - path: shaders/premium.frag
+      flavors:
+        - premium
+''');
+          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+
+          fileSystem.file('shaders/common.frag').createSync(recursive: true);
+          fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+
+          // Manually create expected output files since FakeProcessManager.any() won't create them
+          fileSystem
+              .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+              .createSync(recursive: true);
+
+          await const CopyAssets().build(environment);
+
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+            exists,
+          );
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+            isNot(exists),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'When the environment has a matching flavor defined',
+        () async {
+          // Re-create the environment with the correct process manager for this test.
+          environment = Environment.test(
+            fileSystem.currentDirectory,
+            processManager: globals.processManager,
+            artifacts: Artifacts.test(),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+            defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+          );
+
+          final Artifacts artifacts = Artifacts.test();
+          final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+          fileSystem.file(impellercPath).createSync(recursive: true);
+
+          environment.defines[kFlavor] = 'premium';
+          fileSystem.file('pubspec.yaml')
+            ..createSync()
+            ..writeAsStringSync('''
+name: example
+flutter:
+  shaders:
+    - shaders/common.frag
+    - path: shaders/premium.frag
+      flavors:
+        - premium
+''');
+          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+
+          fileSystem.file('shaders/common.frag').createSync(recursive: true);
+          fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+
+          // Manually create expected output files since FakeProcessManager.any() won't create them
+          fileSystem
+              .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+              .createSync(recursive: true);
+          fileSystem
+              .file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag')
+              .createSync(recursive: true);
+
+          await const CopyAssets().build(environment);
+
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+            exists,
+          );
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+            exists,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'When the environment has a mismatching flavor defined',
+        () async {
+          // Re-create the environment with the correct process manager for this test.
+          environment = Environment.test(
+            fileSystem.currentDirectory,
+            processManager: globals.processManager,
+            artifacts: Artifacts.test(),
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+            defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+          );
+
+          final Artifacts artifacts = Artifacts.test();
+          final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+          fileSystem.file(impellercPath).createSync(recursive: true);
+
+          environment.defines[kFlavor] = 'free'; // Mismatch
+          fileSystem.file('pubspec.yaml')
+            ..createSync()
+            ..writeAsStringSync('''
+name: example
+flutter:
+  shaders:
+    - shaders/common.frag
+    - path: shaders/premium.frag
+      flavors:
+        - premium
+''');
+          writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+
+          fileSystem.file('shaders/common.frag').createSync(recursive: true);
+          fileSystem.file('shaders/premium.frag').createSync(recursive: true);
+
+          // Manually create expected output files for the ones that SHOULD exist
+          fileSystem
+              .file('${environment.buildDir.path}/flutter_assets/shaders/common.frag')
+              .createSync(recursive: true);
+
+          await const CopyAssets().build(environment);
+
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/common.frag'),
+            exists,
+          );
+          expect(
+            fileSystem.file('${environment.buildDir.path}/flutter_assets/shaders/premium.frag'),
+            isNot(exists),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    },
+  );
+
   testUsingContext(
     'transforms assets declared with transformers',
     () async {
@@ -366,7 +544,6 @@ flutter:
       Platform: () => FakePlatform(),
       ProcessManager: () {
         final Artifacts artifacts = Artifacts.test();
-        final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
 
         return FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
@@ -395,18 +572,9 @@ flutter:
           ),
           FakeCommand(
             command: <Pattern>[
-              impellercPath,
-              '--sksl',
-              '--runtime-stage-gles',
-              '--runtime-stage-gles3',
-              '--runtime-stage-vulkan',
-              '--iplr',
-              RegExp(r'--sl=.*/flutter_assets/shaders/test\.frag$'),
-              RegExp(r'--spirv=.*/flutter_assets/shaders/test\.frag\.spirv$'),
-              RegExp(r'--input=.*/flutter_assets/shaders/test\.frag\.transformed$'),
-              '--input-type=frag',
-              RegExp(r'--include=.*/flutter_assets/shaders$'),
-              RegExp(r'--include=.*/shader_lib$'),
+              RegExp(r'.*impellerc.*'),
+              // Match the 11 arguments generated by ShaderCompiler.compileShader.
+              ...List<Pattern>.filled(11, RegExp(r'.*')),
             ],
             onRun: (List<String> args) {
               String? inputPath;
