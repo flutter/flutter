@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'dialog.dart';
 import 'theme.dart';
 
 // Dismiss is handled by RawMenuAnchor
@@ -40,11 +41,6 @@ bool get _isCupertino {
       return false;
   }
 }
-
-const Color _kMenuSurfaceColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xCCF2F2F2),
-  darkColor: Color(0xCC2D2D2D),
-);
 
 /// The font family for menu items at smaller text scales.
 const String _kBodyFont = 'CupertinoSystemText';
@@ -993,8 +989,8 @@ class _MenuOverlayState extends State<_MenuOverlay>
   // the user has dragged their pointer away from the menu edges.
   void _updateSwipeScale(Duration elapsed) {
     const maxVelocity = 20.0;
-    const double minVelocity = 8;
-    const double maxSwipeDistance = 150;
+    const minVelocity = 8.0;
+    const maxSwipeDistance = 150.0;
     const accelerationRate = 0.12;
 
     // The distance below which velocity begins to decelerate.
@@ -1003,7 +999,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
     // velocity reduces proportionally to create smooth arrival at the target.
     // Higher values mean the animation begins to decelerate sooner, resulting to
     // a smoother animation curve.
-    const double decelerationDistanceThreshold = 80;
+    const decelerationDistanceThreshold = 80.0;
 
     // The distance at which the animation will snap to the target distance without
     // any animation.
@@ -1096,28 +1092,18 @@ class _MenuOverlayState extends State<_MenuOverlay>
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   alwaysIncludeSemantics: true,
-                  // TODO(davidhicks980): Use CupertinoPopupSurface when
-                  // appearance is fixed on Impeller.
-                  // https://github.com/flutter/flutter/issues/182066
-                  child: ClipRSuperellipse(
-                    borderRadius: const BorderRadius.all(Radius.circular(13)),
-                    child: BackdropFilter(
-                      filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                      child: ColoredBox(
-                        color: CupertinoDynamicColor.resolve(_kMenuSurfaceColor, context),
-                        child: AnimatedBuilder(
-                          animation: _sizeAnimation,
-                          builder: _buildAlign,
-                          child: Semantics(
-                            explicitChildNodes: true,
-                            scopesRoute: true,
-                            child: ConstrainedBox(
-                              constraints: constraints,
-                              child: SingleChildScrollView(
-                                clipBehavior: Clip.none,
-                                child: Column(mainAxisSize: MainAxisSize.min, children: _children),
-                              ),
-                            ),
+                  child: CupertinoPopupSurface(
+                    child: AnimatedBuilder(
+                      animation: _sizeAnimation,
+                      builder: _buildAlign,
+                      child: Semantics(
+                        explicitChildNodes: true,
+                        scopesRoute: true,
+                        child: ConstrainedBox(
+                          constraints: constraints,
+                          child: SingleChildScrollView(
+                            clipBehavior: Clip.none,
+                            child: Column(mainAxisSize: MainAxisSize.min, children: _children),
                           ),
                         ),
                       ),
