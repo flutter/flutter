@@ -766,7 +766,7 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
       _addErrorWithLineInfo(
         versionLiteral,
         error:
-            'Deprecation notice must end with a line saying "This feature was deprecated after...".',
+            'Deprecation notice must end with a line saying "This feature was deprecated after v<version>.".',
       );
       return;
     }
