@@ -8,6 +8,7 @@
 #include <optional>
 #include <utility>
 
+#include "fml/logging.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
@@ -185,6 +186,7 @@ bool TextureContents::Render(const ContentContext& renderer,
 
     FSStrict::FragInfo frag_info;
     if (texture_->GetYCoordScale() < 0.0) {
+      FML_DCHECK(texture_->GetYCoordScale() == -1.0f);
       frag_info.source_rect = Vector4(strict_texture_coords.GetLeft(),
                                       1.0f - strict_texture_coords.GetBottom(),
                                       strict_texture_coords.GetRight(),
