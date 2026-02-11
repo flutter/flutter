@@ -104,11 +104,11 @@ void main() {
         swiftPMPluginPackageManifest.writeAsStringSync(
           manifestContents
               .replaceFirst(
-                'dependencies: []',
+                'dependencies: [\n        .package(name: "FlutterFramework", path: "../FlutterFramework")\n    ]',
                 'dependencies: [.package(name: "${integrationTestPlugin.pluginName}", path: "../${integrationTestPlugin.pluginName}")]',
               )
               .replaceFirst(
-                'dependencies: []',
+                'dependencies: [\n                .product(name: "FlutterFramework", package: "FlutterFramework")\n            ]',
                 'dependencies: [.product(name: "${integrationTestPlugin.pluginName.replaceAll('_', '-')}", package: "${integrationTestPlugin.pluginName}")]',
               ),
         );
