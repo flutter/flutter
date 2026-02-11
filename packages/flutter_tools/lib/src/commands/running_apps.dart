@@ -107,7 +107,10 @@ class RunningAppsCommand extends FlutterCommand {
       final String deviceId = app.deviceId;
       final String platform = app.targetPlatform;
       final String vmServiceUri = app.wsUri;
-      final String age = _systemClock.now().difference(DateTime.fromMillisecondsSinceEpoch(app.epoch)).ago();
+      final String age = _systemClock
+          .now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(app.epoch))
+          .ago();
 
       // If the device name and ID are effectively the same (e.g., "macos" and "macos"),
       // only show the name to avoid redundancy like "macos (macos)".

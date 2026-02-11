@@ -205,8 +205,6 @@ dart_version=2.0.0''',
     );
   });
 
-
-
   testUsingContext('running-apps deduplicates apps with same ws_uri', () async {
     final fakeMDnsClient = FakeMDnsClient(
       <PtrResourceRecord>[
