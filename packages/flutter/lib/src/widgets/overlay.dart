@@ -534,13 +534,14 @@ class Overlay extends StatefulWidget {
 
   /// Determines that the overlay should always size itself to content.
   ///
-  /// Normally overlay will only size itself to content if the the incoming
+  /// Normally overlay will only size itself to content if the incoming
   /// constraints are infinite and there is a [OverlayEntry] that can size
   /// the overlay. Setting this to `true` will force this behavior even for
   /// finite (but possibly loose) constraints.
   ///
   /// Setting this to true requires an [OverlayEntry] that can size the overlay
-  /// based on itself.
+  /// based on itself ([OverlayEntry.canSizeOverlay] set to true). If not provided
+  /// an exception is thrown.
   final bool alwaysSizeToContent;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
@@ -1498,8 +1499,8 @@ class _RenderTheater extends RenderBox
           'Overlay was asked to size itself to content but does not have a suitable child.',
         ),
         ErrorDescription(
-          'When created with alwaysSizeToContent=true the Overlay requires at least one '
-          'non-positioned OverlayEntry with canSizeOverlay set to true',
+          'When `alwaysSizeToContent` is true, the Overlay requires at least one '
+          'non-positioned `OverlayEntry` with `canSizeOverlay` set to true to determine its size.',
         ),
         ErrorHint(
           'Try removing alwaysSizeToContent=true or provide a suitable child that can size the Overlay',
