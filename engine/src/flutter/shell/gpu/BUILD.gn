@@ -74,6 +74,26 @@ source_set("gpu_surface_vulkan") {
   }
 }
 
+if (impeller_enable_vulkan) {
+  impeller_component("gpu_surface_vulkan_unittests") {
+    testonly = true
+
+    target_type = "executable"
+    sources = [ "gpu_surface_vulkan_impeller_unittests.cc" ]
+
+    deps = [
+             ":gpu_surface_vulkan",
+             "//flutter/fml",
+             "//flutter/impeller/fixtures",
+             "//flutter/runtime",
+             "//flutter/runtime:libdart",
+             "//flutter/testing",
+             "//flutter/testing:vulkan",
+             "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
+           ] + gpu_common_deps
+  }
+}
+
 if (shell_enable_metal) {
   source_set("gpu_surface_metal") {
     cflags_objc = flutter_cflags_objc

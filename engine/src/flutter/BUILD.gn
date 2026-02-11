@@ -239,6 +239,7 @@ group("unittests") {
         "//flutter/impeller:impeller_dart_unittests",
         "//flutter/impeller:impeller_unittests",
         "//flutter/impeller/toolkit/interop:example",
+        "//flutter/shell/gpu:gpu_surface_vulkan_unittests",
       ]
     }
 
