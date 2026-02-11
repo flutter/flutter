@@ -266,13 +266,13 @@ bool TextContents::Render(const ContentContext& renderer,
   SamplerDescriptor sampler_desc;
   if (is_translation_scale) {
     // When the transform is translation+scale only, we normally use nearest-
-    // neighbor sampling for pixel-perfect text.  However, if the X and Y
+    // neighbor sampling for pixel-perfect text. However, if the X and Y
     // scales differ significantly (non-uniform / anisotropic scaling, e.g.
     // Transform.scale(scaleY: 2)), the glyph atlas entry is rasterized at
     // max(|scaleX|,|scaleY|) uniformly and the compensating unscaled_basis
-    // squeezes one axis, causing a minification.  Nearest-neighbor during
+    // squeezes one axis, causing a minification. Nearest-neighbor during
     // minification discards texel columns/rows, producing jagged diagonals
-    // and varying stroke weights.  Fall back to bilinear in that case.
+    // and varying stroke weights. Fall back to bilinear in that case.
     // See https://github.com/flutter/flutter/issues/182143
     constexpr Scalar kMinScaleForRatio = 0.001f;
     constexpr Scalar kAnisotropicScaleThreshold = 1.15f;
