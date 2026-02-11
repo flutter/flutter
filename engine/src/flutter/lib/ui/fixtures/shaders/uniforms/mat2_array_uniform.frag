@@ -4,15 +4,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// If updating this file, also update
-// engine/src/flutter/lib/web_ui/test/ui/fragment_shader_test.dart
+#include <flutter/runtime_effect.glsl>
 
 precision highp float;
 
-uniform vec3[2] color_array;
+uniform mat2[2] colors;
 
 out vec4 fragColor;
 
 void main() {
-  fragColor = vec4(mix(color_array[0], color_array[1], 0.5), 1);
+  vec2 uv = FlutterFragCoord().xy;
+
+  if (uv.x < 1) {
+    fragColor = vec4(colors[0][0], colors[0][1]);
+  } else {
+    fragColor = vec4(colors[1][0], colors[1][1]);
+  }
 }
