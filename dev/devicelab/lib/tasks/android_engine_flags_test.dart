@@ -20,8 +20,8 @@ TaskFunction androidEngineFlagsTest(String buildMode) {
   final isReleaseMode = buildMode == 'release';
   final List<TaskFunction> tests = [
     // _testInvalidFlag(buildMode),
-    if (isReleaseMode) _testIllegalFlagInReleaseMode(),
-    // _testCommandLineFlagPrecedence(buildMode), TODO(camsim99): change approach to use vm service port
+    // if (isReleaseMode) _testIllegalFlagInReleaseMode(),
+    _testCommandLineFlagPrecedence(buildMode),
   ];
 
   return () async {
@@ -177,7 +177,121 @@ TaskFunction _testIllegalFlagInReleaseMode() {
   };
 }
 
+// TODO(camsim99): Refactor this into common location if I can.
+Future<int> getFreePort() async {
+  var port = 0;
+  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  port = serverSocket.port;
+  await serverSocket.close();
+  return port;
+}
+
 TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
+  return () async {
+    section('Create new Flutter Android app');
+    final Directory tempDir = Directory.systemTemp.createTempSync(
+      'android_flutter_shell_args_test.',
+    );
+    const projectName = 'androidfluttershellargstest';
+
+    try {
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>['--platforms', 'android', '--org', 'io.flutter.devicelab', projectName],
+        );
+      });
+
+      section('Retrieve two free ports for Dart VM service');
+      final int manifestServicePort = await getFreePort();
+      int commandLineServicePort = await getFreePort();
+      while (commandLineServicePort == manifestServicePort) {
+        commandLineServicePort = await getFreePort();
+      }
+
+      section('Insert metadata for manifest VM service port into the manifest');
+      final metadataKeyPairs = <(String, String)>[
+        ('io.flutter.embedding.android.VMServicePort', manifestServicePort.toString()),
+      ];
+
+      addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
+
+      section('Run Flutter Android app with modified manifest and --vm-service-port=');
+      late Process run;
+
+      await inDirectory(path.join(tempDir.path, projectName), () async {
+        run = await startFlutter(
+          'run',
+          options: <String>[
+            '--$buildMode',
+            '--vm-service-port=$commandLineServicePort',
+            '--verbose',
+          ],
+        );
+      });
+
+      section('Attempt to connect to VM service until available or timeout');
+      final Duration timeout = const Duration(seconds: 30);
+      final Stopwatch stopwatch = Stopwatch()..start();
+      Socket? socket;
+      while (socket == null && stopwatch.elapsed < timeout) {
+        try {
+          socket = await Socket.connect('127.0.0.1', commandLineServicePort);
+        } catch (e) {
+          // Ignore connection errors and retry.
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+      }
+
+      section('Check that the VM service is running on the specified port');
+      if (socket == null) {
+        try {
+          await Socket.connect('127.0.0.1', manifestServicePort).timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              throw Exception(
+                'Failed to connect to VM service on port $commandLineServicePort specified on the command line and also did not connect to $manifestServicePort specified in the manifest.',
+              );
+            },
+          );
+        } catch (e) {
+          throw Exception(
+            'Failed to connect to VM service on port $commandLineServicePort specified on the command line. Connected to $manifestServicePort specified in the manifest instead.',
+          );
+        }
+
+        //     throw Exception(
+        //           'Incorrectly connecte to VM service on port $manifestServicePort specified in the manifest instead of $commandLineServicePort specified on the command line.',
+        //         );
+        //       },
+        //     );
+
+        //     throw Exception(
+        //       'Failed to connect to VM service on port $commandLineServicePort specified on the command line and also did not connect to $manifestServicePort specified in the manifest.',
+        //     );
+        //   },
+        // );
+      } else {
+        socket.destroy();
+      }
+
+      section('Kill the app');
+      run.kill();
+      await run.exitCode;
+
+      return TaskResult.success(null);
+    } on TaskResult catch (taskResult) {
+      return taskResult;
+    } catch (e, stackTrace) {
+      print('Task exception stack trace:\n$stackTrace');
+      return TaskResult.failure(e.toString());
+    } finally {
+      rmTree(tempDir);
+    }
+  };
+}
+
+TaskFunction _testCommandLineFlagPrecedence2(String buildMode) {
   return () async {
     section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(

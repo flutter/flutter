@@ -16,14 +16,14 @@ void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs
     'main',
     'AndroidManifest.xml',
   );
-  final File file = File(manifestPath);
+  final file = File(manifestPath);
 
   if (!file.existsSync()) {
     throw Exception('AndroidManifest.xml not found at $manifestPath');
   }
 
   final String xmlStr = file.readAsStringSync();
-  final XmlDocument xmlDoc = XmlDocument.parse(xmlStr);
+  final xmlDoc = XmlDocument.parse(xmlStr);
   final XmlElement applicationNode = xmlDoc.findAllElements('application').first;
 
   // Check if the meta-data node already exists.
@@ -36,7 +36,7 @@ void addMetadataToManifest(String testDirectory, List<(String, String)> keyPairs
       final XmlElement existingEntry = existingMetaData.first;
       existingEntry.setAttribute('android:value', value);
     } else {
-      final XmlElement metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
+      final metaData = XmlElement(XmlName('meta-data'), <XmlAttribute>[
         XmlAttribute(XmlName('android:name'), key),
         XmlAttribute(XmlName('android:value'), value),
       ]);
