@@ -4,7 +4,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
-#include "flutter/shell/platform/windows/testing/mock_window_binding_handler.h"
 #include "flutter/shell/platform/windows/testing/mock_window_binding_handler_delegate.h"
 #include "flutter/shell/platform/windows/testing/mock_windows_proc_table.h"
 #include "flutter/shell/platform/windows/testing/windows_test.h"
@@ -27,7 +26,7 @@ static constexpr int32_t kDefaultPointerDeviceId = 0;
 
 class MockFlutterWindow : public FlutterWindow {
  public:
-  MockFlutterWindow(bool reset_view_on_exit = true)
+  explicit MockFlutterWindow(bool reset_view_on_exit = true)
       : reset_view_on_exit_(reset_view_on_exit) {
     ON_CALL(*this, GetDpiScale())
         .WillByDefault(Return(this->FlutterWindow::GetDpiScale()));
@@ -37,7 +36,7 @@ class MockFlutterWindow : public FlutterWindow {
   MockFlutterWindow(int width,
                     int height,
                     std::shared_ptr<WindowsProcTable> proc_table = nullptr)
-      : FlutterWindow(width, height, proc_table) {}
+      : FlutterWindow(width, height, nullptr, std::move(proc_table)) {}
 
   virtual ~MockFlutterWindow() {
     if (reset_view_on_exit_) {
