@@ -153,7 +153,7 @@ Future<void> testMain() async {
       tester.updateNode(
         id: 0,
         role: ui.SemanticsRole.tab,
-        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue, isSelected: ui.Tristate.none),
+        flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
         rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       );
       tester.apply();
