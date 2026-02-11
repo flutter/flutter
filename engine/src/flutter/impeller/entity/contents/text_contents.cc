@@ -274,11 +274,13 @@ bool TextContents::Render(const ContentContext& renderer,
     // minification discards texel columns/rows, producing jagged diagonals
     // and varying stroke weights.  Fall back to bilinear in that case.
     // See https://github.com/flutter/flutter/issues/182143
-    Scalar sx = std::abs(entity_transform.GetBasisX().GetLength());
-    Scalar sy = std::abs(entity_transform.GetBasisY().GetLength());
-    Scalar ratio = (sx > sy) ? sx / std::max(sy, 0.001f)
-                             : sy / std::max(sx, 0.001f);
-    if (ratio > 1.15f) {
+    constexpr Scalar kMinScaleForRatio = 0.001f;
+    constexpr Scalar kAnisotropicScaleThreshold = 1.15f;
+    const Scalar sx = entity_transform.GetBasisX().GetLength();
+    const Scalar sy = entity_transform.GetBasisY().GetLength();
+    const Scalar ratio = (sx > sy) ? sx / std::max(sy, kMinScaleForRatio)
+                                   : sy / std::max(sx, kMinScaleForRatio);
+    if (ratio > kAnisotropicScaleThreshold) {
       // Non-uniform scale — use bilinear to avoid aliasing.
       sampler_desc.min_filter = MinMagFilter::kLinear;
       sampler_desc.mag_filter = MinMagFilter::kLinear;
