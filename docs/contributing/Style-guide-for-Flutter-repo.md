@@ -822,21 +822,27 @@ really is, and tends to encourage "spaghetti" code (where distant components ref
 than "lasagna" code (where each section of the code is cleanly layered and separable).
 
 
-### Avoid using `extension`.
+### Guidelines for `extension`s.
 
-Extension methods are confusing to document and discover. To an end developer,
-they appear no different than the built-in API of the class, and discovering
-the documentation and implementation of an extension is more challenging than
-for class members.
+[Extension methods][] let you add additional functionality to an existing type.
+When choosing between declaring a regular instance method and an extension
+method, consider the trade-offs. Extension methods are resolved statically and
+cannot be overridden. Furthermore, misusing extension methods can pollute IDE
+suggestions and cause naming collisions.
 
-Prefer instead adding methods directly to relevant classes. If that is not
-possible, create a method that clearly identifies what object(s) it works with
-and is part of.
+Don't declare an extension method when declaring a regular method will do.
 
-(A rare exception can be made for extensions that provide temporary workarounds
-when deprecating features. In those cases, however, the extensions and all their
-members must be deprecated in the PR that adds them, and they must be removed
-in accordance with our deprecation policy.)
+Don't use extension methods if the end developer might want to override the
+extension method's implementation. Extension methods cannot be overridden.
+
+Don't create extension methods with the same name on the same type in separate
+Flutter libraries. This causes collisions if both libraries are imported.
+
+Avoid creating public extension methods on common types from the Dart SDK like
+`Object`, `List`, `Map`, `Future`, etc. This should be done with extreme care to
+avoid polluting the suggestions end developers see in IDEs.
+
+[Extension methods]: https://dart.dev/language/extension-methods
 
 
 ### Avoid using `FutureOr<T>`
@@ -1021,6 +1027,322 @@ anyway. It should also be avoided in very large functions.
 It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler
 to actually desugar the generator into something that uses an iterator class.
 
+### Use dot shorthands to reduce redundant information
+
+1. [Always omit a local variable's obvious type over using dot shorthands](#always-omit-a-local-variables-obvious-type-over-using-dot-shorthands).
+2. [Prefer using dot shorthands to initialize top-level variables and fields](#prefer-using-dot-shorthands-to-initialize-top-level-variables-and-fields).
+3. [Consider using dot shorthand to omit obvious types when assigning to an existing variable, field, or setter](#consider-using-dot-shorthands-to-omit-obvious-types-when-assigning-to-an-existing-variable-field-or-setter).
+4. [Prefer using dot shorthands to omit obvious types for named argument values](#prefer-using-dot-shorthands-to-omit-obvious-types-for-named-argument-values).
+5. [Don't use dot shorthands for positional argument values](#dont-use-dot-shorthands-for-positional-argument-values).
+6. [Prefer using dot shorthands for implicit returns](#prefer-using-dot-shorthands-for-implicit-returns).
+7. [Prefer using explicit types for explicit returns](#prefer-using-explicit-types-for-explicit-returns).
+8. [Prefer using dot shorthands to omit obvious types for the default values of constructors' initializing formals](#prefer-using-dot-shorthands-to-omit-obvious-types-for-default-values-of-constructors-initializing-formals).
+9. [Prefer using dot shorthands for switch cases to omit obvious types](#prefer-using-dot-shorthands-for-switch-cases-to-omit-obvious-types).
+10. [Prefer using dot shorthands in collection literals if the collection's element type is obvious](#prefer-using-dot-shorthands-in-collection-literals-if-the-collections-element-type-is-obvious).
+
+
+#### Always omit a local variable's obvious type over using dot shorthands
+
+When declaring a variable, decide whether you want to infer the variable's type or not *first*,
+and then based on that, decide if you're still able to use a dot shorthand for the initializer.
+In other words, the rule to omit a variable's obvious type has higher precedence than the rule
+to use dot shorthands.
+
+```dart
+void foo() {
+  // ✅ Good. The expression SliverAppBar is obviously typed,
+  // so the local variable's type should be omitted.
+  var appBar = SliverAppBar('Hello');
+
+  // ❌ BAD: Infer the local variable's type instead of using dot shorthands.
+  SliverAppBar appBar = .new();
+
+  // ❌ BAD: The type of an enum value isn't obviously typed.
+  // The expression "Foo.bar" might be an enum value, or it might be a static getter that returns any type.
+  // The local variable's declaration should not use type inference.
+  var alignment = MainAxisAlignment.start;
+
+  // ✅ Good. Use explicit types for a local variable declaration if the expression is not obviously typed.
+  // You can use dot shorthands to initialize an explicitly typed local variable.
+  MainAxisAlignment alignment = .start;
+}
+```
+
+
+#### Prefer using dot shorthands to initialize top-level variables and fields
+
+Top-level variables and fields must have explicit types, so top-level variables and fields can
+use dot shorthands to initialize their values.
+
+```dart
+// ✅ Good. Uses dot shorthands to initialize top-level variables.
+const MainAxisAlignment kGlobalAlignment = .start;
+const SliverAppBar kGlobalAppBar = .new();
+
+// ⚠️ OK but verbose. Consider using dot shorthands.
+const MainAxisAlignment kGlobalAlignment = MainAxisAlignment.start;
+const SliverAppBar kGlobalAppBar = SliverAppBar();
+
+// ❌ BAD. Always use explicit types for public APIs.
+const kGlobalAppBar = SliverAppBar();
+
+class Foo {
+  // ✅ Good. Uses dot shorthands to initialize public APIs.
+  final MainAxisAlignment defaultAlignment = .start;
+  final MainAxisAlignment _privateAlignment = .start;
+  final SliverAppBar defaultAppBar = .new();
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  final MainAxisAlignment defaultAlignment = MainAxisAlignment.start;
+  final MainAxisAlignment _privateAlignment = MainAxisAlignment.start;
+  final SliverAppBar defaultAppBar = SliverAppBar();
+
+  // ❌ BAD. Always use explicit types for public APIs.
+  final defaultAppBar = SliverAppBar();
+}
+```
+
+
+#### Consider using dot shorthands to omit obvious types when assigning to an existing variable, field, or setter
+
+```dart
+void foo() {
+  MainAxisAlignment mainAxisAlignment = ...;
+  SliverAppBar sliverAppBar = ...;
+  MutableConfig config = ...;
+
+  // ✅ Good. Uses dot shorthands to assign to an existing local variable.
+  mainAxisAlignment = .start;
+  sliverAppBar = .new();
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  mainAxisAlignment = MainAxisAlignment.start;
+  sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  // Or, consider renaming 'fu' to make the type obvious.
+  fu = .new('Hello');
+
+  // ✅ Good. Uses dot shorthands to assign to an existing field or setter.
+  config.mainAxisAlignment = .start;
+  config.sliverAppBar = .new();
+
+  // ⚠️ OK but the type of config.text is less obvious: config.text might be
+  // a String, Widget, etc. If a reviewer deems this non-obvious, they can
+  // request an explicit type.
+  config.text = .new('Hello');
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  config.mainAxisAlignment = MainAxisAlignment.start;
+  config.sliverAppBar = SliverAppBar();
+
+  // ❌ BAD. Use explicit types if the type is not obvious from the name.
+  config.fu = .new('Hello');
+}
+```
+
+
+#### Prefer using dot shorthands to omit obvious types for named argument values
+
+```dart
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Row(
+  mainAxisAlignment: .start,
+  crossAxisAlignment: .start,
+  children: children,
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Row(
+  mainAxisAlignment: MainAxisAlignment.start,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: children,
+),
+
+// ✅ Good. Uses dot shorthands for named argument values
+// to omit types that are obvious.
+Text('Hello world', textScaler: .new()),
+
+// ⚠️ OK but consider using dot shorthands.
+Text('Hello world', textScaler: TextScaler()),
+```
+
+A special case is the `EdgeInsetsGeometry` type: it is considered obvious for named arguments like "padding":
+
+```dart
+// ✅ Good. Use dot shorthands for named argument values
+// to omit types that are obvious. EdgeInsetsGeometry is obvious
+// for a named arguments like "padding".
+Padding(
+  padding: .all(8.0),
+  child: child,
+),
+
+// ✅ Good.
+Chip(
+  label: Text('Hello'),
+  labelPadding: .all(8.0),
+),
+
+// ❌ BAD. Use dot shorthands to omit types that are obvious
+// from the named argument.
+Padding(
+  padding: EdgeInsets.all(8.0),
+  child: child,
+),
+
+// ❌ BAD.
+Chip(
+  label: Text('Hello'),
+  labelPadding: EdgeInsets.all(8.0),
+),
+```
+
+
+#### Don't use dot shorthands for positional argument values.
+
+```dart
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .zero?
+Curve2DSample(0.5, .zero)
+
+// ❌ BAD. Uses dot shorthands for positional argument values.
+// What's the type of .new?
+decodeImageFromList(.new(1024)),
+
+// ✅ Good.
+Curve2DSample(0.5, Offset.zero)
+
+// ✅ Good.
+decodeImageFromList(Uint8List(1024)),
+```
+
+
+#### Prefer using dot shorthands for implicit returns
+
+```dart
+// ✅ Good. Uses dot shorthands for implicit returns.
+MainAxisAlignment pickAlignment() => .start;
+Text createText() => .new('Hello');
+
+// ⚠️ OK but repetitive. Consider using dot shorthands.
+MainAxisAlignment pickAlignment() => MainAxisAlignment.start;
+Text createText() => Text('Hello');
+
+// ❌ BAD. Avoid implicit returns for complex expressions.
+Text createText() => doThing((ThingEnum thing) => switch (thing) {
+  .thing1 => .new('Hello'),
+  .thing2 => .new('World'),
+});
+```
+
+
+#### Prefer using explicit types for explicit returns
+
+```dart
+// ✅ Good. Uses explicit types for explicit returns.
+MainAxisAlignment pickAlignment() {
+  return MainAxisAlignment.start;
+}
+
+// ✅ Good. Uses dot explicit types for explicit returns.
+Text createText() {
+  return Text('Hello');
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+MainAxisAlignment pickAlignment() {
+  return .start;
+}
+
+// ⚠️ OK but consider using explicit types, especially if
+// this method is multiple lines.
+Text createText() {
+  return .new('Hello');
+}
+```
+
+
+#### Prefer using dot shorthands to omit obvious types for default values of constructors' initializing formals
+
+```dart
+class Foo {
+  final MainAxisAlignment mainAxisAlignment;
+
+  // ✅ Good. Uses dot shorthands for the default value.
+  Foo({this.mainAxisAlignment = .start});
+  Foo([this.mainAxisAlignment = .start]);
+
+  // ⚠️ OK but verbose. Consider using dot shorthands.
+  Foo({this.mainAxisAlignment = MainAxisAlignment.start});
+  Foo([this.mainAxisAlignment = MainAxisAlignment.start]);
+}
+```
+
+
+#### Prefer using dot shorthands for switch cases to omit obvious types
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in switch cases.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    .spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use dot shorthands to omit obvious types.
+  MainAxisAlignment alignment = .spaceBetween;
+  _ = switch (alignment) {
+    MainAxisAlignment.spaceBetween => true,
+    _ => false,
+  };
+
+  // ❌ BAD. Use explicit types if the type is not obvious.
+  // Consider renaming "whatIsThis" to make the type obvious.
+  _ = switch (whatIsThis()) {
+    .mystery => true,
+    _ => false,
+  };
+
+  // ✅ Good. Uses explicit types if the type is not obvious.
+  _ = switch (whatIsThis()) {
+    BookGenre.mystery => true,
+    _ => false,
+  };
+}
+```
+
+
+#### Prefer using dot shorthands in collection literals if the collection's element type is obvious
+
+```dart
+void foo() {
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var alignments = <MainAxisAlignment>[.start, .end];
+  var objects = <AwesomeObject>[.new('Foo'), .new('Bar'), .new('Buzz')];
+
+  // ⚠️ OK but repetitive. Consider using dot shorthands.
+  var objects = <AwesomeObject>[AwesomeObject('Foo'), AwesomeObject('Bar'), AwesomeObject('Buzz')];
+
+  // ❌ BAD. Per Flutter's existing style guide, all list and map literals must
+  // be explicitly typed.
+  var alignments = [MainAxisAlignment.start, MainAxisAlignment.end];
+
+  // ❌ BAD. Per Flutter's existing omit_obvious_local_variable_types lint,
+  // a local variable's type is not obvious if the elements don't all have the
+  // same type.
+  var objects = [DifferentObject('Foo'), AwesomeObject('Bar')];
+
+  // ✅ Good. Uses dot shorthands in a collection literal whose type is obvious.
+  var objects = <BaseObject>[DifferentObject('Foo'), AwesomeObject('Bar')];
+}
+```
+
+
 ## Writing tests
 
 ### Make each test entirely self-contained
@@ -1028,11 +1350,11 @@ to actually desugar the generator into something that uses an iterator class.
 Embrace code duplication in tests. It makes it easier to make new tests by copying and pasting them and
 tweaking a few things.
 
-Avoid using `setUp`, `tearDown`, and similar features, as well as test-global variables or other state
-shared between tests. They make writing tests easier but make maintaining them, debugging them, and
-refactoring code much harder. (These are commonly used in Flutter's codebase today, but that is almost
-always a mistake. When you are editing a file that uses those features, aim to reduce the number of
-tests using them while you're there.)
+Avoid test-global variables or state shared between tests; these make maintaining, debugging, and refactoring
+significantly harder. Instead of `setUp`, use local helper functions called within each test block to
+initialize state. To handle cleanup, prefer `addTearDown` over the global `tearDown` callback. `addTearDown`
+allows you to register cleanup logic at the exact point where a resource is created, ensuring it only runs
+if the initialization was successful.
 
 Specifically, we are trying to avoid shared state, which could persist across tests, and non-local
 side-effects, which would prevent being able to move a test to another file without breaking the test.
@@ -1042,17 +1364,27 @@ have side-effects that might change how other tests run.)
 
 ### Prefer more test files, avoid long test files
 
-Avoid adding tests to files that already have more than one or two hundred lines of code. It's easier
+Organize tests into smaller files grouped by feature, widget, or behavior. It's easier
 to understand a test file when it has only a few related tests, rather than when it has an entire test
 suite. (It also makes developing the tests faster because you can run the test file faster.)
 
+Instead of keeping everything in a single file like:
 
-### Avoid using `pumpAndSettle`
+- `button_test.dart`
 
-As per the API docs for [pumpAndSettle](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pumpAndSettle.html), prefer using explicit [`pump`](https://main-api.flutter.dev/flutter/flutter_test/WidgetController/pump.html) calls rather than `pumpAndSettle`.
+that includes layout, semantics, and interaction tests, it can be split into:
 
-Using `pumpAndSettle`, especially without checking its return value, makes it very easy for bugs to sneak in where we trigger animations across multiple frames instead of immediately. It is almost always the case that a call to `pumpAndSettle` is more strictly correctly written as two `pump` calls, one to trigger the animations and one (with a duration) to jump to the point after the animations.
+- `button_layout_test.dart`
+- `button_semantics_test.dart`
+- `button_interaction_test.dart`
 
+Or group tests by behavior:
+
+- `navigator_push_test.dart`
+- `navigator_pop_test.dart`
+- `navigator_transition_test.dart`
+
+For more on writing tests, see [Running & writing tests](./testing/Running-and-writing-tests.md).
 
 ## Naming
 
@@ -1073,18 +1405,6 @@ However, where possible avoid global constants. Rather than `kDefaultButtonColor
 Unless the abbreviation is more recognizable than the expansion (e.g. XML, HTTP, JSON), expand abbreviations
 when selecting a name for an identifier. In general, avoid one-character names unless one character is idiomatic
 (for example, prefer `index` over `i`, but prefer `x` over `horizontalPosition`).
-
-
-### Avoid anonymous parameter names
-
-Provide full type information and names even for parameters that are otherwise unused. This makes it easier for
-people reading the code to tell what is actually going on (e.g. what is being ignored). For example:
-
-```dart
-  onTapDown: (TapDownDetails details) { print('hello!'); }, // GOOD
-  onTapUp: (_) { print('good bye'); }, // BAD
-```
-
 
 ### Naming rules for typedefs and function variables
 
@@ -1311,121 +1631,10 @@ reviewing docs in PRs.
 Line length for code is automatically handled by `dart format`, which is configured to use a maximum
 line length of 100.
 
-
-### Consider using `=>` for short functions and methods
-
-But only use `=>` when everything, including the function declaration, fits
-on a single line.
-
-Example:
-
-```dart
-// BAD:
-String capitalize(String s) =>
-  '${s[0].toUpperCase()}${s.substring(1)}';
-
-// GOOD:
-String capitalize(String s) => '${s[0].toUpperCase()}${s.substring(1)}';
-
-String capitalize(String s) {
-  return '${s[0].toUpperCase()}${s.substring(1)}';
-}
-```
-
-### Use `=>` for getters and callbacks that just return literals or switch expressions
-
-```dart
-// GOOD:
-List<Color> get favorites => <Color>[
-  const Color(0xFF80FFFF),
-  const Color(0xFF00FFF0),
-  const Color(0xFF4000FF),
-  _mysteryColor(),
-];
-
-// GOOD:
-bool get isForwardOrCompleted => switch (status) {
-  AnimationStatus.forward || AnimationStatus.completed => true,
-  AnimationStatus.reverse || AnimationStatus.dismissed => false,
-};
-```
-
-It's important to use discretion, since there are cases where a function body
-is easier to visually parse:
-
-```dart
-// OKAY, but the code is more dense than it could be:
-String? get validated => switch(input[_inputIndex]?.trim()) {
-  final String value when value.isNotEmpty => value,
-  _ => null,
-}
-
-// BETTER (more verbose, but also more readable):
-String? get validated {
-  final String? value = input[_inputIndex]?.trim();
-
-  if (value != null && value.isNotEmpty) {
-    return value;
-  }
-  return null;
-}
-```
-
-If your code is passing an inline closure containing only a `return` statement,
-you can instead use the `=>` form.\
-When doing this, the closing `]`, `}`, or `)` bracket will have the same
-indentation as the line where the callback starts.
-
-For example:
-
-```dart
-    // GOOD, but slightly more verbose than necessary since it doesn't use =>
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) {
-          return <PopupMenuItem<String>>[
-            PopupMenuItem<String>(
-              value: 'Friends',
-              child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-            ),
-            PopupMenuItem<String>(
-              value: 'Events',
-              child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-            ),
-          ];
-        }
-      );
-    }
-
-    // GOOD, does use =>, slightly briefer
-    @override
-    Widget build(BuildContext context) {
-      return PopupMenuButton<String>(
-        onSelected: (String value) { print('Selected: $value'); },
-        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-          PopupMenuItem<String>(
-            value: 'Friends',
-            child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
-          ),
-          PopupMenuItem<String>(
-            value: 'Events',
-            child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming'),
-          ),
-        ]
-      );
-    }
-```
-
-The important part is that the closing punctuation lines up with the start
-of the line that has the opening punctuation, so that you can easily determine
-what's going on by just scanning the indentation on the left edge.
-
-
 ### Use braces for long functions and methods
 
-Use a block (with braces) when a body would wrap onto more than one line (as opposed to using `=>`; the cases where you can use `=>` are discussed in the previous two guidelines).
+Use a block (with braces) when a body would wrap onto more than one line (as opposed to using arrow
+syntax, `=>`).
 
 
 ### Prefer `+=` over `++`

@@ -712,9 +712,10 @@ targets:
       tags: >
         ["firebaselab"]
       task_name: release_smoke_test
+      # TODO(flutter/flutter#181954) Restore the Pixel 9/API 36 device when
+      # it is available in Firebase Test Lab.
       physical_devices: >-
         [
-          "--device", "model=tokay,version=36",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
@@ -1248,6 +1249,7 @@ targets:
       task_name: linux_feature_flags_test
 
   - name: Linux_android_emu android_display_cutout
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/181900
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2358,7 +2360,6 @@ targets:
       task_name: basic_material_app_android__compile
 
   - name: Linux_pixel_7pro android_verified_input_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2664,7 +2665,6 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/179114
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2849,7 +2849,6 @@ targets:
   - name: Linux_mokey hybrid_android_views_integration_test
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # https://github.com/flutter/flutter/issues/148085
     timeout: 60
     properties:
       tags: >
@@ -3255,7 +3254,6 @@ targets:
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/172210
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -5359,6 +5357,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: wide_gamut_ios
 
+  - name: Mac wide_gamut_macos
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: wide_gamut_macos
+
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5870,7 +5882,10 @@ targets:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"}
+          {"dependency": "goldctl", "version": "git_revision:2387d6fff449587eecbb7e45b2692ca0710b63b9"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6950,7 +6965,6 @@ targets:
       task_name: windows_startup_test
 
   - name: Windows windowing_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/177715
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
