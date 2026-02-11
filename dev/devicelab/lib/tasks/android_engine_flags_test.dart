@@ -186,7 +186,7 @@ Future<int> getFreePort() async {
   return port;
 }
 
-TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
+TaskFunction _testCommandLineFlagPrecedence2(String buildMode) {
   return () async {
     section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
@@ -202,21 +202,17 @@ TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
         );
       });
 
-      section('Retrieve two free ports for Dart VM service');
-      final int manifestServicePort = await getFreePort();
-      int commandLineServicePort = await getFreePort();
-      while (commandLineServicePort == manifestServicePort) {
-        commandLineServicePort = await getFreePort();
-      }
-
       section('Insert metadata for manifest VM service port into the manifest');
+      const invalidAotSharedLibraryPath = 'something/completely/and/totally/invalid.so';
       final metadataKeyPairs = <(String, String)>[
-        ('io.flutter.embedding.android.VMServicePort', manifestServicePort.toString()),
+        ('io.flutter.embedding.android.AOTSharedLibraryName', invalidAotSharedLibraryPath),
       ];
 
       addMetadataToManifest(path.join(tempDir.path, projectName), metadataKeyPairs);
 
       section('Run Flutter Android app with modified manifest and --vm-service-port=');
+      const validAotSharedLibraryPath = 'data/data/$projectName/';
+      final foundInvalidAotLibraryLog = Completer<bool>();
       late Process run;
 
       await inDirectory(path.join(tempDir.path, projectName), () async {
@@ -224,61 +220,37 @@ TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
           'run',
           options: <String>[
             '--$buildMode',
-            '--vm-service-port=$commandLineServicePort',
+            '--aot-shared-library-name=$invalidAotSharedLibraryPath',
             '--verbose',
           ],
         );
       });
 
-      section('Attempt to connect to VM service until available or timeout');
-      final Duration timeout = const Duration(seconds: 30);
-      final Stopwatch stopwatch = Stopwatch()..start();
-      Socket? socket;
-      while (socket == null && stopwatch.elapsed < timeout) {
-        try {
-          socket = await Socket.connect('127.0.0.1', commandLineServicePort);
-        } catch (e) {
-          // Ignore connection errors and retry.
-          await Future<void>.delayed(const Duration(milliseconds: 500));
-        }
+      final StreamSubscription<void> stdout = run.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+            print('CAMILLE :$line');
+            if (line.contains(
+              "Skipping unsafe AOT shared library name flag: something/completely/and/totally/invalid.so. Please ensure that the library is vetted and placed in your application's internal storage.",
+            )) {
+              foundInvalidAotLibraryLog.complete(true);
+            }
+          });
+
+      section('Check that warning log for invalid AOT shared library name is in STDOUT');
+      final Object result = await Future.any(<Future<Object>>[
+        foundInvalidAotLibraryLog.future,
+        run.exitCode,
+      ]);
+
+      if (result is int) {
+        throw Exception('flutter run failed, exitCode=$result');
       }
 
-      section('Check that the VM service is running on the specified port');
-      if (socket == null) {
-        try {
-          await Socket.connect('127.0.0.1', manifestServicePort).timeout(
-            const Duration(seconds: 5),
-            onTimeout: () {
-              throw Exception(
-                'Failed to connect to VM service on port $commandLineServicePort specified on the command line and also did not connect to $manifestServicePort specified in the manifest.',
-              );
-            },
-          );
-        } catch (e) {
-          throw Exception(
-            'Failed to connect to VM service on port $commandLineServicePort specified on the command line. Connected to $manifestServicePort specified in the manifest instead.',
-          );
-        }
-
-        //     throw Exception(
-        //           'Incorrectly connecte to VM service on port $manifestServicePort specified in the manifest instead of $commandLineServicePort specified on the command line.',
-        //         );
-        //       },
-        //     );
-
-        //     throw Exception(
-        //       'Failed to connect to VM service on port $commandLineServicePort specified on the command line and also did not connect to $manifestServicePort specified in the manifest.',
-        //     );
-        //   },
-        // );
-      } else {
-        socket.destroy();
-      }
-
-      section('Kill the app');
+      section('Stop listening to STDOUT');
+      await stdout.cancel();
       run.kill();
-      await run.exitCode;
-
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
@@ -291,7 +263,7 @@ TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
   };
 }
 
-TaskFunction _testCommandLineFlagPrecedence2(String buildMode) {
+TaskFunction _testCommandLineFlagPrecedence(String buildMode) {
   return () async {
     section('Create new Flutter Android app');
     final Directory tempDir = Directory.systemTemp.createTempSync(
