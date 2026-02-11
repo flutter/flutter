@@ -3936,8 +3936,7 @@ void main() {
     await tester.pump();
 
     // Verify focus changed to start thumb
-    // Verify focus changed to start thumb
-    final FocusNode startFocusNode =
+    final startFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
     expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
     expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
@@ -3952,7 +3951,7 @@ void main() {
     await tester.pump();
 
     // Verify focus changed to end thumb
-    final FocusNode endFocusNode =
+    final endFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tap');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
@@ -3995,7 +3994,7 @@ void main() {
     await tester.pump();
 
     // Verify focus on start drag
-    final FocusNode startFocusNode =
+    final startFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
     expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus on drag start');
     expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
@@ -4014,8 +4013,7 @@ void main() {
     await tester.pump();
 
     // Verify focus on end drag
-    // Verify focus on end drag
-    final FocusNode endFocusNode =
+    final endFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus on drag start');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
@@ -4060,8 +4058,7 @@ void main() {
     await tester.pump();
 
     // Verify start thumb has focus
-    // Verify start thumb has focus
-    final FocusNode startFocusNode =
+    final startFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
     expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
     expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
@@ -4071,8 +4068,7 @@ void main() {
     await tester.pump();
 
     // Verify end thumb has focus
-    // Verify end thumb has focus
-    final FocusNode endFocusNode =
+    final endFocusNode =
         (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
     expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
     expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
