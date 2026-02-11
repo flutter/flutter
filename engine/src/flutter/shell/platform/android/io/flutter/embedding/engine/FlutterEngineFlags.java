@@ -208,6 +208,14 @@ public final class FlutterEngineFlags {
   public static final Flag ISOLATE_SNAPSHOT_DATA =
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
+  /**
+   * Enables Dart profiling for use with DevTools.
+   *
+   * <p>Allowed in release mode for testing purposes.
+   */
+  private static final Flag ENABLE_DART_PROFILING =
+      new Flag("--enable-dart-profiling", "EnableDartProfiling", true);
+
   // Manifest flags NOT allowed in release mode:
 
   /** Ensures deterministic Skia rendering by skipping CPU feature swaps. */
@@ -262,10 +270,6 @@ public final class FlutterEngineFlags {
   /** Enables an endless trace buffer for timeline events. */
   private static final Flag ENDLESS_TRACE_BUFFER =
       new Flag("--endless-trace-buffer", "EndlessTraceBuffer");
-
-  /** Enables Dart profiling for use with DevTools. */
-  private static final Flag ENABLE_DART_PROFILING =
-      new Flag("--enable-dart-profiling", "EnableDartProfiling");
 
   /** Discards new profiler samples once the buffer is full. */
   private static final Flag PROFILE_STARTUP = new Flag("--profile-startup", "ProfileStartup");
