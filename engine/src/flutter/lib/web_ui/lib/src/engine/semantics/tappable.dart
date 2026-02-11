@@ -68,20 +68,21 @@ class Tappable extends SemanticBehavior {
       owner.element.setAttribute('flt-tappable', '');
       _isListening = true;
     } else {
-      owner.element.removeEventListener('click', _clickListener);
-      owner.element.removeAttribute('flt-tappable');
-      _clickListener = null;
-      _isListening = false;
+      _cleanUp();
     }
+  }
+
+  void _cleanUp() {
+    owner.element.removeEventListener('click', _clickListener);
+    owner.element.removeAttribute('flt-tappable');
+    _clickListener = null;
+    _isListening = false;
   }
 
   @override
   void dispose() {
     if (_isListening) {
-      owner.removeEventListener('click', _clickListener);
-      owner.element.removeAttribute('flt-tappable');
-      _clickListener = null;
-      _isListening = false;
+      _cleanUp();
     }
     super.dispose();
   }

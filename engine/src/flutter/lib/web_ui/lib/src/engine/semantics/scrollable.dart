@@ -114,12 +114,14 @@ class SemanticScrollable extends SemanticRole {
   @override
   void update() {
     super.update();
-
-    if (_canScroll) {
-      if (_scrollOverflowElement == null) {
-        _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
-        _scrollOverflowElement!.style
-          ..position = 'absolute'
+    if (!_canScroll) {
+      _cleanUp();
+      return;
+    }
+    if (_scrollOverflowElement == null) {
+      _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
+      _scrollOverflowElement!.style
+        ..position = 'absolute'
           ..transformOrigin = '0 0 0'
           // Ignore pointer events since this is a dummy element.
           ..pointerEvents = 'none';
@@ -170,8 +172,6 @@ class SemanticScrollable extends SemanticRole {
         });
         addEventListener('scroll', scrollListener);
       }
-    } else {
-      _cleanUp();
     }
   }
 
@@ -268,10 +268,8 @@ class SemanticScrollable extends SemanticRole {
   }
 
   void _cleanUp() {
-    if (_scrollOverflowElement != null) {
-      _scrollOverflowElement!.remove();
-      _scrollOverflowElement = null;
-    }
+    _scrollOverflowElement?.remove();
+    _scrollOverflowElement = null;
     final DomCSSStyleDeclaration style = element.style;
     style.removeProperty('overflowY');
     style.removeProperty('overflowX');
