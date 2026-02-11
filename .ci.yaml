@@ -2832,6 +2832,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey hot_mode_dev_cycle_linux__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/182206
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
