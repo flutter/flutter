@@ -17,6 +17,12 @@ if (enable_unittests) {
     "vec3_array_uniform.frag",
     "vec4_uniform.frag",
     "vec4_array_uniform.frag",
+    "mat2_uniform.frag",
+    "mat2_array_uniform.frag",
+    "mat3_uniform.frag",
+    "mat3_array_uniform.frag",
+    "mat4_uniform.frag",
+    "mat4_array_uniform.frag",
   ]
 
   group("uniforms") {
