@@ -472,7 +472,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       updateAccessibilityFeature(feature, isFeatureEnabled());
     }
 
-
     protected abstract boolean isFeatureEnabled();
 
     void initialize() {
@@ -617,7 +616,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
-    private static String getStringFromBuffer(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
+  private static String getStringFromBuffer(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
     int stringIndex = buffer.getInt();
 
     return stringIndex == EMPTY_STRING_INDEX ? null : strings[stringIndex];
@@ -721,24 +720,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     sendLatestAccessibilityFlagsToFlutter();
   }
 
-    @RequiresApi(API_LEVELS.API_34)
-    private void registerHighContrastObserver(Context context) {
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager != null) {
-            uiModeManager.addContrastChangeListener(
-                    context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
-        }
+  @RequiresApi(API_LEVELS.API_34)
+  private void registerHighContrastObserver(Context context) {
+    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+    if (uiModeManager != null) {
+      uiModeManager.addContrastChangeListener(
+          context.getMainExecutor(), (UiModeManager.ContrastChangeListener) highContrastObserver);
     }
+  }
 
-
-    @RequiresApi(API_LEVELS.API_34)
-    private void unregisterHighContrastObserver(Context context) {
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        if (uiModeManager != null) {
-            uiModeManager.removeContrastChangeListener(
-                    (UiModeManager.ContrastChangeListener) highContrastObserver);
-        }
+  @RequiresApi(API_LEVELS.API_34)
+  private void unregisterHighContrastObserver(Context context) {
+    UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+    if (uiModeManager != null) {
+      uiModeManager.removeContrastChangeListener(
+          (UiModeManager.ContrastChangeListener) highContrastObserver);
     }
+  }
 
   @RequiresApi(API_LEVELS.API_34)
   private void setHighContrastFlag() {
