@@ -18,8 +18,8 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
-  const MotionEventsPage({Key? key})
-    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
+  const MotionEventsPage({super.key})
+    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
 
   @override
   Widget build(BuildContext context) {
@@ -135,10 +135,11 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         'packages/assets_for_android_views/assets/touchEvents',
       );
       final unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
-      final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
-          .cast<Map<dynamic, dynamic>>()
-          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
-          .toList();
+      final List<Map<String, dynamic>> recordedEvents =
+          unTypedRecordedEvents
+              .cast<Map<dynamic, dynamic>>()
+              .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
+              .toList();
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel?.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
@@ -305,8 +306,8 @@ class TouchEventDiff extends StatelessWidget {
       buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords = (event['pointerCoords'] as List<dynamic>)
-        .cast<Map<dynamic, dynamic>>();
+    final List<Map<dynamic, dynamic>> coords =
+        (event['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
     for (var i = 0; i < coords.length; i++) {
       buffer.write(
         'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ',
