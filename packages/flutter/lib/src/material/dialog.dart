@@ -1760,8 +1760,11 @@ Future<T?> showDialog<T>({
           preferredSize: fullscreenDialog ? parentSize : null,
         ),
       );
-    } on UnsupportedError {
+    } on UnsupportedError catch (error, stacktrace) {
       // Fallback to normal dialog route if windowing is not supported
+      FlutterError.reportError(
+        FlutterErrorDetails(exception: error, library: 'material library', stack: stacktrace),
+      );
     }
   }
 

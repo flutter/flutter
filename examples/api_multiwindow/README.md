@@ -12,7 +12,7 @@ each program via:
 flutter run <lib/path/to/file.dart>
 ```
 
-For example, to run the Material dialog tests, run:
+For example, to run the Material dialog example, run:
 
 ```bash
 flutter run lib/material/dialog/dialog.0.dart
