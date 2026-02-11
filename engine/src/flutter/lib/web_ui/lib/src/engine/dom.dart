@@ -124,9 +124,6 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   /// if not in an iframe.
   external DomWindow? get parent;
 
-  /// Scrolls the window by the given amount in pixels.
-  external void scrollBy(int x, int y);
-
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
