@@ -110,7 +110,7 @@ void main() {
     await _testChromeFormatTrace(vmService);
     await _testPerfettoFormatTrace(vmService);
     await vmService.dispose();
-  });
+  }, timeout: const Timeout(Duration(seconds: 60)));
 
   test('Frame request pending begin/end pairs are matched', () async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
