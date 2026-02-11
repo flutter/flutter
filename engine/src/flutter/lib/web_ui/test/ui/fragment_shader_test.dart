@@ -1015,7 +1015,10 @@ Future<void> testMain() async {
 
       group('vec4 array', () {
         test('set using setFloat', () async {
-          const cpuColors = [ui.Color.fromARGB(77, 67, 42, 12), ui.Color.fromARGB(51, 11, 22, 96)];
+          const cpuColors = [
+            ui.Color.fromARGB(255, 67, 42, 12),
+            ui.Color.fromARGB(255, 11, 22, 96),
+          ];
           final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformVec4Slot>]!;
           // 'u_size'
           shader.setFloat(0, 2);
@@ -1032,7 +1035,10 @@ Future<void> testMain() async {
         });
 
         test('set using getUniformVec4Array', () async {
-          const cpuColors = [ui.Color.fromARGB(51, 11, 22, 96), ui.Color.fromARGB(77, 67, 42, 12)];
+          const cpuColors = [
+            ui.Color.fromARGB(255, 11, 22, 96),
+            ui.Color.fromARGB(255, 67, 42, 12),
+          ];
           final ui.FragmentShader shader = shaderMap[ui.UniformArray<ui.UniformVec4Slot>]!;
           shader.getUniformVec2('u_size').set(2, 2);
           final ui.UniformArray<ui.UniformVec4Slot> colors = shader.getUniformVec4Array(
@@ -1078,12 +1084,7 @@ Future<void> testMain() async {
           );
           // uVec4
           cpuColors.add(
-            ui.Color.fromARGB(
-              random.nextInt(255),
-              random.nextInt(255),
-              random.nextInt(255),
-              random.nextInt(255),
-            ),
+            ui.Color.fromARGB(255, random.nextInt(255), random.nextInt(255), random.nextInt(255)),
           );
           for (var i = 0; i < 10; ++i) {
             cpuColors.add(ui.Color.fromARGB(255, random.nextInt(255), 0, 0));
@@ -1100,12 +1101,7 @@ Future<void> testMain() async {
           }
           for (var i = 0; i < 10; ++i) {
             cpuColors.add(
-              ui.Color.fromARGB(
-                random.nextInt(255),
-                random.nextInt(255),
-                random.nextInt(255),
-                random.nextInt(255),
-              ),
+              ui.Color.fromARGB(255, random.nextInt(255), random.nextInt(255), random.nextInt(255)),
             );
           }
         });
