@@ -3898,7 +3898,7 @@ void main() {
   });
 
   testWidgets('RangeSlider taps should set focus on start/end thumbs', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3936,13 +3936,11 @@ void main() {
     await tester.pump();
 
     // Verify focus changed to start thumb
-    final dynamic state = tester.state(find.byType(RangeSlider));
-    expect(
-      state.startFocusNode.hasFocus,
-      isTrue,
-      reason: 'Start thumb should have focus after tap',
-    );
-    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+    // Verify focus changed to start thumb
+    final FocusNode startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
 
     // Reset focus
     FocusManager.instance.primaryFocus?.unfocus();
@@ -3953,12 +3951,15 @@ void main() {
     await tester.tapAt(endThumbPos);
     await tester.pump();
 
-    expect(state.endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tap');
-    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
+    // Verify focus changed to end thumb
+    final FocusNode endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
 
   testWidgets('RangeSlider drag should set focus on start/end thumbs', (WidgetTester tester) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -3994,13 +3995,10 @@ void main() {
     await tester.pump();
 
     // Verify focus on start drag
-    final dynamic state = tester.state(find.byType(RangeSlider));
-    expect(
-      state.startFocusNode.hasFocus,
-      isTrue,
-      reason: 'Start thumb should have focus on drag start',
-    );
-    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+    final FocusNode startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
 
     await gesture.moveBy(const Offset(10, 0));
     await gesture.up();
@@ -4016,12 +4014,11 @@ void main() {
     await tester.pump();
 
     // Verify focus on end drag
-    expect(
-      state.endFocusNode.hasFocus,
-      isTrue,
-      reason: 'End thumb should have focus on drag start',
-    );
-    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
+    // Verify focus on end drag
+    final FocusNode endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus on drag start');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
 
     await endGesture.moveBy(const Offset(-10, 0));
     await endGesture.up();
@@ -4031,7 +4028,7 @@ void main() {
   testWidgets('RangeSlider tap start thumb then tab should focus end thumb', (
     WidgetTester tester,
   ) async {
-    RangeValues values = const RangeValues(0.3, 0.7);
+    var values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4063,21 +4060,22 @@ void main() {
     await tester.pump();
 
     // Verify start thumb has focus
-    final dynamic state = tester.state(find.byType(RangeSlider));
-    expect(
-      state.startFocusNode.hasFocus,
-      isTrue,
-      reason: 'Start thumb should have focus after tap',
-    );
-    expect(FocusManager.instance.primaryFocus, equals(state.startFocusNode));
+    // Verify start thumb has focus
+    final FocusNode startFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).startFocusNode as FocusNode;
+    expect(startFocusNode.hasFocus, isTrue, reason: 'Start thumb should have focus after tap');
+    expect(FocusManager.instance.primaryFocus, equals(startFocusNode));
 
     // Press Tab
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
 
     // Verify end thumb has focus
-    expect(state.endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
-    expect(FocusManager.instance.primaryFocus, equals(state.endFocusNode));
+    // Verify end thumb has focus
+    final FocusNode endFocusNode =
+        (tester.state(find.byType(RangeSlider)) as dynamic).endFocusNode as FocusNode;
+    expect(endFocusNode.hasFocus, isTrue, reason: 'End thumb should have focus after tab');
+    expect(FocusManager.instance.primaryFocus, equals(endFocusNode));
   });
 }
 
