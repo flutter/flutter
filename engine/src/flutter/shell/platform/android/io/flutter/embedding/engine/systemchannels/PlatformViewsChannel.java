@@ -91,12 +91,14 @@ public class PlatformViewsChannel {
                   ? ByteBuffer.wrap((byte[]) createArgs.get("params"))
                   : null;
 
+          Log.e("HI GRAY", "before important lines");
+
           try {
             // TODO(gmackall): Enable hcpp path in a follow up PR to
             //                 https://github.com/flutter/flutter/pull/170553/.
             //                 with a new more externally friendly flag name.
             if (handler.isHcppEnabled()) {
-              Log.e("HI GRAY", "Using HCPP path");
+              Log.e("HI GRAY", "Using HCPP path~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHCPPRequest(
                       (int) createArgs.get("id"),
@@ -107,7 +109,7 @@ public class PlatformViewsChannel {
               result.success(null);
               return;
             }
-            Log.e("HI GRAY", "Using Legacy path");
+            Log.e("HI GRAY", "Using Legacy path~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             if (usesPlatformViewLayer) {
               final PlatformViewCreationRequest request =
                   PlatformViewCreationRequest.createHybridCompositionRequest(
