@@ -296,12 +296,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return;
     }
     accessibleNavigation = value;
-    if (accessibleNavigation) {
-      accessibilityFeatureFlags |= AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
-    } else {
-      accessibilityFeatureFlags &= ~AccessibilityFeature.ACCESSIBLE_NAVIGATION.value;
-    }
-    sendLatestAccessibilityFlagsToFlutter();
+    updateAccessibilityFeature(AccessibilityFeature.ACCESSIBLE_NAVIGATION, value);
   }
 
   // Set to true after {@code release} has been invoked.
@@ -499,6 +494,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       try {
         return Settings.Secure.getInt(contentResolver, settingKey) == 1;
       } catch (Settings.SettingNotFoundException e) {
+        Log.d(TAG, "Setting not found: " + settingKey + ", using default: " + defaultValue);
         return defaultValue == 1;
       }
     }
@@ -712,12 +708,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
             && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
 
-    if (shouldBold) {
-      accessibilityFeatureFlags |= AccessibilityFeature.BOLD_TEXT.value;
-    } else {
-      accessibilityFeatureFlags &= ~AccessibilityFeature.BOLD_TEXT.value;
-    }
-    sendLatestAccessibilityFlagsToFlutter();
+    updateAccessibilityFeature(AccessibilityFeature.BOLD_TEXT, shouldBold);
   }
 
   @RequiresApi(API_LEVELS.API_34)
