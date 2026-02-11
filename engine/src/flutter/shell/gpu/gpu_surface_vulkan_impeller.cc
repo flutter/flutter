@@ -25,25 +25,29 @@ namespace flutter {
 class WrappedTextureSourceVK : public impeller::TextureSourceVK {
  public:
   explicit WrappedTextureSourceVK(impeller::vk::Image image,
-                                  impeller::vk::ImageView image_view,
+                                  impeller::vk::UniqueImageView image_view,
                                   impeller::TextureDescriptor desc)
-      : TextureSourceVK(desc), image_(image), image_view_(image_view) {}
+      : TextureSourceVK(desc),
+        image_(image),
+        image_view_(std::move(image_view)) {}
 
-  ~WrappedTextureSourceVK() {}
+  ~WrappedTextureSourceVK() override = default;
 
  private:
   impeller::vk::Image GetImage() const override { return image_; }
 
-  impeller::vk::ImageView GetImageView() const override { return image_view_; }
+  impeller::vk::ImageView GetImageView() const override {
+    return image_view_.get();
+  }
 
   impeller::vk::ImageView GetRenderTargetView() const override {
-    return image_view_;
+    return image_view_.get();
   }
 
   bool IsSwapchainImage() const override { return true; }
 
   impeller::vk::Image image_;
-  impeller::vk::ImageView image_view_;
+  impeller::vk::UniqueImageView image_view_;
 };
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
@@ -177,7 +181,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     view_info.image = vk_image;
 
     auto [result, image_view] =
-        context_vk.GetDevice().createImageView(view_info);
+        context_vk.GetDevice().createImageViewUnique(view_info);
     if (result != impeller::vk::Result::eSuccess) {
       FML_LOG(ERROR) << "Failed to create image view for provided image: "
                      << impeller::vk::to_string(result);
@@ -190,8 +194,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
           /*enable_msaa=*/true);
     }
 
-    auto wrapped_onscreen =
-        std::make_shared<WrappedTextureSourceVK>(vk_image, image_view, desc);
+    auto wrapped_onscreen = std::make_shared<WrappedTextureSourceVK>(
+        vk_image, std::move(image_view), desc);
     auto surface = impeller::SurfaceVK::WrapSwapchainImage(
         transients_, wrapped_onscreen, [&]() -> bool { return true; });
     impeller::RenderTarget render_target = surface->GetRenderTarget();
