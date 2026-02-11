@@ -4880,7 +4880,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerOpenGL) {
                  GL_UNSIGNED_BYTE, buffer.data());
     texture->target = GL_TEXTURE_2D;
     texture->name = gl_texture;
-    texture->format = GL_RGBA;
+    texture->format = GL_RGBA8;
     texture->destruction_callback = nullptr;
     texture->user_data = nullptr;
     texture->width = width;

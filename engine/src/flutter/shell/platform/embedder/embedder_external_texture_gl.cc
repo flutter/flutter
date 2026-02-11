@@ -138,6 +138,11 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
+  if (texture->format != GL_RGBA8) {
+    FML_LOG(ERROR) << "Only support GL_RGBA8 format now";
+    return nullptr;
+  }
+
   impeller::TextureDescriptor desc;
   desc.size = impeller::ISize(texture->width, texture->height);
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
