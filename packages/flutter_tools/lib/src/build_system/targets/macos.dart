@@ -44,16 +44,6 @@ abstract class UnpackMacOS extends UnpackDarwin {
 
   @override
   List<Source> get outputs {
-    // Swift Package Manager will also produce the FlutterMacOS framework. If both SwiftPM and
-    // "Flutter Assemble" output the framework, the build will fail with an error about multiple
-    // commands producing the same output. Only output the framework if the project isn't using
-    // SwiftPM.
-    final FlutterProject flutterProject = FlutterProject.current();
-    final MacOSProject xcodeProject = flutterProject.macos;
-    if (xcodeProject.usesSwiftPackageManager &&
-        xcodeProject.flutterFrameworkSwiftPackageDirectory.existsSync()) {
-      return <Source>[];
-    }
     return <Source>[kFlutterMacOSFrameworkBinarySource];
   }
 

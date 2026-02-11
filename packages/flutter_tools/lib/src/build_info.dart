@@ -61,6 +61,50 @@ class BuildInfo {
        dartDefines = dartDefines ?? const <String>[],
        dartExperiments = dartExperiments ?? const <String>[];
 
+  BuildInfo copyWith({
+    String? fileSystemScheme,
+    List<String>? fileSystemRoots,
+    List<String>? extraFrontEndOptions,
+    String? packageConfigPath,
+    PackageConfig? packageConfig,
+    String? initializeFromDill,
+    List<String>? dartDefines,
+    bool? includeUnsupportedPlatformLibraryStubs,
+  }) {
+    return BuildInfo(
+      mode,
+      flavor,
+      trackWidgetCreation: trackWidgetCreation,
+      frontendServerStarterPath: frontendServerStarterPath,
+      extraFrontEndOptions: extraFrontEndOptions ?? this.extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      fileSystemRoots: fileSystemRoots ?? this.fileSystemRoots,
+      androidProjectArgs: androidProjectArgs,
+      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
+      fileSystemScheme: fileSystemScheme ?? this.fileSystemScheme,
+      buildNumber: buildNumber,
+      buildName: buildName,
+      splitDebugInfoPath: splitDebugInfoPath,
+      dartObfuscation: dartObfuscation,
+      dartDefines: dartDefines ?? this.dartDefines,
+      dartExperiments: dartExperiments,
+      performanceMeasurementFile: performanceMeasurementFile,
+      packageConfigPath: packageConfigPath ?? this.packageConfigPath,
+      codeSizeDirectory: codeSizeDirectory,
+      androidGradleDaemon: androidGradleDaemon,
+      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+      packageConfig: packageConfig ?? this.packageConfig,
+      initializeFromDill: initializeFromDill ?? this.initializeFromDill,
+      assumeInitializeFromDillUpToDate: assumeInitializeFromDillUpToDate,
+      buildNativeAssets: buildNativeAssets,
+      useLocalCanvasKit: useLocalCanvasKit,
+      includeUnsupportedPlatformLibraryStubs:
+          includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
+      webEnableHotReload: webEnableHotReload,
+      treeShakeIcons: treeShakeIcons,
+    );
+  }
+
   final BuildMode mode;
 
   /// Whether the build should subset icon fonts.
@@ -600,79 +644,79 @@ enum TargetPlatform {
 
   String get fuchsiaArchForTargetPlatform {
     switch (this) {
-      case TargetPlatform.fuchsia_arm64:
+      case fuchsia_arm64:
         return 'arm64';
-      case TargetPlatform.fuchsia_x64:
+      case fuchsia_x64:
         return 'x64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
+      case android:
+      case android_arm:
+      case android_arm64:
+      case android_x64:
+      case darwin:
+      case ios:
+      case linux_arm64:
+      case linux_riscv64:
+      case linux_x64:
+      case tester:
+      case web_javascript:
+      case windows_x64:
+      case windows_arm64:
+      case unsupported:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
 
   String get osName {
     switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
+      case linux_x64:
+      case linux_arm64:
+      case linux_riscv64:
         return 'linux';
-      case TargetPlatform.darwin:
+      case darwin:
         return 'macos';
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+      case windows_x64:
+      case windows_arm64:
         return 'windows';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
+      case android:
+      case android_arm:
+      case android_arm64:
+      case android_x64:
         return 'android';
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
+      case fuchsia_arm64:
+      case fuchsia_x64:
         return 'fuchsia';
-      case TargetPlatform.ios:
+      case ios:
         return 'ios';
-      case TargetPlatform.tester:
+      case tester:
         return 'flutter-tester';
-      case TargetPlatform.web_javascript:
+      case web_javascript:
         return 'web';
-      case TargetPlatform.unsupported:
+      case unsupported:
         throw UnsupportedError('Unexpected target platform $this');
     }
   }
 
   String get simpleName {
     switch (this) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.windows_x64:
+      case linux_x64:
+      case darwin:
+      case windows_x64:
         return 'x64';
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.windows_arm64:
+      case linux_arm64:
+      case windows_arm64:
         return 'arm64';
-      case TargetPlatform.linux_riscv64:
+      case linux_riscv64:
         return 'riscv64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.unsupported:
+      case android:
+      case android_arm:
+      case android_arm64:
+      case android_x64:
+      case fuchsia_arm64:
+      case fuchsia_x64:
+      case ios:
+      case tester:
+      case web_javascript:
+      case unsupported:
         throw UnsupportedError('Unexpected target platform $this');
     }
   }
@@ -697,9 +741,9 @@ enum DarwinArch {
   /// merged into a universal binary using the `lipo` tool.
   String get dartName {
     return switch (this) {
-      DarwinArch.armv7 => 'armv7',
-      DarwinArch.arm64 => 'arm64',
-      DarwinArch.x86_64 => 'x64',
+      armv7 => 'armv7',
+      arm64 => 'arm64',
+      x86_64 => 'x64',
     };
   }
 }
@@ -711,15 +755,15 @@ enum AndroidArch {
   x86_64;
 
   String get archName => switch (this) {
-    AndroidArch.armeabi_v7a => 'armeabi-v7a',
-    AndroidArch.arm64_v8a => 'arm64-v8a',
-    AndroidArch.x86_64 => 'x86_64',
+    armeabi_v7a => 'armeabi-v7a',
+    arm64_v8a => 'arm64-v8a',
+    x86_64 => 'x86_64',
   };
 
   String get platformName => switch (this) {
-    AndroidArch.armeabi_v7a => 'android-arm',
-    AndroidArch.arm64_v8a => 'android-arm64',
-    AndroidArch.x86_64 => 'android-x64',
+    armeabi_v7a => 'android-arm',
+    arm64_v8a => 'android-arm64',
+    x86_64 => 'android-x64',
   };
 }
 
