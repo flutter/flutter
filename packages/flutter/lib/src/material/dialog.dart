@@ -1173,6 +1173,7 @@ class SimpleDialog extends StatelessWidget {
     this.titleTextStyle,
     this.children,
     this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.contentTextStyle,
     this.backgroundColor,
     this.elevation,
     this.shadowColor,
@@ -1239,6 +1240,9 @@ class SimpleDialog extends StatelessWidget {
 
   /// {@macro flutter.material.dialog.surfaceTintColor}
   final Color? surfaceTintColor;
+
+  /// Temporarily unused.
+  final TextStyle? contentTextStyle;
 
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
