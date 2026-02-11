@@ -419,6 +419,8 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         compiler_->get_decoration(ubo.id, spv::Decoration::DecorationBinding);
     auto members = ReadStructMembers(ubo.type_id);
     std::vector<fb::PaddingType> padding_layout;
+    std::vector<StructField> struct_fields;
+    struct_fields.reserve(members.size());
     size_t float_count = 0;
 
     for (size_t i = 0; i < members.size(); i += 1) {
@@ -435,6 +437,11 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
           break;
         }
         case StructMember::UnderlyingType::kFloat: {
+          StructField field_desc;
+          field_desc.name = member.name;
+          field_desc.byte_size =
+              member.size * member.array_elements.value_or(1);
+          struct_fields.push_back(field_desc);
           if (member.array_elements > 1) {
             // For each array element member, insert 1 layout property per byte
             // and 0 layout property per byte of padding
@@ -469,6 +476,7 @@ std::shared_ptr<RuntimeStageData::Shader> Reflector::GenerateRuntimeStageData()
         .binding = binding,
         .type = spirv_cross::SPIRType::Struct,
         .padding_layout = std::move(padding_layout),
+        .struct_fields = std::move(struct_fields),
         .struct_float_count = float_count,
     });
   }
@@ -923,6 +931,29 @@ std::vector<StructMember> Reflector::ReadStructMembers(
           /*p_byte_length=*/total_length,
           /*p_array_elements=*/count,
           /*p_element_padding=*/8,
+      });
+      current_byte_offset += total_length;
+      continue;
+    }
+
+    if (member.basetype == spirv_cross::SPIRType::BaseType::Float &&
+        member.width == 32 && member.columns == 3 && member.vecsize == 3) {
+      // Mat3s are packed as three vec3s with one float of padding after each.
+      // {val, val, val, padding, val, val, val, padding, val, val, val,
+      // padding}.
+      uint32_t count = array_elements.value_or(1) * 3;
+      uint32_t stride = 16;
+      uint32_t total_length = stride * count;
+
+      result.emplace_back(StructMember{
+          /*p_type=*/"Mat3",
+          /*p_base_type=*/spirv_cross::SPIRType::BaseType::Float,
+          /*p_name=*/GetMemberNameAtIndex(struct_type, i),
+          /*p_offset=*/struct_member_offset,
+          /*p_size=*/12,
+          /*p_byte_length=*/total_length,
+          /*p_array_elements=*/count,
+          /*p_element_padding=*/4,
       });
       current_byte_offset += total_length;
       continue;

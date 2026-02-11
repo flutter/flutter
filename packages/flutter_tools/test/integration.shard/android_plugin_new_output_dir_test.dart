@@ -49,6 +49,9 @@ dependencies:
       ...getLocalEngineArguments(),
       'build',
       'aar',
+      '--no-debug',
+      '--no-profile',
+
       '--target-platform=android-arm',
     ], workingDirectory: projectPath);
 
