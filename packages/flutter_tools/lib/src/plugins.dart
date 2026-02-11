@@ -568,7 +568,7 @@ SwiftPackageManagerPluginValidationResult validatePluginSwiftPackageManagerSuppo
   required FileSystem fileSystem,
   required String platform,
 }) {
-  final List<String> messages = <String>[];
+  final messages = <String>[];
 
   final String? podspecPath = plugin.pluginPodspecPath(fileSystem, platform);
   final String? packageSwiftPath = plugin.pluginSwiftPackageManifestPath(fileSystem, platform);
@@ -578,7 +578,7 @@ SwiftPackageManagerPluginValidationResult validatePluginSwiftPackageManagerSuppo
   final bool hasPackageSwift =
       packageSwiftPath != null && fileSystem.file(packageSwiftPath).existsSync();
 
-  bool hasFlutterFrameworkDependency = false;
+  var hasFlutterFrameworkDependency = false;
 
   if (hasPodspec && !hasPackageSwift) {
     messages.add(

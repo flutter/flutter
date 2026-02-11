@@ -1254,12 +1254,12 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
     return;
   }
 
-  final List<String> platforms = <String>[
+  final platforms = <String>[
     if (iosPlatform) IOSPlugin.kConfigKey,
     if (macOSPlatform) MacOSPlugin.kConfigKey,
   ];
 
-  for (final String platform in platforms) {
+  for (final platform in platforms) {
     final SwiftPackageManagerPluginValidationResult result =
         validatePluginSwiftPackageManagerSupport(
       parentPlugin,
@@ -1267,9 +1267,7 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
       platform: platform,
     );
 
-    for (final String message in result.validationMessages) {
-      globals.printWarning(message);
-    }
+    result.validationMessages.forEach(globals.printWarning);
   }
 }
 

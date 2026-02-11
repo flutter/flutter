@@ -2674,7 +2674,7 @@ flutter:
       fs.directory('/path/to/test_plugin/ios').createSync(recursive: true);
       fs.file('/path/to/test_plugin/ios/test_plugin.podspec').createSync();
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2735,7 +2735,7 @@ let package = Package(
 )
 ''');
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2784,7 +2784,7 @@ let package = Package(
 )
 ''');
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2839,7 +2839,7 @@ let package = Package(
 )
 ''');
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2867,7 +2867,7 @@ let package = Package(
       fs.directory('/path/to/test_plugin/macos').createSync(recursive: true);
       fs.file('/path/to/test_plugin/macos/test_plugin.podspec').createSync();
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: MacOSPlugin.kConfigKey,
@@ -2900,7 +2900,7 @@ let package = Package(
         isDevDependency: false,
       );
 
-      final result = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult result = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2938,7 +2938,7 @@ let package = Package(
       fs.directory('/path/to/test_plugin/darwin').createSync(recursive: true);
       fs.file('/path/to/test_plugin/darwin/test_plugin.podspec').createSync();
 
-      final iosResult = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult iosResult = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: IOSPlugin.kConfigKey,
@@ -2948,7 +2948,7 @@ let package = Package(
       expect(iosResult.hasPackageSwift, isFalse);
       expect(iosResult.needsSwiftPackageManagerSupport, isTrue);
 
-      final macosResult = validatePluginSwiftPackageManagerSupport(
+      final SwiftPackageManagerPluginValidationResult macosResult = validatePluginSwiftPackageManagerSupport(
         plugin,
         fileSystem: fs,
         platform: MacOSPlugin.kConfigKey,
