@@ -7,7 +7,7 @@
 #include "flutter/fml/icu_util.h"
 #include "gtest/gtest.h"
 
-#include "fuchsia_intl.h"
+#include "flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h"
 
 using fuchsia::intl::CalendarId;
 using fuchsia::intl::LocaleId;

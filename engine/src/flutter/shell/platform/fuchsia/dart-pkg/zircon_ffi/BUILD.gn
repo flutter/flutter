@@ -4,13 +4,7 @@
 
 import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
-config("zircon_ffi_config") {
-  include_dirs = [ "." ]
-}
-
 shared_library("zircon_ffi") {
-  public_configs = [ ":zircon_ffi_config" ]
-
   sources = [
     "basic_types.cc",
     "basic_types.h",

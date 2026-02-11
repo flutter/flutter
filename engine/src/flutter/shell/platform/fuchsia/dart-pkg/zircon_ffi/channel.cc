@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "channel.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon_ffi/channel.h"
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"

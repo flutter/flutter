@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+
 #include "flutter/fml/logging.h"
 
 namespace flutter_runner {

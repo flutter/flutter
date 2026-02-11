@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "handle_exception.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.h"
 
 #include <fuchsia/feedback/cpp/fidl.h>
 #include <fuchsia/mem/cpp/fidl.h>

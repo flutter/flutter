@@ -4,10 +4,6 @@
 
 import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
-config("sdk_ext_config") {
-  include_dirs = [ "../.." ]
-}
-
 group("fuchsia") {
   public_deps = [ ":sdk_ext" ]
 }
@@ -26,6 +22,4 @@ source_set("sdk_ext") {
   ]
 
   public_deps = [ "${fuchsia_sdk}/pkg/zx" ]
-
-  public_configs = [ ":sdk_ext_config" ]
 }

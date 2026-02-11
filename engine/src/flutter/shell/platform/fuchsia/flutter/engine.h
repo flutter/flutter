@@ -22,11 +22,11 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 
-#include "external_view_embedder.h"
-#include "flatland_connection.h"
-#include "flutter_runner_product_configuration.h"
-#include "isolate_configurator.h"
-#include "surface_producer.h"
+#include "flutter/shell/platform/fuchsia/flutter/external_view_embedder.h"
+#include "flutter/shell/platform/fuchsia/flutter/flatland_connection.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h"
+#include "flutter/shell/platform/fuchsia/flutter/isolate_configurator.h"
+#include "flutter/shell/platform/fuchsia/flutter/surface_producer.h"
 
 namespace flutter_runner {
 

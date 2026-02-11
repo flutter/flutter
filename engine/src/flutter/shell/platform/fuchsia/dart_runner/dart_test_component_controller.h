@@ -13,13 +13,13 @@
 #include <lib/async/cpp/executor.h>
 #include <lib/async/cpp/wait.h>
 #include <lib/fdio/namespace.h>
+#include <lib/fidl/cpp/binding.h>
+#include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/zx/timer.h>
 
-#include <lib/fidl/cpp/binding_set.h>
-#include "lib/fidl/cpp/binding.h"
-#include "runtime/dart/utils/mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace dart_runner {

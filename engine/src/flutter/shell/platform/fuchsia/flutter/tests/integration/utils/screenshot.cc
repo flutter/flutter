@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "screenshot.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/screenshot.h"
 
 #include <lib/zx/vmar.h>
 

@@ -15,7 +15,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 
-#include "../runtime/dart/utils/root_inspect_node.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 
 namespace flutter_runner {
 namespace {

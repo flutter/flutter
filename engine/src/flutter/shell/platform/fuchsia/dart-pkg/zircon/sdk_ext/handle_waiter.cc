@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "handle_waiter.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle_waiter.h"
 
 #include <lib/async/default.h>
 
-#include "handle.h"
+#include "flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/handle.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"

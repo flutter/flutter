@@ -12,7 +12,7 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "flutter_runner_product_configuration.h"
+#include "flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h"
 
 namespace flutter_runner {
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "pointer_event_utility.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/pointer_event_utility.h"
 
 namespace flutter_runner::testing {
 

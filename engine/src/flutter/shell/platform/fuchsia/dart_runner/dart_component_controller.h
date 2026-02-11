@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "runtime/dart/utils/mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace dart_runner {

@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "vulkan_surface.h"
+#include "flutter/shell/platform/fuchsia/flutter/vulkan_surface.h"
 
 namespace flutter_runner {
 
