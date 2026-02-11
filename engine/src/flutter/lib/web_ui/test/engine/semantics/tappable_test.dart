@@ -126,7 +126,7 @@ Future<void> testMain() async {
     // Initial state: GenericRole (no specific role), Untappable
     // Use ID 1 to avoid conflict with previous test if state leaks (though setUp resets semantics)
     tester.updateNode(
-      id: 1,
+      id: 0,
       flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
@@ -138,7 +138,7 @@ Future<void> testMain() async {
 
     // Update to be Tappable
     tester.updateNode(
-      id: 1,
+      id: 0,
       flags: const ui.SemanticsFlags(isEnabled: ui.Tristate.isTrue),
       hasTap: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
