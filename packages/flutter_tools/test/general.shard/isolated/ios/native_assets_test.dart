@@ -77,7 +77,9 @@ void main() {
                 '/build/native_assets/ios/bar.framework.dSYM',
               ],
               onRun: (_) {
-                fileSystem.directory('/build/native_assets/ios/bar.framework.dSYM').createSync(recursive: true);
+                fileSystem
+                    .directory('/build/native_assets/ios/bar.framework.dSYM')
+                    .createSync(recursive: true);
               },
             ),
             const FakeCommand(
@@ -125,7 +127,9 @@ void main() {
                 '/build/native_assets/ios/buz.framework.dSYM',
               ],
               onRun: (_) {
-                fileSystem.directory('/build/native_assets/ios/buz.framework.dSYM').createSync(recursive: true);
+                fileSystem
+                    .directory('/build/native_assets/ios/buz.framework.dSYM')
+                    .createSync(recursive: true);
               },
             ),
             const FakeCommand(
@@ -313,11 +317,13 @@ void main() {
       final fakeStdio = globals.stdio as FakeStdio;
       expect(
         fakeStdio.writtenToStderr,
-        contains(contains(
-          'Code asset "package:bar/bar.dart" has different framework names for '
-          'different architectures. Picking "bar.framework" and '
-          'ignoring "bar_different.framework".',
-        )),
+        contains(
+          contains(
+            'Code asset "package:bar/bar.dart" has different framework names for '
+            'different architectures. Picking "bar.framework" and '
+            'ignoring "bar_different.framework".',
+          ),
+        ),
       );
     },
     overrides: <Type, Generator>{
