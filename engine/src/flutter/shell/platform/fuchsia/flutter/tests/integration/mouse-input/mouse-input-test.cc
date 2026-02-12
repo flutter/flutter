@@ -20,6 +20,7 @@
 #include <fuchsia/web/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
 #include <lib/fidl/cpp/binding_set.h>
+#include <lib/fidl/cpp/interface_ptr.h>
 #include <lib/sys/component/cpp/testing/realm_builder.h>
 #include <lib/sys/component/cpp/testing/realm_builder_types.h>
 #include <zircon/status.h>
@@ -41,7 +42,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/portable_ui_test.h"
-#include "lib/fidl/cpp/interface_ptr.h"
 
 namespace mouse_input_test::testing {
 namespace {

@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 
-#include "runner.h"
+#include "flutter/shell/platform/fuchsia/flutter/runner.h"
 #include "third_party/icu/source/i18n/unicode/timezone.h"
 
 namespace flutter_runner {

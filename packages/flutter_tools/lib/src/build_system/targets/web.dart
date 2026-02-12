@@ -578,6 +578,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    const Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
