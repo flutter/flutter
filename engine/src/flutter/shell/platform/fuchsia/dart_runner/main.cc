@@ -9,15 +9,13 @@
 #include <lib/trace-provider/provider.h>
 #include <lib/trace/event.h>
 
-#include "dart_runner.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/trace_event.h"
-#include "logging.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_runner.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/logging.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/build_info.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/root_inspect_node.h"
 #include "platform/utils.h"
-#include "runtime/dart/utils/build_info.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/root_inspect_node.h"
-#include "runtime/dart/utils/tempfs.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 #if !defined(DART_PRODUCT)
