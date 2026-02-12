@@ -344,10 +344,8 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
 /// architecture is used.
 Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
   List<FlutterCodeAsset> nativeAssets,
-  KernelAsset Function(
-    FlutterCodeAsset asset,
-    Set<String> alreadyTakenNames,
-  ) targetLocationCallback,
+  KernelAsset Function(FlutterCodeAsset asset, Set<String> alreadyTakenNames)
+  targetLocationCallback,
 ) {
   final alreadyTakenNames = <String>{};
   final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
@@ -356,14 +354,11 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
     // Use same target path for all assets with the same id.
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath? existingPath = idToPath[assetId];
-    final KernelAssetPath currentPath =
-        targetLocationCallback(asset, alreadyTakenNames).path;
+    final KernelAssetPath currentPath = targetLocationCallback(asset, alreadyTakenNames).path;
 
     if (existingPath != null && existingPath != currentPath) {
-      final String existingName =
-          (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
-      final String currentName =
-          (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+      final String existingName = (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+      final String currentName = (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
       globals.logger.printWarning(
         'Code asset "$assetId" has different framework names for '
         'different architectures. Picking "$existingName" and '
