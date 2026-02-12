@@ -119,6 +119,11 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   external DomVisualViewport? get visualViewport;
   external DomPerformance get performance;
 
+  /// The parent window of this window.
+  /// Returns null if this is the top-level window, or the same window
+  /// if not in an iframe.
+  external DomWindow? get parent;
+
   @visibleForTesting
   Future<Object?> fetch(String url) {
     // To make sure we have a consistent approach for handling and reporting
