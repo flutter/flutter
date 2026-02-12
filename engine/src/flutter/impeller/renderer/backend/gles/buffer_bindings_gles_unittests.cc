@@ -88,7 +88,7 @@ TEST(BufferBindingsGLESTest, BindArrayData) {
                                        Range{0, 1}));
 }
 
-TEST(BufferBindingsGLESTest, BindUniformDataWithNewTypes) {
+TEST(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices) {
   BufferBindingsGLES bindings;
   absl::flat_hash_map<std::string, GLint> uniform_bindings;
   uniform_bindings["SHADERMETADATA.VEC2"] = 1;
