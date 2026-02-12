@@ -623,11 +623,7 @@ bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
   try {
     final String contents = packageSwiftFile.readAsStringSync();
 
-    final List<String> uncommentedLines = contents
-        .split('\n')
-        .where((String line) => !line.trim().startsWith('//'))
-        .toList();
-    final String uncommentedContents = uncommentedLines.join('\n');
+    final String uncommentedContents = contents.replaceAll(RegExp(r'//.*|/\*[\s\S]*?\*/'), '');
 
     final bool hasPackageDependency = uncommentedContents.contains(
       RegExp(r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"'),

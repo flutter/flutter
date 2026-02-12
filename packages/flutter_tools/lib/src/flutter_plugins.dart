@@ -1241,7 +1241,8 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
   final FlutterProject parentProject;
   try {
     parentProject = FlutterProject.fromDirectory(parentDir);
-  } on Exception {
+  } on Exception catch (e) {
+    globals.printTrace('Failed to parse parent project for SPM validation: $e');
     return;
   }
 
