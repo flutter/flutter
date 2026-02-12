@@ -882,17 +882,7 @@ final class TabBarScrollController extends ScrollController {
   /// The state of the [TabBar] widget to which this controller is attached.
   ///
   /// Is null if this controller is not attached to a [TabBar].
-  _TabBarState? _tabBar;
-
-  set _tabBarState(_TabBarState? tabBarState) {
-    _tabBar = tabBarState;
-  }
-
-  _TabBarState get _tabBarState {
-    assert(debugCheckHasTabBarState());
-
-    return _tabBar!;
-  }
+  _TabBarState? _tabBarState;
 
   /// Asserts that this controller is currently attached to a [TabBar]'s [State].
   ///
@@ -900,7 +890,7 @@ final class TabBarScrollController extends ScrollController {
   ///
   /// Does nothing if asserts are disabled. Always returns true.
   bool debugCheckHasTabBarState() {
-    assert(_tabBar != null, 'This TabBarScrollController is not attached to any TabBar.');
+    assert(_tabBarState != null, 'This TabBarScrollController is not attached to any TabBar.');
 
     return true;
   }
@@ -911,11 +901,13 @@ final class TabBarScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition? oldPosition,
   ) {
+    assert(debugCheckHasTabBarState());
+
     return _TabBarScrollPosition(
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      tabBar: _tabBarState,
+      tabBar: _tabBarState!,
     );
   }
 
