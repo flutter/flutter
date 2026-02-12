@@ -2862,6 +2862,73 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('TabBar correctly detaches old external TabBarScrollController when switched to a new one', (WidgetTester tester) async {
+    final List<Tab> tabs = <Tab>[
+      for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
+    ];
+
+    final TabBarScrollController controllerA = TabBarScrollController();
+    final TabBarScrollController controllerB = TabBarScrollController();
+    addTearDown(controllerA.dispose);
+    addTearDown(controllerB.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          scrollController: controllerA,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    expect(controllerA.debugCheckHasTabBarState(), isTrue);
+    expect(() => controllerB.debugCheckHasTabBarState(), throwsAssertionError);
+
+    // Switch to controllerB
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          scrollController: controllerB,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    expect(controllerB.debugCheckHasTabBarState(), isTrue);
+    expect(() => controllerA.debugCheckHasTabBarState(), throwsAssertionError);
+  });
+
+  testWidgets('TabBar correctly detaches external TabBarScrollController when disposed', (WidgetTester tester) async {
+    final List<Tab> tabs = <Tab>[
+      for (int i = 0; i < 10; i++) Tab(text: 'Tab $i'),
+    ];
+
+    final TabBarScrollController controller = TabBarScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TabBar(
+          isScrollable: true,
+          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          scrollController: controller,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    expect(controller.debugCheckHasTabBarState(), isTrue);
+
+    // Dispose the TabBar by pumping a different widget
+    await tester.pumpWidget(boilerplate(child: const SizedBox.shrink()));
+
+    expect(() => controller.debugCheckHasTabBarState(), throwsAssertionError);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/124608
   testWidgets('TabBar can be wrapped with RawScrollbar', (WidgetTester tester) async {
     final tabs = List<Tab>.generate(6, (int index) {
