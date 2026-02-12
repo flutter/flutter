@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "check_view.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/integration/utils/check_view.h"
 
 #include "flutter/fml/logging.h"
 
