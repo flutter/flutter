@@ -1603,7 +1603,7 @@ void main() {
   );
 
   test(
-    'WebAssetServer serves index.html with web-define variables',
+    'WebAssetServer serves index.html without user defined web-define variables',
     () => testbed.run(() async {
       // Simple test case with no custom variables - should work like before
       globals.fs.file(
@@ -1637,7 +1637,7 @@ void main() {
   );
 
   test(
-    'WebAssetServer throws error for missing web-define variables in index.html',
+    'WebAssetServer warns for missing user defined web-define variables in index.html',
     () => testbed.run(() async {
       const htmlContent = '''
 <!DOCTYPE html>

@@ -470,7 +470,7 @@ void main() {
     expect(result, contains('debugMode: false'));
   });
 
-  testUsingContext('logs warning when web-define variable is missing', () {
+  testUsingContext('logs warning when user defined web-define variable is missing', () {
     const htmlWithMissingVar = '''
 <!DOCTYPE html>
 <html>
@@ -499,7 +499,7 @@ void main() {
     expect(result, contains("const apiUrl = '{{API_URL}}';"));
   });
 
-  testUsingContext('logs warning with multiple missing variables', () {
+  testUsingContext('logs warning with multiple missing user defined variables', () {
     const htmlWithMultipleMissingVars = '''
 <!DOCTYPE html>
 <html>
