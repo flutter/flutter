@@ -93,6 +93,9 @@ void main() {
               if (buildMode == BuildMode.release) ...<FakeCommand>[
                 FakeCommand(
                   command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
                 ),
                 FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
               ],
@@ -118,6 +121,9 @@ void main() {
               if (buildMode == BuildMode.release) ...<FakeCommand>[
                 FakeCommand(
                   command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
                 ),
                 FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
               ],
@@ -195,6 +201,9 @@ void main() {
               if (buildMode == BuildMode.release) ...<FakeCommand>[
                 FakeCommand(
                   command: <Pattern>['xcrun', 'dsymutil', dylibPathBar, '-o', '$signPathBar.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBar.dSYM').createSync(recursive: true);
+                  },
                 ),
                 FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBar]),
               ],
@@ -221,6 +230,9 @@ void main() {
               if (buildMode == BuildMode.release) ...<FakeCommand>[
                 FakeCommand(
                   command: <Pattern>['xcrun', 'dsymutil', dylibPathBuz, '-o', '$signPathBuz.dSYM'],
+                  onRun: (_) {
+                    fileSystem.directory('$signPathBuz.dSYM').createSync(recursive: true);
+                  },
                 ),
                 FakeCommand(command: <Pattern>['xcrun', 'strip', '-x', '-S', dylibPathBuz]),
               ],
