@@ -36,8 +36,6 @@ void main() {
   });
 
   test('semantics blocksemantics corner case', () {
-    // The parent won't use child's size, so child is a relayout boundary.
-    // The child also sets itself as a semantic boundary.
     final child = RenderTestLayoutSemanticsBoundary();
     final middle1 = RenderTestParent(child: child);
     middle1.isSemanticBoundary = true;
@@ -48,8 +46,6 @@ void main() {
 
     TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
     layout(parent, phase: EnginePhase.flushSemantics);
-
-    debugDumpRenderObjectSemanticsTree();
 
     // Verify initial state
     expect(child.size, const Size(100.0, 100.0));
@@ -62,12 +58,10 @@ void main() {
     parent.add(child2);
     pumpFrame(phase: EnginePhase.flushSemantics);
 
-    debugDumpRenderObjectSemanticsTree();
     middle1.markNeedsLayout();
     child.markNeedsLayout();
     pumpFrame(phase: EnginePhase.flushSemantics);
-
-    debugDumpRenderObjectSemanticsTree();
+    // Does not crash.
   });
 }
 
