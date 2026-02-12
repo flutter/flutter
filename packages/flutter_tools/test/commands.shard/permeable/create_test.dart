@@ -351,6 +351,44 @@ void main() {
   );
 
   testUsingContext(
+    'can create a project in the engine examples directory',
+    () async {
+      final String flutterBin = globals.fs.path.join(
+        getFlutterRoot(),
+        'bin',
+        globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+      );
+      final String engineExamplesDirectory = globals.fs.path.join(
+        getFlutterRoot(),
+        'engine',
+        'src',
+        'flutter',
+        'examples',
+      );
+      const projectName = 'flutter_project';
+      final ProcessResult exec = await Process.run(flutterBin, <String>[
+        'create',
+        projectName,
+      ], workingDirectory: engineExamplesDirectory);
+      expect(exec.exitCode, 0);
+      globals.fs
+          .file(globals.fs.path.join(engineExamplesDirectory, projectName))
+          .deleteSync(recursive: true);
+    },
+    overrides: {
+      Pub: () => Pub.test(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        botDetector: globals.botDetector,
+        platform: globals.platform,
+        stdio: mockStdio,
+      ),
+      ...noColorTerminalOverride,
+    },
+  );
+
+  testUsingContext(
     'Will create an app project if non-empty non-project directory exists without .metadata',
     () async {
       await projectDir.absolute.childDirectory('blag').create(recursive: true);
