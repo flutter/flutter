@@ -1569,6 +1569,9 @@ class _TabBarState extends State<TabBar> {
 
   TabBarScrollController get _effectiveScrollController {
     if (widget.scrollController != null) {
+      _internalScrollController?.dispose();
+      _internalScrollController = null;
+
       return widget.scrollController!;
     }
 
