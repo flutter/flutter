@@ -118,16 +118,14 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
       // Package native assets.
-      final Directory nativeAssetsDirectory = buildOutput.childDirectory('native_assets');
-      final Iterable<Directory> frameworkDirectories = nativeAssetsDirectory
-          .listSync()
-          .whereType<Directory>()
-          .where((d) => !d.basename.endsWith('.dSYM'));
-      for (final frameworkDirectory in frameworkDirectories) {
-        final frameworks = [frameworkDirectory];
+      final Iterable<String> frameworkNames = BuildFrameworkCommand.findFrameworkNames(buildOutput);
+      for (final frameworkName in frameworkNames) {
+        final Directory frameworkDirectory = buildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
         await BuildFrameworkCommand.produceXCFramework(
-          frameworks,
-          frameworkDirectory.basename.replaceAll('.framework', ''),
+          <Directory>[frameworkDirectory],
+          frameworkName.replaceAll('.framework', ''),
           modeDirectory,
           globals.processManager,
         );

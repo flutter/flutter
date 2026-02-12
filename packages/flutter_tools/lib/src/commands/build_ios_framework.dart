@@ -146,6 +146,18 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     }
   }
 
+  static Iterable<String> findFrameworkNames(Directory outputDirectory) {
+    final Directory nativeAssetsDirectory = outputDirectory.childDirectory('native_assets');
+    if (!nativeAssetsDirectory.existsSync()) {
+      return const <String>[];
+    }
+    return nativeAssetsDirectory
+        .listSync()
+        .whereType<Directory>()
+        .where((Directory d) => !d.basename.endsWith('.dSYM'))
+        .map((Directory d) => d.basename);
+  }
+
   static Future<void> produceXCFramework(
     Iterable<Directory> frameworks,
     String frameworkBinaryName,
@@ -319,31 +331,17 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
 
       // Package native assets.
-      final Directory nativeAssetSimulatorDirectory = simulatorBuildOutput.childDirectory(
-        'native_assets',
-      );
-      final Directory nativeAssetDeviceDirectory = iPhoneBuildOutput.childDirectory(
-        'native_assets',
-      );
-      final Iterable<Directory> frameworkDirectoriesSimulator = nativeAssetSimulatorDirectory
-          .listSync()
-          .whereType<Directory>()
-          .where((d) => !d.basename.endsWith('.dSYM'));
-      final Iterable<Directory> frameworkDirectoriesDevice = nativeAssetDeviceDirectory
-          .listSync()
-          .whereType<Directory>()
-          .where((d) => !d.basename.endsWith('.dSYM'));
-      final frameworkNames = <String>{
-        ...frameworkDirectoriesSimulator.map((Directory d) => d.basename),
-        ...frameworkDirectoriesDevice.map((Directory d) => d.basename),
+      final Iterable<String> frameworkNames = <String>{
+        ...BuildFrameworkCommand.findFrameworkNames(simulatorBuildOutput),
+        ...BuildFrameworkCommand.findFrameworkNames(iPhoneBuildOutput),
       };
       for (final frameworkName in frameworkNames) {
-        final Directory frameworkDirectoryDevice = nativeAssetDeviceDirectory.childDirectory(
-          frameworkName,
-        );
-        final Directory frameworkDirectorySimulator = nativeAssetSimulatorDirectory.childDirectory(
-          frameworkName,
-        );
+        final Directory frameworkDirectoryDevice = iPhoneBuildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
+        final Directory frameworkDirectorySimulator = simulatorBuildOutput
+            .childDirectory('native_assets')
+            .childDirectory(frameworkName);
         final frameworks = <Directory>[
           if (frameworkDirectoryDevice.existsSync()) frameworkDirectoryDevice,
           if (frameworkDirectorySimulator.existsSync()) frameworkDirectorySimulator,

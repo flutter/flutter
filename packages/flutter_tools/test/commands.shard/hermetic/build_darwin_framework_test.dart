@@ -731,4 +731,30 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
   });
+
+  group('findFrameworkNames', () {
+    late MemoryFileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+    });
+
+    testWithoutContext('finds frameworks in native_assets', () {
+      final Directory output = fileSystem.directory('output')..createSync();
+      final Directory nativeAssets = output.childDirectory('native_assets')..createSync();
+      nativeAssets.childDirectory('foo.framework').createSync();
+      nativeAssets.childDirectory('bar.framework').createSync();
+      nativeAssets.childDirectory('baz.framework.dSYM').createSync(); // Should be ignored
+      nativeAssets.childFile('something_else').createSync(); // Should be ignored
+
+      final Iterable<String> names = BuildFrameworkCommand.findFrameworkNames(output);
+      expect(names, unorderedEquals(<String>['foo.framework', 'bar.framework']));
+    });
+
+    testWithoutContext('returns empty if native_assets does not exist', () {
+      final Directory output = fileSystem.directory('output')..createSync();
+      final Iterable<String> names = BuildFrameworkCommand.findFrameworkNames(output);
+      expect(names, isEmpty);
+    });
+  });
 }
