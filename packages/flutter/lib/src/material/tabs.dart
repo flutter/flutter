@@ -1681,16 +1681,16 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _updateScrollController({TabBarScrollController? oldScrollController}) {
+    if (oldScrollController != widget.scrollController) {
+      oldScrollController?._tabBarState = null;
+    }
     if (widget.scrollController != null) {
       _internalScrollController?._tabBarState = null;
       widget.scrollController?._tabBarState = this;
-
-      return;
+    } else {
+      _internalScrollController ??= TabBarScrollController();
+      _internalScrollController?._tabBarState = this;
     }
-
-    oldScrollController?._tabBarState = null;
-    _internalScrollController ??= TabBarScrollController();
-    _internalScrollController?._tabBarState = this;
   }
 
   void _initIndicatorPainter() {
@@ -1786,6 +1786,7 @@ class _TabBarState extends State<TabBar> {
     }
     _controller = null;
     _internalScrollController?.dispose();
+    widget.scrollController?._tabBarState = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
