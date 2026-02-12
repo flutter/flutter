@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -156,6 +157,85 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         .whereType<Directory>()
         .where((Directory d) => !d.basename.endsWith('.dSYM'))
         .map((Directory d) => d.basename);
+  }
+
+  /// Parses the NativeAssetsManifest.json in [outputDirectory] and returns a
+  /// mapping from asset ID to the path of the code asset within the bundle
+  /// (e.g., "MyFramework.framework/MyFramework").
+  static Map<String, String> parseNativeAssetsManifest(
+    Directory outputDirectory,
+  ) {
+    final File manifestFile = outputDirectory
+        .childDirectory('App.framework')
+        .childDirectory('flutter_assets')
+        .childFile('NativeAssetsManifest.json');
+    if (!manifestFile.existsSync()) {
+      return const <String, String>{};
+    }
+    final manifest =
+        json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+    final nativeAssets =
+        manifest['native-assets'] as Map<String, Object?>?;
+    if (nativeAssets == null) {
+      return const <String, String>{};
+    }
+    final result = <String, String>{};
+    for (final Object? targetAssets in nativeAssets.values) {
+      if (targetAssets is! Map<String, Object?>) {
+        continue;
+      }
+      for (final MapEntry<String, Object?> entry in targetAssets.entries) {
+        final String assetId = entry.key;
+        final Object? pathInfo = entry.value;
+        if (pathInfo is List<Object?> && pathInfo.length >= 2) {
+          final path = pathInfo[1]! as String;
+          result[assetId] = path;
+        }
+      }
+    }
+    return result;
+  }
+
+  /// Verifies that code assets built for physical devices and simulators are
+  /// consistent.
+  ///
+  /// The physical device build is considered the source of truth. Every asset
+  /// in the simulator build must also be in the physical device build and have
+  /// the same framework path.
+  static void verifyCodeAssetConsistency(
+    Directory iPhoneBuildOutput,
+    Directory simulatorBuildOutput,
+  ) {
+    final Map<String, String> deviceAssets =
+        BuildFrameworkCommand.parseNativeAssetsManifest(iPhoneBuildOutput);
+    final Map<String, String> simulatorAssets =
+        BuildFrameworkCommand.parseNativeAssetsManifest(simulatorBuildOutput);
+
+    for (final String assetId in simulatorAssets.keys) {
+      final String? deviceAssetPath = deviceAssets[assetId];
+      final String simulatorAssetPath = simulatorAssets[assetId]!;
+      if (deviceAssetPath == null) {
+        throwToolExit(
+          'The simulator build contains a code asset "$assetId" that is '
+          'not present in the physical device build. \n'
+          'The device build is the source of truth for distributed '
+          'frameworks. \n'
+          'Ensure "$assetId" is also built for physical devices.',
+        );
+      }
+      if (deviceAssetPath != simulatorAssetPath) {
+        throwToolExit(
+          'Consistent code asset framework names are required for '
+          'XCFramework creation.\n'
+          'The asset "$assetId" has different framework paths across '
+          'platforms:\n'
+          '  - iphoneos: $deviceAssetPath\n'
+          '  - iphonesimulator: $simulatorAssetPath\n\n'
+          'Ensure the "build.dart" hook produces consistent filenames for '
+          'all targets.',
+        );
+      }
+    }
   }
 
   static Future<void> produceXCFramework(
@@ -331,6 +411,11 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
 
       // Package native assets.
+      BuildFrameworkCommand.verifyCodeAssetConsistency(
+        iPhoneBuildOutput,
+        simulatorBuildOutput,
+      );
+
       final Iterable<String> frameworkNames = <String>{
         ...BuildFrameworkCommand.findCodeAssetFrameworkNames(simulatorBuildOutput),
         ...BuildFrameworkCommand.findCodeAssetFrameworkNames(iPhoneBuildOutput),

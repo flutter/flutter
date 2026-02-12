@@ -11,12 +11,14 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart' hide Target;
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:hooks/hooks.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -273,4 +275,46 @@ void main() {
       },
     );
   }
+
+  testUsingContext(
+    'pick-first warning',
+    () async {
+      final assets = <FlutterCodeAsset>[
+        FlutterCodeAsset(
+          codeAsset: CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('arm64/libbar.dylib'),
+          ),
+          target: Target.fromArchitectureAndOS(Architecture.arm64, OS.iOS),
+        ),
+        FlutterCodeAsset(
+          codeAsset: CodeAsset(
+            package: 'bar',
+            name: 'bar.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('x64/libbar_different.dylib'),
+          ),
+          target: Target.fromArchitectureAndOS(Architecture.x64, OS.iOS),
+        ),
+      ];
+
+      fatAssetTargetLocationsIOS(assets);
+
+      expect(
+        logger.warningText,
+        contains(
+          'Code asset "package:bar/bar.dart" has different framework names for '
+          'different architectures. Picking "bar.framework" and '
+          'ignoring "bar_different.framework".',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => logger,
+    },
+  );
 }

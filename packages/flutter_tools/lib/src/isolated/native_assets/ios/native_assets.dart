@@ -29,22 +29,16 @@ Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
   };
 }
 
+/// Groups native assets by their target framework path for iOS
+/// multi-architecture bundling.
 Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  final alreadyTakenNames = <String>{};
-  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
-  final idToPath = <String, KernelAssetPath>{};
-  for (final asset in nativeAssets) {
-    // Use same target path for all assets with the same id.
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
-    idToPath[assetId] = path;
-    result[path] ??= <FlutterCodeAsset>[];
-    result[path]!.add(asset);
-  }
-  return result;
+  return fatAssetTargetLocations(
+    nativeAssets,
+    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
+        _targetLocationIOS(asset, alreadyTakenNames),
+  );
 }
 
 Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {

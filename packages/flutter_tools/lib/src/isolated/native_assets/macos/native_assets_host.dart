@@ -5,12 +5,14 @@
 // Shared logic between iOS and macOS implementations of native assets.
 
 import 'package:code_assets/code_assets.dart';
+import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
+import '../native_assets.dart';
 
 /// Create an `Info.plist` in [target] for a framework with a single dylib.
 ///
@@ -328,4 +330,52 @@ Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   }
 
   return architectureSections;
+}
+
+/// Groups native assets by their target framework path for multi-architecture
+/// bundling.
+///
+/// On macOS and iOS, architecture-specific binaries for the same Asset ID are
+/// combined into a single "fat" (universal) binary using `lipo`. This function
+/// ensures that all assets with the same ID map to the same framework location.
+///
+/// If different architectures for the same Asset ID have different framework
+/// names, a warning is issued, and the name of the first encountered
+/// architecture is used.
+Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
+  List<FlutterCodeAsset> nativeAssets,
+  KernelAsset Function(
+    FlutterCodeAsset asset,
+    Set<String> alreadyTakenNames,
+  ) targetLocationCallback,
+) {
+  final alreadyTakenNames = <String>{};
+  final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
+  final idToPath = <String, KernelAssetPath>{};
+  for (final asset in nativeAssets) {
+    // Use same target path for all assets with the same id.
+    final String assetId = asset.codeAsset.id;
+    final KernelAssetPath? existingPath = idToPath[assetId];
+    final KernelAssetPath currentPath =
+        targetLocationCallback(asset, alreadyTakenNames).path;
+
+    if (existingPath != null && existingPath != currentPath) {
+      final String existingName =
+          (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+      final String currentName =
+          (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
+      globals.logger.printWarning(
+        'Code asset "$assetId" has different framework names for '
+        'different architectures. Picking "$existingName" and '
+        'ignoring "$currentName". Ensuring consistent filenames in '
+        '"build.dart" is recommended.',
+      );
+    }
+
+    final KernelAssetPath path = existingPath ?? currentPath;
+    idToPath[assetId] = path;
+    result[path] ??= <FlutterCodeAsset>[];
+    result[path]!.add(asset);
+  }
+  return result;
 }
