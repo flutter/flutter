@@ -261,20 +261,10 @@ import PluginA
             ..createSync(recursive: true)
             ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA', platforms: '.iOS("15.0")')),
         ];
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
+        final (Version highestVersion, bool skipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(highestVersion, Version(15, 0, 0));
+        expect(skipped, isFalse);
 
         manifests.add(
           fs.file('PluginB/Package.swift')
@@ -283,15 +273,10 @@ import PluginA
               _pluginManifest(pluginName: 'PluginB', platforms: '.iOS( .v16 ),\n .macOS("26.0")'),
             ),
         );
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(16, 0, 0));
+        final (Version retryHighestVersion, bool retrySkipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(retryHighestVersion, Version(16, 0, 0));
+        expect(retrySkipped, isFalse);
       });
 
       testWithoutContext('determineHighestSupportedVersion matches using swift', () async {
@@ -351,32 +336,16 @@ import PluginA
             ..createSync(recursive: true)
             ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA', platforms: 'someVar')),
         ];
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(13, 0, 0));
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
-        expect(processManager.hasRemainingExpectations, isFalse);
+        final (Version highestVersion, bool skipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(highestVersion, Version(15, 0, 0));
+        expect(skipped, isFalse);
 
         // Verify it uses cache next time it runs (process is not called again)
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(15, 0, 0));
+        final (Version retryHighestVersion, bool retrySkipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(retryHighestVersion, Version(15, 0, 0));
+        expect(retrySkipped, isTrue);
       });
 
       testWithoutContext('generateDependencies', () {
@@ -629,20 +598,10 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
               _pluginManifest(pluginName: 'PluginA', platforms: '.macOS("10.16")'),
             ),
         ];
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(10, 15, 0));
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(10, 16, 0));
+        final (Version highestVersion, bool skipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(highestVersion, Version(10, 16, 0));
+        expect(skipped, isFalse);
 
         manifests.add(
           fs.file('PluginB/Package.swift')
@@ -654,15 +613,10 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
               ),
             ),
         );
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(11, 15, 0));
+        final (Version retryHighestVersion, bool retrySkipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(retryHighestVersion, Version(11, 15, 0));
+        expect(retrySkipped, isFalse);
       });
 
       testWithoutContext('determineHighestSupportedVersion matches using swift', () async {
@@ -722,32 +676,16 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
             ..createSync(recursive: true)
             ..writeAsStringSync(_pluginManifest(pluginName: 'PluginA', platforms: 'someVar')),
         ];
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(10, 15, 0));
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(26, 0, 0));
-        expect(processManager.hasRemainingExpectations, isFalse);
+        final (Version highestVersion, bool skipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(highestVersion, Version(26, 0, 0));
+        expect(skipped, isFalse);
 
         // Verify it uses cache next time it runs (process is not called again)
-        await pluginSwiftDependencies.determineHighestSupportedVersion(
-          manifests: manifests,
-          cacheDirectory: cacheDirectory,
-        );
-        expect(
-          pluginSwiftDependencies.highestSupportedVersion.platform,
-          targetPlatform.swiftPackagePlatform,
-        );
-        expect(pluginSwiftDependencies.highestSupportedVersion.version, Version(26, 0, 0));
+        final (Version retryHighestVersion, bool retrySkipped) = await pluginSwiftDependencies
+            .determineHighestSupportedVersion(manifests: manifests, cacheDirectory: cacheDirectory);
+        expect(retryHighestVersion, Version(26, 0, 0));
+        expect(retrySkipped, isTrue);
       });
 
       testWithoutContext('generateDependencies', () {

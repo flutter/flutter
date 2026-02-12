@@ -428,14 +428,16 @@ class FlutterPluginSwiftDependencies {
 
   /// The highest [SwiftPackageSupportedPlatform] among all of the Flutter SwiftPM plugins.
   /// Defaults to the Flutter framework's [SwiftPackageSupportedPlatform].
-  late SwiftPackageSupportedPlatform highestSupportedVersion =
+  SwiftPackageSupportedPlatform get highestSupportedVersion => _highestSupportedVersion;
+  late SwiftPackageSupportedPlatform _highestSupportedVersion =
       _targetPlatform.supportedPackagePlatform;
 
   @visibleForTesting
   /// A list of [Plugin]s copied and path to the copied Swift package.
   final List<(Plugin, String)> copiedPlugins = [];
 
-  /// Copy plugins from pubcache to [pluginsDirectory] and determines [highestSupportedVersion].
+  /// Copy plugins from pubcache to [pluginsDirectory] and sets [highestSupportedVersion] to later
+  /// be used when creating the FlutterPluginRegistrant.
   Future<void> processPlugins({
     required Directory cacheDirectory,
     required List<Plugin> plugins,
@@ -448,9 +450,14 @@ class FlutterPluginSwiftDependencies {
         plugins: plugins,
         pluginsDirectory: pluginsDirectory,
       );
-      skipped = await determineHighestSupportedVersion(
+      final Version parsedHighestVersion;
+      (parsedHighestVersion, skipped) = await determineHighestSupportedVersion(
         cacheDirectory: cacheDirectory,
         manifests: manifests,
+      );
+      _highestSupportedVersion = SwiftPackageSupportedPlatform(
+        platform: _targetPlatform.swiftPackagePlatform,
+        version: parsedHighestVersion,
       );
     } finally {
       status.stop();
@@ -478,15 +485,14 @@ class FlutterPluginSwiftDependencies {
         continue;
       }
 
-      // The entire plugin is copied (excluding the example app) instead of just the Swift package
-      // to maintain any relative links within the plugin.
+      // The entire plugin is copied instead of just the Swift package to maintain any relative
+      // links within the plugin.
       // Example: https://github.com/firebase/flutterfire/blob/198aef8db6c96a08f57d750f1fa756da5e4a68a5/packages/firebase_core/firebase_core/ios/firebase_core/Package.swift#L21-L26
       final Directory pluginDestination = pluginsDirectory.childDirectory(plugin.name)
         ..createSync(recursive: true);
       copyDirectory(
         _utils.fileSystem.directory(plugin.path),
         pluginDestination,
-        shouldCopyDirectory: (Directory dir) => dir.basename != 'example',
       );
 
       final String? swiftPackagePath = plugin.pluginSwiftPackagePath(
@@ -503,14 +509,13 @@ class FlutterPluginSwiftDependencies {
     return manifests;
   }
 
-  /// Determines the highest [SwiftPackageSupportedPlatform] version among the plugins and saves
-  /// the value to [highestSupportedVersion] to later be used when creating the
-  /// FlutterPluginRegistrant.
+  /// Returns the highest [SwiftPackageSupportedPlatform.version] among the plugins and `true` if
+  /// it was able to get the version from the cache.
   ///
   /// Saves the value to a file in [cacheDirectory] for quicker lookup when the list of Swift
   /// package manifests has not changed.
   @visibleForTesting
-  Future<bool> determineHighestSupportedVersion({
+  Future<(Version, bool)> determineHighestSupportedVersion({
     required List<File> manifests,
     required Directory cacheDirectory,
   }) async {
@@ -538,32 +543,25 @@ class FlutterPluginSwiftDependencies {
     if (fingerprinter.doesFingerprintMatch() && savedHighestVersionFile.existsSync()) {
       // Use saved version if possible
       final String versionAsString = savedHighestVersionFile.readAsStringSync();
-      final Version? parsedVersion = Version.parse(versionAsString);
-      if (parsedVersion != null) {
-        highestSupportedVersion = SwiftPackageSupportedPlatform(
-          platform: _targetPlatform.swiftPackagePlatform,
-          version: parsedVersion,
-        );
-        return true;
+      final Version? savedVersion = Version.parse(versionAsString);
+      if (savedVersion != null) {
+        return (savedVersion, true);
       }
     }
+    Version parsedHighestVersion = _highestSupportedVersion.version;
     for (final manifest in manifests) {
       // Parse the plugins for the minimum deployment target.
       // The FlutterPluginRegistrant needs to match the highest version. Otherwise, it will error.
       final Version? pluginSupportedVersion = await _parseSwiftPackageSupportedPlatform(manifest);
-      if (pluginSupportedVersion != null &&
-          (highestSupportedVersion.version < pluginSupportedVersion)) {
-        highestSupportedVersion = SwiftPackageSupportedPlatform(
-          platform: _targetPlatform.swiftPackagePlatform,
-          version: pluginSupportedVersion,
-        );
+      if (pluginSupportedVersion != null && (parsedHighestVersion < pluginSupportedVersion)) {
+        parsedHighestVersion = pluginSupportedVersion;
       }
     }
     savedHighestVersionFile
       ..createSync(recursive: true)
-      ..writeAsStringSync(highestSupportedVersion.version.toString());
+      ..writeAsStringSync(parsedHighestVersion.toString());
     fingerprinter.writeFingerprint();
-    return false;
+    return (parsedHighestVersion, false);
   }
 
   /// Parses the [SwiftPackageSupportedPlatform] from the Package.swift using either regex or
@@ -574,8 +572,10 @@ class FlutterPluginSwiftDependencies {
       return null;
     }
     // First attempt to parse with regex, which is fast
-    // e.g. \.iOS\((.*)\) matches .iOS("13.0") or .iOS(.v13) or .macOS(.v10_15)
-    final pattern = RegExp('\\${_targetPlatform.swiftPackagePlatform.displayName}\\((.*)\\)');
+    // e.g. \.iOS\(([\.v\d"\s]*)\) matches .iOS("13.0") or .iOS(.v13) or .iOS(.v10_15)
+    final pattern = RegExp(
+      '\\${_targetPlatform.swiftPackagePlatform.displayName}\\(([_v\\.\\d\\s"]*)\\)',
+    );
     final Iterable<RegExpMatch> matches = pattern.allMatches(manifestContents);
     if (matches.length == 1) {
       final String? match = matches.first.group(1);
@@ -595,15 +595,16 @@ class FlutterPluginSwiftDependencies {
     // If regex matching fails, convert the manifest to json and then parse
     final Map<String, Object?> manifestAsJson = await _parseSwiftPackage(swiftPackageManifest);
     if (manifestAsJson case {'platforms': final List<Object?> platformsData}) {
-      final Iterable<SwiftPackageSupportedPlatform?> parsedPlatforms = platformsData
-          .whereType<Map<String, Object?>>()
-          .map((platformData) => SwiftPackageSupportedPlatform.fromJson(platformData))
-          .where(
-            (parsedPlatform) =>
-                parsedPlatform != null &&
-                parsedPlatform.platform == _targetPlatform.swiftPackagePlatform,
-          );
-      return parsedPlatforms.firstOrNull?.version;
+      for (final Map<String, Object?> platformData
+          in platformsData.whereType<Map<String, Object?>>()) {
+        final SwiftPackageSupportedPlatform? parsedPlatform =
+            SwiftPackageSupportedPlatform.fromJson(platformData);
+        if (parsedPlatform != null &&
+            parsedPlatform.platform == _targetPlatform.swiftPackagePlatform) {
+          return parsedPlatform.version;
+        }
+      }
+      return null;
     }
     throwToolExit(
       'Unable to parse ${_targetPlatform.name} supported platform version from '

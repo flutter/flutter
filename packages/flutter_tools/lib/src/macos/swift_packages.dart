@@ -213,16 +213,11 @@ class SwiftPackageSupportedPlatform {
     }) {
       final Version? parsedVersion = Version.parse(versionString);
       if (parsedVersion != null) {
-        if (platformName == SwiftPackagePlatform.ios.name) {
-          return SwiftPackageSupportedPlatform(
-            platform: SwiftPackagePlatform.ios,
-            version: parsedVersion,
-          );
-        } else if (platformName == SwiftPackagePlatform.macos.name) {
-          return SwiftPackageSupportedPlatform(
-            platform: SwiftPackagePlatform.macos,
-            version: parsedVersion,
-          );
+        switch (platformName) {
+          case 'ios':
+            return SwiftPackageSupportedPlatform(platform: .ios, version: parsedVersion);
+          case 'macos':
+            return SwiftPackageSupportedPlatform(platform: .macos, version: parsedVersion);
         }
       }
     }
