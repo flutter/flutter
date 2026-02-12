@@ -50,7 +50,7 @@ class RenderTestParent extends RenderBox with RenderObjectWithChildMixin<RenderB
   @override
   void performLayout() {
     if (child != null) {
-      child!.layout(constraints.loosen(), parentUsesSize: false);
+      child!.layout(constraints.loosen());
     }
     size = constraints.biggest;
   }
