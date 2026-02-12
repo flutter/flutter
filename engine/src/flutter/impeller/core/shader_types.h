@@ -60,6 +60,8 @@ enum class ShaderType {
   kSampler,
 };
 
+// This is a separate type from ShaderType because ShaderType is used for
+// OpenGLES's attrib type which doesn't map to things like vec4.
 enum class ShaderFloatType {
   kFloat,
   kVec2,
