@@ -640,13 +640,15 @@ class FlutterPluginSwiftDependencies {
     for (final (plugin, swiftPackagePath) in copiedPlugins) {
       // Symlink the swift package inside the packagesForConfiguration directory
       final Link symlink = packagesForConfiguration.childLink(plugin.name);
-      if (symlink.existsSync()) {
-        continue;
-      }
-      symlink.createSync(
-        _utils.fileSystem.path.relative(swiftPackagePath, from: symlink.parent.path),
-        recursive: true,
+      final String target = _utils.fileSystem.path.relative(
+        swiftPackagePath,
+        from: symlink.parent.path,
       );
+      if (symlink.existsSync()) {
+        symlink.updateSync(target);
+      } else {
+        symlink.createSync(target, recursive: true);
+      }
 
       packageDependencies.add(
         SwiftPackagePackageDependency(
