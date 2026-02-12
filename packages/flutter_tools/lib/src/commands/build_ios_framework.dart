@@ -209,19 +209,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       simulatorBuildOutput,
     );
 
-    for (final String assetId in simulatorAssets.keys) {
-      final String? deviceAssetPath = deviceAssets[assetId];
-      final String simulatorAssetPath = simulatorAssets[assetId]!;
-      if (deviceAssetPath == null) {
-        throwToolExit(
-          'The simulator build contains a code asset "$assetId" that is '
-          'not present in the physical device build. \n'
-          'The device build is the source of truth for distributed '
-          'frameworks. \n'
-          'Ensure "$assetId" is also built for physical devices.',
-        );
-      }
-      if (deviceAssetPath != simulatorAssetPath) {
+    for (final String assetId in deviceAssets.keys) {
+      final String deviceAssetPath = deviceAssets[assetId]!;
+      final String? simulatorAssetPath = simulatorAssets[assetId];
+      if (simulatorAssetPath != null && deviceAssetPath != simulatorAssetPath) {
         throwToolExit(
           'Consistent code asset framework names are required for '
           'XCFramework creation.\n'
@@ -229,8 +220,23 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
           'platforms:\n'
           '  - iphoneos: $deviceAssetPath\n'
           '  - iphonesimulator: $simulatorAssetPath\n\n'
-          'Ensure the "build.dart" hook produces consistent filenames for '
-          'all targets.',
+          'This is likely an issue in the package providing the asset. '
+          'Please report this to the package maintainers and ensure the '
+          '"build.dart" hook produces consistent filenames.',
+        );
+      }
+    }
+
+    for (final String assetId in simulatorAssets.keys) {
+      if (!deviceAssets.containsKey(assetId)) {
+        throwToolExit(
+          'The simulator build contains a code asset "$assetId" that is '
+          'not present in the physical device build. \n'
+          'The device build is the source of truth for distributed '
+          'frameworks. \n\n'
+          'This is likely an issue in the package providing the asset. '
+          'Please report this to the package maintainers and ensure '
+          '"$assetId" is also built for physical devices.',
         );
       }
     }

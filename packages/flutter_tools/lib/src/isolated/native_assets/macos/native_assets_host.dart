@@ -11,6 +11,7 @@ import '../../../base/common.dart';
 import '../../../base/file_system.dart';
 import '../../../base/process.dart';
 import '../../../build_info.dart';
+import '../../../build_system/targets/darwin.dart';
 import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 
@@ -359,11 +360,13 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
     if (existingPath != null && existingPath != currentPath) {
       final String existingName = (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
       final String currentName = (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
-      globals.logger.printWarning(
+      printXcodeWarning(
         'Code asset "$assetId" has different framework names for '
         'different architectures. Picking "$existingName" and '
-        'ignoring "$currentName". Ensuring consistent filenames in '
-        '"build.dart" is recommended.',
+        'ignoring "$currentName". This is likely an issue in the '
+        'package providing the asset. Please report this to the '
+        'package maintainers and ensure the "build.dart" hook '
+        'produces consistent filenames.',
       );
     }
 

@@ -16,12 +16,13 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
   return int.parse(environmentDefines[kMinSdkVersion] ?? minSdkVersion);
 }
 
-Future<void> copyNativeCodeAssetsAndroid(
+Future<List<File>> copyNativeCodeAssetsAndroid(
   Uri targetUri,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
+  final installedFiles = <File>[];
   final jniArchDirs = <String>[
     for (final AndroidArch androidArch in AndroidArch.values) androidArch.archName,
   ];
@@ -37,8 +38,10 @@ Future<void> copyNativeCodeAssetsAndroid(
     final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     final Uri assetTargetUri = archUri.resolveUri(target);
     final String targetFullPath = assetTargetUri.toFilePath();
-    await fileSystem.file(source).copy(targetFullPath);
+    final File installedFile = await fileSystem.file(source).copy(targetFullPath);
+    installedFiles.add(installedFile);
   }
+  return installedFiles;
 }
 
 /// Get the [Architecture] for [androidArch].

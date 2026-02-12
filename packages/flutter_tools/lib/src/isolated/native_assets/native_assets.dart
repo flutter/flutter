@@ -90,7 +90,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   );
 }
 
-Future<void> installCodeAssets({
+Future<List<File>> installCodeAssets({
   required DartHooksResult dartHookResult,
   required Map<String, String> environmentDefines,
   required TargetPlatform targetPlatform,
@@ -110,7 +110,7 @@ Future<void> installCodeAssets({
     flutterTester,
     targetUri,
   );
-  await _copyNativeCodeAssetsForOS(
+  final List<File> installedFiles = await _copyNativeCodeAssetsForOS(
     targetOS,
     targetUri,
     buildMode,
@@ -124,6 +124,7 @@ Future<void> installCodeAssets({
     nativeAssetsFileUri,
     fileSystem,
   );
+  return <File>[fileSystem.file(nativeAssetsFileUri), ...installedFiles];
 }
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
@@ -418,7 +419,7 @@ Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsForOS(
   }
 }
 
-Future<void> _copyNativeCodeAssetsForOS(
+Future<List<File>> _copyNativeCodeAssetsForOS(
   OS targetOS,
   Uri targetUri,
   BuildMode buildMode,
@@ -446,16 +447,17 @@ Future<void> _copyNativeCodeAssetsForOS(
   }
 
   if (assetTargetLocations.isEmpty) {
-    return;
+    return const <File>[];
   }
 
   globals.logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
   final List<FlutterCodeAsset> codeAssets = assetTargetLocations.keys.toList();
+  final List<File> installedFiles;
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
       assert(codesignIdentity == null);
-      await _copyNativeCodeAssetsToBundleOnWindowsLinux(
+      installedFiles = await _copyNativeCodeAssetsToBundleOnWindowsLinux(
         targetUri,
         assetTargetLocations,
         buildMode,
@@ -463,7 +465,7 @@ Future<void> _copyNativeCodeAssetsForOS(
       );
     case OS.macOS:
       if (flutterTester) {
-        await copyNativeCodeAssetsMacOSFlutterTester(
+        installedFiles = await copyNativeCodeAssetsMacOSFlutterTester(
           targetUri,
           fatAssetTargetLocationsMacOS(codeAssets, targetUri),
           codesignIdentity,
@@ -471,7 +473,7 @@ Future<void> _copyNativeCodeAssetsForOS(
           fileSystem,
         );
       } else {
-        await copyNativeCodeAssetsMacOS(
+        installedFiles = await copyNativeCodeAssetsMacOS(
           targetUri,
           fatAssetTargetLocationsMacOS(codeAssets, null),
           codesignIdentity,
@@ -480,7 +482,7 @@ Future<void> _copyNativeCodeAssetsForOS(
         );
       }
     case OS.iOS:
-      await copyNativeCodeAssetsIOS(
+      installedFiles = await copyNativeCodeAssetsIOS(
         targetUri,
         fatAssetTargetLocationsIOS(codeAssets),
         codesignIdentity,
@@ -489,11 +491,16 @@ Future<void> _copyNativeCodeAssetsForOS(
       );
     case OS.android:
       assert(codesignIdentity == null);
-      await copyNativeCodeAssetsAndroid(targetUri, assetTargetLocations, fileSystem);
+      installedFiles = await copyNativeCodeAssetsAndroid(
+        targetUri,
+        assetTargetLocations,
+        fileSystem,
+      );
     default:
       throw StateError('This should be unreachable.');
   }
   globals.logger.printTrace('Copying native assets done.');
+  return installedFiles;
 }
 
 /// Invokes the build of all transitive Dart packages.
@@ -617,7 +624,7 @@ Future<LinkResult> _link(
   return linkResult;
 }
 
-Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
+Future<List<File>> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri targetUri,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   BuildMode buildMode,
@@ -625,13 +632,16 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
 ) async {
   assert(assetTargetLocations.isNotEmpty);
 
+  final installedFiles = <File>[];
   for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
     final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final Uri assetTargetUri = targetUri.resolveUri(target);
     final String targetFullPath = assetTargetUri.toFilePath();
-    await fileSystem.file(source).copy(targetFullPath);
+    final File installedFile = await fileSystem.file(source).copy(targetFullPath);
+    installedFiles.add(installedFile);
   }
+  return installedFiles;
 }
 
 Never _throwNativeAssetsBuildFailed() {

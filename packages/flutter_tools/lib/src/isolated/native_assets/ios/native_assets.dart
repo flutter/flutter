@@ -86,7 +86,7 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 ///
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
-Future<void> copyNativeCodeAssetsIOS(
+Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
   Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
@@ -94,6 +94,7 @@ Future<void> copyNativeCodeAssetsIOS(
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
+  final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
@@ -111,10 +112,15 @@ Future<void> copyNativeCodeAssetsIOS(
       await frameworkDir.create(recursive: true);
     }
     await lipoDylibs(dylibFile, sources);
+    installedFiles.add(dylibFile);
 
     if (buildMode != BuildMode.debug) {
-      await dsymutilDylib(dylibFile, '${frameworkDir.path}.dSYM');
+      final dsymPath = '${frameworkDir.path}.dSYM';
+      await dsymutilDylib(dylibFile, dsymPath);
       await stripDylib(dylibFile);
+      installedFiles.addAll(
+        fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
+      );
     }
 
     final String dylibFileName = dylibFile.basename;
@@ -130,10 +136,12 @@ Future<void> copyNativeCodeAssetsIOS(
       frameworkDir,
       minimumIOSVersion: '$targetIOSVersion.0',
     );
+    installedFiles.add(frameworkDir.childFile('Info.plist'));
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
     await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
     await codesignDylib(codesignIdentity, buildMode, frameworkDir);
   }
+  return installedFiles;
 }

@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// The build mode and target architecture can be changed from the
+/// native build project (Xcode etc.), so only `flutter assemble` has the
+/// information about build-mode and target architecture.
+///
+/// Also, only `flutter assemble` has access to the code sign identity.
+///
+/// Hence running the build hooks for code assets and the installation steps
+/// need to be run in the `Target`s in `flutter assemble`.
+library;
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -60,7 +70,10 @@ class DartBuild extends Target {
 
     final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartHookResultJsonFile)],
+      <File>[
+        fileSystem.file(dartHookResultJsonFile),
+        for (final Uri uri in result.filesToBeBundled) fileSystem.file(uri),
+      ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -122,10 +135,6 @@ class DartBuildForNative extends DartBuild {
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
-///
-/// The build mode and target architecture can be changed from the
-/// native build project (Xcode etc.), so only `flutter assemble` has the
-/// information about build-mode and target architecture.
 class InstallCodeAssets extends Target {
   const InstallCodeAssets();
 
@@ -149,7 +158,7 @@ class InstallCodeAssets extends Target {
       targetUri = targetUri.resolve('$osName/');
     }
 
-    await installCodeAssets(
+    final List<File> installedFiles = await installCodeAssets(
       dartHookResult: dartHookResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
@@ -160,10 +169,9 @@ class InstallCodeAssets extends Target {
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
-    final depfile = Depfile(
-      <File>[for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file)],
-      <File>[fileSystem.file(nativeAssetsFileUri)],
-    );
+    final depfile = Depfile(<File>[
+      for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file),
+    ], installedFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!await outputDepfile.exists()) {
