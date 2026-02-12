@@ -66,14 +66,17 @@ void main() {
             ],
           ),
           if (buildMode == BuildMode.release) ...<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>[
+            FakeCommand(
+              command: const <Pattern>[
                 'xcrun',
                 'dsymutil',
                 '/build/native_assets/ios/bar.framework/bar',
                 '-o',
                 '/build/native_assets/ios/bar.framework.dSYM',
               ],
+              onRun: (_) {
+                fileSystem.directory('/build/native_assets/ios/bar.framework.dSYM').createSync(recursive: true);
+              },
             ),
             const FakeCommand(
               command: <Pattern>[
@@ -111,14 +114,17 @@ void main() {
             ],
           ),
           if (buildMode == BuildMode.release) ...<FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>[
+            FakeCommand(
+              command: const <Pattern>[
                 'xcrun',
                 'dsymutil',
                 '/build/native_assets/ios/buz.framework/buz',
                 '-o',
                 '/build/native_assets/ios/buz.framework.dSYM',
               ],
+              onRun: (_) {
+                fileSystem.directory('/build/native_assets/ios/buz.framework.dSYM').createSync(recursive: true);
+              },
             ),
             const FakeCommand(
               command: <Pattern>[
