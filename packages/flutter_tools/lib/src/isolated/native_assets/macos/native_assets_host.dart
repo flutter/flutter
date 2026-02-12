@@ -8,7 +8,7 @@ import 'package:code_assets/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
-import '../../../base/io.dart';
+import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
 
@@ -62,7 +62,8 @@ Future<void> createInfoPlist(String name, Directory target, {String? minimumIOSV
 /// arm64 ios simulator cannot be combined with a dylib targeting arm64
 /// ios device or macos arm64.
 Future<void> lipoDylibs(File target, List<File> sources) async {
-  final ProcessResult lipoResult = await globals.processManager.run(<String>[
+  final RunResult lipoResult = await globals.processUtils.run(<String>[
+    'xcrun',
     'lipo',
     '-create',
     '-output',
@@ -72,8 +73,6 @@ Future<void> lipoDylibs(File target, List<File> sources) async {
   if (lipoResult.exitCode != 0) {
     throwToolExit('Failed to create universal binary:\n${lipoResult.stderr}');
   }
-  globals.logger.printTrace(lipoResult.stdout as String);
-  globals.logger.printTrace(lipoResult.stderr as String);
 }
 
 /// Sets the install names in a dylib with a Mach-O format.
@@ -93,7 +92,8 @@ Future<void> setInstallNamesDylib(
   String newInstallName,
   Map<String, String> oldToNewInstallNames,
 ) async {
-  final ProcessResult setInstallNamesResult = await globals.processManager.run(<String>[
+  final RunResult setInstallNamesResult = await globals.processUtils.run(<String>[
+    'xcrun',
     'install_name_tool',
     '-id',
     newInstallName,
@@ -115,7 +115,8 @@ Future<void> setInstallNamesDylib(
 }
 
 Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
-  final ProcessResult installNameResult = await globals.processManager.run(<String>[
+  final RunResult installNameResult = await globals.processUtils.run(<String>[
+    'xcrun',
     'otool',
     '-D',
     dylibFile.path,
@@ -126,7 +127,7 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 
   return <String>{
     for (final List<String> architectureSection in parseOtoolArchitectureSections(
-      installNameResult.stdout as String,
+      installNameResult.stdout,
     ).values)
       // For each architecture, a separate install name is reported, which are
       // not necessarily the same.
@@ -136,15 +137,14 @@ Future<Set<String>> getInstallNamesDylib(File dylibFile) async {
 
 /// Creates a dSYM bundle for a dylib.
 Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
-  final ProcessResult result = await globals.processManager.run(<String>[
+  final RunResult result = await globals.processUtils.run(<String>[
+    'xcrun',
     'dsymutil',
     dylibFile.path,
     '-o',
     dsymPath,
   ]);
   if (result.exitCode != 0) {
-    globals.logger.printError(result.stdout as String);
-    globals.logger.printError(result.stderr as String);
     throwToolExit('dsymutil failed with exit code ${result.exitCode}');
   }
 }
@@ -153,15 +153,16 @@ Future<void> dsymutilDylib(File dylibFile, String dsymPath) async {
 ///
 /// This is useful for release builds to reduce binary size.
 Future<void> stripDylib(File dylibFile) async {
-  final ProcessResult result = await globals.processManager.run(<String>[
+  final RunResult result = await globals.processUtils.run(<String>[
+    'xcrun',
     'strip',
     '-x', // Remove local symbols.
     '-S', // Remove debugging symbol table.
     dylibFile.path,
   ]);
   if (result.exitCode != 0) {
-    globals.logger.printError(result.stdout as String);
-    globals.logger.printError(result.stderr as String);
+    globals.logger.printError(result.stdout);
+    globals.logger.printError(result.stderr);
     throwToolExit('strip failed with exit code ${result.exitCode}');
   }
 }
@@ -175,6 +176,7 @@ Future<void> codesignDylib(
     codesignIdentity = '-';
   }
   final codesignCommand = <String>[
+    'xcrun',
     'codesign',
     '--force',
     '--sign',
@@ -185,16 +187,13 @@ Future<void> codesignDylib(
     ],
     target.path,
   ];
-  globals.logger.printTrace(codesignCommand.join(' '));
-  final ProcessResult codesignResult = await globals.processManager.run(codesignCommand);
+  final RunResult codesignResult = await globals.processUtils.run(codesignCommand);
   if (codesignResult.exitCode != 0) {
     throwToolExit(
       'Failed to code sign binary: exit code: ${codesignResult.exitCode} '
       '${codesignResult.stdout} ${codesignResult.stderr}',
     );
   }
-  globals.logger.printTrace(codesignResult.stdout as String);
-  globals.logger.printTrace(codesignResult.stderr as String);
 }
 
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
@@ -218,7 +217,7 @@ Future<CCompilerConfig?> cCompilerConfigMacOS({required bool throwIfNotFound}) a
 
 /// Invokes `xcrun --find` to find the full path to [binaryName].
 Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
-  final ProcessResult xcrunResult = await globals.processManager.run(<String>[
+  final RunResult xcrunResult = await globals.processUtils.run(<String>[
     'xcrun',
     '--find',
     binaryName,
@@ -230,7 +229,7 @@ Future<Uri?> _findXcrunBinary(String binaryName, bool throwIfNotFound) async {
       return null;
     }
   }
-  return Uri.file((xcrunResult.stdout as String).trim());
+  return Uri.file(xcrunResult.stdout.trim());
 }
 
 /// Converts [fileName] into a suitable framework name.

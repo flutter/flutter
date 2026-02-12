@@ -318,27 +318,42 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}',
       );
 
-      // Copy the native assets. The native assets have already been signed in
-      // buildNativeAssetsMacOS.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/ios/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          '--filter',
-          '- native_assets.json',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
-        }
+      // Package native assets.
+      final Directory nativeAssetSimulatorDirectory = simulatorBuildOutput.childDirectory(
+        'native_assets',
+      );
+      final Directory nativeAssetDeviceDirectory = iPhoneBuildOutput.childDirectory(
+        'native_assets',
+      );
+      final Iterable<Directory> frameworkDirectoriesSimulator = nativeAssetSimulatorDirectory
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => !d.basename.endsWith('.dSYM'));
+      final Iterable<Directory> frameworkDirectoriesDevice = nativeAssetDeviceDirectory
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => !d.basename.endsWith('.dSYM'));
+      final frameworkNames = <String>{
+        ...frameworkDirectoriesSimulator.map((Directory d) => d.basename),
+        ...frameworkDirectoriesDevice.map((Directory d) => d.basename),
+      };
+      for (final frameworkName in frameworkNames) {
+        final Directory frameworkDirectoryDevice = nativeAssetDeviceDirectory.childDirectory(
+          frameworkName,
+        );
+        final Directory frameworkDirectorySimulator = nativeAssetSimulatorDirectory.childDirectory(
+          frameworkName,
+        );
+        final frameworks = <Directory>[
+          if (frameworkDirectoryDevice.existsSync()) frameworkDirectoryDevice,
+          if (frameworkDirectorySimulator.existsSync()) frameworkDirectorySimulator,
+        ];
+        await BuildFrameworkCommand.produceXCFramework(
+          frameworks,
+          frameworkName.replaceAll('.framework', ''),
+          modeDirectory,
+          globals.processManager,
+        );
       }
 
       try {

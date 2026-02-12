@@ -80,7 +80,8 @@ class DartBuild extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
-    // If different packages are resolved, different native assets might need to be built.
+    // If different packages are resolved, different native assets might need to
+    // be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
@@ -140,6 +141,14 @@ class InstallCodeAssets extends Target {
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
+
+    Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
+    final String osName = targetPlatform.osName;
+    if (osName == 'linux' || osName == 'windows') {
+      // Avoid needing migration for CMake files, keep old directory structure.
+      targetUri = targetUri.resolve('$osName/');
+    }
+
     await installCodeAssets(
       dartHookResult: dartHookResult,
       environmentDefines: environment.defines,
@@ -147,6 +156,7 @@ class InstallCodeAssets extends Target {
       projectUri: projectUri,
       fileSystem: fileSystem,
       nativeAssetsFileUri: nativeAssetsFileUri,
+      targetUri: targetUri,
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
@@ -172,7 +182,10 @@ class InstallCodeAssets extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
-    // If different packages are resolved, different native assets might need to be built.
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    // If different packages are resolved, different native assets might need to
+    // be built. We can't depend on the exact outputs from `DartBuild`, so
+    // depend on all the same inputs.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 

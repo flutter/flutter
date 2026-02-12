@@ -55,14 +55,6 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required bool buildCodeAssets,
   required bool buildDataAssets,
 }) async {
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
-  final Directory buildDir = fileSystem.directory(buildUri);
-  if (!await buildDir.exists()) {
-    // Ensure the folder exists so the native build system can copy it even
-    // if there's no native assets.
-    await buildDir.create(recursive: true);
-  }
-
   if (!await _hookRunRequired(buildRunner)) {
     return DartHooksResult.empty();
   }
@@ -105,9 +97,9 @@ Future<void> installCodeAssets({
   required Uri projectUri,
   required FileSystem fileSystem,
   required Uri nativeAssetsFileUri,
+  required Uri targetUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -116,11 +108,11 @@ Future<void> installCodeAssets({
     targetOS,
     dartHookResult.codeAssets,
     flutterTester,
-    buildUri,
+    targetUri,
   );
   await _copyNativeCodeAssetsForOS(
     targetOS,
-    buildUri,
+    targetUri,
     buildMode,
     fileSystem,
     assetTargetLocations,
@@ -364,13 +356,6 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
   );
 }
 
-/// This should be the same for different archs, debug/release, etc.
-/// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, String osName) {
-  final String buildDir = getBuildDirectory();
-  return projectUri.resolve('$buildDir/native_assets/$osName/');
-}
-
 Map<FlutterCodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
   List<FlutterCodeAsset> assets,
   Uri? absolutePath,
@@ -435,7 +420,7 @@ Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsForOS(
 
 Future<void> _copyNativeCodeAssetsForOS(
   OS targetOS,
-  Uri buildUri,
+  Uri targetUri,
   BuildMode buildMode,
   FileSystem fileSystem,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
@@ -452,18 +437,23 @@ Future<void> _copyNativeCodeAssetsForOS(
         codeAsset: assetTargetLocations[codeAsset]!,
   };
 
+  final Directory targetDir = fileSystem.directory(targetUri.toFilePath());
+  if (!targetDir.existsSync()) {
+    targetDir.createSync(recursive: true);
+  }
+
   if (assetTargetLocations.isEmpty) {
     return;
   }
 
-  globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
+  globals.logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
   final List<FlutterCodeAsset> codeAssets = assetTargetLocations.keys.toList();
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
       assert(codesignIdentity == null);
       await _copyNativeCodeAssetsToBundleOnWindowsLinux(
-        buildUri,
+        targetUri,
         assetTargetLocations,
         buildMode,
         fileSystem,
@@ -471,15 +461,15 @@ Future<void> _copyNativeCodeAssetsForOS(
     case OS.macOS:
       if (flutterTester) {
         await copyNativeCodeAssetsMacOSFlutterTester(
-          buildUri,
-          fatAssetTargetLocationsMacOS(codeAssets, buildUri),
+          targetUri,
+          fatAssetTargetLocationsMacOS(codeAssets, targetUri),
           codesignIdentity,
           buildMode,
           fileSystem,
         );
       } else {
         await copyNativeCodeAssetsMacOS(
-          buildUri,
+          targetUri,
           fatAssetTargetLocationsMacOS(codeAssets, null),
           codesignIdentity,
           buildMode,
@@ -488,7 +478,7 @@ Future<void> _copyNativeCodeAssetsForOS(
       }
     case OS.iOS:
       await copyNativeCodeAssetsIOS(
-        buildUri,
+        targetUri,
         fatAssetTargetLocationsIOS(codeAssets),
         codesignIdentity,
         buildMode,
@@ -496,7 +486,7 @@ Future<void> _copyNativeCodeAssetsForOS(
       );
     case OS.android:
       assert(codesignIdentity == null);
-      await copyNativeCodeAssetsAndroid(buildUri, assetTargetLocations, fileSystem);
+      await copyNativeCodeAssetsAndroid(targetUri, assetTargetLocations, fileSystem);
     default:
       throw StateError('This should be unreachable.');
   }
@@ -559,13 +549,6 @@ Future<DartHooksResult> _runDartHooks({
     }
     dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
     dependencies.addAll(buildResult.dependencies);
-  }
-  if (codeAssets.isNotEmpty) {
-    globals.logger.printTrace(
-      'Note: You are using the dart build hooks feature which is currently '
-      'in preview. Please see '
-      'https://dart.dev/interop/c-interop#native-assets for more details.',
-    );
   }
 
   if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
@@ -632,22 +615,18 @@ Future<LinkResult> _link(
 }
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
-  Uri buildUri,
+  Uri targetUri,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
   assert(assetTargetLocations.isNotEmpty);
 
-  final Directory buildDir = fileSystem.directory(buildUri.toFilePath());
-  if (!buildDir.existsSync()) {
-    buildDir.createSync(recursive: true);
-  }
   for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
     final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-    final Uri targetUri = buildUri.resolveUri(target);
-    final String targetFullPath = targetUri.toFilePath();
+    final Uri assetTargetUri = targetUri.resolveUri(target);
+    final String targetFullPath = assetTargetUri.toFilePath();
     await fileSystem.file(source).copy(targetFullPath);
   }
 }

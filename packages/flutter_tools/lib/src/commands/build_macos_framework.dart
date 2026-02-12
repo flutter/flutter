@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -118,26 +117,20 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
       globals.logger.printStatus(' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
-      // Copy the native assets.
-      final Directory nativeAssetsDirectory = globals.fs
-          .directory(getBuildDirectory())
-          .childDirectory('native_assets/macos/');
-      if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
-          'rsync',
-          '-av',
-          '--filter',
-          '- .DS_Store',
-          '--filter',
-          '- native_assets.yaml',
-          '--filter',
-          '- native_assets.json',
-          nativeAssetsDirectory.path,
-          modeDirectory.path,
-        ]);
-        if (rsyncResult.exitCode != 0) {
-          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
-        }
+      // Package native assets.
+      final Directory nativeAssetsDirectory = buildOutput.childDirectory('native_assets');
+      final Iterable<Directory> frameworkDirectories = nativeAssetsDirectory
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => !d.basename.endsWith('.dSYM'));
+      for (final frameworkDirectory in frameworkDirectories) {
+        final frameworks = [frameworkDirectory];
+        await BuildFrameworkCommand.produceXCFramework(
+          frameworks,
+          frameworkDirectory.basename.replaceAll('.framework', ''),
+          modeDirectory,
+          globals.processManager,
+        );
       }
 
       // Delete the intermediaries since they would have been copied into our

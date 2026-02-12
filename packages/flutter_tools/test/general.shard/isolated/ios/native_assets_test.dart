@@ -54,6 +54,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'lipo',
               '-create',
               '-output',
@@ -65,6 +66,7 @@ void main() {
           if (buildMode == BuildMode.release) ...<FakeCommand>[
             const FakeCommand(
               command: <Pattern>[
+                'xcrun',
                 'dsymutil',
                 '/build/native_assets/ios/bar.framework/bar',
                 '-o',
@@ -72,11 +74,22 @@ void main() {
               ],
             ),
             const FakeCommand(
-              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/bar.framework/bar'],
+              command: <Pattern>[
+                'xcrun',
+                'strip',
+                '-x',
+                '-S',
+                '/build/native_assets/ios/bar.framework/bar',
+              ],
             ),
           ],
           FakeCommand(
-            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/bar.framework/bar'],
+            command: const <Pattern>[
+              'xcrun',
+              'otool',
+              '-D',
+              '/build/native_assets/ios/bar.framework/bar',
+            ],
             stdout: <String>[
               '/build/native_assets/ios/bar.framework/bar (architecture x86_64):',
               '@rpath/libbar.dylib',
@@ -86,6 +99,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'lipo',
               '-create',
               '-output',
@@ -97,6 +111,7 @@ void main() {
           if (buildMode == BuildMode.release) ...<FakeCommand>[
             const FakeCommand(
               command: <Pattern>[
+                'xcrun',
                 'dsymutil',
                 '/build/native_assets/ios/buz.framework/buz',
                 '-o',
@@ -104,11 +119,22 @@ void main() {
               ],
             ),
             const FakeCommand(
-              command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/buz.framework/buz'],
+              command: <Pattern>[
+                'xcrun',
+                'strip',
+                '-x',
+                '-S',
+                '/build/native_assets/ios/buz.framework/buz',
+              ],
             ),
           ],
           FakeCommand(
-            command: const <Pattern>['otool', '-D', '/build/native_assets/ios/buz.framework/buz'],
+            command: const <Pattern>[
+              'xcrun',
+              'otool',
+              '-D',
+              '/build/native_assets/ios/buz.framework/buz',
+            ],
             stdout: <String>[
               '/build/native_assets/ios/buz.framework/buz (architecture x86_64):',
               '@rpath/libbuz.dylib',
@@ -118,6 +144,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'install_name_tool',
               '-id',
               '@rpath/bar.framework/bar',
@@ -132,6 +159,7 @@ void main() {
           ),
           FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'codesign',
               '--force',
               '--sign',
@@ -142,6 +170,7 @@ void main() {
           ),
           const FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'install_name_tool',
               '-id',
               '@rpath/buz.framework/buz',
@@ -156,6 +185,7 @@ void main() {
           ),
           FakeCommand(
             command: <Pattern>[
+              'xcrun',
               'codesign',
               '--force',
               '--sign',
@@ -227,6 +257,7 @@ void main() {
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
+          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
         );
         expect(
           (globals.logger as BufferLogger).traceText,

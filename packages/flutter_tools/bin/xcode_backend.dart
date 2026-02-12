@@ -349,7 +349,16 @@ class Context {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
+    var nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
+    final String? builtProductsDir = environment['BUILT_PRODUCTS_DIR'];
+    if (builtProductsDir != null) {
+      final Directory nativeAssetsInBuiltProducts = directoryFromPath(
+        '$builtProductsDir/native_assets/',
+      );
+      if (nativeAssetsInBuiltProducts.existsSync()) {
+        nativeAssetsPath = '${nativeAssetsInBuiltProducts.path}/';
+      }
+    }
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
 
     final Set<String> referencedFrameworks = {};

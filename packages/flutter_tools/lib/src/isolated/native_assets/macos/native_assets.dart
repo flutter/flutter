@@ -107,7 +107,7 @@ KernelAsset _targetLocationMacOS(
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in macos_assemble.sh.
 Future<void> copyNativeCodeAssetsMacOS(
-  Uri buildUri,
+  Uri targetUri,
   Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
@@ -125,9 +125,9 @@ Future<void> copyNativeCodeAssetsMacOS(
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
     ];
-    final Uri targetUri = buildUri.resolveUri(target);
-    final String name = targetUri.pathSegments.last;
-    final Directory frameworkDir = fileSystem.file(targetUri).parent;
+    final Uri assetTargetUri = targetUri.resolveUri(target);
+    final String name = assetTargetUri.pathSegments.last;
+    final Directory frameworkDir = fileSystem.file(assetTargetUri).parent;
     if (await frameworkDir.exists()) {
       await frameworkDir.delete(recursive: true);
     }
@@ -205,7 +205,7 @@ Future<void> copyNativeCodeAssetsMacOS(
 ///
 /// Code signing is also done here.
 Future<void> copyNativeCodeAssetsMacOSFlutterTester(
-  Uri buildUri,
+  Uri targetUri,
   Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
@@ -223,8 +223,8 @@ Future<void> copyNativeCodeAssetsMacOSFlutterTester(
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
     ];
-    final Uri targetUri = buildUri.resolveUri(target);
-    final File dylibFile = fileSystem.file(targetUri);
+    final Uri assetTargetUri = targetUri.resolveUri(target);
+    final File dylibFile = fileSystem.file(assetTargetUri);
     final Directory targetParent = dylibFile.parent;
     if (!await targetParent.exists()) {
       await targetParent.create(recursive: true);

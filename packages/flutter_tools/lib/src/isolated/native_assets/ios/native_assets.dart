@@ -93,7 +93,7 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
 /// Code signing is also done here, so that it doesn't have to be done in
 /// in xcode_backend.dart.
 Future<void> copyNativeCodeAssetsIOS(
-  Uri buildUri,
+  Uri targetUri,
   Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
@@ -110,8 +110,8 @@ Future<void> copyNativeCodeAssetsIOS(
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
     ];
-    final Uri targetUri = buildUri.resolveUri(target);
-    final File dylibFile = fileSystem.file(targetUri);
+    final Uri assetTargetUri = targetUri.resolveUri(target);
+    final File dylibFile = fileSystem.file(assetTargetUri);
     final Directory frameworkDir = dylibFile.parent;
     if (!await frameworkDir.exists()) {
       await frameworkDir.create(recursive: true);
@@ -132,7 +132,7 @@ Future<void> copyNativeCodeAssetsIOS(
     dylibs.add((dylibFile, newInstallName, frameworkDir));
 
     await createInfoPlist(
-      targetUri.pathSegments.last,
+      assetTargetUri.pathSegments.last,
       frameworkDir,
       minimumIOSVersion: '$targetIOSVersion.0',
     );

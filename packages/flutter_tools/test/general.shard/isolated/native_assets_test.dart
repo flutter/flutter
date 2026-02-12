@@ -89,6 +89,7 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
+        targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/test/'),
       );
       expect(testLogger.traceText, isNot(contains('Copying native assets to')));
     },
@@ -145,6 +146,7 @@ void main() {
         buildCodeAssets: true,
         buildDataAssets: true,
       );
+      final Uri targetUri = environment.buildDir.uri.resolve('native_assets/');
       await installCodeAssets(
         dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
@@ -152,18 +154,13 @@ void main() {
         projectUri: projectUri,
         fileSystem: fileSystem,
         nativeAssetsFileUri: nonFlutterTesterAssetUri,
+        targetUri: targetUri,
       );
       expect(
         await fileSystem.file(nonFlutterTesterAssetUri).readAsString(),
         isNot(contains('package:bar/bar.dart')),
       );
-      expect(
-        environment.projectDir
-            .childDirectory('build')
-            .childDirectory('native_assets')
-            .childDirectory('windows'),
-        exists,
-      );
+      expect(fileSystem.directory(targetUri), exists);
     },
   );
 

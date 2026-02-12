@@ -17,7 +17,7 @@ int targetAndroidNdkApi(Map<String, String> environmentDefines) {
 }
 
 Future<void> copyNativeCodeAssetsAndroid(
-  Uri buildUri,
+  Uri targetUri,
   Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
@@ -26,7 +26,7 @@ Future<void> copyNativeCodeAssetsAndroid(
     for (final AndroidArch androidArch in AndroidArch.values) androidArch.archName,
   ];
   for (final jniArchDir in jniArchDirs) {
-    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     await fileSystem.directory(archUri).create(recursive: true);
   }
   for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
@@ -34,9 +34,9 @@ Future<void> copyNativeCodeAssetsAndroid(
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final AndroidArch androidArch = _getAndroidArch(assetMapping.value.target.architecture);
     final String jniArchDir = androidArch.archName;
-    final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
-    final Uri targetUri = archUri.resolveUri(target);
-    final String targetFullPath = targetUri.toFilePath();
+    final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
+    final Uri assetTargetUri = archUri.resolveUri(target);
+    final String targetFullPath = assetTargetUri.toFilePath();
     await fileSystem.file(source).copy(targetFullPath);
   }
 }

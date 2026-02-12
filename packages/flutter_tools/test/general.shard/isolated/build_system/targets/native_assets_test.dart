@@ -143,32 +143,34 @@ void main() {
         // Create the framework dylib.
         const FakeCommand(
           command: <Pattern>[
+            'xcrun',
             'lipo',
             '-create',
             '-output',
-            '/build/native_assets/ios/foo.framework/foo',
+            '/native_assets/foo.framework/foo',
             'foo.framework/foo',
           ],
         ),
         const FakeCommand(
           command: <Pattern>[
+            'xcrun',
             'dsymutil',
-            '/build/native_assets/ios/foo.framework/foo',
+            '/native_assets/foo.framework/foo',
             '-o',
-            '/build/native_assets/ios/foo.framework.dSYM',
+            '/native_assets/foo.framework.dSYM',
           ],
         ),
         const FakeCommand(
-          command: <Pattern>['strip', '-x', '-S', '/build/native_assets/ios/foo.framework/foo'],
+          command: <Pattern>['xcrun', 'strip', '-x', '-S', '/native_assets/foo.framework/foo'],
         ),
         // Lookup the original install names of the dylib.
         // There can be different install names for different architectures.
         FakeCommand(
-          command: const <Pattern>['otool', '-D', '/build/native_assets/ios/foo.framework/foo'],
+          command: const <Pattern>['xcrun', 'otool', '-D', '/native_assets/foo.framework/foo'],
           stdout: <String>[
-            '/build/native_assets/ios/foo.framework/foo (architecture x86_64):',
+            '/native_assets/foo.framework/foo (architecture x86_64):',
             '@rpath/libfoo.dylib',
-            '/build/native_assets/ios/foo.framework/foo (architecture arm64):',
+            '/native_assets/foo.framework/foo (architecture arm64):',
             '@rpath/libfoo.dylib',
           ].join('\n'),
         ),
@@ -178,24 +180,26 @@ void main() {
         // is ignored if the dylib does not depend on the target dylib.
         const FakeCommand(
           command: <Pattern>[
+            'xcrun',
             'install_name_tool',
             '-id',
             '@rpath/foo.framework/foo',
             '-change',
             '@rpath/libfoo.dylib',
             '@rpath/foo.framework/foo',
-            '/build/native_assets/ios/foo.framework/foo',
+            '/native_assets/foo.framework/foo',
           ],
         ),
         // Only after all changes to the dylib have been made do we sign it.
         const FakeCommand(
           command: <Pattern>[
+            'xcrun',
             'codesign',
             '--force',
             '--sign',
             '-',
             '--timestamp=none',
-            '/build/native_assets/ios/foo.framework',
+            '/native_assets/foo.framework',
           ],
         ),
       ]),
