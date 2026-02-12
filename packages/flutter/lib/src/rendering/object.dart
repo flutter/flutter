@@ -1523,9 +1523,17 @@ base class PipelineOwner with DiagnosticableTreeMixin {
               .toList()
             ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
       _nodesNeedingSemanticsGeometryUpdate.clear();
-
+      final nodeToEnsureGeometry = <_RenderObjectSemantics>{};
       // Clear geometry for nodes that needs geometry update.
       for (final node in nodesToProcessGeometry) {
+        _RenderObjectSemantics target = node._semantics;
+        while (!target.isRoot && (!target.shouldFormSemanticsNode)) {
+          target = target.parent!;
+        }
+        if (!target.geometryDirty) {
+          nodeToEnsureGeometry.add(target);
+        }
+
         if (node._semantics.shouldFormSemanticsNode && node._semantics.geometryDirty) {
           // This node is already dirty, skip it.
           continue;
@@ -1564,16 +1572,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }
 
       // Conduct the geometry update
-      for (final node in nodesToProcessGeometry) {
-        _RenderObjectSemantics target = node._semantics;
-        // Find the first render object semantics that forms a semantics node
-        // and whose geometry is not dirty as the anchor point to start the geometry update.
-        while (!target.isRoot && (target.geometryDirty || !target.shouldFormSemanticsNode)) {
-          target = target.parent!;
-        }
-
-        target.ensureGeometry();
+      for (final _RenderObjectSemantics node
+          in nodeToEnsureGeometry.toList()..sort(
+            (_RenderObjectSemantics a, _RenderObjectSemantics b) =>
+                a.renderObject.depth - b.renderObject.depth,
+          )) {
+        node.ensureGeometry();
       }
+
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
