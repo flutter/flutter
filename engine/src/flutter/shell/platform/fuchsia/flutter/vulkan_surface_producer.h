@@ -11,15 +11,13 @@
 #include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/shell/platform/fuchsia/flutter/vulkan_surface.h"
+#include "flutter/shell/platform/fuchsia/flutter/vulkan_surface_pool.h"
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_provider.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
-
-#include "logging.h"
-#include "vulkan_surface.h"
-#include "vulkan_surface_pool.h"
 
 namespace flutter_runner {
 
