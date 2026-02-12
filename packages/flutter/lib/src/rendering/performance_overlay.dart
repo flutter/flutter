@@ -94,21 +94,24 @@ class RenderPerformanceOverlay extends RenderBox {
     return 0.0;
   }
 
-      double get _intrinsicHeight {
-        const kDefaultGraphHeight = 80.0;
-        var result = 0.0;
-        final int rasterizerBits = (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) |
-            (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index);
-        if ((optionsMask & rasterizerBits) != 0) {
-          result += kDefaultGraphHeight;
-        }
-        final int engineBits = (1 << PerformanceOverlayOption.displayEngineStatistics.index) |
-            (1 << PerformanceOverlayOption.visualizeEngineStatistics.index);
-        if ((optionsMask & engineBits) != 0) {
-          result += kDefaultGraphHeight;
-        }
-        return result;
-      }
+  double get _intrinsicHeight {
+    const kDefaultGraphHeight = 80.0;
+    var result = 0.0;
+    final int rasterizerBits =
+        (1 << PerformanceOverlayOption.displayRasterizerStatistics.index) |
+        (1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index);
+    if ((optionsMask & rasterizerBits) != 0) {
+      result += kDefaultGraphHeight;
+    }
+    final int engineBits =
+        (1 << PerformanceOverlayOption.displayEngineStatistics.index) |
+        (1 << PerformanceOverlayOption.visualizeEngineStatistics.index);
+    if ((optionsMask & engineBits) != 0) {
+      result += kDefaultGraphHeight;
+    }
+    return result;
+  }
+
   @override
   double computeMinIntrinsicHeight(double width) {
     return _intrinsicHeight;
