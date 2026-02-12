@@ -24,5 +24,27 @@ void main() {
     // Both engine and rasterizer graphs.
     r.optionsMask = engineMask | rasterMask;
     expect(r.computeMinIntrinsicHeight(100.0), 2 * kGraph);
+
+    // One visualize engine stat enabled.
+    final int visualizeEngineMask = 1 << PerformanceOverlayOption.visualizeEngineStatistics.index;
+    r.optionsMask = visualizeEngineMask;
+    expect(r.computeMinIntrinsicHeight(100.0), kGraph);
+
+    // One visualize rasterizer stat enabled.
+    final int visualizeRasterMask = 1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index;
+    r.optionsMask = visualizeRasterMask;
+    expect(r.computeMinIntrinsicHeight(100.0), kGraph);
+
+    // Both display and visualize engine stats enabled.
+    r.optionsMask = engineMask | visualizeEngineMask;
+    expect(r.computeMinIntrinsicHeight(100.0), kGraph);
+
+    // Both display and visualize rasterizer stats enabled.
+    r.optionsMask = rasterMask | visualizeRasterMask;
+    expect(r.computeMinIntrinsicHeight(100.0), kGraph);
+
+    // All options enabled.
+    r.optionsMask = engineMask | visualizeEngineMask | rasterMask | visualizeRasterMask;
+    expect(r.computeMinIntrinsicHeight(100.0), 2 * kGraph);
   });
 }
