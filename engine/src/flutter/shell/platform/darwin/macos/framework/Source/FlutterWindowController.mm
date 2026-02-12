@@ -293,7 +293,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [window orderFront:nil];
   [window zoom:nil];
   [window close];
-  NSArray* modes = (__bridge NSArray*)CFRunLoopCopyAllModes(CFRunLoopGetCurrent());
+  NSArray* modes = (__bridge_transfer NSArray*)CFRunLoopCopyAllModes(CFRunLoopGetCurrent());
   for (NSString* mode in modes) {
     if ([mode hasSuffix:@"MoveTimerRunLoopMode"]) {
       CFRunLoopAddCommonMode(CFRunLoopGetCurrent(), (__bridge CFStringRef)mode);
