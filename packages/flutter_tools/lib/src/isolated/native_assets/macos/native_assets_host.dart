@@ -360,15 +360,14 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
     if (existingPath != null && existingPath != currentPath) {
       final String existingName = (existingPath as KernelAssetAbsolutePath).uri.pathSegments.first;
       final String currentName = (currentPath as KernelAssetAbsolutePath).uri.pathSegments.first;
-      final message =
-          'Code asset "$assetId" has different framework names for '
-          'different architectures. Picking "$existingName" and '
-          'ignoring "$currentName". This is likely an issue in the '
-          'package providing the asset. Please report this to the '
-          'package maintainers and ensure the "build.dart" hook '
-          'produces consistent filenames.';
-      globals.logger.printWarning(message);
-      printXcodeWarning(message);
+      printXcodeWarning(
+        'Code asset "$assetId" has different framework names for '
+        'different architectures. Picking "$existingName" and '
+        'ignoring "$currentName". This is likely an issue in the '
+        'package providing the asset. Please report this to the '
+        'package maintainers and ensure the "build.dart" hook '
+        'produces consistent filenames.',
+      );
     }
 
     final KernelAssetPath path = existingPath ?? currentPath;

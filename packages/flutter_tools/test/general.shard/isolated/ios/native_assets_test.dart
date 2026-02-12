@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -22,6 +23,7 @@ import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -308,19 +310,21 @@ void main() {
 
       fatAssetTargetLocationsIOS(assets);
 
+      final fakeStdio = globals.stdio as FakeStdio;
       expect(
-        logger.warningText,
-        contains(
+        fakeStdio.writtenToStderr,
+        contains(contains(
           'Code asset "package:bar/bar.dart" has different framework names for '
           'different architectures. Picking "bar.framework" and '
           'ignoring "bar_different.framework".',
-        ),
+        )),
       );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
+      Stdio: () => FakeStdio(),
     },
   );
 }
