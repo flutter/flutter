@@ -622,14 +622,21 @@ bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
 
   try {
     final String contents = packageSwiftFile.readAsStringSync();
-    final bool hasPackageDependency = contents.contains(
+
+    final List<String> uncommentedLines = contents
+        .split('\n')
+        .where((String line) => !line.trim().startsWith('//'))
+        .toList();
+    final String uncommentedContents = uncommentedLines.join('\n');
+
+    final bool hasPackageDependency = uncommentedContents.contains(
       RegExp(r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"'),
     );
-    final bool hasTargetDependency = contents.contains(
+    final bool hasTargetDependency = uncommentedContents.contains(
       RegExp(r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"'),
     );
 
-    return hasPackageDependency || hasTargetDependency;
+    return hasPackageDependency && hasTargetDependency;
   } on FileSystemException {
     return false;
   }
