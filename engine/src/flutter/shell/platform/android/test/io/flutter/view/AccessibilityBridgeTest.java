@@ -1479,10 +1479,9 @@ public class AccessibilityBridgeTest {
     observer.onChange(false);
 
     ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-    assertEquals(
-        ACCESSIBILITY_FEATURE_INVERT_COLORS,
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_INVERT_COLORS));
+    verify(mockChannel).setAccessibilityFeatures(featuresCaptor.capture());
+    int expectedFlags = ACCESSIBILITY_FEATURE_INVERT_COLORS | ACCESSIBILITY_FEATURE_NO_ANNOUNCE;
+    assertEquals(expectedFlags, featuresCaptor.getValue().intValue());
 
     reset(mockChannel);
 
@@ -1490,10 +1489,8 @@ public class AccessibilityBridgeTest {
         spyContentResolver, Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0);
     observer.onChange(false);
 
-    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-    assertNotEquals(
-        ACCESSIBILITY_FEATURE_INVERT_COLORS,
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_INVERT_COLORS));
+    verify(mockChannel).setAccessibilityFeatures(featuresCaptor.capture());
+    assertEquals(ACCESSIBILITY_FEATURE_NO_ANNOUNCE, featuresCaptor.getValue().intValue());
   }
 
   @Config(sdk = API_LEVELS.API_34)
@@ -1524,9 +1521,9 @@ public class AccessibilityBridgeTest {
 
     ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
     verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-    assertEquals(
-        ACCESSIBILITY_FEATURE_HIGH_CONTRAST,
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
+
+    int expectedFlags = ACCESSIBILITY_FEATURE_HIGH_CONTRAST | ACCESSIBILITY_FEATURE_NO_ANNOUNCE;
+    assertEquals(expectedFlags, featuresCaptor.getValue().intValue());
   }
 
   @Config(sdk = API_LEVELS.API_34)
@@ -1566,20 +1563,17 @@ public class AccessibilityBridgeTest {
     listener.onContrastChanged(0.5f);
 
     ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
-    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-    assertTrue(
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST)
-            == ACCESSIBILITY_FEATURE_HIGH_CONTRAST);
+    verify(mockChannel).setAccessibilityFeatures(featuresCaptor.capture());
+    int expectedFlags = ACCESSIBILITY_FEATURE_HIGH_CONTRAST | ACCESSIBILITY_FEATURE_NO_ANNOUNCE;
+    assertEquals(expectedFlags, featuresCaptor.getValue().intValue());
 
     reset(mockChannel);
 
     when(mockUiModeManager.getContrast()).thenReturn(0.0f);
     listener.onContrastChanged(0.0f);
 
-    verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-    assertNotEquals(
-        ACCESSIBILITY_FEATURE_HIGH_CONTRAST,
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
+    verify(mockChannel).setAccessibilityFeatures(featuresCaptor.capture());
+    assertEquals(ACCESSIBILITY_FEATURE_NO_ANNOUNCE, featuresCaptor.getValue().intValue());
   }
 
   @Config(sdk = API_LEVELS.API_33)
@@ -1603,11 +1597,7 @@ public class AccessibilityBridgeTest {
 
     ArgumentCaptor<Integer> featuresCaptor = ArgumentCaptor.forClass(Integer.class);
     verify(mockChannel, atLeastOnce()).setAccessibilityFeatures(featuresCaptor.capture());
-
-    assertNotEquals(
-        ACCESSIBILITY_FEATURE_HIGH_CONTRAST,
-        (featuresCaptor.getValue() & ACCESSIBILITY_FEATURE_HIGH_CONTRAST));
-
+    assertEquals(ACCESSIBILITY_FEATURE_NO_ANNOUNCE, featuresCaptor.getValue().intValue());
     verify(context, never()).getSystemService(Context.UI_MODE_SERVICE);
   }
 
