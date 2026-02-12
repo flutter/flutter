@@ -247,17 +247,14 @@ class CopyAssets extends Target {
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    DartBuildForNative(),
-    KernelSnapshot(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[DartBuildForNative(), KernelSnapshot()];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart',
     ),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -288,11 +285,6 @@ class CopyAssets extends Target {
       targetPlatform: targetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
-      additionalContent: <String, DevFSContent>{
-        'NativeAssetsManifest.json': DevFSFileContent(
-          environment.buildDir.childFile('native_assets.json'),
-        ),
-      },
     );
     environment.depFileService.writeToFile(
       depfile,

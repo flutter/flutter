@@ -22,8 +22,10 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
 
   @override
-  String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows.name).toFilePath();
+  String windowsBuildDirectory(FlutterProject project) {
+    final String buildDir = getBuildDirectory();
+    return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
+  }
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -61,7 +63,9 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
+  final String buildDir = getBuildDirectory();
+  final String osName = targetOS.name;
+  final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
   final environmentDefines = <String, String>{kBuildMode: buildInfo.mode.cliName};
@@ -85,6 +89,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     projectUri: projectUri,
     fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri,
+    targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
   );
   assert(await globals.fs.file(nativeAssetsFileUri).exists());
 

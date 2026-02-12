@@ -2,6 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// The build mode and target architecture can be changed from the
+/// native build project (Xcode etc.), so only `flutter assemble` has the
+/// information about build-mode and target architecture.
+///
+/// Also, only `flutter assemble` has access to the code sign identity.
+///
+/// Hence running the build hooks for code assets and the installation steps
+/// need to be run in the `Target`s in `flutter assemble`.
+library;
+
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -60,7 +70,10 @@ class DartBuild extends Target {
 
     final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartHookResultJsonFile)],
+      <File>[
+        fileSystem.file(dartHookResultJsonFile),
+        for (final Uri uri in result.filesToBeBundled) fileSystem.file(uri),
+      ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -80,7 +93,8 @@ class DartBuild extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
-    // If different packages are resolved, different native assets might need to be built.
+    // If different packages are resolved, different native assets might need to
+    // be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
     // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
@@ -121,10 +135,6 @@ class DartBuildForNative extends DartBuild {
 }
 
 /// Installs the code assets from a [DartBuild] Flutter app.
-///
-/// The build mode and target architecture can be changed from the
-/// native build project (Xcode etc.), so only `flutter assemble` has the
-/// information about build-mode and target architecture.
 class InstallCodeAssets extends Target {
   const InstallCodeAssets();
 
@@ -140,20 +150,28 @@ class InstallCodeAssets extends Target {
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
-    await installCodeAssets(
+
+    Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
+    final String osName = targetPlatform.osName;
+    if (osName == 'linux' || osName == 'windows') {
+      // Avoid needing migration for CMake files, keep old directory structure.
+      targetUri = targetUri.resolve('$osName/');
+    }
+
+    final List<File> installedFiles = await installCodeAssets(
       dartHookResult: dartHookResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
       nativeAssetsFileUri: nativeAssetsFileUri,
+      targetUri: targetUri,
     );
     assert(await fileSystem.file(nativeAssetsFileUri).exists());
 
-    final depfile = Depfile(
-      <File>[for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file)],
-      <File>[fileSystem.file(nativeAssetsFileUri)],
-    );
+    final depfile = Depfile(<File>[
+      for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file),
+    ], installedFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
     if (!await outputDepfile.exists()) {
@@ -172,7 +190,10 @@ class InstallCodeAssets extends Target {
     Source.pattern(
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart',
     ),
-    // If different packages are resolved, different native assets might need to be built.
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    // If different packages are resolved, different native assets might need to
+    // be built. We can't depend on the exact outputs from `DartBuild`, so
+    // depend on all the same inputs.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
   ];
 

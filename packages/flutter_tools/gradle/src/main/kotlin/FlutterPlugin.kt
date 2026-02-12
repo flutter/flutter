@@ -719,10 +719,8 @@ class FlutterPlugin : Plugin<Project> {
                             into(abi ?: "null")
                         }
                         // Copy the native assets created by build.dart and placed in build/native_assets by flutter assemble.
-                        val buildDir =
-                            "${FlutterPluginUtils.getFlutterSourceDirectory(project)}/build"
                         val nativeAssetsDir =
-                            "$buildDir/native_assets/android/jniLibs/lib"
+                            "${flutterCompileTask.intermediateDir}/native_assets/jniLibs/lib"
                         from("$nativeAssetsDir/$abi") {
                             include("*.so")
                             into(abi ?: "null")

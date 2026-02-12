@@ -512,11 +512,32 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
     'build/$os/framework/${buildMode.upperCaseFirst()}',
   );
   expect(frameworksFolder, exists);
-  const String frameworkName = packageName;
-  final File dylib = frameworksFolder
-      .childDirectory('$frameworkName.framework')
-      .childFile(frameworkName);
-  expect(dylib, exists);
+  final Directory xcFrameworkDirectory = frameworksFolder.childDirectory(
+    '$packageName.xcframework',
+  );
+  if (os == 'macos') {
+    final File dylib = xcFrameworkDirectory
+        .childDirectory('macos-arm64_x86_64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(dylib, exists);
+    _expectBinaryContainsArchitectures(dylib, ['x86_64', 'arm64']);
+  } else {
+    assert(os == 'ios');
+    final File deviceDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(deviceDylib, exists);
+    _expectBinaryContainsArchitectures(deviceDylib, ['arm64']);
+
+    final File simulatorDylib = xcFrameworkDirectory
+        .childDirectory('ios-arm64_x86_64-simulator')
+        .childDirectory('$packageName.framework')
+        .childFile(packageName);
+    expect(simulatorDylib, exists);
+    _expectBinaryContainsArchitectures(simulatorDylib, ['x86_64', 'arm64']);
+  }
 }
 
 /// Check that the native assets are built with the C Compiler that Flutter uses.
@@ -610,5 +631,25 @@ void expectDylibIsStripped(File dylib, {required bool stripped}) {
 extension on String {
   String upperCaseFirst() {
     return replaceFirst(this[0], this[0].toUpperCase());
+  }
+}
+
+/// Runs 'lipo -info' on a binary and asserts that it contains the expected architectures.
+void _expectBinaryContainsArchitectures(File binary, List<String> expectedArchs) {
+  expect(binary, exists);
+  final ProcessResult lipoResult = processManager.runSync(<String>['lipo', '-info', binary.path]);
+  expect(
+    lipoResult.exitCode,
+    0,
+    reason: 'lipo -info failed for ${binary.path}:\n${lipoResult.stderr}',
+  );
+  final lipoOutput = lipoResult.stdout.toString();
+  for (final arch in expectedArchs) {
+    expect(
+      lipoOutput,
+      contains(arch),
+      reason:
+          'Binary ${binary.path} does not contain expected architecture $arch.\nLipo output: $lipoOutput',
+    );
   }
 }

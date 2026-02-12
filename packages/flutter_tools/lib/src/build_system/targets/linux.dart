@@ -104,6 +104,7 @@ abstract class BundleLinuxAssets extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...IconTreeShaker.inputs,
   ];
 
