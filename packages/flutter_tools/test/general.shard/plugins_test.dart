@@ -2832,8 +2832,14 @@ import PackageDescription
 
 let package = Package(
     name: "test_plugin",
+    platforms: [
+        .iOS("13.0"),
+    ],
+    products: [
+        .library(name: "test-plugin", targets: ["test_plugin"]),
+    ],
     dependencies: [
-        .package(path: "../FlutterFramework")
+        .package(name: "FlutterFramework", path: "../FlutterFramework")
     ],
     targets: [
         .target(

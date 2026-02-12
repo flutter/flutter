@@ -613,8 +613,8 @@ SwiftPackageManagerPluginValidationResult validatePluginSwiftPackageManagerSuppo
 /// Checks if a Package.swift file contains a dependency on FlutterFramework.
 ///
 /// This looks for common patterns used to declare a FlutterFramework dependency:
-/// - `.package(name: "FlutterFramework"` - path-based dependency
-/// - `package: "FlutterFramework"` - product dependency reference
+/// - `.package(name: "FlutterFramework", path: "../FlutterFramework")` - package dependency
+/// - `.product(name: "FlutterFramework", package: "FlutterFramework")` - target dependency
 bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
   if (!packageSwiftFile.existsSync()) {
     return false;
@@ -622,12 +622,12 @@ bool _hasFlutterFrameworkDependency(File packageSwiftFile) {
 
   try {
     final String contents = packageSwiftFile.readAsStringSync();
-    final bool hasPackageDependency =
-        contents.contains(RegExp(r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"')) ||
-        contents.contains(RegExp(r'\.package\s*\(\s*path\s*:\s*"[^"]*FlutterFramework[^"]*"'));
-    final bool hasTargetDependency =
-        contents.contains(RegExp(r'package\s*:\s*"FlutterFramework"')) ||
-        contents.contains(RegExp(r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"'));
+    final bool hasPackageDependency = contents.contains(
+      RegExp(r'\.package\s*\(\s*name\s*:\s*"FlutterFramework"'),
+    );
+    final bool hasTargetDependency = contents.contains(
+      RegExp(r'\.product\s*\(\s*name\s*:\s*"FlutterFramework"'),
+    );
 
     return hasPackageDependency || hasTargetDependency;
   } on FileSystemException {
