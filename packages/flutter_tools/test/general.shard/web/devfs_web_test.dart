@@ -1693,6 +1693,68 @@ void main() {
   );
 
   test(
+    'WebAssetServer logs warning for multiple missing web-define variables in index.html',
+    () => testbed.run(() async {
+      const htmlContent = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{MISSING_VAR_1}}';
+    const apiKey = '{{MISSING_VAR_2}}';
+  </script>
+</body>
+</html>''';
+
+      globals.fs.currentDirectory.childDirectory('web').childFile('index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(htmlContent);
+
+      globals.fs.file(
+          globals.fs.path.join(
+            globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+            'flutter.js',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('flutter.js content');
+
+      final webAssetServer = WebAssetServer(
+        FakeHttpServer(),
+        PackageConfig.empty,
+        InternetAddress.anyIPv4,
+        <String, String>{},
+        <String, String>{},
+        usesDdcModuleSystem,
+        canaryFeatures,
+        webRenderer: WebRendererMode.canvaskit,
+        useLocalCanvasKit: false,
+        fileSystem: globals.fs,
+        webDefines: <String, String>{}, // Empty webDefines
+        logger: logger,
+      );
+
+      final Response response = await webAssetServer.handleRequest(
+        Request('GET', Uri.parse('http://foobar/')),
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      // Verify the placeholders are preserved
+      final String responseBody = await response.readAsString();
+      expect(responseBody, contains("const apiUrl = '{{MISSING_VAR_1}}';"));
+      expect(responseBody, contains("const apiKey = '{{MISSING_VAR_2}}';"));
+      expect(
+        logger.warningText,
+        contains('Missing web-define variables: MISSING_VAR_1, MISSING_VAR_2'),
+      );
+    }),
+  );
+
+  test(
     'WebAssetServer serves flutter_bootstrap.js with web-define variables',
     () => testbed.run(() async {
       const bootstrapContent = '''

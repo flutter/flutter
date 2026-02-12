@@ -186,21 +186,23 @@ class WebTemplate {
       // Return the original match for missing variables.
       return match.group(0)!;
     });
-    if (missingVariables.isNotEmpty) {
-      final String variables = missingVariables.join(', ');
-      final String suggestion = missingVariables
-          .map((String name) => '--web-define=$name=VALUE')
-          .join(' ');
-      final String variablesList = pluralize('variable', missingVariables.length);
-      logger.printWarning(
-        'Warning: Missing web-define $variablesList: $variables\n\n'
-        'You can provide the missing $variablesList using:\n'
-        'flutter run $suggestion\n'
-        'or\n'
-        'flutter build web $suggestion\n'
-        'This variable will be skipped.\n',
-      );
+    if (missingVariables.isEmpty) {
+      return result;
     }
+
+    final String variables = missingVariables.join(', ');
+    final String suggestion = missingVariables
+        .map((String name) => '--web-define=$name=VALUE')
+        .join(' ');
+    final String variablesList = pluralize('variable', missingVariables.length);
+    logger.printWarning(
+      'Warning: Missing web-define $variablesList: $variables\n\n'
+      'You can provide the missing $variablesList using:\n'
+      'flutter run $suggestion\n'
+      'or\n'
+      'flutter build web $suggestion\n'
+      'This variable will be skipped.\n',
+    );
 
     return result;
   }
