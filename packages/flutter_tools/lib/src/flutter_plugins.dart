@@ -1208,6 +1208,10 @@ Future<void> refreshPluginsList(
   }
 }
 
+/// Tracks which plugin/platform combinations have already been warned about
+/// during this session to avoid duplicate warnings.
+final Set<String> _spmValidationWarningsShown = <String>{};
+
 /// Validates Swift Package Manager support for a plugin's example app.
 ///
 /// Checks if the current project is a plugin example app and
@@ -1260,6 +1264,11 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
   ];
 
   for (final platform in platforms) {
+    final cacheKey = '${parentPlugin.name}:$platform';
+    if (_spmValidationWarningsShown.contains(cacheKey)) {
+      continue;
+    }
+
     final SwiftPackageManagerPluginValidationResult result =
         validatePluginSwiftPackageManagerSupport(
           parentPlugin,
@@ -1267,7 +1276,10 @@ Future<void> _validatePluginExampleAppSwiftPackageManagerSupport(
           platform: platform,
         );
 
-    result.validationMessages.forEach(globals.printWarning);
+    if (result.validationMessages.isNotEmpty) {
+      _spmValidationWarningsShown.add(cacheKey);
+      result.validationMessages.forEach(globals.printWarning);
+    }
   }
 }
 
